@@ -31,7 +31,7 @@ const JournalPage = (props) => {
 
     const uploadChunk = async (fileId, chunkId, fileChunk) => {
 
-        actor.createJournalEntryFile(
+        return actor.createJournalEntryFile(
             fileId, 
             chunkId, 
             [...new Uint8Array(await fileChunk.arrayBuffer())]
@@ -63,7 +63,8 @@ const JournalPage = (props) => {
             chunk += 1;
         };
 
-        await Promise.all(promises).then((result) => console.log(result));    
+        const results = await Promise.all(promises);    
+        console.log("results: ",results);
     };
 
 

@@ -28,13 +28,13 @@ const Journal = (props) => {
     },[journalState.journal.length]);
 
     useEffect(async () => {
-        (actor) ? await actor.readJournal().then((result) => {
+        actor.readJournal().then((result) => {
             // if("ok" in result){
             //     console.log(result.ok);
             // }
             console.log(result);
             console.log("test")
-        }) : () => {};
+        });
     },[authClient])
 
     const displayJournalTable = () => {
