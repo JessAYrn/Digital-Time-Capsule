@@ -23,7 +23,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _dfinity_candid__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @dfinity/candid */ "./node_modules/@dfinity/candid/lib/esm/index.js");
 /* harmony import */ var _polling__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./polling */ "./node_modules/@dfinity/agent/lib/esm/polling/index.js");
 /* harmony import */ var _dfinity_principal__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @dfinity/principal */ "./node_modules/@dfinity/principal/lib/esm/index.js");
-/* harmony import */ var _request_id__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./request_id */ "./node_modules/@dfinity/agent/lib/esm/request_id.js");
+/* harmony import */ var _utils_buffer__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./utils/buffer */ "./node_modules/@dfinity/agent/lib/esm/utils/buffer.js");
 
 
 
@@ -60,7 +60,7 @@ class QueryCallRejectedError extends ActorCallError {
 class UpdateCallRejectedError extends ActorCallError {
     constructor(canisterId, methodName, requestId, response) {
         super(canisterId, methodName, 'update', {
-            'Request ID': (0,_request_id__WEBPACK_IMPORTED_MODULE_7__.toHex)(requestId),
+            'Request ID': (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_7__.toHex)(requestId),
             'HTTP status code': response.status.toString(),
             'HTTP status text': response.statusText,
         });
@@ -107,9 +107,9 @@ class Actor {
     static async install(fields, config) {
         const mode = fields.mode === undefined ? CanisterInstallMode.Install : fields.mode;
         // Need to transform the arg into a number array.
-        const arg = fields.arg ? [...fields.arg] : [];
+        const arg = fields.arg ? [...new Uint8Array(fields.arg)] : [];
         // Same for module.
-        const wasmModule = [...fields.module];
+        const wasmModule = [...new Uint8Array(fields.module)];
         const canisterId = typeof config.canisterId === 'string'
             ? _dfinity_principal__WEBPACK_IMPORTED_MODULE_6__.Principal.fromText(config.canisterId)
             : config.canisterId;
@@ -263,20 +263,20 @@ var ReplicaRejectCode;
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Expiry": () => (/* reexport safe */ _transforms__WEBPACK_IMPORTED_MODULE_6__.Expiry),
-/* harmony export */   "makeExpiryTransform": () => (/* reexport safe */ _transforms__WEBPACK_IMPORTED_MODULE_6__.makeExpiryTransform),
-/* harmony export */   "makeNonceTransform": () => (/* reexport safe */ _transforms__WEBPACK_IMPORTED_MODULE_6__.makeNonceTransform),
+/* harmony export */   "Expiry": () => (/* reexport safe */ _transforms__WEBPACK_IMPORTED_MODULE_5__.Expiry),
+/* harmony export */   "makeExpiryTransform": () => (/* reexport safe */ _transforms__WEBPACK_IMPORTED_MODULE_5__.makeExpiryTransform),
+/* harmony export */   "makeNonceTransform": () => (/* reexport safe */ _transforms__WEBPACK_IMPORTED_MODULE_5__.makeNonceTransform),
+/* harmony export */   "makeNonce": () => (/* reexport safe */ _types__WEBPACK_IMPORTED_MODULE_6__.makeNonce),
 /* harmony export */   "RequestStatusResponseStatus": () => (/* binding */ RequestStatusResponseStatus),
 /* harmony export */   "HttpAgent": () => (/* binding */ HttpAgent)
 /* harmony export */ });
-/* harmony import */ var buffer___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! buffer/ */ "./node_modules/buffer/index.js");
+/* harmony import */ var _dfinity_principal__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @dfinity/principal */ "./node_modules/@dfinity/principal/lib/esm/index.js");
 /* harmony import */ var _auth__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../auth */ "./node_modules/@dfinity/agent/lib/esm/auth.js");
 /* harmony import */ var _cbor__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../cbor */ "./node_modules/@dfinity/agent/lib/esm/cbor.js");
-/* harmony import */ var _dfinity_principal__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @dfinity/principal */ "./node_modules/@dfinity/principal/lib/esm/index.js");
-/* harmony import */ var _request_id__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../request_id */ "./node_modules/@dfinity/agent/lib/esm/request_id.js");
-/* harmony import */ var _dfinity_candid__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @dfinity/candid */ "./node_modules/@dfinity/candid/lib/esm/index.js");
-/* harmony import */ var _transforms__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./transforms */ "./node_modules/@dfinity/agent/lib/esm/agent/http/transforms.js");
-/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./types */ "./node_modules/@dfinity/agent/lib/esm/agent/http/types.js");
+/* harmony import */ var _request_id__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../request_id */ "./node_modules/@dfinity/agent/lib/esm/request_id.js");
+/* harmony import */ var _utils_buffer__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../utils/buffer */ "./node_modules/@dfinity/agent/lib/esm/utils/buffer.js");
+/* harmony import */ var _transforms__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./transforms */ "./node_modules/@dfinity/agent/lib/esm/agent/http/transforms.js");
+/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./types */ "./node_modules/@dfinity/agent/lib/esm/agent/http/types.js");
 
 
 
@@ -326,9 +326,9 @@ function getDefaultFetch() {
 // allowing extensions.
 class HttpAgent {
     constructor(options = {}) {
+        this.rootKey = (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_4__.fromHex)(IC_ROOT_KEY);
         this._pipeline = [];
         this._rootKeyFetched = false;
-        this.rootKey = (0,_dfinity_candid__WEBPACK_IMPORTED_MODULE_5__.blobFromHex)(IC_ROOT_KEY);
         if (options.source) {
             if (!(options.source instanceof HttpAgent)) {
                 throw new Error("An Agent's source can only be another HttpAgent");
@@ -377,18 +377,18 @@ class HttpAgent {
     }
     async call(canisterId, options, identity) {
         const id = (await (identity !== undefined ? await identity : await this._identity));
-        const canister = _dfinity_principal__WEBPACK_IMPORTED_MODULE_3__.Principal.from(canisterId);
+        const canister = _dfinity_principal__WEBPACK_IMPORTED_MODULE_0__.Principal.from(canisterId);
         const ecid = options.effectiveCanisterId
-            ? _dfinity_principal__WEBPACK_IMPORTED_MODULE_3__.Principal.from(options.effectiveCanisterId)
+            ? _dfinity_principal__WEBPACK_IMPORTED_MODULE_0__.Principal.from(options.effectiveCanisterId)
             : canister;
-        const sender = id.getPrincipal() || _dfinity_principal__WEBPACK_IMPORTED_MODULE_3__.Principal.anonymous();
+        const sender = id.getPrincipal() || _dfinity_principal__WEBPACK_IMPORTED_MODULE_0__.Principal.anonymous();
         const submit = {
-            request_type: _types__WEBPACK_IMPORTED_MODULE_7__.SubmitRequestType.Call,
+            request_type: _types__WEBPACK_IMPORTED_MODULE_6__.SubmitRequestType.Call,
             canister_id: canister,
             method_name: options.methodName,
             arg: options.arg,
-            sender: sender,
-            ingress_expiry: new _transforms__WEBPACK_IMPORTED_MODULE_6__.Expiry(DEFAULT_INGRESS_EXPIRY_DELTA_IN_MSECS),
+            sender,
+            ingress_expiry: new _transforms__WEBPACK_IMPORTED_MODULE_5__.Expiry(DEFAULT_INGRESS_EXPIRY_DELTA_IN_MSECS),
         };
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let transformedRequest = (await this._transform({
@@ -407,7 +407,7 @@ class HttpAgent {
         // calculate the requestId locally.
         const [response, requestId] = await Promise.all([
             this._fetch('' + new URL(`/api/v2/canister/${ecid.toText()}/call`, this._host), Object.assign(Object.assign({}, transformedRequest.request), { body })),
-            (0,_request_id__WEBPACK_IMPORTED_MODULE_4__.requestIdOf)(submit),
+            (0,_request_id__WEBPACK_IMPORTED_MODULE_3__.requestIdOf)(submit),
         ]);
         if (!response.ok) {
             throw new Error(`Server returned an error:\n` +
@@ -425,15 +425,15 @@ class HttpAgent {
     }
     async query(canisterId, fields, identity) {
         const id = await (identity !== undefined ? await identity : await this._identity);
-        const canister = typeof canisterId === 'string' ? _dfinity_principal__WEBPACK_IMPORTED_MODULE_3__.Principal.fromText(canisterId) : canisterId;
-        const sender = (id === null || id === void 0 ? void 0 : id.getPrincipal()) || _dfinity_principal__WEBPACK_IMPORTED_MODULE_3__.Principal.anonymous();
+        const canister = typeof canisterId === 'string' ? _dfinity_principal__WEBPACK_IMPORTED_MODULE_0__.Principal.fromText(canisterId) : canisterId;
+        const sender = (id === null || id === void 0 ? void 0 : id.getPrincipal()) || _dfinity_principal__WEBPACK_IMPORTED_MODULE_0__.Principal.anonymous();
         const request = {
             request_type: "query" /* Query */,
             canister_id: canister,
             method_name: fields.methodName,
             arg: fields.arg,
-            sender: sender,
-            ingress_expiry: new _transforms__WEBPACK_IMPORTED_MODULE_6__.Expiry(DEFAULT_INGRESS_EXPIRY_DELTA_IN_MSECS),
+            sender,
+            ingress_expiry: new _transforms__WEBPACK_IMPORTED_MODULE_5__.Expiry(DEFAULT_INGRESS_EXPIRY_DELTA_IN_MSECS),
         };
         // TODO: remove this any. This can be a Signed or UnSigned request.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -454,12 +454,12 @@ class HttpAgent {
                 `  Code: ${response.status} (${response.statusText})\n` +
                 `  Body: ${await response.text()}\n`);
         }
-        return _cbor__WEBPACK_IMPORTED_MODULE_2__.decode(buffer___WEBPACK_IMPORTED_MODULE_0__.Buffer.from(await response.arrayBuffer()));
+        return _cbor__WEBPACK_IMPORTED_MODULE_2__.decode(await response.arrayBuffer());
     }
     async readState(canisterId, fields, identity) {
-        const canister = typeof canisterId === 'string' ? _dfinity_principal__WEBPACK_IMPORTED_MODULE_3__.Principal.fromText(canisterId) : canisterId;
+        const canister = typeof canisterId === 'string' ? _dfinity_principal__WEBPACK_IMPORTED_MODULE_0__.Principal.fromText(canisterId) : canisterId;
         const id = await (identity !== undefined ? await identity : await this._identity);
-        const sender = (id === null || id === void 0 ? void 0 : id.getPrincipal()) || _dfinity_principal__WEBPACK_IMPORTED_MODULE_3__.Principal.anonymous();
+        const sender = (id === null || id === void 0 ? void 0 : id.getPrincipal()) || _dfinity_principal__WEBPACK_IMPORTED_MODULE_0__.Principal.anonymous();
         // TODO: remove this any. This can be a Signed or UnSigned request.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let transformedRequest = await this._transform({
@@ -471,8 +471,8 @@ class HttpAgent {
             body: {
                 request_type: "read_state" /* ReadState */,
                 paths: fields.paths,
-                sender: sender,
-                ingress_expiry: new _transforms__WEBPACK_IMPORTED_MODULE_6__.Expiry(DEFAULT_INGRESS_EXPIRY_DELTA_IN_MSECS),
+                sender,
+                ingress_expiry: new _transforms__WEBPACK_IMPORTED_MODULE_5__.Expiry(DEFAULT_INGRESS_EXPIRY_DELTA_IN_MSECS),
             },
         });
         // Apply transform for identity.
@@ -484,7 +484,7 @@ class HttpAgent {
                 `  Code: ${response.status} (${response.statusText})\n` +
                 `  Body: ${await response.text()}\n`);
         }
-        return _cbor__WEBPACK_IMPORTED_MODULE_2__.decode(buffer___WEBPACK_IMPORTED_MODULE_0__.Buffer.from(await response.arrayBuffer()));
+        return _cbor__WEBPACK_IMPORTED_MODULE_2__.decode(await response.arrayBuffer());
     }
     async status() {
         const headers = this._credentials
@@ -498,13 +498,12 @@ class HttpAgent {
                 `  Code: ${response.status} (${response.statusText})\n` +
                 `  Body: ${await response.text()}\n`);
         }
-        const buffer = await response.arrayBuffer();
-        return _cbor__WEBPACK_IMPORTED_MODULE_2__.decode(new Uint8Array(buffer));
+        return _cbor__WEBPACK_IMPORTED_MODULE_2__.decode(await response.arrayBuffer());
     }
     async fetchRootKey() {
         if (!this._rootKeyFetched) {
             // Hex-encoded version of the replica root key
-            this.rootKey = (0,_dfinity_candid__WEBPACK_IMPORTED_MODULE_5__.blobFromUint8Array)((await this.status()).root_key);
+            this.rootKey = (await this.status()).root_key;
             this._rootKeyFetched = true;
         }
         return this.rootKey;
@@ -534,9 +533,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "makeNonceTransform": () => (/* binding */ makeNonceTransform),
 /* harmony export */   "makeExpiryTransform": () => (/* binding */ makeExpiryTransform)
 /* harmony export */ });
-/* harmony import */ var simple_cbor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! simple-cbor */ "./node_modules/simple-cbor/src/index.js");
-/* harmony import */ var simple_cbor__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(simple_cbor__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _dfinity_candid__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @dfinity/candid */ "./node_modules/@dfinity/candid/lib/esm/index.js");
+/* harmony import */ var _dfinity_candid__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @dfinity/candid */ "./node_modules/@dfinity/candid/lib/esm/index.js");
+/* harmony import */ var simple_cbor__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! simple-cbor */ "./node_modules/simple-cbor/src/index.js");
+/* harmony import */ var simple_cbor__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(simple_cbor__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./types */ "./node_modules/@dfinity/agent/lib/esm/agent/http/types.js");
+
 
 
 const NANOSECONDS_PER_MILLISECONDS = BigInt(1000000);
@@ -550,10 +551,10 @@ class Expiry {
     }
     toCBOR() {
         // TODO: change this to take the minimum amount of space (it always takes 8 bytes now).
-        return simple_cbor__WEBPACK_IMPORTED_MODULE_0__.value.u64(this._value.toString(16), 16);
+        return simple_cbor__WEBPACK_IMPORTED_MODULE_1__.value.u64(this._value.toString(16), 16);
     }
     toHash() {
-        return (0,_dfinity_candid__WEBPACK_IMPORTED_MODULE_1__.lebEncode)(this._value);
+        return (0,_dfinity_candid__WEBPACK_IMPORTED_MODULE_0__.lebEncode)(this._value);
     }
 }
 /**
@@ -561,7 +562,7 @@ class Expiry {
  * as the nonce to every call requests.
  * @param nonceFn A function that returns a buffer. By default uses a semi-random method.
  */
-function makeNonceTransform(nonceFn = _dfinity_candid__WEBPACK_IMPORTED_MODULE_1__.makeNonce) {
+function makeNonceTransform(nonceFn = _types__WEBPACK_IMPORTED_MODULE_2__.makeNonce) {
     return async (request) => {
         // Nonce are only useful for async calls, to prevent replay attacks. Other types of
         // calls don't need Nonce so we just skip creating one.
@@ -593,7 +594,8 @@ function makeExpiryTransform(delayInMilliseconds) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "SubmitRequestType": () => (/* binding */ SubmitRequestType)
+/* harmony export */   "SubmitRequestType": () => (/* binding */ SubmitRequestType),
+/* harmony export */   "makeNonce": () => (/* binding */ makeNonce)
 /* harmony export */ });
 // tslint:enable:camel-case
 // The types of values allowed in the `request_type` field for submit requests.
@@ -601,6 +603,19 @@ var SubmitRequestType;
 (function (SubmitRequestType) {
     SubmitRequestType["Call"] = "call";
 })(SubmitRequestType || (SubmitRequestType = {}));
+/**
+ * Create a random Nonce, based on date and a random suffix.
+ */
+function makeNonce() {
+    // Encode 128 bits.
+    const buffer = new ArrayBuffer(16);
+    const view = new DataView(buffer);
+    const value = BigInt(+Date.now()) * BigInt(100000) + BigInt(Math.floor(Math.random() * 100000));
+    view.setBigUint64(0, value);
+    // tslint:disable-next-line:no-bitwise
+    view.setBigUint64(1, value >> BigInt(64));
+    return buffer;
+}
 //# sourceMappingURL=types.js.map
 
 /***/ }),
@@ -619,6 +634,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "HttpAgent": () => (/* reexport safe */ _http__WEBPACK_IMPORTED_MODULE_1__.HttpAgent),
 /* harmony export */   "RequestStatusResponseStatus": () => (/* reexport safe */ _http__WEBPACK_IMPORTED_MODULE_1__.RequestStatusResponseStatus),
 /* harmony export */   "makeExpiryTransform": () => (/* reexport safe */ _http__WEBPACK_IMPORTED_MODULE_1__.makeExpiryTransform),
+/* harmony export */   "makeNonce": () => (/* reexport safe */ _http__WEBPACK_IMPORTED_MODULE_1__.makeNonce),
 /* harmony export */   "makeNonceTransform": () => (/* reexport safe */ _http__WEBPACK_IMPORTED_MODULE_1__.makeNonceTransform),
 /* harmony export */   "ProxyAgent": () => (/* reexport safe */ _proxy__WEBPACK_IMPORTED_MODULE_2__.ProxyAgent),
 /* harmony export */   "ProxyMessageKind": () => (/* reexport safe */ _proxy__WEBPACK_IMPORTED_MODULE_2__.ProxyMessageKind),
@@ -830,13 +846,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "SignIdentity": () => (/* binding */ SignIdentity),
 /* harmony export */   "AnonymousIdentity": () => (/* binding */ AnonymousIdentity),
-/* harmony export */   "createIdentityDescriptor": () => (/* binding */ createIdentityDescriptor),
-/* harmony export */   "isIdentityDescriptor": () => (/* binding */ isIdentityDescriptor)
+/* harmony export */   "createIdentityDescriptor": () => (/* binding */ createIdentityDescriptor)
 /* harmony export */ });
-/* harmony import */ var buffer___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! buffer/ */ "./node_modules/buffer/index.js");
-/* harmony import */ var _dfinity_principal__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @dfinity/principal */ "./node_modules/@dfinity/principal/lib/esm/index.js");
-/* harmony import */ var _request_id__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./request_id */ "./node_modules/@dfinity/agent/lib/esm/request_id.js");
-/* harmony import */ var _dfinity_candid__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @dfinity/candid */ "./node_modules/@dfinity/candid/lib/esm/index.js");
+/* harmony import */ var _dfinity_principal__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @dfinity/principal */ "./node_modules/@dfinity/principal/lib/esm/index.js");
+/* harmony import */ var _request_id__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./request_id */ "./node_modules/@dfinity/agent/lib/esm/request_id.js");
+/* harmony import */ var _utils_buffer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./utils/buffer */ "./node_modules/@dfinity/agent/lib/esm/utils/buffer.js");
 var __rest = (undefined && undefined.__rest) || function (s, e) {
     var t = {};
     for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
@@ -851,8 +865,7 @@ var __rest = (undefined && undefined.__rest) || function (s, e) {
 
 
 
-
-const domainSeparator = buffer___WEBPACK_IMPORTED_MODULE_0__.Buffer.from(new TextEncoder().encode('\x0Aic-request'));
+const domainSeparator = new TextEncoder().encode('\x0Aic-request');
 /**
  * An Identity that can sign blobs.
  */
@@ -863,7 +876,7 @@ class SignIdentity {
      */
     getPrincipal() {
         if (!this._principal) {
-            this._principal = _dfinity_principal__WEBPACK_IMPORTED_MODULE_1__.Principal.selfAuthenticating(this.getPublicKey().toDer());
+            this._principal = _dfinity_principal__WEBPACK_IMPORTED_MODULE_0__.Principal.selfAuthenticating(new Uint8Array(this.getPublicKey().toDer()));
         }
         return this._principal;
     }
@@ -875,17 +888,17 @@ class SignIdentity {
      */
     async transformRequest(request) {
         const { body } = request, fields = __rest(request, ["body"]);
-        const requestId = await (0,_request_id__WEBPACK_IMPORTED_MODULE_2__.requestIdOf)(body);
+        const requestId = await (0,_request_id__WEBPACK_IMPORTED_MODULE_1__.requestIdOf)(body);
         return Object.assign(Object.assign({}, fields), { body: {
                 content: body,
                 sender_pubkey: this.getPublicKey().toDer(),
-                sender_sig: await this.sign((0,_dfinity_candid__WEBPACK_IMPORTED_MODULE_3__.blobFromBuffer)(buffer___WEBPACK_IMPORTED_MODULE_0__.Buffer.concat([domainSeparator, requestId]))),
+                sender_sig: await this.sign((0,_utils_buffer__WEBPACK_IMPORTED_MODULE_2__.concat)(domainSeparator, requestId)),
             } });
     }
 }
 class AnonymousIdentity {
     getPrincipal() {
-        return _dfinity_principal__WEBPACK_IMPORTED_MODULE_1__.Principal.anonymous();
+        return _dfinity_principal__WEBPACK_IMPORTED_MODULE_0__.Principal.anonymous();
     }
     async transformRequest(request) {
         return Object.assign(Object.assign({}, request), { body: { content: request.body } });
@@ -897,26 +910,9 @@ class AnonymousIdentity {
  */
 function createIdentityDescriptor(identity) {
     const identityIndicator = 'getPublicKey' in identity
-        ? { type: 'PublicKeyIdentity', publicKey: identity.getPublicKey().toDer().toString('hex') }
+        ? { type: 'PublicKeyIdentity', publicKey: (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_2__.toHex)(identity.getPublicKey().toDer()) }
         : { type: 'AnonymousIdentity' };
     return identityIndicator;
-}
-/**
- * Type Guard for whether the unknown value is an IdentityDescriptor or not.
- * @param value - value to type guard
- */
-function isIdentityDescriptor(value) {
-    var _a, _b;
-    switch ((_a = value) === null || _a === void 0 ? void 0 : _a.type) {
-        case 'AnonymousIdentity':
-            return true;
-        case 'PublicKeyIdentity':
-            if (typeof ((_b = value) === null || _b === void 0 ? void 0 : _b.publicKey) !== 'string') {
-                return false;
-            }
-            return true;
-    }
-    return false;
 }
 //# sourceMappingURL=auth.js.map
 
@@ -1070,15 +1066,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "decode": () => (/* binding */ decode)
 /* harmony export */ });
 /* harmony import */ var borc__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! borc */ "./node_modules/borc/src/index.js");
-/* harmony import */ var buffer___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! buffer/ */ "./node_modules/buffer/index.js");
-/* harmony import */ var simple_cbor__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! simple-cbor */ "./node_modules/simple-cbor/src/index.js");
-/* harmony import */ var simple_cbor__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(simple_cbor__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _dfinity_candid__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @dfinity/candid */ "./node_modules/@dfinity/candid/lib/esm/index.js");
+/* harmony import */ var simple_cbor__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! simple-cbor */ "./node_modules/simple-cbor/src/index.js");
+/* harmony import */ var simple_cbor__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(simple_cbor__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _utils_buffer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./utils/buffer */ "./node_modules/@dfinity/agent/lib/esm/utils/buffer.js");
 // tslint:disable:max-classes-per-file
 // This file is based on:
 // tslint:disable-next-line: max-line-length
 // https://github.com/dfinity-lab/dfinity/blob/9bca65f8edd65701ea6bdb00e0752f9186bbc893/docs/spec/public/index.adoc#cbor-encoding-of-requests-and-responses
-
 
 
 
@@ -1099,7 +1093,7 @@ class PrincipalEncoder {
         return value && value._isPrincipal === true;
     }
     encode(v) {
-        return simple_cbor__WEBPACK_IMPORTED_MODULE_2__.value.bytes(v.toUint8Array().buffer);
+        return simple_cbor__WEBPACK_IMPORTED_MODULE_1__.value.bytes(v.toUint8Array());
     }
 }
 class BufferEncoder {
@@ -1110,10 +1104,10 @@ class BufferEncoder {
         return 1;
     }
     match(value) {
-        return buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.isBuffer(value);
+        return value instanceof ArrayBuffer || ArrayBuffer.isView(value);
     }
     encode(v) {
-        return simple_cbor__WEBPACK_IMPORTED_MODULE_2__.value.bytes(new Uint8Array(v));
+        return simple_cbor__WEBPACK_IMPORTED_MODULE_1__.value.bytes(new Uint8Array(v));
     }
 }
 class BigIntEncoder {
@@ -1129,14 +1123,14 @@ class BigIntEncoder {
     encode(v) {
         // Always use a bigint encoding.
         if (v > BigInt(0)) {
-            return simple_cbor__WEBPACK_IMPORTED_MODULE_2__.value.tagged(2, simple_cbor__WEBPACK_IMPORTED_MODULE_2__.value.bytes((0,_dfinity_candid__WEBPACK_IMPORTED_MODULE_3__.blobFromHex)(v.toString(16))));
+            return simple_cbor__WEBPACK_IMPORTED_MODULE_1__.value.tagged(2, simple_cbor__WEBPACK_IMPORTED_MODULE_1__.value.bytes((0,_utils_buffer__WEBPACK_IMPORTED_MODULE_2__.fromHex)(v.toString(16))));
         }
         else {
-            return simple_cbor__WEBPACK_IMPORTED_MODULE_2__.value.tagged(3, simple_cbor__WEBPACK_IMPORTED_MODULE_2__.value.bytes((0,_dfinity_candid__WEBPACK_IMPORTED_MODULE_3__.blobFromHex)((BigInt('-1') * v).toString(16))));
+            return simple_cbor__WEBPACK_IMPORTED_MODULE_1__.value.tagged(3, simple_cbor__WEBPACK_IMPORTED_MODULE_1__.value.bytes((0,_utils_buffer__WEBPACK_IMPORTED_MODULE_2__.fromHex)((BigInt('-1') * v).toString(16))));
         }
     }
 }
-const serializer = simple_cbor__WEBPACK_IMPORTED_MODULE_2__.SelfDescribeCborSerializer.withDefaultEncoders(true);
+const serializer = simple_cbor__WEBPACK_IMPORTED_MODULE_1__.SelfDescribeCborSerializer.withDefaultEncoders(true);
 serializer.addEncoder(new PrincipalEncoder());
 serializer.addEncoder(new BufferEncoder());
 serializer.addEncoder(new BigIntEncoder());
@@ -1145,9 +1139,12 @@ var CborTag;
     CborTag[CborTag["Uint64LittleEndian"] = 71] = "Uint64LittleEndian";
     CborTag[CborTag["Semantic"] = 55799] = "Semantic";
 })(CborTag || (CborTag = {}));
-const encode = (value) => {
-    return (0,_dfinity_candid__WEBPACK_IMPORTED_MODULE_3__.blobFromBuffer)(buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.from(serializer.serialize(value)));
-};
+/**
+ * Encode a JavaScript value into CBOR.
+ */
+function encode(value) {
+    return serializer.serialize(value);
+}
 function decodePositiveBigInt(buf) {
     const len = buf.byteLength;
     let res = BigInt(0);
@@ -1157,9 +1154,22 @@ function decodePositiveBigInt(buf) {
     }
     return res;
 }
+// A BORC subclass that decodes byte strings to ArrayBuffer instead of the Buffer class.
+class Uint8ArrayDecoder extends borc__WEBPACK_IMPORTED_MODULE_0__.Decoder {
+    createByteString(raw) {
+        return (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_2__.concat)(...raw);
+    }
+    createByteStringFromHeap(start, end) {
+        if (start === end) {
+            return new ArrayBuffer(0);
+        }
+        return new Uint8Array(this._heap.slice(start, end));
+    }
+}
 function decode(input) {
-    const decoder = new borc__WEBPACK_IMPORTED_MODULE_0__.Decoder({
-        size: input.byteLength,
+    const buffer = new Uint8Array(input);
+    const decoder = new Uint8ArrayDecoder({
+        size: buffer.byteLength,
         tags: {
             // Override tags 2 and 3 for BigInt support (borc supports only BigNumber).
             2: val => decodePositiveBigInt(val),
@@ -1167,8 +1177,7 @@ function decode(input) {
             [CborTag.Semantic]: (value) => value,
         },
     });
-    const result = decoder.decodeFirst(input);
-    return result;
+    return decoder.decodeFirst(buffer);
 }
 //# sourceMappingURL=cbor.js.map
 
@@ -1187,17 +1196,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "hashTreeToString": () => (/* binding */ hashTreeToString),
 /* harmony export */   "Certificate": () => (/* binding */ Certificate),
 /* harmony export */   "reconstruct": () => (/* binding */ reconstruct),
-/* harmony export */   "lookupPathEx": () => (/* binding */ lookupPathEx),
 /* harmony export */   "lookup_path": () => (/* binding */ lookup_path)
 /* harmony export */ });
-/* harmony import */ var buffer___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! buffer/ */ "./node_modules/buffer/index.js");
-/* harmony import */ var _agent__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./agent */ "./node_modules/@dfinity/agent/lib/esm/agent/index.js");
-/* harmony import */ var _cbor__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./cbor */ "./node_modules/@dfinity/agent/lib/esm/cbor.js");
-/* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./errors */ "./node_modules/@dfinity/agent/lib/esm/errors.js");
-/* harmony import */ var _request_id__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./request_id */ "./node_modules/@dfinity/agent/lib/esm/request_id.js");
-/* harmony import */ var _dfinity_candid__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @dfinity/candid */ "./node_modules/@dfinity/candid/lib/esm/index.js");
-/* harmony import */ var _utils_bls__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./utils/bls */ "./node_modules/@dfinity/agent/lib/esm/utils/bls.js");
-
+/* harmony import */ var _agent__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./agent */ "./node_modules/@dfinity/agent/lib/esm/agent/index.js");
+/* harmony import */ var _cbor__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./cbor */ "./node_modules/@dfinity/agent/lib/esm/cbor.js");
+/* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./errors */ "./node_modules/@dfinity/agent/lib/esm/errors.js");
+/* harmony import */ var _request_id__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./request_id */ "./node_modules/@dfinity/agent/lib/esm/request_id.js");
+/* harmony import */ var _utils_bls__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./utils/bls */ "./node_modules/@dfinity/agent/lib/esm/utils/bls.js");
+/* harmony import */ var _utils_buffer__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./utils/buffer */ "./node_modules/@dfinity/agent/lib/esm/utils/buffer.js");
 
 
 
@@ -1208,7 +1214,7 @@ __webpack_require__.r(__webpack_exports__);
  * A certificate needs to be verified (using {@link Certificate.prototype.verify})
  * before it can be used.
  */
-class UnverifiedCertificateError extends _errors__WEBPACK_IMPORTED_MODULE_3__.AgentError {
+class UnverifiedCertificateError extends _errors__WEBPACK_IMPORTED_MODULE_2__.AgentError {
     constructor() {
         super(`Cannot lookup unverified certificate. Call 'verify()' first.`);
     }
@@ -1232,23 +1238,23 @@ function hashTreeToString(tree) {
         }
     }
     switch (tree[0]) {
-        case 0:
+        case 0 /* Empty */:
             return '()';
-        case 1: {
+        case 1 /* Fork */: {
             const left = hashTreeToString(tree[1]);
             const right = hashTreeToString(tree[2]);
             return `sub(\n left:\n${indent(left)}\n---\n right:\n${indent(right)}\n)`;
         }
-        case 2: {
+        case 2 /* Labeled */: {
             const label = labelToString(tree[1]);
             const sub = hashTreeToString(tree[2]);
             return `label(\n label:\n${indent(label)}\n sub:\n${indent(sub)}\n)`;
         }
-        case 3: {
+        case 3 /* Leaf */: {
             return `leaf(...${tree[1].byteLength} bytes)`;
         }
-        case 4: {
-            return `pruned(${(0,_dfinity_candid__WEBPACK_IMPORTED_MODULE_5__.blobToHex)((0,_dfinity_candid__WEBPACK_IMPORTED_MODULE_5__.blobFromUint8Array)(new Uint8Array(tree[1])))}`;
+        case 4 /* Pruned */: {
+            return `pruned(${(0,_utils_buffer__WEBPACK_IMPORTED_MODULE_5__.toHex)(new Uint8Array(tree[1]))}`;
         }
         default: {
             return `unknown(${JSON.stringify(tree[0])})`;
@@ -1256,26 +1262,24 @@ function hashTreeToString(tree) {
     }
 }
 function isBufferEqual(a, b) {
-    if (a.length !== b.length) {
+    if (a.byteLength !== b.byteLength) {
         return false;
     }
-    for (let i = 0; i < a.length; i++) {
-        if (a[i] !== b[i]) {
+    const a8 = new Uint8Array(a);
+    const b8 = new Uint8Array(b);
+    for (let i = 0; i < a8.length; i++) {
+        if (a8[i] !== b8[i]) {
             return false;
         }
     }
     return true;
 }
 class Certificate {
-    constructor(response, _agent = (0,_agent__WEBPACK_IMPORTED_MODULE_1__.getDefaultAgent)()) {
+    constructor(response, _agent = (0,_agent__WEBPACK_IMPORTED_MODULE_0__.getDefaultAgent)()) {
         this._agent = _agent;
         this.verified = false;
         this._rootKey = null;
-        this.cert = _cbor__WEBPACK_IMPORTED_MODULE_2__.decode(response.certificate);
-    }
-    lookupEx(path) {
-        this.checkState();
-        return lookupPathEx(path, this.cert.tree);
+        this.cert = _cbor__WEBPACK_IMPORTED_MODULE_1__.decode(new Uint8Array(response.certificate));
     }
     lookup(path) {
         this.checkState();
@@ -1286,8 +1290,8 @@ class Certificate {
         const derKey = await this._checkDelegation(this.cert.delegation);
         const sig = this.cert.signature;
         const key = extractDER(derKey);
-        const msg = buffer___WEBPACK_IMPORTED_MODULE_0__.Buffer.concat([domain_sep('ic-state-root'), rootHash]);
-        const res = await (0,_utils_bls__WEBPACK_IMPORTED_MODULE_6__.blsVerify)(key, sig, msg);
+        const msg = (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_5__.concat)(domain_sep('ic-state-root'), rootHash);
+        const res = await (0,_utils_bls__WEBPACK_IMPORTED_MODULE_4__.blsVerify)(new Uint8Array(key), new Uint8Array(sig), new Uint8Array(msg));
         this.verified = res;
         return res;
     }
@@ -1311,25 +1315,25 @@ class Certificate {
         if (!(await cert.verify())) {
             throw new Error('fail to verify delegation certificate');
         }
-        const lookup = cert.lookupEx(['subnet', d.subnet_id, 'public_key']);
+        const lookup = cert.lookup(['subnet', d.subnet_id, 'public_key']);
         if (!lookup) {
-            throw new Error(`Could not find subnet key for subnet 0x${d.subnet_id.toString('hex')}`);
+            throw new Error(`Could not find subnet key for subnet 0x${(0,_utils_buffer__WEBPACK_IMPORTED_MODULE_5__.toHex)(d.subnet_id)}`);
         }
-        return buffer___WEBPACK_IMPORTED_MODULE_0__.Buffer.from(lookup);
+        return lookup;
     }
 }
-const DER_PREFIX = buffer___WEBPACK_IMPORTED_MODULE_0__.Buffer.from('308182301d060d2b0601040182dc7c0503010201060c2b0601040182dc7c05030201036100', 'hex');
+const DER_PREFIX = (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_5__.fromHex)('308182301d060d2b0601040182dc7c0503010201060c2b0601040182dc7c05030201036100');
 const KEY_LENGTH = 96;
 function extractDER(buf) {
-    const expectedLength = DER_PREFIX.length + KEY_LENGTH;
-    if (buf.length !== expectedLength) {
+    const expectedLength = DER_PREFIX.byteLength + KEY_LENGTH;
+    if (buf.byteLength !== expectedLength) {
         throw new TypeError(`BLS DER-encoded public key must be ${expectedLength} bytes long`);
     }
-    const prefix = buf.slice(0, DER_PREFIX.length);
+    const prefix = buf.slice(0, DER_PREFIX.byteLength);
     if (!isBufferEqual(prefix, DER_PREFIX)) {
         throw new TypeError(`BLS DER-encoded public key is invalid. Expect the following prefix: ${DER_PREFIX}, but get ${prefix}`);
     }
-    return buf.slice(DER_PREFIX.length);
+    return buf.slice(DER_PREFIX.byteLength);
 }
 /**
  * @param t
@@ -1337,50 +1341,23 @@ function extractDER(buf) {
 async function reconstruct(t) {
     switch (t[0]) {
         case 0 /* Empty */:
-            return (0,_request_id__WEBPACK_IMPORTED_MODULE_4__.hash)(domain_sep('ic-hashtree-empty'));
+            return (0,_request_id__WEBPACK_IMPORTED_MODULE_3__.hash)(domain_sep('ic-hashtree-empty'));
         case 4 /* Pruned */:
-            return buffer___WEBPACK_IMPORTED_MODULE_0__.Buffer.from(t[1]);
+            return t[1];
         case 3 /* Leaf */:
-            return (0,_request_id__WEBPACK_IMPORTED_MODULE_4__.hash)(buffer___WEBPACK_IMPORTED_MODULE_0__.Buffer.concat([
-                domain_sep('ic-hashtree-leaf'),
-                buffer___WEBPACK_IMPORTED_MODULE_0__.Buffer.from(t[1]),
-            ]));
+            return (0,_request_id__WEBPACK_IMPORTED_MODULE_3__.hash)((0,_utils_buffer__WEBPACK_IMPORTED_MODULE_5__.concat)(domain_sep('ic-hashtree-leaf'), t[1]));
         case 2 /* Labeled */:
-            return (0,_request_id__WEBPACK_IMPORTED_MODULE_4__.hash)(buffer___WEBPACK_IMPORTED_MODULE_0__.Buffer.concat([
-                domain_sep('ic-hashtree-labeled'),
-                buffer___WEBPACK_IMPORTED_MODULE_0__.Buffer.from(t[1]),
-                buffer___WEBPACK_IMPORTED_MODULE_0__.Buffer.from(await reconstruct(t[2])),
-            ]));
+            return (0,_request_id__WEBPACK_IMPORTED_MODULE_3__.hash)((0,_utils_buffer__WEBPACK_IMPORTED_MODULE_5__.concat)(domain_sep('ic-hashtree-labeled'), t[1], await reconstruct(t[2])));
         case 1 /* Fork */:
-            return (0,_request_id__WEBPACK_IMPORTED_MODULE_4__.hash)(buffer___WEBPACK_IMPORTED_MODULE_0__.Buffer.concat([
-                domain_sep('ic-hashtree-fork'),
-                buffer___WEBPACK_IMPORTED_MODULE_0__.Buffer.from(await reconstruct(t[1])),
-                buffer___WEBPACK_IMPORTED_MODULE_0__.Buffer.from(await reconstruct(t[2])),
-            ]));
+            return (0,_request_id__WEBPACK_IMPORTED_MODULE_3__.hash)((0,_utils_buffer__WEBPACK_IMPORTED_MODULE_5__.concat)(domain_sep('ic-hashtree-fork'), await reconstruct(t[1]), await reconstruct(t[2])));
         default:
             throw new Error('unreachable');
     }
 }
 function domain_sep(s) {
-    const buf = buffer___WEBPACK_IMPORTED_MODULE_0__.Buffer.alloc(1);
-    buf.writeUInt8(s.length, 0);
-    return buffer___WEBPACK_IMPORTED_MODULE_0__.Buffer.concat([buf, buffer___WEBPACK_IMPORTED_MODULE_0__.Buffer.from(s)]);
-}
-/**
- *
- * @param path
- * @param tree
- */
-function lookupPathEx(path, tree) {
-    const maybeReturn = lookup_path(path.map(p => {
-        if (typeof p === 'string') {
-            return (0,_dfinity_candid__WEBPACK_IMPORTED_MODULE_5__.blobFromText)(p);
-        }
-        else {
-            return (0,_dfinity_candid__WEBPACK_IMPORTED_MODULE_5__.blobFromUint8Array)(new Uint8Array(p));
-        }
-    }), tree);
-    return maybeReturn && (0,_dfinity_candid__WEBPACK_IMPORTED_MODULE_5__.blobToUint8Array)((0,_dfinity_candid__WEBPACK_IMPORTED_MODULE_5__.blobFromBuffer)(maybeReturn));
+    const len = new Uint8Array([s.length]);
+    const str = new TextEncoder().encode(s);
+    return (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_5__.concat)(len, str);
 }
 /**
  * @param path
@@ -1390,14 +1367,15 @@ function lookup_path(path, tree) {
     if (path.length === 0) {
         switch (tree[0]) {
             case 3 /* Leaf */: {
-                return buffer___WEBPACK_IMPORTED_MODULE_0__.Buffer.from(tree[1]);
+                return new Uint8Array(tree[1]).buffer;
             }
             default: {
                 return undefined;
             }
         }
     }
-    const t = find_label(path[0], flatten_forks(tree));
+    const label = typeof path[0] === 'string' ? new TextEncoder().encode(path[0]) : path[0];
+    const t = find_label(label, flatten_forks(tree));
     if (t) {
         return lookup_path(path.slice(1), t);
     }
@@ -1418,7 +1396,7 @@ function find_label(l, trees) {
     }
     for (const t of trees) {
         if (t[0] === 2 /* Labeled */) {
-            const p = buffer___WEBPACK_IMPORTED_MODULE_0__.Buffer.from(t[1]);
+            const p = t[1];
             if (isBufferEqual(l, p)) {
                 return t[2];
             }
@@ -1475,23 +1453,22 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "RequestStatusResponseStatus": () => (/* reexport safe */ _agent__WEBPACK_IMPORTED_MODULE_1__.RequestStatusResponseStatus),
 /* harmony export */   "getDefaultAgent": () => (/* reexport safe */ _agent__WEBPACK_IMPORTED_MODULE_1__.getDefaultAgent),
 /* harmony export */   "makeExpiryTransform": () => (/* reexport safe */ _agent__WEBPACK_IMPORTED_MODULE_1__.makeExpiryTransform),
+/* harmony export */   "makeNonce": () => (/* reexport safe */ _agent__WEBPACK_IMPORTED_MODULE_1__.makeNonce),
 /* harmony export */   "makeNonceTransform": () => (/* reexport safe */ _agent__WEBPACK_IMPORTED_MODULE_1__.makeNonceTransform),
 /* harmony export */   "AnonymousIdentity": () => (/* reexport safe */ _auth__WEBPACK_IMPORTED_MODULE_2__.AnonymousIdentity),
 /* harmony export */   "SignIdentity": () => (/* reexport safe */ _auth__WEBPACK_IMPORTED_MODULE_2__.SignIdentity),
 /* harmony export */   "createIdentityDescriptor": () => (/* reexport safe */ _auth__WEBPACK_IMPORTED_MODULE_2__.createIdentityDescriptor),
-/* harmony export */   "isIdentityDescriptor": () => (/* reexport safe */ _auth__WEBPACK_IMPORTED_MODULE_2__.isIdentityDescriptor),
 /* harmony export */   "Certificate": () => (/* reexport safe */ _certificate__WEBPACK_IMPORTED_MODULE_3__.Certificate),
 /* harmony export */   "UnverifiedCertificateError": () => (/* reexport safe */ _certificate__WEBPACK_IMPORTED_MODULE_3__.UnverifiedCertificateError),
 /* harmony export */   "hashTreeToString": () => (/* reexport safe */ _certificate__WEBPACK_IMPORTED_MODULE_3__.hashTreeToString),
-/* harmony export */   "lookupPathEx": () => (/* reexport safe */ _certificate__WEBPACK_IMPORTED_MODULE_3__.lookupPathEx),
 /* harmony export */   "lookup_path": () => (/* reexport safe */ _certificate__WEBPACK_IMPORTED_MODULE_3__.lookup_path),
 /* harmony export */   "reconstruct": () => (/* reexport safe */ _certificate__WEBPACK_IMPORTED_MODULE_3__.reconstruct),
 /* harmony export */   "SubmitRequestType": () => (/* reexport safe */ _agent_http_types__WEBPACK_IMPORTED_MODULE_5__.SubmitRequestType),
 /* harmony export */   "createAssetCanisterActor": () => (/* reexport safe */ _canisters_asset__WEBPACK_IMPORTED_MODULE_6__.createAssetCanisterActor),
 /* harmony export */   "getManagementCanister": () => (/* reexport safe */ _canisters_management__WEBPACK_IMPORTED_MODULE_7__.getManagementCanister),
 /* harmony export */   "hash": () => (/* reexport safe */ _request_id__WEBPACK_IMPORTED_MODULE_8__.hash),
+/* harmony export */   "hashValue": () => (/* reexport safe */ _request_id__WEBPACK_IMPORTED_MODULE_8__.hashValue),
 /* harmony export */   "requestIdOf": () => (/* reexport safe */ _request_id__WEBPACK_IMPORTED_MODULE_8__.requestIdOf),
-/* harmony export */   "toHex": () => (/* reexport safe */ _request_id__WEBPACK_IMPORTED_MODULE_8__.toHex),
 /* harmony export */   "blsVerify": () => (/* reexport safe */ _utils_bls__WEBPACK_IMPORTED_MODULE_9__.blsVerify),
 /* harmony export */   "verify": () => (/* reexport safe */ _utils_bls__WEBPACK_IMPORTED_MODULE_9__.verify),
 /* harmony export */   "polling": () => (/* reexport module object */ _polling__WEBPACK_IMPORTED_MODULE_10__),
@@ -1534,16 +1511,14 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "strategy": () => (/* reexport module object */ _strategy__WEBPACK_IMPORTED_MODULE_4__),
-/* harmony export */   "defaultStrategy": () => (/* reexport safe */ _strategy__WEBPACK_IMPORTED_MODULE_4__.defaultStrategy),
+/* harmony export */   "strategy": () => (/* reexport module object */ _strategy__WEBPACK_IMPORTED_MODULE_3__),
+/* harmony export */   "defaultStrategy": () => (/* reexport safe */ _strategy__WEBPACK_IMPORTED_MODULE_3__.defaultStrategy),
 /* harmony export */   "pollForResponse": () => (/* binding */ pollForResponse)
 /* harmony export */ });
 /* harmony import */ var _agent__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../agent */ "./node_modules/@dfinity/agent/lib/esm/agent/index.js");
 /* harmony import */ var _certificate__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../certificate */ "./node_modules/@dfinity/agent/lib/esm/certificate.js");
-/* harmony import */ var _request_id__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../request_id */ "./node_modules/@dfinity/agent/lib/esm/request_id.js");
-/* harmony import */ var _dfinity_candid__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @dfinity/candid */ "./node_modules/@dfinity/candid/lib/esm/index.js");
-/* harmony import */ var _strategy__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./strategy */ "./node_modules/@dfinity/agent/lib/esm/polling/strategy.js");
-
+/* harmony import */ var _utils_buffer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils/buffer */ "./node_modules/@dfinity/agent/lib/esm/utils/buffer.js");
+/* harmony import */ var _strategy__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./strategy */ "./node_modules/@dfinity/agent/lib/esm/polling/strategy.js");
 
 
 
@@ -1558,25 +1533,25 @@ __webpack_require__.r(__webpack_exports__);
  * @param strategy A polling strategy.
  */
 async function pollForResponse(agent, canisterId, requestId, strategy) {
-    const path = [(0,_dfinity_candid__WEBPACK_IMPORTED_MODULE_3__.blobFromText)('request_status'), requestId];
+    const path = [new TextEncoder().encode('request_status'), requestId];
     const state = await agent.readState(canisterId, { paths: [path] });
     const cert = new _certificate__WEBPACK_IMPORTED_MODULE_1__.Certificate(state, agent);
     const verified = await cert.verify();
     if (!verified) {
         throw new Error('Fail to verify certificate');
     }
-    const maybeBuf = cert.lookup([...path, (0,_dfinity_candid__WEBPACK_IMPORTED_MODULE_3__.blobFromText)('status')]);
+    const maybeBuf = cert.lookup([...path, new TextEncoder().encode('status')]);
     let status;
     if (typeof maybeBuf === 'undefined') {
         // Missing requestId means we need to wait
         status = _agent__WEBPACK_IMPORTED_MODULE_0__.RequestStatusResponseStatus.Unknown;
     }
     else {
-        status = maybeBuf.toString();
+        status = new TextDecoder().decode(maybeBuf);
     }
     switch (status) {
         case _agent__WEBPACK_IMPORTED_MODULE_0__.RequestStatusResponseStatus.Replied: {
-            return cert.lookup([...path, (0,_dfinity_candid__WEBPACK_IMPORTED_MODULE_3__.blobFromText)('reply')]);
+            return cert.lookup([...path, 'reply']);
         }
         case _agent__WEBPACK_IMPORTED_MODULE_0__.RequestStatusResponseStatus.Received:
         case _agent__WEBPACK_IMPORTED_MODULE_0__.RequestStatusResponseStatus.Unknown:
@@ -1585,10 +1560,10 @@ async function pollForResponse(agent, canisterId, requestId, strategy) {
             await strategy(canisterId, requestId, status);
             return pollForResponse(agent, canisterId, requestId, strategy);
         case _agent__WEBPACK_IMPORTED_MODULE_0__.RequestStatusResponseStatus.Rejected: {
-            const rejectCode = cert.lookup([...path, (0,_dfinity_candid__WEBPACK_IMPORTED_MODULE_3__.blobFromText)('reject_code')]).toString();
-            const rejectMessage = cert.lookup([...path, (0,_dfinity_candid__WEBPACK_IMPORTED_MODULE_3__.blobFromText)('reject_message')]).toString();
+            const rejectCode = new Uint8Array(cert.lookup([...path, 'reject_code']))[0];
+            const rejectMessage = new TextDecoder().decode(cert.lookup([...path, 'reject_message']));
             throw new Error(`Call was rejected:\n` +
-                `  Request ID: ${(0,_request_id__WEBPACK_IMPORTED_MODULE_2__.toHex)(requestId)}\n` +
+                `  Request ID: ${(0,_utils_buffer__WEBPACK_IMPORTED_MODULE_2__.toHex)(requestId)}\n` +
                 `  Reject code: ${rejectCode}\n` +
                 `  Reject text: ${rejectMessage}\n`);
         }
@@ -1596,7 +1571,7 @@ async function pollForResponse(agent, canisterId, requestId, strategy) {
             // This is _technically_ not an error, but we still didn't see the `Replied` status so
             // we don't know the result and cannot decode it.
             throw new Error(`Call was marked as done but we never saw the reply:\n` +
-                `  Request ID: ${(0,_request_id__WEBPACK_IMPORTED_MODULE_2__.toHex)(requestId)}\n`);
+                `  Request ID: ${(0,_utils_buffer__WEBPACK_IMPORTED_MODULE_2__.toHex)(requestId)}\n`);
     }
     throw new Error('unreachable');
 }
@@ -1622,7 +1597,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "backoff": () => (/* binding */ backoff),
 /* harmony export */   "chain": () => (/* binding */ chain)
 /* harmony export */ });
-/* harmony import */ var ___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! .. */ "./node_modules/@dfinity/agent/lib/esm/index.js");
+/* harmony import */ var _utils_buffer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utils/buffer */ "./node_modules/@dfinity/agent/lib/esm/utils/buffer.js");
 
 const FIVE_MINUTES_IN_MSEC = 5 * 60 * 1000;
 /**
@@ -1666,7 +1641,7 @@ function maxAttempts(count) {
     return async (canisterId, requestId, status) => {
         if (--attempts <= 0) {
             throw new Error(`Failed to retrieve a reply for request after ${count} attempts:\n` +
-                `  Request ID: ${(0,___WEBPACK_IMPORTED_MODULE_0__.toHex)(requestId)}\n` +
+                `  Request ID: ${(0,_utils_buffer__WEBPACK_IMPORTED_MODULE_0__.toHex)(requestId)}\n` +
                 `  Request status: ${status}\n`);
         }
     };
@@ -1687,7 +1662,7 @@ function timeout(timeInMsec) {
     return async (canisterId, requestId, status) => {
         if (Date.now() > end) {
             throw new Error(`Request timed out after ${timeInMsec} msec:\n` +
-                `  Request ID: ${(0,___WEBPACK_IMPORTED_MODULE_0__.toHex)(requestId)}\n` +
+                `  Request ID: ${(0,_utils_buffer__WEBPACK_IMPORTED_MODULE_0__.toHex)(requestId)}\n` +
                 `  Request status: ${status}\n`);
         }
     };
@@ -1730,36 +1705,31 @@ function chain(...strategies) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "toHex": () => (/* binding */ toHex),
 /* harmony export */   "hash": () => (/* binding */ hash),
+/* harmony export */   "hashValue": () => (/* binding */ hashValue),
 /* harmony export */   "requestIdOf": () => (/* binding */ requestIdOf)
 /* harmony export */ });
-/* harmony import */ var js_sha256__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! js-sha256 */ "./node_modules/js-sha256/src/sha256.js");
-/* harmony import */ var js_sha256__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(js_sha256__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _dfinity_candid__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @dfinity/candid */ "./node_modules/@dfinity/candid/lib/esm/index.js");
 /* harmony import */ var borc__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! borc */ "./node_modules/borc/src/index.js");
-/* harmony import */ var buffer___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! buffer/ */ "./node_modules/buffer/index.js");
-/* harmony import */ var _dfinity_candid__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @dfinity/candid */ "./node_modules/@dfinity/candid/lib/esm/index.js");
-/* harmony import */ var _dfinity_principal__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @dfinity/principal */ "./node_modules/@dfinity/principal/lib/esm/index.js");
+/* harmony import */ var js_sha256__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! js-sha256 */ "./node_modules/js-sha256/src/sha256.js");
+/* harmony import */ var js_sha256__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(js_sha256__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _utils_buffer__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./utils/buffer */ "./node_modules/@dfinity/agent/lib/esm/utils/buffer.js");
 
 
 
 
-
-/**
- * get RequestId as hex-encoded blob.
- * @param requestId - RequestId to hex
- */
-function toHex(requestId) {
-    return (0,_dfinity_candid__WEBPACK_IMPORTED_MODULE_3__.blobToHex)(requestId);
-}
 /**
  * sha256 hash the provided Buffer
  * @param data - input to hash function
  */
 function hash(data) {
-    const hashed = js_sha256__WEBPACK_IMPORTED_MODULE_0__.sha256.create().update(data).arrayBuffer();
-    return (0,_dfinity_candid__WEBPACK_IMPORTED_MODULE_3__.blobFromUint8Array)(new Uint8Array(hashed));
+    return js_sha256__WEBPACK_IMPORTED_MODULE_2__.sha256.create().update(new Uint8Array(data)).arrayBuffer();
 }
+/**
+ *
+ * @param value unknown value
+ * @returns ArrayBuffer
+ */
 function hashValue(value) {
     if (value instanceof borc__WEBPACK_IMPORTED_MODULE_1__.Tagged) {
         return hashValue(value.value);
@@ -1768,20 +1738,17 @@ function hashValue(value) {
         return hashString(value);
     }
     else if (typeof value === 'number') {
-        return hash((0,_dfinity_candid__WEBPACK_IMPORTED_MODULE_3__.lebEncode)(value));
+        return hash((0,_dfinity_candid__WEBPACK_IMPORTED_MODULE_0__.lebEncode)(value));
     }
-    else if (buffer___WEBPACK_IMPORTED_MODULE_2__.Buffer.isBuffer(value)) {
-        return hash((0,_dfinity_candid__WEBPACK_IMPORTED_MODULE_3__.blobFromUint8Array)(new Uint8Array(value)));
-    }
-    else if (value instanceof Uint8Array || value instanceof ArrayBuffer) {
-        return hash((0,_dfinity_candid__WEBPACK_IMPORTED_MODULE_3__.blobFromUint8Array)(new Uint8Array(value)));
+    else if (value instanceof ArrayBuffer || ArrayBuffer.isView(value)) {
+        return hash(value);
     }
     else if (Array.isArray(value)) {
         const vals = value.map(hashValue);
-        return hash(buffer___WEBPACK_IMPORTED_MODULE_2__.Buffer.concat(vals));
+        return hash((0,_utils_buffer__WEBPACK_IMPORTED_MODULE_3__.concat)(...vals));
     }
-    else if (value instanceof _dfinity_principal__WEBPACK_IMPORTED_MODULE_4__.Principal) {
-        return hash((0,_dfinity_candid__WEBPACK_IMPORTED_MODULE_3__.blobFromUint8Array)(value.toUint8Array()));
+    else if (value && typeof value === 'object' && value._isPrincipal) {
+        return hash(value.toUint8Array());
     }
     else if (typeof value === 'object' &&
         value !== null &&
@@ -1796,7 +1763,7 @@ function hashValue(value) {
         // Do this check much later than the other bigint check because this one is much less
         // type-safe.
         // So we want to try all the high-assurance type guards before this 'probable' one.
-        return hash((0,_dfinity_candid__WEBPACK_IMPORTED_MODULE_3__.lebEncode)(value));
+        return hash((0,_dfinity_candid__WEBPACK_IMPORTED_MODULE_0__.lebEncode)(value));
     }
     throw Object.assign(new Error(`Attempt to hash a value of unsupported type: ${value}`), {
         // include so logs/callers can understand the confusing value.
@@ -1805,17 +1772,9 @@ function hashValue(value) {
     });
 }
 const hashString = (value) => {
-    const encoder = new TextEncoder();
-    const encoded = encoder.encode(value);
-    return hash(buffer___WEBPACK_IMPORTED_MODULE_2__.Buffer.from(encoded));
+    const encoded = new TextEncoder().encode(value);
+    return hash(encoded);
 };
-/**
- * Concatenate many blobs.
- * @param bs - blobs to concatenate
- */
-function concat(bs) {
-    return (0,_dfinity_candid__WEBPACK_IMPORTED_MODULE_3__.blobFromBuffer)(buffer___WEBPACK_IMPORTED_MODULE_2__.Buffer.concat(bs));
-}
 /**
  * Get the RequestId of the provided ic-ref request.
  * RequestId is the result of the representation-independent-hash function.
@@ -1833,9 +1792,9 @@ function requestIdOf(request) {
     });
     const traversed = hashed;
     const sorted = traversed.sort(([k1], [k2]) => {
-        return buffer___WEBPACK_IMPORTED_MODULE_2__.Buffer.compare(buffer___WEBPACK_IMPORTED_MODULE_2__.Buffer.from(k1), buffer___WEBPACK_IMPORTED_MODULE_2__.Buffer.from(k2));
+        return (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_3__.compare)(k1, k2);
     });
-    const concatenated = concat(sorted.map(concat));
+    const concatenated = (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_3__.concat)(...sorted.map(x => (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_3__.concat)(...x)));
     const requestId = hash(concatenated);
     return requestId;
 }
@@ -1879,6 +1838,75 @@ async function blsVerify(pk, sig, msg) {
     return verify(pk, sig, msg);
 }
 //# sourceMappingURL=bls.js.map
+
+/***/ }),
+
+/***/ "./node_modules/@dfinity/agent/lib/esm/utils/buffer.js":
+/*!*************************************************************!*\
+  !*** ./node_modules/@dfinity/agent/lib/esm/utils/buffer.js ***!
+  \*************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "concat": () => (/* binding */ concat),
+/* harmony export */   "toHex": () => (/* binding */ toHex),
+/* harmony export */   "fromHex": () => (/* binding */ fromHex),
+/* harmony export */   "compare": () => (/* binding */ compare)
+/* harmony export */ });
+/**
+ * Concatenate multiple array buffers.
+ * @param buffers The buffers to concatenate.
+ */
+function concat(...buffers) {
+    const result = new Uint8Array(buffers.reduce((acc, curr) => acc + curr.byteLength, 0));
+    let index = 0;
+    for (const b of buffers) {
+        result.set(new Uint8Array(b), index);
+        index += b.byteLength;
+    }
+    return result.buffer;
+}
+/**
+ * Transforms a buffer to an hexadecimal string. This will use the buffer as an Uint8Array.
+ * @param buffer The buffer to return the hexadecimal string of.
+ */
+function toHex(buffer) {
+    return [...new Uint8Array(buffer)].map(x => x.toString(16).padStart(2, '0')).join('');
+}
+const hexRe = /^([0-9A-F]{2})*$/i.compile();
+/**
+ * Transforms a hexadecimal string into an array buffer.
+ * @param hex The hexadecimal string to use.
+ */
+function fromHex(hex) {
+    if (!hexRe.test(hex)) {
+        throw new Error('Invalid hexadecimal string.');
+    }
+    const buffer = [...hex]
+        .reduce((acc, curr, i) => {
+        // tslint:disable-next-line:no-bitwise
+        acc[(i / 2) | 0] = (acc[(i / 2) | 0] || '') + curr;
+        return acc;
+    }, [])
+        .map(x => Number.parseInt(x, 16));
+    return new Uint8Array(buffer).buffer;
+}
+function compare(b1, b2) {
+    if (b1.byteLength !== b2.byteLength) {
+        return b1.byteLength - b2.byteLength;
+    }
+    const u1 = new Uint8Array(b1);
+    const u2 = new Uint8Array(b2);
+    for (let i = 0; i < u1.length; i++) {
+        if (u1[i] !== u2[i]) {
+            return u1[i] - u2[i];
+        }
+    }
+    return 0;
+}
+//# sourceMappingURL=buffer.js.map
 
 /***/ }),
 
@@ -3748,16 +3776,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "Func": () => (/* binding */ Func),
 /* harmony export */   "Service": () => (/* binding */ Service)
 /* harmony export */ });
-/* harmony import */ var buffer_pipe__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! buffer-pipe */ "./node_modules/buffer-pipe/index.js");
-/* harmony import */ var buffer_pipe__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(buffer_pipe__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var buffer___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! buffer/ */ "./node_modules/buffer/index.js");
-/* harmony import */ var _dfinity_principal__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @dfinity/principal */ "./node_modules/@dfinity/principal/lib/esm/index.js");
-/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./types */ "./node_modules/@dfinity/candid/lib/esm/types.js");
-/* harmony import */ var _utils_hash__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./utils/hash */ "./node_modules/@dfinity/candid/lib/esm/utils/hash.js");
-/* harmony import */ var _utils_leb128__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./utils/leb128 */ "./node_modules/@dfinity/candid/lib/esm/utils/leb128.js");
+/* harmony import */ var _dfinity_principal__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @dfinity/principal */ "./node_modules/@dfinity/principal/lib/esm/index.js");
+/* harmony import */ var _utils_buffer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./utils/buffer */ "./node_modules/@dfinity/candid/lib/esm/utils/buffer.js");
+/* harmony import */ var _utils_hash__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./utils/hash */ "./node_modules/@dfinity/candid/lib/esm/utils/hash.js");
+/* harmony import */ var _utils_leb128__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./utils/leb128 */ "./node_modules/@dfinity/candid/lib/esm/utils/leb128.js");
 // tslint:disable:max-classes-per-file
-
-
 
 
 
@@ -3799,15 +3822,15 @@ class TypeTable {
         this._idx.delete(knot);
     }
     encode() {
-        const len = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.lebEncode)(this._typs.length);
-        const buf = buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.concat(this._typs);
-        return buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.concat([len, buf]);
+        const len = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.lebEncode)(this._typs.length);
+        const buf = (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_1__.concat)(...this._typs);
+        return (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_1__.concat)(len, buf);
     }
     indexOf(typeName) {
         if (!this._idx.has(typeName)) {
             throw new Error('Missing type index for ' + typeName);
         }
-        return (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.slebEncode)(this._idx.get(typeName) || 0);
+        return (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.slebEncode)(this._idx.get(typeName) || 0);
     }
 }
 class Visitor {
@@ -3946,7 +3969,7 @@ class EmptyClass extends PrimitiveType {
         throw new Error('Empty cannot appear as a value');
     }
     encodeType() {
-        return (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.slebEncode)(-17 /* Empty */);
+        return (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.slebEncode)(-17 /* Empty */);
     }
     decodeValue() {
         throw new Error('Empty cannot appear as an output');
@@ -3966,24 +3989,20 @@ class BoolClass extends PrimitiveType {
         return typeof x === 'boolean';
     }
     encodeValue(x) {
-        const buf = buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.alloc(1);
-        buf.writeInt8(x ? 1 : 0, 0);
-        return buf;
+        return new Uint8Array([x ? 1 : 0]);
     }
     encodeType() {
-        return (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.slebEncode)(-2 /* Bool */);
+        return (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.slebEncode)(-2 /* Bool */);
     }
     decodeValue(b, t) {
         this.checkType(t);
-        const x = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.safeRead)(b, 1).toString('hex');
-        if (x === '00') {
-            return false;
-        }
-        else if (x === '01') {
-            return true;
-        }
-        else {
-            throw new Error('Boolean value out of range');
+        switch ((0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.safeReadUint8)(b)) {
+            case 0:
+                return false;
+            case 1:
+                return true;
+            default:
+                throw new Error('Boolean value out of range');
         }
     }
     get name() {
@@ -4001,10 +4020,10 @@ class NullClass extends PrimitiveType {
         return x === null;
     }
     encodeValue() {
-        return buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.alloc(0);
+        return new ArrayBuffer(0);
     }
     encodeType() {
-        return (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.slebEncode)(-1 /* Null */);
+        return (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.slebEncode)(-1 /* Null */);
     }
     decodeValue(b, t) {
         this.checkType(t);
@@ -4025,10 +4044,10 @@ class ReservedClass extends PrimitiveType {
         return true;
     }
     encodeValue() {
-        return buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.alloc(0);
+        return new ArrayBuffer(0);
     }
     encodeType() {
-        return (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.slebEncode)(-16 /* Reserved */);
+        return (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.slebEncode)(-16 /* Reserved */);
     }
     decodeValue(b, t) {
         if (t.name !== this.name) {
@@ -4039,9 +4058,6 @@ class ReservedClass extends PrimitiveType {
     get name() {
         return 'reserved';
     }
-}
-function isValidUTF8(buf) {
-    return buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.compare(new buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer(buf.toString(), 'utf8'), buf) === 0;
 }
 /**
  * Represents an IDL Text
@@ -4054,21 +4070,19 @@ class TextClass extends PrimitiveType {
         return typeof x === 'string';
     }
     encodeValue(x) {
-        const buf = buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.from(x, 'utf8');
-        const len = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.lebEncode)(buf.length);
-        return buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.concat([len, buf]);
+        const buf = new TextEncoder().encode(x);
+        const len = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.lebEncode)(buf.byteLength);
+        return (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_1__.concat)(len, buf);
     }
     encodeType() {
-        return (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.slebEncode)(-15 /* Text */);
+        return (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.slebEncode)(-15 /* Text */);
     }
     decodeValue(b, t) {
         this.checkType(t);
-        const len = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.lebDecode)(b);
-        const buf = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.safeRead)(b, Number(len));
-        if (!isValidUTF8(buf)) {
-            throw new Error('Not valid UTF8 text');
-        }
-        return buf.toString('utf8');
+        const len = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.lebDecode)(b);
+        const buf = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.safeRead)(b, Number(len));
+        const decoder = new TextDecoder('utf8', { fatal: true });
+        return decoder.decode(buf);
     }
     get name() {
         return 'text';
@@ -4090,14 +4104,14 @@ class IntClass extends PrimitiveType {
         return typeof x === 'bigint' || Number.isInteger(x);
     }
     encodeValue(x) {
-        return (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.slebEncode)(x);
+        return (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.slebEncode)(x);
     }
     encodeType() {
-        return (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.slebEncode)(-4 /* Int */);
+        return (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.slebEncode)(-4 /* Int */);
     }
     decodeValue(b, t) {
         this.checkType(t);
-        return (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.slebDecode)(b);
+        return (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.slebDecode)(b);
     }
     get name() {
         return 'int';
@@ -4119,14 +4133,14 @@ class NatClass extends PrimitiveType {
         return (typeof x === 'bigint' && x >= BigInt(0)) || (Number.isInteger(x) && x >= 0);
     }
     encodeValue(x) {
-        return (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.lebEncode)(x);
+        return (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.lebEncode)(x);
     }
     encodeType() {
-        return (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.slebEncode)(-3 /* Nat */);
+        return (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.slebEncode)(-3 /* Nat */);
     }
     decodeValue(b, t) {
         this.checkType(t);
-        return (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.lebDecode)(b);
+        return (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.lebDecode)(b);
     }
     get name() {
         return 'nat';
@@ -4153,27 +4167,29 @@ class FloatClass extends PrimitiveType {
         return typeof x === 'number' || x instanceof Number;
     }
     encodeValue(x) {
-        const buf = buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.allocUnsafe(this._bits / 8);
+        const buf = new ArrayBuffer(this._bits / 8);
+        const view = new DataView(buf);
         if (this._bits === 32) {
-            buf.writeFloatLE(x, 0);
+            view.setFloat32(0, x, true);
         }
         else {
-            buf.writeDoubleLE(x, 0);
+            view.setFloat64(0, x, true);
         }
         return buf;
     }
     encodeType() {
         const opcode = this._bits === 32 ? -13 /* Float32 */ : -14 /* Float64 */;
-        return (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.slebEncode)(opcode);
+        return (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.slebEncode)(opcode);
     }
     decodeValue(b, t) {
         this.checkType(t);
-        const x = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.safeRead)(b, this._bits / 8);
+        const bytes = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.safeRead)(b, this._bits / 8);
+        const view = new DataView(bytes);
         if (this._bits === 32) {
-            return x.readFloatLE(0);
+            return view.getFloat32(0, true);
         }
         else {
-            return x.readDoubleLE(0);
+            return view.getFloat64(0, true);
         }
     }
     get name() {
@@ -4209,15 +4225,15 @@ class FixedIntClass extends PrimitiveType {
         }
     }
     encodeValue(x) {
-        return (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.writeIntLE)(x, this._bits / 8);
+        return (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.writeIntLE)(x, this._bits / 8);
     }
     encodeType() {
         const offset = Math.log2(this._bits) - 3;
-        return (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.slebEncode)(-9 - offset);
+        return (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.slebEncode)(-9 - offset);
     }
     decodeValue(b, t) {
         this.checkType(t);
-        const num = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.readIntLE)(b, this._bits / 8);
+        const num = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.readIntLE)(b, this._bits / 8);
         if (this._bits <= 32) {
             return Number(num);
         }
@@ -4257,15 +4273,15 @@ class FixedNatClass extends PrimitiveType {
         }
     }
     encodeValue(x) {
-        return (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.writeUIntLE)(x, this.bits / 8);
+        return (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.writeUIntLE)(x, this.bits / 8);
     }
     encodeType() {
         const offset = Math.log2(this.bits) - 3;
-        return (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.slebEncode)(-5 - offset);
+        return (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.slebEncode)(-5 - offset);
     }
     decodeValue(b, t) {
         this.checkType(t);
-        const num = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.readUIntLE)(b, this.bits / 8);
+        const num = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.readUIntLE)(b, this.bits / 8);
         if (this.bits <= 32) {
             return Number(num);
         }
@@ -4301,24 +4317,24 @@ class VecClass extends ConstructType {
         return Array.isArray(x) && x.every(v => this._type.covariant(v));
     }
     encodeValue(x) {
-        const len = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.lebEncode)(x.length);
+        const len = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.lebEncode)(x.length);
         if (this._blobOptimization) {
-            return buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.concat([len, buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.from(x)]);
+            return (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_1__.concat)(len, new Uint8Array(x));
         }
-        return buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.concat([len, ...x.map(d => this._type.encodeValue(d))]);
+        return (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_1__.concat)(len, ...x.map(d => this._type.encodeValue(d)));
     }
     _buildTypeTableImpl(typeTable) {
         this._type.buildTypeTable(typeTable);
-        const opCode = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.slebEncode)(-19 /* Vector */);
+        const opCode = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.slebEncode)(-19 /* Vector */);
         const buffer = this._type.encodeType(typeTable);
-        typeTable.add(this, buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.concat([opCode, buffer]));
+        typeTable.add(this, (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_1__.concat)(opCode, buffer));
     }
     decodeValue(b, t) {
         const vec = this.checkType(t);
         if (!(vec instanceof VecClass)) {
             throw new Error('Not a vector type');
         }
-        const len = Number((0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.lebDecode)(b));
+        const len = Number((0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.lebDecode)(b));
         if (this._blobOptimization) {
             return [...new Uint8Array(b.read(len))];
         }
@@ -4356,32 +4372,30 @@ class OptClass extends ConstructType {
     }
     encodeValue(x) {
         if (x.length === 0) {
-            return buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.from([0]);
+            return new Uint8Array([0]);
         }
         else {
-            return buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.concat([buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.from([1]), this._type.encodeValue(x[0])]);
+            return (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_1__.concat)(new Uint8Array([1]), this._type.encodeValue(x[0]));
         }
     }
     _buildTypeTableImpl(typeTable) {
         this._type.buildTypeTable(typeTable);
-        const opCode = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.slebEncode)(-18 /* Opt */);
+        const opCode = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.slebEncode)(-18 /* Opt */);
         const buffer = this._type.encodeType(typeTable);
-        typeTable.add(this, buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.concat([opCode, buffer]));
+        typeTable.add(this, (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_1__.concat)(opCode, buffer));
     }
     decodeValue(b, t) {
         const opt = this.checkType(t);
         if (!(opt instanceof OptClass)) {
             throw new Error('Not an option type');
         }
-        const len = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.safeRead)(b, 1).toString('hex');
-        if (len === '00') {
-            return [];
-        }
-        else if (len === '01') {
-            return [this._type.decodeValue(b, opt._type)];
-        }
-        else {
-            throw new Error('Not an option value');
+        switch ((0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.safeReadUint8)(b)) {
+            case 0:
+                return [];
+            case 1:
+                return [this._type.decodeValue(b, opt._type)];
+            default:
+                throw new Error('Not an option value');
         }
     }
     get name() {
@@ -4406,7 +4420,7 @@ class OptClass extends ConstructType {
 class RecordClass extends ConstructType {
     constructor(fields = {}) {
         super();
-        this._fields = Object.entries(fields).sort((a, b) => (0,_utils_hash__WEBPACK_IMPORTED_MODULE_4__.idlLabelToId)(a[0]) - (0,_utils_hash__WEBPACK_IMPORTED_MODULE_4__.idlLabelToId)(b[0]));
+        this._fields = Object.entries(fields).sort((a, b) => (0,_utils_hash__WEBPACK_IMPORTED_MODULE_2__.idlLabelToId)(a[0]) - (0,_utils_hash__WEBPACK_IMPORTED_MODULE_2__.idlLabelToId)(b[0]));
     }
     accept(v, d) {
         return v.visitRecord(this, this._fields, d);
@@ -4435,14 +4449,14 @@ class RecordClass extends ConstructType {
     encodeValue(x) {
         const values = this._fields.map(([key]) => x[key]);
         const bufs = zipWith(this._fields, values, ([, c], d) => c.encodeValue(d));
-        return buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.concat(bufs);
+        return (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_1__.concat)(...bufs);
     }
     _buildTypeTableImpl(T) {
         this._fields.forEach(([_, value]) => value.buildTypeTable(T));
-        const opCode = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.slebEncode)(-20 /* Record */);
-        const len = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.lebEncode)(this._fields.length);
-        const fields = this._fields.map(([key, value]) => buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.concat([(0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.lebEncode)((0,_utils_hash__WEBPACK_IMPORTED_MODULE_4__.idlLabelToId)(key)), value.encodeType(T)]));
-        T.add(this, buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.concat([opCode, len, buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.concat(fields)]));
+        const opCode = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.slebEncode)(-20 /* Record */);
+        const len = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.lebEncode)(this._fields.length);
+        const fields = this._fields.map(([key, value]) => (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_1__.concat)((0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.lebEncode)((0,_utils_hash__WEBPACK_IMPORTED_MODULE_2__.idlLabelToId)(key)), value.encodeType(T)));
+        T.add(this, (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_1__.concat)(opCode, len, (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_1__.concat)(...fields)));
     }
     decodeValue(b, t) {
         const record = this.checkType(t);
@@ -4452,7 +4466,7 @@ class RecordClass extends ConstructType {
         const x = {};
         let idx = 0;
         for (const [hash, type] of record._fields) {
-            if (idx >= this._fields.length || (0,_utils_hash__WEBPACK_IMPORTED_MODULE_4__.idlLabelToId)(this._fields[idx][0]) !== (0,_utils_hash__WEBPACK_IMPORTED_MODULE_4__.idlLabelToId)(hash)) {
+            if (idx >= this._fields.length || (0,_utils_hash__WEBPACK_IMPORTED_MODULE_2__.idlLabelToId)(this._fields[idx][0]) !== (0,_utils_hash__WEBPACK_IMPORTED_MODULE_2__.idlLabelToId)(hash)) {
                 // skip field
                 type.decodeValue(b, type);
                 continue;
@@ -4502,7 +4516,7 @@ class TupleClass extends RecordClass {
     }
     encodeValue(x) {
         const bufs = zipWith(this._components, x, (c, d) => c.encodeValue(d));
-        return buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.concat(bufs);
+        return (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_1__.concat)(...bufs);
     }
     decodeValue(b, t) {
         const tuple = this.checkType(t);
@@ -4540,7 +4554,7 @@ class TupleClass extends RecordClass {
 class VariantClass extends ConstructType {
     constructor(fields = {}) {
         super();
-        this._fields = Object.entries(fields).sort((a, b) => (0,_utils_hash__WEBPACK_IMPORTED_MODULE_4__.idlLabelToId)(a[0]) - (0,_utils_hash__WEBPACK_IMPORTED_MODULE_4__.idlLabelToId)(b[0]));
+        this._fields = Object.entries(fields).sort((a, b) => (0,_utils_hash__WEBPACK_IMPORTED_MODULE_2__.idlLabelToId)(a[0]) - (0,_utils_hash__WEBPACK_IMPORTED_MODULE_2__.idlLabelToId)(b[0]));
     }
     accept(v, d) {
         return v.visitVariant(this, this._fields, d);
@@ -4558,9 +4572,9 @@ class VariantClass extends ConstructType {
             const [name, type] = this._fields[i];
             // eslint-disable-next-line
             if (x.hasOwnProperty(name)) {
-                const idx = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.lebEncode)(i);
+                const idx = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.lebEncode)(i);
                 const buf = type.encodeValue(x[name]);
-                return buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.concat([idx, buf]);
+                return (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_1__.concat)(idx, buf);
             }
         }
         throw Error('Variant has no data: ' + x);
@@ -4569,23 +4583,23 @@ class VariantClass extends ConstructType {
         this._fields.forEach(([, type]) => {
             type.buildTypeTable(typeTable);
         });
-        const opCode = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.slebEncode)(-21 /* Variant */);
-        const len = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.lebEncode)(this._fields.length);
-        const fields = this._fields.map(([key, value]) => buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.concat([(0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.lebEncode)((0,_utils_hash__WEBPACK_IMPORTED_MODULE_4__.idlLabelToId)(key)), value.encodeType(typeTable)]));
-        typeTable.add(this, buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.concat([opCode, len, ...fields]));
+        const opCode = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.slebEncode)(-21 /* Variant */);
+        const len = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.lebEncode)(this._fields.length);
+        const fields = this._fields.map(([key, value]) => (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_1__.concat)((0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.lebEncode)((0,_utils_hash__WEBPACK_IMPORTED_MODULE_2__.idlLabelToId)(key)), value.encodeType(typeTable)));
+        typeTable.add(this, (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_1__.concat)(opCode, len, ...fields));
     }
     decodeValue(b, t) {
         const variant = this.checkType(t);
         if (!(variant instanceof VariantClass)) {
             throw new Error('Not a variant type');
         }
-        const idx = Number((0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.lebDecode)(b));
+        const idx = Number((0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.lebDecode)(b));
         if (idx >= variant._fields.length) {
             throw Error('Invalid variant index: ' + idx);
         }
         const [wireHash, wireType] = variant._fields[idx];
         for (const [key, expectType] of this._fields) {
-            if ((0,_utils_hash__WEBPACK_IMPORTED_MODULE_4__.idlLabelToId)(wireHash) === (0,_utils_hash__WEBPACK_IMPORTED_MODULE_4__.idlLabelToId)(key)) {
+            if ((0,_utils_hash__WEBPACK_IMPORTED_MODULE_2__.idlLabelToId)(wireHash) === (0,_utils_hash__WEBPACK_IMPORTED_MODULE_2__.idlLabelToId)(key)) {
                 const value = expectType.decodeValue(b, wireType);
                 return { [key]: value };
             }
@@ -4651,7 +4665,7 @@ class RecClass extends ConstructType {
         if (!this._type) {
             throw Error('Recursive type uninitialized.');
         }
-        typeTable.add(this, buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.alloc(0));
+        typeTable.add(this, new Uint8Array([]));
         this._type.buildTypeTable(typeTable);
         typeTable.merge(this, this._type.name);
     }
@@ -4679,13 +4693,12 @@ class RecClass extends ConstructType {
 }
 RecClass._counter = 0;
 function decodePrincipalId(b) {
-    const x = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.safeRead)(b, 1).toString('hex');
-    if (x !== '01') {
+    const x = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.safeReadUint8)(b);
+    if (x !== 1) {
         throw new Error('Cannot decode principal');
     }
-    const len = Number((0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.lebDecode)(b));
-    const hex = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.safeRead)(b, len).toString('hex').toUpperCase();
-    return _dfinity_principal__WEBPACK_IMPORTED_MODULE_2__.Principal.fromHex(hex);
+    const len = Number((0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.lebDecode)(b));
+    return _dfinity_principal__WEBPACK_IMPORTED_MODULE_0__.Principal.fromUint8Array(new Uint8Array((0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.safeRead)(b, len)));
 }
 /**
  * Represents an IDL principal reference
@@ -4698,13 +4711,12 @@ class PrincipalClass extends PrimitiveType {
         return x && x._isPrincipal;
     }
     encodeValue(x) {
-        const hex = x.toHex();
-        const buf = buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.from(hex, 'hex');
-        const len = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.lebEncode)(buf.length);
-        return buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.concat([buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.from([1]), len, buf]);
+        const buf = x.toUint8Array();
+        const len = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.lebEncode)(buf.byteLength);
+        return (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_1__.concat)(new Uint8Array([1]), len, buf);
     }
     encodeType() {
-        return (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.slebEncode)(-24 /* Principal */);
+        return (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.slebEncode)(-24 /* Principal */);
     }
     decodeValue(b, t) {
         this.checkType(t);
@@ -4742,39 +4754,36 @@ class FuncClass extends ConstructType {
     covariant(x) {
         return (Array.isArray(x) && x.length === 2 && x[0] && x[0]._isPrincipal && typeof x[1] === 'string');
     }
-    encodeValue(x) {
-        const hex = x[0].toHex();
-        const buf = buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.from(hex, 'hex');
-        const len = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.lebEncode)(buf.length);
-        const canister = buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.concat([buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.from([1]), len, buf]);
-        const method = buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.from(x[1], 'utf8');
-        const methodLen = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.lebEncode)(method.length);
-        return buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.concat([buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.from([1]), canister, methodLen, method]);
+    encodeValue([principal, methodName]) {
+        const buf = principal.toUint8Array();
+        const len = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.lebEncode)(buf.byteLength);
+        const canister = (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_1__.concat)(new Uint8Array([1]), len, buf);
+        const method = new TextEncoder().encode(methodName);
+        const methodLen = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.lebEncode)(method.byteLength);
+        return (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_1__.concat)(new Uint8Array([1]), canister, methodLen, method);
     }
     _buildTypeTableImpl(T) {
         this.argTypes.forEach(arg => arg.buildTypeTable(T));
         this.retTypes.forEach(arg => arg.buildTypeTable(T));
-        const opCode = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.slebEncode)(-22 /* Func */);
-        const argLen = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.lebEncode)(this.argTypes.length);
-        const args = buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.concat(this.argTypes.map(arg => arg.encodeType(T)));
-        const retLen = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.lebEncode)(this.retTypes.length);
-        const rets = buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.concat(this.retTypes.map(arg => arg.encodeType(T)));
-        const annLen = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.lebEncode)(this.annotations.length);
-        const anns = buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.concat(this.annotations.map(a => this.encodeAnnotation(a)));
-        T.add(this, buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.concat([opCode, argLen, args, retLen, rets, annLen, anns]));
+        const opCode = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.slebEncode)(-22 /* Func */);
+        const argLen = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.lebEncode)(this.argTypes.length);
+        const args = (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_1__.concat)(...this.argTypes.map(arg => arg.encodeType(T)));
+        const retLen = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.lebEncode)(this.retTypes.length);
+        const rets = (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_1__.concat)(...this.retTypes.map(arg => arg.encodeType(T)));
+        const annLen = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.lebEncode)(this.annotations.length);
+        const anns = (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_1__.concat)(...this.annotations.map(a => this.encodeAnnotation(a)));
+        T.add(this, (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_1__.concat)(opCode, argLen, args, retLen, rets, annLen, anns));
     }
     decodeValue(b) {
-        const x = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.safeRead)(b, 1).toString('hex');
-        if (x !== '01') {
+        const x = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.safeReadUint8)(b);
+        if (x !== 1) {
             throw new Error('Cannot decode function reference');
         }
         const canister = decodePrincipalId(b);
-        const mLen = Number((0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.lebDecode)(b));
-        const buf = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.safeRead)(b, mLen);
-        if (!isValidUTF8(buf)) {
-            throw new Error('Not valid UTF8 method name');
-        }
-        const method = buf.toString('utf8');
+        const mLen = Number((0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.lebDecode)(b));
+        const buf = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.safeRead)(b, mLen);
+        const decoder = new TextDecoder('utf8', { fatal: true });
+        const method = decoder.decode(buf);
         return [canister, method];
     }
     get name() {
@@ -4794,10 +4803,10 @@ class FuncClass extends ConstructType {
     }
     encodeAnnotation(ann) {
         if (ann === 'query') {
-            return buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.from([1]);
+            return new Uint8Array([1]);
         }
         else if (ann === 'oneway') {
-            return buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.from([2]);
+            return new Uint8Array([2]);
         }
         else {
             throw new Error('Illeagal function annotation');
@@ -4807,7 +4816,7 @@ class FuncClass extends ConstructType {
 class ServiceClass extends ConstructType {
     constructor(fields) {
         super();
-        this._fields = Object.entries(fields).sort((a, b) => (0,_utils_hash__WEBPACK_IMPORTED_MODULE_4__.idlLabelToId)(a[0]) - (0,_utils_hash__WEBPACK_IMPORTED_MODULE_4__.idlLabelToId)(b[0]));
+        this._fields = Object.entries(fields).sort((a, b) => (0,_utils_hash__WEBPACK_IMPORTED_MODULE_2__.idlLabelToId)(a[0]) - (0,_utils_hash__WEBPACK_IMPORTED_MODULE_2__.idlLabelToId)(b[0]));
     }
     accept(v, d) {
         return v.visitService(this, d);
@@ -4816,21 +4825,20 @@ class ServiceClass extends ConstructType {
         return x && x._isPrincipal;
     }
     encodeValue(x) {
-        const hex = x.toHex();
-        const buf = buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.from(hex, 'hex');
-        const len = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.lebEncode)(buf.length);
-        return buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.concat([buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.from([1]), len, buf]);
+        const buf = x.toUint8Array();
+        const len = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.lebEncode)(buf.length);
+        return (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_1__.concat)(new Uint8Array([1]), len, buf);
     }
     _buildTypeTableImpl(T) {
         this._fields.forEach(([_, func]) => func.buildTypeTable(T));
-        const opCode = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.slebEncode)(-23 /* Service */);
-        const len = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.lebEncode)(this._fields.length);
+        const opCode = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.slebEncode)(-23 /* Service */);
+        const len = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.lebEncode)(this._fields.length);
         const meths = this._fields.map(([label, func]) => {
-            const labelBuf = buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.from(label, 'utf8');
-            const labelLen = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.lebEncode)(labelBuf.length);
-            return buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.concat([labelLen, labelBuf, func.encodeType(T)]);
+            const labelBuf = new TextEncoder().encode(label);
+            const labelLen = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.lebEncode)(labelBuf.length);
+            return (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_1__.concat)(labelLen, labelBuf, func.encodeType(T));
         });
-        T.add(this, buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.concat([opCode, len, buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.concat(meths)]));
+        T.add(this, (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_1__.concat)(opCode, len, ...meths));
     }
     decodeValue(b) {
         return decodePrincipalId(b);
@@ -4853,6 +4861,8 @@ function toReadableString(x) {
 }
 /**
  * Encode a array of values
+ * @param argTypes
+ * @param args
  * @returns {Buffer} serialised value
  */
 function encode(argTypes, args) {
@@ -4861,17 +4871,17 @@ function encode(argTypes, args) {
     }
     const typeTable = new TypeTable();
     argTypes.forEach(t => t.buildTypeTable(typeTable));
-    const magic = buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.from(magicNumber, 'utf8');
+    const magic = new TextEncoder().encode(magicNumber);
     const table = typeTable.encode();
-    const len = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.lebEncode)(args.length);
-    const typs = buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.concat(argTypes.map(t => t.encodeType(typeTable)));
-    const vals = buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.concat(zipWith(argTypes, args, (t, x) => {
+    const len = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.lebEncode)(args.length);
+    const typs = (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_1__.concat)(...argTypes.map(t => t.encodeType(typeTable)));
+    const vals = (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_1__.concat)(...zipWith(argTypes, args, (t, x) => {
         if (!t.covariant(x)) {
             throw new Error(`Invalid ${t.display()} argument: ${toReadableString(x)}`);
         }
         return t.encodeValue(x);
     }));
-    return (0,_types__WEBPACK_IMPORTED_MODULE_3__.blobFromBuffer)(buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer.concat([magic, table, len, typs, vals]));
+    return (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_1__.concat)(magic, table, len, typs, vals);
 }
 /**
  * Decode a binary value
@@ -4880,33 +4890,34 @@ function encode(argTypes, args) {
  * @returns Value deserialised to JS type
  */
 function decode(retTypes, bytes) {
-    const b = new (buffer_pipe__WEBPACK_IMPORTED_MODULE_0___default())(bytes);
+    const b = new _utils_buffer__WEBPACK_IMPORTED_MODULE_1__.PipeArrayBuffer(bytes);
     if (bytes.byteLength < magicNumber.length) {
         throw new Error('Message length smaller than magic number');
     }
-    const magic = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.safeRead)(b, magicNumber.length).toString();
+    const magicBuffer = (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.safeRead)(b, magicNumber.length);
+    const magic = new TextDecoder().decode(magicBuffer);
     if (magic !== magicNumber) {
-        throw new Error('Wrong magic number: ' + magic);
+        throw new Error('Wrong magic number: ' + JSON.stringify(magic));
     }
     function readTypeTable(pipe) {
         const typeTable = [];
-        const len = Number((0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.lebDecode)(pipe));
+        const len = Number((0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.lebDecode)(pipe));
         for (let i = 0; i < len; i++) {
-            const ty = Number((0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.slebDecode)(pipe));
+            const ty = Number((0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.slebDecode)(pipe));
             switch (ty) {
                 case -18 /* Opt */:
                 case -19 /* Vector */: {
-                    const t = Number((0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.slebDecode)(pipe));
+                    const t = Number((0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.slebDecode)(pipe));
                     typeTable.push([ty, t]);
                     break;
                 }
                 case -20 /* Record */:
                 case -21 /* Variant */: {
                     const fields = [];
-                    let objectLength = Number((0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.lebDecode)(pipe));
+                    let objectLength = Number((0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.lebDecode)(pipe));
                     let prevHash;
                     while (objectLength--) {
-                        const hash = Number((0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.lebDecode)(pipe));
+                        const hash = Number((0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.lebDecode)(pipe));
                         if (hash >= Math.pow(2, 32)) {
                             throw new Error('field id out of 32-bit range');
                         }
@@ -4914,7 +4925,7 @@ function decode(retTypes, bytes) {
                             throw new Error('field id collision or not sorted');
                         }
                         prevHash = hash;
-                        const t = Number((0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.slebDecode)(pipe));
+                        const t = Number((0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.slebDecode)(pipe));
                         fields.push([hash, t]);
                     }
                     typeTable.push([ty, fields]);
@@ -4922,22 +4933,22 @@ function decode(retTypes, bytes) {
                 }
                 case -22 /* Func */: {
                     for (let k = 0; k < 2; k++) {
-                        let funcLength = Number((0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.lebDecode)(pipe));
+                        let funcLength = Number((0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.lebDecode)(pipe));
                         while (funcLength--) {
-                            (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.slebDecode)(pipe);
+                            (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.slebDecode)(pipe);
                         }
                     }
-                    const annLen = Number((0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.lebDecode)(pipe));
-                    (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.safeRead)(pipe, annLen);
+                    const annLen = Number((0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.lebDecode)(pipe));
+                    (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.safeRead)(pipe, annLen);
                     typeTable.push([ty, undefined]);
                     break;
                 }
                 case -23 /* Service */: {
-                    let servLength = Number((0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.lebDecode)(pipe));
+                    let servLength = Number((0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.lebDecode)(pipe));
                     while (servLength--) {
-                        const l = Number((0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.lebDecode)(pipe));
-                        (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.safeRead)(pipe, l);
-                        (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.slebDecode)(pipe);
+                        const l = Number((0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.lebDecode)(pipe));
+                        (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.safeRead)(pipe, l);
+                        (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.slebDecode)(pipe);
                     }
                     typeTable.push([ty, undefined]);
                     break;
@@ -4947,9 +4958,9 @@ function decode(retTypes, bytes) {
             }
         }
         const rawList = [];
-        const length = Number((0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.lebDecode)(pipe));
+        const length = Number((0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.lebDecode)(pipe));
         for (let i = 0; i < length; i++) {
-            rawList.push(Number((0,_utils_leb128__WEBPACK_IMPORTED_MODULE_5__.slebDecode)(pipe)));
+            rawList.push(Number((0,_utils_leb128__WEBPACK_IMPORTED_MODULE_3__.slebDecode)(pipe)));
         }
         return [typeTable, rawList];
     }
@@ -5064,7 +5075,7 @@ function decode(retTypes, bytes) {
     for (let ind = retTypes.length; ind < types.length; ind++) {
         types[ind].decodeValue(b, types[ind]);
     }
-    if (b.buffer.length > 0) {
+    if (b.byteLength > 0) {
         throw new Error('decode: Left-over bytes');
     }
     return output;
@@ -5189,19 +5200,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "readIntLE": () => (/* reexport safe */ _utils_leb128__WEBPACK_IMPORTED_MODULE_4__.readIntLE),
 /* harmony export */   "readUIntLE": () => (/* reexport safe */ _utils_leb128__WEBPACK_IMPORTED_MODULE_4__.readUIntLE),
 /* harmony export */   "safeRead": () => (/* reexport safe */ _utils_leb128__WEBPACK_IMPORTED_MODULE_4__.safeRead),
+/* harmony export */   "safeReadUint8": () => (/* reexport safe */ _utils_leb128__WEBPACK_IMPORTED_MODULE_4__.safeReadUint8),
 /* harmony export */   "slebDecode": () => (/* reexport safe */ _utils_leb128__WEBPACK_IMPORTED_MODULE_4__.slebDecode),
 /* harmony export */   "slebEncode": () => (/* reexport safe */ _utils_leb128__WEBPACK_IMPORTED_MODULE_4__.slebEncode),
 /* harmony export */   "writeIntLE": () => (/* reexport safe */ _utils_leb128__WEBPACK_IMPORTED_MODULE_4__.writeIntLE),
-/* harmony export */   "writeUIntLE": () => (/* reexport safe */ _utils_leb128__WEBPACK_IMPORTED_MODULE_4__.writeUIntLE),
-/* harmony export */   "blobFromBuffer": () => (/* reexport safe */ _types__WEBPACK_IMPORTED_MODULE_5__.blobFromBuffer),
-/* harmony export */   "blobFromHex": () => (/* reexport safe */ _types__WEBPACK_IMPORTED_MODULE_5__.blobFromHex),
-/* harmony export */   "blobFromText": () => (/* reexport safe */ _types__WEBPACK_IMPORTED_MODULE_5__.blobFromText),
-/* harmony export */   "blobFromUint32Array": () => (/* reexport safe */ _types__WEBPACK_IMPORTED_MODULE_5__.blobFromUint32Array),
-/* harmony export */   "blobFromUint8Array": () => (/* reexport safe */ _types__WEBPACK_IMPORTED_MODULE_5__.blobFromUint8Array),
-/* harmony export */   "blobToHex": () => (/* reexport safe */ _types__WEBPACK_IMPORTED_MODULE_5__.blobToHex),
-/* harmony export */   "blobToUint8Array": () => (/* reexport safe */ _types__WEBPACK_IMPORTED_MODULE_5__.blobToUint8Array),
-/* harmony export */   "derBlobFromBlob": () => (/* reexport safe */ _types__WEBPACK_IMPORTED_MODULE_5__.derBlobFromBlob),
-/* harmony export */   "makeNonce": () => (/* reexport safe */ _types__WEBPACK_IMPORTED_MODULE_5__.makeNonce)
+/* harmony export */   "writeUIntLE": () => (/* reexport safe */ _utils_leb128__WEBPACK_IMPORTED_MODULE_4__.writeUIntLE)
 /* harmony export */ });
 /* harmony import */ var _candid_ui__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./candid-ui */ "./node_modules/@dfinity/candid/lib/esm/candid-ui.js");
 /* harmony import */ var _candid_core__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./candid-core */ "./node_modules/@dfinity/candid/lib/esm/candid-core.js");
@@ -5227,54 +5230,125 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+
+//# sourceMappingURL=types.js.map
+
+/***/ }),
+
+/***/ "./node_modules/@dfinity/candid/lib/esm/utils/buffer.js":
+/*!**************************************************************!*\
+  !*** ./node_modules/@dfinity/candid/lib/esm/utils/buffer.js ***!
+  \**************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "blobFromBuffer": () => (/* binding */ blobFromBuffer),
-/* harmony export */   "blobFromUint8Array": () => (/* binding */ blobFromUint8Array),
-/* harmony export */   "blobFromText": () => (/* binding */ blobFromText),
-/* harmony export */   "blobFromUint32Array": () => (/* binding */ blobFromUint32Array),
-/* harmony export */   "derBlobFromBlob": () => (/* binding */ derBlobFromBlob),
-/* harmony export */   "blobFromHex": () => (/* binding */ blobFromHex),
-/* harmony export */   "blobToHex": () => (/* binding */ blobToHex),
-/* harmony export */   "blobToUint8Array": () => (/* binding */ blobToUint8Array),
-/* harmony export */   "makeNonce": () => (/* binding */ makeNonce)
+/* harmony export */   "concat": () => (/* binding */ concat),
+/* harmony export */   "toHexString": () => (/* binding */ toHexString),
+/* harmony export */   "fromHexString": () => (/* binding */ fromHexString),
+/* harmony export */   "PipeArrayBuffer": () => (/* binding */ PipeArrayBuffer)
 /* harmony export */ });
-/* harmony import */ var buffer___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! buffer/ */ "./node_modules/buffer/index.js");
-/* harmony import */ var _utils_leb128__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./utils/leb128 */ "./node_modules/@dfinity/candid/lib/esm/utils/leb128.js");
-/* eslint-disable @typescript-eslint/no-empty-interface */
-/* eslint-disable jsdoc/require-jsdoc */
-
-
-function blobFromBuffer(b) {
-    return b;
-}
-function blobFromUint8Array(arr) {
-    return buffer___WEBPACK_IMPORTED_MODULE_0__.Buffer.from(arr);
-}
-function blobFromText(text) {
-    return buffer___WEBPACK_IMPORTED_MODULE_0__.Buffer.from(text);
-}
-function blobFromUint32Array(arr) {
-    return buffer___WEBPACK_IMPORTED_MODULE_0__.Buffer.from(arr);
-}
-function derBlobFromBlob(blob) {
-    return blob;
-}
-function blobFromHex(hex) {
-    return buffer___WEBPACK_IMPORTED_MODULE_0__.Buffer.from(hex, 'hex');
-}
-function blobToHex(blob) {
-    return blob.toString('hex');
-}
-function blobToUint8Array(blob) {
-    return new Uint8Array(blob.slice(0, blob.byteLength));
+/**
+ * Concatenate multiple array buffers.
+ * @param buffers The buffers to concatenate.
+ */
+function concat(...buffers) {
+    const result = new Uint8Array(buffers.reduce((acc, curr) => acc + curr.byteLength, 0));
+    let index = 0;
+    for (const b of buffers) {
+        result.set(new Uint8Array(b), index);
+        index += b.byteLength;
+    }
+    return result;
 }
 /**
- * Create a random Nonce, based on date and a random suffix.
+ * Returns an hexadecimal representation of an array buffer.
+ * @param bytes The array buffer.
  */
-function makeNonce() {
-    return (0,_utils_leb128__WEBPACK_IMPORTED_MODULE_1__.lebEncode)(BigInt(+Date.now()) * BigInt(100000) + BigInt(Math.floor(Math.random() * 100000)));
+function toHexString(bytes) {
+    return new Uint8Array(bytes).reduce((str, byte) => str + byte.toString(16).padStart(2, '0'), '');
 }
-//# sourceMappingURL=types.js.map
+/**
+ * Return an array buffer from its hexadecimal representation.
+ * @param hexString The hexadecimal string.
+ */
+function fromHexString(hexString) {
+    var _a;
+    return new Uint8Array(((_a = hexString.match(/.{1,2}/g)) !== null && _a !== void 0 ? _a : []).map(byte => parseInt(byte, 16)));
+}
+/**
+ * A class that abstracts a pipe-like ArrayBuffer.
+ */
+class PipeArrayBuffer {
+    /**
+     * Creates a new instance of a pipe
+     * @param buffer an optional buffer to start with
+     * @param length an optional amount of bytes to use for the length.
+     */
+    constructor(buffer, length = (buffer === null || buffer === void 0 ? void 0 : buffer.byteLength) || 0) {
+        this._buffer = buffer || new ArrayBuffer(0);
+        this._view = new Uint8Array(this._buffer, 0, length);
+    }
+    get buffer() {
+        // Return a copy of the buffer.
+        return this._view.slice();
+    }
+    get byteLength() {
+        return this._view.byteLength;
+    }
+    /**
+     * Read `num` number of bytes from the front of the pipe.
+     * @param num The number of bytes to read.
+     */
+    read(num) {
+        const result = this._view.subarray(0, num);
+        this._view = this._view.subarray(num);
+        return result.slice().buffer;
+    }
+    readUint8() {
+        const result = this._view[0];
+        this._view = this._view.subarray(1);
+        return result;
+    }
+    /**
+     * Write a buffer to the end of the pipe.
+     * @param buf The bytes to write.
+     */
+    write(buf) {
+        const b = new Uint8Array(buf);
+        const offset = this._view.byteLength;
+        if (this._view.byteOffset + this._view.byteLength + b.byteLength >= this._buffer.byteLength) {
+            // Alloc grow the view to include the new bytes.
+            this.alloc(b.byteLength);
+        }
+        else {
+            // Update the view to include the new bytes.
+            this._view = new Uint8Array(this._buffer, this._view.byteOffset, this._view.byteLength + b.byteLength);
+        }
+        this._view.set(b, offset);
+    }
+    /**
+     * Whether or not there is more data to read from the buffer
+     */
+    get end() {
+        return this._view.byteLength === 0;
+    }
+    /**
+     * Allocate a fixed amount of memory in the buffer. This does not affect the view.
+     * @param amount A number of bytes to add to the buffer.
+     */
+    alloc(amount) {
+        // Add a little bit of exponential growth.
+        // tslint:disable-next-line:no-bitwise
+        const b = new ArrayBuffer(((this._buffer.byteLength + amount) * 1.2) | 0);
+        const v = new Uint8Array(b, 0, this._view.byteLength + amount);
+        v.set(this._view);
+        this._buffer = b;
+        this._view = v;
+    }
+}
+//# sourceMappingURL=buffer.js.map
 
 /***/ }),
 
@@ -5331,6 +5405,7 @@ function idlLabelToId(label) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "safeRead": () => (/* binding */ safeRead),
+/* harmony export */   "safeReadUint8": () => (/* binding */ safeReadUint8),
 /* harmony export */   "lebEncode": () => (/* binding */ lebEncode),
 /* harmony export */   "lebDecode": () => (/* binding */ lebDecode),
 /* harmony export */   "slebEncode": () => (/* binding */ slebEncode),
@@ -5340,11 +5415,20 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "readUIntLE": () => (/* binding */ readUIntLE),
 /* harmony export */   "readIntLE": () => (/* binding */ readIntLE)
 /* harmony export */ });
-/* harmony import */ var buffer_pipe__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! buffer-pipe */ "./node_modules/buffer-pipe/index.js");
-/* harmony import */ var buffer_pipe__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(buffer_pipe__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var buffer___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! buffer/ */ "./node_modules/buffer/index.js");
+/* harmony import */ var _buffer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./buffer */ "./node_modules/@dfinity/candid/lib/esm/utils/buffer.js");
+/* eslint-disable no-constant-condition */
+// tslint:disable:no-bitwise
+// Note: this file uses buffer-pipe, which on Node only, uses the Node Buffer
+//       implementation, which isn't compatible with the NPM buffer package
+//       which we use everywhere else. This means that we have to transform
+//       one into the other, hence why every function that returns a Buffer
+//       actually return `new Buffer(pipe.buffer)`.
+// TODO: The best solution would be to have our own buffer type around
+//       Uint8Array which is standard.
 
-
+function eob() {
+    throw new Error('unexpected end of buffer');
+}
 /**
  *
  * @param pipe Pipe from buffer-pipe
@@ -5352,10 +5436,20 @@ __webpack_require__.r(__webpack_exports__);
  * @returns Buffer
  */
 function safeRead(pipe, num) {
-    if (pipe.buffer.length < num) {
-        throw new Error('unexpected end of buffer');
+    if (pipe.byteLength < num) {
+        eob();
     }
     return pipe.read(num);
+}
+/**
+ * @param pipe
+ */
+function safeReadUint8(pipe) {
+    const byte = pipe.readUint8();
+    if (byte === undefined) {
+        eob();
+    }
+    return byte;
 }
 /**
  * Encode a positive number (or bigint) into a Buffer. The number will be floored to the
@@ -5369,19 +5463,20 @@ function lebEncode(value) {
     if (value < BigInt(0)) {
         throw new Error('Cannot leb encode negative values.');
     }
-    const pipe = new (buffer_pipe__WEBPACK_IMPORTED_MODULE_0___default())();
+    const byteLength = (value === BigInt(0) ? 0 : Math.ceil(Math.log2(Number(value)))) + 1;
+    const pipe = new _buffer__WEBPACK_IMPORTED_MODULE_0__.PipeArrayBuffer(new ArrayBuffer(byteLength), 0);
     while (true) {
         const i = Number(value & BigInt(0x7f));
         value /= BigInt(0x80);
         if (value === BigInt(0)) {
-            pipe.write([i]);
+            pipe.write(new Uint8Array([i]));
             break;
         }
         else {
-            pipe.write([i | 0x80]);
+            pipe.write(new Uint8Array([i | 0x80]));
         }
     }
-    return new buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer(pipe.buffer);
+    return pipe.buffer;
 }
 /**
  * Decode a leb encoded buffer into a bigint. The number will always be positive (does not
@@ -5393,7 +5488,7 @@ function lebDecode(pipe) {
     let value = BigInt(0);
     let byte;
     do {
-        byte = safeRead(pipe, 1)[0];
+        byte = safeReadUint8(pipe);
         value += BigInt(byte & 0x7f).valueOf() * weight;
         weight *= BigInt(128);
     } while (byte >= 0x80);
@@ -5412,18 +5507,19 @@ function slebEncode(value) {
     if (isNeg) {
         value = -value - BigInt(1);
     }
-    const pipe = new (buffer_pipe__WEBPACK_IMPORTED_MODULE_0___default())();
+    const byteLength = (value === BigInt(0) ? 0 : Math.ceil(Math.log2(Number(value)))) + 1;
+    const pipe = new _buffer__WEBPACK_IMPORTED_MODULE_0__.PipeArrayBuffer(new ArrayBuffer(byteLength), 0);
     while (true) {
         const i = getLowerBytes(value);
         value /= BigInt(0x80);
         // prettier-ignore
         if ((isNeg && value === BigInt(0) && (i & 0x40) !== 0)
             || (!isNeg && value === BigInt(0) && (i & 0x40) === 0)) {
-            pipe.write([i]);
+            pipe.write(new Uint8Array([i]));
             break;
         }
         else {
-            pipe.write([i | 0x80]);
+            pipe.write(new Uint8Array([i | 0x80]));
         }
     }
     function getLowerBytes(num) {
@@ -5436,7 +5532,7 @@ function slebEncode(value) {
             return Number(bytes);
         }
     }
-    return new buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer(pipe.buffer);
+    return pipe.buffer;
 }
 /**
  * Decode a leb encoded buffer into a bigint. The number is decoded with support for negative
@@ -5477,27 +5573,26 @@ function writeUIntLE(value, byteLength) {
 }
 /**
  *
- * @param value bigint | number
- * @param byteLength number
- * @returns Buffer
+ * @param value
+ * @param byteLength
  */
 function writeIntLE(value, byteLength) {
     value = BigInt(value);
-    const pipe = new (buffer_pipe__WEBPACK_IMPORTED_MODULE_0___default())();
+    const pipe = new _buffer__WEBPACK_IMPORTED_MODULE_0__.PipeArrayBuffer(new ArrayBuffer(Math.min(1, byteLength)), 0);
     let i = 0;
     let mul = BigInt(256);
     let sub = BigInt(0);
     let byte = Number(value % mul);
-    pipe.write([byte]);
+    pipe.write(new Uint8Array([byte]));
     while (++i < byteLength) {
         if (value < 0 && sub === BigInt(0) && byte !== 0) {
             sub = BigInt(1);
         }
         byte = Number((value / mul - sub) % BigInt(256));
-        pipe.write([byte]);
+        pipe.write(new Uint8Array([byte]));
         mul *= BigInt(256);
     }
-    return new buffer___WEBPACK_IMPORTED_MODULE_1__.Buffer(pipe.buffer);
+    return pipe.buffer;
 }
 /**
  *
@@ -5506,12 +5601,12 @@ function writeIntLE(value, byteLength) {
  * @returns bigint
  */
 function readUIntLE(pipe, byteLength) {
-    let val = BigInt(safeRead(pipe, 1)[0]);
+    let val = BigInt(safeReadUint8(pipe));
     let mul = BigInt(1);
     let i = 0;
     while (++i < byteLength) {
         mul *= BigInt(256);
-        const byte = BigInt(safeRead(pipe, 1)[0]);
+        const byte = BigInt(safeReadUint8(pipe));
         val = val + mul * byte;
     }
     return val;
@@ -6545,7 +6640,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _utils_base32__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utils/base32 */ "./node_modules/@dfinity/principal/lib/esm/utils/base32.js");
 /* harmony import */ var _utils_getCrc__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./utils/getCrc */ "./node_modules/@dfinity/principal/lib/esm/utils/getCrc.js");
 /* harmony import */ var _utils_sha224__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./utils/sha224 */ "./node_modules/@dfinity/principal/lib/esm/utils/sha224.js");
-/* provided dependency */ var Buffer = __webpack_require__(/*! ./node_modules/buffer/index.js */ "./node_modules/buffer/index.js")["Buffer"];
 
 
 
@@ -6605,7 +6699,7 @@ class Principal {
         const checksumArrayBuf = new ArrayBuffer(4);
         const view = new DataView(checksumArrayBuf);
         view.setUint32(0, (0,_utils_getCrc__WEBPACK_IMPORTED_MODULE_1__.getCrc32)(this._arr));
-        const checksum = Uint8Array.from(Buffer.from(checksumArrayBuf));
+        const checksum = new Uint8Array(checksumArrayBuf);
         const bytes = Uint8Array.from(this._arr);
         const array = new Uint8Array([...checksum, ...bytes]);
         const result = (0,_utils_base32__WEBPACK_IMPORTED_MODULE_0__.encode)(array);
@@ -6808,9 +6902,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var js_sha256__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(js_sha256__WEBPACK_IMPORTED_MODULE_0__);
 
 /**
- *
+ * Returns the SHA224 hash of the buffer.
  * @param data Arraybuffer to encode
- * @returns sha244-encoded BinaryBlob
  */
 function sha224(data) {
     const shaObj = js_sha256__WEBPACK_IMPORTED_MODULE_0__.sha224.create();
@@ -18529,77 +18622,6 @@ if (typeof self === 'object') {
       return crypto.randomBytes(n);
     };
   } catch (e) {
-  }
-}
-
-
-/***/ }),
-
-/***/ "./node_modules/buffer-pipe/index.js":
-/*!*******************************************!*\
-  !*** ./node_modules/buffer-pipe/index.js ***!
-  \*******************************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-"use strict";
-
-const Buffer = (__webpack_require__(/*! safe-buffer */ "./node_modules/safe-buffer/index.js").Buffer)
-
-module.exports = class BufferPipe {
-  /**
-   * Creates a new instance of a pipe
-   * @param {Buffer} buf - an optional buffer to start with
-   */
-  constructor (buf = Buffer.from([])) {
-    this.buffer = buf
-    this._bytesRead = 0
-    this._bytesWrote = 0
-  }
-
-  /**
-   * read `num` number of bytes from the pipe
-   * @param {Number} num
-   * @return {Buffer}
-   */
-  read (num) {
-    this._bytesRead += num
-    const data = this.buffer.slice(0, num)
-    this.buffer = this.buffer.slice(num)
-    return data
-  }
-
-  /**
-   * Wites a buffer to the pipe
-   * @param {Buffer} buf
-   */
-  write (buf) {
-    buf = Buffer.from(buf)
-    this._bytesWrote += buf.length
-    this.buffer = Buffer.concat([this.buffer, buf])
-  }
-
-  /**
-   * Whether or not there is more data to read from the buffer
-   * returns {Boolean}
-   */
-  get end () {
-    return !this.buffer.length
-  }
-
-  /**
-   * returns the number of bytes read from the stream
-   * @return {Integer}
-   */
-  get bytesRead () {
-    return this._bytesRead
-  }
-
-  /**
-   * returns the number of bytes wrote to the stream
-   * @return {Integer}
-   */
-  get bytesWrote () {
-    return this._bytesWrote
   }
 }
 
@@ -60546,78 +60568,6 @@ if ( true && typeof isCrushed.name === 'string' && isCrushed.name !== 'isCrushed
 
 /***/ }),
 
-/***/ "./node_modules/safe-buffer/index.js":
-/*!*******************************************!*\
-  !*** ./node_modules/safe-buffer/index.js ***!
-  \*******************************************/
-/***/ ((module, exports, __webpack_require__) => {
-
-/* eslint-disable node/no-deprecated-api */
-var buffer = __webpack_require__(/*! buffer */ "./node_modules/buffer/index.js")
-var Buffer = buffer.Buffer
-
-// alternative to using Object.keys for old browsers
-function copyProps (src, dst) {
-  for (var key in src) {
-    dst[key] = src[key]
-  }
-}
-if (Buffer.from && Buffer.alloc && Buffer.allocUnsafe && Buffer.allocUnsafeSlow) {
-  module.exports = buffer
-} else {
-  // Copy properties from require('buffer')
-  copyProps(buffer, exports)
-  exports.Buffer = SafeBuffer
-}
-
-function SafeBuffer (arg, encodingOrOffset, length) {
-  return Buffer(arg, encodingOrOffset, length)
-}
-
-// Copy static methods from Buffer
-copyProps(Buffer, SafeBuffer)
-
-SafeBuffer.from = function (arg, encodingOrOffset, length) {
-  if (typeof arg === 'number') {
-    throw new TypeError('Argument must not be a number')
-  }
-  return Buffer(arg, encodingOrOffset, length)
-}
-
-SafeBuffer.alloc = function (size, fill, encoding) {
-  if (typeof size !== 'number') {
-    throw new TypeError('Argument must be a number')
-  }
-  var buf = Buffer(size)
-  if (fill !== undefined) {
-    if (typeof encoding === 'string') {
-      buf.fill(fill, encoding)
-    } else {
-      buf.fill(fill)
-    }
-  } else {
-    buf.fill(0)
-  }
-  return buf
-}
-
-SafeBuffer.allocUnsafe = function (size) {
-  if (typeof size !== 'number') {
-    throw new TypeError('Argument must be a number')
-  }
-  return Buffer(size)
-}
-
-SafeBuffer.allocUnsafeSlow = function (size) {
-  if (typeof size !== 'number') {
-    throw new TypeError('Argument must be a number')
-  }
-  return buffer.SlowBuffer(size)
-}
-
-
-/***/ }),
-
 /***/ "./node_modules/scheduler/cjs/scheduler-tracing.development.js":
 /*!*********************************************************************!*\
   !*** ./node_modules/scheduler/cjs/scheduler-tracing.development.js ***!
@@ -63780,6 +63730,7 @@ const App = () => {
             React.createElement("h2", null, " Load Screen ")));
 };
 exports["default"] = App;
+//This is a test
 
 
 /***/ }),
@@ -64049,13 +64000,13 @@ const Journal = (props) => {
         }));
     }, [journalState.journal.length]);
     (0, react_1.useEffect)(async () => {
-        (actor) ? await actor.readJournal().then((result) => {
+        actor.readJournal().then((result) => {
             // if("ok" in result){
             //     console.log(result.ok);
             // }
             console.log(result);
             console.log("test");
-        }) : () => { };
+        });
     }, [authClient]);
     const displayJournalTable = () => {
         const openPage = (e, index) => {
@@ -64169,7 +64120,7 @@ const JournalPage = (props) => {
         await actor.readEntry({ entryKey: 1 }).then((result) => { console.log(result); });
     }, [actor, file1, file2]);
     const uploadChunk = async (fileId, chunkId, fileChunk) => {
-        actor.createJournalEntryFile(fileId, chunkId, [...new Uint8Array(await fileChunk.arrayBuffer())]);
+        return actor.createJournalEntryFile(fileId, chunkId, [...new Uint8Array(await fileChunk.arrayBuffer())]);
     };
     const mapAndSendFileToApi = async (fileId, file) => {
         const fileSize = file.size;
@@ -64185,7 +64136,7 @@ const JournalPage = (props) => {
             chunk += 1;
         }
         ;
-        await Promise.all(promises).then((result) => console.log(result));
+        return result = await Promise.all(promises);
     };
     const handleSubmit = (0, react_1.useCallback)(async () => {
         await mapAndSendFileToApi("test1", file1);
@@ -67075,7 +67026,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 // CANISTER_ID is replaced by webpack based on node environment
-const canisterId = "7pdsn-cqaaa-aaaaa-aabcq-cai";
+const canisterId = "txssk-maaaa-aaaaa-aaanq-cai";
 
 /**
  * 

@@ -21,7 +21,10 @@ THE BUILD SHOULD FAIL THE FIRST TIME. WHEN IT DOES, PERFORM THE FOLLOWING STEPS
 
 
 replace the "build" within the dfx.json file of the Internet-Identity repo from {"src/internet_identity/build.sh"} to {"cargo build --release --target wasm32-unknown-unknown"}
-next run the following commands in the Internet-Identity project directory again
+
+next, delete the package-lock.json file and the node_modules file
+
+then run the following commands in the Internet-Identity project directory again
 
 npm i
 
