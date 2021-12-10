@@ -8,14 +8,18 @@ import { canisterId, createActor } from '../../declarations/dtc/index';
 
 export const AppContext = createContext({
     authClient: {}, 
+    setAuthClient: null,
+    loginAttempted: undefined,
+    setLoginAttempted: null,
+    isAuthenticated: null,
     setIsAuthenticated: null,
-    actor: undefined});
+    actor: undefined,
+    setActor: null
+});
 
 
 const App = () => {
     const [actor, setActor] = useState(undefined);
-    const [greeting, setGreeting] = useState("");
-    const [pending, setPending] = useState(false);
     const [authClient, setAuthClient] = useState(undefined);
     const [isLoaded, setIsLoaded] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -24,6 +28,7 @@ const App = () => {
     // login function used when Authenticating the client (aka user)
     useEffect(() => {
         AuthClient.create().then(async (client) => {
+            console.log("Client: ",client);
             setAuthClient(client);
             await client.isAuthenticated().then((result) => {
                 setIsAuthenticated(result);
@@ -46,53 +51,26 @@ const App = () => {
 
     }, [authClient]);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (pending) return;
-        setPending(true);
-        const name = inputRef.current.value.toString();
-        const userName = {userName: name};
-        const entryKey = {entryKey: 1};
-        const entry = { 
-            date : name,
-            text : name,
-            location : name,    
-        };
-
-        // Interact with hello actor, calling the greet method
-        const greeting = await dtc.updateJournal([], [entry]);
-        let msg;
-        if(greeting.ok === null){
-            msg = "Journal Created";
-        } else {
-            msg = "Journal Already Exists"
-        };
-        setGreeting(msg);
-        setPending(false);
-        return false;
-    }
-
     return (
         <AppContext.Provider 
-        value={{
-            authClient, 
-            setAuthClient, 
-            setIsAuthenticated, 
-            actor, 
-            setActor, 
-            setIsLoaded,
-            loginAttempted, 
-            setLoginAttempted, 
-            isAuthenticated
-            }}>
+            value={{
+                authClient, 
+                setAuthClient, 
+                setIsAuthenticated, 
+                actor, 
+                setActor, 
+                setIsLoaded,
+                loginAttempted, 
+                setLoginAttempted, 
+                isAuthenticated
+            }}
+        >
 
             {
                 isLoaded &&
                     isAuthenticated ? 
-                    <main>
-                        <Journal/>
-                        <section id="greeting">{greeting}</section>
-                    </main> : <LoginPage/> 
+                    <Journal/> : 
+                    <LoginPage/> 
             }
             {
                 !isLoaded && 

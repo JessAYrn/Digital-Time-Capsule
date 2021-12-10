@@ -63676,6 +63676,7 @@ const App = () => {
         if (!authClient)
             return;
         const identity = authClient.getIdentity();
+        console.log('identity: ', identity);
         const actor = (0, index_1.createActor)(index_1.canisterId, {
             agentOptions: {
                 identity
@@ -63919,7 +63920,7 @@ __webpack_require__(/*! ./Slider.scss */ "./src/dtc_assets/src/Components/Fields
 const Slider = (props) => {
     const { min, max, dispatch, dispatchAction, index, value } = props;
     const inputRef = (0, react_1.useRef)();
-    const [sliderValue, setSliderValue] = (0, react_1.useState)('');
+    const [sliderValue, setSliderValue] = (0, react_1.useState)(value);
     const [disabledOrEnabled, setDisabledOrEnabled] = (0, react_1.useState)('disabled');
     const onBlur = () => {
         setDisabledOrEnabled("disabled");
@@ -64001,9 +64002,6 @@ const Journal = (props) => {
     }, [journalState.journal.length]);
     (0, react_1.useEffect)(async () => {
         actor.readJournal().then((result) => {
-            // if("ok" in result){
-            //     console.log(result.ok);
-            // }
             console.log(result);
             console.log("test");
         });
@@ -64115,12 +64113,26 @@ const JournalPage = (props) => {
     const [file1, setFile1] = (0, react_1.useState)(null);
     const [file2, setFile2] = (0, react_1.useState)(null);
     const { journalReducerDispatchFunction, index, journalPageData, closePage } = props;
-    const { actor } = (0, react_1.useContext)(App_1.AppContext);
+    const { actor, authClient } = (0, react_1.useContext)(App_1.AppContext);
     (0, react_1.useEffect)(async () => {
         await actor.readEntry({ entryKey: 1 }).then((result) => { console.log(result); });
     }, [actor, file1, file2]);
     const uploadChunk = async (fileId, chunkId, fileChunk) => {
         return actor.createJournalEntryFile(fileId, chunkId, [...new Uint8Array(await fileChunk.arrayBuffer())]);
+    };
+    const mapAndSendEntryToApi = async (entryKey, journalEntry) => {
+        const entryAsApiObject = [{
+                entryTitle: journalEntry.title,
+                text: journalEntry.entry,
+                location: journalEntry.location,
+                date: journalEntry.date,
+                lockTime: journalEntry.lockTime,
+                timeTillUnlock: journalEntry.timeTillUnlock
+            }];
+        const entryKeyAsApiObject = (entryKey) ? { entryKey: entryKey } : [];
+        actor.updateJournalEntry(entryKeyAsApiObject, entryAsApiObject).then((result) => {
+            console.log(result);
+        });
     };
     const mapAndSendFileToApi = async (fileId, file) => {
         const fileSize = file.size;
@@ -64136,11 +64148,13 @@ const JournalPage = (props) => {
             chunk += 1;
         }
         ;
-        return result = await Promise.all(promises);
+        const results = await Promise.all(promises);
+        console.log("results: ", results);
     };
     const handleSubmit = (0, react_1.useCallback)(async () => {
         await mapAndSendFileToApi("test1", file1);
         await mapAndSendFileToApi("test2", file2);
+        await mapAndSendEntryToApi(null, journalPageData);
     }, [journalPageData, file1, file2]);
     return (react_1.default.createElement("div", { className: "journalPageContainer" },
         react_1.default.createElement("div", { className: "logoDiv" },
@@ -64373,7 +64387,8 @@ exports.types = {
     CHANGE_POB: "CHANGE_POB",
     CHANGE_PREFACE: "CHANGE_PREFACE",
     CHANGE_DEDICATIONS: "CHANGE_DEDICATIONS",
-    CHANGE_NAME: "CHANGE_NAME"
+    CHANGE_NAME: "CHANGE_NAME",
+    CHANGE_ENTRY_TITLE: "CHANGE_ENTRY_TITLE"
 };
 exports.initialState = {
     bio: {
@@ -64385,24 +64400,30 @@ exports.initialState = {
     },
     journal: [
         {
-            date: 'test',
+            date: 0,
+            title: '',
             location: 'test',
             entry: '',
-            lockTime: 'test'
+            lockTime: 0,
+            timeTillUnlock: 0
         },
         {
-            date: 'test',
+            date: 0,
+            title: '',
             location: 'test',
             entry: '',
-            lockTime: 'test'
+            lockTime: 0,
+            timeTillUnlock: 0
         }
     ]
 };
 const freshPage = {
-    date: 'test',
+    date: 0,
+    title: 'test',
     location: 'test',
     entry: '',
-    lockTime: 'test'
+    lockTime: 0,
+    timeTillUnlock: 0
 };
 const changeValue = (state = exports.initialState, action) => {
     const { actionType, payload, index } = action;
@@ -64411,7 +64432,16 @@ const changeValue = (state = exports.initialState, action) => {
         case exports.types.CHANGE_DATE:
             updatedJournalPage = {
                 ...state.journal[index],
-                date: payload
+                date: parseInt(payload)
+            };
+            state.journal[index] = updatedJournalPage;
+            return {
+                ...state
+            };
+        case exports.types.CHANGE_ENTRY_TITLE:
+            updatedJournalPage = {
+                ...state.journal[index],
+                title: payload
             };
             state.journal[index] = updatedJournalPage;
             return {
@@ -64438,7 +64468,7 @@ const changeValue = (state = exports.initialState, action) => {
         case exports.types.CHANGE_LOCK_TIME:
             updatedJournalPage = {
                 ...state.journal[index],
-                lockTime: payload
+                lockTime: parseInt(payload)
             };
             state.journal[index] = updatedJournalPage;
             return {
@@ -67026,7 +67056,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 // CANISTER_ID is replaced by webpack based on node environment
-const canisterId = "txssk-maaaa-aaaaa-aaanq-cai";
+const canisterId = "me2pp-5yaaa-aaaaa-aacfa-cai";
 
 /**
  * 

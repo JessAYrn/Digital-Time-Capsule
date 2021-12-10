@@ -105,7 +105,7 @@ actor class User(){
             };
             case ( ? v) {
                 //No need to write return when attribute of a varient is being returned
-                return #err(#NotAuthorized);
+                return #err(#AlreadyExists);
             }
         };
     };
@@ -150,6 +150,7 @@ actor class User(){
         //};
 
         let callerId = msg.caller;
+
         let result = Trie.find(
             profiles,
             key(callerId),
@@ -176,6 +177,7 @@ actor class User(){
         //};
 
         let callerId = msg.caller;
+        
         let result = Trie.find(
             profiles,
             key(callerId),

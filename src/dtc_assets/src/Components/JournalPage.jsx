@@ -21,12 +21,13 @@ const JournalPage = (props) => {
     } = props;
 
     const { 
-        actor 
+        actor, 
+        authClient
     } = useContext(AppContext);
 
     useEffect( async () => {
         
-        await actor.readEntry({entryKey: 1}).then((result) => { console.log(result)});
+        await actor.readJournal();
     }, [actor, file1, file2]);
 
     const uploadChunk = async (fileId, chunkId, fileChunk) => {
@@ -38,6 +39,30 @@ const JournalPage = (props) => {
         );
 
     };
+
+    const mapAndSendEntryToApi = async (entryKey, journalEntry) => {
+
+        console.log(authClient);
+
+        const entryAsApiObject = [{
+            entryTitle: journalEntry.title,
+            text: journalEntry.entry,
+            location: journalEntry.location,
+            date: journalEntry.date,
+            lockTime: journalEntry.lockTime,
+            timeTillUnlock: journalEntry.timeTillUnlock
+        }];
+
+        const entryKeyAsApiObject = (entryKey) ? [{entryKey: entryKey}] : [];
+        
+        actor.updateJournalEntry(
+            entryKeyAsApiObject,
+            entryAsApiObject
+        ).then((result) => {
+            console.log(result)
+        });
+
+    }
 
 
 
@@ -70,8 +95,10 @@ const JournalPage = (props) => {
 
 
     const handleSubmit = useCallback(async () => {
-        await mapAndSendFileToApi("test1", file1);
-        await mapAndSendFileToApi("test2", file2);
+        console.log("Client: ", authClient);
+        await mapAndSendEntryToApi(null, journalPageData);
+        // await mapAndSendFileToApi("test1", file1);
+        // await mapAndSendFileToApi("test2", file2);
 
     }, [journalPageData, file1, file2])
     

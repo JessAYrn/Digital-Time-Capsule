@@ -8,7 +8,8 @@ export const types = {
     CHANGE_POB: "CHANGE_POB",
     CHANGE_PREFACE: "CHANGE_PREFACE",
     CHANGE_DEDICATIONS: "CHANGE_DEDICATIONS",
-    CHANGE_NAME: "CHANGE_NAME"
+    CHANGE_NAME: "CHANGE_NAME",
+    CHANGE_ENTRY_TITLE: "CHANGE_ENTRY_TITLE"
 }
 
 export const initialState = {
@@ -21,26 +22,32 @@ export const initialState = {
     },
     journal: [
         {
-            date: 'test',
+            date: 0,
+            title: '',
             location: 'test',
             entry: '',
-            lockTime: 'test'
+            lockTime: 0,
+            timeTillUnlock: 0
         },
         {
-            date: 'test',
+            date: 0,
+            title: '',
             location: 'test',
             entry: '',
-            lockTime: 'test'
+            lockTime: 0,
+            timeTillUnlock: 0
         }
     ]
 
 }
 
 const freshPage = {
-    date: 'test',
+    date: 0,
+    title: 'test',
     location: 'test',
     entry: '',
-    lockTime: 'test'
+    lockTime: 0,
+    timeTillUnlock: 0
 }
 
 const changeValue = (state = initialState, action) => {
@@ -54,7 +61,16 @@ const changeValue = (state = initialState, action) => {
         case types.CHANGE_DATE:
             updatedJournalPage = {
                 ... state.journal[index],
-                date: payload
+                date: parseInt(payload)
+            }
+            state.journal[index] = updatedJournalPage;
+            return {
+                ...state
+            }
+        case types.CHANGE_ENTRY_TITLE:
+            updatedJournalPage = {
+                ... state.journal[index],
+                title: payload
             }
             state.journal[index] = updatedJournalPage;
             return {
@@ -81,7 +97,7 @@ const changeValue = (state = initialState, action) => {
         case types.CHANGE_LOCK_TIME:
             updatedJournalPage = {
                 ... state.journal[index],
-                lockTime: payload
+                lockTime: parseInt(payload)
             }
             state.journal[index] = updatedJournalPage;
             return {
