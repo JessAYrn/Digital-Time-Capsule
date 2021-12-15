@@ -8,6 +8,7 @@ import Text "mo:base/Text";
 import Cycles "mo:base/ExperimentalCycles";
 import Nat64 "mo:base/Nat64";
 import Time "mo:base/Time";
+import Iter "mo:base/Iter";
 
 
 shared(msg) actor class Journal (principal : Principal){
@@ -85,7 +86,7 @@ shared(msg) actor class Journal (principal : Principal){
         { accepted = Nat64.fromNat(accepted) };
     };
 
-    public func createEntry( journalEntry : JournalEntry) : async Result.Result<(), Error> {
+    public func createEntry( journalEntry : JournalEntry) : async Result.Result<Trie.Trie<Nat, JournalEntry>, Error> {
         numberOfJournalEntries += 1;
         
         let (newJournal, oldJournal) = Trie.put(
@@ -97,7 +98,7 @@ shared(msg) actor class Journal (principal : Principal){
 
         journal := newJournal;
 
-        #ok(());
+        #ok(journal);
             
         
 
@@ -130,8 +131,9 @@ shared(msg) actor class Journal (principal : Principal){
         };
     };
 
-    public func readJournal() : async Result.Result<(Trie.Trie<Nat,JournalEntry>, Bio),Error> {
-        return #ok((journal, biography));
+    public func readJournal() : async Result.Result<([(Nat,JournalEntry)], Bio),Error> {
+        let journalAsArray = Iter.toArray(Trie.iter(journal));
+        return #ok(((journalAsArray), biography));
     };
 
     public func readJournalEntry(key : Nat): async Result.Result<JournalEntry, Error> {
@@ -172,7 +174,7 @@ shared(msg) actor class Journal (principal : Principal){
 
 
 
-    public func updateJournalEntry(key: Nat, journalEntry: JournalEntry) : async Result.Result<(),Error> {
+    public func updateJournalEntry(key: Nat, journalEntry: JournalEntry) : async Result.Result<Trie.Trie<Nat,JournalEntry>,Error> {
 
         let entry = Trie.find(
             journal,
@@ -194,7 +196,7 @@ shared(msg) actor class Journal (principal : Principal){
 
                 journal := newJournal;
 
-                #ok(());
+                #ok(newJournal);
 
             }
         }
@@ -233,7 +235,7 @@ shared(msg) actor class Journal (principal : Principal){
 
 
 
-    public func deleteJournalEntry(key: Nat) : async Result.Result<(),Error> {
+    public func deleteJournalEntry(key: Nat) : async Result.Result<Trie.Trie<Nat,JournalEntry>,Error> {
         let entry = Trie.find(
             journal,
             natKey(key),
@@ -253,7 +255,7 @@ shared(msg) actor class Journal (principal : Principal){
                 );
 
                 journal := updatedJournal.0;
-                #ok(());
+                #ok(updatedJournal.0);
 
             };
         };

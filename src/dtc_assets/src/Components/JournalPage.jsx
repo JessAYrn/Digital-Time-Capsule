@@ -21,8 +21,7 @@ const JournalPage = (props) => {
     } = props;
 
     const { 
-        actor, 
-        authClient
+        actor
     } = useContext(AppContext);
 
     useEffect( async () => {
@@ -42,8 +41,6 @@ const JournalPage = (props) => {
 
     const mapAndSendEntryToApi = async (entryKey, journalEntry) => {
 
-        console.log(authClient);
-
         const entryAsApiObject = [{
             entryTitle: journalEntry.title,
             text: journalEntry.entry,
@@ -58,9 +55,7 @@ const JournalPage = (props) => {
         actor.updateJournalEntry(
             entryKeyAsApiObject,
             entryAsApiObject
-        ).then((result) => {
-            console.log(result)
-        });
+        );
 
     }
 
@@ -89,14 +84,13 @@ const JournalPage = (props) => {
         };
 
         const results = await Promise.all(promises);    
-        console.log("results: ",results);
     };
 
 
 
     const handleSubmit = useCallback(async () => {
-        console.log("Client: ", authClient);
         await mapAndSendEntryToApi(null, journalPageData);
+        console.log('Reading Journal: ',await actor.readJournal());
         // await mapAndSendFileToApi("test1", file1);
         // await mapAndSendFileToApi("test2", file2);
 

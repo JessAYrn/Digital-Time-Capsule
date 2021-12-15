@@ -28,7 +28,6 @@ const App = () => {
     // login function used when Authenticating the client (aka user)
     useEffect(() => {
         AuthClient.create().then(async (client) => {
-            console.log("Client: ",client);
             setAuthClient(client);
             await client.isAuthenticated().then((result) => {
                 setIsAuthenticated(result);
