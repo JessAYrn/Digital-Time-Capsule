@@ -263,20 +263,22 @@ var ReplicaRejectCode;
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Expiry": () => (/* reexport safe */ _transforms__WEBPACK_IMPORTED_MODULE_5__.Expiry),
-/* harmony export */   "makeExpiryTransform": () => (/* reexport safe */ _transforms__WEBPACK_IMPORTED_MODULE_5__.makeExpiryTransform),
-/* harmony export */   "makeNonceTransform": () => (/* reexport safe */ _transforms__WEBPACK_IMPORTED_MODULE_5__.makeNonceTransform),
-/* harmony export */   "makeNonce": () => (/* reexport safe */ _types__WEBPACK_IMPORTED_MODULE_6__.makeNonce),
+/* harmony export */   "Expiry": () => (/* reexport safe */ _transforms__WEBPACK_IMPORTED_MODULE_6__.Expiry),
+/* harmony export */   "makeExpiryTransform": () => (/* reexport safe */ _transforms__WEBPACK_IMPORTED_MODULE_6__.makeExpiryTransform),
+/* harmony export */   "makeNonceTransform": () => (/* reexport safe */ _transforms__WEBPACK_IMPORTED_MODULE_6__.makeNonceTransform),
+/* harmony export */   "makeNonce": () => (/* reexport safe */ _types__WEBPACK_IMPORTED_MODULE_7__.makeNonce),
 /* harmony export */   "RequestStatusResponseStatus": () => (/* binding */ RequestStatusResponseStatus),
 /* harmony export */   "HttpAgent": () => (/* binding */ HttpAgent)
 /* harmony export */ });
 /* harmony import */ var _dfinity_principal__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @dfinity/principal */ "./node_modules/@dfinity/principal/lib/esm/index.js");
-/* harmony import */ var _auth__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../auth */ "./node_modules/@dfinity/agent/lib/esm/auth.js");
-/* harmony import */ var _cbor__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../cbor */ "./node_modules/@dfinity/agent/lib/esm/cbor.js");
-/* harmony import */ var _request_id__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../request_id */ "./node_modules/@dfinity/agent/lib/esm/request_id.js");
-/* harmony import */ var _utils_buffer__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../utils/buffer */ "./node_modules/@dfinity/agent/lib/esm/utils/buffer.js");
-/* harmony import */ var _transforms__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./transforms */ "./node_modules/@dfinity/agent/lib/esm/agent/http/transforms.js");
-/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./types */ "./node_modules/@dfinity/agent/lib/esm/agent/http/types.js");
+/* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../errors */ "./node_modules/@dfinity/agent/lib/esm/errors.js");
+/* harmony import */ var _auth__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../auth */ "./node_modules/@dfinity/agent/lib/esm/auth.js");
+/* harmony import */ var _cbor__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../cbor */ "./node_modules/@dfinity/agent/lib/esm/cbor.js");
+/* harmony import */ var _request_id__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../request_id */ "./node_modules/@dfinity/agent/lib/esm/request_id.js");
+/* harmony import */ var _utils_buffer__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../utils/buffer */ "./node_modules/@dfinity/agent/lib/esm/utils/buffer.js");
+/* harmony import */ var _transforms__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./transforms */ "./node_modules/@dfinity/agent/lib/esm/agent/http/transforms.js");
+/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./types */ "./node_modules/@dfinity/agent/lib/esm/agent/http/types.js");
+
 
 
 
@@ -302,18 +304,44 @@ const IC_ROOT_KEY = '308182301d060d2b0601040182dc7c0503010201060c2b0601040182dc7
     'c0e6ec71fab583b08bd81373c255c3c371b2e84863c98a4f1e08b74235d14fb5d9c0cd546d968' +
     '5f913a0c0b2cc5341583bf4b4392e467db96d65b9bb4cb717112f8472e0d5a4d14505ffd7484' +
     'b01291091c5f87b98883463f98091a0baaae';
-function getDefaultFetch() {
-    const result = typeof window === 'undefined'
-        ? typeof __webpack_require__.g === 'undefined'
-            ? typeof self === 'undefined'
-                ? undefined
-                : self.fetch.bind(self)
-            : __webpack_require__.g.fetch.bind(__webpack_require__.g)
-        : window.fetch.bind(window);
-    if (!result) {
-        throw new Error('Could not find default `fetch` implementation.');
+// IC0 domain info
+const IC0_DOMAIN = 'ic0.app';
+const IC0_SUB_DOMAIN = '.ic0.app';
+class HttpDefaultFetchError extends _errors__WEBPACK_IMPORTED_MODULE_1__.AgentError {
+    constructor(message) {
+        super(message);
+        this.message = message;
     }
-    return result;
+}
+function getDefaultFetch() {
+    let defaultFetch;
+    if (typeof window !== 'undefined') {
+        // Browser context
+        if (window.fetch) {
+            defaultFetch = window.fetch.bind(window);
+        }
+        else {
+            throw new HttpDefaultFetchError('Fetch implementation was not available. You appear to be in a browser context, but window.fetch was not present.');
+        }
+    }
+    else if (typeof __webpack_require__.g !== 'undefined') {
+        // Node context
+        if (__webpack_require__.g.fetch) {
+            defaultFetch = __webpack_require__.g.fetch;
+        }
+        else {
+            throw new HttpDefaultFetchError('Fetch implementation was not available. You appear to be in a Node.js context, but global.fetch was not available.');
+        }
+    }
+    else if (typeof self !== 'undefined') {
+        if (self.fetch) {
+            defaultFetch = self.fetch;
+        }
+    }
+    if (defaultFetch) {
+        return defaultFetch;
+    }
+    throw new HttpDefaultFetchError('Fetch implementation was not available. Please provide fetch to the HttpAgent constructor, or ensure it is available in the window or global context.');
 }
 // A HTTP agent allows users to interact with a client of the internet computer
 // using the available methods. It exposes an API that closely follows the
@@ -326,7 +354,7 @@ function getDefaultFetch() {
 // allowing extensions.
 class HttpAgent {
     constructor(options = {}) {
-        this.rootKey = (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_4__.fromHex)(IC_ROOT_KEY);
+        this.rootKey = (0,_utils_buffer__WEBPACK_IMPORTED_MODULE_5__.fromHex)(IC_ROOT_KEY);
         this._pipeline = [];
         this._rootKeyFetched = false;
         if (options.source) {
@@ -361,11 +389,15 @@ class HttpAgent {
             }
             this._host = new URL(location + '');
         }
+        // Rewrite to avoid redirects
+        if (this._host.hostname.endsWith(IC0_SUB_DOMAIN)) {
+            this._host.hostname = IC0_DOMAIN;
+        }
         if (options.credentials) {
             const { name, password } = options.credentials;
             this._credentials = `${name}${password ? ':' + password : ''}`;
         }
-        this._identity = Promise.resolve(options.identity || new _auth__WEBPACK_IMPORTED_MODULE_1__.AnonymousIdentity());
+        this._identity = Promise.resolve(options.identity || new _auth__WEBPACK_IMPORTED_MODULE_2__.AnonymousIdentity());
     }
     addTransform(fn, priority = fn.priority || 0) {
         // Keep the pipeline sorted at all time, by priority.
@@ -383,12 +415,12 @@ class HttpAgent {
             : canister;
         const sender = id.getPrincipal() || _dfinity_principal__WEBPACK_IMPORTED_MODULE_0__.Principal.anonymous();
         const submit = {
-            request_type: _types__WEBPACK_IMPORTED_MODULE_6__.SubmitRequestType.Call,
+            request_type: _types__WEBPACK_IMPORTED_MODULE_7__.SubmitRequestType.Call,
             canister_id: canister,
             method_name: options.methodName,
             arg: options.arg,
             sender,
-            ingress_expiry: new _transforms__WEBPACK_IMPORTED_MODULE_5__.Expiry(DEFAULT_INGRESS_EXPIRY_DELTA_IN_MSECS),
+            ingress_expiry: new _transforms__WEBPACK_IMPORTED_MODULE_6__.Expiry(DEFAULT_INGRESS_EXPIRY_DELTA_IN_MSECS),
         };
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let transformedRequest = (await this._transform({
@@ -402,12 +434,12 @@ class HttpAgent {
         }));
         // Apply transform for identity.
         transformedRequest = await id.transformRequest(transformedRequest);
-        const body = _cbor__WEBPACK_IMPORTED_MODULE_2__.encode(transformedRequest.body);
+        const body = _cbor__WEBPACK_IMPORTED_MODULE_3__.encode(transformedRequest.body);
         // Run both in parallel. The fetch is quite expensive, so we have plenty of time to
         // calculate the requestId locally.
         const [response, requestId] = await Promise.all([
             this._fetch('' + new URL(`/api/v2/canister/${ecid.toText()}/call`, this._host), Object.assign(Object.assign({}, transformedRequest.request), { body })),
-            (0,_request_id__WEBPACK_IMPORTED_MODULE_3__.requestIdOf)(submit),
+            (0,_request_id__WEBPACK_IMPORTED_MODULE_4__.requestIdOf)(submit),
         ]);
         if (!response.ok) {
             throw new Error(`Server returned an error:\n` +
@@ -433,7 +465,7 @@ class HttpAgent {
             method_name: fields.methodName,
             arg: fields.arg,
             sender,
-            ingress_expiry: new _transforms__WEBPACK_IMPORTED_MODULE_5__.Expiry(DEFAULT_INGRESS_EXPIRY_DELTA_IN_MSECS),
+            ingress_expiry: new _transforms__WEBPACK_IMPORTED_MODULE_6__.Expiry(DEFAULT_INGRESS_EXPIRY_DELTA_IN_MSECS),
         };
         // TODO: remove this any. This can be a Signed or UnSigned request.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -447,14 +479,14 @@ class HttpAgent {
         });
         // Apply transform for identity.
         transformedRequest = await id.transformRequest(transformedRequest);
-        const body = _cbor__WEBPACK_IMPORTED_MODULE_2__.encode(transformedRequest.body);
+        const body = _cbor__WEBPACK_IMPORTED_MODULE_3__.encode(transformedRequest.body);
         const response = await this._fetch('' + new URL(`/api/v2/canister/${canister.toText()}/query`, this._host), Object.assign(Object.assign({}, transformedRequest.request), { body }));
         if (!response.ok) {
             throw new Error(`Server returned an error:\n` +
                 `  Code: ${response.status} (${response.statusText})\n` +
                 `  Body: ${await response.text()}\n`);
         }
-        return _cbor__WEBPACK_IMPORTED_MODULE_2__.decode(await response.arrayBuffer());
+        return _cbor__WEBPACK_IMPORTED_MODULE_3__.decode(await response.arrayBuffer());
     }
     async readState(canisterId, fields, identity) {
         const canister = typeof canisterId === 'string' ? _dfinity_principal__WEBPACK_IMPORTED_MODULE_0__.Principal.fromText(canisterId) : canisterId;
@@ -472,19 +504,19 @@ class HttpAgent {
                 request_type: "read_state" /* ReadState */,
                 paths: fields.paths,
                 sender,
-                ingress_expiry: new _transforms__WEBPACK_IMPORTED_MODULE_5__.Expiry(DEFAULT_INGRESS_EXPIRY_DELTA_IN_MSECS),
+                ingress_expiry: new _transforms__WEBPACK_IMPORTED_MODULE_6__.Expiry(DEFAULT_INGRESS_EXPIRY_DELTA_IN_MSECS),
             },
         });
         // Apply transform for identity.
         transformedRequest = await id.transformRequest(transformedRequest);
-        const body = _cbor__WEBPACK_IMPORTED_MODULE_2__.encode(transformedRequest.body);
+        const body = _cbor__WEBPACK_IMPORTED_MODULE_3__.encode(transformedRequest.body);
         const response = await this._fetch('' + new URL(`/api/v2/canister/${canister}/read_state`, this._host), Object.assign(Object.assign({}, transformedRequest.request), { body }));
         if (!response.ok) {
             throw new Error(`Server returned an error:\n` +
                 `  Code: ${response.status} (${response.statusText})\n` +
                 `  Body: ${await response.text()}\n`);
         }
-        return _cbor__WEBPACK_IMPORTED_MODULE_2__.decode(await response.arrayBuffer());
+        return _cbor__WEBPACK_IMPORTED_MODULE_3__.decode(await response.arrayBuffer());
     }
     async status() {
         const headers = this._credentials
@@ -498,7 +530,7 @@ class HttpAgent {
                 `  Code: ${response.status} (${response.statusText})\n` +
                 `  Body: ${await response.text()}\n`);
         }
-        return _cbor__WEBPACK_IMPORTED_MODULE_2__.decode(await response.arrayBuffer());
+        return _cbor__WEBPACK_IMPORTED_MODULE_3__.decode(await response.arrayBuffer());
     }
     async fetchRootKey() {
         if (!this._rootKeyFetched) {
@@ -6679,7 +6711,7 @@ class Principal {
         arr = arr.slice(4, arr.length);
         const principal = new this(arr);
         if (principal.toText() !== text) {
-            throw new Error(`Principal "${principal.toText()}" does not have a valid checksum.`);
+            throw new Error(`Principal "${principal.toText()}" does not have a valid checksum (original value "${text}" may not be a valid Principal ID).`);
         }
         return principal;
     }
@@ -7162,10 +7194,10 @@ var __WEBPACK_AMD_DEFINE_RESULT__;;(function (globalObject) {
   'use strict';
 
 /*
- *      bignumber.js v9.0.1
+ *      bignumber.js v9.0.2
  *      A JavaScript library for arbitrary-precision arithmetic.
  *      https://github.com/MikeMcl/bignumber.js
- *      Copyright (c) 2020 Michael Mclaughlin <M8ch88l@gmail.com>
+ *      Copyright (c) 2021 Michael Mclaughlin <M8ch88l@gmail.com>
  *      MIT Licensed.
  *
  *      BigNumber.prototype methods     |  BigNumber methods
@@ -7305,7 +7337,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;;(function (globalObject) {
 
       // The maximum number of significant digits of the result of the exponentiatedBy operation.
       // If POW_PRECISION is 0, there will be unlimited significant digits.
-      POW_PRECISION = 0,                    // 0 to MAX
+      POW_PRECISION = 0,                       // 0 to MAX
 
       // The format specification used by the BigNumber.prototype.toFormat method.
       FORMAT = {
@@ -7315,14 +7347,15 @@ var __WEBPACK_AMD_DEFINE_RESULT__;;(function (globalObject) {
         groupSeparator: ',',
         decimalSeparator: '.',
         fractionGroupSize: 0,
-        fractionGroupSeparator: '\xA0',      // non-breaking space
+        fractionGroupSeparator: '\xA0',        // non-breaking space
         suffix: ''
       },
 
       // The alphabet used for base conversion. It must be at least 2 characters long, with no '+',
       // '-', '.', whitespace, or repeated character.
       // '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$_'
-      ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyz';
+      ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyz',
+      alphabetHasNormalDecimalDigits = true;
 
 
     //------------------------------------------------------------------------------------------
@@ -7412,7 +7445,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;;(function (globalObject) {
 
         // Allow exponential notation to be used with base 10 argument, while
         // also rounding to DECIMAL_PLACES as with other bases.
-        if (b == 10) {
+        if (b == 10 && alphabetHasNormalDecimalDigits) {
           x = new BigNumber(v);
           return round(x, DECIMAL_PLACES + x.e + 1, ROUNDING_MODE);
         }
@@ -7704,6 +7737,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;;(function (globalObject) {
             // Disallow if less than two characters,
             // or if it contains '+', '-', '.', whitespace, or a repeated character.
             if (typeof v == 'string' && !/^.?$|[+\-.\s]|(.).*\1/.test(v)) {
+              alphabetHasNormalDecimalDigits = v.slice(0, 10) == '0123456789';
               ALPHABET = v;
             } else {
               throw Error
@@ -9878,7 +9912,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;;(function (globalObject) {
           str = e <= TO_EXP_NEG || e >= TO_EXP_POS
            ? toExponential(coeffToString(n.c), e)
            : toFixedPoint(coeffToString(n.c), e, '0');
-        } else if (b === 10) {
+        } else if (b === 10 && alphabetHasNormalDecimalDigits) {
           n = round(new BigNumber(n), DECIMAL_PLACES + e + 1, ROUNDING_MODE);
           str = toFixedPoint(coeffToString(n.c), n.e, '0');
         } else {
@@ -63643,20 +63677,22 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AppContext = void 0;
 const React = __importStar(__webpack_require__(/*! react */ "./node_modules/react/index.js"));
 const react_1 = __webpack_require__(/*! react */ "./node_modules/react/index.js");
-const dtc_1 = __webpack_require__(/*! ../../declarations/dtc */ "./src/declarations/dtc/index.js");
 const Journal_1 = __importDefault(__webpack_require__(/*! ./Components/Journal */ "./src/dtc_assets/src/Components/Journal.jsx"));
 const auth_client_1 = __webpack_require__(/*! @dfinity/auth-client */ "./node_modules/@dfinity/auth-client/lib/esm/index.js");
 const LoginPage_1 = __importDefault(__webpack_require__(/*! ./Components/LoginPage */ "./src/dtc_assets/src/Components/LoginPage.jsx"));
 const index_1 = __webpack_require__(/*! ../../declarations/dtc/index */ "./src/declarations/dtc/index.js");
 exports.AppContext = (0, react_1.createContext)({
     authClient: {},
+    setAuthClient: null,
+    loginAttempted: undefined,
+    setLoginAttempted: null,
+    isAuthenticated: null,
     setIsAuthenticated: null,
-    actor: undefined
+    actor: undefined,
+    setActor: null
 });
 const App = () => {
     const [actor, setActor] = (0, react_1.useState)(undefined);
-    const [greeting, setGreeting] = (0, react_1.useState)("");
-    const [pending, setPending] = (0, react_1.useState)(false);
     const [authClient, setAuthClient] = (0, react_1.useState)(undefined);
     const [isLoaded, setIsLoaded] = (0, react_1.useState)(true);
     const [isAuthenticated, setIsAuthenticated] = (0, react_1.useState)(false);
@@ -63683,33 +63719,6 @@ const App = () => {
         });
         setActor(actor);
     }, [authClient]);
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (pending)
-            return;
-        setPending(true);
-        const name = inputRef.current.value.toString();
-        const userName = { userName: name };
-        const entryKey = { entryKey: 1 };
-        const entry = {
-            date: name,
-            text: name,
-            location: name,
-        };
-        // Interact with hello actor, calling the greet method
-        const greeting = await dtc_1.dtc.updateJournal([], [entry]);
-        let msg;
-        if (greeting.ok === null) {
-            msg = "Journal Created";
-        }
-        else {
-            msg = "Journal Already Exists";
-        }
-        ;
-        setGreeting(msg);
-        setPending(false);
-        return false;
-    };
     return (React.createElement(exports.AppContext.Provider, { value: {
             authClient,
             setAuthClient,
@@ -63723,14 +63732,59 @@ const App = () => {
         } },
         isLoaded &&
             isAuthenticated ?
-            React.createElement("main", null,
-                React.createElement(Journal_1.default, null),
-                React.createElement("section", { id: "greeting" }, greeting)) : React.createElement(LoginPage_1.default, null),
+            React.createElement(Journal_1.default, null) :
+            React.createElement(LoginPage_1.default, null),
         !isLoaded &&
             React.createElement("h2", null, " Load Screen ")));
 };
 exports["default"] = App;
 //This is a test
+
+
+/***/ }),
+
+/***/ "./src/dtc_assets/src/Components/CreateJournal.jsx":
+/*!*********************************************************!*\
+  !*** ./src/dtc_assets/src/Components/CreateJournal.jsx ***!
+  \*********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const react_1 = __importStar(__webpack_require__(/*! react */ "./node_modules/react/index.js"));
+const App_1 = __webpack_require__(/*! ../App */ "./src/dtc_assets/src/App.jsx");
+const CreateJournal = (props) => {
+    const { authClient, actor, setIsLoaded } = (0, react_1.useContext)(App_1.AppContext);
+    const createUserJournal = () => {
+        console.log("Client: ", authClient);
+        actor.create({ userName: "JesseTheGreat" }).then((result) => {
+            console.log(result);
+        });
+    };
+    return (react_1.default.createElement("div", null,
+        react_1.default.createElement("button", { onClick: createUserJournal }, " Create Journal ")));
+};
+exports["default"] = CreateJournal;
 
 
 /***/ }),
@@ -63919,7 +63973,7 @@ __webpack_require__(/*! ./Slider.scss */ "./src/dtc_assets/src/Components/Fields
 const Slider = (props) => {
     const { min, max, dispatch, dispatchAction, index, value } = props;
     const inputRef = (0, react_1.useRef)();
-    const [sliderValue, setSliderValue] = (0, react_1.useState)('');
+    const [sliderValue, setSliderValue] = (0, react_1.useState)(value);
     const [disabledOrEnabled, setDisabledOrEnabled] = (0, react_1.useState)('disabled');
     const onBlur = () => {
         setDisabledOrEnabled("disabled");
@@ -63983,11 +64037,13 @@ const journalReducer_1 = __importStar(__webpack_require__(/*! ../reducers/journa
 __webpack_require__(/*! ./Journal.scss */ "./src/dtc_assets/src/Components/Journal.scss");
 const App_1 = __webpack_require__(/*! ../App */ "./src/dtc_assets/src/App.jsx");
 const InputBox_1 = __importDefault(__webpack_require__(/*! ./Fields/InputBox */ "./src/dtc_assets/src/Components/Fields/InputBox.jsx"));
+const CreateJournal_1 = __importDefault(__webpack_require__(/*! ../Components/CreateJournal */ "./src/dtc_assets/src/Components/CreateJournal.jsx"));
 const Journal = (props) => {
     const [journalState, dispatch] = (0, react_1.useReducer)(journalReducer_1.default, journalReducer_1.initialState);
     const [pageIsVisibleArray, setPageIsVisibleArray] = (0, react_1.useState)(journalState.journal.map((page) => false));
     const [newPageAdded, setNewPageAdded] = (0, react_1.useState)(false);
-    const { actor, authClient, setAuthClient, setActor, setIsLoaded } = (0, react_1.useContext)(App_1.AppContext);
+    const { actor, authClient, setIsLoaded, isAuthenticated } = (0, react_1.useContext)(App_1.AppContext);
+    const [hasJournal, setHasJournal] = (0, react_1.useState)(false);
     (0, react_1.useEffect)(() => {
         setPageIsVisibleArray(journalState.journal.map((page, index) => {
             if ((index === journalState.journal.length - 1) && newPageAdded) {
@@ -64000,13 +64056,12 @@ const Journal = (props) => {
         }));
     }, [journalState.journal.length]);
     (0, react_1.useEffect)(async () => {
-        actor.readJournal().then((result) => {
-            // if("ok" in result){
-            //     console.log(result.ok);
-            // }
-            console.log(result);
-            console.log("test");
-        });
+        const result = await actor.readJournal();
+        if ("ok" in result) {
+            setHasJournal(true);
+        }
+        ;
+        console.log(result);
     }, [authClient]);
     const displayJournalTable = () => {
         const openPage = (e, index) => {
@@ -64058,14 +64113,18 @@ const Journal = (props) => {
             return false;
         }));
     };
-    return (react_1.default.createElement("div", null,
-        (getIndexOfVisiblePage() < 0) ?
-            displayJournalTable() :
-            react_1.default.createElement(JournalPage_1.default, { closePage: closePage, index: getIndexOfVisiblePage(), journalPageData: journalState.journal[getIndexOfVisiblePage()], journalReducerDispatchFunction: dispatch }),
-        react_1.default.createElement("button", { className: 'loginButtonDiv', onClick: async () => {
-                await authClient.logout();
-                setIsLoaded(false);
-            } }, " Log Out ")));
+    return (react_1.default.createElement(react_1.default.Fragment, null,
+        hasJournal &&
+            react_1.default.createElement("div", null,
+                (getIndexOfVisiblePage() < 0) ?
+                    displayJournalTable() :
+                    react_1.default.createElement(JournalPage_1.default, { closePage: closePage, index: getIndexOfVisiblePage(), journalPageData: journalState.journal[getIndexOfVisiblePage()], journalReducerDispatchFunction: dispatch }),
+                react_1.default.createElement("button", { className: 'loginButtonDiv', onClick: async () => {
+                        await authClient.logout();
+                        setIsLoaded(false);
+                    } }, " Log Out ")),
+        !hasJournal &&
+            react_1.default.createElement(CreateJournal_1.default, null)));
 };
 exports["default"] = Journal;
 
@@ -64117,10 +64176,25 @@ const JournalPage = (props) => {
     const { journalReducerDispatchFunction, index, journalPageData, closePage } = props;
     const { actor } = (0, react_1.useContext)(App_1.AppContext);
     (0, react_1.useEffect)(async () => {
-        await actor.readEntry({ entryKey: 1 }).then((result) => { console.log(result); });
+        await actor.readJournal();
     }, [actor, file1, file2]);
     const uploadChunk = async (fileId, chunkId, fileChunk) => {
         return actor.createJournalEntryFile(fileId, chunkId, [...new Uint8Array(await fileChunk.arrayBuffer())]);
+    };
+    const mapAndSendEntryToApi = async (entryKey, journalEntry) => {
+        const entryAsApiObject = [{
+                entryTitle: journalEntry.title,
+                text: journalEntry.entry,
+                location: journalEntry.location,
+                date: journalEntry.date,
+                lockTime: journalEntry.lockTime,
+                timeTillUnlock: journalEntry.timeTillUnlock
+            }];
+        const entryKeyAsApiObject = (entryKey) ? [{ entryKey: entryKey }] : [];
+        console.log(entryAsApiObject);
+        actor.updateJournalEntry(entryKeyAsApiObject, entryAsApiObject).then((result) => {
+            console.log(result);
+        });
     };
     const mapAndSendFileToApi = async (fileId, file) => {
         const fileSize = file.size;
@@ -64136,11 +64210,14 @@ const JournalPage = (props) => {
             chunk += 1;
         }
         ;
-        return result = await Promise.all(promises);
+        const results = await Promise.all(promises);
+        console.log("results: ", results);
     };
     const handleSubmit = (0, react_1.useCallback)(async () => {
-        await mapAndSendFileToApi("test1", file1);
-        await mapAndSendFileToApi("test2", file2);
+        await mapAndSendEntryToApi(null, journalPageData);
+        console.log('Reading Journal: ', await actor.readJournal());
+        // await mapAndSendFileToApi("test1", file1);
+        // await mapAndSendFileToApi("test2", file2);
     }, [journalPageData, file1, file2]);
     return (react_1.default.createElement("div", { className: "journalPageContainer" },
         react_1.default.createElement("div", { className: "logoDiv" },
@@ -64194,27 +64271,14 @@ const react_1 = __importStar(__webpack_require__(/*! react */ "./node_modules/re
 const App_1 = __webpack_require__(/*! ../App */ "./src/dtc_assets/src/App.jsx");
 __webpack_require__(/*! ./LoginPage.scss */ "./src/dtc_assets/src/Components/LoginPage.scss");
 const LoginPage = (props) => {
-    const { authClient, setIsLoaded, loginAttempted, setLoginAttempted, actor, isAuthenticated } = (0, react_1.useContext)(App_1.AppContext);
+    const { authClient, setAuthClient, setIsLoaded, loginAttempted, setLoginAttempted, actor, } = (0, react_1.useContext)(App_1.AppContext);
     const handleClick = async () => {
         setIsLoaded(false);
-        if (loginAttempted) {
-            actor.readJournal().then((result) => {
-                console.log(result);
-                if ("err" in result) {
-                    actor.create({ userName: "JesseTheGreat" }).then((result) => {
-                        if ("err" in result) {
-                            alert("No Internet Identity Detected");
-                        }
-                        ;
-                    });
-                }
-                else {
-                    console.log(result);
-                }
-            });
+        if (!loginAttempted) {
+            await authClient.login({ identityProvider: "http://localhost:8000?canisterId=rwlgt-iiaaa-aaaaa-aaaaa-cai#authorize" });
+            setLoginAttempted(!loginAttempted);
         }
         else {
-            await authClient.login({ identityProvider: "http://localhost:8000?canisterId=rwlgt-iiaaa-aaaaa-aaaaa-cai#authorize" });
             setLoginAttempted(!loginAttempted);
         }
     };
@@ -64373,7 +64437,8 @@ exports.types = {
     CHANGE_POB: "CHANGE_POB",
     CHANGE_PREFACE: "CHANGE_PREFACE",
     CHANGE_DEDICATIONS: "CHANGE_DEDICATIONS",
-    CHANGE_NAME: "CHANGE_NAME"
+    CHANGE_NAME: "CHANGE_NAME",
+    CHANGE_ENTRY_TITLE: "CHANGE_ENTRY_TITLE"
 };
 exports.initialState = {
     bio: {
@@ -64385,24 +64450,30 @@ exports.initialState = {
     },
     journal: [
         {
-            date: 'test',
+            date: 0,
+            title: '',
             location: 'test',
             entry: '',
-            lockTime: 'test'
+            lockTime: 0,
+            timeTillUnlock: 0
         },
         {
-            date: 'test',
+            date: 0,
+            title: '',
             location: 'test',
             entry: '',
-            lockTime: 'test'
+            lockTime: 0,
+            timeTillUnlock: 0
         }
     ]
 };
 const freshPage = {
-    date: 'test',
+    date: 0,
+    title: 'test',
     location: 'test',
     entry: '',
-    lockTime: 'test'
+    lockTime: 0,
+    timeTillUnlock: 0
 };
 const changeValue = (state = exports.initialState, action) => {
     const { actionType, payload, index } = action;
@@ -64411,7 +64482,16 @@ const changeValue = (state = exports.initialState, action) => {
         case exports.types.CHANGE_DATE:
             updatedJournalPage = {
                 ...state.journal[index],
-                date: payload
+                date: parseInt(payload)
+            };
+            state.journal[index] = updatedJournalPage;
+            return {
+                ...state
+            };
+        case exports.types.CHANGE_ENTRY_TITLE:
+            updatedJournalPage = {
+                ...state.journal[index],
+                title: payload
             };
             state.journal[index] = updatedJournalPage;
             return {
@@ -64438,7 +64518,7 @@ const changeValue = (state = exports.initialState, action) => {
         case exports.types.CHANGE_LOCK_TIME:
             updatedJournalPage = {
                 ...state.journal[index],
-                lockTime: payload
+                lockTime: parseInt(payload)
             };
             state.journal[index] = updatedJournalPage;
             return {
@@ -66946,7 +67026,7 @@ const idlFactory = ({ IDL }) => {
     'AlreadyExists' : IDL.Null,
     'NoInputGiven' : IDL.Null,
   });
-  const Result_3 = IDL.Variant({ 'ok' : AmountAccepted, 'err' : Error });
+  const Result_4 = IDL.Variant({ 'ok' : AmountAccepted, 'err' : Error });
   const Result = IDL.Variant({ 'ok' : IDL.Null, 'err' : Error });
   const EntryKey = IDL.Record({ 'entryKey' : IDL.Nat });
   const JournalEntry = IDL.Record({
@@ -66957,7 +67037,19 @@ const idlFactory = ({ IDL }) => {
     'location' : IDL.Text,
     'entryTitle' : IDL.Text,
   });
-  const Result_2 = IDL.Variant({ 'ok' : JournalEntry, 'err' : Error });
+  const Result_3 = IDL.Variant({ 'ok' : JournalEntry, 'err' : Error });
+  const Bio = IDL.Record({
+    'dob' : IDL.Text,
+    'name' : IDL.Text,
+    'biography' : IDL.Text,
+    'birthPlace' : IDL.Text,
+    'siblings' : IDL.Text,
+    'children' : IDL.Text,
+  });
+  const Result_2 = IDL.Variant({
+    'ok' : IDL.Tuple(IDL.Vec(IDL.Tuple(IDL.Nat, JournalEntry)), Bio),
+    'err' : Error,
+  });
   const Branch = IDL.Record({
     'left' : Trie,
     'size' : IDL.Nat,
@@ -66971,28 +67063,20 @@ const idlFactory = ({ IDL }) => {
   Trie.fill(
     IDL.Variant({ 'branch' : Branch, 'leaf' : Leaf, 'empty' : IDL.Null })
   );
-  const Bio = IDL.Record({
-    'dob' : IDL.Text,
-    'name' : IDL.Text,
-    'biography' : IDL.Text,
-    'birthPlace' : IDL.Text,
-    'siblings' : IDL.Text,
-    'children' : IDL.Text,
-  });
-  const Result_1 = IDL.Variant({ 'ok' : IDL.Tuple(Trie, Bio), 'err' : Error });
+  const Result_1 = IDL.Variant({ 'ok' : Trie, 'err' : Error });
   const User = IDL.Service({
-    'create' : IDL.Func([ProfileInput], [Result_3], []),
+    'create' : IDL.Func([ProfileInput], [Result_4], []),
     'createJournalEntryFile' : IDL.Func(
         [IDL.Text, IDL.Text, IDL.Vec(IDL.Nat8)],
         [Result],
         [],
       ),
     'delete' : IDL.Func([], [Result], []),
-    'readEntry' : IDL.Func([EntryKey], [Result_2], []),
-    'readJournal' : IDL.Func([], [Result_1], []),
+    'readEntry' : IDL.Func([EntryKey], [Result_3], []),
+    'readJournal' : IDL.Func([], [Result_2], []),
     'updateJournalEntry' : IDL.Func(
         [IDL.Opt(EntryKey), IDL.Opt(JournalEntry)],
-        [Result],
+        [Result_1],
         [],
       ),
     'updateProfile' : IDL.Func([ProfileInput], [Result], []),
@@ -67026,7 +67110,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 // CANISTER_ID is replaced by webpack based on node environment
-const canisterId = "txssk-maaaa-aaaaa-aaanq-cai";
+const canisterId = "r7inp-6aaaa-aaaaa-aaabq-cai";
 
 /**
  * 
@@ -67170,14 +67254,9 @@ function ownKeys(object, enumerableOnly) {
 
   if (Object.getOwnPropertySymbols) {
     var symbols = Object.getOwnPropertySymbols(object);
-
-    if (enumerableOnly) {
-      symbols = symbols.filter(function (sym) {
-        return Object.getOwnPropertyDescriptor(object, sym).enumerable;
-      });
-    }
-
-    keys.push.apply(keys, symbols);
+    enumerableOnly && (symbols = symbols.filter(function (sym) {
+      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+    })), keys.push.apply(keys, symbols);
   }
 
   return keys;
@@ -67185,19 +67264,12 @@ function ownKeys(object, enumerableOnly) {
 
 function _objectSpread2(target) {
   for (var i = 1; i < arguments.length; i++) {
-    var source = arguments[i] != null ? arguments[i] : {};
-
-    if (i % 2) {
-      ownKeys(Object(source), true).forEach(function (key) {
-        (0,_defineProperty_js__WEBPACK_IMPORTED_MODULE_0__["default"])(target, key, source[key]);
-      });
-    } else if (Object.getOwnPropertyDescriptors) {
-      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
-    } else {
-      ownKeys(Object(source)).forEach(function (key) {
-        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
-      });
-    }
+    var source = null != arguments[i] ? arguments[i] : {};
+    i % 2 ? ownKeys(Object(source), !0).forEach(function (key) {
+      (0,_defineProperty_js__WEBPACK_IMPORTED_MODULE_0__["default"])(target, key, source[key]);
+    }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) {
+      Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+    });
   }
 
   return target;

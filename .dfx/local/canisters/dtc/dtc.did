@@ -1,11 +1,11 @@
 type User = 
  service {
-   create: (ProfileInput) -> (Result_3);
+   create: (ProfileInput) -> (Result_4);
    createJournalEntryFile: (text, text, blob) -> (Result);
    delete: () -> (Result);
-   readEntry: (EntryKey) -> (Result_2);
-   readJournal: () -> (Result_1);
-   updateJournalEntry: (opt EntryKey, opt JournalEntry) -> (Result);
+   readEntry: (EntryKey) -> (Result_3);
+   readJournal: () -> (Result_2);
+   updateJournalEntry: (opt EntryKey, opt JournalEntry) -> (Result_1);
    updateProfile: (ProfileInput) -> (Result);
  };
 type Trie = 
@@ -14,23 +14,31 @@ type Trie =
    "empty";
    leaf: Leaf;
  };
-type Result_3 = 
+type Result_4 = 
  variant {
    err: Error;
    ok: AmountAccepted;
  };
-type Result_2 = 
+type Result_3 = 
  variant {
    err: Error;
    ok: JournalEntry;
  };
-type Result_1 = 
+type Result_2 = 
  variant {
    err: Error;
    ok: record {
-         Trie;
+         vec record {
+               nat;
+               JournalEntry;
+             };
          Bio;
        };
+ };
+type Result_1 = 
+ variant {
+   err: Error;
+   ok: Trie;
  };
 type Result = 
  variant {

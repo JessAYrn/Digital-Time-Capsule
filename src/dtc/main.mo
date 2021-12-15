@@ -10,6 +10,7 @@ import Cycles "mo:base/ExperimentalCycles";
 actor class User(){
 
     type Profile = {
+        journal : Journal.Journal;
         userName: Text;
         id: Principal;
     };
@@ -79,39 +80,45 @@ actor class User(){
         //    return #err(#NotAuthorized);
         //};
 
-        let userProfile: Profile = {
-            userName = profile.userName;
-            id = callerId;
-        };
-
-        let (newProfiles, existing) = Trie.put(
+        let existing = Trie.find(
             profiles,       //Target Trie
             key(callerId), //Key
-            Principal.equal,       //Equality Checker
-            userProfile
+            Principal.equal
         );
 
         // If there is an original value, do not update
         switch(existing) {
             case null {
+                Cycles.add(100_000_000_000);
+                let newUserJournal = await Journal.Journal(callerId);
+                let amountAccepted = await newUserJournal.wallet_receive();
 
-                Cycles.add(100_000_000_000);
-                let journal = await Journal.Journal(callerId);
-                Cycles.add(100_000_000_000);
-                let amountAccepted = await journal.wallet_receive();
+                let userProfile: Profile = {
+                    journal = newUserJournal;
+                    userName = profile.userName;
+                    id = callerId;
+                };
+
+                let (newProfiles, existingProfiles) = Trie.put(
+                    profiles, 
+                    key(callerId),
+                    Principal.equal,
+                    userProfile
+                );
+
                 profiles := newProfiles;
                 //No need to write return when attribute of a varient is being returned
                 return #ok(amountAccepted);
             };
             case ( ? v) {
                 //No need to write return when attribute of a varient is being returned
-                return #err(#NotAuthorized);
+                return #err(#AlreadyExists);
             }
         };
     };
 
     //read Journal
-    public shared(msg) func readJournal () : async Result.Result<(Trie.Trie<Nat,JournalEntry>, Bio), Error> {
+    public shared(msg) func readJournal () : async Result.Result<([(Nat,JournalEntry)], Bio), Error> {
 
         //Reject Anonymous User
         //if(Principal.toText(msg.caller) == "2vxsx-fae"){
@@ -131,7 +138,7 @@ actor class User(){
                 return #err(#NotFound);
             };
             case(? v){
-                let journal = await Journal.Journal(callerId); 
+                let journal = v.journal; 
                 let userJournal = await journal.readJournal();
                 return userJournal;
                 
@@ -150,6 +157,7 @@ actor class User(){
         //};
 
         let callerId = msg.caller;
+
         let result = Trie.find(
             profiles,
             key(callerId),
@@ -160,7 +168,7 @@ actor class User(){
                 #err(#NotAuthorized)
             };
             case(? v){
-                let journal = await Journal.Journal(callerId);
+                let journal = v.journal;
                 let entry = await journal.readJournalEntry(entryKey.entryKey);
                 return entry;
             };
@@ -168,7 +176,7 @@ actor class User(){
 
     };
 
-    public shared(msg) func updateJournalEntry(entryKey : ?EntryKey, entry : ?JournalEntry) : async Result.Result<(), Error> {
+    public shared(msg) func updateJournalEntry(entryKey : ?EntryKey, entry : ?JournalEntry) : async Result.Result<Trie.Trie<Nat,JournalEntry>, Error> {
 
         //Reject Anonymous User
         //if(Principal.toText(msg.caller) == "2vxsx-fae"){
@@ -176,6 +184,7 @@ actor class User(){
         //};
 
         let callerId = msg.caller;
+        
         let result = Trie.find(
             profiles,
             key(callerId),
@@ -194,7 +203,7 @@ actor class User(){
                                 #err(#NoInputGiven)
                             };
                             case(?entryValue){
-                                let journal = await Journal.Journal(callerId);
+                                let journal = result.journal;
                                 let status = await journal.createEntry(entryValue);
                                 return status;
                             };
@@ -203,12 +212,12 @@ actor class User(){
                     case (? entryKeyValue){
                         switch(entry){
                             case null {
-                                let journal = await Journal.Journal(callerId);
+                                let journal = result.journal;
                                 let journalStatus = await journal.deleteJournalEntry(entryKeyValue.entryKey);
                                 return journalStatus;
                             };
                             case (?entryValue){
-                                let journal = await Journal.Journal(callerId);
+                                let journal = result.journal;
                                 let entryStatus = await journal.updateJournalEntry(entryKeyValue.entryKey, entryValue);
 
                                 return entryStatus;
@@ -225,9 +234,22 @@ actor class User(){
     public shared(msg) func createJournalEntryFile(fileId: Text, chunkId: Text, blobChunk: Blob): async Result.Result<(), Error>{
         let callerId = msg.caller;
 
-        let journal = await Journal.Journal(callerId);
-        let status = await journal.createFile(fileId,chunkId, blobChunk);
-        return status;
+        let result = Trie.find(
+            profiles,
+            key(callerId),
+            Principal.equal
+        );
+
+        switch(result){
+            case null{
+                return #err(#NotFound)
+            };
+            case (? v){
+                let journal = v.journal;
+                let status = await journal.createFile(fileId,chunkId, blobChunk);
+                return status;
+            };
+        };
     };
 
     //update profile
@@ -239,11 +261,6 @@ actor class User(){
         //};
 
         let callerId = msg.caller;
-
-        let userProfile : Profile = {
-            userName = profile.userName;
-            id = callerId;
-        };
 
         let result = Trie.find(
             profiles,       //Target Trie
@@ -257,6 +274,13 @@ actor class User(){
                 #err(#NotFound);
             };
             case(? v) {
+
+                let userProfile : Profile = {
+                    journal = v.journal;
+                    userName = profile.userName;
+                    id = callerId;
+                };
+
                 profiles := Trie.replace(
                     profiles,       //Target trie
                     key(callerId), //Key

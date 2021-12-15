@@ -13,7 +13,7 @@ const Slider = (props) => {
 
     const inputRef = useRef();
 
-    const [sliderValue, setSliderValue] = useState('');
+    const [sliderValue, setSliderValue] = useState(value);
     const [disabledOrEnabled, setDisabledOrEnabled] = useState('disabled');
 
     const onBlur = () => {

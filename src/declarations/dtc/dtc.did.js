@@ -9,7 +9,7 @@ export const idlFactory = ({ IDL }) => {
     'AlreadyExists' : IDL.Null,
     'NoInputGiven' : IDL.Null,
   });
-  const Result_3 = IDL.Variant({ 'ok' : AmountAccepted, 'err' : Error });
+  const Result_4 = IDL.Variant({ 'ok' : AmountAccepted, 'err' : Error });
   const Result = IDL.Variant({ 'ok' : IDL.Null, 'err' : Error });
   const EntryKey = IDL.Record({ 'entryKey' : IDL.Nat });
   const JournalEntry = IDL.Record({
@@ -20,7 +20,19 @@ export const idlFactory = ({ IDL }) => {
     'location' : IDL.Text,
     'entryTitle' : IDL.Text,
   });
-  const Result_2 = IDL.Variant({ 'ok' : JournalEntry, 'err' : Error });
+  const Result_3 = IDL.Variant({ 'ok' : JournalEntry, 'err' : Error });
+  const Bio = IDL.Record({
+    'dob' : IDL.Text,
+    'name' : IDL.Text,
+    'biography' : IDL.Text,
+    'birthPlace' : IDL.Text,
+    'siblings' : IDL.Text,
+    'children' : IDL.Text,
+  });
+  const Result_2 = IDL.Variant({
+    'ok' : IDL.Tuple(IDL.Vec(IDL.Tuple(IDL.Nat, JournalEntry)), Bio),
+    'err' : Error,
+  });
   const Branch = IDL.Record({
     'left' : Trie,
     'size' : IDL.Nat,
@@ -34,28 +46,20 @@ export const idlFactory = ({ IDL }) => {
   Trie.fill(
     IDL.Variant({ 'branch' : Branch, 'leaf' : Leaf, 'empty' : IDL.Null })
   );
-  const Bio = IDL.Record({
-    'dob' : IDL.Text,
-    'name' : IDL.Text,
-    'biography' : IDL.Text,
-    'birthPlace' : IDL.Text,
-    'siblings' : IDL.Text,
-    'children' : IDL.Text,
-  });
-  const Result_1 = IDL.Variant({ 'ok' : IDL.Tuple(Trie, Bio), 'err' : Error });
+  const Result_1 = IDL.Variant({ 'ok' : Trie, 'err' : Error });
   const User = IDL.Service({
-    'create' : IDL.Func([ProfileInput], [Result_3], []),
+    'create' : IDL.Func([ProfileInput], [Result_4], []),
     'createJournalEntryFile' : IDL.Func(
         [IDL.Text, IDL.Text, IDL.Vec(IDL.Nat8)],
         [Result],
         [],
       ),
     'delete' : IDL.Func([], [Result], []),
-    'readEntry' : IDL.Func([EntryKey], [Result_2], []),
-    'readJournal' : IDL.Func([], [Result_1], []),
+    'readEntry' : IDL.Func([EntryKey], [Result_3], []),
+    'readJournal' : IDL.Func([], [Result_2], []),
     'updateJournalEntry' : IDL.Func(
         [IDL.Opt(EntryKey), IDL.Opt(JournalEntry)],
-        [Result],
+        [Result_1],
         [],
       ),
     'updateProfile' : IDL.Func([ProfileInput], [Result], []),

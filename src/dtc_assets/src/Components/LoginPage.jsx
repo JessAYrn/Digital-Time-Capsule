@@ -6,37 +6,24 @@ import "./LoginPage.scss";
 const LoginPage = (props) => {
     const {    
             authClient, 
+            setAuthClient,
             setIsLoaded, 
             loginAttempted, 
             setLoginAttempted, 
             actor,
-            isAuthenticated
         } = useContext(AppContext);
 
-        const handleClick = async () => {
+    const handleClick = async () => {
 
-            setIsLoaded(false);
+        setIsLoaded(false);
 
-            if(loginAttempted){
-                actor.readJournal().then((result) => {
-                    console.log(result);
-                    if("err" in result){
-                        actor.create({userName: "JesseTheGreat"}).then((result) => {
-                            if("err" in result){
-                                alert("No Internet Identity Detected");
-                            };
-                        });
-                    } else {
-                        console.log(result);
-                    }
-                });
-                
-            } else {
-
-                await authClient.login({identityProvider : process.env.II_URL});
-                setLoginAttempted(!loginAttempted);
-            }
-        };
+        if(!loginAttempted){
+            await authClient.login({identityProvider : process.env.II_URL});
+            setLoginAttempted(!loginAttempted);
+        } else {
+            setLoginAttempted(!loginAttempted);
+        }
+    };
 
 
     return(
