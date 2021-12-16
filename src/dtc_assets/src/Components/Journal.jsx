@@ -22,7 +22,7 @@ const Journal = (props) => {
                 console.log(result);
             });
         }
-    },[actor, pageIsVisibleArray])
+    },[actor, pageIsVisibleArray, authClient])
 
     useEffect(() => {
         setPageIsVisibleArray(journalState.journal.map((page, index) => { 
