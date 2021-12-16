@@ -4,7 +4,6 @@ import journalReducer, {initialState, types} from "../reducers/journalReducer";
 import "./Journal.scss";
 import { AppContext } from "../App";
 import InputBox from "./Fields/InputBox";
-import CreateJournal from "../Components/CreateJournal";
 
 
 
@@ -14,7 +13,16 @@ const Journal = (props) => {
     const [pageIsVisibleArray, setPageIsVisibleArray] = useState(journalState.journal.map((page) => false));
     const [newPageAdded, setNewPageAdded] = useState(false);
     const {actor, authClient, setIsLoaded, isAuthenticated} = useContext(AppContext);
-    const [hasJournal, setHasJournal] = useState(false);
+
+    useEffect(async () => {
+        const journal = await actor.readJournal();
+        console.log(journal);
+        if("err" in journal){
+            actor.create({userName: "Default"}).then((result) => {
+                console.log(result);
+            });
+        }
+    },[actor, pageIsVisibleArray])
 
     useEffect(() => {
         setPageIsVisibleArray(journalState.journal.map((page, index) => { 
@@ -27,16 +35,6 @@ const Journal = (props) => {
             }
         }));
     },[journalState.journal.length]);
-
-    useEffect(async () => {
-        const result = await actor.readJournal();
-
-        if("ok" in result){
-            setHasJournal(true);
-        };
-
-        console.log(result);
-    },[authClient])
 
     const displayJournalTable = () => {
 
@@ -137,26 +135,20 @@ const Journal = (props) => {
 
     return(
         <React.Fragment>
-            {hasJournal && 
-                <div>
-                    { (getIndexOfVisiblePage() < 0) ? 
-                        displayJournalTable() : 
-                        <JournalPage
-                        closePage={closePage}
-                        index={getIndexOfVisiblePage()}
-                        journalPageData={journalState.journal[getIndexOfVisiblePage()]}
-                        journalReducerDispatchFunction={dispatch}
-                    /> }
-                    <button className={'loginButtonDiv'} onClick={async () => {
-                        await authClient.logout();
-                        setIsLoaded(false);
-                    }} > Log Out </button>   
-                </div>
-            }
-            {!hasJournal &&
-                <CreateJournal/>
-
-            }
+            <div>
+                { (getIndexOfVisiblePage() < 0) ? 
+                    displayJournalTable() : 
+                    <JournalPage
+                    closePage={closePage}
+                    index={getIndexOfVisiblePage()}
+                    journalPageData={journalState.journal[getIndexOfVisiblePage()]}
+                    journalReducerDispatchFunction={dispatch}
+                /> }
+                <button className={'loginButtonDiv'} onClick={async () => {
+                    await authClient.logout();
+                    setIsLoaded(false);
+                }} > Log Out </button>   
+            </div>
         </React.Fragment>
     );
 
