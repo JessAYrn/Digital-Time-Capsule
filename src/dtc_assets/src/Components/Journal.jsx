@@ -12,17 +12,25 @@ const Journal = (props) => {
     const [journalState, dispatch] = useReducer(journalReducer, initialState);
     const [pageIsVisibleArray, setPageIsVisibleArray] = useState(journalState.journal.map((page) => false));
     const [newPageAdded, setNewPageAdded] = useState(false);
-    const {actor, authClient, setIsLoaded, isAuthenticated} = useContext(AppContext);
+    const {actor, authClient, setIsLoaded, setSubmissionsMade, submissionsMade} = useContext(AppContext);
 
     useEffect(async () => {
-        const journal = await actor.readJournal();
+        let journal = await actor.readJournal();
         console.log(journal);
         if("err" in journal){
             actor.create({userName: "Default"}).then((result) => {
                 console.log(result);
             });
+        } else {
+            journal = journal.ok[0].map((arrayWithKeyAndPage) => {
+                return arrayWithKeyAndPage[1]
+            });
+            dispatch({
+                payload: journal,
+                actionType: types.SET_JOURNAL
+            })
         }
-    },[actor, pageIsVisibleArray, authClient])
+    },[actor, submissionsMade, authClient])
 
     useEffect(() => {
         setPageIsVisibleArray(journalState.journal.map((page, index) => { 

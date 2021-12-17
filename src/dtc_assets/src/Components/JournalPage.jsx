@@ -21,7 +21,9 @@ const JournalPage = (props) => {
     } = props;
 
     const { 
-        actor
+        actor,
+        setSubmissionsMade,
+        submissionsMade
     } = useContext(AppContext);
 
     useEffect( async () => {
@@ -90,11 +92,15 @@ const JournalPage = (props) => {
 
     const handleSubmit = useCallback(async () => {
         await mapAndSendEntryToApi(null, journalPageData);
+        setSubmissionsMade(submissionsMade + 1);
         console.log('Reading Journal: ',await actor.readJournal());
         // await mapAndSendFileToApi("test1", file1);
         // await mapAndSendFileToApi("test2", file2);
 
-    }, [journalPageData, file1, file2])
+    }, [journalPageData, file1, file2]);
+
+    console.log(journalPageData.lockTime);
+    console.log(journalPageData.date);
     
 
     return (

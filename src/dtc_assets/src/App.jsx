@@ -24,6 +24,7 @@ const App = () => {
     const [isLoaded, setIsLoaded] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [loginAttempted, setLoginAttempted] = useState(false);
+    const [submissionsMade, setSubmissionsMade] = useState(0);
 
     // login function used when Authenticating the client (aka user)
     useEffect(() => {
@@ -61,7 +62,9 @@ const App = () => {
                 setIsLoaded,
                 loginAttempted, 
                 setLoginAttempted, 
-                isAuthenticated
+                isAuthenticated,
+                submissionsMade,
+                setSubmissionsMade
             }}
         >
 

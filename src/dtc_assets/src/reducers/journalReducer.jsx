@@ -1,4 +1,5 @@
 export const types = {
+    SET_JOURNAL: "SET_JOURNAL",
     CHANGE_DATE: "CHANGE_DATE",
     CHANGE_LOCATION: "CHANGE_LOCATION",
     CHANGE_ENTRY: "CHANGE_ENTRY",
@@ -23,17 +24,9 @@ export const initialState = {
     journal: [
         {
             date: 0,
-            title: '',
-            location: 'test',
-            entry: '',
-            lockTime: 0,
-            timeTillUnlock: 0
-        },
-        {
-            date: 0,
-            title: '',
-            location: 'test',
-            entry: '',
+            title: 'Loading...',
+            location: 'Loading...',
+            entry: 'Loading...',
             lockTime: 0,
             timeTillUnlock: 0
         }
@@ -43,8 +36,8 @@ export const initialState = {
 
 const freshPage = {
     date: 0,
-    title: 'test',
-    location: 'test',
+    title: '',
+    location: '',
     entry: '',
     lockTime: 0,
     timeTillUnlock: 0
@@ -58,6 +51,11 @@ const changeValue = (state = initialState, action) => {
     
 
     switch (actionType){
+        case types.SET_JOURNAL:
+            state.journal = payload;
+            return {
+                ...state
+            }
         case types.CHANGE_DATE:
             updatedJournalPage = {
                 ... state.journal[index],
