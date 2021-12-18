@@ -23,24 +23,23 @@ export const initialState = {
     },
     journal: [
         {
-            date: 0,
+            date: '',
             title: 'Loading...',
             location: 'Loading...',
             entry: 'Loading...',
-            lockTime: 0,
-            timeTillUnlock: 0
+            lockTime: '3'
         }
     ]
 
 }
 
 const freshPage = {
-    date: 0,
+    date: '',
     title: '',
     location: '',
     entry: '',
-    lockTime: 0,
-    timeTillUnlock: 0
+    lockTime: '3',
+    timeTillUnlock: '0'
 }
 
 const changeValue = (state = initialState, action) => {
@@ -59,7 +58,7 @@ const changeValue = (state = initialState, action) => {
         case types.CHANGE_DATE:
             updatedJournalPage = {
                 ... state.journal[index],
-                date: parseInt(payload)
+                date: payload
             }
             state.journal[index] = updatedJournalPage;
             return {
@@ -95,7 +94,7 @@ const changeValue = (state = initialState, action) => {
         case types.CHANGE_LOCK_TIME:
             updatedJournalPage = {
                 ... state.journal[index],
-                lockTime: parseInt(payload)
+                lockTime: payload
             }
             state.journal[index] = updatedJournalPage;
             return {

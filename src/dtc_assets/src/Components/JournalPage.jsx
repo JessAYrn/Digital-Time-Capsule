@@ -17,6 +17,7 @@ const JournalPage = (props) => {
         journalReducerDispatchFunction,
         index,
         journalPageData,
+        journalSize,
         closePage
     } = props;
 
@@ -48,11 +49,10 @@ const JournalPage = (props) => {
             text: journalEntry.entry,
             location: journalEntry.location,
             date: journalEntry.date,
-            lockTime: journalEntry.lockTime,
-            timeTillUnlock: journalEntry.timeTillUnlock
+            lockTime: journalEntry.lockTime
         }];
 
-        const entryKeyAsApiObject = (entryKey) ? [{entryKey: entryKey}] : [];
+        const entryKeyAsApiObject = (entryKey >= 0 && entryKey < journalSize ) ? [{entryKey: entryKey}] : [];
         
         actor.updateJournalEntry(
             entryKeyAsApiObject,
@@ -91,17 +91,13 @@ const JournalPage = (props) => {
 
 
     const handleSubmit = useCallback(async () => {
-        await mapAndSendEntryToApi(null, journalPageData);
+        await mapAndSendEntryToApi(index, journalPageData);
         setSubmissionsMade(submissionsMade + 1);
         console.log('Reading Journal: ',await actor.readJournal());
         // await mapAndSendFileToApi("test1", file1);
         // await mapAndSendFileToApi("test2", file2);
 
     }, [journalPageData, file1, file2]);
-
-    console.log(journalPageData.lockTime);
-    console.log(journalPageData.date);
-    
 
     return (
         <div className={"journalPageContainer"}>

@@ -37,3 +37,13 @@ export const mapAndSendJournalPageRequestToApi = async (key, pageData, files, ac
     });
 
 };
+
+export const mapApiObjectToFrontEndObject = (backEndObj) => {
+    return {
+        date: backEndObj.date,
+        title: backEndObj.entryTitle,
+        location: backEndObj.location,
+        lockTime: backEndObj.lockTime,
+        entry: backEndObj.text
+    }
+}

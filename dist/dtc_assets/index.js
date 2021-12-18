@@ -21512,7 +21512,7 @@ BasePoint.prototype.dblp = function dblp(k) {
 
 var utils = __webpack_require__(/*! ../utils */ "./node_modules/elliptic/lib/elliptic/utils.js");
 var BN = __webpack_require__(/*! bn.js */ "./node_modules/bn.js/lib/bn.js");
-var inherits = __webpack_require__(/*! inherits */ "./node_modules/elliptic/node_modules/inherits/inherits_browser.js");
+var inherits = __webpack_require__(/*! inherits */ "./node_modules/inherits/inherits_browser.js");
 var Base = __webpack_require__(/*! ./base */ "./node_modules/elliptic/lib/elliptic/curve/base.js");
 
 var assert = utils.assert;
@@ -21976,7 +21976,7 @@ curve.edwards = __webpack_require__(/*! ./edwards */ "./node_modules/elliptic/li
 
 
 var BN = __webpack_require__(/*! bn.js */ "./node_modules/bn.js/lib/bn.js");
-var inherits = __webpack_require__(/*! inherits */ "./node_modules/elliptic/node_modules/inherits/inherits_browser.js");
+var inherits = __webpack_require__(/*! inherits */ "./node_modules/inherits/inherits_browser.js");
 var Base = __webpack_require__(/*! ./base */ "./node_modules/elliptic/lib/elliptic/curve/base.js");
 
 var utils = __webpack_require__(/*! ../utils */ "./node_modules/elliptic/lib/elliptic/utils.js");
@@ -22166,7 +22166,7 @@ Point.prototype.getX = function getX() {
 
 var utils = __webpack_require__(/*! ../utils */ "./node_modules/elliptic/lib/elliptic/utils.js");
 var BN = __webpack_require__(/*! bn.js */ "./node_modules/bn.js/lib/bn.js");
-var inherits = __webpack_require__(/*! inherits */ "./node_modules/elliptic/node_modules/inherits/inherits_browser.js");
+var inherits = __webpack_require__(/*! inherits */ "./node_modules/inherits/inherits_browser.js");
 var Base = __webpack_require__(/*! ./base */ "./node_modules/elliptic/lib/elliptic/curve/base.js");
 
 var assert = utils.assert;
@@ -25115,43 +25115,6 @@ utils.intFromLE = intFromLE;
 
 /***/ }),
 
-/***/ "./node_modules/elliptic/node_modules/inherits/inherits_browser.js":
-/*!*************************************************************************!*\
-  !*** ./node_modules/elliptic/node_modules/inherits/inherits_browser.js ***!
-  \*************************************************************************/
-/***/ ((module) => {
-
-if (typeof Object.create === 'function') {
-  // implementation from standard node.js 'util' module
-  module.exports = function inherits(ctor, superCtor) {
-    if (superCtor) {
-      ctor.super_ = superCtor
-      ctor.prototype = Object.create(superCtor.prototype, {
-        constructor: {
-          value: ctor,
-          enumerable: false,
-          writable: true,
-          configurable: true
-        }
-      })
-    }
-  };
-} else {
-  // old school shim for old browsers
-  module.exports = function inherits(ctor, superCtor) {
-    if (superCtor) {
-      ctor.super_ = superCtor
-      var TempCtor = function () {}
-      TempCtor.prototype = superCtor.prototype
-      ctor.prototype = new TempCtor()
-      ctor.prototype.constructor = ctor
-    }
-  }
-}
-
-
-/***/ }),
-
 /***/ "./node_modules/hash.js/lib/hash.js":
 /*!******************************************!*\
   !*** ./node_modules/hash.js/lib/hash.js ***!
@@ -27041,24 +27004,28 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
-    ctor.super_ = superCtor
-    ctor.prototype = Object.create(superCtor.prototype, {
-      constructor: {
-        value: ctor,
-        enumerable: false,
-        writable: true,
-        configurable: true
-      }
-    });
+    if (superCtor) {
+      ctor.super_ = superCtor
+      ctor.prototype = Object.create(superCtor.prototype, {
+        constructor: {
+          value: ctor,
+          enumerable: false,
+          writable: true,
+          configurable: true
+        }
+      })
+    }
   };
 } else {
   // old school shim for old browsers
   module.exports = function inherits(ctor, superCtor) {
-    ctor.super_ = superCtor
-    var TempCtor = function () {}
-    TempCtor.prototype = superCtor.prototype
-    ctor.prototype = new TempCtor()
-    ctor.prototype.constructor = ctor
+    if (superCtor) {
+      ctor.super_ = superCtor
+      var TempCtor = function () {}
+      TempCtor.prototype = superCtor.prototype
+      ctor.prototype = new TempCtor()
+      ctor.prototype.constructor = ctor
+    }
   }
 }
 
@@ -63697,6 +63664,7 @@ const App = () => {
     const [isLoaded, setIsLoaded] = (0, react_1.useState)(true);
     const [isAuthenticated, setIsAuthenticated] = (0, react_1.useState)(false);
     const [loginAttempted, setLoginAttempted] = (0, react_1.useState)(false);
+    const [submissionsMade, setSubmissionsMade] = (0, react_1.useState)(0);
     // login function used when Authenticating the client (aka user)
     (0, react_1.useEffect)(() => {
         auth_client_1.AuthClient.create().then(async (client) => {
@@ -63728,7 +63696,9 @@ const App = () => {
             setIsLoaded,
             loginAttempted,
             setLoginAttempted,
-            isAuthenticated
+            isAuthenticated,
+            submissionsMade,
+            setSubmissionsMade
         } },
         isLoaded &&
             isAuthenticated ?
@@ -63739,52 +63709,6 @@ const App = () => {
 };
 exports["default"] = App;
 //This is a test
-
-
-/***/ }),
-
-/***/ "./src/dtc_assets/src/Components/CreateJournal.jsx":
-/*!*********************************************************!*\
-  !*** ./src/dtc_assets/src/Components/CreateJournal.jsx ***!
-  \*********************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const react_1 = __importStar(__webpack_require__(/*! react */ "./node_modules/react/index.js"));
-const App_1 = __webpack_require__(/*! ../App */ "./src/dtc_assets/src/App.jsx");
-const CreateJournal = (props) => {
-    const { authClient, actor, setIsLoaded } = (0, react_1.useContext)(App_1.AppContext);
-    const createUserJournal = () => {
-        console.log("Client: ", authClient);
-        actor.create({ userName: "JesseTheGreat" }).then((result) => {
-            console.log(result);
-        });
-    };
-    return (react_1.default.createElement("div", null,
-        react_1.default.createElement("button", { onClick: createUserJournal }, " Create Journal ")));
-};
-exports["default"] = CreateJournal;
 
 
 /***/ }),
@@ -64034,16 +63958,35 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const JournalPage_1 = __importDefault(__webpack_require__(/*! ./JournalPage */ "./src/dtc_assets/src/Components/JournalPage.jsx"));
 const react_1 = __importStar(__webpack_require__(/*! react */ "./node_modules/react/index.js"));
 const journalReducer_1 = __importStar(__webpack_require__(/*! ../reducers/journalReducer */ "./src/dtc_assets/src/reducers/journalReducer.jsx"));
+const journalPageMappers_1 = __webpack_require__(/*! ../mappers/journalPageMappers */ "./src/dtc_assets/src/mappers/journalPageMappers.jsx");
 __webpack_require__(/*! ./Journal.scss */ "./src/dtc_assets/src/Components/Journal.scss");
 const App_1 = __webpack_require__(/*! ../App */ "./src/dtc_assets/src/App.jsx");
 const InputBox_1 = __importDefault(__webpack_require__(/*! ./Fields/InputBox */ "./src/dtc_assets/src/Components/Fields/InputBox.jsx"));
-const CreateJournal_1 = __importDefault(__webpack_require__(/*! ../Components/CreateJournal */ "./src/dtc_assets/src/Components/CreateJournal.jsx"));
 const Journal = (props) => {
     const [journalState, dispatch] = (0, react_1.useReducer)(journalReducer_1.default, journalReducer_1.initialState);
     const [pageIsVisibleArray, setPageIsVisibleArray] = (0, react_1.useState)(journalState.journal.map((page) => false));
     const [newPageAdded, setNewPageAdded] = (0, react_1.useState)(false);
-    const { actor, authClient, setIsLoaded, isAuthenticated } = (0, react_1.useContext)(App_1.AppContext);
-    const [hasJournal, setHasJournal] = (0, react_1.useState)(false);
+    const [journalSize, setJournalSize] = (0, react_1.useState)(0);
+    const { actor, authClient, setIsLoaded, setSubmissionsMade, submissionsMade } = (0, react_1.useContext)(App_1.AppContext);
+    (0, react_1.useEffect)(async () => {
+        let journal = await actor.readJournal();
+        console.log(journal);
+        if ("err" in journal) {
+            actor.create({ userName: "Default" }).then((result) => {
+                console.log(result);
+            });
+        }
+        else {
+            journal = journal.ok[0].map((arrayWithKeyAndPage) => {
+                return (0, journalPageMappers_1.mapApiObjectToFrontEndObject)(arrayWithKeyAndPage[1]);
+            });
+            setJournalSize(journal.length);
+            dispatch({
+                payload: journal,
+                actionType: journalReducer_1.types.SET_JOURNAL
+            });
+        }
+    }, [actor, submissionsMade, authClient]);
     (0, react_1.useEffect)(() => {
         setPageIsVisibleArray(journalState.journal.map((page, index) => {
             if ((index === journalState.journal.length - 1) && newPageAdded) {
@@ -64055,14 +63998,6 @@ const Journal = (props) => {
             }
         }));
     }, [journalState.journal.length]);
-    (0, react_1.useEffect)(async () => {
-        const result = await actor.readJournal();
-        if ("ok" in result) {
-            setHasJournal(true);
-        }
-        ;
-        console.log(result);
-    }, [authClient]);
     const displayJournalTable = () => {
         const openPage = (e, index) => {
             setPageIsVisibleArray(pageIsVisibleArray.map((page, mapIndex) => {
@@ -64114,17 +64049,14 @@ const Journal = (props) => {
         }));
     };
     return (react_1.default.createElement(react_1.default.Fragment, null,
-        hasJournal &&
-            react_1.default.createElement("div", null,
-                (getIndexOfVisiblePage() < 0) ?
-                    displayJournalTable() :
-                    react_1.default.createElement(JournalPage_1.default, { closePage: closePage, index: getIndexOfVisiblePage(), journalPageData: journalState.journal[getIndexOfVisiblePage()], journalReducerDispatchFunction: dispatch }),
-                react_1.default.createElement("button", { className: 'loginButtonDiv', onClick: async () => {
-                        await authClient.logout();
-                        setIsLoaded(false);
-                    } }, " Log Out ")),
-        !hasJournal &&
-            react_1.default.createElement(CreateJournal_1.default, null)));
+        react_1.default.createElement("div", null,
+            (getIndexOfVisiblePage() < 0) ?
+                displayJournalTable() :
+                react_1.default.createElement(JournalPage_1.default, { journalSize: journalSize, closePage: closePage, index: getIndexOfVisiblePage(), journalPageData: journalState.journal[getIndexOfVisiblePage()], journalReducerDispatchFunction: dispatch }),
+            react_1.default.createElement("button", { className: 'loginButtonDiv', onClick: async () => {
+                    await authClient.logout();
+                    setIsLoaded(false);
+                } }, " Log Out "))));
 };
 exports["default"] = Journal;
 
@@ -64173,8 +64105,8 @@ const CHUNK_SIZE = 1024 * 1024;
 const JournalPage = (props) => {
     const [file1, setFile1] = (0, react_1.useState)(null);
     const [file2, setFile2] = (0, react_1.useState)(null);
-    const { journalReducerDispatchFunction, index, journalPageData, closePage } = props;
-    const { actor } = (0, react_1.useContext)(App_1.AppContext);
+    const { journalReducerDispatchFunction, index, journalPageData, journalSize, closePage } = props;
+    const { actor, setSubmissionsMade, submissionsMade } = (0, react_1.useContext)(App_1.AppContext);
     (0, react_1.useEffect)(async () => {
         await actor.readJournal();
     }, [actor, file1, file2]);
@@ -64187,14 +64119,10 @@ const JournalPage = (props) => {
                 text: journalEntry.entry,
                 location: journalEntry.location,
                 date: journalEntry.date,
-                lockTime: journalEntry.lockTime,
-                timeTillUnlock: journalEntry.timeTillUnlock
+                lockTime: journalEntry.lockTime
             }];
-        const entryKeyAsApiObject = (entryKey) ? [{ entryKey: entryKey }] : [];
-        console.log(entryAsApiObject);
-        actor.updateJournalEntry(entryKeyAsApiObject, entryAsApiObject).then((result) => {
-            console.log(result);
-        });
+        const entryKeyAsApiObject = (entryKey >= 0 && entryKey < journalSize) ? [{ entryKey: entryKey }] : [];
+        actor.updateJournalEntry(entryKeyAsApiObject, entryAsApiObject);
     };
     const mapAndSendFileToApi = async (fileId, file) => {
         const fileSize = file.size;
@@ -64211,10 +64139,10 @@ const JournalPage = (props) => {
         }
         ;
         const results = await Promise.all(promises);
-        console.log("results: ", results);
     };
     const handleSubmit = (0, react_1.useCallback)(async () => {
-        await mapAndSendEntryToApi(null, journalPageData);
+        await mapAndSendEntryToApi(index, journalPageData);
+        setSubmissionsMade(submissionsMade + 1);
         console.log('Reading Journal: ', await actor.readJournal());
         // await mapAndSendFileToApi("test1", file1);
         // await mapAndSendFileToApi("test2", file2);
@@ -64395,6 +64323,56 @@ ReactDOM.render(React.createElement(react_redux_1.Provider, { store: store },
 
 /***/ }),
 
+/***/ "./src/dtc_assets/src/mappers/journalPageMappers.jsx":
+/*!***********************************************************!*\
+  !*** ./src/dtc_assets/src/mappers/journalPageMappers.jsx ***!
+  \***********************************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.mapApiObjectToFrontEndObject = exports.mapAndSendJournalPageRequestToApi = void 0;
+const mapAndSendJournalPageRequestToApi = async (key, pageData, files, actor) => {
+    const [currentChunkIndex, setCurrentChunkIndex] = useState(0);
+    let blob1;
+    let blob2;
+    await files.file1.arrayBuffer().then((arrayBuffer) => {
+        blob1 = new Blob([...new Uint8Array(arrayBuffer)], { type: files.file1.type });
+    });
+    await files.file2.arrayBuffer().then((arrayBuffer) => {
+        blob2 = new Blob([...new Uint8Array(arrayBuffer)], { type: files.file2.type });
+    });
+    const journalEntry = {
+        date: pageData.date,
+        text: pageData.entry,
+        lockTime: pageData.lockTime * 2.592 * 10 ** 15,
+        timeTillUnlock: pageData.lockTime * 2.592 * 10 ** 15,
+        location: pageData.location,
+        entryTitle: "test"
+    };
+    const entry = (journalEntry, { file1: blob1, file2: blob2 });
+    const entryKey = (key) ? { entryKey: key } : [];
+    console.log(entry);
+    await actor.updateJournal(entryKey, entry).then((result) => {
+        console.log(result);
+    });
+};
+exports.mapAndSendJournalPageRequestToApi = mapAndSendJournalPageRequestToApi;
+const mapApiObjectToFrontEndObject = (backEndObj) => {
+    return {
+        date: backEndObj.date,
+        title: backEndObj.entryTitle,
+        location: backEndObj.location,
+        lockTime: backEndObj.lockTime,
+        entry: backEndObj.text
+    };
+};
+exports.mapApiObjectToFrontEndObject = mapApiObjectToFrontEndObject;
+
+
+/***/ }),
+
 /***/ "./src/dtc_assets/src/middleware/logger.jsx":
 /*!**************************************************!*\
   !*** ./src/dtc_assets/src/middleware/logger.jsx ***!
@@ -64428,6 +64406,7 @@ exports["default"] = logger;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.initialState = exports.types = void 0;
 exports.types = {
+    SET_JOURNAL: "SET_JOURNAL",
     CHANGE_DATE: "CHANGE_DATE",
     CHANGE_LOCATION: "CHANGE_LOCATION",
     CHANGE_ENTRY: "CHANGE_ENTRY",
@@ -64450,39 +64429,35 @@ exports.initialState = {
     },
     journal: [
         {
-            date: 0,
-            title: '',
-            location: 'test',
-            entry: '',
-            lockTime: 0,
-            timeTillUnlock: 0
-        },
-        {
-            date: 0,
-            title: '',
-            location: 'test',
-            entry: '',
-            lockTime: 0,
-            timeTillUnlock: 0
+            date: '',
+            title: 'Loading...',
+            location: 'Loading...',
+            entry: 'Loading...',
+            lockTime: '3'
         }
     ]
 };
 const freshPage = {
-    date: 0,
-    title: 'test',
-    location: 'test',
+    date: '',
+    title: '',
+    location: '',
     entry: '',
-    lockTime: 0,
-    timeTillUnlock: 0
+    lockTime: '3',
+    timeTillUnlock: '0'
 };
 const changeValue = (state = exports.initialState, action) => {
     const { actionType, payload, index } = action;
     let updatedJournalPage;
     switch (actionType) {
+        case exports.types.SET_JOURNAL:
+            state.journal = payload;
+            return {
+                ...state
+            };
         case exports.types.CHANGE_DATE:
             updatedJournalPage = {
                 ...state.journal[index],
-                date: parseInt(payload)
+                date: payload
             };
             state.journal[index] = updatedJournalPage;
             return {
@@ -64518,7 +64493,7 @@ const changeValue = (state = exports.initialState, action) => {
         case exports.types.CHANGE_LOCK_TIME:
             updatedJournalPage = {
                 ...state.journal[index],
-                lockTime: parseInt(payload)
+                lockTime: payload
             };
             state.journal[index] = updatedJournalPage;
             return {
@@ -67030,10 +67005,9 @@ const idlFactory = ({ IDL }) => {
   const Result = IDL.Variant({ 'ok' : IDL.Null, 'err' : Error });
   const EntryKey = IDL.Record({ 'entryKey' : IDL.Nat });
   const JournalEntry = IDL.Record({
-    'date' : IDL.Int,
+    'date' : IDL.Text,
     'text' : IDL.Text,
-    'timeTillUnlock' : IDL.Int,
-    'lockTime' : IDL.Int,
+    'lockTime' : IDL.Text,
     'location' : IDL.Text,
     'entryTitle' : IDL.Text,
   });
@@ -67110,7 +67084,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 // CANISTER_ID is replaced by webpack based on node environment
-const canisterId = "r7inp-6aaaa-aaaaa-aaabq-cai";
+const canisterId = "wxns6-qiaaa-aaaaa-aaaqa-cai";
 
 /**
  * 

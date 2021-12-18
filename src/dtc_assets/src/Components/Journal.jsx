@@ -1,6 +1,7 @@
 import JournalPage from "./JournalPage";
 import React, {useEffect, useReducer, useState, useContext } from "react";
 import journalReducer, {initialState, types} from "../reducers/journalReducer";
+import { mapApiObjectToFrontEndObject } from "../mappers/journalPageMappers";
 import "./Journal.scss";
 import { AppContext } from "../App";
 import InputBox from "./Fields/InputBox";
@@ -12,6 +13,7 @@ const Journal = (props) => {
     const [journalState, dispatch] = useReducer(journalReducer, initialState);
     const [pageIsVisibleArray, setPageIsVisibleArray] = useState(journalState.journal.map((page) => false));
     const [newPageAdded, setNewPageAdded] = useState(false);
+    const [journalSize, setJournalSize] = useState(0);
     const {actor, authClient, setIsLoaded, setSubmissionsMade, submissionsMade} = useContext(AppContext);
 
     useEffect(async () => {
@@ -23,8 +25,9 @@ const Journal = (props) => {
             });
         } else {
             journal = journal.ok[0].map((arrayWithKeyAndPage) => {
-                return arrayWithKeyAndPage[1]
+                return mapApiObjectToFrontEndObject(arrayWithKeyAndPage[1]);
             });
+            setJournalSize(journal.length);
             dispatch({
                 payload: journal,
                 actionType: types.SET_JOURNAL
@@ -147,6 +150,7 @@ const Journal = (props) => {
                 { (getIndexOfVisiblePage() < 0) ? 
                     displayJournalTable() : 
                     <JournalPage
+                    journalSize={journalSize}
                     closePage={closePage}
                     index={getIndexOfVisiblePage()}
                     journalPageData={journalState.journal[getIndexOfVisiblePage()]}

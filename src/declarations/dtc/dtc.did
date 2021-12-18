@@ -66,12 +66,11 @@ type Key =
  };
 type JournalEntry = 
  record {
-   date: int;
+   date: text;
    entryTitle: text;
    location: text;
-   lockTime: int;
+   lockTime: text;
    "text": text;
-   timeTillUnlock: int;
  };
 type Hash = nat32;
 type Error = 
