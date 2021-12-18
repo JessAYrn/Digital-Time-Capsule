@@ -17,10 +17,9 @@ export type Error = { 'NotFound' : null } |
   { 'NoInputGiven' : null };
 export type Hash = number;
 export interface JournalEntry {
-  'date' : bigint,
+  'date' : string,
   'text' : string,
-  'timeTillUnlock' : bigint,
-  'lockTime' : bigint,
+  'lockTime' : string,
   'location' : string,
   'entryTitle' : string,
 }

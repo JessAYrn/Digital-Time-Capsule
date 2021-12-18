@@ -36,9 +36,8 @@ actor class User(){
         entryTitle: Text;
         text: Text;
         location: Text;
-        date: Int;
-        lockTime: Int;
-        timeTillUnlock: Int;
+        date: Text;
+        lockTime: Text;
     };
 
     type Bio = {

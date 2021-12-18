@@ -18,9 +18,8 @@ shared(msg) actor class Journal (principal : Principal){
         entryTitle: Text;
         text: Text;
         location: Text;
-        date: Int;
-        lockTime: Int;
-        timeTillUnlock: Int;
+        date: Text;
+        lockTime: Text;
     }; 
 
     type JournalFile = {
@@ -63,7 +62,7 @@ shared(msg) actor class Journal (principal : Principal){
         biography = "";
     };
 
-    private stable var numberOfJournalEntries : Nat = 0;
+    private stable var journalEntryIndex : Nat = 0;
 
     private var capacity = 1000000000000000000;
 
@@ -87,16 +86,17 @@ shared(msg) actor class Journal (principal : Principal){
     };
 
     public func createEntry( journalEntry : JournalEntry) : async Result.Result<Trie.Trie<Nat, JournalEntry>, Error> {
-        numberOfJournalEntries += 1;
         
         let (newJournal, oldJournal) = Trie.put(
             journal,
-            natKey(numberOfJournalEntries),
+            natKey(journalEntryIndex),
             Nat.equal,
             journalEntry
         );
 
         journal := newJournal;
+
+        journalEntryIndex += 1;
 
         #ok(journal);
             
