@@ -47,7 +47,7 @@ const Journal = (props) => {
         }));
     },[journalState.journal.length]);
 
-    const DisplayJournalTable = () => {
+    const displayJournalTable = () => {
 
         const openPage = (e, index) => {
             setPageIsVisibleArray(pageIsVisibleArray.map((page, mapIndex) => {
@@ -155,7 +155,7 @@ const Journal = (props) => {
         <React.Fragment>
             <div>
                 { (getIndexOfVisiblePage() < 0) ? 
-                    <DisplayJournalTable/> : 
+                    displayJournalTable() : 
                     <JournalPage
                     journalSize={journalSize}
                     closePage={closePage}
