@@ -20,14 +20,10 @@ const InputBox = (props) => {
     } = props;
 
     const onBlur = () => {
-        
         setDisabledOrEnabled("disabled");
-
-
     };
     const onFocus = () => {
         setDisabledOrEnabled("enabled");
-        
     };
 
     const onChnage = () => {

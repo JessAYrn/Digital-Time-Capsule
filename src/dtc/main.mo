@@ -43,10 +43,9 @@ actor class User(){
     type Bio = {
         name : Text;
         dob: Text;
-        birthPlace: Text;
-        siblings: Text;
-        children: Text;
-        biography: Text;
+        pob: Text;
+        dedications: Text;
+        preface: Text;
     };
 
     // This "Error" type is known as a varient. The attributes of varients are tagged with the hashtag and there is no need to specify the data type of the attribute because varients only attributes of a specific data type. 
@@ -173,6 +172,27 @@ actor class User(){
             };
         };
 
+    };
+
+    public shared(msg) func updateBio(bio: Bio) : async Result.Result<(), Error> {
+        let callerId = msg.caller;
+        
+        let result = Trie.find(
+            profiles,
+            key(callerId),
+            Principal.equal
+        );
+
+        switch(result){
+            case null{
+                #err(#NotAuthorized);
+            };
+            case (? existingJournal){
+                let journal = existingJournal.journal;
+                let status = await journal.updateBio(bio);
+                return status;
+            };
+        };
     };
 
     public shared(msg) func updateJournalEntry(entryKey : ?EntryKey, entry : ?JournalEntry) : async Result.Result<Trie.Trie<Nat,JournalEntry>, Error> {

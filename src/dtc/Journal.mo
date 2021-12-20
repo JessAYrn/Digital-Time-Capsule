@@ -34,10 +34,9 @@ shared(msg) actor class Journal (principal : Principal){
     type Bio = {
         name : Text;
         dob: Text;
-        birthPlace: Text;
-        siblings: Text;
-        children: Text;
-        biography: Text;
+        pob: Text;
+        dedications: Text;
+        preface: Text;
     };
 
 
@@ -56,10 +55,9 @@ shared(msg) actor class Journal (principal : Principal){
     private stable var biography : Bio = {
         name = "";
         dob = "";
-        birthPlace = "";
-        siblings = "";
-        children = "";
-        biography = "";
+        pob = "";
+        dedications = "";
+        preface = "";
     };
 
     private stable var journalEntryIndex : Nat = 0;
@@ -170,6 +168,11 @@ shared(msg) actor class Journal (principal : Principal){
                 #ok(existingFile);
             };
         };
+    };
+
+    public func updateBio(bio: Bio) : async Result.Result<(), Error>{
+        biography := bio;
+        #ok(());
     };
 
 

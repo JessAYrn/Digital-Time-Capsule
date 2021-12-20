@@ -117,6 +117,13 @@ const Journal = (props) => {
 
                 </div>
                 <table className={"table"}>
+                <tr className={"tableRow "}>
+                    <th className={"tableCell "}>DATE</th>
+                    <th className={"tableCell "}>LOCATION</th>
+                    <th className={"tableCell "}>LOCKTIME</th>
+                    <th className={"tableCell "}></th>
+
+                </tr>
                 { journalState.journal.map((page, index) => {
                     return(
                         <tr className={"tableRow "+index}>

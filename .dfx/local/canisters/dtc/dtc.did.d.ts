@@ -3,11 +3,10 @@ export interface AmountAccepted { 'accepted' : bigint }
 export type AssocList = [] | [[[Key, JournalEntry], List]];
 export interface Bio {
   'dob' : string,
+  'pob' : string,
+  'preface' : string,
   'name' : string,
-  'biography' : string,
-  'birthPlace' : string,
-  'siblings' : string,
-  'children' : string,
+  'dedications' : string,
 }
 export interface Branch { 'left' : Trie, 'size' : bigint, 'right' : Trie }
 export interface EntryKey { 'entryKey' : bigint }
@@ -50,6 +49,7 @@ export interface User {
   'delete' : () => Promise<Result>,
   'readEntry' : (arg_0: EntryKey) => Promise<Result_3>,
   'readJournal' : () => Promise<Result_2>,
+  'updateBio' : (arg_0: Bio) => Promise<Result>,
   'updateJournalEntry' : (
       arg_0: [] | [EntryKey],
       arg_1: [] | [JournalEntry],

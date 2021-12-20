@@ -22,11 +22,10 @@ export const idlFactory = ({ IDL }) => {
   const Result_3 = IDL.Variant({ 'ok' : JournalEntry, 'err' : Error });
   const Bio = IDL.Record({
     'dob' : IDL.Text,
+    'pob' : IDL.Text,
+    'preface' : IDL.Text,
     'name' : IDL.Text,
-    'biography' : IDL.Text,
-    'birthPlace' : IDL.Text,
-    'siblings' : IDL.Text,
-    'children' : IDL.Text,
+    'dedications' : IDL.Text,
   });
   const Result_2 = IDL.Variant({
     'ok' : IDL.Tuple(IDL.Vec(IDL.Tuple(IDL.Nat, JournalEntry)), Bio),
@@ -56,6 +55,7 @@ export const idlFactory = ({ IDL }) => {
     'delete' : IDL.Func([], [Result], []),
     'readEntry' : IDL.Func([EntryKey], [Result_3], []),
     'readJournal' : IDL.Func([], [Result_2], []),
+    'updateBio' : IDL.Func([Bio], [Result], []),
     'updateJournalEntry' : IDL.Func(
         [IDL.Opt(EntryKey), IDL.Opt(JournalEntry)],
         [Result_1],
