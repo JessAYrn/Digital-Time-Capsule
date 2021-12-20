@@ -1,5 +1,6 @@
 export const types = {
     SET_JOURNAL: "SET_JOURNAL",
+    SET_BIO: "SET_BIO",
     CHANGE_DATE: "CHANGE_DATE",
     CHANGE_LOCATION: "CHANGE_LOCATION",
     CHANGE_ENTRY: "CHANGE_ENTRY",
@@ -52,6 +53,11 @@ const changeValue = (state = initialState, action) => {
     switch (actionType){
         case types.SET_JOURNAL:
             state.journal = payload;
+            return {
+                ...state
+            }
+        case types.SET_BIO:
+            state.bio = payload;
             return {
                 ...state
             }

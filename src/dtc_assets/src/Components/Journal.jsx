@@ -17,19 +17,25 @@ const Journal = (props) => {
     const {actor, authClient, setIsLoaded, setSubmissionsMade, submissionsMade} = useContext(AppContext);
 
     useEffect(async () => {
-        let journal = await actor.readJournal();
+        const journal = await actor.readJournal();
         console.log(journal);
         if("err" in journal){
             actor.create({userName: "Default"}).then((result) => {
                 console.log(result);
             });
         } else {
-            journal = journal.ok[0].map((arrayWithKeyAndPage) => {
+            const journalEntries = journal.ok[0].map((arrayWithKeyAndPage) => {
                 return mapApiObjectToFrontEndObject(arrayWithKeyAndPage[1]);
             });
+            const journalBio = journal.ok[1];
+            
             setJournalSize(journal.length);
             dispatch({
-                payload: journal,
+                payload: journalBio,
+                actionType: types.SET_BIO
+            })
+            dispatch({
+                payload: journalEntries,
                 actionType: types.SET_JOURNAL
             })
         }
@@ -65,6 +71,17 @@ const Journal = (props) => {
             });
             setNewPageAdded(true);
             openPage(null, journalState.journal.length - 1);
+        }
+
+        const handleSubmit = async () => {
+            const result = await actor.updateBio({
+                dob: journalState.bio.dob,
+                pob: journalState.bio.pob,
+                name: journalState.bio.name,
+                dedications: journalState.bio.dedications,
+                preface: journalState.bio.preface
+            });
+            console.log(result);
         }
 
         return(
@@ -113,6 +130,9 @@ const Journal = (props) => {
                         dispatchAction={types.CHANGE_PREFACE}
                         value={journalState.bio.preface}
                     />
+                    </div>
+                    <div>
+                        <button type="submit" onClick={handleSubmit}> Submit </button>
                     </div>
 
                 </div>
