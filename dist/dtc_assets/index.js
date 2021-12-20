@@ -64027,16 +64027,22 @@ const Journal = (props) => {
                     react_1.default.createElement("img", { src: "dtc-logo-black.png", alt: "TDTC logo" })),
                 react_1.default.createElement("div", { className: 'prefaceDiv' },
                     react_1.default.createElement(InputBox_1.default, { divClassName: 'preface', label: "Preface: ", rows: "10", dispatch: dispatch, dispatchAction: journalReducer_1.types.CHANGE_PREFACE, value: journalState.bio.preface }))),
-            react_1.default.createElement("table", { className: "table" }, journalState.journal.map((page, index) => {
-                return (react_1.default.createElement("tr", { className: "tableRow " + index },
-                    react_1.default.createElement("td", { className: "tableCell " + index }, page.date),
-                    react_1.default.createElement("td", { className: "tableCell " + index }, page.location),
-                    react_1.default.createElement("td", { className: "tableCell " + index }, page.lockTime),
-                    react_1.default.createElement("td", { className: "tableCell " + index },
-                        " ",
-                        react_1.default.createElement("button", { onClick: (e) => openPage(e, index) }, " open "),
-                        " ")));
-            })),
+            react_1.default.createElement("table", { className: "table" },
+                react_1.default.createElement("tr", { className: "tableRow " },
+                    react_1.default.createElement("th", { className: "tableCell " }, "DATE"),
+                    react_1.default.createElement("th", { className: "tableCell " }, "LOCATION"),
+                    react_1.default.createElement("th", { className: "tableCell " }, "LOCKTIME"),
+                    react_1.default.createElement("th", { className: "tableCell " })),
+                journalState.journal.map((page, index) => {
+                    return (react_1.default.createElement("tr", { className: "tableRow " + index },
+                        react_1.default.createElement("td", { className: "tableCell " + index }, page.date),
+                        react_1.default.createElement("td", { className: "tableCell " + index }, page.location),
+                        react_1.default.createElement("td", { className: "tableCell " + index }, page.lockTime),
+                        react_1.default.createElement("td", { className: "tableCell " + index },
+                            " ",
+                            react_1.default.createElement("button", { onClick: (e) => openPage(e, index) }, " open "),
+                            " ")));
+                })),
             react_1.default.createElement("div", { className: 'addNewEntryButtonDiv' },
                 react_1.default.createElement("button", { className: 'addNewEntryButton', onClick: addJournalPage }, " Create New Entry "))));
     };
@@ -67014,11 +67020,10 @@ const idlFactory = ({ IDL }) => {
   const Result_3 = IDL.Variant({ 'ok' : JournalEntry, 'err' : Error });
   const Bio = IDL.Record({
     'dob' : IDL.Text,
+    'pob' : IDL.Text,
+    'preface' : IDL.Text,
     'name' : IDL.Text,
-    'biography' : IDL.Text,
-    'birthPlace' : IDL.Text,
-    'siblings' : IDL.Text,
-    'children' : IDL.Text,
+    'dedications' : IDL.Text,
   });
   const Result_2 = IDL.Variant({
     'ok' : IDL.Tuple(IDL.Vec(IDL.Tuple(IDL.Nat, JournalEntry)), Bio),
@@ -67048,6 +67053,7 @@ const idlFactory = ({ IDL }) => {
     'delete' : IDL.Func([], [Result], []),
     'readEntry' : IDL.Func([EntryKey], [Result_3], []),
     'readJournal' : IDL.Func([], [Result_2], []),
+    'updateBio' : IDL.Func([Bio], [Result], []),
     'updateJournalEntry' : IDL.Func(
         [IDL.Opt(EntryKey), IDL.Opt(JournalEntry)],
         [Result_1],
@@ -67084,7 +67090,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 // CANISTER_ID is replaced by webpack based on node environment
-const canisterId = "wxns6-qiaaa-aaaaa-aaaqa-cai";
+const canisterId = "xpeh5-6iaaa-aaaaa-aaaua-cai";
 
 /**
  * 

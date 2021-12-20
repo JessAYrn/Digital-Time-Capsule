@@ -5,6 +5,7 @@ type User =
    delete: () -> (Result);
    readEntry: (EntryKey) -> (Result_3);
    readJournal: () -> (Result_2);
+   updateBio: (Bio) -> (Result);
    updateJournalEntry: (opt EntryKey, opt JournalEntry) -> (Result_1);
    updateProfile: (ProfileInput) -> (Result);
  };
@@ -89,12 +90,11 @@ type Branch =
  };
 type Bio = 
  record {
-   biography: text;
-   birthPlace: text;
-   children: text;
+   dedications: text;
    dob: text;
    name: text;
-   siblings: text;
+   pob: text;
+   preface: text;
  };
 type AssocList = 
  opt record {
