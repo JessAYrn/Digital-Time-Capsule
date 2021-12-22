@@ -5,6 +5,7 @@ import { mapApiObjectToFrontEndObject } from "../mappers/journalPageMappers";
 import "./Journal.scss";
 import { AppContext } from "../App";
 import InputBox from "./Fields/InputBox";
+import SubcriptionPage from "./SubcriptionPage";
 
 
 
@@ -188,6 +189,10 @@ const Journal = (props) => {
                     setIsLoaded(false);
                 }} > Log Out </button>   
             </div>
+            <SubcriptionPage
+                journalState={journalState}
+                dispatch={dispatch}
+            />
         </React.Fragment>
     );
 
