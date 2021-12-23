@@ -123,39 +123,45 @@ const Journal = (props) => {
                         <img src="dtc-logo-black.png" alt="TDTC logo" />
                     </div>
                     <div className={'prefaceDiv'}>
-                    <InputBox
-                        divClassName={'preface'}
-                        label={"Preface: "}
-                        rows={"10"}
-                        dispatch={dispatch}
-                        dispatchAction={types.CHANGE_PREFACE}
-                        value={journalState.bio.preface}
-                    />
+                        <InputBox
+                            divClassName={'preface'}
+                            label={"Preface: "}
+                            rows={"21"}
+                            dispatch={dispatch}
+                            dispatchAction={types.CHANGE_PREFACE}
+                            value={journalState.bio.preface}
+                        />
+                    </div>
+                    <div className={'tableDiv'}>
+                        <table className={"tableHeader"}>
+                            <tr className={"tableRow "}>
+                                <th className={"tableCell "}>DATE</th>
+                                <th className={"tableCell "}>LOCATION</th>
+                                <th className={"tableCell "}>LOCKTIME</th>
+                                <th className={"tableCell "}></th>
+
+                            </tr>
+                        </table>
+                        <div class='scrollable'>
+                            <table className={"table"}>
+                                { journalState.journal.map((page, index) => {
+                                    return(
+                                        <tr className={"tableRow "+index}>
+                                            <td className={"tableCell "+index}>{page.date}</td>
+                                            <td className={"tableCell "+index}>{page.location}</td>
+                                            <td className={"tableCell "+index}>{page.lockTime}</td>
+                                            <td className={"tableCell "+index}> <button onClick={(e) => openPage(e, index)}> open </button> </td>
+                                        </tr>  
+                                    );
+                                }) }
+                            </table>
+                        </div>
                     </div>
                     <div>
                         <button type="submit" onClick={handleSubmit}> Submit </button>
                     </div>
 
                 </div>
-                <table className={"table"}>
-                <tr className={"tableRow "}>
-                    <th className={"tableCell "}>DATE</th>
-                    <th className={"tableCell "}>LOCATION</th>
-                    <th className={"tableCell "}>LOCKTIME</th>
-                    <th className={"tableCell "}></th>
-
-                </tr>
-                { journalState.journal.map((page, index) => {
-                    return(
-                        <tr className={"tableRow "+index}>
-                            <td className={"tableCell "+index}>{page.date}</td>
-                            <td className={"tableCell "+index}>{page.location}</td>
-                            <td className={"tableCell "+index}>{page.lockTime}</td>
-                            <td className={"tableCell "+index}> <button onClick={(e) => openPage(e, index)}> open </button> </td>
-                        </tr>  
-                    );
-                }) }
-                </table>
                 <div className={'addNewEntryButtonDiv'}>
                     <button className={'addNewEntryButton'} onClick={addJournalPage}> Create New Entry </button>
                 </div>

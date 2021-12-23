@@ -1,19 +1,52 @@
-.table{
-  font-family: 'Julius Sans One', sans-serif;
-  font-size: 1rem;
-  color: rgb(122, 122, 122);
-  border-collapse: collapse;
-  width: 100%;
-  .tableRow{
-    border-bottom: solid rgb(122, 122, 122) .5px;
+.tableDiv{
+  width: 55%;
+  float: left;
+  border: solid 1px;
+  border-radius: 10px;
+  margin-top: 60px;
+  .tableHeader{
+    font-family: 'Julius Sans One', sans-serif;
+    font-size: 1rem;
+    color: rgb(122, 122, 122);
+    border-collapse: collapse;
     width: 100%;
-    padding-bottom: .5rem;
-    .tableCell{
-      text-align: center;
-      padding: 0.5rem;
+    .tableRow{
+      border-bottom: solid rgb(122, 122, 122) .5px;
+      width: 100%;
+      padding-bottom: .5rem;
+      .tableCell{
+        width: 25%;
+        text-align: center;
+        padding: 0.5rem;
+      }
     }
   }
+  .scrollable{
+    height: 328px; /* or any value */
+    overflow-y: auto;
+    width: 100%;
+    .table{
+      font-family: 'Julius Sans One', sans-serif;
+      font-size: 1rem;
+      color: rgb(122, 122, 122);
+      border-collapse: collapse;
+      width: 100%;
+      .tableRow{
+        border-bottom: solid rgb(122, 122, 122) .5px;
+        width: 100%;
+        padding-bottom: .5rem;
+        .tableCell{
+          width: 25%;
+          text-align: center;
+          padding: 0.5rem;
+        }
+      }
+    }
+
+  }
+
 }
+
 
 .addNewEntryButtonDiv{
   width: 50%;
@@ -36,10 +69,12 @@
           
           .enabled{
             border-width: 1px 1px 1px !important;
+            border-radius: 10px;
           }
         
           .disabled{
               border-width: 1px 1px 1px !important;
+              border-radius: 10px;
           }
           
           
@@ -54,16 +89,20 @@
 
     .prefaceDiv{
       margin-top: 2rem;
-      width: 100%;
+      margin-right: 5%;
+      width: 33%;
+      float: left;
       .inputBox{
         .input-element-div__preface{
           
           .enabled{
             border-width: 1px 1px 1px !important;
+            border-radius: 10px;
           }
         
           .disabled{
               border-width: 1px 1px 1px !important;
+              border-radius: 10px;
           }
           
           
