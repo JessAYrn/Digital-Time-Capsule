@@ -11,7 +11,8 @@ export const types = {
     CHANGE_PREFACE: "CHANGE_PREFACE",
     CHANGE_DEDICATIONS: "CHANGE_DEDICATIONS",
     CHANGE_NAME: "CHANGE_NAME",
-    CHANGE_ENTRY_TITLE: "CHANGE_ENTRY_TITLE"
+    CHANGE_ENTRY_TITLE: "CHANGE_ENTRY_TITLE",
+    CHANGE_EMAIL: "CHANGE_EMAIL"
 }
 
 export const initialState = {
@@ -20,7 +21,8 @@ export const initialState = {
         dob: '',
         pob: '',
         dedications: '',
-        preface:''
+        preface:'',
+        email: ''
     },
     journal: [
         {
@@ -59,6 +61,14 @@ const changeValue = (state = initialState, action) => {
         case types.SET_BIO:
             state.bio = payload;
             return {
+                ...state
+            }
+        case types.CHANGE_EMAIL:
+            state.bio = {
+                ...state.bio,
+                email: payload
+            }
+            return{
                 ...state
             }
         case types.CHANGE_DATE:
