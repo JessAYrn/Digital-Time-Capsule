@@ -52,6 +52,53 @@ const SubcriptionPage = (props) => {
 
     }; 
 
+    const handleSubmitSub = async (e) => {
+
+        if(!stripe || ! elements){
+            return;
+        }
+
+        const result = await stripe.createPaymentMethod({
+            type: 'card',
+            card: elements.getElement(CardElement),
+            billing_details: {
+                email: journalState.bio.email
+            }
+        });
+
+        if(result.error){
+            console.log(result.error.message);
+        } else {
+            const res = await axios.post(
+                'https://6717drw5l0.execute-api.us-east-2.amazonaws.com/sub',
+                {
+                    payment_method: result.paymentMethod.id,
+                    email: journalState.bio.email
+                }
+            );
+    
+            console.log(res.data);
+    
+            const {client_secret, status} = res.data;
+    
+            if(status === 'requires_action'){
+                stripe.confirmCardPayment(client_secret).then((result) => {
+                    if(result.error){
+                        console.log('There was an issue');
+                        console.log(result.error);
+                    } else {
+                        if(result.paymentIntent.status === 'succeeded'){
+                            console.log('Money is in the Bank!');
+                        }
+                    }
+                });
+            } else {
+                console.log('Money in the Bank!');
+            }
+        }
+
+    }; 
+
 
 return(
     <div>
@@ -65,7 +112,7 @@ return(
         />
         <CardInput/>
         <div>
-            <button type="submit" onClick={handleSubmitPay}> Subscribe </button>
+            <button type="submit" onClick={handleSubmitSub}> Subscribe </button>
         </div>
     </div>
 )
