@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import {
-  BrowserRouter,
+  HashRouter,
   Routes,
   Route
 } from "react-router-dom";
@@ -18,11 +18,11 @@ const store = configureStore();
 
 ReactDOM.render(
 <Provider store={store}>
-    <BrowserRouter>
+    <HashRouter>
         <Routes>
             <Route path="/" element={<HomePage />}/>
             <Route path="/app" element={<App />}/>
         </Routes>
-    </BrowserRouter>
+    </HashRouter>
 </Provider>
 , document.getElementById('root'));
