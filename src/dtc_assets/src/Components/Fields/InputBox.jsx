@@ -4,7 +4,7 @@ import "./InputBox.scss";
 
 const InputBox = (props) => {
     const inputRef = useRef();
-    const [disabledOrEnabled,setDisabledOrEnabled] = useState("enabled");
+    const [disabledOrEnabled,setDisabledOrEnabled] = useState("disabled");
     const {
         label,
         maxLength,
