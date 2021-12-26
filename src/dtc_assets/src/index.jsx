@@ -8,6 +8,7 @@ import {
 } from "react-router-dom";
 import HomePage from './HomePage';
 import App from './App';
+import AccountPage from "./AccountPage"
 import configureStore from './configureStore';
 
 
@@ -22,6 +23,7 @@ ReactDOM.render(
         <Routes>
             <Route path="/" element={<HomePage />}/>
             <Route path="/app" element={<App />}/>
+            <Route path="/account" element={<AccountPage />}/>
         </Routes>
     </HashRouter>
 </Provider>

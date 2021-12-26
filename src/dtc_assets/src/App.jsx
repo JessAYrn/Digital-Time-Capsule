@@ -1,13 +1,10 @@
 import * as React from 'react';
 import { createContext, useState, useEffect} from 'react';
-import { Elements } from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
 import Journal from './Components/Journal';
 import {AuthClient} from "@dfinity/auth-client";
 import LoginPage from './Components/LoginPage';
 import { canisterId, createActor } from '../../declarations/dtc/index';
-
-const stripePromise = loadStripe('pk_test_51K9W1hL2dowpsXoJ9detXdiT0DOrp7ILxHf37TejyOHGrrEXwcdl71swxOHU2ejtSBt6d7DJF1ESBn6MyqxhhcCt00a5WsmPLu');
+import { UI_CONTEXTS } from './Contexts';
 
 export const AppContext = createContext({
     authClient: {}, 
@@ -54,8 +51,7 @@ const App = () => {
     }, [authClient]);
 
     return (
-        <Elements stripe={stripePromise}>
-            <AppContext.Provider 
+        <AppContext.Provider 
             value={{
                 authClient, 
                 setAuthClient, 
@@ -75,7 +71,9 @@ const App = () => {
                 isLoaded &&
                     isAuthenticated ? 
                     <Journal/> : 
-                    <LoginPage/> 
+                    <LoginPage
+                        context={UI_CONTEXTS.JOURNAL}
+                    /> 
             }
             {
                 !isLoaded && 
@@ -83,7 +81,6 @@ const App = () => {
             }
 
         </AppContext.Provider>
-        </Elements>
     )
 }
 
