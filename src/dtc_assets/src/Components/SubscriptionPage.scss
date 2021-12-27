@@ -1,0 +1,35 @@
+.subscriptionSectionContainer{
+    width: 66%;
+    border: solid 1px black;
+    border-radius: 10px;
+    margin-left: 17%;
+    margin-top: 2.5rem;
+
+    .logoDiv{
+
+        border: solid;
+        border-width: 2px;
+        border-color: rgb(0, 0, 0);
+        background-color: rgb(233, 233, 233);
+        max-width: 50%;
+        height: 40rem;
+        margin-left:25%;
+        margin-top: 3.5rem;
+        margin-bottom: 3.5rem;
+
+        .subscriptionSection{
+            width: 90%;
+            margin-left: 5%;
+    
+            .subscribeButtonDiv{
+                width: 9%;
+                margin-left: 39%;
+                margin-bottom: 1rem;
+    
+                .subscriptionButton{
+                    border-radius: 10px;
+                }
+            }
+        }
+    }
+}
