@@ -149,7 +149,7 @@ const Journal = (props) => {
                                                 <td className={"tableCell "+index}>{page.date}</td>
                                                 <td className={"tableCell "+index}>{page.location}</td>
                                                 <td className={"tableCell "+index}>{page.lockTime}</td>
-                                                <td className={"tableCell "+index}> <button onClick={(e) => openPage(e, index)}> open </button> </td>
+                                                <td className={"tableCell "+index}> <button className={'openButton'} onClick={(e) => openPage(e, index)}> open </button> </td>
                                             </tr>  
                                         );
                                     }) }
