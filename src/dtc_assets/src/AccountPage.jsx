@@ -55,10 +55,6 @@ const AccountPage = (props) => {
 
     }, [authClient]);
 
-    console.log({
-        journalState
-    });
-
     return (
         <Elements stripe={stripePromise}>
             <AppContext.Provider 

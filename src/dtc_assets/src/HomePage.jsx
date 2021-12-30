@@ -1,8 +1,23 @@
 import React from 'react';
 import { Link } from "react-router-dom";
+import YouTube from 'react-youtube';
 import "./HomePage.scss";
 
+const getYoutubeId = require('get-youtube-id');
+
 const HomePage = () => {
+    const opts= {
+        height: 515,
+        width:925,
+        playerVars: {
+            autoplay: 1
+        }
+    };
+
+    const onready = () => {
+
+    };
+
 
     return (
         <div className="container">
@@ -14,7 +29,13 @@ const HomePage = () => {
                 </nav>
             </div>
             <div className="background center">
-                {/* <img style={}className={'homePageLogoImg'} src={"dtc-logo-black.png"} alt="Logo"/> */}
+                <div class={'scrollable'}>
+                    <div className={'transparentDiv'}>
+                        <div className={'carouselDiv'}>
+                            <YouTube videoId={'hiB8OCPxF40'} opts={opts} onReady={onready}/>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     );

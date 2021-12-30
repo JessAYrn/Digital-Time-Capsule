@@ -23817,7 +23817,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, ".StripeElement {\n  height: 40px;\n  padding: 10px 12px;\n  width: 100%;\n  color: \"#323225d\";\n  background-color: white;\n  border: 1px solid transparent;\n  border-radius: 4px;\n  box-shadow: 0 1px 3px 0 \"#e6ebf1\";\n  -webkit-transition: box-shadow 150ms ease;\n  transition: box-shadow 150ms ease;\n}\n\n.StripeElement--focus {\n  box-shadow: 0 1px 3px 0 \"#cfd7df\";\n}\n\n.StripeElement--invalid {\n  border-color: \"#fa755a\";\n}\n\n.StripeElement--webkit-autofill {\n  background-color: \"#fefde5\" !important;\n}", "",{"version":3,"sources":["webpack://./src/dtc_assets/src/Components/CardInput.scss"],"names":[],"mappings":"AAAA;EACI,YAAA;EACA,kBAAA;EACA,WAAA;EACA,iBAAA;EACA,uBAAA;EACA,6BAAA;EACA,kBAAA;EAEA,iCAAA;EACA,yCAAA;EACA,iCAAA;AAAJ;;AAIA;EACI,iCAAA;AADJ;;AAIA;EACI,uBAAA;AADJ;;AAIA;EACI,sCAAA;AADJ","sourcesContent":[".StripeElement{\n    height: 40px;\n    padding: 10px 12px;\n    width: 100%;\n    color: '#323225d';\n    background-color: white;\n    border: 1px solid transparent;\n    border-radius: 4px;\n\n    box-shadow: 0 1px 3px 0 '#e6ebf1';\n    -webkit-transition: box-shadow 150ms ease;\n    transition: box-shadow 150ms ease;\n\n}\n\n.StripeElement--focus {\n    box-shadow: 0 1px 3px 0 '#cfd7df'; \n}\n\n.StripeElement--invalid {\n    border-color: '#fa755a';\n}\n\n.StripeElement--webkit-autofill{\n    background-color: '#fefde5' !important;\n}\n\n"],"sourceRoot":""}]);
+___CSS_LOADER_EXPORT___.push([module.id, ".StripeElement {\n  height: 40px;\n  padding: 10px 12px;\n  width: 85%;\n  margin-top: 3rem;\n  color: \"#323225d\";\n  background-color: white;\n  border: 1px solid transparent;\n  border-radius: 10px;\n  box-shadow: 0 1px 3px 0 \"#e6ebf1\";\n  -webkit-transition: box-shadow 150ms ease;\n  transition: box-shadow 150ms ease;\n}\n\n.StripeElement--focus {\n  box-shadow: 0 1px 3px 0 \"#cfd7df\";\n}\n\n.StripeElement--invalid {\n  border-color: \"#fa755a\";\n}\n\n.StripeElement--webkit-autofill {\n  background-color: \"#fefde5\" !important;\n}", "",{"version":3,"sources":["webpack://./src/dtc_assets/src/Components/CardInput.scss"],"names":[],"mappings":"AAAA;EACI,YAAA;EACA,kBAAA;EACA,UAAA;EACA,gBAAA;EACA,iBAAA;EACA,uBAAA;EACA,6BAAA;EACA,mBAAA;EAEA,iCAAA;EACA,yCAAA;EACA,iCAAA;AAAJ;;AAIA;EACI,iCAAA;AADJ;;AAIA;EACI,uBAAA;AADJ;;AAIA;EACI,sCAAA;AADJ","sourcesContent":[".StripeElement{\n    height: 40px;\n    padding: 10px 12px;\n    width: 85%;\n    margin-top: 3rem;\n    color: '#323225d';\n    background-color: white;\n    border: 1px solid transparent;\n    border-radius: 10px;\n\n    box-shadow: 0 1px 3px 0 '#e6ebf1';\n    -webkit-transition: box-shadow 150ms ease;\n    transition: box-shadow 150ms ease;\n\n}\n\n.StripeElement--focus {\n    box-shadow: 0 1px 3px 0 '#cfd7df'; \n}\n\n.StripeElement--invalid {\n    border-color: '#fa755a';\n}\n\n.StripeElement--webkit-autofill{\n    background-color: '#fefde5' !important;\n}\n\n"],"sourceRoot":""}]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -23925,7 +23925,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, ".tableDivContainer {\n  width: 55%;\n  float: left;\n}\n.tableDivContainer .tableDiv {\n  width: 100%;\n  float: left;\n  border: solid 1px;\n  border-radius: 10px;\n  margin-top: 60px;\n}\n.tableDivContainer .tableDiv .tableHeader {\n  font-family: \"Julius Sans One\", sans-serif;\n  font-size: 1rem;\n  color: #7a7a7a;\n  border-collapse: collapse;\n  width: 100%;\n}\n.tableDivContainer .tableDiv .tableHeader .tableRow {\n  border-bottom: solid #7a7a7a 0.5px;\n  width: 100%;\n  padding-bottom: 0.5rem;\n}\n.tableDivContainer .tableDiv .tableHeader .tableRow .tableCell {\n  width: 25%;\n  text-align: center;\n  padding: 0.5rem;\n}\n.tableDivContainer .tableDiv .scrollable {\n  height: 328px;\n  /* or any value */\n  overflow-y: auto;\n  width: 100%;\n}\n.tableDivContainer .tableDiv .scrollable .table {\n  font-family: \"Julius Sans One\", sans-serif;\n  font-size: 1rem;\n  color: #7a7a7a;\n  border-collapse: collapse;\n  width: 100%;\n}\n.tableDivContainer .tableDiv .scrollable .table .tableRow {\n  border-bottom: solid #7a7a7a 0.5px;\n  width: 100%;\n  padding-bottom: 0.5rem;\n}\n.tableDivContainer .tableDiv .scrollable .table .tableRow .tableCell {\n  width: 25%;\n  text-align: center;\n  padding: 0.5rem;\n}\n.tableDivContainer .addNewEntryButtonDiv {\n  width: 50%;\n  margin-left: 24%;\n  float: left;\n}\n.tableDivContainer .addNewEntryButtonDiv .addNewEntryButton {\n  background-color: #e6e6e6;\n  border-radius: 25px;\n  border-color: #e6e6e6;\n  width: 100%;\n}\n\n.biographyDiv .section1 {\n  width: 33%;\n  float: left;\n  height: 22rem;\n}\n.biographyDiv .section1 .inputBox .input-element-div__dedications .enabled {\n  border-width: 1px 1px 1px !important;\n  border-radius: 10px;\n}\n.biographyDiv .section1 .inputBox .input-element-div__dedications .disabled {\n  border-width: 1px 1px 1px !important;\n  border-radius: 10px;\n}\n.biographyDiv .section2 {\n  width: 66%;\n  float: left;\n  height: 22rem;\n}\n.biographyDiv .prefaceDiv {\n  margin-top: 2rem;\n  margin-right: 5%;\n  width: 33%;\n  float: left;\n}\n.biographyDiv .prefaceDiv .inputBox .input-element-div__preface .enabled {\n  border-width: 1px 1px 1px !important;\n  border-radius: 10px;\n}\n.biographyDiv .prefaceDiv .inputBox .input-element-div__preface .disabled {\n  border-width: 1px 1px 1px !important;\n  border-radius: 10px;\n}", "",{"version":3,"sources":["webpack://./src/dtc_assets/src/Components/Journal.scss"],"names":[],"mappings":"AAAA;EACE,UAAA;EACE,WAAA;AACJ;AAAE;EACE,WAAA;EACA,WAAA;EACA,iBAAA;EACA,mBAAA;EACA,gBAAA;AAEJ;AADI;EACE,0CAAA;EACA,eAAA;EACA,cAAA;EACA,yBAAA;EACA,WAAA;AAGN;AAFM;EACE,kCAAA;EACA,WAAA;EACA,sBAAA;AAIR;AAHQ;EACE,UAAA;EACA,kBAAA;EACA,eAAA;AAKV;AADI;EACE,aAAA;EAAe,iBAAA;EACf,gBAAA;EACA,WAAA;AAIN;AAHM;EACE,0CAAA;EACA,eAAA;EACA,cAAA;EACA,yBAAA;EACA,WAAA;AAKR;AAJQ;EACE,kCAAA;EACA,WAAA;EACA,sBAAA;AAMV;AALU;EACE,UAAA;EACA,kBAAA;EACA,eAAA;AAOZ;AAEE;EACE,UAAA;EACA,gBAAA;EACA,WAAA;AAAJ;AACI;EACE,yBAAA;EACA,mBAAA;EACA,qBAAA;EACA,WAAA;AACN;;AAKI;EACE,UAAA;EACA,WAAA;EACA,aAAA;AAFN;AAMU;EACE,oCAAA;EACA,mBAAA;AAJZ;AAOU;EACI,oCAAA;EACA,mBAAA;AALd;AAYI;EACE,UAAA;EACA,WAAA;EACA,aAAA;AAVN;AAaI;EACE,gBAAA;EACA,gBAAA;EACA,UAAA;EACA,WAAA;AAXN;AAeU;EACE,oCAAA;EACA,mBAAA;AAbZ;AAgBU;EACI,oCAAA;EACA,mBAAA;AAdd","sourcesContent":[".tableDivContainer{\n  width: 55%;\n    float: left;\n  .tableDiv{\n    width: 100%;\n    float: left;\n    border: solid 1px;\n    border-radius: 10px;\n    margin-top: 60px;\n    .tableHeader{\n      font-family: 'Julius Sans One', sans-serif;\n      font-size: 1rem;\n      color: rgb(122, 122, 122);\n      border-collapse: collapse;\n      width: 100%;\n      .tableRow{\n        border-bottom: solid rgb(122, 122, 122) .5px;\n        width: 100%;\n        padding-bottom: .5rem;\n        .tableCell{\n          width: 25%;\n          text-align: center;\n          padding: 0.5rem;\n        }\n      }\n    }\n    .scrollable{\n      height: 328px; /* or any value */\n      overflow-y: auto;\n      width: 100%;\n      .table{\n        font-family: 'Julius Sans One', sans-serif;\n        font-size: 1rem;\n        color: rgb(122, 122, 122);\n        border-collapse: collapse;\n        width: 100%;\n        .tableRow{\n          border-bottom: solid rgb(122, 122, 122) .5px;\n          width: 100%;\n          padding-bottom: .5rem;\n          .tableCell{\n            width: 25%;\n            text-align: center;\n            padding: 0.5rem;\n          }\n        }\n      }\n  \n    }\n  \n  }\n\n  .addNewEntryButtonDiv{\n    width: 50%;\n    margin-left: 24%;\n    float: left;\n    .addNewEntryButton{\n      background-color: rgb(230, 230, 230);\n      border-radius: 25px;\n      border-color: rgb(230, 230, 230);\n      width: 100%;\n    }\n  }\n}\n\n.biographyDiv{\n    .section1{\n      width: 33%;\n      float: left;\n      height: 22rem;\n      .inputBox{\n        .input-element-div__dedications{\n          \n          .enabled{\n            border-width: 1px 1px 1px !important;\n            border-radius: 10px;\n          }\n        \n          .disabled{\n              border-width: 1px 1px 1px !important;\n              border-radius: 10px;\n          }\n          \n          \n        }\n      }\n    }\n    .section2{\n      width: 66%;\n      float: left;\n      height: 22rem;\n    }\n\n    .prefaceDiv{\n      margin-top: 2rem;\n      margin-right: 5%;\n      width: 33%;\n      float: left;\n      .inputBox{\n        .input-element-div__preface{\n          \n          .enabled{\n            border-width: 1px 1px 1px !important;\n            border-radius: 10px;\n          }\n        \n          .disabled{\n              border-width: 1px 1px 1px !important;\n              border-radius: 10px;\n          }\n          \n          \n        }\n      }\n    }\n  \n}"],"sourceRoot":""}]);
+___CSS_LOADER_EXPORT___.push([module.id, ".tableDivContainer {\n  width: 55%;\n  float: left;\n}\n.tableDivContainer .tableDiv {\n  width: 100%;\n  float: left;\n  border: solid 1px;\n  border-radius: 10px;\n  margin-top: 60px;\n}\n.tableDivContainer .tableDiv .tableHeader {\n  font-family: \"Julius Sans One\", sans-serif;\n  font-size: 1rem;\n  color: #7a7a7a;\n  border-collapse: collapse;\n  width: 100%;\n}\n.tableDivContainer .tableDiv .tableHeader .tableRow {\n  border-bottom: solid #7a7a7a 0.5px;\n  width: 100%;\n  padding-bottom: 0.5rem;\n}\n.tableDivContainer .tableDiv .tableHeader .tableRow .tableCell {\n  width: 25%;\n  text-align: center;\n  padding: 0.5rem;\n}\n.tableDivContainer .tableDiv .tableHeader .tableRow .tableCell .openButton {\n  border-radius: 10px;\n}\n.tableDivContainer .tableDiv .scrollable {\n  height: 328px;\n  /* or any value */\n  overflow-y: auto;\n  width: 100%;\n}\n.tableDivContainer .tableDiv .scrollable .table {\n  font-family: \"Julius Sans One\", sans-serif;\n  font-size: 1rem;\n  color: #7a7a7a;\n  border-collapse: collapse;\n  width: 100%;\n}\n.tableDivContainer .tableDiv .scrollable .table .tableRow {\n  border-bottom: solid #7a7a7a 0.5px;\n  width: 100%;\n  padding-bottom: 0.5rem;\n}\n.tableDivContainer .tableDiv .scrollable .table .tableRow .tableCell {\n  width: 25%;\n  text-align: center;\n  padding: 0.5rem;\n}\n.tableDivContainer .addNewEntryButtonDiv {\n  width: 50%;\n  margin-left: 24%;\n  float: left;\n}\n.tableDivContainer .addNewEntryButtonDiv .addNewEntryButton {\n  background-color: #e6e6e6;\n  border-radius: 25px;\n  border-color: #e6e6e6;\n  width: 100%;\n}\n\n.biographyDiv .section1 {\n  width: 33%;\n  float: left;\n  height: 22rem;\n}\n.biographyDiv .section1 .inputBox .input-element-div__dedications .enabled {\n  border-width: 1px 1px 1px !important;\n  border-radius: 10px;\n}\n.biographyDiv .section1 .inputBox .input-element-div__dedications .disabled {\n  border-width: 1px 1px 1px !important;\n  border-radius: 10px;\n}\n.biographyDiv .section2 {\n  width: 66%;\n  float: left;\n  height: 22rem;\n}\n.biographyDiv .prefaceDiv {\n  margin-top: 2rem;\n  margin-right: 5%;\n  width: 33%;\n  float: left;\n}\n.biographyDiv .prefaceDiv .inputBox .input-element-div__preface .enabled {\n  border-width: 1px 1px 1px !important;\n  border-radius: 10px;\n}\n.biographyDiv .prefaceDiv .inputBox .input-element-div__preface .disabled {\n  border-width: 1px 1px 1px !important;\n  border-radius: 10px;\n}", "",{"version":3,"sources":["webpack://./src/dtc_assets/src/Components/Journal.scss"],"names":[],"mappings":"AAAA;EACE,UAAA;EACE,WAAA;AACJ;AAAE;EACE,WAAA;EACA,WAAA;EACA,iBAAA;EACA,mBAAA;EACA,gBAAA;AAEJ;AADI;EACE,0CAAA;EACA,eAAA;EACA,cAAA;EACA,yBAAA;EACA,WAAA;AAGN;AAFM;EACE,kCAAA;EACA,WAAA;EACA,sBAAA;AAIR;AAHQ;EACE,UAAA;EACA,kBAAA;EACA,eAAA;AAKV;AAJU;EACE,mBAAA;AAMZ;AADI;EACE,aAAA;EAAe,iBAAA;EACf,gBAAA;EACA,WAAA;AAIN;AAHM;EACE,0CAAA;EACA,eAAA;EACA,cAAA;EACA,yBAAA;EACA,WAAA;AAKR;AAJQ;EACE,kCAAA;EACA,WAAA;EACA,sBAAA;AAMV;AALU;EACE,UAAA;EACA,kBAAA;EACA,eAAA;AAOZ;AAEE;EACE,UAAA;EACA,gBAAA;EACA,WAAA;AAAJ;AACI;EACE,yBAAA;EACA,mBAAA;EACA,qBAAA;EACA,WAAA;AACN;;AAKI;EACE,UAAA;EACA,WAAA;EACA,aAAA;AAFN;AAMU;EACE,oCAAA;EACA,mBAAA;AAJZ;AAOU;EACI,oCAAA;EACA,mBAAA;AALd;AAYI;EACE,UAAA;EACA,WAAA;EACA,aAAA;AAVN;AAaI;EACE,gBAAA;EACA,gBAAA;EACA,UAAA;EACA,WAAA;AAXN;AAeU;EACE,oCAAA;EACA,mBAAA;AAbZ;AAgBU;EACI,oCAAA;EACA,mBAAA;AAdd","sourcesContent":[".tableDivContainer{\n  width: 55%;\n    float: left;\n  .tableDiv{\n    width: 100%;\n    float: left;\n    border: solid 1px;\n    border-radius: 10px;\n    margin-top: 60px;\n    .tableHeader{\n      font-family: 'Julius Sans One', sans-serif;\n      font-size: 1rem;\n      color: rgb(122, 122, 122);\n      border-collapse: collapse;\n      width: 100%;\n      .tableRow{\n        border-bottom: solid rgb(122, 122, 122) .5px;\n        width: 100%;\n        padding-bottom: .5rem;\n        .tableCell{\n          width: 25%;\n          text-align: center;\n          padding: 0.5rem;\n          .openButton{\n            border-radius: 10px;\n          }\n        }\n      }\n    }\n    .scrollable{\n      height: 328px; /* or any value */\n      overflow-y: auto;\n      width: 100%;\n      .table{\n        font-family: 'Julius Sans One', sans-serif;\n        font-size: 1rem;\n        color: rgb(122, 122, 122);\n        border-collapse: collapse;\n        width: 100%;\n        .tableRow{\n          border-bottom: solid rgb(122, 122, 122) .5px;\n          width: 100%;\n          padding-bottom: .5rem;\n          .tableCell{\n            width: 25%;\n            text-align: center;\n            padding: 0.5rem;\n          }\n        }\n      }\n  \n    }\n  \n  }\n\n  .addNewEntryButtonDiv{\n    width: 50%;\n    margin-left: 24%;\n    float: left;\n    .addNewEntryButton{\n      background-color: rgb(230, 230, 230);\n      border-radius: 25px;\n      border-color: rgb(230, 230, 230);\n      width: 100%;\n    }\n  }\n}\n\n.biographyDiv{\n    .section1{\n      width: 33%;\n      float: left;\n      height: 22rem;\n      .inputBox{\n        .input-element-div__dedications{\n          \n          .enabled{\n            border-width: 1px 1px 1px !important;\n            border-radius: 10px;\n          }\n        \n          .disabled{\n              border-width: 1px 1px 1px !important;\n              border-radius: 10px;\n          }\n          \n          \n        }\n      }\n    }\n    .section2{\n      width: 66%;\n      float: left;\n      height: 22rem;\n    }\n\n    .prefaceDiv{\n      margin-top: 2rem;\n      margin-right: 5%;\n      width: 33%;\n      float: left;\n      .inputBox{\n        .input-element-div__preface{\n          \n          .enabled{\n            border-width: 1px 1px 1px !important;\n            border-radius: 10px;\n          }\n        \n          .disabled{\n              border-width: 1px 1px 1px !important;\n              border-radius: 10px;\n          }\n          \n          \n        }\n      }\n    }\n  \n}"],"sourceRoot":""}]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -23980,6 +23980,65 @@ __webpack_require__.r(__webpack_exports__);
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
 // Module
 ___CSS_LOADER_EXPORT___.push([module.id, ".loginPageDiv {\n  border: solid;\n  border-width: 2px;\n  border-color: black;\n  background-color: #e9e9e9;\n  max-width: 50%;\n  height: 40rem;\n  margin-left: 25%;\n  margin-top: 7rem;\n}\n.loginPageDiv .open {\n  max-width: 27%;\n  max-height: 10%;\n  border-radius: 25px;\n}\n.loginPageDiv .loginButtonDiv__open {\n  margin-left: 42.5%;\n  max-width: 27%;\n  max-height: 10%;\n  border-radius: 25px;\n}\n.loginPageDiv .loginButtonDiv__closed {\n  margin-left: 36.5%;\n  max-width: 27%;\n  max-height: 10%;\n  border-radius: 25px;\n}", "",{"version":3,"sources":["webpack://./src/dtc_assets/src/Components/LoginPage.scss"],"names":[],"mappings":"AAAA;EACI,aAAA;EACA,iBAAA;EACA,mBAAA;EACA,yBAAA;EACA,cAAA;EACA,aAAA;EACA,gBAAA;EACA,gBAAA;AACJ;AACI;EACI,cAAA;EACA,eAAA;EACA,mBAAA;AACR;AAGQ;EACI,kBAAA;EACA,cAAA;EACA,eAAA;EACA,mBAAA;AADZ;AAGQ;EACI,kBAAA;EACA,cAAA;EACA,eAAA;EACA,mBAAA;AADZ","sourcesContent":[".loginPageDiv{\n    border: solid;\n    border-width: 2px;\n    border-color: rgb(0, 0, 0);\n    background-color: rgb(233, 233, 233);\n    max-width: 50%;\n    height: 40rem;\n    margin-left:25%;\n    margin-top: 7rem;\n\n    .open{\n        max-width: 27%;\n        max-height: 10%;\n        border-radius: 25px;\n    }\n\n    .loginButtonDiv__{\n        &open{\n            margin-left: 42.5%;\n            max-width: 27%;\n            max-height: 10%;\n            border-radius: 25px;\n        }\n        &closed{\n            margin-left: 36.5%;\n            max-width: 27%;\n            max-height: 10%;\n            border-radius: 25px;\n        }\n    }\n}"],"sourceRoot":""}]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/dtc_assets/src/Components/SubscriptionPage.scss":
+/*!******************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/dtc_assets/src/Components/SubscriptionPage.scss ***!
+  \******************************************************************************************************************************************/
+/***/ ((module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../node_modules/css-loader/dist/runtime/sourceMaps.js */ "./node_modules/css-loader/dist/runtime/sourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, ".subscriptionSectionContainer {\n  width: 66%;\n  border: solid 1px black;\n  border-radius: 10px;\n  margin-left: 17%;\n  margin-top: 2.5rem;\n}\n.subscriptionSectionContainer .logoDiv {\n  border: solid;\n  border-width: 2px;\n  border-color: black;\n  background-color: #e9e9e9;\n  max-width: 50%;\n  height: 40rem;\n  margin-left: 25%;\n  margin-top: 3.5rem;\n  margin-bottom: 3.5rem;\n}\n.subscriptionSectionContainer .logoDiv .subscriptionSection {\n  width: 90%;\n  margin-left: 5%;\n}\n.subscriptionSectionContainer .logoDiv .subscriptionSection .subscribeButtonDiv {\n  width: 9%;\n  margin-left: 39%;\n  margin-bottom: 1rem;\n}\n.subscriptionSectionContainer .logoDiv .subscriptionSection .subscribeButtonDiv .subscriptionButton {\n  border-radius: 10px;\n}", "",{"version":3,"sources":["webpack://./src/dtc_assets/src/Components/SubscriptionPage.scss"],"names":[],"mappings":"AAAA;EACI,UAAA;EACA,uBAAA;EACA,mBAAA;EACA,gBAAA;EACA,kBAAA;AACJ;AACI;EAEI,aAAA;EACA,iBAAA;EACA,mBAAA;EACA,yBAAA;EACA,cAAA;EACA,aAAA;EACA,gBAAA;EACA,kBAAA;EACA,qBAAA;AAAR;AAEQ;EACI,UAAA;EACA,eAAA;AAAZ;AAEY;EACI,SAAA;EACA,gBAAA;EACA,mBAAA;AAAhB;AAEgB;EACI,mBAAA;AAApB","sourcesContent":[".subscriptionSectionContainer{\n    width: 66%;\n    border: solid 1px black;\n    border-radius: 10px;\n    margin-left: 17%;\n    margin-top: 2.5rem;\n\n    .logoDiv{\n\n        border: solid;\n        border-width: 2px;\n        border-color: rgb(0, 0, 0);\n        background-color: rgb(233, 233, 233);\n        max-width: 50%;\n        height: 40rem;\n        margin-left:25%;\n        margin-top: 3.5rem;\n        margin-bottom: 3.5rem;\n\n        .subscriptionSection{\n            width: 90%;\n            margin-left: 5%;\n    \n            .subscribeButtonDiv{\n                width: 9%;\n                margin-left: 39%;\n                margin-bottom: 1rem;\n    \n                .subscriptionButton{\n                    border-radius: 10px;\n                }\n            }\n        }\n    }\n}"],"sourceRoot":""}]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/dtc_assets/src/HomePage.scss":
+/*!***********************************************************************************************************************!*\
+  !*** ./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/dtc_assets/src/HomePage.scss ***!
+  \***********************************************************************************************************************/
+/***/ ((module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/sourceMaps.js */ "./node_modules/css-loader/dist/runtime/sourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_getUrl_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/getUrl.js */ "./node_modules/css-loader/dist/runtime/getUrl.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_getUrl_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_getUrl_js__WEBPACK_IMPORTED_MODULE_2__);
+// Imports
+
+
+
+var ___CSS_LOADER_URL_IMPORT_0___ = new URL(/* asset import */ __webpack_require__(/*! ../assets/dtc-logo-black.png */ "./src/dtc_assets/assets/dtc-logo-black.png"), __webpack_require__.b);
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+var ___CSS_LOADER_URL_REPLACEMENT_0___ = _node_modules_css_loader_dist_runtime_getUrl_js__WEBPACK_IMPORTED_MODULE_2___default()(___CSS_LOADER_URL_IMPORT_0___);
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, ".container {\n  height: 48rem;\n}\n.container .background {\n  background-image: url(" + ___CSS_LOADER_URL_REPLACEMENT_0___ + ");\n  background-size: 160px;\n  height: 100%;\n}\n.container .background .scrollable {\n  height: 90%;\n  /* or any value */\n  overflow-y: auto;\n  width: 100%;\n  background-color: transparent;\n}\n.container .background .scrollable .transparentDiv {\n  width: 65%;\n  height: 75%;\n  padding-left: 17.5%;\n  padding-top: 4%;\n  padding-bottom: 4%;\n}\n.container .background .scrollable .transparentDiv .carouselDiv {\n  background-color: white;\n  border: solid black;\n  border-radius: 10px;\n  width: 100%;\n  height: 100%;\n}\n.container .background .carouselContainer {\n  height: 15%;\n  width: 45%;\n  background-color: black;\n}\n\n.linkDiv {\n  background-color: black;\n  border: solid black;\n  border-radius: 10px;\n}\n.linkDiv .navBar {\n  padding-left: 77%;\n  color: white;\n}\n.linkDiv .navBar .navLink {\n  font-family: \"Julius Sans One\", sans-serif;\n  color: white;\n  text-decoration: none;\n}", "",{"version":3,"sources":["webpack://./src/dtc_assets/src/HomePage.scss"],"names":[],"mappings":"AACA;EACI,aAAA;AAAJ;AAEI;EACI,yDAAA;EACA,sBAAA;EACA,YAAA;AAAR;AAEQ;EACI,WAAA;EAAa,iBAAA;EACb,gBAAA;EACA,WAAA;EACA,6BAAA;AACZ;AAAY;EACI,UAAA;EACA,WAAA;EACA,mBAAA;EACA,eAAA;EACA,kBAAA;AAEhB;AADgB;EACI,uBAAA;EACA,mBAAA;EACA,mBAAA;EACA,WAAA;EACA,YAAA;AAGpB;AACQ;EACI,WAAA;EACA,UAAA;EACA,uBAAA;AACZ;;AAGA;EACI,uBAAA;EACA,mBAAA;EACA,mBAAA;AAAJ;AACI;EACI,iBAAA;EACA,YAAA;AACR;AAAQ;EACI,0CAAA;EACA,YAAA;EACA,qBAAA;AAEZ","sourcesContent":["\n.container{\n    height: 48rem;\n\n    .background {\n        background-image: url(\"../assets/dtc-logo-black.png\");\n        background-size: 160px;\n        height:100%;\n\n        .scrollable{\n            height: 90%; /* or any value */\n            overflow-y: auto;\n            width: 100%;\n            background-color: transparent;\n            .transparentDiv{\n                width: 65%;\n                height: 75%;\n                padding-left: 17.5%;\n                padding-top: 4%;\n                padding-bottom: 4%;\n                .carouselDiv{\n                    background-color: white;\n                    border: solid black;\n                    border-radius: 10px;\n                    width: 100%;\n                    height: 100%;\n                }\n            }\n        }\n        .carouselContainer{\n            height: 15%;\n            width: 45%;\n            background-color: black;\n        }\n    }\n}\n.linkDiv{\n    background-color: black;\n    border: solid black;\n    border-radius: 10px;\n    .navBar{\n        padding-left: 77%;\n        color: white;\n        .navLink{\n            font-family: 'Julius Sans One', sans-serif;\n            color: white;\n            text-decoration: none;\n        }\n    }\n}\n"],"sourceRoot":""}]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -24094,6 +24153,45 @@ module.exports = function (cssWithMappingToString) {
   };
 
   return list;
+};
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/dist/runtime/getUrl.js":
+/*!********************************************************!*\
+  !*** ./node_modules/css-loader/dist/runtime/getUrl.js ***!
+  \********************************************************/
+/***/ ((module) => {
+
+"use strict";
+
+
+module.exports = function (url, options) {
+  if (!options) {
+    options = {};
+  }
+
+  if (!url) {
+    return url;
+  }
+
+  url = String(url.__esModule ? url.default : url); // If url is already wrapped in quotes, remove them
+
+  if (/^['"].*['"]$/.test(url)) {
+    url = url.slice(1, -1);
+  }
+
+  if (options.hash) {
+    url += options.hash;
+  } // Should url be wrapped?
+  // See https://drafts.csswg.org/css-values-3/#urls
+
+
+  if (/["'() \t\n]|(%20)/.test(url) || options.needQuotes) {
+    return "\"".concat(url.replace(/"/g, '\\"').replace(/\n/g, "\\n"), "\"");
+  }
+
+  return url;
 };
 
 /***/ }),
@@ -67689,6 +67787,116 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
 
 /***/ }),
 
+/***/ "./src/dtc_assets/src/Components/SubscriptionPage.scss":
+/*!*************************************************************!*\
+  !*** ./src/dtc_assets/src/Components/SubscriptionPage.scss ***!
+  \*************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! !../../../../node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js */ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! !../../../../node_modules/style-loader/dist/runtime/styleDomAPI.js */ "./node_modules/style-loader/dist/runtime/styleDomAPI.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! !../../../../node_modules/style-loader/dist/runtime/insertBySelector.js */ "./node_modules/style-loader/dist/runtime/insertBySelector.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! !../../../../node_modules/style-loader/dist/runtime/setAttributesWithoutAttributes.js */ "./node_modules/style-loader/dist/runtime/setAttributesWithoutAttributes.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! !../../../../node_modules/style-loader/dist/runtime/insertStyleElement.js */ "./node_modules/style-loader/dist/runtime/insertStyleElement.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! !../../../../node_modules/style-loader/dist/runtime/styleTagTransform.js */ "./node_modules/style-loader/dist/runtime/styleTagTransform.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_SubscriptionPage_scss__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! !!../../../../node_modules/css-loader/dist/cjs.js!../../../../node_modules/sass-loader/dist/cjs.js!./SubscriptionPage.scss */ "./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/dtc_assets/src/Components/SubscriptionPage.scss");
+
+      
+      
+      
+      
+      
+      
+      
+      
+      
+
+var options = {};
+
+options.styleTagTransform = (_node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5___default());
+options.setAttributes = (_node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3___default());
+
+      options.insert = _node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2___default().bind(null, "head");
+    
+options.domAPI = (_node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1___default());
+options.insertStyleElement = (_node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4___default());
+
+var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default()(_node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_SubscriptionPage_scss__WEBPACK_IMPORTED_MODULE_6__["default"], options);
+
+
+
+
+       /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_SubscriptionPage_scss__WEBPACK_IMPORTED_MODULE_6__["default"] && _node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_SubscriptionPage_scss__WEBPACK_IMPORTED_MODULE_6__["default"].locals ? _node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_SubscriptionPage_scss__WEBPACK_IMPORTED_MODULE_6__["default"].locals : undefined);
+
+
+/***/ }),
+
+/***/ "./src/dtc_assets/src/HomePage.scss":
+/*!******************************************!*\
+  !*** ./src/dtc_assets/src/HomePage.scss ***!
+  \******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! !../../../node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js */ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! !../../../node_modules/style-loader/dist/runtime/styleDomAPI.js */ "./node_modules/style-loader/dist/runtime/styleDomAPI.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! !../../../node_modules/style-loader/dist/runtime/insertBySelector.js */ "./node_modules/style-loader/dist/runtime/insertBySelector.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! !../../../node_modules/style-loader/dist/runtime/setAttributesWithoutAttributes.js */ "./node_modules/style-loader/dist/runtime/setAttributesWithoutAttributes.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! !../../../node_modules/style-loader/dist/runtime/insertStyleElement.js */ "./node_modules/style-loader/dist/runtime/insertStyleElement.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! !../../../node_modules/style-loader/dist/runtime/styleTagTransform.js */ "./node_modules/style-loader/dist/runtime/styleTagTransform.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_HomePage_scss__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! !!../../../node_modules/css-loader/dist/cjs.js!../../../node_modules/sass-loader/dist/cjs.js!./HomePage.scss */ "./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/dtc_assets/src/HomePage.scss");
+
+      
+      
+      
+      
+      
+      
+      
+      
+      
+
+var options = {};
+
+options.styleTagTransform = (_node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5___default());
+options.setAttributes = (_node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3___default());
+
+      options.insert = _node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2___default().bind(null, "head");
+    
+options.domAPI = (_node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1___default());
+options.insertStyleElement = (_node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4___default());
+
+var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default()(_node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_HomePage_scss__WEBPACK_IMPORTED_MODULE_6__["default"], options);
+
+
+
+
+       /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_HomePage_scss__WEBPACK_IMPORTED_MODULE_6__["default"] && _node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_HomePage_scss__WEBPACK_IMPORTED_MODULE_6__["default"].locals ? _node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_HomePage_scss__WEBPACK_IMPORTED_MODULE_6__["default"].locals : undefined);
+
+
+/***/ }),
+
 /***/ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js":
 /*!****************************************************************************!*\
   !*** ./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js ***!
@@ -68001,6 +68209,106 @@ module.exports = styleTagTransform;
 
 /***/ }),
 
+/***/ "./src/dtc_assets/src/AccountPage.jsx":
+/*!********************************************!*\
+  !*** ./src/dtc_assets/src/AccountPage.jsx ***!
+  \********************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AppContext = void 0;
+const react_1 = __importStar(__webpack_require__(/*! react */ "./node_modules/react/index.js"));
+const journalReducer_1 = __importStar(__webpack_require__(/*! ./reducers/journalReducer */ "./src/dtc_assets/src/reducers/journalReducer.jsx"));
+const SubcriptionPage_1 = __importDefault(__webpack_require__(/*! ./Components/SubcriptionPage */ "./src/dtc_assets/src/Components/SubcriptionPage.jsx"));
+const react_stripe_js_1 = __webpack_require__(/*! @stripe/react-stripe-js */ "./node_modules/@stripe/react-stripe-js/dist/react-stripe.umd.js");
+const stripe_js_1 = __webpack_require__(/*! @stripe/stripe-js */ "./node_modules/@stripe/stripe-js/dist/stripe.esm.js");
+const LoginPage_1 = __importDefault(__webpack_require__(/*! ./Components/LoginPage */ "./src/dtc_assets/src/Components/LoginPage.jsx"));
+const auth_client_1 = __webpack_require__(/*! @dfinity/auth-client */ "./node_modules/@dfinity/auth-client/lib/esm/index.js");
+const index_1 = __webpack_require__(/*! ../../declarations/dtc/index */ "./src/declarations/dtc/index.js");
+const Contexts_1 = __webpack_require__(/*! ./Contexts */ "./src/dtc_assets/src/Contexts.jsx");
+const stripePromise = (0, stripe_js_1.loadStripe)('pk_test_51K9W1hL2dowpsXoJ9detXdiT0DOrp7ILxHf37TejyOHGrrEXwcdl71swxOHU2ejtSBt6d7DJF1ESBn6MyqxhhcCt00a5WsmPLu');
+exports.AppContext = (0, react_1.createContext)({
+    authClient: {},
+    setAuthClient: null,
+    loginAttempted: undefined,
+    setLoginAttempted: null,
+    isAuthenticated: null,
+    setIsAuthenticated: null,
+    actor: undefined,
+    setActor: null
+});
+const AccountPage = (props) => {
+    const [journalState, dispatch] = (0, react_1.useReducer)(journalReducer_1.default, journalReducer_1.initialState);
+    const [actor, setActor] = (0, react_1.useState)(undefined);
+    const [authClient, setAuthClient] = (0, react_1.useState)(undefined);
+    const [isLoaded, setIsLoaded] = (0, react_1.useState)(true);
+    const [isAuthenticated, setIsAuthenticated] = (0, react_1.useState)(false);
+    const [loginAttempted, setLoginAttempted] = (0, react_1.useState)(false);
+    // login function used when Authenticating the client (aka user)
+    (0, react_1.useEffect)(() => {
+        auth_client_1.AuthClient.create().then(async (client) => {
+            setAuthClient(client);
+            await client.isAuthenticated().then((result) => {
+                setIsAuthenticated(result);
+            });
+            setIsLoaded(true);
+        });
+    }, [isLoaded]);
+    //Creating the canisterActor that enables us to be able to call the functions defined on the backend
+    (0, react_1.useEffect)(() => {
+        if (!authClient)
+            return;
+        const identity = authClient.getIdentity();
+        const actor = (0, index_1.createActor)(index_1.canisterId, {
+            agentOptions: {
+                identity
+            }
+        });
+        setActor(actor);
+    }, [authClient]);
+    return (react_1.default.createElement(react_stripe_js_1.Elements, { stripe: stripePromise },
+        react_1.default.createElement(exports.AppContext.Provider, { value: {
+                authClient,
+                setIsLoaded,
+                loginAttempted,
+                setLoginAttempted,
+            } },
+            isLoaded &&
+                isAuthenticated ?
+                react_1.default.createElement(SubcriptionPage_1.default, { journalState: journalState, dispatch: dispatch }) :
+                react_1.default.createElement(LoginPage_1.default, { context: Contexts_1.UI_CONTEXTS.ACCOUNT_PAGE }),
+            !isLoaded &&
+                react_1.default.createElement("h2", null, " Load Screen "))));
+};
+exports["default"] = AccountPage;
+
+
+/***/ }),
+
 /***/ "./src/dtc_assets/src/App.jsx":
 /*!************************************!*\
   !*** ./src/dtc_assets/src/App.jsx ***!
@@ -68035,13 +68343,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AppContext = void 0;
 const React = __importStar(__webpack_require__(/*! react */ "./node_modules/react/index.js"));
 const react_1 = __webpack_require__(/*! react */ "./node_modules/react/index.js");
-const react_stripe_js_1 = __webpack_require__(/*! @stripe/react-stripe-js */ "./node_modules/@stripe/react-stripe-js/dist/react-stripe.umd.js");
-const stripe_js_1 = __webpack_require__(/*! @stripe/stripe-js */ "./node_modules/@stripe/stripe-js/dist/stripe.esm.js");
 const Journal_1 = __importDefault(__webpack_require__(/*! ./Components/Journal */ "./src/dtc_assets/src/Components/Journal.jsx"));
 const auth_client_1 = __webpack_require__(/*! @dfinity/auth-client */ "./node_modules/@dfinity/auth-client/lib/esm/index.js");
 const LoginPage_1 = __importDefault(__webpack_require__(/*! ./Components/LoginPage */ "./src/dtc_assets/src/Components/LoginPage.jsx"));
 const index_1 = __webpack_require__(/*! ../../declarations/dtc/index */ "./src/declarations/dtc/index.js");
-const stripePromise = (0, stripe_js_1.loadStripe)('pk_test_51K9W1hL2dowpsXoJ9detXdiT0DOrp7ILxHf37TejyOHGrrEXwcdl71swxOHU2ejtSBt6d7DJF1ESBn6MyqxhhcCt00a5WsmPLu');
+const Contexts_1 = __webpack_require__(/*! ./Contexts */ "./src/dtc_assets/src/Contexts.jsx");
 exports.AppContext = (0, react_1.createContext)({
     authClient: {},
     setAuthClient: null,
@@ -68081,26 +68387,25 @@ const App = () => {
         });
         setActor(actor);
     }, [authClient]);
-    return (React.createElement(react_stripe_js_1.Elements, { stripe: stripePromise },
-        React.createElement(exports.AppContext.Provider, { value: {
-                authClient,
-                setAuthClient,
-                setIsAuthenticated,
-                actor,
-                setActor,
-                setIsLoaded,
-                loginAttempted,
-                setLoginAttempted,
-                isAuthenticated,
-                submissionsMade,
-                setSubmissionsMade
-            } },
-            isLoaded &&
-                isAuthenticated ?
-                React.createElement(Journal_1.default, null) :
-                React.createElement(LoginPage_1.default, null),
-            !isLoaded &&
-                React.createElement("h2", null, " Load Screen "))));
+    return (React.createElement(exports.AppContext.Provider, { value: {
+            authClient,
+            setAuthClient,
+            setIsAuthenticated,
+            actor,
+            setActor,
+            setIsLoaded,
+            loginAttempted,
+            setLoginAttempted,
+            isAuthenticated,
+            submissionsMade,
+            setSubmissionsMade
+        } },
+        isLoaded &&
+            isAuthenticated ?
+            React.createElement(Journal_1.default, null) :
+            React.createElement(LoginPage_1.default, { context: Contexts_1.UI_CONTEXTS.JOURNAL }),
+        !isLoaded &&
+            React.createElement("h2", null, " Load Screen ")));
 };
 exports["default"] = App;
 //This is a test
@@ -68397,7 +68702,6 @@ const journalPageMappers_1 = __webpack_require__(/*! ../mappers/journalPageMappe
 __webpack_require__(/*! ./Journal.scss */ "./src/dtc_assets/src/Components/Journal.scss");
 const App_1 = __webpack_require__(/*! ../App */ "./src/dtc_assets/src/App.jsx");
 const InputBox_1 = __importDefault(__webpack_require__(/*! ./Fields/InputBox */ "./src/dtc_assets/src/Components/Fields/InputBox.jsx"));
-const SubcriptionPage_1 = __importDefault(__webpack_require__(/*! ./SubcriptionPage */ "./src/dtc_assets/src/Components/SubcriptionPage.jsx"));
 const Journal = (props) => {
     const [journalState, dispatch] = (0, react_1.useReducer)(journalReducer_1.default, journalReducer_1.initialState);
     const [pageIsVisibleArray, setPageIsVisibleArray] = (0, react_1.useState)(journalState.journal.map((page) => false));
@@ -68494,7 +68798,7 @@ const Journal = (props) => {
                                     react_1.default.createElement("td", { className: "tableCell " + index }, page.lockTime),
                                     react_1.default.createElement("td", { className: "tableCell " + index },
                                         " ",
-                                        react_1.default.createElement("button", { onClick: (e) => openPage(e, index) }, " open "),
+                                        react_1.default.createElement("button", { className: 'openButton', onClick: (e) => openPage(e, index) }, " open "),
                                         " ")));
                             })))),
                     react_1.default.createElement("div", { className: 'addNewEntryButtonDiv' },
@@ -68518,8 +68822,7 @@ const Journal = (props) => {
             react_1.default.createElement("button", { className: 'loginButtonDiv', onClick: async () => {
                     await authClient.logout();
                     setIsLoaded(false);
-                } }, " Log Out ")),
-        react_1.default.createElement(SubcriptionPage_1.default, { journalState: journalState, dispatch: dispatch })));
+                } }, " Log Out "))));
 };
 exports["default"] = Journal;
 
@@ -68660,9 +68963,22 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const react_1 = __importStar(__webpack_require__(/*! react */ "./node_modules/react/index.js"));
 const App_1 = __webpack_require__(/*! ../App */ "./src/dtc_assets/src/App.jsx");
+const AccountPage_1 = __webpack_require__(/*! ../AccountPage */ "./src/dtc_assets/src/AccountPage.jsx");
+// import { AppContext as PodcastContext } from "../PodcastPage"
 __webpack_require__(/*! ./LoginPage.scss */ "./src/dtc_assets/src/Components/LoginPage.scss");
 const LoginPage = (props) => {
-    const { authClient, setAuthClient, setIsLoaded, loginAttempted, setLoginAttempted, actor, } = (0, react_1.useContext)(App_1.AppContext);
+    const { context } = props;
+    let properContext;
+    if (context === 'journal') {
+        properContext = App_1.AppContext;
+    }
+    else if (context === 'accountPage') {
+        properContext = AccountPage_1.AppContext;
+    }
+    // else if(context === 'podcast'){
+    //     properContext = PodcastContext
+    // }
+    const { authClient, setIsLoaded, loginAttempted, setLoginAttempted, } = (0, react_1.useContext)(properContext);
     const handleClick = async () => {
         setIsLoaded(false);
         if (!loginAttempted) {
@@ -68704,6 +69020,7 @@ const react_stripe_js_1 = __webpack_require__(/*! @stripe/react-stripe-js */ "./
 const InputBox_1 = __importDefault(__webpack_require__(/*! ./Fields/InputBox */ "./src/dtc_assets/src/Components/Fields/InputBox.jsx"));
 const journalReducer_1 = __webpack_require__(/*! ../reducers/journalReducer */ "./src/dtc_assets/src/reducers/journalReducer.jsx");
 const CardInput_1 = __importDefault(__webpack_require__(/*! ./CardInput */ "./src/dtc_assets/src/Components/CardInput.jsx"));
+__webpack_require__(/*! ./SubscriptionPage.scss */ "./src/dtc_assets/src/Components/SubscriptionPage.scss");
 const SubcriptionPage = (props) => {
     const { journalState, dispatch } = props;
     const stripe = (0, react_stripe_js_1.useStripe)();
@@ -68771,13 +69088,71 @@ const SubcriptionPage = (props) => {
             }
         }
     };
-    return (react_1.default.createElement("div", null,
-        react_1.default.createElement(InputBox_1.default, { divClassName: "email", label: "Email: ", rows: "1", dispatch: dispatch, dispatchAction: journalReducer_1.types.CHANGE_EMAIL, value: journalState.bio.email }),
-        react_1.default.createElement(CardInput_1.default, null),
-        react_1.default.createElement("div", null,
-            react_1.default.createElement("button", { type: "submit", onClick: handleSubmitSub }, " Subscribe "))));
+    return (react_1.default.createElement("div", { className: 'subscriptionSectionContainer' },
+        react_1.default.createElement("div", { className: 'logoDiv' },
+            react_1.default.createElement("img", { className: 'logoImg', src: "dtc-logo-black.png", alt: "Logo" }),
+            react_1.default.createElement("div", { className: 'subscriptionSection' },
+                react_1.default.createElement(InputBox_1.default, { divClassName: "email", label: "Email: ", rows: "1", dispatch: dispatch, dispatchAction: journalReducer_1.types.CHANGE_EMAIL, value: journalState.bio.email }),
+                react_1.default.createElement(CardInput_1.default, null),
+                react_1.default.createElement("div", { className: 'subscribeButtonDiv' },
+                    react_1.default.createElement("button", { className: 'subscriptionButton', type: "submit", onClick: handleSubmitSub }, " Subscribe "))))));
 };
 exports["default"] = SubcriptionPage;
+
+
+/***/ }),
+
+/***/ "./src/dtc_assets/src/Contexts.jsx":
+/*!*****************************************!*\
+  !*** ./src/dtc_assets/src/Contexts.jsx ***!
+  \*****************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UI_CONTEXTS = void 0;
+exports.UI_CONTEXTS = {
+    JOURNAL: 'journal',
+    ACCOUNT_PAGE: 'accountPage',
+    PODCAST: 'podcast'
+};
+
+
+/***/ }),
+
+/***/ "./src/dtc_assets/src/HomePage.jsx":
+/*!*****************************************!*\
+  !*** ./src/dtc_assets/src/HomePage.jsx ***!
+  \*****************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const react_1 = __importDefault(__webpack_require__(/*! react */ "./node_modules/react/index.js"));
+const react_router_dom_1 = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router-dom/index.js");
+__webpack_require__(/*! ./HomePage.scss */ "./src/dtc_assets/src/HomePage.scss");
+const HomePage = () => {
+    return (react_1.default.createElement("div", { className: "container" },
+        react_1.default.createElement("div", { className: 'linkDiv' },
+            react_1.default.createElement("nav", { className: 'navBar' },
+                react_1.default.createElement(react_router_dom_1.Link, { className: "navLink", to: "/" }, "Home"),
+                " |",
+                " ",
+                react_1.default.createElement(react_router_dom_1.Link, { className: "navLink", to: "app" }, "App"),
+                " |",
+                " ",
+                react_1.default.createElement(react_router_dom_1.Link, { className: "navLink", to: 'account' }, "My Account"))),
+        react_1.default.createElement("div", { className: "background center" },
+            react_1.default.createElement("div", { class: 'scrollable' },
+                react_1.default.createElement("div", { className: 'transparentDiv' },
+                    react_1.default.createElement("div", { className: 'carouselDiv' }))))));
+};
+exports["default"] = HomePage;
 
 
 /***/ }),
@@ -68874,13 +69249,17 @@ const React = __importStar(__webpack_require__(/*! react */ "./node_modules/reac
 const ReactDOM = __importStar(__webpack_require__(/*! react-dom */ "./node_modules/react-dom/index.js"));
 const react_redux_1 = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
 const react_router_dom_1 = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router-dom/index.js");
+const HomePage_1 = __importDefault(__webpack_require__(/*! ./HomePage */ "./src/dtc_assets/src/HomePage.jsx"));
 const App_1 = __importDefault(__webpack_require__(/*! ./App */ "./src/dtc_assets/src/App.jsx"));
+const AccountPage_1 = __importDefault(__webpack_require__(/*! ./AccountPage */ "./src/dtc_assets/src/AccountPage.jsx"));
 const configureStore_1 = __importDefault(__webpack_require__(/*! ./configureStore */ "./src/dtc_assets/src/configureStore.jsx"));
 const store = (0, configureStore_1.default)();
 ReactDOM.render(React.createElement(react_redux_1.Provider, { store: store },
-    React.createElement(react_router_dom_1.BrowserRouter, null,
+    React.createElement(react_router_dom_1.HashRouter, null,
         React.createElement(react_router_dom_1.Routes, null,
-            React.createElement(react_router_dom_1.Route, { path: "/", element: React.createElement(App_1.default, null) })))), document.getElementById('root'));
+            React.createElement(react_router_dom_1.Route, { path: "/", element: React.createElement(HomePage_1.default, null) }),
+            React.createElement(react_router_dom_1.Route, { path: "/app", element: React.createElement(App_1.default, null) }),
+            React.createElement(react_router_dom_1.Route, { path: "/account", element: React.createElement(AccountPage_1.default, null) })))), document.getElementById('root'));
 
 
 /***/ }),
@@ -71662,7 +72041,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 // CANISTER_ID is replaced by webpack based on node environment
-const canisterId = "si2b5-pyaaa-aaaaa-aaaja-cai";
+const canisterId = "st75y-vaaaa-aaaaa-aaalq-cai";
 
 /**
  * 
@@ -71695,6 +72074,17 @@ const canisterId = "si2b5-pyaaa-aaaaa-aaaja-cai";
  */
  const dtc = createActor(canisterId);
 
+
+/***/ }),
+
+/***/ "./src/dtc_assets/assets/dtc-logo-black.png":
+/*!**************************************************!*\
+  !*** ./src/dtc_assets/assets/dtc-logo-black.png ***!
+  \**************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+module.exports = __webpack_require__.p + "528f450713dd7a292100.png";
 
 /***/ }),
 
@@ -71897,6 +72287,9 @@ module.exports = JSON.parse('{"_from":"elliptic@^6.5.2","_id":"elliptic@6.5.4","
 /******/ 		return module.exports;
 /******/ 	}
 /******/ 	
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = __webpack_modules__;
+/******/ 	
 /************************************************************************/
 /******/ 	/* webpack/runtime/amd options */
 /******/ 	(() => {
@@ -71962,6 +72355,52 @@ module.exports = JSON.parse('{"_from":"elliptic@^6.5.2","_id":"elliptic@6.5.4","
 /******/ 			if (!module.children) module.children = [];
 /******/ 			return module;
 /******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/publicPath */
+/******/ 	(() => {
+/******/ 		var scriptUrl;
+/******/ 		if (__webpack_require__.g.importScripts) scriptUrl = __webpack_require__.g.location + "";
+/******/ 		var document = __webpack_require__.g.document;
+/******/ 		if (!scriptUrl && document) {
+/******/ 			if (document.currentScript)
+/******/ 				scriptUrl = document.currentScript.src
+/******/ 			if (!scriptUrl) {
+/******/ 				var scripts = document.getElementsByTagName("script");
+/******/ 				if(scripts.length) scriptUrl = scripts[scripts.length - 1].src
+/******/ 			}
+/******/ 		}
+/******/ 		// When supporting browsers where an automatic publicPath is not supported you must specify an output.publicPath manually via configuration
+/******/ 		// or pass an empty string ("") and set the __webpack_public_path__ variable from your code to use your own logic.
+/******/ 		if (!scriptUrl) throw new Error("Automatic publicPath is not supported in this browser");
+/******/ 		scriptUrl = scriptUrl.replace(/#.*$/, "").replace(/\?.*$/, "").replace(/\/[^\/]+$/, "/");
+/******/ 		__webpack_require__.p = scriptUrl;
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/jsonp chunk loading */
+/******/ 	(() => {
+/******/ 		__webpack_require__.b = document.baseURI || self.location.href;
+/******/ 		
+/******/ 		// object to store loaded and loading chunks
+/******/ 		// undefined = chunk not loaded, null = chunk preloaded/prefetched
+/******/ 		// [resolve, reject, Promise] = chunk loading, 0 = chunk loaded
+/******/ 		var installedChunks = {
+/******/ 			"index": 0
+/******/ 		};
+/******/ 		
+/******/ 		// no chunk on demand loading
+/******/ 		
+/******/ 		// no prefetching
+/******/ 		
+/******/ 		// no preloaded
+/******/ 		
+/******/ 		// no HMR
+/******/ 		
+/******/ 		// no HMR manifest
+/******/ 		
+/******/ 		// no on chunks loaded
+/******/ 		
+/******/ 		// no jsonp function
 /******/ 	})();
 /******/ 	
 /************************************************************************/
