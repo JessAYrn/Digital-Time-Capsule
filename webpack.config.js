@@ -118,8 +118,10 @@ module.exports = {
       },
     },
     hot: true,
-    contentBase: path.resolve(__dirname, "./src/dtc_assets"),
-    watchContentBase: true,
+    static: {
+      directory: path.join(__dirname, "./src/dtc_assets"),
+      watch: true
+    },
     port: 3000
   },
 };
