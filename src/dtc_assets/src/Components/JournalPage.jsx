@@ -49,7 +49,10 @@ const JournalPage = (props) => {
             text: journalEntry.entry,
             location: journalEntry.location,
             date: journalEntry.date,
-            lockTime: journalEntry.lockTime
+            lockTime: journalEntry.lockTime,
+            emailOne: journalEntry.emailOne,
+            emailTwo: journalEntry.emailTwo,
+            emailThree: journalEntry.emailThree
         }];
 
         const entryKeyAsApiObject = (entryKey >= 0 && entryKey < journalSize ) ? [{entryKey: entryKey}] : [];
@@ -99,6 +102,8 @@ const JournalPage = (props) => {
 
     }, [journalPageData, file1, file2]);
 
+    console.log(journalPageData);
+
     return (
         <div className={"journalPageContainer"}>
             <div className={"logoDiv"}>
@@ -114,45 +119,71 @@ const JournalPage = (props) => {
                 value={journalPageData.lockTime}
             />
             <div className={"journalText"} >
-            <InputBox
-                label={"Date: "}
-                rows={"1"}
-                dispatch={journalReducerDispatchFunction}
-                dispatchAction={types.CHANGE_DATE}
-                index={index}
-                value={journalPageData.date}
-            />
-            <InputBox
-                label={"Location: "}
-                rows={"1"}
-                dispatch={journalReducerDispatchFunction}
-                dispatchAction={types.CHANGE_LOCATION}
-                index={index}
-                value={journalPageData.location}
-            />
-            <InputBox
-                divClassName={"entry"}
-                label={"Entry: "}
-                rows={"59"}
-                dispatch={journalReducerDispatchFunction}
-                dispatchAction={types.CHANGE_ENTRY}
-                index={index}
-                value={journalPageData.entry}
-            />
+                <InputBox
+                    label={"Date: "}
+                    rows={"1"}
+                    dispatch={journalReducerDispatchFunction}
+                    dispatchAction={types.CHANGE_DATE}
+                    index={index}
+                    value={journalPageData.date}
+                />
+                <InputBox
+                    label={"Location: "}
+                    rows={"1"}
+                    dispatch={journalReducerDispatchFunction}
+                    dispatchAction={types.CHANGE_LOCATION}
+                    index={index}
+                    value={journalPageData.location}
+                />
+                <InputBox
+                    divClassName={"entry"}
+                    label={"Entry: "}
+                    rows={"59"}
+                    dispatch={journalReducerDispatchFunction}
+                    dispatchAction={types.CHANGE_ENTRY}
+                    index={index}
+                    value={journalPageData.entry}
+                />
             </div>
             <div className={"journalImages"}>
-            <FileUpload
-                label={'file1'}
-                value={file1}
-                setValue={setFile1}
-                index={index}
-            />
-            <FileUpload
-                label={'file2'}
-                value={file2}
-                setValue={setFile2}
-                index={index}
-            />
+                <FileUpload
+                    label={'file1'}
+                    value={file1}
+                    setValue={setFile1}
+                    index={index}
+                />
+                <FileUpload
+                    label={'file2'}
+                    value={file2}
+                    setValue={setFile2}
+                    index={index}
+                />
+            </div>
+            <div className={'recipientEmailsDiv'}>
+                <InputBox
+                    label={"1st Recipient Email: "}
+                    rows={"1"}
+                    dispatch={journalReducerDispatchFunction}
+                    dispatchAction={types.CHANGE_RECIPIENT_EMAIL_ONE}
+                    index={index}
+                    value={journalPageData.emailOne}
+                />
+                <InputBox
+                    label={"2nd Recipient Email: "}
+                    rows={"1"}
+                    dispatch={journalReducerDispatchFunction}
+                    dispatchAction={types.CHANGE_RECIPIENT_EMAIL_TWO}
+                    index={index}
+                    value={journalPageData.emailTwo}
+                />
+                <InputBox
+                    label={"3rd Recipient Email: "}
+                    rows={"1"}
+                    dispatch={journalReducerDispatchFunction}
+                    dispatchAction={types.CHANGE_RECIPIENT_EMAIL_THREE}
+                    index={index}
+                    value={journalPageData.emailThree}
+                />
             </div>
             <div>
                 <button type="submit" onClick={handleSubmit}> Submit </button>

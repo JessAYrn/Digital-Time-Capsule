@@ -12,7 +12,10 @@ export const types = {
     CHANGE_DEDICATIONS: "CHANGE_DEDICATIONS",
     CHANGE_NAME: "CHANGE_NAME",
     CHANGE_ENTRY_TITLE: "CHANGE_ENTRY_TITLE",
-    CHANGE_EMAIL: "CHANGE_EMAIL"
+    CHANGE_EMAIL: "CHANGE_EMAIL",
+    CHANGE_RECIPIENT_EMAIL_ONE: "CHANGE_RECIPIENT_EMAIL_ONE",
+    CHANGE_RECIPIENT_EMAIL_TWO: "CHANGE_RECIPIENT_EMAIL_TWO",
+    CHANGE_RECIPIENT_EMAIL_THREE: "CHANGE_RECIPIENT_EMAIL_THREE"
 }
 
 export const initialState = {
@@ -30,7 +33,10 @@ export const initialState = {
             title: 'Loading...',
             location: 'Loading...',
             entry: 'Loading...',
-            lockTime: '3'
+            lockTime: '3',
+            emailOne: '',
+            emailTwo: '',
+            emailThree: ''
         }
     ]
 
@@ -42,7 +48,10 @@ const freshPage = {
     location: '',
     entry: '',
     lockTime: '3',
-    timeTillUnlock: '0'
+    timeTillUnlock: '0',
+    emailOne: '',
+    emailTwo: '',
+    emailThree: ''
 }
 
 const changeValue = (state = initialState, action) => {
@@ -84,6 +93,33 @@ const changeValue = (state = initialState, action) => {
             updatedJournalPage = {
                 ... state.journal[index],
                 title: payload
+            }
+            state.journal[index] = updatedJournalPage;
+            return {
+                ...state
+            }
+        case types.CHANGE_RECIPIENT_EMAIL_ONE:
+            updatedJournalPage = {
+                ... state.journal[index],
+                emailOne: payload
+            }
+            state.journal[index] = updatedJournalPage;
+            return {
+                ...state
+            }
+        case types.CHANGE_RECIPIENT_EMAIL_TWO:
+            updatedJournalPage = {
+                ... state.journal[index],
+                emailTwo: payload
+            }
+            state.journal[index] = updatedJournalPage;
+            return {
+                ...state
+            }
+        case types.CHANGE_RECIPIENT_EMAIL_THREE:
+            updatedJournalPage = {
+                ... state.journal[index],
+                emailThree: payload
             }
             state.journal[index] = updatedJournalPage;
             return {

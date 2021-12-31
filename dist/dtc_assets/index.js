@@ -23952,7 +23952,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, ".journalPageContainer .journalText {\n  width: 40%;\n  float: left;\n}\n.journalPageContainer .JournalImages {\n  width: 50%;\n  float: left;\n}\n.journalPageContainer .imageDiv {\n  float: left;\n  margin-left: 4%;\n}\n.journalPageContainer .logoDiv {\n  width: 100%;\n  float: left;\n}\n.journalPageContainer .logoDiv .backButtonImg {\n  margin-top: 3rem;\n  float: left;\n  max-width: 3rem;\n  max-height: 3rem;\n}\n.journalPageContainer .logoDiv .logoImg {\n  float: right;\n  max-width: 10rem;\n  max-height: 10rem;\n}\n.journalPageContainer .input-element-div__entry .enabled {\n  border-width: 1px 1px 1px;\n  border-radius: 10px;\n  height: 20rem;\n}\n.journalPageContainer .input-element-div__entry .disabled {\n  border-width: 1px 1px 1px;\n  border-radius: 10px;\n  height: 20rem;\n}", "",{"version":3,"sources":["webpack://./src/dtc_assets/src/Components/JournalPage.scss"],"names":[],"mappings":"AACI;EACI,UAAA;EACA,WAAA;AAAR;AAGI;EACI,UAAA;EACA,WAAA;AADR;AAII;EACI,WAAA;EACA,eAAA;AAFR;AAII;EACI,WAAA;EACA,WAAA;AAFR;AAGQ;EACI,gBAAA;EACA,WAAA;EACA,eAAA;EACA,gBAAA;AADZ;AAIQ;EACI,YAAA;EACA,gBAAA;EACA,iBAAA;AAFZ;AAOQ;EACI,yBAAA;EACA,mBAAA;EACA,aAAA;AALZ;AAOQ;EACI,yBAAA;EACA,mBAAA;EACA,aAAA;AALZ","sourcesContent":[".journalPageContainer{\n    .journalText{\n        width: 40%;\n        float: left;\n    }\n\n    .JournalImages{\n        width: 50%;\n        float: left;\n    }\n\n    .imageDiv{\n        float: left;\n        margin-left: 4%;\n    }\n    .logoDiv{\n        width: 100%;\n        float: left;\n        .backButtonImg{\n            margin-top: 3rem;\n            float: left;\n            max-width: 3rem;\n            max-height: 3rem;\n        }\n    \n        .logoImg{\n            float: right;\n            max-width: 10rem;\n            max-height: 10rem;\n        }\n    }\n\n    .input-element-div__entry{\n        .enabled{\n            border-width: 1px 1px 1px;\n            border-radius: 10px;\n            height: 20rem;\n        }\n        .disabled{\n            border-width: 1px 1px 1px;\n            border-radius: 10px;\n            height: 20rem;\n        }\n        \n    }\n}"],"sourceRoot":""}]);
+___CSS_LOADER_EXPORT___.push([module.id, ".journalPageContainer .journalText {\n  width: 40%;\n  float: left;\n}\n.journalPageContainer .recipientEmailsDiv {\n  width: 40%;\n  margin-top: 37%;\n}\n.journalPageContainer .imageDiv {\n  float: left;\n  margin-left: 6%;\n}\n.journalPageContainer .logoDiv {\n  width: 100%;\n  float: left;\n}\n.journalPageContainer .logoDiv .backButtonImg {\n  margin-top: 3rem;\n  float: left;\n  max-width: 3rem;\n  max-height: 3rem;\n}\n.journalPageContainer .logoDiv .logoImg {\n  float: right;\n  max-width: 10rem;\n  max-height: 10rem;\n}\n.journalPageContainer .input-element-div__entry .enabled {\n  border-width: 1px 1px 1px;\n  border-radius: 10px;\n  height: 20rem;\n}\n.journalPageContainer .input-element-div__entry .disabled {\n  border-width: 1px 1px 1px;\n  border-radius: 10px;\n  height: 20rem;\n}", "",{"version":3,"sources":["webpack://./src/dtc_assets/src/Components/JournalPage.scss"],"names":[],"mappings":"AACI;EACI,UAAA;EACA,WAAA;AAAR;AAGI;EACI,UAAA;EACA,eAAA;AADR;AAII;EACI,WAAA;EACA,eAAA;AAFR;AAII;EACI,WAAA;EACA,WAAA;AAFR;AAGQ;EACI,gBAAA;EACA,WAAA;EACA,eAAA;EACA,gBAAA;AADZ;AAIQ;EACI,YAAA;EACA,gBAAA;EACA,iBAAA;AAFZ;AAOQ;EACI,yBAAA;EACA,mBAAA;EACA,aAAA;AALZ;AAOQ;EACI,yBAAA;EACA,mBAAA;EACA,aAAA;AALZ","sourcesContent":[".journalPageContainer{\n    .journalText{\n        width: 40%;\n        float: left;\n    }\n\n    .recipientEmailsDiv{\n        width: 40%;\n        margin-top: 37%;\n    }\n\n    .imageDiv{\n        float: left;\n        margin-left: 6%;\n    }\n    .logoDiv{\n        width: 100%;\n        float: left;\n        .backButtonImg{\n            margin-top: 3rem;\n            float: left;\n            max-width: 3rem;\n            max-height: 3rem;\n        }\n    \n        .logoImg{\n            float: right;\n            max-width: 10rem;\n            max-height: 10rem;\n        }\n    }\n\n    .input-element-div__entry{\n        .enabled{\n            border-width: 1px 1px 1px;\n            border-radius: 10px;\n            height: 20rem;\n        }\n        .disabled{\n            border-width: 1px 1px 1px;\n            border-radius: 10px;\n            height: 20rem;\n        }\n        \n    }\n}"],"sourceRoot":""}]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -70833,7 +70833,10 @@ const JournalPage = (props) => {
                 text: journalEntry.entry,
                 location: journalEntry.location,
                 date: journalEntry.date,
-                lockTime: journalEntry.lockTime
+                lockTime: journalEntry.lockTime,
+                emailOne: journalEntry.emailOne,
+                emailTwo: journalEntry.emailTwo,
+                emailThree: journalEntry.emailThree
             }];
         const entryKeyAsApiObject = (entryKey >= 0 && entryKey < journalSize) ? [{ entryKey: entryKey }] : [];
         actor.updateJournalEntry(entryKeyAsApiObject, entryAsApiObject);
@@ -70873,6 +70876,10 @@ const JournalPage = (props) => {
         react_1.default.createElement("div", { className: "journalImages" },
             react_1.default.createElement(FileUpload_1.default, { label: 'file1', value: file1, setValue: setFile1, index: index }),
             react_1.default.createElement(FileUpload_1.default, { label: 'file2', value: file2, setValue: setFile2, index: index })),
+        react_1.default.createElement("div", { className: 'recipientEmailsDiv' },
+            react_1.default.createElement(InputBox_1.default, { label: "1st Recipient Email: ", rows: "1", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_RECIPIENT_EMAIL_ONE, index: index, value: journalPageData.emailOne }),
+            react_1.default.createElement(InputBox_1.default, { label: "2nd Recipient Email: ", rows: "1", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_RECIPIENT_EMAIL_TWO, index: index, value: journalPageData.emailTwo }),
+            react_1.default.createElement(InputBox_1.default, { label: "3rd Recipient Email: ", rows: "1", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_RECIPIENT_EMAIL_THREE, index: index, value: journalPageData.emailThree })),
         react_1.default.createElement("div", null,
             react_1.default.createElement("button", { type: "submit", onClick: handleSubmit }, " Submit "))));
 };
@@ -71320,7 +71327,10 @@ exports.types = {
     CHANGE_DEDICATIONS: "CHANGE_DEDICATIONS",
     CHANGE_NAME: "CHANGE_NAME",
     CHANGE_ENTRY_TITLE: "CHANGE_ENTRY_TITLE",
-    CHANGE_EMAIL: "CHANGE_EMAIL"
+    CHANGE_EMAIL: "CHANGE_EMAIL",
+    CHANGE_RECIPIENT_EMAIL_ONE: "CHANGE_RECIPIENT_EMAIL_ONE",
+    CHANGE_RECIPIENT_EMAIL_TWO: "CHANGE_RECIPIENT_EMAIL_TWO",
+    CHANGE_RECIPIENT_EMAIL_THREE: "CHANGE_RECIPIENT_EMAIL_THREE"
 };
 exports.initialState = {
     bio: {
@@ -71337,7 +71347,10 @@ exports.initialState = {
             title: 'Loading...',
             location: 'Loading...',
             entry: 'Loading...',
-            lockTime: '3'
+            lockTime: '3',
+            emailOne: '',
+            emailTwo: '',
+            emailThree: ''
         }
     ]
 };
@@ -71347,7 +71360,10 @@ const freshPage = {
     location: '',
     entry: '',
     lockTime: '3',
-    timeTillUnlock: '0'
+    timeTillUnlock: '0',
+    emailOne: '',
+    emailTwo: '',
+    emailThree: ''
 };
 const changeValue = (state = exports.initialState, action) => {
     const { actionType, payload, index } = action;
@@ -71384,6 +71400,33 @@ const changeValue = (state = exports.initialState, action) => {
             updatedJournalPage = {
                 ...state.journal[index],
                 title: payload
+            };
+            state.journal[index] = updatedJournalPage;
+            return {
+                ...state
+            };
+        case exports.types.CHANGE_RECIPIENT_EMAIL_ONE:
+            updatedJournalPage = {
+                ...state.journal[index],
+                emailOne: payload
+            };
+            state.journal[index] = updatedJournalPage;
+            return {
+                ...state
+            };
+        case exports.types.CHANGE_RECIPIENT_EMAIL_TWO:
+            updatedJournalPage = {
+                ...state.journal[index],
+                emailTwo: payload
+            };
+            state.journal[index] = updatedJournalPage;
+            return {
+                ...state
+            };
+        case exports.types.CHANGE_RECIPIENT_EMAIL_THREE:
+            updatedJournalPage = {
+                ...state.journal[index],
+                emailThree: payload
             };
             state.journal[index] = updatedJournalPage;
             return {
@@ -74403,9 +74446,12 @@ const idlFactory = ({ IDL }) => {
   const Result = IDL.Variant({ 'ok' : IDL.Null, 'err' : Error });
   const EntryKey = IDL.Record({ 'entryKey' : IDL.Nat });
   const JournalEntry = IDL.Record({
+    'emailThree' : IDL.Text,
     'date' : IDL.Text,
     'text' : IDL.Text,
     'lockTime' : IDL.Text,
+    'emailOne' : IDL.Text,
+    'emailTwo' : IDL.Text,
     'location' : IDL.Text,
     'entryTitle' : IDL.Text,
   });
@@ -74482,7 +74528,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 // CANISTER_ID is replaced by webpack based on node environment
-const canisterId = "vh6yy-miaaa-aaaaa-aaaya-cai";
+const canisterId = "u7xn3-ciaaa-aaaaa-aaa4a-cai";
 
 /**
  * 
