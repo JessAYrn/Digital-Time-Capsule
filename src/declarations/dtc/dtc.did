@@ -68,6 +68,9 @@ type Key =
 type JournalEntry = 
  record {
    date: text;
+   emailOne: text;
+   emailThree: text;
+   emailTwo: text;
    entryTitle: text;
    location: text;
    lockTime: text;

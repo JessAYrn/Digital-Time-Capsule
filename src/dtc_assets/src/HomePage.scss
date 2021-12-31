@@ -1,0 +1,50 @@
+
+.container{
+    height: 48rem;
+
+    .background {
+        background-image: url("../assets/dtc-logo-black.png");
+        background-size: 160px;
+        height:100%;
+
+        .scrollable{
+            height: 90%; /* or any value */
+            overflow-y: auto;
+            width: 100%;
+            background-color: transparent;
+            .transparentDiv{
+                width: 65%;
+                height: 75%;
+                padding-left: 17.5%;
+                padding-top: 4%;
+                padding-bottom: 4%;
+                .carouselDiv{
+                    background-color: black;
+                    border: solid black;
+                    border-radius: 10px;
+                    width: 100%;
+                    height: 100%;
+                }
+            }
+        }
+        .carouselContainer{
+            height: 15%;
+            width: 45%;
+            background-color: black;
+        }
+    }
+}
+.linkDiv{
+    background-color: black;
+    border: solid black;
+    border-radius: 10px;
+    .navBar{
+        padding-left: 77%;
+        color: white;
+        .navLink{
+            font-family: 'Julius Sans One', sans-serif;
+            color: white;
+            text-decoration: none;
+        }
+    }
+}

@@ -38,6 +38,9 @@ actor class User(){
         location: Text;
         date: Text;
         lockTime: Text;
+        emailOne: Text;
+        emailTwo: Text;
+        emailThree: Text;
     };
 
     type Bio = {

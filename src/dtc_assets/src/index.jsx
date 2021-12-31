@@ -2,12 +2,13 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import {
-  BrowserRouter,
+  HashRouter,
   Routes,
   Route
 } from "react-router-dom";
 import HomePage from './HomePage';
 import App from './App';
+import AccountPage from "./AccountPage"
 import configureStore from './configureStore';
 
 
@@ -18,11 +19,12 @@ const store = configureStore();
 
 ReactDOM.render(
 <Provider store={store}>
-    <BrowserRouter>
+    <HashRouter>
         <Routes>
             <Route path="/" element={<HomePage />}/>
             <Route path="/app" element={<App />}/>
+            <Route path="/account" element={<AccountPage />}/>
         </Routes>
-    </BrowserRouter>
+    </HashRouter>
 </Provider>
 , document.getElementById('root'));

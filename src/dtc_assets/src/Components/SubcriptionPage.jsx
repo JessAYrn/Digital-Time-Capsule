@@ -4,6 +4,7 @@ import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
 import  InputBox  from './Fields/InputBox';
 import { types } from '../reducers/journalReducer'
 import CardInput from './CardInput';
+import "./SubscriptionPage.scss";
 
 
 
@@ -101,18 +102,23 @@ const SubcriptionPage = (props) => {
 
 
 return(
-    <div>
-        <InputBox
-            divClassName={"email"}
-            label={"Email: "}
-            rows={"1"}
-            dispatch={dispatch}
-            dispatchAction={types.CHANGE_EMAIL}
-            value={journalState.bio.email}
-        />
-        <CardInput/>
-        <div>
-            <button type="submit" onClick={handleSubmitSub}> Subscribe </button>
+    <div className='subscriptionSectionContainer'>
+        <div className={'logoDiv'}>
+            <img className={'logoImg'}src="dtc-logo-black.png" alt="Logo"/>
+            <div className={'subscriptionSection'}>
+                <InputBox
+                    divClassName={"email"}
+                    label={"Email: "}
+                    rows={"1"}
+                    dispatch={dispatch}
+                    dispatchAction={types.CHANGE_EMAIL}
+                    value={journalState.bio.email}
+                />
+                <CardInput/>
+                <div className={'subscribeButtonDiv'}>
+                    <button className={'subscriptionButton'} type="submit" onClick={handleSubmitSub}> Subscribe </button>
+                </div>
+            </div>
         </div>
     </div>
 )

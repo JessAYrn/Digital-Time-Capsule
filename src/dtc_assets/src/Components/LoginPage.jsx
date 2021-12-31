@@ -1,17 +1,32 @@
 import React, {useContext} from "react";
-import { AppContext } from "../App";
+import { AppContext as JournalContext } from "../App";
+import { AppContext as AccountContext } from "../AccountPage";
+// import { AppContext as PodcastContext } from "../PodcastPage"
 import "./LoginPage.scss";
 
 
 const LoginPage = (props) => {
+
+    const {
+        context
+    } = props
+
+    let properContext;
+    if(context === 'journal'){
+        properContext = JournalContext
+    } else if(context === 'accountPage'){
+        properContext = AccountContext
+    } 
+    // else if(context === 'podcast'){
+    //     properContext = PodcastContext
+    // }
+
     const {    
             authClient, 
-            setAuthClient,
             setIsLoaded, 
             loginAttempted, 
             setLoginAttempted, 
-            actor,
-        } = useContext(AppContext);
+        } = useContext(properContext);
 
     const handleClick = async () => {
 

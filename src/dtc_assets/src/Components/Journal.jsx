@@ -5,8 +5,6 @@ import { mapApiObjectToFrontEndObject } from "../mappers/journalPageMappers";
 import "./Journal.scss";
 import { AppContext } from "../App";
 import InputBox from "./Fields/InputBox";
-import SubcriptionPage from "./SubcriptionPage";
-
 
 
 const Journal = (props) => {
@@ -151,7 +149,7 @@ const Journal = (props) => {
                                                 <td className={"tableCell "+index}>{page.date}</td>
                                                 <td className={"tableCell "+index}>{page.location}</td>
                                                 <td className={"tableCell "+index}>{page.lockTime}</td>
-                                                <td className={"tableCell "+index}> <button onClick={(e) => openPage(e, index)}> open </button> </td>
+                                                <td className={"tableCell "+index}> <button className={'openButton'} onClick={(e) => openPage(e, index)}> open </button> </td>
                                             </tr>  
                                         );
                                     }) }
@@ -197,10 +195,6 @@ const Journal = (props) => {
                     setIsLoaded(false);
                 }} > Log Out </button>   
             </div>
-            <SubcriptionPage
-                journalState={journalState}
-                dispatch={dispatch}
-            />
         </React.Fragment>
     );
 

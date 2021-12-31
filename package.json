@@ -30,11 +30,11 @@
     "events": "3.3.0",
     "html-webpack-plugin": "5.3.1",
     "mini-css-extract-plugin": "^2.4.3",
-    "node-sass": "^6.0.1",
+    "node-sass": "^7.0.1",
     "nodemon": "^2.0.15",
     "process": "0.11.10",
     "redux-devtools-extension": "^2.13.9",
-    "remotedev-server": "^0.3.1",
+    "remotedev-server": "^0.2.7",
     "sass": "^1.43.3",
     "sass-loader": "^12.2.0",
     "stream-browserify": "3.0.0",
@@ -45,7 +45,7 @@
     "util": "0.12.3",
     "webpack": "^5.24.4",
     "webpack-cli": "4.9.0",
-    "webpack-dev-server": "^3.11.2"
+    "webpack-dev-server": "^4.7.2"
   },
   "browserslist": [
     "last 2 chrome version",
@@ -63,11 +63,14 @@
     "babel-preset-es2021": "^1.0.0",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
+    "get-youtube-id": "^1.0.1",
     "jsonwebtoken": "^8.5.1",
+    "nvm": "^0.0.4",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-redux": "^7.2.6",
     "react-router-dom": "^6.2.1",
+    "react-youtube": "^7.13.1",
     "redux": "^4.1.2",
     "redux-thunk": "^2.4.0"
   }
