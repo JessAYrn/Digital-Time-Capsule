@@ -50,6 +50,7 @@ const JournalPage = (props) => {
             location: journalEntry.location,
             date: journalEntry.date,
             lockTime: journalEntry.lockTime,
+            unlockTime: journalEntry.unlockTime,
             emailOne: journalEntry.emailOne,
             emailTwo: journalEntry.emailTwo,
             emailThree: journalEntry.emailThree

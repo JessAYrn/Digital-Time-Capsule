@@ -20,6 +20,7 @@ shared(msg) actor class Journal (principal : Principal){
         location: Text;
         date: Text;
         lockTime: Text;
+        unlockTime: Text;
         emailOne: Text;
         emailTwo: Text;
         emailThree: Text;

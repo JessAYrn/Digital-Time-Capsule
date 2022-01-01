@@ -54,14 +54,18 @@ const Journal = (props) => {
 
     const displayJournalTable = () => {
 
-        const openPage = (e, index) => {
-            setPageIsVisibleArray(pageIsVisibleArray.map((page, mapIndex) => {
-                if(index === mapIndex){
-                    return true;
-                } else {
-                    return false;
-                }
-            }))
+        const openPage = (e, index, open) => {
+            if(open){
+                setPageIsVisibleArray(pageIsVisibleArray.map((page, mapIndex) => {
+                    if(index === mapIndex){
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }))
+            } else {
+                () => {}
+            }
         };
 
         const addJournalPage = () => {
@@ -144,12 +148,14 @@ const Journal = (props) => {
                             <div class='scrollable'>
                                 <table className={"table"}>
                                     { journalState.journal.map((page, index) => {
+                                        const open = (Date.now() >= parseInt(page.unlockTime));
+                                        const openButton = (open) ? 'Open' : 'Locked';
                                         return(
                                             <tr className={"tableRow "+index}>
                                                 <td className={"tableCell "+index}>{page.date}</td>
                                                 <td className={"tableCell "+index}>{page.location}</td>
                                                 <td className={"tableCell "+index}>{page.lockTime}</td>
-                                                <td className={"tableCell "+index}> <button className={'openButton'} onClick={(e) => openPage(e, index)}> open </button> </td>
+                                                <td className={"tableCell "+index}> <button className={'openButton'} onClick={(e) => openPage(e, index, open)}> {openButton} </button> </td>
                                             </tr>  
                                         );
                                     }) }

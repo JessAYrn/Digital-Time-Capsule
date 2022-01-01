@@ -13,6 +13,7 @@ export const idlFactory = ({ IDL }) => {
   const Result = IDL.Variant({ 'ok' : IDL.Null, 'err' : Error });
   const EntryKey = IDL.Record({ 'entryKey' : IDL.Nat });
   const JournalEntry = IDL.Record({
+    'unlockTime' : IDL.Text,
     'emailThree' : IDL.Text,
     'date' : IDL.Text,
     'text' : IDL.Text,

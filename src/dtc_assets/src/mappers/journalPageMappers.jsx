@@ -44,6 +44,7 @@ export const mapApiObjectToFrontEndObject = (backEndObj) => {
         title: backEndObj.entryTitle,
         location: backEndObj.location,
         lockTime: backEndObj.lockTime,
+        unlockTime: backEndObj.unlockTime,
         entry: backEndObj.text,
         emailOne: backEndObj.emailOne,
         emailTwo: backEndObj.emailTwo,

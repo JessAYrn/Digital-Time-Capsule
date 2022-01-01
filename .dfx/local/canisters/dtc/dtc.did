@@ -75,6 +75,7 @@ type JournalEntry =
    location: text;
    lockTime: text;
    "text": text;
+   unlockTime: text;
  };
 type Hash = nat32;
 type Error = 

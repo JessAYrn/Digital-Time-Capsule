@@ -38,6 +38,7 @@ actor class User(){
         location: Text;
         date: Text;
         lockTime: Text;
+        unlockTime: Text;
         emailOne: Text;
         emailTwo: Text;
         emailThree: Text;

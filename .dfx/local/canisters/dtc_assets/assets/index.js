@@ -70834,6 +70834,7 @@ const JournalPage = (props) => {
                 location: journalEntry.location,
                 date: journalEntry.date,
                 lockTime: journalEntry.lockTime,
+                unlockTime: journalEntry.unlockTime,
                 emailOne: journalEntry.emailOne,
                 emailTwo: journalEntry.emailTwo,
                 emailThree: journalEntry.emailThree
@@ -70864,6 +70865,7 @@ const JournalPage = (props) => {
         // await mapAndSendFileToApi("test1", file1);
         // await mapAndSendFileToApi("test2", file2);
     }, [journalPageData, file1, file2]);
+    console.log(journalPageData);
     return (react_1.default.createElement("div", { className: "journalPageContainer" },
         react_1.default.createElement("div", { className: "logoDiv" },
             react_1.default.createElement("img", { className: 'backButtonImg', src: "back-icon.png", alt: "Back Button", onClick: (e) => closePage(e) }),
@@ -71106,13 +71108,10 @@ const HomePage = () => {
     return (react_1.default.createElement("div", { className: "container" },
         react_1.default.createElement("div", { className: 'linkDiv' },
             react_1.default.createElement("nav", { className: 'navBar' },
-                react_1.default.createElement(react_router_dom_1.Link, { className: "navLink", to: "/" }, "Home"),
+                react_1.default.createElement(react_router_dom_1.Link, { className: "navLink", to: "app" }, "Time Capsule"),
                 " |",
                 " ",
-                react_1.default.createElement(react_router_dom_1.Link, { className: "navLink", to: "app" }, "App"),
-                " |",
-                " ",
-                react_1.default.createElement(react_router_dom_1.Link, { className: "navLink", to: 'account' }, "My Account"))),
+                react_1.default.createElement(react_router_dom_1.Link, { className: "navLink", to: 'account' }, "Account"))),
         react_1.default.createElement("div", { className: "background center" },
             react_1.default.createElement("div", { class: 'scrollable' },
                 react_1.default.createElement("div", { className: 'transparentDiv' },
@@ -71273,7 +71272,11 @@ const mapApiObjectToFrontEndObject = (backEndObj) => {
         title: backEndObj.entryTitle,
         location: backEndObj.location,
         lockTime: backEndObj.lockTime,
-        entry: backEndObj.text
+        unlockTime: backEndObj.unlockTime,
+        entry: backEndObj.text,
+        emailOne: backEndObj.emailOne,
+        emailTwo: backEndObj.emailTwo,
+        emailThree: backEndObj.emailThree
     };
 };
 exports.mapApiObjectToFrontEndObject = mapApiObjectToFrontEndObject;
@@ -71360,7 +71363,7 @@ const freshPage = {
     location: '',
     entry: '',
     lockTime: '3',
-    timeTillUnlock: '0',
+    unlockTime: '0',
     emailOne: '',
     emailTwo: '',
     emailThree: ''
@@ -71451,9 +71454,11 @@ const changeValue = (state = exports.initialState, action) => {
                 ...state
             };
         case exports.types.CHANGE_LOCK_TIME:
+            const unlockTime = Date.now() + parseInt(payload) * 86400000 * 30;
             updatedJournalPage = {
                 ...state.journal[index],
-                lockTime: payload
+                lockTime: payload,
+                unlockTime: `${unlockTime}`
             };
             state.journal[index] = updatedJournalPage;
             return {
@@ -74446,6 +74451,7 @@ const idlFactory = ({ IDL }) => {
   const Result = IDL.Variant({ 'ok' : IDL.Null, 'err' : Error });
   const EntryKey = IDL.Record({ 'entryKey' : IDL.Nat });
   const JournalEntry = IDL.Record({
+    'unlockTime' : IDL.Text,
     'emailThree' : IDL.Text,
     'date' : IDL.Text,
     'text' : IDL.Text,
@@ -74528,7 +74534,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 // CANISTER_ID is replaced by webpack based on node environment
-const canisterId = "u7xn3-ciaaa-aaaaa-aaa4a-cai";
+const canisterId = "7thi4-vqaaa-aaaaa-aabaq-cai";
 
 /**
  * 

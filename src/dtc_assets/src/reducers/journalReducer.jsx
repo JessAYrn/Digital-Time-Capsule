@@ -48,7 +48,7 @@ const freshPage = {
     location: '',
     entry: '',
     lockTime: '3',
-    timeTillUnlock: '0',
+    unlockTime: `${Date.now() + 86400000 * 3 * 30}`,
     emailOne: '',
     emailTwo: '',
     emailThree: ''
@@ -144,9 +144,11 @@ const changeValue = (state = initialState, action) => {
                 ...state
             }
         case types.CHANGE_LOCK_TIME:
+            const unlockTime = Date.now() + parseInt(payload) * 86400000 * 30;
             updatedJournalPage = {
                 ... state.journal[index],
-                lockTime: payload
+                lockTime: payload,
+                unlockTime: `${unlockTime}`
             }
             state.journal[index] = updatedJournalPage;
             return {
