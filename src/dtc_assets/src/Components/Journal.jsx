@@ -20,16 +20,24 @@ const Journal = (props) => {
         const journal = await actor.readJournal();
         console.log(journal);
         if("err" in journal){
-            actor.create({userName: "admin"}).then((result) => {
+            actor.create({
+                userName: "admin",
+                email: "admin@test.com"
+        }).then((result) => {
                 console.log(result);
             });
         } else {
-            const journalEntries = journal.ok[0].map((arrayWithKeyAndPage) => {
+            const journalEntries = journal.ok.userJournalData[0].map((arrayWithKeyAndPage) => {
                 return mapApiObjectToFrontEndObject(arrayWithKeyAndPage[1]);
             });
-            const journalBio = journal.ok[1];
+            const journalBio = journal.ok.userJournalData[1];
+            const metaData = {email : journal.ok.email, userName: journal.ok.userName};
             
             setJournalSize(journal.length);
+            dispatch({
+                payload: metaData,
+                actionType: types.SET_METADATA
+            })
             dispatch({
                 payload: journalBio,
                 actionType: types.SET_BIO

@@ -28,13 +28,18 @@ type Result_3 =
 type Result_2 = 
  variant {
    err: Error;
-   ok: record {
-         vec record {
-               nat;
-               JournalEntry;
-             };
-         Bio;
-       };
+   ok:
+    record {
+      email: text;
+      userJournalData: record {
+                         vec record {
+                               nat;
+                               JournalEntry;
+                             };
+                         Bio;
+                       };
+      userName: text;
+    };
  };
 type Result_1 = 
  variant {
@@ -46,7 +51,11 @@ type Result =
    err: Error;
    ok;
  };
-type ProfileInput = record {userName: text;};
+type ProfileInput = 
+ record {
+   email: text;
+   userName: text;
+ };
 type List = 
  opt record {
        record {

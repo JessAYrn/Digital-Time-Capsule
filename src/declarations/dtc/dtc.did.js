@@ -1,7 +1,10 @@
 export const idlFactory = ({ IDL }) => {
   const List = IDL.Rec();
   const Trie = IDL.Rec();
-  const ProfileInput = IDL.Record({ 'userName' : IDL.Text });
+  const ProfileInput = IDL.Record({
+    'userName' : IDL.Text,
+    'email' : IDL.Text,
+  });
   const AmountAccepted = IDL.Record({ 'accepted' : IDL.Nat64 });
   const Error = IDL.Variant({
     'NotFound' : IDL.Null,
@@ -32,7 +35,14 @@ export const idlFactory = ({ IDL }) => {
     'dedications' : IDL.Text,
   });
   const Result_2 = IDL.Variant({
-    'ok' : IDL.Tuple(IDL.Vec(IDL.Tuple(IDL.Nat, JournalEntry)), Bio),
+    'ok' : IDL.Record({
+      'userName' : IDL.Text,
+      'email' : IDL.Text,
+      'userJournalData' : IDL.Tuple(
+        IDL.Vec(IDL.Tuple(IDL.Nat, JournalEntry)),
+        Bio,
+      ),
+    }),
     'err' : Error,
   });
   const Branch = IDL.Record({

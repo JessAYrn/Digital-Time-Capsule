@@ -11,12 +11,14 @@ actor class User(){
 
     type Profile = {
         journal : Journal.Journal;
+        email: Text;
         userName: Text;
         id: Principal;
     };
 
     type ProfileInput = {
         userName: Text;
+        email: Text;
     };
 
     type AmountAccepted = {
@@ -97,6 +99,7 @@ actor class User(){
 
                 let userProfile: Profile = {
                     journal = newUserJournal;
+                    email = profile.email;
                     userName = profile.userName;
                     id = callerId;
                 };
@@ -120,7 +123,13 @@ actor class User(){
     };
 
     //read Journal
-    public shared(msg) func readJournal () : async Result.Result<([(Nat,JournalEntry)], Bio), Error> {
+    public shared(msg) func readJournal () : async Result.Result<(
+            {
+                userJournalData : ([(Nat,JournalEntry)], Bio);
+                email: Text;
+                userName: Text;
+            }
+        ), Error> {
 
         //Reject Anonymous User
         //if(Principal.toText(msg.caller) == "2vxsx-fae"){
@@ -141,8 +150,13 @@ actor class User(){
             };
             case(? v){
                 let journal = v.journal; 
-                let userJournal = await journal.readJournal();
-                return userJournal;
+                let userJournalData = await journal.readJournal();
+                
+                return #ok({
+                    userJournalData = userJournalData;
+                    email = v.email;
+                    userName = v.userName;
+                });
                 
             };
         };
@@ -300,6 +314,7 @@ actor class User(){
 
                 let userProfile : Profile = {
                     journal = v.journal;
+                    email = profile.email;
                     userName = profile.userName;
                     id = callerId;
                 };

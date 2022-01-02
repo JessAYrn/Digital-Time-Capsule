@@ -133,9 +133,9 @@ shared(msg) actor class Journal (principal : Principal){
         };
     };
 
-    public func readJournal() : async Result.Result<([(Nat,JournalEntry)], Bio),Error> {
+    public func readJournal() : async ([(Nat,JournalEntry)], Bio) {
         let journalAsArray = Iter.toArray(Trie.iter(journal));
-        return #ok(((journalAsArray), biography));
+        return ((journalAsArray), biography);
     };
 
     public func readJournalEntry(key : Nat): async Result.Result<JournalEntry, Error> {

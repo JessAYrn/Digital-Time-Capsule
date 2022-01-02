@@ -70650,6 +70650,7 @@ const journalPageMappers_1 = __webpack_require__(/*! ../mappers/journalPageMappe
 __webpack_require__(/*! ./Journal.scss */ "./src/dtc_assets/src/Components/Journal.scss");
 const App_1 = __webpack_require__(/*! ../App */ "./src/dtc_assets/src/App.jsx");
 const InputBox_1 = __importDefault(__webpack_require__(/*! ./Fields/InputBox */ "./src/dtc_assets/src/Components/Fields/InputBox.jsx"));
+const Constants_1 = __webpack_require__(/*! ../Constants */ "./src/dtc_assets/src/Constants.jsx");
 const Journal = (props) => {
     const [journalState, dispatch] = (0, react_1.useReducer)(journalReducer_1.default, journalReducer_1.initialState);
     const [pageIsVisibleArray, setPageIsVisibleArray] = (0, react_1.useState)(journalState.journal.map((page) => false));
@@ -70660,16 +70661,24 @@ const Journal = (props) => {
         const journal = await actor.readJournal();
         console.log(journal);
         if ("err" in journal) {
-            actor.create({ userName: "Default" }).then((result) => {
+            actor.create({
+                userName: "admin",
+                email: "admin@test.com"
+            }).then((result) => {
                 console.log(result);
             });
         }
         else {
-            const journalEntries = journal.ok[0].map((arrayWithKeyAndPage) => {
+            const journalEntries = journal.ok.userJournalData[0].map((arrayWithKeyAndPage) => {
                 return (0, journalPageMappers_1.mapApiObjectToFrontEndObject)(arrayWithKeyAndPage[1]);
             });
-            const journalBio = journal.ok[1];
+            const journalBio = journal.ok.userJournalData[1];
+            const metaData = { email: journal.ok.email, userName: journal.ok.userName };
             setJournalSize(journal.length);
+            dispatch({
+                payload: metaData,
+                actionType: journalReducer_1.types.SET_METADATA
+            });
             dispatch({
                 payload: journalBio,
                 actionType: journalReducer_1.types.SET_BIO
@@ -70692,15 +70701,20 @@ const Journal = (props) => {
         }));
     }, [journalState.journal.length]);
     const displayJournalTable = () => {
-        const openPage = (e, index) => {
-            setPageIsVisibleArray(pageIsVisibleArray.map((page, mapIndex) => {
-                if (index === mapIndex) {
-                    return true;
-                }
-                else {
-                    return false;
-                }
-            }));
+        const openPage = (e, index, open) => {
+            if (open) {
+                setPageIsVisibleArray(pageIsVisibleArray.map((page, mapIndex) => {
+                    if (index === mapIndex) {
+                        return true;
+                    }
+                    else {
+                        return false;
+                    }
+                }));
+            }
+            else {
+                () => { };
+            }
         };
         const addJournalPage = () => {
             dispatch({
@@ -70736,17 +70750,33 @@ const Journal = (props) => {
                             react_1.default.createElement("tr", { className: "tableRow " },
                                 react_1.default.createElement("th", { className: "tableCell " }, "DATE"),
                                 react_1.default.createElement("th", { className: "tableCell " }, "LOCATION"),
-                                react_1.default.createElement("th", { className: "tableCell " }, "LOCKTIME"),
+                                react_1.default.createElement("th", { className: "tableCell " }, "TIME LAPSED"),
                                 react_1.default.createElement("th", { className: "tableCell " }))),
                         react_1.default.createElement("div", { class: 'scrollable' },
                             react_1.default.createElement("table", { className: "table" }, journalState.journal.map((page, index) => {
+                                const unlockTimeAsInt = parseInt(page.unlockTime);
+                                const currentTimeAsInt = Date.now();
+                                const open = (currentTimeAsInt >= unlockTimeAsInt);
+                                const remainingWaitTime = unlockTimeAsInt - currentTimeAsInt;
+                                const remainingWaitTimeInMonths = remainingWaitTime / (Constants_1.dayInSeconds * Constants_1.monthInDays);
+                                const timeLapsed = page.lockTime - remainingWaitTimeInMonths;
+                                const timeLapsedRound = Math.round(timeLapsed * 100) / 100;
+                                const openButton = (open) ? 'Open' : 'Locked';
                                 return (react_1.default.createElement("tr", { className: "tableRow " + index },
                                     react_1.default.createElement("td", { className: "tableCell " + index }, page.date),
                                     react_1.default.createElement("td", { className: "tableCell " + index }, page.location),
-                                    react_1.default.createElement("td", { className: "tableCell " + index }, page.lockTime),
                                     react_1.default.createElement("td", { className: "tableCell " + index },
                                         " ",
-                                        react_1.default.createElement("button", { className: 'openButton', onClick: (e) => openPage(e, index) }, " open "),
+                                        timeLapsedRound,
+                                        " / ",
+                                        page.lockTime,
+                                        " mo."),
+                                    react_1.default.createElement("td", { className: "tableCell " + index },
+                                        " ",
+                                        react_1.default.createElement("button", { className: 'openButton', onClick: (e) => openPage(e, index, open) },
+                                            " ",
+                                            openButton,
+                                            " "),
                                         " ")));
                             })))),
                     react_1.default.createElement("div", { className: 'addNewEntryButtonDiv' },
@@ -71059,6 +71089,22 @@ exports["default"] = SubcriptionPage;
 
 /***/ }),
 
+/***/ "./src/dtc_assets/src/Constants.jsx":
+/*!******************************************!*\
+  !*** ./src/dtc_assets/src/Constants.jsx ***!
+  \******************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.monthInDays = exports.dayInSeconds = void 0;
+exports.dayInSeconds = 86400000;
+exports.monthInDays = 30;
+
+
+/***/ }),
+
 /***/ "./src/dtc_assets/src/Contexts.jsx":
 /*!*****************************************!*\
   !*** ./src/dtc_assets/src/Contexts.jsx ***!
@@ -71310,15 +71356,17 @@ exports["default"] = logger;
 /*!********************************************************!*\
   !*** ./src/dtc_assets/src/reducers/journalReducer.jsx ***!
   \********************************************************/
-/***/ ((__unused_webpack_module, exports) => {
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.initialState = exports.types = void 0;
+const Constants_1 = __webpack_require__(/*! ../Constants */ "./src/dtc_assets/src/Constants.jsx");
 exports.types = {
     SET_JOURNAL: "SET_JOURNAL",
     SET_BIO: "SET_BIO",
+    SET_METADATA: "SET_METADATA",
     CHANGE_DATE: "CHANGE_DATE",
     CHANGE_LOCATION: "CHANGE_LOCATION",
     CHANGE_ENTRY: "CHANGE_ENTRY",
@@ -71336,6 +71384,10 @@ exports.types = {
     CHANGE_RECIPIENT_EMAIL_THREE: "CHANGE_RECIPIENT_EMAIL_THREE"
 };
 exports.initialState = {
+    metaData: {
+        email: '',
+        userName: ''
+    },
     bio: {
         name: '',
         dob: '',
@@ -71363,7 +71415,7 @@ const freshPage = {
     location: '',
     entry: '',
     lockTime: '3',
-    unlockTime: '0',
+    unlockTime: `${Date.now() + Constants_1.dayInSeconds * 3 * Constants_1.monthInDays}`,
     emailOne: '',
     emailTwo: '',
     emailThree: ''
@@ -71379,6 +71431,11 @@ const changeValue = (state = exports.initialState, action) => {
             };
         case exports.types.SET_BIO:
             state.bio = payload;
+            return {
+                ...state
+            };
+        case exports.types.SET_METADATA:
+            state.metaData = payload;
             return {
                 ...state
             };
@@ -71454,7 +71511,7 @@ const changeValue = (state = exports.initialState, action) => {
                 ...state
             };
         case exports.types.CHANGE_LOCK_TIME:
-            const unlockTime = Date.now() + parseInt(payload) * 86400000 * 30;
+            const unlockTime = Date.now() + parseInt(payload) * Constants_1.dayInSeconds * 30;
             updatedJournalPage = {
                 ...state.journal[index],
                 lockTime: payload,
@@ -74439,7 +74496,10 @@ __webpack_require__.r(__webpack_exports__);
 const idlFactory = ({ IDL }) => {
   const List = IDL.Rec();
   const Trie = IDL.Rec();
-  const ProfileInput = IDL.Record({ 'userName' : IDL.Text });
+  const ProfileInput = IDL.Record({
+    'userName' : IDL.Text,
+    'email' : IDL.Text,
+  });
   const AmountAccepted = IDL.Record({ 'accepted' : IDL.Nat64 });
   const Error = IDL.Variant({
     'NotFound' : IDL.Null,
@@ -74470,7 +74530,14 @@ const idlFactory = ({ IDL }) => {
     'dedications' : IDL.Text,
   });
   const Result_2 = IDL.Variant({
-    'ok' : IDL.Tuple(IDL.Vec(IDL.Tuple(IDL.Nat, JournalEntry)), Bio),
+    'ok' : IDL.Record({
+      'userName' : IDL.Text,
+      'email' : IDL.Text,
+      'userJournalData' : IDL.Tuple(
+        IDL.Vec(IDL.Tuple(IDL.Nat, JournalEntry)),
+        Bio,
+      ),
+    }),
     'err' : Error,
   });
   const Branch = IDL.Record({
@@ -74534,7 +74601,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 // CANISTER_ID is replaced by webpack based on node environment
-const canisterId = "7thi4-vqaaa-aaaaa-aabaq-cai";
+const canisterId = "6lo57-3qaaa-aaaaa-aabeq-cai";
 
 /**
  * 

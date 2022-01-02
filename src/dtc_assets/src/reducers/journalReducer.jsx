@@ -4,6 +4,7 @@ import { dayInSeconds, monthInDays } from "../Constants"
 export const types = {
     SET_JOURNAL: "SET_JOURNAL",
     SET_BIO: "SET_BIO",
+    SET_METADATA: "SET_METADATA",
     CHANGE_DATE: "CHANGE_DATE",
     CHANGE_LOCATION: "CHANGE_LOCATION",
     CHANGE_ENTRY: "CHANGE_ENTRY",
@@ -22,6 +23,10 @@ export const types = {
 }
 
 export const initialState = {
+    metaData: {
+        email: '',
+        userName: ''
+    },
     bio: {
         name: '',
         dob: '',
@@ -75,6 +80,11 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
+        case types.SET_METADATA:
+        state.metaData = payload;
+        return {
+            ...state
+        }
         case types.CHANGE_EMAIL:
             state.bio = {
                 ...state.bio,
