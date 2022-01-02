@@ -5,6 +5,7 @@ import { mapApiObjectToFrontEndObject } from "../mappers/journalPageMappers";
 import "./Journal.scss";
 import { AppContext } from "../App";
 import InputBox from "./Fields/InputBox";
+import { dayInSeconds, monthInDays } from "../Constants";
 
 
 const Journal = (props) => {
@@ -19,7 +20,7 @@ const Journal = (props) => {
         const journal = await actor.readJournal();
         console.log(journal);
         if("err" in journal){
-            actor.create({userName: "Default"}).then((result) => {
+            actor.create({userName: "admin"}).then((result) => {
                 console.log(result);
             });
         } else {
@@ -140,7 +141,7 @@ const Journal = (props) => {
                                 <tr className={"tableRow "}>
                                     <th className={"tableCell "}>DATE</th>
                                     <th className={"tableCell "}>LOCATION</th>
-                                    <th className={"tableCell "}>LOCKTIME</th>
+                                    <th className={"tableCell "}>TIME LAPSED</th>
                                     <th className={"tableCell "}></th>
 
                                 </tr>
@@ -148,13 +149,19 @@ const Journal = (props) => {
                             <div class='scrollable'>
                                 <table className={"table"}>
                                     { journalState.journal.map((page, index) => {
-                                        const open = (Date.now() >= parseInt(page.unlockTime));
+                                        const unlockTimeAsInt = parseInt(page.unlockTime);
+                                        const currentTimeAsInt = Date.now();
+                                        const open = (currentTimeAsInt >= unlockTimeAsInt);
+                                        const remainingWaitTime = unlockTimeAsInt - currentTimeAsInt;
+                                        const remainingWaitTimeInMonths = remainingWaitTime / (dayInSeconds * monthInDays);
+                                        const timeLapsed = page.lockTime - remainingWaitTimeInMonths;
+                                        const timeLapsedRound = Math.round(timeLapsed * 100) / 100;
                                         const openButton = (open) ? 'Open' : 'Locked';
                                         return(
                                             <tr className={"tableRow "+index}>
                                                 <td className={"tableCell "+index}>{page.date}</td>
                                                 <td className={"tableCell "+index}>{page.location}</td>
-                                                <td className={"tableCell "+index}>{page.lockTime}</td>
+                                                <td className={"tableCell "+index}> {timeLapsedRound} / {page.lockTime} mo.</td>
                                                 <td className={"tableCell "+index}> <button className={'openButton'} onClick={(e) => openPage(e, index, open)}> {openButton} </button> </td>
                                             </tr>  
                                         );

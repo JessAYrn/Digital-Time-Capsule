@@ -1,3 +1,6 @@
+import { dayInSeconds, monthInDays } from "../Constants"
+
+
 export const types = {
     SET_JOURNAL: "SET_JOURNAL",
     SET_BIO: "SET_BIO",
@@ -48,7 +51,7 @@ const freshPage = {
     location: '',
     entry: '',
     lockTime: '3',
-    unlockTime: `${Date.now() + 86400000 * 3 * 30}`,
+    unlockTime: `${Date.now() + dayInSeconds * 3 * monthInDays}`,
     emailOne: '',
     emailTwo: '',
     emailThree: ''
@@ -144,7 +147,7 @@ const changeValue = (state = initialState, action) => {
                 ...state
             }
         case types.CHANGE_LOCK_TIME:
-            const unlockTime = Date.now() + parseInt(payload) * 86400000 * 30;
+            const unlockTime = Date.now() + parseInt(payload) * dayInSeconds * 30;
             updatedJournalPage = {
                 ... state.journal[index],
                 lockTime: payload,
