@@ -1,12 +1,13 @@
 type User = 
  service {
-   create: (ProfileInput) -> (Result_4);
+   create: (ProfileInput) -> (Result_5);
    createJournalEntryFile: (text, text, blob) -> (Result);
    delete: () -> (Result);
+   getEntriesToBeSent: () -> (Result_4);
    readEntry: (EntryKey) -> (Result_3);
    readJournal: () -> (Result_2);
    updateBio: (Bio) -> (Result);
-   updateJournalEntry: (opt EntryKey, opt JournalEntry) -> (Result_1);
+   updateJournalEntry: (opt EntryKey, opt JournalEntryInput) -> (Result_1);
    updateProfile: (ProfileInput) -> (Result);
  };
 type Trie = 
@@ -15,10 +16,21 @@ type Trie =
    "empty";
    leaf: Leaf;
  };
-type Result_4 = 
+type Result_5 = 
  variant {
    err: Error;
    ok: AmountAccepted;
+ };
+type Result_4 = 
+ variant {
+   err: Error;
+   ok: vec record {
+             text;
+             vec record {
+                   nat;
+                   JournalEntry;
+                 };
+           };
  };
 type Result_3 = 
  variant {
@@ -28,13 +40,18 @@ type Result_3 =
 type Result_2 = 
  variant {
    err: Error;
-   ok: record {
-         vec record {
-               nat;
-               JournalEntry;
-             };
-         Bio;
-       };
+   ok:
+    record {
+      email: text;
+      userJournalData: record {
+                         vec record {
+                               nat;
+                               JournalEntry;
+                             };
+                         Bio;
+                       };
+      userName: text;
+    };
  };
 type Result_1 = 
  variant {
@@ -46,7 +63,11 @@ type Result =
    err: Error;
    ok;
  };
-type ProfileInput = record {userName: text;};
+type ProfileInput = 
+ record {
+   email: text;
+   userName: text;
+ };
 type List = 
  opt record {
        record {
@@ -65,6 +86,17 @@ type Key =
    hash: Hash;
    key: nat;
  };
+type JournalEntryInput = 
+ record {
+   date: text;
+   emailOne: text;
+   emailThree: text;
+   emailTwo: text;
+   entryTitle: text;
+   location: text;
+   lockTime: int;
+   "text": text;
+ };
 type JournalEntry = 
  record {
    date: text;
@@ -73,8 +105,10 @@ type JournalEntry =
    emailTwo: text;
    entryTitle: text;
    location: text;
-   lockTime: text;
+   lockTime: int;
+   sent: bool;
    "text": text;
+   unlockTime: int;
  };
 type Hash = nat32;
 type Error = 

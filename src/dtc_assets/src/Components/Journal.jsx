@@ -5,6 +5,7 @@ import { mapApiObjectToFrontEndObject } from "../mappers/journalPageMappers";
 import "./Journal.scss";
 import { AppContext } from "../App";
 import InputBox from "./Fields/InputBox";
+import { dayInNanoSeconds, monthInDays } from "../Constants";
 
 
 const Journal = (props) => {
@@ -19,16 +20,24 @@ const Journal = (props) => {
         const journal = await actor.readJournal();
         console.log(journal);
         if("err" in journal){
-            actor.create({userName: "Default"}).then((result) => {
+            actor.create({
+                userName: "admin",
+                email: "admin@test.com"
+        }).then((result) => {
                 console.log(result);
             });
         } else {
-            const journalEntries = journal.ok[0].map((arrayWithKeyAndPage) => {
+            const journalEntries = journal.ok.userJournalData[0].map((arrayWithKeyAndPage) => {
                 return mapApiObjectToFrontEndObject(arrayWithKeyAndPage[1]);
             });
-            const journalBio = journal.ok[1];
+            const journalBio = journal.ok.userJournalData[1];
+            const metaData = {email : journal.ok.email, userName: journal.ok.userName};
             
             setJournalSize(journal.length);
+            dispatch({
+                payload: metaData,
+                actionType: types.SET_METADATA
+            })
             dispatch({
                 payload: journalBio,
                 actionType: types.SET_BIO
@@ -54,14 +63,18 @@ const Journal = (props) => {
 
     const displayJournalTable = () => {
 
-        const openPage = (e, index) => {
-            setPageIsVisibleArray(pageIsVisibleArray.map((page, mapIndex) => {
-                if(index === mapIndex){
-                    return true;
-                } else {
-                    return false;
-                }
-            }))
+        const openPage = (e, index, open) => {
+            if(open){
+                setPageIsVisibleArray(pageIsVisibleArray.map((page, mapIndex) => {
+                    if(index === mapIndex){
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }))
+            } else {
+                () => {}
+            }
         };
 
         const addJournalPage = () => {
@@ -136,7 +149,7 @@ const Journal = (props) => {
                                 <tr className={"tableRow "}>
                                     <th className={"tableCell "}>DATE</th>
                                     <th className={"tableCell "}>LOCATION</th>
-                                    <th className={"tableCell "}>LOCKTIME</th>
+                                    <th className={"tableCell "}>TIME LAPSED</th>
                                     <th className={"tableCell "}></th>
 
                                 </tr>
@@ -144,12 +157,20 @@ const Journal = (props) => {
                             <div class='scrollable'>
                                 <table className={"table"}>
                                     { journalState.journal.map((page, index) => {
+                                        const unlockTimeAsInt = page.unlockTime;
+                                        const currentTimeAsInt = Date.now() *1000000;
+                                        const open = (currentTimeAsInt >= unlockTimeAsInt);
+                                        const remainingWaitTime = unlockTimeAsInt - currentTimeAsInt;
+                                        const remainingWaitTimeInMonths = remainingWaitTime / (dayInNanoSeconds * monthInDays);
+                                        const timeLapsed = page.lockTime - remainingWaitTimeInMonths;
+                                        const timeLapsedRound = Math.round(timeLapsed * 100) / 100;
+                                        const openButton = (open) ? 'Open' : 'Locked';
                                         return(
                                             <tr className={"tableRow "+index}>
                                                 <td className={"tableCell "+index}>{page.date}</td>
                                                 <td className={"tableCell "+index}>{page.location}</td>
-                                                <td className={"tableCell "+index}>{page.lockTime}</td>
-                                                <td className={"tableCell "+index}> <button className={'openButton'} onClick={(e) => openPage(e, index)}> open </button> </td>
+                                                <td className={"tableCell "+index}> {timeLapsedRound} / {page.lockTime} mo.</td>
+                                                <td className={"tableCell "+index}> <button className={'openButton'} onClick={(e) => openPage(e, index, open)}> {openButton} </button> </td>
                                             </tr>  
                                         );
                                     }) }
