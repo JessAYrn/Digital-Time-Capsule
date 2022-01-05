@@ -63,6 +63,7 @@ const AccountPage = (props) => {
                     setIsLoaded,
                     loginAttempted, 
                     setLoginAttempted, 
+                    actor
                 }}
             >
                 {
@@ -71,7 +72,7 @@ const AccountPage = (props) => {
                         <SubcriptionPage
                             journalState={journalState}
                             dispatch={dispatch}
-                        />: 
+                        /> : 
                         <LoginPage
                             context={UI_CONTEXTS.ACCOUNT_PAGE}
                         /> 

@@ -5,7 +5,7 @@ import { mapApiObjectToFrontEndObject } from "../mappers/journalPageMappers";
 import "./Journal.scss";
 import { AppContext } from "../App";
 import InputBox from "./Fields/InputBox";
-import { dayInSeconds, monthInDays } from "../Constants";
+import { dayInNanoSeconds, monthInDays } from "../Constants";
 
 
 const Journal = (props) => {
@@ -157,11 +157,11 @@ const Journal = (props) => {
                             <div class='scrollable'>
                                 <table className={"table"}>
                                     { journalState.journal.map((page, index) => {
-                                        const unlockTimeAsInt = parseInt(page.unlockTime);
-                                        const currentTimeAsInt = Date.now();
+                                        const unlockTimeAsInt = page.unlockTime;
+                                        const currentTimeAsInt = Date.now() *1000000;
                                         const open = (currentTimeAsInt >= unlockTimeAsInt);
                                         const remainingWaitTime = unlockTimeAsInt - currentTimeAsInt;
-                                        const remainingWaitTimeInMonths = remainingWaitTime / (dayInSeconds * monthInDays);
+                                        const remainingWaitTimeInMonths = remainingWaitTime / (dayInNanoSeconds * monthInDays);
                                         const timeLapsed = page.lockTime - remainingWaitTimeInMonths;
                                         const timeLapsedRound = Math.round(timeLapsed * 100) / 100;
                                         const openButton = (open) ? 'Open' : 'Locked';

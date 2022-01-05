@@ -6,6 +6,9 @@ import Principal "mo:base/Principal";
 import Time "mo:base/Time";
 import Journal "Journal";
 import Cycles "mo:base/ExperimentalCycles";
+import Buffer "mo:base/Buffer";
+import Iter "mo:base/Iter";
+import Array "mo:base/Array";
 
 actor class User(){
 
@@ -39,8 +42,20 @@ actor class User(){
         text: Text;
         location: Text;
         date: Text;
-        lockTime: Text;
-        unlockTime: Text;
+        lockTime: Int;
+        unlockTime: Int;
+        sent: Bool;
+        emailOne: Text;
+        emailTwo: Text;
+        emailThree: Text;
+    };
+
+    type JournalEntryInput = {
+        entryTitle: Text;
+        text: Text;
+        location: Text;
+        date: Text;
+        lockTime: Int;
         emailOne: Text;
         emailTwo: Text;
         emailThree: Text;
@@ -213,7 +228,7 @@ actor class User(){
         };
     };
 
-    public shared(msg) func updateJournalEntry(entryKey : ?EntryKey, entry : ?JournalEntry) : async Result.Result<Trie.Trie<Nat,JournalEntry>, Error> {
+    public shared(msg) func updateJournalEntry(entryKey : ?EntryKey, entry : ?JournalEntryInput) : async Result.Result<Trie.Trie<Nat,JournalEntry>, Error> {
 
         //Reject Anonymous User
         //if(Principal.toText(msg.caller) == "2vxsx-fae"){
@@ -360,6 +375,49 @@ actor class User(){
                 #ok(());
             };
         };
+    };
+
+    public shared(msg) func getEntriesToBeSent() : async Result.Result<[(Text,[(Nat, JournalEntry)])], Error>{
+
+        let callerId = msg.caller;
+        
+        let callerProfile = Trie.find(
+            profiles,
+            key(callerId), //Key
+            Principal.equal 
+        );
+
+        switch(callerProfile){
+            case null{
+                #err(#NotFound)
+            };
+            case( ? profile){
+                let callerUserName = profile.userName;
+                if(callerUserName == "admin"){
+                    var index = 0;
+                    let numberOfProfiles = Trie.size(profiles);
+                    let profilesIter = Trie.iter(profiles);
+                    let profilesArray = Iter.toArray(profilesIter);
+                    let AllEntriesToBeSentBuffer = Buffer.Buffer<(Text, [(Nat, JournalEntry)])>(1);
+
+                    while(index < numberOfProfiles){
+                        let userProfile = profilesArray[index];
+                        let userEmail = userProfile.1.email;
+                        let userJournal = userProfile.1.journal;
+                        let userEntriesToBeSent = await userJournal.getEntriesToBeSent();
+                        if(userEntriesToBeSent != []){
+                            AllEntriesToBeSentBuffer.add((userEmail, userEntriesToBeSent))
+                        };
+                        index += 1;
+                    };
+
+                    return #ok(AllEntriesToBeSentBuffer.toArray());
+                } else {
+                    #err(#NotAuthorized);
+                }
+            };
+        };
+
     };
 
     private  func key(x: Principal) : Trie.Key<Principal> {

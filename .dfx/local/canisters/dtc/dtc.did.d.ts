@@ -16,11 +16,22 @@ export type Error = { 'NotFound' : null } |
   { 'NoInputGiven' : null };
 export type Hash = number;
 export interface JournalEntry {
-  'unlockTime' : string,
+  'unlockTime' : bigint,
+  'emailThree' : string,
+  'date' : string,
+  'sent' : boolean,
+  'text' : string,
+  'lockTime' : bigint,
+  'emailOne' : string,
+  'emailTwo' : string,
+  'location' : string,
+  'entryTitle' : string,
+}
+export interface JournalEntryInput {
   'emailThree' : string,
   'date' : string,
   'text' : string,
-  'lockTime' : string,
+  'lockTime' : bigint,
   'emailOne' : string,
   'emailTwo' : string,
   'location' : string,
@@ -44,25 +55,30 @@ export type Result_2 = {
   { 'err' : Error };
 export type Result_3 = { 'ok' : JournalEntry } |
   { 'err' : Error };
-export type Result_4 = { 'ok' : AmountAccepted } |
+export type Result_4 = {
+    'ok' : Array<[string, Array<[bigint, JournalEntry]>]>
+  } |
+  { 'err' : Error };
+export type Result_5 = { 'ok' : AmountAccepted } |
   { 'err' : Error };
 export type Trie = { 'branch' : Branch } |
   { 'leaf' : Leaf } |
   { 'empty' : null };
 export interface User {
-  'create' : (arg_0: ProfileInput) => Promise<Result_4>,
+  'create' : (arg_0: ProfileInput) => Promise<Result_5>,
   'createJournalEntryFile' : (
       arg_0: string,
       arg_1: string,
       arg_2: Array<number>,
     ) => Promise<Result>,
   'delete' : () => Promise<Result>,
+  'getEntriesToBeSent' : () => Promise<Result_4>,
   'readEntry' : (arg_0: EntryKey) => Promise<Result_3>,
   'readJournal' : () => Promise<Result_2>,
   'updateBio' : (arg_0: Bio) => Promise<Result>,
   'updateJournalEntry' : (
       arg_0: [] | [EntryKey],
-      arg_1: [] | [JournalEntry],
+      arg_1: [] | [JournalEntryInput],
     ) => Promise<Result_1>,
   'updateProfile' : (arg_0: ProfileInput) => Promise<Result>,
 }

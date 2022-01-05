@@ -32414,7 +32414,7 @@ module.exports = function(isValidElement, throwOnDirectAccess) {
         if (checkerResult == null) {
           return null;
         }
-        if (checkerResult.data.hasOwnProperty('expectedType')) {
+        if (checkerResult.data && has(checkerResult.data, 'expectedType')) {
           expectedTypes.push(checkerResult.data.expectedType);
         }
       }
@@ -62731,11 +62731,13 @@ function shouldUpdateVideo(prevProps, props) {
 
 function filterResetOptions(opts) {
   return _objectSpread(_objectSpread({}, opts), {}, {
-    playerVars: _objectSpread({
+    height: 0,
+    width: 0,
+    playerVars: _objectSpread(_objectSpread({}, opts.playerVars), {}, {
       autoplay: 0,
       start: 0,
       end: 0
-    }, opts.playerVars)
+    })
   });
 }
 /**
@@ -62750,7 +62752,7 @@ function filterResetOptions(opts) {
 
 
 function shouldResetPlayer(prevProps, props) {
-  return !fast_deep_equal__WEBPACK_IMPORTED_MODULE_2___default()(filterResetOptions(prevProps.opts), filterResetOptions(props.opts));
+  return prevProps.videoId !== props.videoId || !fast_deep_equal__WEBPACK_IMPORTED_MODULE_2___default()(filterResetOptions(prevProps.opts), filterResetOptions(props.opts));
 }
 /**
  * Check whether a props change should result in an id or className update.
@@ -62761,7 +62763,7 @@ function shouldResetPlayer(prevProps, props) {
 
 
 function shouldUpdatePlayer(prevProps, props) {
-  return prevProps.id !== props.id || prevProps.className !== props.className;
+  return prevProps.id !== props.id || prevProps.className !== props.className || prevProps.opts.width !== props.opts.width || prevProps.opts.height !== props.opts.height || prevProps.title !== props.title;
 }
 
 var YouTube = /*#__PURE__*/function (_React$Component) {
@@ -62850,6 +62852,9 @@ var YouTube = /*#__PURE__*/function (_React$Component) {
       _this.internalPlayer.getIframe().then(function (iframe) {
         if (_this.props.id) iframe.setAttribute('id', _this.props.id);else iframe.removeAttribute('id');
         if (_this.props.className) iframe.setAttribute('class', _this.props.className);else iframe.removeAttribute('class');
+        if (_this.props.opts && _this.props.opts.width) iframe.setAttribute('width', _this.props.opts.width);else iframe.removeAttribute('width');
+        if (_this.props.opts && _this.props.opts.height) iframe.setAttribute('height', _this.props.opts.height);else iframe.removeAttribute('height');
+        if (typeof _this.props.title === 'string') iframe.setAttribute('title', _this.props.title);else iframe.setAttribute('title', 'YouTube video player');
       });
     });
 
@@ -62948,7 +62953,8 @@ var YouTube = /*#__PURE__*/function (_React$Component) {
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1__.createElement("div", {
         id: this.props.id,
         className: this.props.className,
-        ref: this.refContainer
+        ref: this.refContainer,
+        loading: this.props.loading
       }));
     }
   }]);
@@ -62973,6 +62979,10 @@ YouTube.propTypes = {
   className: (prop_types__WEBPACK_IMPORTED_MODULE_0___default().string),
   // custom class name for player container element
   containerClassName: (prop_types__WEBPACK_IMPORTED_MODULE_0___default().string),
+  // custom title for the iFrame, see https://www.w3.org/TR/WCAG20-TECHS/H64.html
+  title: (prop_types__WEBPACK_IMPORTED_MODULE_0___default().string),
+  // custom loading for player element
+  loading: prop_types__WEBPACK_IMPORTED_MODULE_0___default().oneOf(['lazy', 'eager', 'auto']),
   // https://developers.google.com/youtube/iframe_api_reference#Loading_a_Video_Player
   opts: prop_types__WEBPACK_IMPORTED_MODULE_0___default().objectOf((prop_types__WEBPACK_IMPORTED_MODULE_0___default().any)),
   // event subscriptions
@@ -62989,6 +62999,7 @@ YouTube.defaultProps = {
   videoId: null,
   id: null,
   className: null,
+  loading: null,
   opts: {},
   containerClassName: '',
   onReady: function onReady() {},
@@ -62998,7 +63009,8 @@ YouTube.defaultProps = {
   onEnd: function onEnd() {},
   onStateChange: function onStateChange() {},
   onPlaybackRateChange: function onPlaybackRateChange() {},
-  onPlaybackQualityChange: function onPlaybackQualityChange() {}
+  onPlaybackQualityChange: function onPlaybackQualityChange() {},
+  title: null
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (YouTube);
 
@@ -70244,6 +70256,7 @@ const AccountPage = (props) => {
                 setIsLoaded,
                 loginAttempted,
                 setLoginAttempted,
+                actor
             } },
             isLoaded &&
                 isAuthenticated ?
@@ -70357,6 +70370,50 @@ const App = () => {
 };
 exports["default"] = App;
 //This is a test
+
+
+/***/ }),
+
+/***/ "./src/dtc_assets/src/Components/AdminSection.jsx":
+/*!********************************************************!*\
+  !*** ./src/dtc_assets/src/Components/AdminSection.jsx ***!
+  \********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const react_1 = __importStar(__webpack_require__(/*! react */ "./node_modules/react/index.js"));
+const AccountPage_1 = __webpack_require__(/*! ../AccountPage */ "./src/dtc_assets/src/AccountPage.jsx");
+const AdminSection = (props) => {
+    const { actor } = (0, react_1.useContext)(AccountPage_1.AppContext);
+    const handleSubmit = async () => {
+        const listOfCapsules = await actor.getEntriesToBeSent();
+        console.log(listOfCapsules);
+    };
+    return (react_1.default.createElement("div", { className: 'subscribeButtonDiv' },
+        react_1.default.createElement("button", { className: 'subscriptionButton', type: "submit", onClick: handleSubmit }, " Send Emails ")));
+};
+exports["default"] = AdminSection;
 
 
 /***/ }),
@@ -70754,11 +70811,11 @@ const Journal = (props) => {
                                 react_1.default.createElement("th", { className: "tableCell " }))),
                         react_1.default.createElement("div", { class: 'scrollable' },
                             react_1.default.createElement("table", { className: "table" }, journalState.journal.map((page, index) => {
-                                const unlockTimeAsInt = parseInt(page.unlockTime);
-                                const currentTimeAsInt = Date.now();
+                                const unlockTimeAsInt = page.unlockTime;
+                                const currentTimeAsInt = Date.now() * 1000000;
                                 const open = (currentTimeAsInt >= unlockTimeAsInt);
                                 const remainingWaitTime = unlockTimeAsInt - currentTimeAsInt;
-                                const remainingWaitTimeInMonths = remainingWaitTime / (Constants_1.dayInSeconds * Constants_1.monthInDays);
+                                const remainingWaitTimeInMonths = remainingWaitTime / (Constants_1.dayInNanoSeconds * Constants_1.monthInDays);
                                 const timeLapsed = page.lockTime - remainingWaitTimeInMonths;
                                 const timeLapsedRound = Math.round(timeLapsed * 100) / 100;
                                 const openButton = (open) ? 'Open' : 'Locked';
@@ -70863,8 +70920,7 @@ const JournalPage = (props) => {
                 text: journalEntry.entry,
                 location: journalEntry.location,
                 date: journalEntry.date,
-                lockTime: journalEntry.lockTime,
-                unlockTime: journalEntry.unlockTime,
+                lockTime: parseInt(journalEntry.lockTime),
                 emailOne: journalEntry.emailOne,
                 emailTwo: journalEntry.emailTwo,
                 emailThree: journalEntry.emailThree
@@ -70900,18 +70956,18 @@ const JournalPage = (props) => {
         react_1.default.createElement("div", { className: "logoDiv" },
             react_1.default.createElement("img", { className: 'backButtonImg', src: "back-icon.png", alt: "Back Button", onClick: (e) => closePage(e) }),
             react_1.default.createElement("img", { className: 'logoImg', src: "dtc-logo-black.png", alt: "Logo" })),
-        react_1.default.createElement(Slider_1.default, { min: 3, max: 120, dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_LOCK_TIME, index: index, value: journalPageData.lockTime }),
+        react_1.default.createElement(Slider_1.default, { min: 3, max: 120, dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_LOCK_TIME, index: index, value: (journalPageData) ? journalPageData.lockTime : '3' }),
         react_1.default.createElement("div", { className: "journalText" },
-            react_1.default.createElement(InputBox_1.default, { label: "Date: ", rows: "1", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_DATE, index: index, value: journalPageData.date }),
-            react_1.default.createElement(InputBox_1.default, { label: "Location: ", rows: "1", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_LOCATION, index: index, value: journalPageData.location }),
-            react_1.default.createElement(InputBox_1.default, { divClassName: "entry", label: "Entry: ", rows: "59", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_ENTRY, index: index, value: journalPageData.entry })),
+            react_1.default.createElement(InputBox_1.default, { label: "Date: ", rows: "1", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_DATE, index: index, value: (journalPageData) ? journalPageData.date : '' }),
+            react_1.default.createElement(InputBox_1.default, { label: "Location: ", rows: "1", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_LOCATION, index: index, value: (journalPageData) ? journalPageData.location : '' }),
+            react_1.default.createElement(InputBox_1.default, { divClassName: "entry", label: "Entry: ", rows: "59", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_ENTRY, index: index, value: (journalPageData) ? journalPageData.entry : '' })),
         react_1.default.createElement("div", { className: "journalImages" },
             react_1.default.createElement(FileUpload_1.default, { label: 'file1', value: file1, setValue: setFile1, index: index }),
             react_1.default.createElement(FileUpload_1.default, { label: 'file2', value: file2, setValue: setFile2, index: index })),
         react_1.default.createElement("div", { className: 'recipientEmailsDiv' },
-            react_1.default.createElement(InputBox_1.default, { label: "1st Recipient Email: ", rows: "1", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_RECIPIENT_EMAIL_ONE, index: index, value: journalPageData.emailOne }),
-            react_1.default.createElement(InputBox_1.default, { label: "2nd Recipient Email: ", rows: "1", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_RECIPIENT_EMAIL_TWO, index: index, value: journalPageData.emailTwo }),
-            react_1.default.createElement(InputBox_1.default, { label: "3rd Recipient Email: ", rows: "1", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_RECIPIENT_EMAIL_THREE, index: index, value: journalPageData.emailThree })),
+            react_1.default.createElement(InputBox_1.default, { label: "1st Recipient Email: ", rows: "1", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_RECIPIENT_EMAIL_ONE, index: index, value: (journalPageData) ? journalPageData.emailOne : '' }),
+            react_1.default.createElement(InputBox_1.default, { label: "2nd Recipient Email: ", rows: "1", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_RECIPIENT_EMAIL_TWO, index: index, value: (journalPageData) ? journalPageData.emailTwo : '' }),
+            react_1.default.createElement(InputBox_1.default, { label: "3rd Recipient Email: ", rows: "1", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_RECIPIENT_EMAIL_THREE, index: index, value: (journalPageData) ? journalPageData.emailThree : '' })),
         react_1.default.createElement("div", null,
             react_1.default.createElement("button", { type: "submit", onClick: handleSubmit }, " Submit "))));
 };
@@ -70997,19 +71053,60 @@ exports["default"] = LoginPage;
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const react_1 = __importDefault(__webpack_require__(/*! react */ "./node_modules/react/index.js"));
+const react_1 = __importStar(__webpack_require__(/*! react */ "./node_modules/react/index.js"));
 const axios_1 = __importDefault(__webpack_require__(/*! axios */ "./node_modules/axios/index.js"));
 const react_stripe_js_1 = __webpack_require__(/*! @stripe/react-stripe-js */ "./node_modules/@stripe/react-stripe-js/dist/react-stripe.umd.js");
 const InputBox_1 = __importDefault(__webpack_require__(/*! ./Fields/InputBox */ "./src/dtc_assets/src/Components/Fields/InputBox.jsx"));
 const journalReducer_1 = __webpack_require__(/*! ../reducers/journalReducer */ "./src/dtc_assets/src/reducers/journalReducer.jsx");
 const CardInput_1 = __importDefault(__webpack_require__(/*! ./CardInput */ "./src/dtc_assets/src/Components/CardInput.jsx"));
+const AdminSection_1 = __importDefault(__webpack_require__(/*! ./AdminSection */ "./src/dtc_assets/src/Components/AdminSection.jsx"));
 __webpack_require__(/*! ./SubscriptionPage.scss */ "./src/dtc_assets/src/Components/SubscriptionPage.scss");
+const AccountPage_1 = __webpack_require__(/*! ../AccountPage */ "./src/dtc_assets/src/AccountPage.jsx");
 const SubcriptionPage = (props) => {
     const { journalState, dispatch } = props;
+    const { actor, authClient } = (0, react_1.useContext)(AccountPage_1.AppContext);
+    (0, react_1.useEffect)(async () => {
+        const journal = await actor.readJournal();
+        console.log(journal);
+        if ("err" in journal) {
+            actor.create({
+                userName: "admin",
+                email: "admin@test.com"
+            }).then((result) => {
+                console.log(result);
+            });
+        }
+        else {
+            const metaData = { email: journal.ok.email, userName: journal.ok.userName };
+            dispatch({
+                payload: metaData,
+                actionType: journalReducer_1.types.SET_METADATA
+            });
+        }
+    }, [actor, authClient]);
     const stripe = (0, react_stripe_js_1.useStripe)();
     const elements = (0, react_stripe_js_1.useElements)();
     const handleSubmitPay = async (e) => {
@@ -71075,12 +71172,13 @@ const SubcriptionPage = (props) => {
             }
         }
     };
+    console.log(journalState.metaData);
     return (react_1.default.createElement("div", { className: 'subscriptionSectionContainer' },
         react_1.default.createElement("div", { className: 'logoDiv' },
             react_1.default.createElement("img", { className: 'logoImg', src: "dtc-logo-black.png", alt: "Logo" }),
             react_1.default.createElement("div", { className: 'subscriptionSection' },
-                react_1.default.createElement(InputBox_1.default, { divClassName: "email", label: "Email: ", rows: "1", dispatch: dispatch, dispatchAction: journalReducer_1.types.CHANGE_EMAIL, value: journalState.bio.email }),
-                react_1.default.createElement(CardInput_1.default, null),
+                react_1.default.createElement(InputBox_1.default, { divClassName: "email", label: "Email: ", rows: "1", dispatch: dispatch, dispatchAction: journalReducer_1.types.CHANGE_EMAIL, value: journalState.metaData.email }),
+                journalState.metaData.userName === 'admin' ? react_1.default.createElement(AdminSection_1.default, null) : react_1.default.createElement(CardInput_1.default, null),
                 react_1.default.createElement("div", { className: 'subscribeButtonDiv' },
                     react_1.default.createElement("button", { className: 'subscriptionButton', type: "submit", onClick: handleSubmitSub }, " Subscribe "))))));
 };
@@ -71098,8 +71196,8 @@ exports["default"] = SubcriptionPage;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.monthInDays = exports.dayInSeconds = void 0;
-exports.dayInSeconds = 86400000;
+exports.monthInDays = exports.dayInNanoSeconds = void 0;
+exports.dayInNanoSeconds = 86400000000000;
 exports.monthInDays = 30;
 
 
@@ -71317,12 +71415,13 @@ const mapApiObjectToFrontEndObject = (backEndObj) => {
         date: backEndObj.date,
         title: backEndObj.entryTitle,
         location: backEndObj.location,
-        lockTime: backEndObj.lockTime,
-        unlockTime: backEndObj.unlockTime,
+        lockTime: parseInt(backEndObj.lockTime),
+        unlockTime: parseInt(backEndObj.unlockTime),
         entry: backEndObj.text,
         emailOne: backEndObj.emailOne,
         emailTwo: backEndObj.emailTwo,
-        emailThree: backEndObj.emailThree
+        emailThree: backEndObj.emailThree,
+        sent: backEndObj.sent
     };
 };
 exports.mapApiObjectToFrontEndObject = mapApiObjectToFrontEndObject;
@@ -71356,13 +71455,12 @@ exports["default"] = logger;
 /*!********************************************************!*\
   !*** ./src/dtc_assets/src/reducers/journalReducer.jsx ***!
   \********************************************************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+/***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.initialState = exports.types = void 0;
-const Constants_1 = __webpack_require__(/*! ../Constants */ "./src/dtc_assets/src/Constants.jsx");
 exports.types = {
     SET_JOURNAL: "SET_JOURNAL",
     SET_BIO: "SET_BIO",
@@ -71403,6 +71501,7 @@ exports.initialState = {
             location: 'Loading...',
             entry: 'Loading...',
             lockTime: '3',
+            unlockTime: `${Date.now() * 1000000}`,
             emailOne: '',
             emailTwo: '',
             emailThree: ''
@@ -71415,7 +71514,7 @@ const freshPage = {
     location: '',
     entry: '',
     lockTime: '3',
-    unlockTime: `${Date.now() + Constants_1.dayInSeconds * 3 * Constants_1.monthInDays}`,
+    unlockTime: `${Date.now()}`,
     emailOne: '',
     emailTwo: '',
     emailThree: ''
@@ -71511,11 +71610,9 @@ const changeValue = (state = exports.initialState, action) => {
                 ...state
             };
         case exports.types.CHANGE_LOCK_TIME:
-            const unlockTime = Date.now() + parseInt(payload) * Constants_1.dayInSeconds * 30;
             updatedJournalPage = {
                 ...state.journal[index],
-                lockTime: payload,
-                unlockTime: `${unlockTime}`
+                lockTime: payload
             };
             state.journal[index] = updatedJournalPage;
             return {
@@ -74507,20 +74604,27 @@ const idlFactory = ({ IDL }) => {
     'AlreadyExists' : IDL.Null,
     'NoInputGiven' : IDL.Null,
   });
-  const Result_4 = IDL.Variant({ 'ok' : AmountAccepted, 'err' : Error });
+  const Result_5 = IDL.Variant({ 'ok' : AmountAccepted, 'err' : Error });
   const Result = IDL.Variant({ 'ok' : IDL.Null, 'err' : Error });
-  const EntryKey = IDL.Record({ 'entryKey' : IDL.Nat });
   const JournalEntry = IDL.Record({
-    'unlockTime' : IDL.Text,
+    'unlockTime' : IDL.Int,
     'emailThree' : IDL.Text,
     'date' : IDL.Text,
+    'sent' : IDL.Bool,
     'text' : IDL.Text,
-    'lockTime' : IDL.Text,
+    'lockTime' : IDL.Int,
     'emailOne' : IDL.Text,
     'emailTwo' : IDL.Text,
     'location' : IDL.Text,
     'entryTitle' : IDL.Text,
   });
+  const Result_4 = IDL.Variant({
+    'ok' : IDL.Vec(
+      IDL.Tuple(IDL.Text, IDL.Vec(IDL.Tuple(IDL.Nat, JournalEntry)))
+    ),
+    'err' : Error,
+  });
+  const EntryKey = IDL.Record({ 'entryKey' : IDL.Nat });
   const Result_3 = IDL.Variant({ 'ok' : JournalEntry, 'err' : Error });
   const Bio = IDL.Record({
     'dob' : IDL.Text,
@@ -74540,6 +74644,16 @@ const idlFactory = ({ IDL }) => {
     }),
     'err' : Error,
   });
+  const JournalEntryInput = IDL.Record({
+    'emailThree' : IDL.Text,
+    'date' : IDL.Text,
+    'text' : IDL.Text,
+    'lockTime' : IDL.Int,
+    'emailOne' : IDL.Text,
+    'emailTwo' : IDL.Text,
+    'location' : IDL.Text,
+    'entryTitle' : IDL.Text,
+  });
   const Branch = IDL.Record({
     'left' : Trie,
     'size' : IDL.Nat,
@@ -74555,18 +74669,19 @@ const idlFactory = ({ IDL }) => {
   );
   const Result_1 = IDL.Variant({ 'ok' : Trie, 'err' : Error });
   const User = IDL.Service({
-    'create' : IDL.Func([ProfileInput], [Result_4], []),
+    'create' : IDL.Func([ProfileInput], [Result_5], []),
     'createJournalEntryFile' : IDL.Func(
         [IDL.Text, IDL.Text, IDL.Vec(IDL.Nat8)],
         [Result],
         [],
       ),
     'delete' : IDL.Func([], [Result], []),
+    'getEntriesToBeSent' : IDL.Func([], [Result_4], []),
     'readEntry' : IDL.Func([EntryKey], [Result_3], []),
     'readJournal' : IDL.Func([], [Result_2], []),
     'updateBio' : IDL.Func([Bio], [Result], []),
     'updateJournalEntry' : IDL.Func(
-        [IDL.Opt(EntryKey), IDL.Opt(JournalEntry)],
+        [IDL.Opt(EntryKey), IDL.Opt(JournalEntryInput)],
         [Result_1],
         [],
       ),
@@ -74601,7 +74716,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 // CANISTER_ID is replaced by webpack based on node environment
-const canisterId = "6lo57-3qaaa-aaaaa-aabeq-cai";
+const canisterId = "njulb-sqaaa-aaaaa-aaccq-cai";
 
 /**
  * 

@@ -49,8 +49,7 @@ const JournalPage = (props) => {
             text: journalEntry.entry,
             location: journalEntry.location,
             date: journalEntry.date,
-            lockTime: journalEntry.lockTime,
-            unlockTime: journalEntry.unlockTime,
+            lockTime: parseInt(journalEntry.lockTime),
             emailOne: journalEntry.emailOne,
             emailTwo: journalEntry.emailTwo,
             emailThree: journalEntry.emailThree
@@ -112,12 +111,12 @@ const JournalPage = (props) => {
                 <img className={'logoImg'}src="dtc-logo-black.png" alt="Logo" />
             </div>
             <Slider
-                min={3}
+                min={0}
                 max={120}
                 dispatch={journalReducerDispatchFunction}
                 dispatchAction={types.CHANGE_LOCK_TIME}
                 index={index}
-                value={journalPageData.lockTime}
+                value={(journalPageData) ? journalPageData.lockTime : '3'}
             />
             <div className={"journalText"} >
                 <InputBox
@@ -126,7 +125,7 @@ const JournalPage = (props) => {
                     dispatch={journalReducerDispatchFunction}
                     dispatchAction={types.CHANGE_DATE}
                     index={index}
-                    value={journalPageData.date}
+                    value={(journalPageData) ? journalPageData.date : ''}
                 />
                 <InputBox
                     label={"Location: "}
@@ -134,7 +133,7 @@ const JournalPage = (props) => {
                     dispatch={journalReducerDispatchFunction}
                     dispatchAction={types.CHANGE_LOCATION}
                     index={index}
-                    value={journalPageData.location}
+                    value={(journalPageData) ? journalPageData.location : ''}
                 />
                 <InputBox
                     divClassName={"entry"}
@@ -143,7 +142,7 @@ const JournalPage = (props) => {
                     dispatch={journalReducerDispatchFunction}
                     dispatchAction={types.CHANGE_ENTRY}
                     index={index}
-                    value={journalPageData.entry}
+                    value={(journalPageData) ? journalPageData.entry : ''}
                 />
             </div>
             <div className={"journalImages"}>
@@ -167,7 +166,7 @@ const JournalPage = (props) => {
                     dispatch={journalReducerDispatchFunction}
                     dispatchAction={types.CHANGE_RECIPIENT_EMAIL_ONE}
                     index={index}
-                    value={journalPageData.emailOne}
+                    value={(journalPageData) ? journalPageData.emailOne : ''}
                 />
                 <InputBox
                     label={"2nd Recipient Email: "}
@@ -175,7 +174,7 @@ const JournalPage = (props) => {
                     dispatch={journalReducerDispatchFunction}
                     dispatchAction={types.CHANGE_RECIPIENT_EMAIL_TWO}
                     index={index}
-                    value={journalPageData.emailTwo}
+                    value={(journalPageData) ? journalPageData.emailTwo : ''}
                 />
                 <InputBox
                     label={"3rd Recipient Email: "}
@@ -183,7 +182,7 @@ const JournalPage = (props) => {
                     dispatch={journalReducerDispatchFunction}
                     dispatchAction={types.CHANGE_RECIPIENT_EMAIL_THREE}
                     index={index}
-                    value={journalPageData.emailThree}
+                    value={(journalPageData) ? journalPageData.emailThree : ''}
                 />
             </div>
             <div>

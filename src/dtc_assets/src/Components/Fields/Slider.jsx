@@ -42,7 +42,7 @@ const Slider = (props) => {
         <div className={"sliderDiv"} >
             <div className={"sliderLabelDiv__"+disabledOrEnabled}>
                 <label className={"sliderLabel"}> 
-                    {` Lock Journal For ${sliderValue || '3'} Months`}
+                    {` Lock Journal For ${(sliderValue || sliderValue === 0) ? sliderValue : "3"} Months`}
                 </label>
             </div>
             <div className={"sliderInputDiv"}>
@@ -51,7 +51,7 @@ const Slider = (props) => {
                     min={min} 
                     max={max} 
                     className="slider" 
-                    value={sliderValue || "3"} 
+                    value={(sliderValue || sliderValue === 0) ? sliderValue : "3"} 
                     id="myRange" ref={inputRef}  
                     onBlur={onBlur} 
                     onFocus={onFocus}

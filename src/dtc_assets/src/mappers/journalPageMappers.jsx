@@ -43,11 +43,12 @@ export const mapApiObjectToFrontEndObject = (backEndObj) => {
         date: backEndObj.date,
         title: backEndObj.entryTitle,
         location: backEndObj.location,
-        lockTime: backEndObj.lockTime,
-        unlockTime: backEndObj.unlockTime,
+        lockTime: parseInt(backEndObj.lockTime),
+        unlockTime: parseInt(backEndObj.unlockTime),
         entry: backEndObj.text,
         emailOne: backEndObj.emailOne,
         emailTwo: backEndObj.emailTwo,
-        emailThree: backEndObj.emailThree
+        emailThree: backEndObj.emailThree,
+        sent : backEndObj.sent
     }
 }

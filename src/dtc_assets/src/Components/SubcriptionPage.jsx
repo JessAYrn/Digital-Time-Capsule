@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useEffect, useContext } from 'react';
 import axios from 'axios';
 import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
 import  InputBox  from './Fields/InputBox';
 import { types } from '../reducers/journalReducer'
 import CardInput from './CardInput';
+import AdminSection from './AdminSection';
 import "./SubscriptionPage.scss";
+import { AppContext } from '../AccountPage';
 
 
 
@@ -13,6 +15,28 @@ const SubcriptionPage = (props) => {
         journalState,
         dispatch
     } = props;
+
+    const { actor, authClient } = useContext(AppContext);
+
+    useEffect(async () => {
+        const journal = await actor.readJournal();
+        console.log(journal);
+        if("err" in journal){
+            actor.create({
+                userName: "admin",
+                email: "admin@test.com"
+        }).then((result) => {
+                console.log(result);
+            });
+        } else {
+            const metaData = {email : journal.ok.email, userName: journal.ok.userName};
+            
+            dispatch({
+                payload: metaData,
+                actionType: types.SET_METADATA
+            });
+        }
+    },[actor, authClient]);
 
     const stripe = useStripe();
     const elements = useElements();
@@ -99,7 +123,7 @@ const SubcriptionPage = (props) => {
         }
 
     }; 
-
+    console.log(journalState.metaData);
 
 return(
     <div className='subscriptionSectionContainer'>
@@ -112,13 +136,13 @@ return(
                     rows={"1"}
                     dispatch={dispatch}
                     dispatchAction={types.CHANGE_EMAIL}
-                    value={journalState.bio.email}
+                    value={journalState.metaData.email}
                 />
-                <CardInput/>
+                {journalState.metaData.userName === 'admin' ? <AdminSection/> : <CardInput/>}
                 <div className={'subscribeButtonDiv'}>
                     <button className={'subscriptionButton'} type="submit" onClick={handleSubmitSub}> Subscribe </button>
                 </div>
-            </div>
+            </div> 
         </div>
     </div>
 )
