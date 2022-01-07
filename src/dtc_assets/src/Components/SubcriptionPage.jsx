@@ -50,7 +50,7 @@ const SubcriptionPage = (props) => {
 
         const res = await axios.post(
             'https://6717drw5l0.execute-api.us-east-2.amazonaws.com/pay', 
-            {email: journalState.bio.email}
+            {email: journalState.metaData.email}
         );
 
         const clientSecret = res.data['client_secret'];
@@ -61,7 +61,7 @@ const SubcriptionPage = (props) => {
                 payment_method: {
                     card: elements.getElement(CardElement),
                     billing_details: {
-                        email: journalState.bio.email
+                        email: journalState.metaData.email
                     }
                 }
             }

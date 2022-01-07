@@ -30,7 +30,7 @@ const AdminSection = (props) => {
             {
                 emailAddresses: emailAddresses
             }
-        );
+        ).then(res => console.log(res)).catch(error => console.log(error.message));
     };
 
     return (
