@@ -6,6 +6,18 @@ const AdminSection = (props) => {
 
     const { actor } = useContext(AppContext);
 
+    const postEmail = async (emailAddress) => {
+
+        const res = await axios.post(
+            'https://6717drw5l0.execute-api.us-east-2.amazonaws.com/nodemailer',
+            {
+                emailAddresses: emailAddress
+            }
+        );
+
+        return res;
+    };
+
     const handleSubmit = async () => {
 
         const listOfCapsules = await actor.getEntriesToBeSent();
@@ -14,23 +26,15 @@ const AdminSection = (props) => {
         });
         console.log(emailAddressesArray);
 
-        let emailAddresses = '';
-        
-        emailAddressesArray.forEach(element => {
-            if(emailAddresses){
-                emailAddresses = emailAddresses.concat(", ", element);
-            } else {
-                emailAddresses = emailAddresses.concat(element);
-            }
-        });
-        console.log(emailAddresses);
+        let promises = [];
 
-        const res = await axios.post(
-            'https://6717drw5l0.execute-api.us-east-2.amazonaws.com/nodemailer',
-            {
-                emailAddresses: emailAddresses
-            }
-        ).then(res => console.log(res)).catch(error => console.log(error.message));
+        emailAddressesArray.forEach(element => {
+            promises.push(postEmail(element));
+        });
+
+        const results = await Promise.all(promises);
+        console.log(results);
+        
     };
 
     return (
