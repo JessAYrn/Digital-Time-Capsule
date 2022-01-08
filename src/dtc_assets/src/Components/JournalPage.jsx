@@ -5,6 +5,7 @@ import Slider from "./Fields/Slider";
 import {types} from "../reducers/journalReducer";
 import  {AppContext} from "../App";
 import "./JournalPage.scss";
+import DatePicker from "./Fields/DatePicker";
 
 const CHUNK_SIZE = 1024 * 1024;
 
@@ -119,7 +120,7 @@ const JournalPage = (props) => {
                 value={(journalPageData) ? journalPageData.lockTime : '3'}
             />
             <div className={"journalText"} >
-                <InputBox
+                <DatePicker
                     label={"Date: "}
                     rows={"1"}
                     dispatch={journalReducerDispatchFunction}
