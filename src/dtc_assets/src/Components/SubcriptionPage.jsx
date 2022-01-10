@@ -50,7 +50,7 @@ const SubcriptionPage = (props) => {
 
         const res = await axios.post(
             'https://6717drw5l0.execute-api.us-east-2.amazonaws.com/pay', 
-            {email: journalState.bio.email}
+            {email: journalState.metaData.email}
         );
 
         const clientSecret = res.data['client_secret'];
@@ -61,7 +61,7 @@ const SubcriptionPage = (props) => {
                 payment_method: {
                     card: elements.getElement(CardElement),
                     billing_details: {
-                        email: journalState.bio.email
+                        email: journalState.metaData.email
                     }
                 }
             }
@@ -87,7 +87,7 @@ const SubcriptionPage = (props) => {
             type: 'card',
             card: elements.getElement(CardElement),
             billing_details: {
-                email: journalState.bio.email
+                email: journalState.metaData.email
             }
         });
 
@@ -98,7 +98,7 @@ const SubcriptionPage = (props) => {
                 'https://6717drw5l0.execute-api.us-east-2.amazonaws.com/sub',
                 {
                     payment_method: result.paymentMethod.id,
-                    email: journalState.bio.email
+                    email: journalState.metaData.email
                 }
             );
     
@@ -138,7 +138,8 @@ return(
                     dispatchAction={types.CHANGE_EMAIL}
                     value={journalState.metaData.email}
                 />
-                {journalState.metaData.userName === 'admin' ? <AdminSection/> : <CardInput/>}
+                {journalState.metaData.userName === 'admin' && <AdminSection/>}
+                <CardInput/>
                 <div className={'subscribeButtonDiv'}>
                     <button className={'subscriptionButton'} type="submit" onClick={handleSubmitSub}> Subscribe </button>
                 </div>
