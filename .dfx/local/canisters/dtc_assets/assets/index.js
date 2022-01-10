@@ -23824,6 +23824,33 @@ ___CSS_LOADER_EXPORT___.push([module.id, ".StripeElement {\n  height: 40px;\n  p
 
 /***/ }),
 
+/***/ "./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/dtc_assets/src/Components/Fields/DatePicker.scss":
+/*!*******************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/dtc_assets/src/Components/Fields/DatePicker.scss ***!
+  \*******************************************************************************************************************************************/
+/***/ ((module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../../node_modules/css-loader/dist/runtime/sourceMaps.js */ "./node_modules/css-loader/dist/runtime/sourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, ".inputBox {\n  width: 100%;\n}\n.inputBox .label__disabled {\n  font-family: \"Julius Sans One\", sans-serif;\n  font-size: 0.8rem;\n  color: #a3a3a3;\n}\n.inputBox .label__enabled {\n  font-family: \"Julius Sans One\", sans-serif;\n  font-size: 0.95rem;\n  color: black;\n}\n.inputBox .enabled {\n  font-family: \"Merriweather\", serif;\n  outline: 0;\n  border-width: 0 0 1px;\n  border-radius: 10px;\n  border-color: black;\n  width: 95%;\n}\n.inputBox .disabled {\n  font-family: \"Merriweather\", serif;\n  outline: 0;\n  border-width: 0 0 1px;\n  border-radius: 10px;\n  color: #a3a3a3;\n  width: 95%;\n}", "",{"version":3,"sources":["webpack://./src/dtc_assets/src/Components/Fields/DatePicker.scss"],"names":[],"mappings":"AAAA;EACI,WAAA;AACJ;AAEQ;EACI,0CAAA;EACA,iBAAA;EACA,cAAA;AAAZ;AAEQ;EACI,0CAAA;EACA,kBAAA;EACA,YAAA;AAAZ;AAGI;EACI,kCAAA;EACA,UAAA;EACA,qBAAA;EACA,mBAAA;EACA,mBAAA;EACA,UAAA;AADR;AAII;EACI,kCAAA;EACA,UAAA;EACA,qBAAA;EACA,mBAAA;EACA,cAAA;EACA,UAAA;AAFR","sourcesContent":[".inputBox{\n    width: 100%;\n    .label{\n\n        &__disabled{\n            font-family: 'Julius Sans One', sans-serif;\n            font-size: .80rem;\n            color: rgb(163, 163, 163);\n        }\n        &__enabled{\n            font-family: 'Julius Sans One', sans-serif;\n            font-size: .95rem;\n            color: rgb(0, 0, 0);\n        }\n    }\n    .enabled{\n        font-family: 'Merriweather', serif;\n        outline: 0;\n        border-width: 0 0 1px;\n        border-radius: 10px;\n        border-color: rgb(0, 0, 0);\n        width: 95%;\n    }\n    \n    .disabled{\n        font-family: 'Merriweather', serif;\n        outline: 0;\n        border-width: 0 0 1px;\n        border-radius: 10px;\n        color: rgb(163, 163, 163);\n        width: 95%;\n    }\n}"],"sourceRoot":""}]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ }),
+
 /***/ "./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/dtc_assets/src/Components/Fields/FileUpload.scss":
 /*!*******************************************************************************************************************************************!*\
   !*** ./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/dtc_assets/src/Components/Fields/FileUpload.scss ***!
@@ -23871,7 +23898,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, ".inputBox {\n  width: 100%;\n}\n.inputBox .label__disabled {\n  font-family: \"Julius Sans One\", sans-serif;\n  font-size: 0.8rem;\n  color: #a3a3a3;\n}\n.inputBox .label__enabled {\n  font-family: \"Julius Sans One\", sans-serif;\n  font-size: 0.95rem;\n  color: black;\n}\n.inputBox .enabled {\n  font-family: \"Merriweather\", serif;\n  outline: 0;\n  border-width: 0 0 1px;\n  border-radius: 10px;\n  border-color: black;\n  width: 100%;\n}\n.inputBox .disabled {\n  font-family: \"Merriweather\", serif;\n  outline: 0;\n  border-width: 0 0 1px;\n  border-radius: 10px;\n  color: #a3a3a3;\n  width: 95%;\n}", "",{"version":3,"sources":["webpack://./src/dtc_assets/src/Components/Fields/InputBox.scss"],"names":[],"mappings":"AAAA;EACI,WAAA;AACJ;AAEQ;EACI,0CAAA;EACA,iBAAA;EACA,cAAA;AAAZ;AAEQ;EACI,0CAAA;EACA,kBAAA;EACA,YAAA;AAAZ;AAGI;EACI,kCAAA;EACA,UAAA;EACA,qBAAA;EACA,mBAAA;EACA,mBAAA;EACA,WAAA;AADR;AAII;EACI,kCAAA;EACA,UAAA;EACA,qBAAA;EACA,mBAAA;EACA,cAAA;EACA,UAAA;AAFR","sourcesContent":[".inputBox{\n    width: 100%;\n    .label{\n\n        &__disabled{\n            font-family: 'Julius Sans One', sans-serif;\n            font-size: .80rem;\n            color: rgb(163, 163, 163);\n        }\n        &__enabled{\n            font-family: 'Julius Sans One', sans-serif;\n            font-size: .95rem;\n            color: rgb(0, 0, 0);\n        }\n    }\n    .enabled{\n        font-family: 'Merriweather', serif;\n        outline: 0;\n        border-width: 0 0 1px;\n        border-radius: 10px;\n        border-color: rgb(0, 0, 0);\n        width: 100%;\n    }\n    \n    .disabled{\n        font-family: 'Merriweather', serif;\n        outline: 0;\n        border-width: 0 0 1px;\n        border-radius: 10px;\n        color: rgb(163, 163, 163);\n        width: 95%;\n    }\n}\n\n"],"sourceRoot":""}]);
+___CSS_LOADER_EXPORT___.push([module.id, ".inputBox {\n  width: 100%;\n}\n.inputBox .label__disabled {\n  font-family: \"Julius Sans One\", sans-serif;\n  font-size: 0.8rem;\n  color: #a3a3a3;\n}\n.inputBox .label__enabled {\n  font-family: \"Julius Sans One\", sans-serif;\n  font-size: 0.95rem;\n  color: black;\n}\n.inputBox .enabled {\n  font-family: \"Merriweather\", serif;\n  outline: 0;\n  border-width: 0 0 1px;\n  border-radius: 10px;\n  border-color: black;\n  width: 100%;\n}\n.inputBox .disabled {\n  font-family: \"Merriweather\", serif;\n  outline: 0;\n  border-width: 0 0 1px;\n  border-radius: 10px;\n  color: #a3a3a3;\n  width: 95%;\n}", "",{"version":3,"sources":["webpack://./src/dtc_assets/src/Components/Fields/InputBox.scss"],"names":[],"mappings":"AAAA;EACI,WAAA;AACJ;AAEQ;EACI,0CAAA;EACA,iBAAA;EACA,cAAA;AAAZ;AAEQ;EACI,0CAAA;EACA,kBAAA;EACA,YAAA;AAAZ;AAGI;EACI,kCAAA;EACA,UAAA;EACA,qBAAA;EACA,mBAAA;EACA,mBAAA;EACA,WAAA;AADR;AAII;EACI,kCAAA;EACA,UAAA;EACA,qBAAA;EACA,mBAAA;EACA,cAAA;EACA,UAAA;AAFR","sourcesContent":[".inputBox{\n    width: 100%;\n    .label{\n\n        &__disabled{\n            font-family: 'Julius Sans One', sans-serif;\n            font-size: .80rem;\n            color: rgb(163, 163, 163);\n        }\n        &__enabled{\n            font-family: 'Julius Sans One', sans-serif;\n            font-size: .95rem;\n            color: rgb(0, 0, 0);\n        }\n    }\n    .enabled{\n        font-family: 'Merriweather', serif;\n        outline: 0;\n        border-width: 0 0 1px;\n        border-radius: 10px;\n        border-color: rgb(0, 0, 0);\n        width: 100%;\n    }\n    \n    .disabled{\n        font-family: 'Merriweather', serif;\n        outline: 0;\n        border-width: 0 0 1px;\n        border-radius: 10px;\n        color: rgb(163, 163, 163);\n        width: 95%;\n    }\n}"],"sourceRoot":""}]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -69417,6 +69444,61 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
 
 /***/ }),
 
+/***/ "./src/dtc_assets/src/Components/Fields/DatePicker.scss":
+/*!**************************************************************!*\
+  !*** ./src/dtc_assets/src/Components/Fields/DatePicker.scss ***!
+  \**************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! !../../../../../node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js */ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! !../../../../../node_modules/style-loader/dist/runtime/styleDomAPI.js */ "./node_modules/style-loader/dist/runtime/styleDomAPI.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! !../../../../../node_modules/style-loader/dist/runtime/insertBySelector.js */ "./node_modules/style-loader/dist/runtime/insertBySelector.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! !../../../../../node_modules/style-loader/dist/runtime/setAttributesWithoutAttributes.js */ "./node_modules/style-loader/dist/runtime/setAttributesWithoutAttributes.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! !../../../../../node_modules/style-loader/dist/runtime/insertStyleElement.js */ "./node_modules/style-loader/dist/runtime/insertStyleElement.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! !../../../../../node_modules/style-loader/dist/runtime/styleTagTransform.js */ "./node_modules/style-loader/dist/runtime/styleTagTransform.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_DatePicker_scss__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! !!../../../../../node_modules/css-loader/dist/cjs.js!../../../../../node_modules/sass-loader/dist/cjs.js!./DatePicker.scss */ "./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/dtc_assets/src/Components/Fields/DatePicker.scss");
+
+      
+      
+      
+      
+      
+      
+      
+      
+      
+
+var options = {};
+
+options.styleTagTransform = (_node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5___default());
+options.setAttributes = (_node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3___default());
+
+      options.insert = _node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2___default().bind(null, "head");
+    
+options.domAPI = (_node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1___default());
+options.insertStyleElement = (_node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4___default());
+
+var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default()(_node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_DatePicker_scss__WEBPACK_IMPORTED_MODULE_6__["default"], options);
+
+
+
+
+       /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_DatePicker_scss__WEBPACK_IMPORTED_MODULE_6__["default"] && _node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_DatePicker_scss__WEBPACK_IMPORTED_MODULE_6__["default"].locals ? _node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_DatePicker_scss__WEBPACK_IMPORTED_MODULE_6__["default"].locals : undefined);
+
+
+/***/ }),
+
 /***/ "./src/dtc_assets/src/Components/Fields/FileUpload.scss":
 /*!**************************************************************!*\
   !*** ./src/dtc_assets/src/Components/Fields/FileUpload.scss ***!
@@ -70401,14 +70483,33 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const react_1 = __importStar(__webpack_require__(/*! react */ "./node_modules/react/index.js"));
+const axios_1 = __importDefault(__webpack_require__(/*! axios */ "./node_modules/axios/index.js"));
 const AccountPage_1 = __webpack_require__(/*! ../AccountPage */ "./src/dtc_assets/src/AccountPage.jsx");
 const AdminSection = (props) => {
     const { actor } = (0, react_1.useContext)(AccountPage_1.AppContext);
+    const postEmail = async (emailAddress) => {
+        const res = await axios_1.default.post('https://6717drw5l0.execute-api.us-east-2.amazonaws.com/nodemailer', {
+            emailAddresses: emailAddress
+        });
+        return res;
+    };
     const handleSubmit = async () => {
         const listOfCapsules = await actor.getEntriesToBeSent();
-        console.log(listOfCapsules);
+        const emailAddressesArray = listOfCapsules.ok.map((profile) => {
+            return profile[0];
+        });
+        console.log(emailAddressesArray);
+        let promises = [];
+        emailAddressesArray.forEach(element => {
+            promises.push(postEmail(element));
+        });
+        const results = await Promise.all(promises);
+        console.log(results);
     };
     return (react_1.default.createElement("div", { className: 'subscribeButtonDiv' },
         react_1.default.createElement("button", { className: 'subscriptionButton', type: "submit", onClick: handleSubmit }, " Send Emails ")));
@@ -70454,6 +70555,69 @@ const CardInput = (props) => {
     return (react_1.default.createElement(react_stripe_js_1.CardElement, { options: CARD_ELEMENT_OPTIONS }));
 };
 exports["default"] = CardInput;
+
+
+/***/ }),
+
+/***/ "./src/dtc_assets/src/Components/Fields/DatePicker.jsx":
+/*!*************************************************************!*\
+  !*** ./src/dtc_assets/src/Components/Fields/DatePicker.jsx ***!
+  \*************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const react_1 = __importStar(__webpack_require__(/*! react */ "./node_modules/react/index.js"));
+__webpack_require__(/*! ./DatePicker.scss */ "./src/dtc_assets/src/Components/Fields/DatePicker.scss");
+const DatePicker = (props) => {
+    const inputRef = (0, react_1.useRef)();
+    const [disabledOrEnabled, setDisabledOrEnabled] = (0, react_1.useState)("disabled");
+    const { label, disabled, divClassName, dispatchAction, dispatch, index, value
+    // dispatchAction //the action that is to take place in order to dispatch the field change to the redux store
+     } = props;
+    const onBlur = () => {
+        setDisabledOrEnabled("disabled");
+    };
+    const onFocus = () => {
+        setDisabledOrEnabled("enabled");
+    };
+    const onChnage = () => {
+        dispatch({
+            payload: inputRef.current.value,
+            actionType: dispatchAction,
+            index: index
+        });
+    };
+    return (react_1.default.createElement("div", { className: 'inputBox' },
+        react_1.default.createElement("div", { className: 'label-element-div ' },
+            react_1.default.createElement("label", { className: "label__" + disabledOrEnabled, htmlFor: 'Label' },
+                " ",
+                label,
+                "  \u00A0 ")),
+        react_1.default.createElement("div", { className: `input-element-div__${(divClassName) ? divClassName : " "}` },
+            react_1.default.createElement("input", { className: disabledOrEnabled, value: value, type: "date", alt: label, ref: inputRef, disabled: disabled, onFocus: onFocus, onBlur: onBlur, onChange: onChnage }))));
+};
+exports["default"] = DatePicker;
 
 
 /***/ }),
@@ -70660,9 +70824,9 @@ const Slider = (props) => {
     };
     return (react_1.default.createElement("div", { className: "sliderDiv" },
         react_1.default.createElement("div", { className: "sliderLabelDiv__" + disabledOrEnabled },
-            react_1.default.createElement("label", { className: "sliderLabel" }, ` Lock Journal For ${sliderValue || '3'} Months`)),
+            react_1.default.createElement("label", { className: "sliderLabel" }, ` Lock Journal For ${(sliderValue || sliderValue === 0) ? sliderValue : "3"} Months`)),
         react_1.default.createElement("div", { className: "sliderInputDiv" },
-            react_1.default.createElement("input", { type: "range", min: min, max: max, className: "slider", value: sliderValue || "3", id: "myRange", ref: inputRef, onBlur: onBlur, onFocus: onFocus, onChange: onChange }))));
+            react_1.default.createElement("input", { type: "range", min: min, max: max, className: "slider", value: (sliderValue || sliderValue === 0) ? sliderValue : "3", id: "myRange", ref: inputRef, onBlur: onBlur, onFocus: onFocus, onChange: onChange }))));
 };
 exports["default"] = Slider;
 
@@ -70720,14 +70884,49 @@ const Journal = (props) => {
         if ("err" in journal) {
             actor.create({
                 userName: "admin",
-                email: "admin@test.com"
+                email: "thedigitaltimecapsule2022@gmail.com"
             }).then((result) => {
                 console.log(result);
             });
         }
         else {
-            const journalEntries = journal.ok.userJournalData[0].map((arrayWithKeyAndPage) => {
+            let journalEntries = journal.ok.userJournalData[0].map((arrayWithKeyAndPage) => {
                 return (0, journalPageMappers_1.mapApiObjectToFrontEndObject)(arrayWithKeyAndPage[1]);
+            });
+            journalEntries = journalEntries.sort(function (a, b) {
+                const dateForAArray = a.date.split('-');
+                const yearForA = parseInt(dateForAArray[2]);
+                const monthForA = parseInt(dateForAArray[0]);
+                const dayForA = parseInt(dateForAArray[1]);
+                const dateForBArray = b.date.split('-');
+                const yearForB = parseInt(dateForBArray[2]);
+                const monthForB = parseInt(dateForBArray[0]);
+                const dayForB = parseInt(dateForBArray[1]);
+                if (yearForA > yearForB) {
+                    return 1;
+                }
+                else if (yearForA < yearForB) {
+                    return -1;
+                }
+                else {
+                    if (monthForA > monthForB) {
+                        return 1;
+                    }
+                    else if (monthForA < monthForB) {
+                        return -1;
+                    }
+                    else {
+                        if (dayForA > dayForB) {
+                            return 1;
+                        }
+                        else if (dayForA < dayForB) {
+                            return -1;
+                        }
+                        else {
+                            return 0;
+                        }
+                    }
+                }
             });
             const journalBio = journal.ok.userJournalData[1];
             const metaData = { email: journal.ok.email, userName: journal.ok.userName };
@@ -70902,6 +71101,7 @@ const Slider_1 = __importDefault(__webpack_require__(/*! ./Fields/Slider */ "./s
 const journalReducer_1 = __webpack_require__(/*! ../reducers/journalReducer */ "./src/dtc_assets/src/reducers/journalReducer.jsx");
 const App_1 = __webpack_require__(/*! ../App */ "./src/dtc_assets/src/App.jsx");
 __webpack_require__(/*! ./JournalPage.scss */ "./src/dtc_assets/src/Components/JournalPage.scss");
+const DatePicker_1 = __importDefault(__webpack_require__(/*! ./Fields/DatePicker */ "./src/dtc_assets/src/Components/Fields/DatePicker.jsx"));
 const CHUNK_SIZE = 1024 * 1024;
 const JournalPage = (props) => {
     const [file1, setFile1] = (0, react_1.useState)(null);
@@ -70956,9 +71156,9 @@ const JournalPage = (props) => {
         react_1.default.createElement("div", { className: "logoDiv" },
             react_1.default.createElement("img", { className: 'backButtonImg', src: "back-icon.png", alt: "Back Button", onClick: (e) => closePage(e) }),
             react_1.default.createElement("img", { className: 'logoImg', src: "dtc-logo-black.png", alt: "Logo" })),
-        react_1.default.createElement(Slider_1.default, { min: 3, max: 120, dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_LOCK_TIME, index: index, value: (journalPageData) ? journalPageData.lockTime : '3' }),
+        react_1.default.createElement(Slider_1.default, { min: 0, max: 120, dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_LOCK_TIME, index: index, value: (journalPageData) ? journalPageData.lockTime : '3' }),
         react_1.default.createElement("div", { className: "journalText" },
-            react_1.default.createElement(InputBox_1.default, { label: "Date: ", rows: "1", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_DATE, index: index, value: (journalPageData) ? journalPageData.date : '' }),
+            react_1.default.createElement(DatePicker_1.default, { label: "Date: ", rows: "1", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_DATE, index: index, value: (journalPageData) ? journalPageData.date : '' }),
             react_1.default.createElement(InputBox_1.default, { label: "Location: ", rows: "1", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_LOCATION, index: index, value: (journalPageData) ? journalPageData.location : '' }),
             react_1.default.createElement(InputBox_1.default, { divClassName: "entry", label: "Entry: ", rows: "59", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_ENTRY, index: index, value: (journalPageData) ? journalPageData.entry : '' })),
         react_1.default.createElement("div", { className: "journalImages" },
@@ -71114,13 +71314,13 @@ const SubcriptionPage = (props) => {
         if (!stripe || !elements) {
             return;
         }
-        const res = await axios_1.default.post('https://6717drw5l0.execute-api.us-east-2.amazonaws.com/pay', { email: journalState.bio.email });
+        const res = await axios_1.default.post('https://6717drw5l0.execute-api.us-east-2.amazonaws.com/pay', { email: journalState.metaData.email });
         const clientSecret = res.data['client_secret'];
         const result = await stripe.confirmCardPayment(clientSecret, {
             payment_method: {
                 card: elements.getElement(react_stripe_js_1.CardElement),
                 billing_details: {
-                    email: journalState.bio.email
+                    email: journalState.metaData.email
                 }
             }
         });
@@ -71141,7 +71341,7 @@ const SubcriptionPage = (props) => {
             type: 'card',
             card: elements.getElement(react_stripe_js_1.CardElement),
             billing_details: {
-                email: journalState.bio.email
+                email: journalState.metaData.email
             }
         });
         if (result.error) {
@@ -71150,7 +71350,7 @@ const SubcriptionPage = (props) => {
         else {
             const res = await axios_1.default.post('https://6717drw5l0.execute-api.us-east-2.amazonaws.com/sub', {
                 payment_method: result.paymentMethod.id,
-                email: journalState.bio.email
+                email: journalState.metaData.email
             });
             console.log(res.data);
             const { client_secret, status } = res.data;
@@ -71178,7 +71378,8 @@ const SubcriptionPage = (props) => {
             react_1.default.createElement("img", { className: 'logoImg', src: "dtc-logo-black.png", alt: "Logo" }),
             react_1.default.createElement("div", { className: 'subscriptionSection' },
                 react_1.default.createElement(InputBox_1.default, { divClassName: "email", label: "Email: ", rows: "1", dispatch: dispatch, dispatchAction: journalReducer_1.types.CHANGE_EMAIL, value: journalState.metaData.email }),
-                journalState.metaData.userName === 'admin' ? react_1.default.createElement(AdminSection_1.default, null) : react_1.default.createElement(CardInput_1.default, null),
+                journalState.metaData.userName === 'admin' && react_1.default.createElement(AdminSection_1.default, null),
+                react_1.default.createElement(CardInput_1.default, null),
                 react_1.default.createElement("div", { className: 'subscribeButtonDiv' },
                     react_1.default.createElement("button", { className: 'subscriptionButton', type: "submit", onClick: handleSubmitSub }, " Subscribe "))))));
 };
@@ -74716,7 +74917,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 // CANISTER_ID is replaced by webpack based on node environment
-const canisterId = "njulb-sqaaa-aaaaa-aaccq-cai";
+const canisterId = "oqek3-yyaaa-aaaaa-aacla-cai";
 
 /**
  * 

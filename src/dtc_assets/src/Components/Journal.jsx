@@ -27,9 +27,43 @@ const Journal = (props) => {
                 console.log(result);
             });
         } else {
-            const journalEntries = journal.ok.userJournalData[0].map((arrayWithKeyAndPage) => {
+            let journalEntries = journal.ok.userJournalData[0].map((arrayWithKeyAndPage) => {
                 return mapApiObjectToFrontEndObject(arrayWithKeyAndPage[1]);
             });
+
+
+            journalEntries = journalEntries.sort(function(a,b) {
+                const dateForAArray = a.date.split('-');
+                const yearForA = parseInt(dateForAArray[0]);
+                const monthForA = parseInt(dateForAArray[1]);
+                const dayForA = parseInt(dateForAArray[2]);
+
+                const dateForBArray = b.date.split('-'); 
+                const yearForB = parseInt(dateForBArray[0]);
+                const monthForB = parseInt(dateForBArray[1]);
+                const dayForB = parseInt(dateForBArray[2]);
+
+                if(yearForA > yearForB){
+                    return 1;
+                } else if(yearForA < yearForB){
+                    return -1;
+                } else {
+                    if(monthForA > monthForB){
+                        return 1;
+                    } else if(monthForA < monthForB){
+                        return -1;
+                    } else {
+                        if(dayForA > dayForB){
+                            return 1;
+                        } else if(dayForA < dayForB){
+                            return -1;
+                        } else {
+                            return 0;
+                        }
+                    }
+                }
+            });
+
             const journalBio = journal.ok.userJournalData[1];
             const metaData = {email : journal.ok.email, userName: journal.ok.userName};
             
