@@ -70615,7 +70615,7 @@ const DatePicker = (props) => {
                 label,
                 "  \u00A0 ")),
         react_1.default.createElement("div", { className: `input-element-div__${(divClassName) ? divClassName : " "}` },
-            react_1.default.createElement("input", { className: disabledOrEnabled, value: value, type: "date", alt: label, ref: inputRef, disabled: disabled, onFocus: onFocus, onBlur: onBlur, onChange: onChnage }))));
+            react_1.default.createElement("input", { className: disabledOrEnabled, value: value, "data-date-format": "yyyy-mm-dd", type: "date", alt: label, ref: inputRef, disabled: disabled, onFocus: onFocus, onBlur: onBlur, onChange: onChnage }))));
 };
 exports["default"] = DatePicker;
 
@@ -70895,13 +70895,13 @@ const Journal = (props) => {
             });
             journalEntries = journalEntries.sort(function (a, b) {
                 const dateForAArray = a.date.split('-');
-                const yearForA = parseInt(dateForAArray[2]);
-                const monthForA = parseInt(dateForAArray[0]);
-                const dayForA = parseInt(dateForAArray[1]);
+                const yearForA = parseInt(dateForAArray[0]);
+                const monthForA = parseInt(dateForAArray[1]);
+                const dayForA = parseInt(dateForAArray[2]);
                 const dateForBArray = b.date.split('-');
-                const yearForB = parseInt(dateForBArray[2]);
-                const monthForB = parseInt(dateForBArray[0]);
-                const dayForB = parseInt(dateForBArray[1]);
+                const yearForB = parseInt(dateForBArray[0]);
+                const monthForB = parseInt(dateForBArray[1]);
+                const dayForB = parseInt(dateForBArray[2]);
                 if (yearForA > yearForB) {
                     return 1;
                 }
@@ -74794,6 +74794,8 @@ __webpack_require__.r(__webpack_exports__);
 const idlFactory = ({ IDL }) => {
   const List = IDL.Rec();
   const Trie = IDL.Rec();
+  const AccountIdentifier = IDL.Vec(IDL.Nat8);
+  const Tokens = IDL.Record({ 'e8s' : IDL.Nat64 });
   const ProfileInput = IDL.Record({
     'userName' : IDL.Text,
     'email' : IDL.Text,
@@ -74870,6 +74872,8 @@ const idlFactory = ({ IDL }) => {
   );
   const Result_1 = IDL.Variant({ 'ok' : Trie, 'err' : Error });
   const User = IDL.Service({
+    'canisterAccount' : IDL.Func([], [AccountIdentifier], ['query']),
+    'canisterBalance' : IDL.Func([], [Tokens], []),
     'create' : IDL.Func([ProfileInput], [Result_5], []),
     'createJournalEntryFile' : IDL.Func(
         [IDL.Text, IDL.Text, IDL.Vec(IDL.Nat8)],
@@ -74880,6 +74884,7 @@ const idlFactory = ({ IDL }) => {
     'getEntriesToBeSent' : IDL.Func([], [Result_4], []),
     'readEntry' : IDL.Func([EntryKey], [Result_3], []),
     'readJournal' : IDL.Func([], [Result_2], []),
+    'transferICP' : IDL.Func([IDL.Nat], [IDL.Principal], []),
     'updateBio' : IDL.Func([Bio], [Result], []),
     'updateJournalEntry' : IDL.Func(
         [IDL.Opt(EntryKey), IDL.Opt(JournalEntryInput)],
@@ -74917,7 +74922,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 // CANISTER_ID is replaced by webpack based on node environment
-const canisterId = "oqek3-yyaaa-aaaaa-aacla-cai";
+const canisterId = "gmhf2-taaaa-aaaaa-aad7q-cai";
 
 /**
  * 

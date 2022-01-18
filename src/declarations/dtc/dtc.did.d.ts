@@ -1,4 +1,5 @@
 import type { Principal } from '@dfinity/principal';
+export type AccountIdentifier = Array<number>;
 export interface AmountAccepted { 'accepted' : bigint }
 export type AssocList = [] | [[[Key, JournalEntry], List]];
 export interface Bio {
@@ -61,10 +62,13 @@ export type Result_4 = {
   { 'err' : Error };
 export type Result_5 = { 'ok' : AmountAccepted } |
   { 'err' : Error };
+export interface Tokens { 'e8s' : bigint }
 export type Trie = { 'branch' : Branch } |
   { 'leaf' : Leaf } |
   { 'empty' : null };
 export interface User {
+  'canisterAccount' : () => Promise<AccountIdentifier>,
+  'canisterBalance' : () => Promise<Tokens>,
   'create' : (arg_0: ProfileInput) => Promise<Result_5>,
   'createJournalEntryFile' : (
       arg_0: string,
@@ -75,6 +79,7 @@ export interface User {
   'getEntriesToBeSent' : () => Promise<Result_4>,
   'readEntry' : (arg_0: EntryKey) => Promise<Result_3>,
   'readJournal' : () => Promise<Result_2>,
+  'transferICP' : (arg_0: bigint) => Promise<Principal>,
   'updateBio' : (arg_0: Bio) => Promise<Result>,
   'updateJournalEntry' : (
       arg_0: [] | [EntryKey],

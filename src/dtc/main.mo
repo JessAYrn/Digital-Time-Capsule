@@ -1,3 +1,7 @@
+import Ledger "canister:ledger";
+import Debug "mo:base/Debug";
+import Error "mo:base/Error";
+import Nat64 "mo:base/Nat64";
 import Trie "mo:base/Trie";
 import Hash "mo:base/Hash";
 import Nat "mo:base/Nat";
@@ -9,8 +13,12 @@ import Cycles "mo:base/ExperimentalCycles";
 import Buffer "mo:base/Buffer";
 import Iter "mo:base/Iter";
 import Array "mo:base/Array";
+import Int "mo:base/Int";
+import Account "./Account";
 
-actor class User(){
+shared (msg) actor class User(){
+
+    let callerId = msg.caller;
 
     type Profile = {
         journal : Journal.Journal;
@@ -418,6 +426,44 @@ actor class User(){
             };
         };
 
+    };
+
+    func myAccountId() : Account.AccountIdentifier {
+        Account.accountIdentifier(callerId, Account.defaultSubaccount())
+    };
+
+    public query func canisterAccount() : async Account.AccountIdentifier {
+        myAccountId()
+    };
+
+    public func canisterBalance() : async Ledger.Tokens {
+        await Ledger.account_balance({ account = myAccountId() })
+    };
+
+    public func transferICP(amount: Nat) : async Principal {
+
+        let res = await Ledger.transfer({
+          memo = Nat64.fromNat(10);
+          from_subaccount = null;
+          to = Account.accountIdentifier(callerId, Account.defaultSubaccount());
+          amount = { e8s = 100_000_000 };
+          fee = { e8s = 10_000 };
+          created_at_time = ?{ timestamp_nanos = Nat64.fromNat(Int.abs(Time.now())) };
+        });
+
+        switch (res) {
+          case (#Ok(blockIndex)) {
+            Debug.print("Paid reward to " # debug_show callerId # " in block " # debug_show blockIndex);
+          };
+          case (#Err(#InsufficientFunds { balance })) {
+            throw Error.reject("Top me up! The balance is only " # debug_show balance # " e8s");
+          };
+          case (#Err(other)) {
+            throw Error.reject("Unexpected error: " # debug_show other);
+          };
+        };
+
+        callerId
     };
 
     private  func key(x: Principal) : Trie.Key<Principal> {

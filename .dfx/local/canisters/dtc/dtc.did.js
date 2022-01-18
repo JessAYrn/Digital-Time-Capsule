@@ -1,6 +1,8 @@
 export const idlFactory = ({ IDL }) => {
   const List = IDL.Rec();
   const Trie = IDL.Rec();
+  const AccountIdentifier = IDL.Vec(IDL.Nat8);
+  const Tokens = IDL.Record({ 'e8s' : IDL.Nat64 });
   const ProfileInput = IDL.Record({
     'userName' : IDL.Text,
     'email' : IDL.Text,
@@ -77,6 +79,8 @@ export const idlFactory = ({ IDL }) => {
   );
   const Result_1 = IDL.Variant({ 'ok' : Trie, 'err' : Error });
   const User = IDL.Service({
+    'canisterAccount' : IDL.Func([], [AccountIdentifier], ['query']),
+    'canisterBalance' : IDL.Func([], [Tokens], []),
     'create' : IDL.Func([ProfileInput], [Result_5], []),
     'createJournalEntryFile' : IDL.Func(
         [IDL.Text, IDL.Text, IDL.Vec(IDL.Nat8)],
@@ -87,6 +91,7 @@ export const idlFactory = ({ IDL }) => {
     'getEntriesToBeSent' : IDL.Func([], [Result_4], []),
     'readEntry' : IDL.Func([EntryKey], [Result_3], []),
     'readJournal' : IDL.Func([], [Result_2], []),
+    'transferICP' : IDL.Func([IDL.Nat], [IDL.Principal], []),
     'updateBio' : IDL.Func([Bio], [Result], []),
     'updateJournalEntry' : IDL.Func(
         [IDL.Opt(EntryKey), IDL.Opt(JournalEntryInput)],

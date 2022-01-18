@@ -1,11 +1,14 @@
 {
   "__Candid_UI": {
-    "local": "p2lib-2iaaa-aaaaa-aacma-cai"
+    "local": "g2xnv-kqaaa-aaaaa-aaeba-cai"
   },
   "dtc": {
-    "local": "oqek3-yyaaa-aaaaa-aacla-cai"
+    "local": "gmhf2-taaaa-aaaaa-aad7q-cai"
   },
   "dtc_assets": {
-    "local": "oxfmp-vaaaa-aaaaa-aaclq-cai"
+    "local": "guva5-raaaa-aaaaa-aaeaa-cai"
+  },
+  "ledger": {
+    "local": "gfeog-fiaaa-aaaaa-aad6a-cai"
   }
 }
