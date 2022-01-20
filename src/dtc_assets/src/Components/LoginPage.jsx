@@ -1,6 +1,7 @@
 import React, {useContext} from "react";
 import { AppContext as JournalContext } from "../App";
 import { AppContext as AccountContext } from "../AccountPage";
+import { AppContext as WalletContex } from "../Wallet";
 // import { AppContext as PodcastContext } from "../PodcastPage"
 import "./LoginPage.scss";
 
@@ -16,10 +17,9 @@ const LoginPage = (props) => {
         properContext = JournalContext
     } else if(context === 'accountPage'){
         properContext = AccountContext
-    } 
-    // else if(context === 'podcast'){
-    //     properContext = PodcastContext
-    // }
+    } else if(context === 'wallet'){
+        properContext = WalletContex
+    }
 
     const {    
             authClient, 

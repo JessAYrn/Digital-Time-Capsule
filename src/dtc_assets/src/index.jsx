@@ -10,6 +10,7 @@ import HomePage from './HomePage';
 import App from './App';
 import AccountPage from "./AccountPage"
 import configureStore from './configureStore';
+import WalletApp from './Wallet';
 
 
 
@@ -24,6 +25,7 @@ ReactDOM.render(
             <Route path="/" element={<HomePage />}/>
             <Route path="/app" element={<App />}/>
             <Route path="/account" element={<AccountPage />}/>
+            <Route path="/wallet" element={<WalletApp/>}/>
         </Routes>
     </HashRouter>
 </Provider>
