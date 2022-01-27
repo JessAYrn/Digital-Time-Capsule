@@ -49,7 +49,9 @@ export type Result_1 = { 'ok' : Trie } |
 export type Result_2 = {
     'ok' : {
       'userName' : string,
+      'balance' : Tokens,
       'email' : string,
+      'address' : [] | [string],
       'userJournalData' : [Array<[bigint, JournalEntry]>, Bio],
     }
   } |

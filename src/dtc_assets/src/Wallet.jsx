@@ -69,7 +69,10 @@ const WalletApp = () => {
                 {
                     isLoaded &&
                         isAuthenticated ? 
-                        <WalletPage/> : 
+                        <WalletPage
+                            journalState={journalState}
+                            dispatch={dispatch}
+                        /> : 
                         <LoginPage
                             context={UI_CONTEXTS.WALLET}
                         /> 

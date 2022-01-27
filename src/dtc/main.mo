@@ -14,6 +14,7 @@ import Buffer "mo:base/Buffer";
 import Iter "mo:base/Iter";
 import Array "mo:base/Array";
 import Int "mo:base/Int";
+import Text "mo:base/Text";
 import Account "./Account";
 
 shared (msg) actor class User(){
@@ -150,6 +151,8 @@ shared (msg) actor class User(){
             {
                 userJournalData : ([(Nat,JournalEntry)], Bio);
                 email: Text;
+                balance : Ledger.Tokens;
+                address: ?Text;
                 userName: Text;
             }
         ), Error> {
@@ -173,11 +176,15 @@ shared (msg) actor class User(){
             };
             case(? v){
                 let journal = v.journal; 
+                let userBalance = await journal.canisterBalance();
+                let userAccountId = await journal.canisterAccount();
                 let userJournalData = await journal.readJournal();
                 
                 return #ok({
                     userJournalData = userJournalData;
                     email = v.email;
+                    balance = userBalance;
+                    address = Text.decodeUtf8(userAccountId);
                     userName = v.userName;
                 });
                 

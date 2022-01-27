@@ -46,7 +46,9 @@ export const idlFactory = ({ IDL }) => {
   const Result_2 = IDL.Variant({
     'ok' : IDL.Record({
       'userName' : IDL.Text,
+      'balance' : Tokens,
       'email' : IDL.Text,
+      'address' : IDL.Opt(IDL.Text),
       'userJournalData' : IDL.Tuple(
         IDL.Vec(IDL.Tuple(IDL.Nat, JournalEntry)),
         Bio,

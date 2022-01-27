@@ -2,8 +2,8 @@
   "canisters": {
     "ledger": {
       "type": "custom",
-      "wasm": "../ledger_canister/ledger.wasm",
-      "candid": "../ledger_canister/ledger.public.did"
+      "wasm": "ledger.wasm",
+      "candid": "ledger.public.did"
     },
     "dtc": {
       "main": "src/dtc/main.mo",
