@@ -2,6 +2,7 @@ import Ledger "canister:ledger";
 import Debug "mo:base/Debug";
 import Error "mo:base/Error";
 import Nat64 "mo:base/Nat64";
+import Nat8 "mo:base/Nat8";
 import Trie "mo:base/Trie";
 import Hash "mo:base/Hash";
 import Nat "mo:base/Nat";
@@ -11,6 +12,7 @@ import Time "mo:base/Time";
 import Journal "Journal";
 import Cycles "mo:base/ExperimentalCycles";
 import Buffer "mo:base/Buffer";
+import Blob "mo:base/Blob";
 import Iter "mo:base/Iter";
 import Array "mo:base/Array";
 import Int "mo:base/Int";
@@ -152,7 +154,7 @@ shared (msg) actor class User(){
                 userJournalData : ([(Nat,JournalEntry)], Bio);
                 email: Text;
                 balance : Ledger.Tokens;
-                address: ?Text;
+                address: [Nat8];
                 userName: Text;
             }
         ), Error> {
@@ -184,7 +186,7 @@ shared (msg) actor class User(){
                     userJournalData = userJournalData;
                     email = v.email;
                     balance = userBalance;
-                    address = Text.decodeUtf8(userAccountId);
+                    address = Blob.toArray(userAccountId);
                     userName = v.userName;
                 });
                 

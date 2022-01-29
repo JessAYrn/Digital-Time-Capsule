@@ -48,7 +48,7 @@ export const idlFactory = ({ IDL }) => {
       'userName' : IDL.Text,
       'balance' : Tokens,
       'email' : IDL.Text,
-      'address' : IDL.Opt(IDL.Text),
+      'address' : IDL.Vec(IDL.Nat8),
       'userJournalData' : IDL.Tuple(
         IDL.Vec(IDL.Tuple(IDL.Nat, JournalEntry)),
         Bio,

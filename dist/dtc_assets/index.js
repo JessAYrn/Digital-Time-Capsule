@@ -75111,7 +75111,7 @@ const idlFactory = ({ IDL }) => {
       'userName' : IDL.Text,
       'balance' : Tokens,
       'email' : IDL.Text,
-      'address' : IDL.Opt(IDL.Text),
+      'address' : IDL.Vec(IDL.Nat8),
       'userJournalData' : IDL.Tuple(
         IDL.Vec(IDL.Tuple(IDL.Nat, JournalEntry)),
         Bio,
@@ -75194,7 +75194,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 // CANISTER_ID is replaced by webpack based on node environment
-const canisterId = "fycqk-2aaaa-aaaaa-aaeka-cai";
+const canisterId = "ejiov-ciaaa-aaaaa-aaepq-cai";
 
 /**
  * 

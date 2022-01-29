@@ -51,7 +51,7 @@ export type Result_2 = {
       'userName' : string,
       'balance' : Tokens,
       'email' : string,
-      'address' : [] | [string],
+      'address' : Array<number>,
       'userJournalData' : [Array<[bigint, JournalEntry]>, Bio],
     }
   } |

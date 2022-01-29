@@ -46,7 +46,7 @@ type Result_2 =
    err: Error;
    ok:
     record {
-      address: opt text;
+      address: vec nat8;
       balance: Tokens;
       email: text;
       userJournalData: record {
