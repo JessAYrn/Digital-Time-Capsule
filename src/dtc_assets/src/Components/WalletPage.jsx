@@ -1,7 +1,8 @@
-import React, {useContext, useEffect} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import { AppContext } from '../Wallet';
 import { toHexString } from '../Utils';
 import { types } from '../reducers/journalReducer';
+import { Modal } from './WalletModal';
 import './WalletPage.scss';
 
 const WalletPage = (props) => {
@@ -12,6 +13,11 @@ const WalletPage = (props) => {
     } = props;
 
     const { actor, authClient } = useContext(AppContext);
+    const [showModal, setShowModal] = useState(false);
+
+    const openModal = () => {
+        setShowModal(true);
+    }
 
     useEffect(async () => {
         const journal = await actor.readJournal();
@@ -51,6 +57,10 @@ const WalletPage = (props) => {
                             <div className='walletAddressDiv'>
                                 Wallet Address: {journalState.walletData.address}
                             </div>
+                            <div className="buttonsDiv" >
+                                <button className='button' onClick={openModal}> Send </button>
+                            </div>
+                            <Modal showModal={showModal} setShowModal={setShowModal} />
                         </div>                
                     </div>
                 </div>
