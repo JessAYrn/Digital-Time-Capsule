@@ -1,0 +1,28 @@
+.sendContentDiv{
+
+    width: 90%;
+    margin-left: 5%;
+
+    .recipientAdressDiv{
+        padding-top: 10%;
+        padding-left: 10%;
+        width: 80%;
+    
+    }
+    
+    .ammountDiv{
+        padding-top: 5%;
+        padding-left: 10%;
+        width: 80%;
+    }
+
+    .ModalContentOnSendButtons{
+        padding-top: 10%;
+        padding-left: 29%;
+        .button{
+            border-radius: 10px;
+            width: 10rem;
+            height: 3rem;
+        }
+    }
+}

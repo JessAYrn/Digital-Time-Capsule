@@ -1,5 +1,6 @@
 import React from 'react';
 import "./WalletModal.scss";
+import ModalContentOnSend from './ModalContentOnSend';
 
 export const Modal = (props) => {
 
@@ -16,9 +17,7 @@ export const Modal = (props) => {
                 <div className={'modalBackground'}>
                     <div className='modalTransparentDiv'>
                         <div className={'modalWrapper'}>
-                            <h1>
-                                Hello!
-                            </h1> 
+                            <ModalContentOnSend/>
                         </div>
                     </div>
                 </div>
