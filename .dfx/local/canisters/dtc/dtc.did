@@ -8,7 +8,7 @@ type User =
    getEntriesToBeSent: () -> (Result_4);
    readEntry: (EntryKey) -> (Result_3);
    readJournal: () -> (Result_2);
-   transferICP: (nat) -> (principal);
+   transferICP: (nat64, AccountIdentifier) -> (Result);
    updateBio: (Bio) -> (Result);
    updateJournalEntry: (opt EntryKey, opt JournalEntryInput) -> (Result_1);
    updateProfile: (ProfileInput) -> (Result);
@@ -123,6 +123,7 @@ type Error =
    NoInputGiven;
    NotAuthorized;
    NotFound;
+   TxFailed;
  };
 type EntryKey = record {entryKey: nat;};
 type Branch = 

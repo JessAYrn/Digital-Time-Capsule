@@ -9,6 +9,7 @@ export const idlFactory = ({ IDL }) => {
   });
   const AmountAccepted = IDL.Record({ 'accepted' : IDL.Nat64 });
   const Error = IDL.Variant({
+    'TxFailed' : IDL.Null,
     'NotFound' : IDL.Null,
     'NotAuthorized' : IDL.Null,
     'AlreadyExists' : IDL.Null,
@@ -93,7 +94,7 @@ export const idlFactory = ({ IDL }) => {
     'getEntriesToBeSent' : IDL.Func([], [Result_4], []),
     'readEntry' : IDL.Func([EntryKey], [Result_3], []),
     'readJournal' : IDL.Func([], [Result_2], []),
-    'transferICP' : IDL.Func([IDL.Nat], [IDL.Principal], []),
+    'transferICP' : IDL.Func([IDL.Nat64, AccountIdentifier], [Result], []),
     'updateBio' : IDL.Func([Bio], [Result], []),
     'updateJournalEntry' : IDL.Func(
         [IDL.Opt(EntryKey), IDL.Opt(JournalEntryInput)],

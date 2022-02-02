@@ -86,6 +86,7 @@ shared (msg) actor class User(){
         #AlreadyExists;
         #NotAuthorized;
         #NoInputGiven;
+        #TxFailed;
     };
 
     //Application State
@@ -449,30 +450,30 @@ shared (msg) actor class User(){
         await Ledger.account_balance({ account = myAccountId() })
     };
 
-    public func transferICP(amount: Nat) : async Principal {
+    public func transferICP(amount: Nat64, canisterAccountId: Account.AccountIdentifier) : async Result.Result<(), Error> {
 
-        let res = await Ledger.transfer({
-          memo = Nat64.fromNat(10);
-          from_subaccount = null;
-          to = Account.accountIdentifier(callerId, Account.defaultSubaccount());
-          amount = { e8s = 100_000_000 };
-          fee = { e8s = 10_000 };
-          created_at_time = ?{ timestamp_nanos = Nat64.fromNat(Int.abs(Time.now())) };
-        });
+        let userProfile = Trie.find(
+            profiles,
+            key(callerId), //Key
+            Principal.equal 
+        );
 
-        switch (res) {
-          case (#Ok(blockIndex)) {
-            Debug.print("Paid reward to " # debug_show callerId # " in block " # debug_show blockIndex);
-          };
-          case (#Err(#InsufficientFunds { balance })) {
-            throw Error.reject("Top me up! The balance is only " # debug_show balance # " e8s");
-          };
-          case (#Err(other)) {
-            throw Error.reject("Unexpected error: " # debug_show other);
-          };
+        switch(userProfile) {
+            case null{
+                #err(#NotFound)
+            }; 
+            case (? profile){
+                let userJournal = profile.journal;
+
+                let status = await userJournal.transferICP(amount, canisterAccountId);
+                if(status == true){
+                    #ok(());
+                } else {
+                    #err(#TxFailed)
+                }
+
+            };
         };
-
-        callerId
     };
 
     private  func key(x: Principal) : Trie.Key<Principal> {

@@ -11,7 +11,8 @@ export interface Bio {
 }
 export interface Branch { 'left' : Trie, 'size' : bigint, 'right' : Trie }
 export interface EntryKey { 'entryKey' : bigint }
-export type Error = { 'NotFound' : null } |
+export type Error = { 'TxFailed' : null } |
+  { 'NotFound' : null } |
   { 'NotAuthorized' : null } |
   { 'AlreadyExists' : null } |
   { 'NoInputGiven' : null };
@@ -81,7 +82,7 @@ export interface User {
   'getEntriesToBeSent' : () => Promise<Result_4>,
   'readEntry' : (arg_0: EntryKey) => Promise<Result_3>,
   'readJournal' : () => Promise<Result_2>,
-  'transferICP' : (arg_0: bigint) => Promise<Principal>,
+  'transferICP' : (arg_0: bigint, arg_1: AccountIdentifier) => Promise<Result>,
   'updateBio' : (arg_0: Bio) => Promise<Result>,
   'updateJournalEntry' : (
       arg_0: [] | [EntryKey],

@@ -15,6 +15,7 @@ import Iter "mo:base/Iter";
 import Buffer "mo:base/Buffer";
 import Int "mo:base/Int";
 import Account "./Account";
+import Bool "mo:base/Bool";
 
 
 shared(msg) actor class Journal (principal : Principal){
@@ -382,13 +383,13 @@ shared(msg) actor class Journal (principal : Principal){
 
     };
 
-    public func transferICP(amount: Nat) : async Principal {
+    public func transferICP(amount: Nat64, recipientAccountId: Account.AccountIdentifier) : async Bool {
 
         let res = await Ledger.transfer({
           memo = Nat64.fromNat(10);
           from_subaccount = null;
-          to = Account.accountIdentifier(principal, Account.defaultSubaccount());
-          amount = { e8s = 100_000_000 };
+          to = recipientAccountId;
+          amount = { e8s = amount };
           fee = { e8s = 10_000 };
           created_at_time = ?{ timestamp_nanos = Nat64.fromNat(Int.abs(Time.now())) };
         });
@@ -396,16 +397,17 @@ shared(msg) actor class Journal (principal : Principal){
         switch (res) {
           case (#Ok(blockIndex)) {
             Debug.print("Paid reward to " # debug_show principal # " in block " # debug_show blockIndex);
+            return true;
           };
           case (#Err(#InsufficientFunds { balance })) {
             throw Error.reject("Top me up! The balance is only " # debug_show balance # " e8s");
+            return false;
           };
           case (#Err(other)) {
             throw Error.reject("Unexpected error: " # debug_show other);
+            return false;
           };
         };
-
-        principal
     };
 
     func userAccountId() : Account.AccountIdentifier {

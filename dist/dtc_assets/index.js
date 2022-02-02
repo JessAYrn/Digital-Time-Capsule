@@ -24033,7 +24033,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, ".sendContentDiv .recipientAdressDiv {\n  padding-top: 2.5%;\n  padding-left: 10%;\n  width: 80%;\n}\n.sendContentDiv .ammountDiv {\n  padding-top: 2.5%;\n  padding-left: 10%;\n  width: 80%;\n}\n.sendContentDiv .ModalContentOnSendButtons {\n  padding-left: 28%;\n}", "",{"version":3,"sources":["webpack://./src/dtc_assets/src/Components/ModalContentOnSend.scss"],"names":[],"mappings":"AAEI;EACI,iBAAA;EACA,iBAAA;EACA,UAAA;AADR;AAKI;EACI,iBAAA;EACA,iBAAA;EACA,UAAA;AAHR;AAMI;EACI,iBAAA;AAJR","sourcesContent":[".sendContentDiv{\n\n    .recipientAdressDiv{\n        padding-top: 2.5%;\n        padding-left: 10%;\n        width: 80%;\n    \n    }\n    \n    .ammountDiv{\n        padding-top: 2.5%;\n        padding-left: 10%;\n        width: 80%;\n    }\n\n    .ModalContentOnSendButtons{\n        padding-left: 28%;\n    }\n}\n"],"sourceRoot":""}]);
+___CSS_LOADER_EXPORT___.push([module.id, ".sendContentDiv {\n  width: 90%;\n  margin-left: 5%;\n}\n.sendContentDiv .recipientAdressDiv {\n  padding-top: 10%;\n  padding-left: 10%;\n  width: 80%;\n}\n.sendContentDiv .ammountDiv {\n  padding-top: 5%;\n  padding-left: 10%;\n  width: 80%;\n}\n.sendContentDiv .ModalContentOnSendButtons {\n  padding-top: 10%;\n  padding-left: 29%;\n}\n.sendContentDiv .ModalContentOnSendButtons .button {\n  border-radius: 10px;\n  width: 10rem;\n  height: 3rem;\n}", "",{"version":3,"sources":["webpack://./src/dtc_assets/src/Components/ModalContentOnSend.scss"],"names":[],"mappings":"AAAA;EAEI,UAAA;EACA,eAAA;AAAJ;AAEI;EACI,gBAAA;EACA,iBAAA;EACA,UAAA;AAAR;AAII;EACI,eAAA;EACA,iBAAA;EACA,UAAA;AAFR;AAKI;EACI,gBAAA;EACA,iBAAA;AAHR;AAIQ;EACI,mBAAA;EACA,YAAA;EACA,YAAA;AAFZ","sourcesContent":[".sendContentDiv{\n\n    width: 90%;\n    margin-left: 5%;\n\n    .recipientAdressDiv{\n        padding-top: 10%;\n        padding-left: 10%;\n        width: 80%;\n    \n    }\n    \n    .ammountDiv{\n        padding-top: 5%;\n        padding-left: 10%;\n        width: 80%;\n    }\n\n    .ModalContentOnSendButtons{\n        padding-top: 10%;\n        padding-left: 29%;\n        .button{\n            border-radius: 10px;\n            width: 10rem;\n            height: 3rem;\n        }\n    }\n}\n"],"sourceRoot":""}]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -71537,16 +71537,20 @@ const react_1 = __importStar(__webpack_require__(/*! react */ "./node_modules/re
 const InputBox_1 = __importDefault(__webpack_require__(/*! ./Fields/InputBox */ "./src/dtc_assets/src/Components/Fields/InputBox.jsx"));
 __webpack_require__(/*! ./ModalContentOnSend.scss */ "./src/dtc_assets/src/Components/ModalContentOnSend.scss");
 const ModalContentOnSend = (props) => {
+    const { setShowModal, showModal } = props;
     const [recipientAddress, setRecipientAddress] = (0, react_1.useState)('');
     const [amountToSend, setAmountToSend] = (0, react_1.useState)(0);
+    const onCancel = () => {
+        setShowModal(false);
+    };
     return (react_1.default.createElement("div", { className: "sendContentDiv" },
         react_1.default.createElement("div", { className: "recipientAdressDiv" },
-            react_1.default.createElement(InputBox_1.default, { label: "Recipient Address: ", rows: "1", setParentState: setRecipientAddress, value: recipientAddress })),
+            react_1.default.createElement(InputBox_1.default, { label: "Recipient Address: ", rows: "1", setParentState: setRecipientAddress, value: showModal ? recipientAddress : '' })),
         react_1.default.createElement("div", { className: "ammountDiv" },
-            react_1.default.createElement(InputBox_1.default, { label: "Amount: ", rows: "1", setParentState: setAmountToSend, value: amountToSend })),
+            react_1.default.createElement(InputBox_1.default, { label: "Amount: ", rows: "1", setParentState: setAmountToSend, value: showModal ? amountToSend : 0 })),
         react_1.default.createElement("div", { className: 'ModalContentOnSendButtons' },
             react_1.default.createElement("button", { className: 'button', onClick: () => { } }, " Send "),
-            react_1.default.createElement("button", { className: 'button', onClick: () => { } }, " Cancel "))));
+            react_1.default.createElement("button", { className: 'button', onClick: onCancel }, " Cancel "))));
 };
 exports["default"] = ModalContentOnSend;
 
@@ -71719,7 +71723,7 @@ const Modal = (props) => {
             react_1.default.createElement("div", { className: 'modalBackground' },
                 react_1.default.createElement("div", { className: 'modalTransparentDiv' },
                     react_1.default.createElement("div", { className: 'modalWrapper' },
-                        react_1.default.createElement(ModalContentOnSend_1.default, null))))) :
+                        react_1.default.createElement(ModalContentOnSend_1.default, { showModal: showModal, setShowModal: setShowModal }))))) :
         null));
 };
 exports.Modal = Modal;
@@ -75367,6 +75371,7 @@ const idlFactory = ({ IDL }) => {
   });
   const AmountAccepted = IDL.Record({ 'accepted' : IDL.Nat64 });
   const Error = IDL.Variant({
+    'TxFailed' : IDL.Null,
     'NotFound' : IDL.Null,
     'NotAuthorized' : IDL.Null,
     'AlreadyExists' : IDL.Null,
@@ -75451,7 +75456,7 @@ const idlFactory = ({ IDL }) => {
     'getEntriesToBeSent' : IDL.Func([], [Result_4], []),
     'readEntry' : IDL.Func([EntryKey], [Result_3], []),
     'readJournal' : IDL.Func([], [Result_2], []),
-    'transferICP' : IDL.Func([IDL.Nat], [IDL.Principal], []),
+    'transferICP' : IDL.Func([IDL.Nat64, AccountIdentifier], [Result], []),
     'updateBio' : IDL.Func([Bio], [Result], []),
     'updateJournalEntry' : IDL.Func(
         [IDL.Opt(EntryKey), IDL.Opt(JournalEntryInput)],
