@@ -17,7 +17,10 @@ export const Modal = (props) => {
                 <div className={'modalBackground'}>
                     <div className='modalTransparentDiv'>
                         <div className={'modalWrapper'}>
-                            <ModalContentOnSend/>
+                            <ModalContentOnSend
+                                showModal={showModal}
+                                setShowModal={setShowModal}
+                            />
                         </div>
                     </div>
                 </div>

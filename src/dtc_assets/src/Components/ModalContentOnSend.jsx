@@ -5,8 +5,18 @@ import "./ModalContentOnSend.scss";
 
 const ModalContentOnSend = (props) => {
 
+    const {
+        setShowModal,
+        showModal
+    } = props;
+
     const [recipientAddress, setRecipientAddress] = useState('');
     const [amountToSend, setAmountToSend] = useState(0);
+
+    const onCancel = () => {
+        setShowModal(false);
+    };
+
     return(
         <div className="sendContentDiv">
             <div className="recipientAdressDiv">
@@ -14,7 +24,7 @@ const ModalContentOnSend = (props) => {
                     label={"Recipient Address: "}
                     rows={"1"}
                     setParentState={setRecipientAddress}
-                    value={recipientAddress}
+                    value={ showModal ? recipientAddress : ''}
                 />
             </div>
             <div className="ammountDiv">
@@ -22,12 +32,12 @@ const ModalContentOnSend = (props) => {
                     label={"Amount: "}
                     rows={"1"}
                     setParentState={setAmountToSend}
-                    value={amountToSend}
+                    value={showModal ? amountToSend : 0}
                 />
             </div>
             <div className='ModalContentOnSendButtons'>
                 <button className='button' onClick={() => {}}> Send </button>
-                <button className='button' onClick={() => {}}> Cancel </button> 
+                <button className='button' onClick={onCancel}> Cancel </button> 
             </div>
 
         </div>
