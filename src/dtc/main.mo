@@ -450,7 +450,9 @@ shared (msg) actor class User(){
         await Ledger.account_balance({ account = myAccountId() })
     };
 
-    public func transferICP(amount: Nat64, canisterAccountId: Account.AccountIdentifier) : async Result.Result<(), Error> {
+    public shared(msg) func transferICP(amount: Nat64, canisterAccountId: Account.AccountIdentifier) : async Result.Result<(), Error> {
+
+        let callerId = msg.caller;
 
         let userProfile = Trie.find(
             profiles,

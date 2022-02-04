@@ -71535,13 +71535,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const react_1 = __importStar(__webpack_require__(/*! react */ "./node_modules/react/index.js"));
 const InputBox_1 = __importDefault(__webpack_require__(/*! ./Fields/InputBox */ "./src/dtc_assets/src/Components/Fields/InputBox.jsx"));
+const Wallet_jsx_1 = __webpack_require__(/*! ../Wallet.jsx */ "./src/dtc_assets/src/Wallet.jsx");
+const Utils_jsx_1 = __webpack_require__(/*! ../Utils.jsx */ "./src/dtc_assets/src/Utils.jsx");
 __webpack_require__(/*! ./ModalContentOnSend.scss */ "./src/dtc_assets/src/Components/ModalContentOnSend.scss");
 const ModalContentOnSend = (props) => {
     const { setShowModal, showModal } = props;
     const [recipientAddress, setRecipientAddress] = (0, react_1.useState)('');
-    const [amountToSend, setAmountToSend] = (0, react_1.useState)(0);
+    const [amountToSend, setAmountToSend] = (0, react_1.useState)('');
+    const { actor } = (0, react_1.useContext)(Wallet_jsx_1.AppContext);
     const onCancel = () => {
         setShowModal(false);
+    };
+    const onSendConfirm = async () => {
+        console.log((0, Utils_jsx_1.fromHexString)(recipientAddress));
+        const status = await actor.transferICP(parseInt(amountToSend), (0, Utils_jsx_1.fromHexString)(recipientAddress));
+        console.log(status);
     };
     return (react_1.default.createElement("div", { className: "sendContentDiv" },
         react_1.default.createElement("div", { className: "recipientAdressDiv" },
@@ -71549,7 +71557,7 @@ const ModalContentOnSend = (props) => {
         react_1.default.createElement("div", { className: "ammountDiv" },
             react_1.default.createElement(InputBox_1.default, { label: "Amount: ", rows: "1", setParentState: setAmountToSend, value: showModal ? amountToSend : 0 })),
         react_1.default.createElement("div", { className: 'ModalContentOnSendButtons' },
-            react_1.default.createElement("button", { className: 'button', onClick: () => { } }, " Send "),
+            react_1.default.createElement("button", { className: 'button', onClick: onSendConfirm }, " Send "),
             react_1.default.createElement("button", { className: 'button', onClick: onCancel }, " Cancel "))));
 };
 exports["default"] = ModalContentOnSend;
@@ -75494,7 +75502,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 // CANISTER_ID is replaced by webpack based on node environment
-const canisterId = "ejiov-ciaaa-aaaaa-aaepq-cai";
+const canisterId = "qoctq-giaaa-aaaaa-aaaea-cai";
 
 /**
  * 

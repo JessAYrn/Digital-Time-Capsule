@@ -1,5 +1,7 @@
-import React, {useState} from "react";
+import React, {useState, useContext} from "react";
 import InputBox from "./Fields/InputBox";
+import { AppContext } from "../Wallet.jsx";
+import { fromHexString } from "../Utils.jsx";
 import "./ModalContentOnSend.scss";
 
 
@@ -11,10 +13,18 @@ const ModalContentOnSend = (props) => {
     } = props;
 
     const [recipientAddress, setRecipientAddress] = useState('');
-    const [amountToSend, setAmountToSend] = useState(0);
+    const [amountToSend, setAmountToSend] = useState('');
+    const {actor} = useContext(AppContext);
+
 
     const onCancel = () => {
         setShowModal(false);
+    };
+
+    const onSendConfirm = async () => {
+        console.log(fromHexString(recipientAddress));
+        const status = await actor.transferICP(parseInt(amountToSend), fromHexString(recipientAddress));
+        console.log(status);
     };
 
     return(
@@ -36,7 +46,7 @@ const ModalContentOnSend = (props) => {
                 />
             </div>
             <div className='ModalContentOnSendButtons'>
-                <button className='button' onClick={() => {}}> Send </button>
+                <button className='button' onClick={onSendConfirm}> Send </button>
                 <button className='button' onClick={onCancel}> Cancel </button> 
             </div>
 
