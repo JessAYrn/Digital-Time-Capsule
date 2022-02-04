@@ -24013,6 +24013,33 @@ ___CSS_LOADER_EXPORT___.push([module.id, ".loginPageDiv {\n  border: solid;\n  b
 
 /***/ }),
 
+/***/ "./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/dtc_assets/src/Components/ModalContentOnSend.scss":
+/*!********************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/dtc_assets/src/Components/ModalContentOnSend.scss ***!
+  \********************************************************************************************************************************************/
+/***/ ((module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../node_modules/css-loader/dist/runtime/sourceMaps.js */ "./node_modules/css-loader/dist/runtime/sourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, ".sendContentDiv {\n  width: 90%;\n  margin-left: 5%;\n}\n.sendContentDiv .recipientAdressDiv {\n  padding-top: 10%;\n  padding-left: 10%;\n  width: 80%;\n}\n.sendContentDiv .ammountDiv {\n  padding-top: 5%;\n  padding-left: 10%;\n  width: 80%;\n}\n.sendContentDiv .ModalContentOnSendButtons {\n  padding-top: 10%;\n  padding-left: 29%;\n}\n.sendContentDiv .ModalContentOnSendButtons .button {\n  border-radius: 10px;\n  width: 10rem;\n  height: 3rem;\n}", "",{"version":3,"sources":["webpack://./src/dtc_assets/src/Components/ModalContentOnSend.scss"],"names":[],"mappings":"AAAA;EAEI,UAAA;EACA,eAAA;AAAJ;AAEI;EACI,gBAAA;EACA,iBAAA;EACA,UAAA;AAAR;AAII;EACI,eAAA;EACA,iBAAA;EACA,UAAA;AAFR;AAKI;EACI,gBAAA;EACA,iBAAA;AAHR;AAIQ;EACI,mBAAA;EACA,YAAA;EACA,YAAA;AAFZ","sourcesContent":[".sendContentDiv{\n\n    width: 90%;\n    margin-left: 5%;\n\n    .recipientAdressDiv{\n        padding-top: 10%;\n        padding-left: 10%;\n        width: 80%;\n    \n    }\n    \n    .ammountDiv{\n        padding-top: 5%;\n        padding-left: 10%;\n        width: 80%;\n    }\n\n    .ModalContentOnSendButtons{\n        padding-top: 10%;\n        padding-left: 29%;\n        .button{\n            border-radius: 10px;\n            width: 10rem;\n            height: 3rem;\n        }\n    }\n}\n"],"sourceRoot":""}]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ }),
+
 /***/ "./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/dtc_assets/src/Components/SubscriptionPage.scss":
 /*!******************************************************************************************************************************************!*\
   !*** ./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/dtc_assets/src/Components/SubscriptionPage.scss ***!
@@ -24034,6 +24061,65 @@ __webpack_require__.r(__webpack_exports__);
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
 // Module
 ___CSS_LOADER_EXPORT___.push([module.id, ".subscriptionSectionContainer {\n  width: 66%;\n  border: solid 1px black;\n  border-radius: 10px;\n  margin-left: 17%;\n  margin-top: 2.5rem;\n}\n.subscriptionSectionContainer .logoDiv {\n  border: solid;\n  border-width: 2px;\n  border-color: black;\n  background-color: #e9e9e9;\n  max-width: 50%;\n  height: 40rem;\n  margin-left: 25%;\n  margin-top: 3.5rem;\n  margin-bottom: 3.5rem;\n}\n.subscriptionSectionContainer .logoDiv .subscriptionSection {\n  width: 90%;\n  margin-left: 5%;\n}\n.subscriptionSectionContainer .logoDiv .subscriptionSection .subscribeButtonDiv {\n  width: 9%;\n  margin-left: 39%;\n  margin-bottom: 1rem;\n}\n.subscriptionSectionContainer .logoDiv .subscriptionSection .subscribeButtonDiv .subscriptionButton {\n  border-radius: 10px;\n}", "",{"version":3,"sources":["webpack://./src/dtc_assets/src/Components/SubscriptionPage.scss"],"names":[],"mappings":"AAAA;EACI,UAAA;EACA,uBAAA;EACA,mBAAA;EACA,gBAAA;EACA,kBAAA;AACJ;AACI;EAEI,aAAA;EACA,iBAAA;EACA,mBAAA;EACA,yBAAA;EACA,cAAA;EACA,aAAA;EACA,gBAAA;EACA,kBAAA;EACA,qBAAA;AAAR;AAEQ;EACI,UAAA;EACA,eAAA;AAAZ;AAEY;EACI,SAAA;EACA,gBAAA;EACA,mBAAA;AAAhB;AAEgB;EACI,mBAAA;AAApB","sourcesContent":[".subscriptionSectionContainer{\n    width: 66%;\n    border: solid 1px black;\n    border-radius: 10px;\n    margin-left: 17%;\n    margin-top: 2.5rem;\n\n    .logoDiv{\n\n        border: solid;\n        border-width: 2px;\n        border-color: rgb(0, 0, 0);\n        background-color: rgb(233, 233, 233);\n        max-width: 50%;\n        height: 40rem;\n        margin-left:25%;\n        margin-top: 3.5rem;\n        margin-bottom: 3.5rem;\n\n        .subscriptionSection{\n            width: 90%;\n            margin-left: 5%;\n    \n            .subscribeButtonDiv{\n                width: 9%;\n                margin-left: 39%;\n                margin-bottom: 1rem;\n    \n                .subscriptionButton{\n                    border-radius: 10px;\n                }\n            }\n        }\n    }\n}"],"sourceRoot":""}]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/dtc_assets/src/Components/WalletModal.scss":
+/*!*************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/dtc_assets/src/Components/WalletModal.scss ***!
+  \*************************************************************************************************************************************/
+/***/ ((module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../node_modules/css-loader/dist/runtime/sourceMaps.js */ "./node_modules/css-loader/dist/runtime/sourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, ".modalDiv {\n  box-sizing: border-box;\n  padding: 0;\n  margin: 0;\n  font-family: \"Julius Sans One\", sans-serif;\n  position: fixed;\n}\n.modalDiv .modalBackground {\n  width: 100%;\n  height: 100%;\n  background: rgba(0, 0, 0, 0.8);\n  position: fixed;\n  display: fixed;\n  justify-content: center;\n  align-items: center;\n  margin-left: -18%;\n  margin-top: -26%;\n}\n.modalDiv .modalBackground .modalTransparentDiv {\n  width: 65%;\n  height: 75%;\n  padding-top: 4%;\n  padding-bottom: 4%;\n  padding-left: 22.5%;\n}\n.modalDiv .modalBackground .modalTransparentDiv .modalWrapper {\n  width: 100%;\n  height: 500px;\n  box-shadow: 0 5px 16px rgba(0, 0, 0, 0.2);\n  background: #fff;\n  color: #000;\n  grid-template-columns: 1fr 1fr;\n  position: relative;\n  z-index: 10;\n  border-radius: 10px;\n}", "",{"version":3,"sources":["webpack://./src/dtc_assets/src/Components/WalletModal.scss"],"names":[],"mappings":"AAAA;EACI,sBAAA;EACA,UAAA;EACA,SAAA;EACA,0CAAA;EACA,eAAA;AACJ;AACI;EACI,WAAA;EACA,YAAA;EACA,8BAAA;EACA,eAAA;EACA,cAAA;EACA,uBAAA;EACA,mBAAA;EACA,iBAAA;EACA,gBAAA;AACR;AACQ;EACI,UAAA;EACA,WAAA;EACA,eAAA;EACA,kBAAA;EACA,mBAAA;AACZ;AACY;EACI,WAAA;EACA,aAAA;EACA,yCAAA;EACA,gBAAA;EACA,WAAA;EACA,8BAAA;EACA,kBAAA;EACA,WAAA;EACA,mBAAA;AAChB","sourcesContent":[".modalDiv{\n    box-sizing: border-box;\n    padding: 0;\n    margin: 0;\n    font-family: 'Julius Sans One', sans-serif;\n    position: fixed;\n\n    .modalBackground{\n        width: 100%;\n        height: 100%;\n        background:rgba(0, 0, 0, 0.8);\n        position: fixed;\n        display: fixed;\n        justify-content: center;\n        align-items: center;\n        margin-left: -18%;\n        margin-top: -26%;\n    \n        .modalTransparentDiv{\n            width: 65%;\n            height: 75%;\n            padding-top: 4%;\n            padding-bottom: 4%;\n            padding-left: 22.5%;\n    \n            .modalWrapper{\n                width: 100%;\n                height: 500px;\n                box-shadow: 0 5px 16px rgba(0, 0, 0, 0.2);\n                background: #fff;\n                color: #000;\n                grid-template-columns: 1fr 1fr;\n                position: relative;\n                z-index: 10;\n                border-radius: 10px;\n            }\n        }\n    }\n}\n\n\n\n\n"],"sourceRoot":""}]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/dtc_assets/src/Components/WalletPage.scss":
+/*!************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/dtc_assets/src/Components/WalletPage.scss ***!
+  \************************************************************************************************************************************/
+/***/ ((module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../node_modules/css-loader/dist/runtime/sourceMaps.js */ "./node_modules/css-loader/dist/runtime/sourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_getUrl_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../../node_modules/css-loader/dist/runtime/getUrl.js */ "./node_modules/css-loader/dist/runtime/getUrl.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_getUrl_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_getUrl_js__WEBPACK_IMPORTED_MODULE_2__);
+// Imports
+
+
+
+var ___CSS_LOADER_URL_IMPORT_0___ = new URL(/* asset import */ __webpack_require__(/*! ../../assets/dtc-logo-black.png */ "./src/dtc_assets/assets/dtc-logo-black.png"), __webpack_require__.b);
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+var ___CSS_LOADER_URL_REPLACEMENT_0___ = _node_modules_css_loader_dist_runtime_getUrl_js__WEBPACK_IMPORTED_MODULE_2___default()(___CSS_LOADER_URL_IMPORT_0___);
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, ".container {\n  height: 48rem;\n}\n.container .background {\n  background-image: url(" + ___CSS_LOADER_URL_REPLACEMENT_0___ + ");\n  background-size: 160px;\n  height: 100%;\n  position: relative;\n}\n.container .background .scrollable {\n  height: 90%;\n  /* or any value */\n  overflow-y: auto;\n  width: 100%;\n  background-color: transparent;\n}\n.container .background .scrollable .transparentDiv {\n  width: 65%;\n  height: 75%;\n  padding-left: 17.5%;\n  padding-top: 4%;\n  padding-bottom: 4%;\n}\n.container .background .scrollable .transparentDiv .infoDiv {\n  background: white;\n  border: solid black;\n  border-radius: 10px;\n  width: 100%;\n  height: 100%;\n}\n.container .background .scrollable .transparentDiv .infoDiv .balanceDiv {\n  margin-top: 4rem;\n  padding-left: 2rem;\n  font-family: \"Julius Sans One\", sans-serif;\n  font-size: 1.75rem;\n  color: #a3a3a3;\n}\n.container .background .scrollable .transparentDiv .infoDiv .walletAddressDiv {\n  margin-top: 6rem;\n  padding-left: 2rem;\n  font-family: \"Julius Sans One\", sans-serif;\n  font-size: 1rem;\n  color: #a3a3a3;\n}\n.container .background .scrollable .transparentDiv .infoDiv .buttonsDiv {\n  padding-top: 3rem;\n  padding-left: 3%;\n}\n.container .background .scrollable .transparentDiv .infoDiv .buttonsDiv .button {\n  border-radius: 10px;\n  width: 10rem;\n  height: 3rem;\n}\n.container .background .scrollable .transparentDiv .infoDiv .modalDiv {\n  box-sizing: border-box;\n  padding: 0;\n  margin: 0;\n  font-family: \"Julius Sans One\", sans-serif;\n  position: fixed;\n}", "",{"version":3,"sources":["webpack://./src/dtc_assets/src/Components/WalletPage.scss"],"names":[],"mappings":"AAAA;EACI,aAAA;AACJ;AAAI;EACI,yDAAA;EACA,sBAAA;EACA,YAAA;EACA,kBAAA;AAER;AAAQ;EACI,WAAA;EAAa,iBAAA;EACb,gBAAA;EACA,WAAA;EACA,6BAAA;AAGZ;AADY;EACI,UAAA;EACA,WAAA;EACA,mBAAA;EACA,eAAA;EACA,kBAAA;AAGhB;AAFgB;EACI,iBAAA;EACA,mBAAA;EACA,mBAAA;EACA,WAAA;EACA,YAAA;AAIpB;AAHoB;EACI,gBAAA;EACA,kBAAA;EACA,0CAAA;EACA,kBAAA;EACA,cAAA;AAKxB;AAHoB;EACI,gBAAA;EACA,kBAAA;EACA,0CAAA;EACA,eAAA;EACA,cAAA;AAKxB;AAHoB;EACI,iBAAA;EACA,gBAAA;AAKxB;AAJwB;EACI,mBAAA;EACA,YAAA;EACA,YAAA;AAM5B;AAHoB;EACI,sBAAA;EACA,UAAA;EACA,SAAA;EACA,0CAAA;EACA,eAAA;AAKxB","sourcesContent":[".container{\n    height: 48rem;\n    .background{\n        background-image: url(\"../../assets/dtc-logo-black.png\");\n        background-size: 160px;\n        height:100%;\n        position: relative;\n\n        .scrollable{\n            height: 90%; /* or any value */\n            overflow-y: auto;\n            width: 100%;\n            background-color: transparent;\n\n            .transparentDiv{\n                width: 65%;\n                height: 75%;\n                padding-left: 17.5%;\n                padding-top: 4%;\n                padding-bottom: 4%;\n                .infoDiv{\n                    background: white;\n                    border: solid black;\n                    border-radius: 10px;\n                    width: 100%;\n                    height: 100%;\n                    .balanceDiv{\n                        margin-top: 4rem;\n                        padding-left: 2rem;\n                        font-family: 'Julius Sans One', sans-serif;\n                        font-size: 1.75rem;\n                        color: rgb(163, 163, 163);\n                    }\n                    .walletAddressDiv{\n                        margin-top: 6rem;\n                        padding-left: 2rem;\n                        font-family: 'Julius Sans One', sans-serif;\n                        font-size: 1rem;\n                        color: rgb(163, 163, 163);\n                    }\n                    .buttonsDiv{\n                        padding-top: 3rem;\n                        padding-left: 3%;\n                        .button{\n                            border-radius: 10px;\n                            width: 10rem;\n                            height: 3rem;\n                        }\n                    }\n                    .modalDiv{\n                        box-sizing: border-box;\n                        padding: 0;\n                        margin: 0;\n                        font-family: 'Julius Sans One', sans-serif;\n                        position: fixed;\n                    }\n                    \n                }\n            }\n        }\n    }\n};"],"sourceRoot":""}]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -24065,7 +24151,7 @@ var ___CSS_LOADER_URL_IMPORT_0___ = new URL(/* asset import */ __webpack_require
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
 var ___CSS_LOADER_URL_REPLACEMENT_0___ = _node_modules_css_loader_dist_runtime_getUrl_js__WEBPACK_IMPORTED_MODULE_2___default()(___CSS_LOADER_URL_IMPORT_0___);
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, ".container {\n  height: 48rem;\n}\n.container .background {\n  background-image: url(" + ___CSS_LOADER_URL_REPLACEMENT_0___ + ");\n  background-size: 160px;\n  height: 100%;\n}\n.container .background .scrollable {\n  height: 90%;\n  /* or any value */\n  overflow-y: auto;\n  width: 100%;\n  background-color: transparent;\n}\n.container .background .scrollable .transparentDiv {\n  width: 65%;\n  height: 75%;\n  padding-left: 17.5%;\n  padding-top: 4%;\n  padding-bottom: 4%;\n}\n.container .background .scrollable .transparentDiv .carouselDiv {\n  background-color: black;\n  border: solid black;\n  border-radius: 10px;\n  width: 100%;\n  height: 100%;\n}\n.container .background .carouselContainer {\n  height: 15%;\n  width: 45%;\n  background-color: black;\n}\n\n.linkDiv {\n  background-color: black;\n  border: solid black;\n  border-radius: 10px;\n}\n.linkDiv .navBar {\n  padding-left: 77%;\n  color: white;\n}\n.linkDiv .navBar .navLink {\n  font-family: \"Julius Sans One\", sans-serif;\n  color: white;\n  text-decoration: none;\n}", "",{"version":3,"sources":["webpack://./src/dtc_assets/src/HomePage.scss"],"names":[],"mappings":"AACA;EACI,aAAA;AAAJ;AAEI;EACI,yDAAA;EACA,sBAAA;EACA,YAAA;AAAR;AAEQ;EACI,WAAA;EAAa,iBAAA;EACb,gBAAA;EACA,WAAA;EACA,6BAAA;AACZ;AAAY;EACI,UAAA;EACA,WAAA;EACA,mBAAA;EACA,eAAA;EACA,kBAAA;AAEhB;AADgB;EACI,uBAAA;EACA,mBAAA;EACA,mBAAA;EACA,WAAA;EACA,YAAA;AAGpB;AACQ;EACI,WAAA;EACA,UAAA;EACA,uBAAA;AACZ;;AAGA;EACI,uBAAA;EACA,mBAAA;EACA,mBAAA;AAAJ;AACI;EACI,iBAAA;EACA,YAAA;AACR;AAAQ;EACI,0CAAA;EACA,YAAA;EACA,qBAAA;AAEZ","sourcesContent":["\n.container{\n    height: 48rem;\n\n    .background {\n        background-image: url(\"../assets/dtc-logo-black.png\");\n        background-size: 160px;\n        height:100%;\n\n        .scrollable{\n            height: 90%; /* or any value */\n            overflow-y: auto;\n            width: 100%;\n            background-color: transparent;\n            .transparentDiv{\n                width: 65%;\n                height: 75%;\n                padding-left: 17.5%;\n                padding-top: 4%;\n                padding-bottom: 4%;\n                .carouselDiv{\n                    background-color: black;\n                    border: solid black;\n                    border-radius: 10px;\n                    width: 100%;\n                    height: 100%;\n                }\n            }\n        }\n        .carouselContainer{\n            height: 15%;\n            width: 45%;\n            background-color: black;\n        }\n    }\n}\n.linkDiv{\n    background-color: black;\n    border: solid black;\n    border-radius: 10px;\n    .navBar{\n        padding-left: 77%;\n        color: white;\n        .navLink{\n            font-family: 'Julius Sans One', sans-serif;\n            color: white;\n            text-decoration: none;\n        }\n    }\n}\n"],"sourceRoot":""}]);
+___CSS_LOADER_EXPORT___.push([module.id, ".container {\n  height: 48rem;\n}\n.container .background {\n  background-image: url(" + ___CSS_LOADER_URL_REPLACEMENT_0___ + ");\n  background-size: 160px;\n  height: 100%;\n}\n.container .background .scrollable {\n  height: 90%;\n  /* or any value */\n  overflow-y: auto;\n  width: 100%;\n  background-color: transparent;\n}\n.container .background .scrollable .transparentDiv {\n  width: 65%;\n  height: 75%;\n  padding-left: 17.5%;\n  padding-top: 4%;\n  padding-bottom: 4%;\n}\n.container .background .scrollable .transparentDiv .carouselDiv {\n  background-color: black;\n  border: solid black;\n  border-radius: 10px;\n  width: 100%;\n  height: 100%;\n}\n.container .background .carouselContainer {\n  height: 15%;\n  width: 45%;\n  background-color: black;\n}\n\n.linkDiv {\n  background-color: black;\n  border: solid black;\n  border-radius: 10px;\n}\n.linkDiv .navBar {\n  padding-left: 70%;\n  color: white;\n}\n.linkDiv .navBar .navLink {\n  font-family: \"Julius Sans One\", sans-serif;\n  color: white;\n  text-decoration: none;\n}", "",{"version":3,"sources":["webpack://./src/dtc_assets/src/HomePage.scss"],"names":[],"mappings":"AACA;EACI,aAAA;AAAJ;AAEI;EACI,yDAAA;EACA,sBAAA;EACA,YAAA;AAAR;AAEQ;EACI,WAAA;EAAa,iBAAA;EACb,gBAAA;EACA,WAAA;EACA,6BAAA;AACZ;AAAY;EACI,UAAA;EACA,WAAA;EACA,mBAAA;EACA,eAAA;EACA,kBAAA;AAEhB;AADgB;EACI,uBAAA;EACA,mBAAA;EACA,mBAAA;EACA,WAAA;EACA,YAAA;AAGpB;AACQ;EACI,WAAA;EACA,UAAA;EACA,uBAAA;AACZ;;AAGA;EACI,uBAAA;EACA,mBAAA;EACA,mBAAA;AAAJ;AACI;EACI,iBAAA;EACA,YAAA;AACR;AAAQ;EACI,0CAAA;EACA,YAAA;EACA,qBAAA;AAEZ","sourcesContent":["\n.container{\n    height: 48rem;\n\n    .background {\n        background-image: url(\"../assets/dtc-logo-black.png\");\n        background-size: 160px;\n        height:100%;\n\n        .scrollable{\n            height: 90%; /* or any value */\n            overflow-y: auto;\n            width: 100%;\n            background-color: transparent;\n            .transparentDiv{\n                width: 65%;\n                height: 75%;\n                padding-left: 17.5%;\n                padding-top: 4%;\n                padding-bottom: 4%;\n                .carouselDiv{\n                    background-color: black;\n                    border: solid black;\n                    border-radius: 10px;\n                    width: 100%;\n                    height: 100%;\n                }\n            }\n        }\n        .carouselContainer{\n            height: 15%;\n            width: 45%;\n            background-color: black;\n        }\n    }\n}\n.linkDiv{\n    background-color: black;\n    border: solid black;\n    border-radius: 10px;\n    .navBar{\n        padding-left: 70%;\n        color: white;\n        .navLink{\n            font-family: 'Julius Sans One', sans-serif;\n            color: white;\n            text-decoration: none;\n        }\n    }\n}\n"],"sourceRoot":""}]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -69829,6 +69915,61 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
 
 /***/ }),
 
+/***/ "./src/dtc_assets/src/Components/ModalContentOnSend.scss":
+/*!***************************************************************!*\
+  !*** ./src/dtc_assets/src/Components/ModalContentOnSend.scss ***!
+  \***************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! !../../../../node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js */ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! !../../../../node_modules/style-loader/dist/runtime/styleDomAPI.js */ "./node_modules/style-loader/dist/runtime/styleDomAPI.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! !../../../../node_modules/style-loader/dist/runtime/insertBySelector.js */ "./node_modules/style-loader/dist/runtime/insertBySelector.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! !../../../../node_modules/style-loader/dist/runtime/setAttributesWithoutAttributes.js */ "./node_modules/style-loader/dist/runtime/setAttributesWithoutAttributes.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! !../../../../node_modules/style-loader/dist/runtime/insertStyleElement.js */ "./node_modules/style-loader/dist/runtime/insertStyleElement.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! !../../../../node_modules/style-loader/dist/runtime/styleTagTransform.js */ "./node_modules/style-loader/dist/runtime/styleTagTransform.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_ModalContentOnSend_scss__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! !!../../../../node_modules/css-loader/dist/cjs.js!../../../../node_modules/sass-loader/dist/cjs.js!./ModalContentOnSend.scss */ "./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/dtc_assets/src/Components/ModalContentOnSend.scss");
+
+      
+      
+      
+      
+      
+      
+      
+      
+      
+
+var options = {};
+
+options.styleTagTransform = (_node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5___default());
+options.setAttributes = (_node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3___default());
+
+      options.insert = _node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2___default().bind(null, "head");
+    
+options.domAPI = (_node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1___default());
+options.insertStyleElement = (_node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4___default());
+
+var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default()(_node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_ModalContentOnSend_scss__WEBPACK_IMPORTED_MODULE_6__["default"], options);
+
+
+
+
+       /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_ModalContentOnSend_scss__WEBPACK_IMPORTED_MODULE_6__["default"] && _node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_ModalContentOnSend_scss__WEBPACK_IMPORTED_MODULE_6__["default"].locals ? _node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_ModalContentOnSend_scss__WEBPACK_IMPORTED_MODULE_6__["default"].locals : undefined);
+
+
+/***/ }),
+
 /***/ "./src/dtc_assets/src/Components/SubscriptionPage.scss":
 /*!*************************************************************!*\
   !*** ./src/dtc_assets/src/Components/SubscriptionPage.scss ***!
@@ -69880,6 +70021,116 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
 
 
        /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_SubscriptionPage_scss__WEBPACK_IMPORTED_MODULE_6__["default"] && _node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_SubscriptionPage_scss__WEBPACK_IMPORTED_MODULE_6__["default"].locals ? _node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_SubscriptionPage_scss__WEBPACK_IMPORTED_MODULE_6__["default"].locals : undefined);
+
+
+/***/ }),
+
+/***/ "./src/dtc_assets/src/Components/WalletModal.scss":
+/*!********************************************************!*\
+  !*** ./src/dtc_assets/src/Components/WalletModal.scss ***!
+  \********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! !../../../../node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js */ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! !../../../../node_modules/style-loader/dist/runtime/styleDomAPI.js */ "./node_modules/style-loader/dist/runtime/styleDomAPI.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! !../../../../node_modules/style-loader/dist/runtime/insertBySelector.js */ "./node_modules/style-loader/dist/runtime/insertBySelector.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! !../../../../node_modules/style-loader/dist/runtime/setAttributesWithoutAttributes.js */ "./node_modules/style-loader/dist/runtime/setAttributesWithoutAttributes.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! !../../../../node_modules/style-loader/dist/runtime/insertStyleElement.js */ "./node_modules/style-loader/dist/runtime/insertStyleElement.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! !../../../../node_modules/style-loader/dist/runtime/styleTagTransform.js */ "./node_modules/style-loader/dist/runtime/styleTagTransform.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_WalletModal_scss__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! !!../../../../node_modules/css-loader/dist/cjs.js!../../../../node_modules/sass-loader/dist/cjs.js!./WalletModal.scss */ "./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/dtc_assets/src/Components/WalletModal.scss");
+
+      
+      
+      
+      
+      
+      
+      
+      
+      
+
+var options = {};
+
+options.styleTagTransform = (_node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5___default());
+options.setAttributes = (_node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3___default());
+
+      options.insert = _node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2___default().bind(null, "head");
+    
+options.domAPI = (_node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1___default());
+options.insertStyleElement = (_node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4___default());
+
+var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default()(_node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_WalletModal_scss__WEBPACK_IMPORTED_MODULE_6__["default"], options);
+
+
+
+
+       /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_WalletModal_scss__WEBPACK_IMPORTED_MODULE_6__["default"] && _node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_WalletModal_scss__WEBPACK_IMPORTED_MODULE_6__["default"].locals ? _node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_WalletModal_scss__WEBPACK_IMPORTED_MODULE_6__["default"].locals : undefined);
+
+
+/***/ }),
+
+/***/ "./src/dtc_assets/src/Components/WalletPage.scss":
+/*!*******************************************************!*\
+  !*** ./src/dtc_assets/src/Components/WalletPage.scss ***!
+  \*******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! !../../../../node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js */ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! !../../../../node_modules/style-loader/dist/runtime/styleDomAPI.js */ "./node_modules/style-loader/dist/runtime/styleDomAPI.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! !../../../../node_modules/style-loader/dist/runtime/insertBySelector.js */ "./node_modules/style-loader/dist/runtime/insertBySelector.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! !../../../../node_modules/style-loader/dist/runtime/setAttributesWithoutAttributes.js */ "./node_modules/style-loader/dist/runtime/setAttributesWithoutAttributes.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! !../../../../node_modules/style-loader/dist/runtime/insertStyleElement.js */ "./node_modules/style-loader/dist/runtime/insertStyleElement.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! !../../../../node_modules/style-loader/dist/runtime/styleTagTransform.js */ "./node_modules/style-loader/dist/runtime/styleTagTransform.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_WalletPage_scss__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! !!../../../../node_modules/css-loader/dist/cjs.js!../../../../node_modules/sass-loader/dist/cjs.js!./WalletPage.scss */ "./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/dtc_assets/src/Components/WalletPage.scss");
+
+      
+      
+      
+      
+      
+      
+      
+      
+      
+
+var options = {};
+
+options.styleTagTransform = (_node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5___default());
+options.setAttributes = (_node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3___default());
+
+      options.insert = _node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2___default().bind(null, "head");
+    
+options.domAPI = (_node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1___default());
+options.insertStyleElement = (_node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4___default());
+
+var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default()(_node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_WalletPage_scss__WEBPACK_IMPORTED_MODULE_6__["default"], options);
+
+
+
+
+       /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_WalletPage_scss__WEBPACK_IMPORTED_MODULE_6__["default"] && _node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_WalletPage_scss__WEBPACK_IMPORTED_MODULE_6__["default"].locals ? _node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_WalletPage_scss__WEBPACK_IMPORTED_MODULE_6__["default"].locals : undefined);
 
 
 /***/ }),
@@ -70615,7 +70866,7 @@ const DatePicker = (props) => {
                 label,
                 "  \u00A0 ")),
         react_1.default.createElement("div", { className: `input-element-div__${(divClassName) ? divClassName : " "}` },
-            react_1.default.createElement("input", { className: disabledOrEnabled, value: value, type: "date", alt: label, ref: inputRef, disabled: disabled, onFocus: onFocus, onBlur: onBlur, onChange: onChnage }))));
+            react_1.default.createElement("input", { className: disabledOrEnabled, value: value, "data-date-format": "yyyy-mm-dd", type: "date", alt: label, ref: inputRef, disabled: disabled, onFocus: onFocus, onBlur: onBlur, onChange: onChnage }))));
 };
 exports["default"] = DatePicker;
 
@@ -70743,7 +70994,7 @@ __webpack_require__(/*! ./InputBox.scss */ "./src/dtc_assets/src/Components/Fiel
 const InputBox = (props) => {
     const inputRef = (0, react_1.useRef)();
     const [disabledOrEnabled, setDisabledOrEnabled] = (0, react_1.useState)("disabled");
-    const { label, maxLength, rows, columns, disabled, divClassName, dispatchAction, dispatch, index, value
+    const { label, maxLength, rows, columns, disabled, divClassName, dispatchAction, dispatch, index, value, setParentState
     // dispatchAction //the action that is to take place in order to dispatch the field change to the redux store
      } = props;
     const onBlur = () => {
@@ -70753,11 +71004,16 @@ const InputBox = (props) => {
         setDisabledOrEnabled("enabled");
     };
     const onChnage = () => {
-        dispatch({
-            payload: inputRef.current.value,
-            actionType: dispatchAction,
-            index: index
-        });
+        if (dispatch) {
+            dispatch({
+                payload: inputRef.current.value,
+                actionType: dispatchAction,
+                index: index
+            });
+        }
+        else {
+            setParentState(inputRef.current.value);
+        }
     };
     return (react_1.default.createElement("div", { className: 'inputBox' },
         react_1.default.createElement("div", { className: 'label-element-div ' },
@@ -70895,13 +71151,13 @@ const Journal = (props) => {
             });
             journalEntries = journalEntries.sort(function (a, b) {
                 const dateForAArray = a.date.split('-');
-                const yearForA = parseInt(dateForAArray[2]);
-                const monthForA = parseInt(dateForAArray[0]);
-                const dayForA = parseInt(dateForAArray[1]);
+                const yearForA = parseInt(dateForAArray[0]);
+                const monthForA = parseInt(dateForAArray[1]);
+                const dayForA = parseInt(dateForAArray[2]);
                 const dateForBArray = b.date.split('-');
-                const yearForB = parseInt(dateForBArray[2]);
-                const monthForB = parseInt(dateForBArray[0]);
-                const dayForB = parseInt(dateForBArray[1]);
+                const yearForB = parseInt(dateForBArray[0]);
+                const monthForB = parseInt(dateForBArray[1]);
+                const dayForB = parseInt(dateForBArray[2]);
                 if (yearForA > yearForB) {
                     return 1;
                 }
@@ -71207,6 +71463,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const react_1 = __importStar(__webpack_require__(/*! react */ "./node_modules/react/index.js"));
 const App_1 = __webpack_require__(/*! ../App */ "./src/dtc_assets/src/App.jsx");
 const AccountPage_1 = __webpack_require__(/*! ../AccountPage */ "./src/dtc_assets/src/AccountPage.jsx");
+const Wallet_1 = __webpack_require__(/*! ../Wallet */ "./src/dtc_assets/src/Wallet.jsx");
 // import { AppContext as PodcastContext } from "../PodcastPage"
 __webpack_require__(/*! ./LoginPage.scss */ "./src/dtc_assets/src/Components/LoginPage.scss");
 const LoginPage = (props) => {
@@ -71218,9 +71475,9 @@ const LoginPage = (props) => {
     else if (context === 'accountPage') {
         properContext = AccountPage_1.AppContext;
     }
-    // else if(context === 'podcast'){
-    //     properContext = PodcastContext
-    // }
+    else if (context === 'wallet') {
+        properContext = Wallet_1.AppContext;
+    }
     const { authClient, setIsLoaded, loginAttempted, setLoginAttempted, } = (0, react_1.useContext)(properContext);
     const handleClick = async () => {
         setIsLoaded(false);
@@ -71241,6 +71498,69 @@ const LoginPage = (props) => {
                 " "))));
 };
 exports["default"] = LoginPage;
+
+
+/***/ }),
+
+/***/ "./src/dtc_assets/src/Components/ModalContentOnSend.jsx":
+/*!**************************************************************!*\
+  !*** ./src/dtc_assets/src/Components/ModalContentOnSend.jsx ***!
+  \**************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const react_1 = __importStar(__webpack_require__(/*! react */ "./node_modules/react/index.js"));
+const InputBox_1 = __importDefault(__webpack_require__(/*! ./Fields/InputBox */ "./src/dtc_assets/src/Components/Fields/InputBox.jsx"));
+const Wallet_jsx_1 = __webpack_require__(/*! ../Wallet.jsx */ "./src/dtc_assets/src/Wallet.jsx");
+const Utils_jsx_1 = __webpack_require__(/*! ../Utils.jsx */ "./src/dtc_assets/src/Utils.jsx");
+__webpack_require__(/*! ./ModalContentOnSend.scss */ "./src/dtc_assets/src/Components/ModalContentOnSend.scss");
+const ModalContentOnSend = (props) => {
+    const { setShowModal, showModal } = props;
+    const [recipientAddress, setRecipientAddress] = (0, react_1.useState)('');
+    const [amountToSend, setAmountToSend] = (0, react_1.useState)('');
+    const { actor } = (0, react_1.useContext)(Wallet_jsx_1.AppContext);
+    const onCancel = () => {
+        setShowModal(false);
+    };
+    const onSendConfirm = async () => {
+        console.log((0, Utils_jsx_1.fromHexString)(recipientAddress));
+        const status = await actor.transferICP(parseInt(amountToSend), (0, Utils_jsx_1.fromHexString)(recipientAddress));
+        console.log(status);
+    };
+    return (react_1.default.createElement("div", { className: "sendContentDiv" },
+        react_1.default.createElement("div", { className: "recipientAdressDiv" },
+            react_1.default.createElement(InputBox_1.default, { label: "Recipient Address: ", rows: "1", setParentState: setRecipientAddress, value: showModal ? recipientAddress : '' })),
+        react_1.default.createElement("div", { className: "ammountDiv" },
+            react_1.default.createElement(InputBox_1.default, { label: "Amount: ", rows: "1", setParentState: setAmountToSend, value: showModal ? amountToSend : 0 })),
+        react_1.default.createElement("div", { className: 'ModalContentOnSendButtons' },
+            react_1.default.createElement("button", { className: 'button', onClick: onSendConfirm }, " Send "),
+            react_1.default.createElement("button", { className: 'button', onClick: onCancel }, " Cancel "))));
+};
+exports["default"] = ModalContentOnSend;
 
 
 /***/ }),
@@ -71388,6 +71708,123 @@ exports["default"] = SubcriptionPage;
 
 /***/ }),
 
+/***/ "./src/dtc_assets/src/Components/WalletModal.jsx":
+/*!*******************************************************!*\
+  !*** ./src/dtc_assets/src/Components/WalletModal.jsx ***!
+  \*******************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Modal = void 0;
+const react_1 = __importDefault(__webpack_require__(/*! react */ "./node_modules/react/index.js"));
+__webpack_require__(/*! ./WalletModal.scss */ "./src/dtc_assets/src/Components/WalletModal.scss");
+const ModalContentOnSend_1 = __importDefault(__webpack_require__(/*! ./ModalContentOnSend */ "./src/dtc_assets/src/Components/ModalContentOnSend.jsx"));
+const Modal = (props) => {
+    const { showModal, setShowModal } = props;
+    return (react_1.default.createElement(react_1.default.Fragment, null, showModal ?
+        react_1.default.createElement("div", { className: "modalDiv" },
+            react_1.default.createElement("div", { className: 'modalBackground' },
+                react_1.default.createElement("div", { className: 'modalTransparentDiv' },
+                    react_1.default.createElement("div", { className: 'modalWrapper' },
+                        react_1.default.createElement(ModalContentOnSend_1.default, { showModal: showModal, setShowModal: setShowModal }))))) :
+        null));
+};
+exports.Modal = Modal;
+
+
+/***/ }),
+
+/***/ "./src/dtc_assets/src/Components/WalletPage.jsx":
+/*!******************************************************!*\
+  !*** ./src/dtc_assets/src/Components/WalletPage.jsx ***!
+  \******************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const react_1 = __importStar(__webpack_require__(/*! react */ "./node_modules/react/index.js"));
+const Wallet_1 = __webpack_require__(/*! ../Wallet */ "./src/dtc_assets/src/Wallet.jsx");
+const Utils_1 = __webpack_require__(/*! ../Utils */ "./src/dtc_assets/src/Utils.jsx");
+const journalReducer_1 = __webpack_require__(/*! ../reducers/journalReducer */ "./src/dtc_assets/src/reducers/journalReducer.jsx");
+const WalletModal_1 = __webpack_require__(/*! ./WalletModal */ "./src/dtc_assets/src/Components/WalletModal.jsx");
+__webpack_require__(/*! ./WalletPage.scss */ "./src/dtc_assets/src/Components/WalletPage.scss");
+const WalletPage = (props) => {
+    const { journalState, dispatch } = props;
+    const { actor, authClient } = (0, react_1.useContext)(Wallet_1.AppContext);
+    const [showModal, setShowModal] = (0, react_1.useState)(false);
+    const openModal = () => {
+        setShowModal(true);
+    };
+    (0, react_1.useEffect)(async () => {
+        const journal = await actor.readJournal();
+        console.log(journal);
+        if ("err" in journal) {
+            actor.create({
+                userName: "admin",
+                email: "admin@test.com"
+            }).then((result) => {
+                console.log(result);
+            });
+        }
+        else {
+            console.log(journal.ok);
+            console.log((0, Utils_1.toHexString)(new Uint8Array([...journal.ok.address])));
+            const walletData = {
+                balance: parseInt(journal.ok.balance.e8s),
+                address: (0, Utils_1.toHexString)(new Uint8Array([...journal.ok.address]))
+            };
+            dispatch({
+                payload: walletData,
+                actionType: journalReducer_1.types.SET_WALLET_DATA
+            });
+        }
+    }, [actor, authClient]);
+    console.log(journalState.walletData);
+    return (react_1.default.createElement("div", { className: "container" },
+        react_1.default.createElement("div", { className: "background center" },
+            react_1.default.createElement("div", { className: 'scrollable' },
+                react_1.default.createElement("div", { className: 'transparentDiv' },
+                    react_1.default.createElement("div", { className: 'infoDiv' },
+                        react_1.default.createElement("div", { className: "balanceDiv" },
+                            "Wallet Balance: ",
+                            journalState.walletData.balance),
+                        react_1.default.createElement("div", { className: 'walletAddressDiv' },
+                            "Wallet Address: ",
+                            journalState.walletData.address),
+                        react_1.default.createElement("div", { className: "buttonsDiv" },
+                            react_1.default.createElement("button", { className: 'button', onClick: openModal }, " Send ")),
+                        react_1.default.createElement(WalletModal_1.Modal, { showModal: showModal, setShowModal: setShowModal })))))));
+};
+exports["default"] = WalletPage;
+
+
+/***/ }),
+
 /***/ "./src/dtc_assets/src/Constants.jsx":
 /*!******************************************!*\
   !*** ./src/dtc_assets/src/Constants.jsx ***!
@@ -71417,7 +71854,7 @@ exports.UI_CONTEXTS = void 0;
 exports.UI_CONTEXTS = {
     JOURNAL: 'journal',
     ACCOUNT_PAGE: 'accountPage',
-    PODCAST: 'podcast'
+    WALLET: 'wallet'
 };
 
 
@@ -71456,7 +71893,10 @@ const HomePage = () => {
                 react_1.default.createElement(react_router_dom_1.Link, { className: "navLink", to: "app" }, "Time Capsule"),
                 " |",
                 " ",
-                react_1.default.createElement(react_router_dom_1.Link, { className: "navLink", to: 'account' }, "Account"))),
+                react_1.default.createElement(react_router_dom_1.Link, { className: "navLink", to: 'account' }, "Account"),
+                " |",
+                " ",
+                react_1.default.createElement(react_router_dom_1.Link, { className: "navLink", to: 'wallet' }, "Wallet"))),
         react_1.default.createElement("div", { className: "background center" },
             react_1.default.createElement("div", { class: 'scrollable' },
                 react_1.default.createElement("div", { className: 'transparentDiv' },
@@ -71464,6 +71904,131 @@ const HomePage = () => {
                         react_1.default.createElement(react_youtube_1.default, { videoId: 'hiB8OCPxF40', opts: opts, onReady: onready })))))));
 };
 exports["default"] = HomePage;
+
+
+/***/ }),
+
+/***/ "./src/dtc_assets/src/Utils.jsx":
+/*!**************************************!*\
+  !*** ./src/dtc_assets/src/Utils.jsx ***!
+  \**************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.fromHexString = exports.toHexString = void 0;
+const toHexString = (byteArray) => {
+    return Array.from(byteArray, function (byte) {
+        return ('0' + (byte & 0xFF).toString(16)).slice(-2);
+    }).join('');
+};
+exports.toHexString = toHexString;
+const fromHexString = (hex) => {
+    if (hex.substr(0, 2) === "0x")
+        hex = hex.substr(2);
+    for (var bytes = [], c = 0; c < hex.length; c += 2)
+        bytes.push(parseInt(hex.substr(c, 2), 16));
+    return bytes;
+};
+exports.fromHexString = fromHexString;
+
+
+/***/ }),
+
+/***/ "./src/dtc_assets/src/Wallet.jsx":
+/*!***************************************!*\
+  !*** ./src/dtc_assets/src/Wallet.jsx ***!
+  \***************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AppContext = void 0;
+const react_1 = __importStar(__webpack_require__(/*! react */ "./node_modules/react/index.js"));
+const journalReducer_1 = __importStar(__webpack_require__(/*! ./reducers/journalReducer */ "./src/dtc_assets/src/reducers/journalReducer.jsx"));
+const LoginPage_1 = __importDefault(__webpack_require__(/*! ./Components/LoginPage */ "./src/dtc_assets/src/Components/LoginPage.jsx"));
+const auth_client_1 = __webpack_require__(/*! @dfinity/auth-client */ "./node_modules/@dfinity/auth-client/lib/esm/index.js");
+const index_1 = __webpack_require__(/*! ../../declarations/dtc/index */ "./src/declarations/dtc/index.js");
+const Contexts_1 = __webpack_require__(/*! ./Contexts */ "./src/dtc_assets/src/Contexts.jsx");
+const WalletPage_1 = __importDefault(__webpack_require__(/*! ./Components/WalletPage */ "./src/dtc_assets/src/Components/WalletPage.jsx"));
+exports.AppContext = (0, react_1.createContext)({
+    authClient: {},
+    setAuthClient: null,
+    loginAttempted: undefined,
+    setLoginAttempted: null,
+    isAuthenticated: null,
+    setIsAuthenticated: null,
+    actor: undefined,
+    setActor: null
+});
+const WalletApp = () => {
+    const [journalState, dispatch] = (0, react_1.useReducer)(journalReducer_1.default, journalReducer_1.initialState);
+    const [actor, setActor] = (0, react_1.useState)(undefined);
+    const [authClient, setAuthClient] = (0, react_1.useState)(undefined);
+    const [isLoaded, setIsLoaded] = (0, react_1.useState)(true);
+    const [isAuthenticated, setIsAuthenticated] = (0, react_1.useState)(false);
+    const [loginAttempted, setLoginAttempted] = (0, react_1.useState)(false);
+    // login function used when Authenticating the client (aka user)
+    (0, react_1.useEffect)(() => {
+        auth_client_1.AuthClient.create().then(async (client) => {
+            setAuthClient(client);
+            await client.isAuthenticated().then((result) => {
+                setIsAuthenticated(result);
+            });
+            setIsLoaded(true);
+        });
+    }, [isLoaded]);
+    //Creating the canisterActor that enables us to be able to call the functions defined on the backend
+    (0, react_1.useEffect)(() => {
+        if (!authClient)
+            return;
+        const identity = authClient.getIdentity();
+        const actor = (0, index_1.createActor)(index_1.canisterId, {
+            agentOptions: {
+                identity
+            }
+        });
+        setActor(actor);
+    }, [authClient]);
+    return (react_1.default.createElement(exports.AppContext.Provider, { value: {
+            authClient,
+            setIsLoaded,
+            loginAttempted,
+            setLoginAttempted,
+            actor
+        } },
+        isLoaded &&
+            isAuthenticated ?
+            react_1.default.createElement(WalletPage_1.default, { journalState: journalState, dispatch: dispatch }) :
+            react_1.default.createElement(LoginPage_1.default, { context: Contexts_1.UI_CONTEXTS.WALLET }),
+        !isLoaded &&
+            react_1.default.createElement("h2", null, " Load Screen ")));
+};
+exports["default"] = WalletApp;
 
 
 /***/ }),
@@ -71564,13 +72129,15 @@ const HomePage_1 = __importDefault(__webpack_require__(/*! ./HomePage */ "./src/
 const App_1 = __importDefault(__webpack_require__(/*! ./App */ "./src/dtc_assets/src/App.jsx"));
 const AccountPage_1 = __importDefault(__webpack_require__(/*! ./AccountPage */ "./src/dtc_assets/src/AccountPage.jsx"));
 const configureStore_1 = __importDefault(__webpack_require__(/*! ./configureStore */ "./src/dtc_assets/src/configureStore.jsx"));
+const Wallet_1 = __importDefault(__webpack_require__(/*! ./Wallet */ "./src/dtc_assets/src/Wallet.jsx"));
 const store = (0, configureStore_1.default)();
 ReactDOM.render(React.createElement(react_redux_1.Provider, { store: store },
     React.createElement(react_router_dom_1.HashRouter, null,
         React.createElement(react_router_dom_1.Routes, null,
             React.createElement(react_router_dom_1.Route, { path: "/", element: React.createElement(HomePage_1.default, null) }),
             React.createElement(react_router_dom_1.Route, { path: "/app", element: React.createElement(App_1.default, null) }),
-            React.createElement(react_router_dom_1.Route, { path: "/account", element: React.createElement(AccountPage_1.default, null) })))), document.getElementById('root'));
+            React.createElement(react_router_dom_1.Route, { path: "/account", element: React.createElement(AccountPage_1.default, null) }),
+            React.createElement(react_router_dom_1.Route, { path: "/wallet", element: React.createElement(Wallet_1.default, null) })))), document.getElementById('root'));
 
 
 /***/ }),
@@ -71666,6 +72233,7 @@ exports.types = {
     SET_JOURNAL: "SET_JOURNAL",
     SET_BIO: "SET_BIO",
     SET_METADATA: "SET_METADATA",
+    SET_WALLET_DATA: "SET_WALLET_DATA",
     CHANGE_DATE: "CHANGE_DATE",
     CHANGE_LOCATION: "CHANGE_LOCATION",
     CHANGE_ENTRY: "CHANGE_ENTRY",
@@ -71686,6 +72254,10 @@ exports.initialState = {
     metaData: {
         email: '',
         userName: ''
+    },
+    walletData: {
+        balance: '',
+        address: ''
     },
     bio: {
         name: '',
@@ -71736,6 +72308,11 @@ const changeValue = (state = exports.initialState, action) => {
             };
         case exports.types.SET_METADATA:
             state.metaData = payload;
+            return {
+                ...state
+            };
+        case exports.types.SET_WALLET_DATA:
+            state.walletData = payload;
             return {
                 ...state
             };
@@ -74794,12 +75371,15 @@ __webpack_require__.r(__webpack_exports__);
 const idlFactory = ({ IDL }) => {
   const List = IDL.Rec();
   const Trie = IDL.Rec();
+  const AccountIdentifier = IDL.Vec(IDL.Nat8);
+  const Tokens = IDL.Record({ 'e8s' : IDL.Nat64 });
   const ProfileInput = IDL.Record({
     'userName' : IDL.Text,
     'email' : IDL.Text,
   });
   const AmountAccepted = IDL.Record({ 'accepted' : IDL.Nat64 });
   const Error = IDL.Variant({
+    'TxFailed' : IDL.Null,
     'NotFound' : IDL.Null,
     'NotAuthorized' : IDL.Null,
     'AlreadyExists' : IDL.Null,
@@ -74837,7 +75417,9 @@ const idlFactory = ({ IDL }) => {
   const Result_2 = IDL.Variant({
     'ok' : IDL.Record({
       'userName' : IDL.Text,
+      'balance' : Tokens,
       'email' : IDL.Text,
+      'address' : IDL.Vec(IDL.Nat8),
       'userJournalData' : IDL.Tuple(
         IDL.Vec(IDL.Tuple(IDL.Nat, JournalEntry)),
         Bio,
@@ -74870,6 +75452,8 @@ const idlFactory = ({ IDL }) => {
   );
   const Result_1 = IDL.Variant({ 'ok' : Trie, 'err' : Error });
   const User = IDL.Service({
+    'canisterAccount' : IDL.Func([], [AccountIdentifier], ['query']),
+    'canisterBalance' : IDL.Func([], [Tokens], []),
     'create' : IDL.Func([ProfileInput], [Result_5], []),
     'createJournalEntryFile' : IDL.Func(
         [IDL.Text, IDL.Text, IDL.Vec(IDL.Nat8)],
@@ -74880,6 +75464,7 @@ const idlFactory = ({ IDL }) => {
     'getEntriesToBeSent' : IDL.Func([], [Result_4], []),
     'readEntry' : IDL.Func([EntryKey], [Result_3], []),
     'readJournal' : IDL.Func([], [Result_2], []),
+    'transferICP' : IDL.Func([IDL.Nat64, AccountIdentifier], [Result], []),
     'updateBio' : IDL.Func([Bio], [Result], []),
     'updateJournalEntry' : IDL.Func(
         [IDL.Opt(EntryKey), IDL.Opt(JournalEntryInput)],
@@ -74917,7 +75502,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 // CANISTER_ID is replaced by webpack based on node environment
-const canisterId = "oqek3-yyaaa-aaaaa-aacla-cai";
+const canisterId = "renrk-eyaaa-aaaaa-aaada-cai";
 
 /**
  * 

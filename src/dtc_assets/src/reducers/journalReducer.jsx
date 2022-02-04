@@ -5,6 +5,7 @@ export const types = {
     SET_JOURNAL: "SET_JOURNAL",
     SET_BIO: "SET_BIO",
     SET_METADATA: "SET_METADATA",
+    SET_WALLET_DATA: "SET_WALLET_DATA",
     CHANGE_DATE: "CHANGE_DATE",
     CHANGE_LOCATION: "CHANGE_LOCATION",
     CHANGE_ENTRY: "CHANGE_ENTRY",
@@ -26,6 +27,10 @@ export const initialState = {
     metaData: {
         email: '',
         userName: ''
+    },
+    walletData: {
+        balance:'',
+        address:''
     },
     bio: {
         name: '',
@@ -83,6 +88,11 @@ const changeValue = (state = initialState, action) => {
             }
         case types.SET_METADATA:
         state.metaData = payload;
+        return {
+            ...state
+        }
+        case types.SET_WALLET_DATA:
+        state.walletData = payload;
         return {
             ...state
         }

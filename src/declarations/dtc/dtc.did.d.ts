@@ -1,4 +1,5 @@
 import type { Principal } from '@dfinity/principal';
+export type AccountIdentifier = Array<number>;
 export interface AmountAccepted { 'accepted' : bigint }
 export type AssocList = [] | [[[Key, JournalEntry], List]];
 export interface Bio {
@@ -10,7 +11,8 @@ export interface Bio {
 }
 export interface Branch { 'left' : Trie, 'size' : bigint, 'right' : Trie }
 export interface EntryKey { 'entryKey' : bigint }
-export type Error = { 'NotFound' : null } |
+export type Error = { 'TxFailed' : null } |
+  { 'NotFound' : null } |
   { 'NotAuthorized' : null } |
   { 'AlreadyExists' : null } |
   { 'NoInputGiven' : null };
@@ -48,7 +50,9 @@ export type Result_1 = { 'ok' : Trie } |
 export type Result_2 = {
     'ok' : {
       'userName' : string,
+      'balance' : Tokens,
       'email' : string,
+      'address' : Array<number>,
       'userJournalData' : [Array<[bigint, JournalEntry]>, Bio],
     }
   } |
@@ -61,10 +65,13 @@ export type Result_4 = {
   { 'err' : Error };
 export type Result_5 = { 'ok' : AmountAccepted } |
   { 'err' : Error };
+export interface Tokens { 'e8s' : bigint }
 export type Trie = { 'branch' : Branch } |
   { 'leaf' : Leaf } |
   { 'empty' : null };
 export interface User {
+  'canisterAccount' : () => Promise<AccountIdentifier>,
+  'canisterBalance' : () => Promise<Tokens>,
   'create' : (arg_0: ProfileInput) => Promise<Result_5>,
   'createJournalEntryFile' : (
       arg_0: string,
@@ -75,6 +82,7 @@ export interface User {
   'getEntriesToBeSent' : () => Promise<Result_4>,
   'readEntry' : (arg_0: EntryKey) => Promise<Result_3>,
   'readJournal' : () => Promise<Result_2>,
+  'transferICP' : (arg_0: bigint, arg_1: AccountIdentifier) => Promise<Result>,
   'updateBio' : (arg_0: Bio) => Promise<Result>,
   'updateJournalEntry' : (
       arg_0: [] | [EntryKey],

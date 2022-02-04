@@ -1,0 +1,62 @@
+.container{
+    height: 48rem;
+    .background{
+        background-image: url("../../assets/dtc-logo-black.png");
+        background-size: 160px;
+        height:100%;
+        position: relative;
+
+        .scrollable{
+            height: 90%; /* or any value */
+            overflow-y: auto;
+            width: 100%;
+            background-color: transparent;
+
+            .transparentDiv{
+                width: 65%;
+                height: 75%;
+                padding-left: 17.5%;
+                padding-top: 4%;
+                padding-bottom: 4%;
+                .infoDiv{
+                    background: white;
+                    border: solid black;
+                    border-radius: 10px;
+                    width: 100%;
+                    height: 100%;
+                    .balanceDiv{
+                        margin-top: 4rem;
+                        padding-left: 2rem;
+                        font-family: 'Julius Sans One', sans-serif;
+                        font-size: 1.75rem;
+                        color: rgb(163, 163, 163);
+                    }
+                    .walletAddressDiv{
+                        margin-top: 6rem;
+                        padding-left: 2rem;
+                        font-family: 'Julius Sans One', sans-serif;
+                        font-size: 1rem;
+                        color: rgb(163, 163, 163);
+                    }
+                    .buttonsDiv{
+                        padding-top: 3rem;
+                        padding-left: 3%;
+                        .button{
+                            border-radius: 10px;
+                            width: 10rem;
+                            height: 3rem;
+                        }
+                    }
+                    .modalDiv{
+                        box-sizing: border-box;
+                        padding: 0;
+                        margin: 0;
+                        font-family: 'Julius Sans One', sans-serif;
+                        position: fixed;
+                    }
+                    
+                }
+            }
+        }
+    }
+};

@@ -1,3 +1,8 @@
+import Ledger "canister:ledger";
+import Debug "mo:base/Debug";
+import Error "mo:base/Error";
+import Nat64 "mo:base/Nat64";
+import Nat8 "mo:base/Nat8";
 import Trie "mo:base/Trie";
 import Hash "mo:base/Hash";
 import Nat "mo:base/Nat";
@@ -7,10 +12,16 @@ import Time "mo:base/Time";
 import Journal "Journal";
 import Cycles "mo:base/ExperimentalCycles";
 import Buffer "mo:base/Buffer";
+import Blob "mo:base/Blob";
 import Iter "mo:base/Iter";
 import Array "mo:base/Array";
+import Int "mo:base/Int";
+import Text "mo:base/Text";
+import Account "./Account";
 
-actor class User(){
+shared (msg) actor class User(){
+
+    let callerId = msg.caller;
 
     type Profile = {
         journal : Journal.Journal;
@@ -75,6 +86,7 @@ actor class User(){
         #AlreadyExists;
         #NotAuthorized;
         #NoInputGiven;
+        #TxFailed;
     };
 
     //Application State
@@ -142,6 +154,8 @@ actor class User(){
             {
                 userJournalData : ([(Nat,JournalEntry)], Bio);
                 email: Text;
+                balance : Ledger.Tokens;
+                address: [Nat8];
                 userName: Text;
             }
         ), Error> {
@@ -165,11 +179,15 @@ actor class User(){
             };
             case(? v){
                 let journal = v.journal; 
+                let userBalance = await journal.canisterBalance();
+                let userAccountId = await journal.canisterAccount();
                 let userJournalData = await journal.readJournal();
                 
                 return #ok({
                     userJournalData = userJournalData;
                     email = v.email;
+                    balance = userBalance;
+                    address = Blob.toArray(userAccountId);
                     userName = v.userName;
                 });
                 
@@ -418,6 +436,46 @@ actor class User(){
             };
         };
 
+    };
+
+    func myAccountId() : Account.AccountIdentifier {
+        Account.accountIdentifier(callerId, Account.defaultSubaccount())
+    };
+
+    public query func canisterAccount() : async Account.AccountIdentifier {
+        myAccountId()
+    };
+
+    public func canisterBalance() : async Ledger.Tokens {
+        await Ledger.account_balance({ account = myAccountId() })
+    };
+
+    public shared(msg) func transferICP(amount: Nat64, canisterAccountId: Account.AccountIdentifier) : async Result.Result<(), Error> {
+
+        let callerId = msg.caller;
+
+        let userProfile = Trie.find(
+            profiles,
+            key(callerId), //Key
+            Principal.equal 
+        );
+
+        switch(userProfile) {
+            case null{
+                #err(#NotFound)
+            }; 
+            case (? profile){
+                let userJournal = profile.journal;
+
+                let status = await userJournal.transferICP(amount, canisterAccountId);
+                if(status == true){
+                    #ok(());
+                } else {
+                    #err(#TxFailed)
+                }
+
+            };
+        };
     };
 
     private  func key(x: Principal) : Trie.Key<Principal> {

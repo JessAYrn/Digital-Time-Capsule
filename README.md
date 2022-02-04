@@ -10,7 +10,7 @@ Within the internet-identity project run the following commands:
 
 npm i 
 
-dfx start [--clean] [--background]
+dfx start --clean --background
 
 In a different terminal, run the following command to install the Internet Identity canister:
 
@@ -28,7 +28,7 @@ then run the following commands in the Internet-Identity project directory again
 
 npm i
 
-dfx start [--clean] [--background]
+dfx start --clean --background
 
 In a different terminal, run the following command to install the Internet Identity canister:
 
@@ -50,7 +50,37 @@ delete the /dist file,
 delete the /.dfx file,
 delete the /src/declarations file
 
-after deleting these files, run the following commands in the Digital-Time-Capsule terminal: 
+change the "candid": "ledger.public.did" line of the dfx.json file so that it reads "candid": "ledger.private.did"
+
+start local replica by running the following line:
+
+```
+dfx start --background
+```
+
+Create a new identity that will work as a minting account by running the following lines:
+
+```
+dfx identity new minter
+dfx identity use minter
+export MINT_ACC=$(dfx ledger account-id)
+```
+
+Switch back to your default identity and record its ledger account identifier by running the following lines:
+
+```
+dfx identity use default
+export LEDGER_ACC=$(dfx ledger account-id)
+```
+
+Deploy the ledger canister to your network by running the following line:
+```
+dfx deploy ledger --argument '(record {minting_account = "'${MINT_ACC}'"; initial_values = vec { record { "'${LEDGER_ACC}'"; record { e8s=100_000_000_000 } }; }; send_whitelist = vec {}})'
+```
+
+change the "candid": "ledger.private.did" line of the dfx.json file back so that it reads "candid": "ledger.public.did" again.
+
+run the following commands in the Digital-Time-Capsule terminal: 
 
 npm i
 
@@ -65,3 +95,24 @@ dfx deploy
 then: 
 
 npm start
+
+
+## Command for minting ICP
+
+```
+dfx canister call ledger transfer 'record {memo = 1234; amount = record { e8s=10_000_000_000 }; fee = record { e8s=0 }; from_subaccount = null; to =  '$(python3 -c 'print("vec{" + ";".join([str(b) for b in bytes.fromhex("'$LEDGER_ACC'")]) + "}")')'; created_at_time = null }' 
+
+```
+
+## Command for view ICP balance 
+
+```
+dfx canister call ledger account_balance '(record { account = '$(python3 -c 'print("vec{" + ";".join([str(b) for b in bytes.fromhex("'$LEDGER_ACC'")]) + "}")')' })'
+```
+
+### Command for setting variable name for an account-id
+```
+export JESSE_ACC=73cee9e565a0eb00aafdefdd04a14f6e6339f0cc8715dba8d353d57e7fda6da2
+```
+
+<!-- this above command creates a variable named 'JESSE_ACC' and sets it equal to the long string of characters on the right side of the equal sign -->

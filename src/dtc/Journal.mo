@@ -1,3 +1,6 @@
+import Ledger "canister:ledger";
+import Debug "mo:base/Debug";
+import Error "mo:base/Error";
 import Trie "mo:base/Trie";
 import Hash "mo:base/Hash";
 import Nat "mo:base/Nat";
@@ -11,6 +14,8 @@ import Time "mo:base/Time";
 import Iter "mo:base/Iter";
 import Buffer "mo:base/Buffer";
 import Int "mo:base/Int";
+import Account "./Account";
+import Bool "mo:base/Bool";
 
 
 shared(msg) actor class Journal (principal : Principal){
@@ -376,6 +381,45 @@ shared(msg) actor class Journal (principal : Principal){
             };
         };
 
+    };
+
+    public func transferICP(amount: Nat64, recipientAccountId: Account.AccountIdentifier) : async Bool {
+
+        let res = await Ledger.transfer({
+          memo = Nat64.fromNat(10);
+          from_subaccount = null;
+          to = recipientAccountId;
+          amount = { e8s = amount };
+          fee = { e8s = 10_000 };
+          created_at_time = ?{ timestamp_nanos = Nat64.fromNat(Int.abs(Time.now())) };
+        });
+
+        switch (res) {
+          case (#Ok(blockIndex)) {
+            Debug.print("Paid reward to " # debug_show principal # " in block " # debug_show blockIndex);
+            return true;
+          };
+          case (#Err(#InsufficientFunds { balance })) {
+            throw Error.reject("Top me up! The balance is only " # debug_show balance # " e8s");
+            return false;
+          };
+          case (#Err(other)) {
+            throw Error.reject("Unexpected error: " # debug_show other);
+            return false;
+          };
+        };
+    };
+
+    func userAccountId() : Account.AccountIdentifier {
+        Account.accountIdentifier(principal, Account.defaultSubaccount())
+    };
+
+    public query func canisterAccount() : async Account.AccountIdentifier {
+        userAccountId()
+    };
+
+    public func canisterBalance() : async Ledger.Tokens {
+        await Ledger.account_balance({ account = userAccountId() })
     };
    
     private  func key(x: Principal) : Trie.Key<Principal> {

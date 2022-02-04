@@ -24,7 +24,8 @@ const HomePage = () => {
             <div className={'linkDiv'}>
                 <nav className={'navBar'}>
                     <Link className={"navLink"} to="app">Time Capsule</Link> |{" "}
-                    <Link className={"navLink"} to='account'>Account</Link>
+                    <Link className={"navLink"} to='account'>Account</Link> |{" "}
+                    <Link className={"navLink"} to='wallet'>Wallet</Link>
                 </nav>
             </div>
             <div className="background center">

@@ -1,11 +1,14 @@
 type User = 
  service {
+   canisterAccount: () -> (AccountIdentifier) query;
+   canisterBalance: () -> (Tokens);
    create: (ProfileInput) -> (Result_5);
    createJournalEntryFile: (text, text, blob) -> (Result);
    delete: () -> (Result);
    getEntriesToBeSent: () -> (Result_4);
    readEntry: (EntryKey) -> (Result_3);
    readJournal: () -> (Result_2);
+   transferICP: (nat64, AccountIdentifier) -> (Result);
    updateBio: (Bio) -> (Result);
    updateJournalEntry: (opt EntryKey, opt JournalEntryInput) -> (Result_1);
    updateProfile: (ProfileInput) -> (Result);
@@ -16,6 +19,7 @@ type Trie =
    "empty";
    leaf: Leaf;
  };
+type Tokens = record {e8s: nat64;};
 type Result_5 = 
  variant {
    err: Error;
@@ -42,6 +46,8 @@ type Result_2 =
    err: Error;
    ok:
     record {
+      address: vec nat8;
+      balance: Tokens;
       email: text;
       userJournalData: record {
                          vec record {
@@ -117,6 +123,7 @@ type Error =
    NoInputGiven;
    NotAuthorized;
    NotFound;
+   TxFailed;
  };
 type EntryKey = record {entryKey: nat;};
 type Branch = 
@@ -142,4 +149,5 @@ type AssocList =
        List;
      };
 type AmountAccepted = record {accepted: nat64;};
+type AccountIdentifier = blob;
 service : () -> User
