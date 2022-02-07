@@ -17,8 +17,7 @@ import Int "mo:base/Int";
 import Account "./Account";
 import Bool "mo:base/Bool";
 
-
-shared(msg) actor class Journal (principal : Principal){
+shared(msg) actor class Journal (principal : Principal) = this {
     let callerId = msg.caller;
 
     type JournalEntry = {
@@ -410,8 +409,9 @@ shared(msg) actor class Journal (principal : Principal){
         };
     };
 
-    func userAccountId() : Account.AccountIdentifier {
-        Account.accountIdentifier(principal, Account.defaultSubaccount())
+    private func userAccountId() : Account.AccountIdentifier {
+        let canisterId =  Principal.fromActor(this);
+        Account.accountIdentifier(canisterId, Account.defaultSubaccount())
     };
 
     public query func canisterAccount() : async Account.AccountIdentifier {

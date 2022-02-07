@@ -4,6 +4,7 @@ import { toHexString } from '../Utils';
 import { types } from '../reducers/journalReducer';
 import { Modal } from './WalletModal';
 import './WalletPage.scss';
+import { e8sInOneICP } from '../Constants';
 
 const WalletPage = (props) => {
 
@@ -52,7 +53,7 @@ const WalletPage = (props) => {
                     <div className={'transparentDiv'}>
                         <div className='infoDiv' >
                             <div className="balanceDiv">
-                                Wallet Balance: {journalState.walletData.balance}
+                                Wallet Balance: {journalState.walletData.balance /  e8sInOneICP} ICP
                             </div>
                             <div className='walletAddressDiv'>
                                 Wallet Address: {journalState.walletData.address}
