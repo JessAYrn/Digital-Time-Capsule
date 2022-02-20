@@ -2,6 +2,7 @@ import JournalPage from "./JournalPage";
 import React, {useEffect, useReducer, useState, useContext } from "react";
 import journalReducer, {initialState, types} from "../reducers/journalReducer";
 import { mapApiObjectToFrontEndObject } from "../mappers/journalPageMappers";
+import { Link } from "react-router-dom";
 import "./Journal.scss";
 import { AppContext } from "../App";
 import InputBox from "./Fields/InputBox";
@@ -235,6 +236,20 @@ const Journal = (props) => {
 
     return(
         <React.Fragment>
+            <div className={'linkDiv_Journal'}>
+                <nav className={'navBar_Journal'}>
+                    <div className="linkContainer">
+                        <div className="timeCapsuleLinkDiv">
+                            <Link className={"navLink_Journal"} to="/wallet">DTC Wallet</Link>
+                        </div>
+                        <div className="accountIconLinkDiv">
+                            <Link className={"navLink_Journal"} to='/account'>
+                                <img src={"../../assets/account-icon.png"} alt="image preview" className="accountIcon_Journal"/> 
+                            </Link>
+                        </div>
+                    </div>
+                </nav>
+            </div>
             <div>
                 { (getIndexOfVisiblePage() < 0) ? 
                     displayJournalTable() : 

@@ -2,6 +2,7 @@ import React, {useContext, useEffect, useState} from 'react';
 import { AppContext } from '../Wallet';
 import { toHexString } from '../Utils';
 import { types } from '../reducers/journalReducer';
+import { Link } from "react-router-dom";
 import { Modal } from './WalletModal';
 import './WalletPage.scss';
 import { e8sInOneICP } from '../Constants';
@@ -48,6 +49,20 @@ const WalletPage = (props) => {
 
     return (
         <div className={"container"}>
+            <div className={'linkDiv_Wallet'}>
+                <nav className={'navBar_Wallet'}>
+                    <div className="linkContainer">
+                        <div className="timeCapsuleLinkDiv">
+                            <Link className={"navLink_Wallet"} to="/app">Time Capsule</Link>
+                        </div>
+                        <div className="accountIconLinkDiv">
+                            <Link className={"navLink_Wallet"} to='/account'>
+                                <img src={"../../assets/account-icon.png"} alt="image preview" className="accountIcon_Wallet"/> 
+                            </Link>
+                        </div>
+                    </div>
+                </nav>
+            </div>
             <div className="background center">
                 <div className='scrollable'>
                     <div className={'transparentDiv'}>
