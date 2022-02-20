@@ -3,6 +3,7 @@ import InputBox from "./Fields/InputBox";
 import { AppContext } from "../Wallet.jsx";
 import { fromHexString } from "../Utils.jsx";
 import "./ModalContentOnSend.scss";
+import { e8sInOneICP } from "../Constants";
 
 
 const ModalContentOnSend = (props) => {
@@ -23,7 +24,7 @@ const ModalContentOnSend = (props) => {
 
     const onSendConfirm = async () => {
         console.log(fromHexString(recipientAddress));
-        const status = await actor.transferICP(parseInt(amountToSend), fromHexString(recipientAddress));
+        const status = await actor.transferICP(parseInt(amountToSend * e8sInOneICP), fromHexString(recipientAddress));
         console.log(status);
     };
 
