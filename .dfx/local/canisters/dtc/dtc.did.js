@@ -4,8 +4,8 @@ export const idlFactory = ({ IDL }) => {
   const AccountIdentifier = IDL.Vec(IDL.Nat8);
   const Tokens = IDL.Record({ 'e8s' : IDL.Nat64 });
   const ProfileInput = IDL.Record({
-    'userName' : IDL.Text,
-    'email' : IDL.Text,
+    'userName' : IDL.Opt(IDL.Text),
+    'email' : IDL.Opt(IDL.Text),
   });
   const AmountAccepted = IDL.Record({ 'accepted' : IDL.Nat64 });
   const Error = IDL.Variant({
@@ -14,6 +14,7 @@ export const idlFactory = ({ IDL }) => {
     'NotAuthorized' : IDL.Null,
     'AlreadyExists' : IDL.Null,
     'NoInputGiven' : IDL.Null,
+    'InsufficientFunds' : IDL.Null,
   });
   const Result_5 = IDL.Variant({ 'ok' : AmountAccepted, 'err' : Error });
   const Result = IDL.Variant({ 'ok' : IDL.Null, 'err' : Error });
@@ -46,9 +47,9 @@ export const idlFactory = ({ IDL }) => {
   });
   const Result_2 = IDL.Variant({
     'ok' : IDL.Record({
-      'userName' : IDL.Text,
+      'userName' : IDL.Opt(IDL.Text),
       'balance' : Tokens,
-      'email' : IDL.Text,
+      'email' : IDL.Opt(IDL.Text),
       'address' : IDL.Vec(IDL.Nat8),
       'userJournalData' : IDL.Tuple(
         IDL.Vec(IDL.Tuple(IDL.Nat, JournalEntry)),

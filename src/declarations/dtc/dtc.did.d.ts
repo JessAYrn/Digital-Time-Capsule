@@ -15,7 +15,8 @@ export type Error = { 'TxFailed' : null } |
   { 'NotFound' : null } |
   { 'NotAuthorized' : null } |
   { 'AlreadyExists' : null } |
-  { 'NoInputGiven' : null };
+  { 'NoInputGiven' : null } |
+  { 'InsufficientFunds' : null };
 export type Hash = number;
 export interface JournalEntry {
   'unlockTime' : bigint,
@@ -42,16 +43,19 @@ export interface JournalEntryInput {
 export interface Key { 'key' : bigint, 'hash' : Hash }
 export interface Leaf { 'size' : bigint, 'keyvals' : AssocList }
 export type List = [] | [[[Key, JournalEntry], List]];
-export interface ProfileInput { 'userName' : string, 'email' : string }
+export interface ProfileInput {
+  'userName' : [] | [string],
+  'email' : [] | [string],
+}
 export type Result = { 'ok' : null } |
   { 'err' : Error };
 export type Result_1 = { 'ok' : Trie } |
   { 'err' : Error };
 export type Result_2 = {
     'ok' : {
-      'userName' : string,
+      'userName' : [] | [string],
       'balance' : Tokens,
-      'email' : string,
+      'email' : [] | [string],
       'address' : Array<number>,
       'userJournalData' : [Array<[bigint, JournalEntry]>, Bio],
     }

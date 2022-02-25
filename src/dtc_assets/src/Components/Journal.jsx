@@ -22,8 +22,8 @@ const Journal = (props) => {
         console.log(journal);
         if("err" in journal){
             actor.create({
-                userName: "admin",
-                email: "thedigitaltimecapsule2022@gmail.com"
+                userName: [],
+                email: []
         }).then((result) => {
                 console.log(result);
             });

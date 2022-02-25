@@ -48,7 +48,7 @@ type Result_2 =
     record {
       address: vec nat8;
       balance: Tokens;
-      email: text;
+      email: opt text;
       userJournalData: record {
                          vec record {
                                nat;
@@ -56,7 +56,7 @@ type Result_2 =
                              };
                          Bio;
                        };
-      userName: text;
+      userName: opt text;
     };
  };
 type Result_1 = 
@@ -71,8 +71,8 @@ type Result =
  };
 type ProfileInput = 
  record {
-   email: text;
-   userName: text;
+   email: opt text;
+   userName: opt text;
  };
 type List = 
  opt record {
@@ -120,6 +120,7 @@ type Hash = nat32;
 type Error = 
  variant {
    AlreadyExists;
+   InsufficientFunds;
    NoInputGiven;
    NotAuthorized;
    NotFound;

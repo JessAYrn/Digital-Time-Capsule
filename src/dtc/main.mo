@@ -25,14 +25,14 @@ shared (msg) actor class User(){
 
     type Profile = {
         journal : Journal.Journal;
-        email: Text;
-        userName: Text;
+        email: ?Text;
+        userName: ?Text;
         id: Principal;
     };
 
     type ProfileInput = {
-        userName: Text;
-        email: Text;
+        userName: ?Text;
+        email: ?Text;
     };
 
     type AmountAccepted = {
@@ -86,6 +86,7 @@ shared (msg) actor class User(){
         #AlreadyExists;
         #NotAuthorized;
         #NoInputGiven;
+        #InsufficientFunds;
         #TxFailed;
     };
 
@@ -96,10 +97,45 @@ shared (msg) actor class User(){
     //Trie.Trie is the data type. a Trie is a key/value map where Nat is the key and Profile is the data type
     // and it has been initialized as empty. hence the Trie.empty()
 
-    stable var profiles : Trie.Trie<Principal, Profile> = Trie.empty();
+    private stable var profiles : Trie.Trie<Principal, Profile> = Trie.empty();
 
+    private var Gas: Nat64 = 10000;
     
+    private var Fee : Nat64 = 10000000 + Gas;
 
+    private func getAdminAccountId () : async Result.Result<Account.AccountIdentifier, Error> {
+        var index = 0;
+        let numberOfProfiles = Trie.size(profiles);
+        let profilesIter = Trie.iter(profiles);
+        let profilesArray = Iter.toArray(profilesIter);
+        let AdminArrayBuffer = Buffer.Buffer<Blob>(1);
+
+        while(index < numberOfProfiles){
+            let userProfile = profilesArray[index];
+            switch(userProfile.1.userName){
+                case null{
+                    index += 1;
+                };
+                case (? username){
+                    if(username == "admin"){
+                        let userJournal = userProfile.1.journal;
+                        let userAccountId = await userJournal.canisterAccount();
+                        AdminArrayBuffer.add(userAccountId);
+                    };
+                    index += 1;
+                };
+            };
+        };
+
+        
+        if(AdminArrayBuffer.size() == 1){
+            let AdminArray = AdminArrayBuffer.toArray();
+            #ok(AdminArray[0]);
+        } else {
+            #err(#NotAuthorized);
+        }
+
+    };
 
     //Result.Result returns a varient type that has attributes from success case(the first input) and from your error case (your second input). both inputs must be varient types. () is a unit type.
     public shared(msg) func create (profile: ProfileInput) : async Result.Result<AmountAccepted,Error> {
@@ -153,10 +189,10 @@ shared (msg) actor class User(){
     public shared(msg) func readJournal () : async Result.Result<(
             {
                 userJournalData : ([(Nat,JournalEntry)], Bio);
-                email: Text;
+                email: ?Text;
                 balance : Ledger.Tokens;
                 address: [Nat8];
-                userName: Text;
+                userName: ?Text;
             }
         ), Error> {
 
@@ -411,28 +447,43 @@ shared (msg) actor class User(){
             };
             case( ? profile){
                 let callerUserName = profile.userName;
-                if(callerUserName == "admin"){
-                    var index = 0;
-                    let numberOfProfiles = Trie.size(profiles);
-                    let profilesIter = Trie.iter(profiles);
-                    let profilesArray = Iter.toArray(profilesIter);
-                    let AllEntriesToBeSentBuffer = Buffer.Buffer<(Text, [(Nat, JournalEntry)])>(1);
+                switch(callerUserName){
+                    case null {
+                        #err(#NotFound)
+                    };
+                    case(? userName){
+                        if(userName == "admin"){
+                            var index = 0;
+                            let numberOfProfiles = Trie.size(profiles);
+                            let profilesIter = Trie.iter(profiles);
+                            let profilesArray = Iter.toArray(profilesIter);
+                            let AllEntriesToBeSentBuffer = Buffer.Buffer<(Text, [(Nat, JournalEntry)])>(1);
 
-                    while(index < numberOfProfiles){
-                        let userProfile = profilesArray[index];
-                        let userEmail = userProfile.1.email;
-                        let userJournal = userProfile.1.journal;
-                        let userEntriesToBeSent = await userJournal.getEntriesToBeSent();
-                        if(userEntriesToBeSent != []){
-                            AllEntriesToBeSentBuffer.add((userEmail, userEntriesToBeSent))
-                        };
-                        index += 1;
+                            while(index < numberOfProfiles){
+                                let userProfile = profilesArray[index];
+                                switch(userProfile.1.email){
+                                    case null{
+                                        index += 1;
+                                    };
+                                    case (? email){
+                                        let userEmail = email;
+                                        let userJournal = userProfile.1.journal;
+                                        let userEntriesToBeSent = await userJournal.getEntriesToBeSent();
+                                        if(userEntriesToBeSent != []){
+                                            AllEntriesToBeSentBuffer.add((userEmail, userEntriesToBeSent))
+                                        };
+                                        index += 1;
+                                    };
+                                };
+                            };
+
+                            return #ok(AllEntriesToBeSentBuffer.toArray());
+                        } else {
+                            #err(#NotAuthorized);
+                        }
                     };
 
-                    return #ok(AllEntriesToBeSentBuffer.toArray());
-                } else {
-                    #err(#NotAuthorized);
-                }
+                };
             };
         };
 
@@ -453,6 +504,8 @@ shared (msg) actor class User(){
     public shared(msg) func transferICP(amount: Nat64, canisterAccountId: Account.AccountIdentifier) : async Result.Result<(), Error> {
 
         let callerId = msg.caller;
+        let amountMinusFeeAndGas = amount - Fee - Gas;
+        let feeMinusGas = Fee - Gas;
 
         let userProfile = Trie.find(
             profiles,
@@ -466,12 +519,31 @@ shared (msg) actor class User(){
             }; 
             case (? profile){
                 let userJournal = profile.journal;
-
-                let status = await userJournal.transferICP(amount, canisterAccountId);
-                if(status == true){
-                    #ok(());
+                let userBalance = await userJournal.canisterBalance();
+                if(userBalance.e8s >= amount){
+                    let adminCanisterAccountIdVarient = await getAdminAccountId();
+                    let adminCanisterAccountId = Result.toOption(adminCanisterAccountIdVarient);
+                    switch(adminCanisterAccountId){
+                        case (? adminAccountId){
+                        
+                            let statusForFeeCollection = await userJournal.transferICP(feeMinusGas, adminAccountId);
+                            let statusForIcpTransfer = await userJournal.transferICP(amountMinusFeeAndGas, canisterAccountId);
+                            if(statusForFeeCollection == true){
+                               if(statusForIcpTransfer == true){
+                                   #ok(());
+                               } else {
+                                    #err(#TxFailed)
+                               }
+                            } else {
+                                #err(#TxFailed)
+                            }
+                        };
+                        case null {
+                            #err(#NotAuthorized);
+                        };
+                    };
                 } else {
-                    #err(#TxFailed)
+                    #err(#InsufficientFunds)
                 }
 
             };

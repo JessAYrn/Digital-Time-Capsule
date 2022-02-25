@@ -4507,8 +4507,14 @@ class RecordClass extends ConstructType {
             x[expectKey] = expectType.decodeValue(b, type);
             idx++;
         }
-        if (idx < this._fields.length) {
-            throw new Error('Cannot find field ' + this._fields[idx][0]);
+        for (const [expectKey, expectType] of this._fields.slice(idx)) {
+            if (expectType instanceof OptClass || expectType instanceof ReservedClass) {
+                // TODO this assumes null value in opt is represented as []
+                x[expectKey] = [];
+            }
+            else {
+                throw new Error('Cannot find required field ' + expectKey);
+            }
         }
         return x;
     }
@@ -7725,7 +7731,7 @@ var registerWrapper = function registerWrapper(stripe, startTime) {
 
   stripe._registerWrapper({
     name: 'stripe-js',
-    version: "1.22.0",
+    version: "1.23.0",
     startTime: startTime
   });
 };
@@ -23952,7 +23958,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, ".tableDivContainer {\n  width: 55%;\n  float: left;\n}\n.tableDivContainer .tableDiv {\n  width: 100%;\n  float: left;\n  border: solid 1px;\n  border-radius: 10px;\n  margin-top: 60px;\n}\n.tableDivContainer .tableDiv .tableHeader {\n  font-family: \"Julius Sans One\", sans-serif;\n  font-size: 1rem;\n  color: #7a7a7a;\n  border-collapse: collapse;\n  width: 100%;\n}\n.tableDivContainer .tableDiv .tableHeader .tableRow {\n  border-bottom: solid #7a7a7a 0.5px;\n  width: 100%;\n  padding-bottom: 0.5rem;\n}\n.tableDivContainer .tableDiv .tableHeader .tableRow .tableCell {\n  width: 25%;\n  text-align: center;\n  padding: 0.5rem;\n}\n.tableDivContainer .tableDiv .tableHeader .tableRow .tableCell .openButton {\n  border-radius: 10px;\n}\n.tableDivContainer .tableDiv .scrollable {\n  height: 328px;\n  /* or any value */\n  overflow-y: auto;\n  width: 100%;\n}\n.tableDivContainer .tableDiv .scrollable .table {\n  font-family: \"Julius Sans One\", sans-serif;\n  font-size: 1rem;\n  color: #7a7a7a;\n  border-collapse: collapse;\n  width: 100%;\n}\n.tableDivContainer .tableDiv .scrollable .table .tableRow {\n  border-bottom: solid #7a7a7a 0.5px;\n  width: 100%;\n  padding-bottom: 0.5rem;\n}\n.tableDivContainer .tableDiv .scrollable .table .tableRow .tableCell {\n  width: 25%;\n  text-align: center;\n  padding: 0.5rem;\n}\n.tableDivContainer .addNewEntryButtonDiv {\n  width: 50%;\n  margin-left: 24%;\n  float: left;\n}\n.tableDivContainer .addNewEntryButtonDiv .addNewEntryButton {\n  background-color: #e6e6e6;\n  border-radius: 25px;\n  border-color: #e6e6e6;\n  width: 100%;\n}\n\n.biographyDiv .section1 {\n  width: 33%;\n  float: left;\n  height: 22rem;\n}\n.biographyDiv .section1 .inputBox .input-element-div__dedications .enabled {\n  border-width: 1px 1px 1px !important;\n  border-radius: 10px;\n}\n.biographyDiv .section1 .inputBox .input-element-div__dedications .disabled {\n  border-width: 1px 1px 1px !important;\n  border-radius: 10px;\n}\n.biographyDiv .section2 {\n  width: 66%;\n  float: left;\n  height: 22rem;\n}\n.biographyDiv .prefaceDiv {\n  margin-top: 2rem;\n  margin-right: 5%;\n  width: 33%;\n  float: left;\n}\n.biographyDiv .prefaceDiv .inputBox .input-element-div__preface .enabled {\n  border-width: 1px 1px 1px !important;\n  border-radius: 10px;\n}\n.biographyDiv .prefaceDiv .inputBox .input-element-div__preface .disabled {\n  border-width: 1px 1px 1px !important;\n  border-radius: 10px;\n}", "",{"version":3,"sources":["webpack://./src/dtc_assets/src/Components/Journal.scss"],"names":[],"mappings":"AAAA;EACE,UAAA;EACE,WAAA;AACJ;AAAE;EACE,WAAA;EACA,WAAA;EACA,iBAAA;EACA,mBAAA;EACA,gBAAA;AAEJ;AADI;EACE,0CAAA;EACA,eAAA;EACA,cAAA;EACA,yBAAA;EACA,WAAA;AAGN;AAFM;EACE,kCAAA;EACA,WAAA;EACA,sBAAA;AAIR;AAHQ;EACE,UAAA;EACA,kBAAA;EACA,eAAA;AAKV;AAJU;EACE,mBAAA;AAMZ;AADI;EACE,aAAA;EAAe,iBAAA;EACf,gBAAA;EACA,WAAA;AAIN;AAHM;EACE,0CAAA;EACA,eAAA;EACA,cAAA;EACA,yBAAA;EACA,WAAA;AAKR;AAJQ;EACE,kCAAA;EACA,WAAA;EACA,sBAAA;AAMV;AALU;EACE,UAAA;EACA,kBAAA;EACA,eAAA;AAOZ;AAEE;EACE,UAAA;EACA,gBAAA;EACA,WAAA;AAAJ;AACI;EACE,yBAAA;EACA,mBAAA;EACA,qBAAA;EACA,WAAA;AACN;;AAKI;EACE,UAAA;EACA,WAAA;EACA,aAAA;AAFN;AAMU;EACE,oCAAA;EACA,mBAAA;AAJZ;AAOU;EACI,oCAAA;EACA,mBAAA;AALd;AAYI;EACE,UAAA;EACA,WAAA;EACA,aAAA;AAVN;AAaI;EACE,gBAAA;EACA,gBAAA;EACA,UAAA;EACA,WAAA;AAXN;AAeU;EACE,oCAAA;EACA,mBAAA;AAbZ;AAgBU;EACI,oCAAA;EACA,mBAAA;AAdd","sourcesContent":[".tableDivContainer{\n  width: 55%;\n    float: left;\n  .tableDiv{\n    width: 100%;\n    float: left;\n    border: solid 1px;\n    border-radius: 10px;\n    margin-top: 60px;\n    .tableHeader{\n      font-family: 'Julius Sans One', sans-serif;\n      font-size: 1rem;\n      color: rgb(122, 122, 122);\n      border-collapse: collapse;\n      width: 100%;\n      .tableRow{\n        border-bottom: solid rgb(122, 122, 122) .5px;\n        width: 100%;\n        padding-bottom: .5rem;\n        .tableCell{\n          width: 25%;\n          text-align: center;\n          padding: 0.5rem;\n          .openButton{\n            border-radius: 10px;\n          }\n        }\n      }\n    }\n    .scrollable{\n      height: 328px; /* or any value */\n      overflow-y: auto;\n      width: 100%;\n      .table{\n        font-family: 'Julius Sans One', sans-serif;\n        font-size: 1rem;\n        color: rgb(122, 122, 122);\n        border-collapse: collapse;\n        width: 100%;\n        .tableRow{\n          border-bottom: solid rgb(122, 122, 122) .5px;\n          width: 100%;\n          padding-bottom: .5rem;\n          .tableCell{\n            width: 25%;\n            text-align: center;\n            padding: 0.5rem;\n          }\n        }\n      }\n  \n    }\n  \n  }\n\n  .addNewEntryButtonDiv{\n    width: 50%;\n    margin-left: 24%;\n    float: left;\n    .addNewEntryButton{\n      background-color: rgb(230, 230, 230);\n      border-radius: 25px;\n      border-color: rgb(230, 230, 230);\n      width: 100%;\n    }\n  }\n}\n\n.biographyDiv{\n    .section1{\n      width: 33%;\n      float: left;\n      height: 22rem;\n      .inputBox{\n        .input-element-div__dedications{\n          \n          .enabled{\n            border-width: 1px 1px 1px !important;\n            border-radius: 10px;\n          }\n        \n          .disabled{\n              border-width: 1px 1px 1px !important;\n              border-radius: 10px;\n          }\n          \n          \n        }\n      }\n    }\n    .section2{\n      width: 66%;\n      float: left;\n      height: 22rem;\n    }\n\n    .prefaceDiv{\n      margin-top: 2rem;\n      margin-right: 5%;\n      width: 33%;\n      float: left;\n      .inputBox{\n        .input-element-div__preface{\n          \n          .enabled{\n            border-width: 1px 1px 1px !important;\n            border-radius: 10px;\n          }\n        \n          .disabled{\n              border-width: 1px 1px 1px !important;\n              border-radius: 10px;\n          }\n          \n          \n        }\n      }\n    }\n  \n}"],"sourceRoot":""}]);
+___CSS_LOADER_EXPORT___.push([module.id, ".tableDivContainer {\n  width: 55%;\n  float: left;\n}\n.tableDivContainer .tableDiv {\n  width: 100%;\n  float: left;\n  border: solid 1px;\n  border-radius: 10px;\n  margin-top: 60px;\n}\n.tableDivContainer .tableDiv .tableHeader {\n  font-family: \"Julius Sans One\", sans-serif;\n  font-size: 1rem;\n  color: #7a7a7a;\n  border-collapse: collapse;\n  width: 100%;\n}\n.tableDivContainer .tableDiv .tableHeader .tableRow {\n  border-bottom: solid #7a7a7a 0.5px;\n  width: 100%;\n  padding-bottom: 0.5rem;\n}\n.tableDivContainer .tableDiv .tableHeader .tableRow .tableCell {\n  width: 25%;\n  text-align: center;\n  padding: 0.5rem;\n}\n.tableDivContainer .tableDiv .tableHeader .tableRow .tableCell .openButton {\n  border-radius: 10px;\n}\n.tableDivContainer .tableDiv .scrollable {\n  height: 328px;\n  /* or any value */\n  overflow-y: auto;\n  width: 100%;\n}\n.tableDivContainer .tableDiv .scrollable .table {\n  font-family: \"Julius Sans One\", sans-serif;\n  font-size: 1rem;\n  color: #7a7a7a;\n  border-collapse: collapse;\n  width: 100%;\n}\n.tableDivContainer .tableDiv .scrollable .table .tableRow {\n  border-bottom: solid #7a7a7a 0.5px;\n  width: 100%;\n  padding-bottom: 0.5rem;\n}\n.tableDivContainer .tableDiv .scrollable .table .tableRow .tableCell {\n  width: 25%;\n  text-align: center;\n  padding: 0.5rem;\n}\n.tableDivContainer .addNewEntryButtonDiv {\n  width: 50%;\n  margin-left: 24%;\n  float: left;\n}\n.tableDivContainer .addNewEntryButtonDiv .addNewEntryButton {\n  background-color: #e6e6e6;\n  border-radius: 25px;\n  border-color: #e6e6e6;\n  width: 100%;\n}\n\n.biographyDiv .section1 {\n  width: 33%;\n  float: left;\n  height: 22rem;\n}\n.biographyDiv .section1 .inputBox .input-element-div__dedications .enabled {\n  border-width: 1px 1px 1px !important;\n  border-radius: 10px;\n}\n.biographyDiv .section1 .inputBox .input-element-div__dedications .disabled {\n  border-width: 1px 1px 1px !important;\n  border-radius: 10px;\n}\n.biographyDiv .section2 {\n  width: 66%;\n  float: left;\n  height: 22rem;\n}\n.biographyDiv .prefaceDiv {\n  margin-top: 2rem;\n  margin-right: 5%;\n  width: 33%;\n  float: left;\n}\n.biographyDiv .prefaceDiv .inputBox .input-element-div__preface .enabled {\n  border-width: 1px 1px 1px !important;\n  border-radius: 10px;\n}\n.biographyDiv .prefaceDiv .inputBox .input-element-div__preface .disabled {\n  border-width: 1px 1px 1px !important;\n  border-radius: 10px;\n}\n\n.linkDiv_Journal {\n  background-color: black;\n  border: solid black;\n  border-radius: 10px;\n}\n.linkDiv_Journal .navBar_Journal {\n  width: 100%;\n  color: white;\n}\n.linkDiv_Journal .navBar_Journal .linkContainer {\n  width: 20%;\n  padding-left: 80%;\n}\n.linkDiv_Journal .navBar_Journal .linkContainer .timeCapsuleLinkDiv {\n  float: left;\n  border-radius: 10px;\n  background-color: white;\n  width: 65%;\n}\n.linkDiv_Journal .navBar_Journal .linkContainer .timeCapsuleLinkDiv .navLink_Journal {\n  font-family: \"Julius Sans One\", sans-serif;\n  padding-left: 10%;\n  text-decoration: none;\n}\n.linkDiv_Journal .navBar_Journal .linkContainer .accountIconLinkDiv .navLink_Journal {\n  font-family: \"Julius Sans One\", sans-serif;\n  color: black;\n  text-decoration: none;\n}\n.linkDiv_Journal .navBar_Journal .linkContainer .accountIconLinkDiv .navLink_Journal .accountIcon_Journal {\n  height: 2rem;\n  border-radius: 10px;\n}", "",{"version":3,"sources":["webpack://./src/dtc_assets/src/Components/Journal.scss"],"names":[],"mappings":"AAAA;EACE,UAAA;EACE,WAAA;AACJ;AAAE;EACE,WAAA;EACA,WAAA;EACA,iBAAA;EACA,mBAAA;EACA,gBAAA;AAEJ;AADI;EACE,0CAAA;EACA,eAAA;EACA,cAAA;EACA,yBAAA;EACA,WAAA;AAGN;AAFM;EACE,kCAAA;EACA,WAAA;EACA,sBAAA;AAIR;AAHQ;EACE,UAAA;EACA,kBAAA;EACA,eAAA;AAKV;AAJU;EACE,mBAAA;AAMZ;AADI;EACE,aAAA;EAAe,iBAAA;EACf,gBAAA;EACA,WAAA;AAIN;AAHM;EACE,0CAAA;EACA,eAAA;EACA,cAAA;EACA,yBAAA;EACA,WAAA;AAKR;AAJQ;EACE,kCAAA;EACA,WAAA;EACA,sBAAA;AAMV;AALU;EACE,UAAA;EACA,kBAAA;EACA,eAAA;AAOZ;AAEE;EACE,UAAA;EACA,gBAAA;EACA,WAAA;AAAJ;AACI;EACE,yBAAA;EACA,mBAAA;EACA,qBAAA;EACA,WAAA;AACN;;AAKI;EACE,UAAA;EACA,WAAA;EACA,aAAA;AAFN;AAMU;EACE,oCAAA;EACA,mBAAA;AAJZ;AAOU;EACI,oCAAA;EACA,mBAAA;AALd;AAYI;EACE,UAAA;EACA,WAAA;EACA,aAAA;AAVN;AAaI;EACE,gBAAA;EACA,gBAAA;EACA,UAAA;EACA,WAAA;AAXN;AAeU;EACE,oCAAA;EACA,mBAAA;AAbZ;AAgBU;EACI,oCAAA;EACA,mBAAA;AAdd;;AAwBA;EACE,uBAAA;EACA,mBAAA;EACA,mBAAA;AArBF;AAsBE;EACI,WAAA;EACA,YAAA;AApBN;AAqBM;EACI,UAAA;EACA,iBAAA;AAnBV;AAoBU;EACI,WAAA;EACA,mBAAA;EACA,uBAAA;EACA,UAAA;AAlBd;AAmBc;EACI,0CAAA;EACA,iBAAA;EACA,qBAAA;AAjBlB;AAqBc;EACI,0CAAA;EACA,YAAA;EACA,qBAAA;AAnBlB;AAqBkB;EACI,YAAA;EACA,mBAAA;AAnBtB","sourcesContent":[".tableDivContainer{\n  width: 55%;\n    float: left;\n  .tableDiv{\n    width: 100%;\n    float: left;\n    border: solid 1px;\n    border-radius: 10px;\n    margin-top: 60px;\n    .tableHeader{\n      font-family: 'Julius Sans One', sans-serif;\n      font-size: 1rem;\n      color: rgb(122, 122, 122);\n      border-collapse: collapse;\n      width: 100%;\n      .tableRow{\n        border-bottom: solid rgb(122, 122, 122) .5px;\n        width: 100%;\n        padding-bottom: .5rem;\n        .tableCell{\n          width: 25%;\n          text-align: center;\n          padding: 0.5rem;\n          .openButton{\n            border-radius: 10px;\n          }\n        }\n      }\n    }\n    .scrollable{\n      height: 328px; /* or any value */\n      overflow-y: auto;\n      width: 100%;\n      .table{\n        font-family: 'Julius Sans One', sans-serif;\n        font-size: 1rem;\n        color: rgb(122, 122, 122);\n        border-collapse: collapse;\n        width: 100%;\n        .tableRow{\n          border-bottom: solid rgb(122, 122, 122) .5px;\n          width: 100%;\n          padding-bottom: .5rem;\n          .tableCell{\n            width: 25%;\n            text-align: center;\n            padding: 0.5rem;\n          }\n        }\n      }\n  \n    }\n  \n  }\n\n  .addNewEntryButtonDiv{\n    width: 50%;\n    margin-left: 24%;\n    float: left;\n    .addNewEntryButton{\n      background-color: rgb(230, 230, 230);\n      border-radius: 25px;\n      border-color: rgb(230, 230, 230);\n      width: 100%;\n    }\n  }\n}\n\n.biographyDiv{\n    .section1{\n      width: 33%;\n      float: left;\n      height: 22rem;\n      .inputBox{\n        .input-element-div__dedications{\n          \n          .enabled{\n            border-width: 1px 1px 1px !important;\n            border-radius: 10px;\n          }\n        \n          .disabled{\n              border-width: 1px 1px 1px !important;\n              border-radius: 10px;\n          }\n          \n          \n        }\n      }\n    }\n    .section2{\n      width: 66%;\n      float: left;\n      height: 22rem;\n    }\n\n    .prefaceDiv{\n      margin-top: 2rem;\n      margin-right: 5%;\n      width: 33%;\n      float: left;\n      .inputBox{\n        .input-element-div__preface{\n          \n          .enabled{\n            border-width: 1px 1px 1px !important;\n            border-radius: 10px;\n          }\n        \n          .disabled{\n              border-width: 1px 1px 1px !important;\n              border-radius: 10px;\n          }\n          \n          \n        }\n      }\n    }\n  \n}\n\n.linkDiv_Journal{\n  background-color: black;\n  border: solid black;\n  border-radius: 10px;\n  .navBar_Journal{\n      width: 100%;\n      color: white;\n      .linkContainer{\n          width:20%;\n          padding-left: 80%;\n          .timeCapsuleLinkDiv{\n              float: left;\n              border-radius: 10px;\n              background-color: white;\n              width: 65%;\n              .navLink_Journal{\n                  font-family: 'Julius Sans One', sans-serif;\n                  padding-left: 10%;\n                  text-decoration: none;\n              }\n          }\n          .accountIconLinkDiv{\n              .navLink_Journal{\n                  font-family: 'Julius Sans One', sans-serif;\n                  color: black;\n                  text-decoration: none;\n  \n                  .accountIcon_Journal{\n                      height: 2rem;\n                      border-radius: 10px;\n                  }\n              }\n          }\n      }\n  }\n}"],"sourceRoot":""}]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -24119,7 +24125,7 @@ var ___CSS_LOADER_URL_IMPORT_0___ = new URL(/* asset import */ __webpack_require
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
 var ___CSS_LOADER_URL_REPLACEMENT_0___ = _node_modules_css_loader_dist_runtime_getUrl_js__WEBPACK_IMPORTED_MODULE_2___default()(___CSS_LOADER_URL_IMPORT_0___);
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, ".container {\n  height: 48rem;\n}\n.container .background {\n  background-image: url(" + ___CSS_LOADER_URL_REPLACEMENT_0___ + ");\n  background-size: 160px;\n  height: 100%;\n  position: relative;\n}\n.container .background .scrollable {\n  height: 90%;\n  /* or any value */\n  overflow-y: auto;\n  width: 100%;\n  background-color: transparent;\n}\n.container .background .scrollable .transparentDiv {\n  width: 65%;\n  height: 75%;\n  padding-left: 17.5%;\n  padding-top: 4%;\n  padding-bottom: 4%;\n}\n.container .background .scrollable .transparentDiv .infoDiv {\n  background: white;\n  border: solid black;\n  border-radius: 10px;\n  width: 100%;\n  height: 100%;\n}\n.container .background .scrollable .transparentDiv .infoDiv .balanceDiv {\n  margin-top: 4rem;\n  padding-left: 2rem;\n  font-family: \"Julius Sans One\", sans-serif;\n  font-size: 1.75rem;\n  color: #a3a3a3;\n}\n.container .background .scrollable .transparentDiv .infoDiv .walletAddressDiv {\n  margin-top: 6rem;\n  padding-left: 2rem;\n  font-family: \"Julius Sans One\", sans-serif;\n  font-size: 1rem;\n  color: #a3a3a3;\n}\n.container .background .scrollable .transparentDiv .infoDiv .buttonsDiv {\n  padding-top: 3rem;\n  padding-left: 3%;\n}\n.container .background .scrollable .transparentDiv .infoDiv .buttonsDiv .button {\n  border-radius: 10px;\n  width: 10rem;\n  height: 3rem;\n}\n.container .background .scrollable .transparentDiv .infoDiv .modalDiv {\n  box-sizing: border-box;\n  padding: 0;\n  margin: 0;\n  font-family: \"Julius Sans One\", sans-serif;\n  position: fixed;\n}", "",{"version":3,"sources":["webpack://./src/dtc_assets/src/Components/WalletPage.scss"],"names":[],"mappings":"AAAA;EACI,aAAA;AACJ;AAAI;EACI,yDAAA;EACA,sBAAA;EACA,YAAA;EACA,kBAAA;AAER;AAAQ;EACI,WAAA;EAAa,iBAAA;EACb,gBAAA;EACA,WAAA;EACA,6BAAA;AAGZ;AADY;EACI,UAAA;EACA,WAAA;EACA,mBAAA;EACA,eAAA;EACA,kBAAA;AAGhB;AAFgB;EACI,iBAAA;EACA,mBAAA;EACA,mBAAA;EACA,WAAA;EACA,YAAA;AAIpB;AAHoB;EACI,gBAAA;EACA,kBAAA;EACA,0CAAA;EACA,kBAAA;EACA,cAAA;AAKxB;AAHoB;EACI,gBAAA;EACA,kBAAA;EACA,0CAAA;EACA,eAAA;EACA,cAAA;AAKxB;AAHoB;EACI,iBAAA;EACA,gBAAA;AAKxB;AAJwB;EACI,mBAAA;EACA,YAAA;EACA,YAAA;AAM5B;AAHoB;EACI,sBAAA;EACA,UAAA;EACA,SAAA;EACA,0CAAA;EACA,eAAA;AAKxB","sourcesContent":[".container{\n    height: 48rem;\n    .background{\n        background-image: url(\"../../assets/dtc-logo-black.png\");\n        background-size: 160px;\n        height:100%;\n        position: relative;\n\n        .scrollable{\n            height: 90%; /* or any value */\n            overflow-y: auto;\n            width: 100%;\n            background-color: transparent;\n\n            .transparentDiv{\n                width: 65%;\n                height: 75%;\n                padding-left: 17.5%;\n                padding-top: 4%;\n                padding-bottom: 4%;\n                .infoDiv{\n                    background: white;\n                    border: solid black;\n                    border-radius: 10px;\n                    width: 100%;\n                    height: 100%;\n                    .balanceDiv{\n                        margin-top: 4rem;\n                        padding-left: 2rem;\n                        font-family: 'Julius Sans One', sans-serif;\n                        font-size: 1.75rem;\n                        color: rgb(163, 163, 163);\n                    }\n                    .walletAddressDiv{\n                        margin-top: 6rem;\n                        padding-left: 2rem;\n                        font-family: 'Julius Sans One', sans-serif;\n                        font-size: 1rem;\n                        color: rgb(163, 163, 163);\n                    }\n                    .buttonsDiv{\n                        padding-top: 3rem;\n                        padding-left: 3%;\n                        .button{\n                            border-radius: 10px;\n                            width: 10rem;\n                            height: 3rem;\n                        }\n                    }\n                    .modalDiv{\n                        box-sizing: border-box;\n                        padding: 0;\n                        margin: 0;\n                        font-family: 'Julius Sans One', sans-serif;\n                        position: fixed;\n                    }\n                    \n                }\n            }\n        }\n    }\n};"],"sourceRoot":""}]);
+___CSS_LOADER_EXPORT___.push([module.id, ".container {\n  height: 48rem;\n}\n.container .background {\n  background-image: url(" + ___CSS_LOADER_URL_REPLACEMENT_0___ + ");\n  background-size: 160px;\n  height: 100%;\n  position: relative;\n}\n.container .background .scrollable {\n  height: 90%;\n  /* or any value */\n  overflow-y: auto;\n  width: 100%;\n  background-color: transparent;\n}\n.container .background .scrollable .transparentDiv {\n  width: 65%;\n  height: 75%;\n  padding-left: 17.5%;\n  padding-top: 4%;\n  padding-bottom: 4%;\n}\n.container .background .scrollable .transparentDiv .infoDiv {\n  background: white;\n  border: solid black;\n  border-radius: 10px;\n  width: 100%;\n  height: 100%;\n}\n.container .background .scrollable .transparentDiv .infoDiv .balanceDiv {\n  margin-top: 4rem;\n  padding-left: 2rem;\n  font-family: \"Julius Sans One\", sans-serif;\n  font-size: 1.75rem;\n  color: #a3a3a3;\n}\n.container .background .scrollable .transparentDiv .infoDiv .walletAddressDiv {\n  margin-top: 6rem;\n  padding-left: 2rem;\n  font-family: \"Julius Sans One\", sans-serif;\n  font-size: 1rem;\n  color: #a3a3a3;\n}\n.container .background .scrollable .transparentDiv .infoDiv .buttonsDiv {\n  padding-top: 3rem;\n  padding-left: 3%;\n}\n.container .background .scrollable .transparentDiv .infoDiv .buttonsDiv .button {\n  border-radius: 10px;\n  width: 10rem;\n  height: 3rem;\n}\n.container .background .scrollable .transparentDiv .infoDiv .modalDiv {\n  box-sizing: border-box;\n  padding: 0;\n  margin: 0;\n  font-family: \"Julius Sans One\", sans-serif;\n  position: fixed;\n}\n.container .linkDiv_Wallet {\n  background-color: black;\n  border: solid black;\n  border-radius: 10px;\n}\n.container .linkDiv_Wallet .navBar_Wallet {\n  width: 100%;\n  color: white;\n}\n.container .linkDiv_Wallet .navBar_Wallet .linkContainer {\n  width: 20%;\n  padding-left: 80%;\n}\n.container .linkDiv_Wallet .navBar_Wallet .linkContainer .timeCapsuleLinkDiv {\n  float: left;\n  border-radius: 10px;\n  background-color: white;\n  width: 70%;\n}\n.container .linkDiv_Wallet .navBar_Wallet .linkContainer .timeCapsuleLinkDiv .navLink_Wallet {\n  font-family: \"Julius Sans One\", sans-serif;\n  padding-left: 10%;\n  text-decoration: none;\n}\n.container .linkDiv_Wallet .navBar_Wallet .linkContainer .accountIconLinkDiv .navLink_Wallet {\n  font-family: \"Julius Sans One\", sans-serif;\n  color: black;\n  text-decoration: none;\n}\n.container .linkDiv_Wallet .navBar_Wallet .linkContainer .accountIconLinkDiv .navLink_Wallet .accountIcon_Wallet {\n  height: 2rem;\n  border-radius: 10px;\n}", "",{"version":3,"sources":["webpack://./src/dtc_assets/src/Components/WalletPage.scss"],"names":[],"mappings":"AAAA;EACI,aAAA;AACJ;AAAI;EACI,yDAAA;EACA,sBAAA;EACA,YAAA;EACA,kBAAA;AAER;AAAQ;EACI,WAAA;EAAa,iBAAA;EACb,gBAAA;EACA,WAAA;EACA,6BAAA;AAGZ;AADY;EACI,UAAA;EACA,WAAA;EACA,mBAAA;EACA,eAAA;EACA,kBAAA;AAGhB;AAFgB;EACI,iBAAA;EACA,mBAAA;EACA,mBAAA;EACA,WAAA;EACA,YAAA;AAIpB;AAHoB;EACI,gBAAA;EACA,kBAAA;EACA,0CAAA;EACA,kBAAA;EACA,cAAA;AAKxB;AAHoB;EACI,gBAAA;EACA,kBAAA;EACA,0CAAA;EACA,eAAA;EACA,cAAA;AAKxB;AAHoB;EACI,iBAAA;EACA,gBAAA;AAKxB;AAJwB;EACI,mBAAA;EACA,YAAA;EACA,YAAA;AAM5B;AAHoB;EACI,sBAAA;EACA,UAAA;EACA,SAAA;EACA,0CAAA;EACA,eAAA;AAKxB;AAEI;EACI,uBAAA;EACA,mBAAA;EACA,mBAAA;AAAR;AACQ;EACI,WAAA;EACA,YAAA;AACZ;AAAY;EACI,UAAA;EACA,iBAAA;AAEhB;AADgB;EACI,WAAA;EACA,mBAAA;EACA,uBAAA;EACA,UAAA;AAGpB;AAFoB;EACI,0CAAA;EACA,iBAAA;EACA,qBAAA;AAIxB;AAAoB;EACI,0CAAA;EACA,YAAA;EACA,qBAAA;AAExB;AAAwB;EACI,YAAA;EACA,mBAAA;AAE5B","sourcesContent":[".container{\n    height: 48rem;\n    .background{\n        background-image: url(\"../../assets/dtc-logo-black.png\");\n        background-size: 160px;\n        height:100%;\n        position: relative;\n\n        .scrollable{\n            height: 90%; /* or any value */\n            overflow-y: auto;\n            width: 100%;\n            background-color: transparent;\n\n            .transparentDiv{\n                width: 65%;\n                height: 75%;\n                padding-left: 17.5%;\n                padding-top: 4%;\n                padding-bottom: 4%;\n                .infoDiv{\n                    background: white;\n                    border: solid black;\n                    border-radius: 10px;\n                    width: 100%;\n                    height: 100%;\n                    .balanceDiv{\n                        margin-top: 4rem;\n                        padding-left: 2rem;\n                        font-family: 'Julius Sans One', sans-serif;\n                        font-size: 1.75rem;\n                        color: rgb(163, 163, 163);\n                    }\n                    .walletAddressDiv{\n                        margin-top: 6rem;\n                        padding-left: 2rem;\n                        font-family: 'Julius Sans One', sans-serif;\n                        font-size: 1rem;\n                        color: rgb(163, 163, 163);\n                    }\n                    .buttonsDiv{\n                        padding-top: 3rem;\n                        padding-left: 3%;\n                        .button{\n                            border-radius: 10px;\n                            width: 10rem;\n                            height: 3rem;\n                        }\n                    }\n                    .modalDiv{\n                        box-sizing: border-box;\n                        padding: 0;\n                        margin: 0;\n                        font-family: 'Julius Sans One', sans-serif;\n                        position: fixed;\n                    }\n                    \n                }\n            }\n        }\n    }\n    .linkDiv_Wallet{\n        background-color: black;\n        border: solid black;\n        border-radius: 10px;\n        .navBar_Wallet{\n            width: 100%;\n            color: white;\n            .linkContainer{\n                width:20%;\n                padding-left: 80%;\n                .timeCapsuleLinkDiv{\n                    float: left;\n                    border-radius: 10px;\n                    background-color: white;\n                    width: 70%;\n                    .navLink_Wallet{\n                        font-family: 'Julius Sans One', sans-serif;\n                        padding-left: 10%;\n                        text-decoration: none;\n                    }\n                }\n                .accountIconLinkDiv{\n                    .navLink_Wallet{\n                        font-family: 'Julius Sans One', sans-serif;\n                        color: black;\n                        text-decoration: none;\n        \n                        .accountIcon_Wallet{\n                            height: 2rem;\n                            border-radius: 10px;\n                        }\n                    }\n                }\n            }\n        }\n    }\n};\n"],"sourceRoot":""}]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -30241,30 +30247,808 @@ exports.shr64_lo = shr64_lo;
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Action": () => (/* binding */ r),
+/* harmony export */   "Action": () => (/* binding */ Action),
 /* harmony export */   "createBrowserHistory": () => (/* binding */ createBrowserHistory),
 /* harmony export */   "createHashHistory": () => (/* binding */ createHashHistory),
 /* harmony export */   "createMemoryHistory": () => (/* binding */ createMemoryHistory),
-/* harmony export */   "createPath": () => (/* binding */ I),
-/* harmony export */   "parsePath": () => (/* binding */ J)
+/* harmony export */   "createPath": () => (/* binding */ createPath),
+/* harmony export */   "parsePath": () => (/* binding */ parsePath)
 /* harmony export */ });
 /* harmony import */ var _babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/esm/extends */ "./node_modules/@babel/runtime/helpers/esm/extends.js");
-var r,B=r||(r={});B.Pop="POP";B.Push="PUSH";B.Replace="REPLACE";var C= true?function(b){return Object.freeze(b)}:0;function D(b,h){if(!b){"undefined"!==typeof console&&console.warn(h);try{throw Error(h);}catch(e){}}}function E(b){b.preventDefault();b.returnValue=""}
-function F(){var b=[];return{get length(){return b.length},push:function(h){b.push(h);return function(){b=b.filter(function(e){return e!==h})}},call:function(h){b.forEach(function(e){return e&&e(h)})}}}function H(){return Math.random().toString(36).substr(2,8)}function I(b){var h=b.pathname;h=void 0===h?"/":h;var e=b.search;e=void 0===e?"":e;b=b.hash;b=void 0===b?"":b;e&&"?"!==e&&(h+="?"===e.charAt(0)?e:"?"+e);b&&"#"!==b&&(h+="#"===b.charAt(0)?b:"#"+b);return h}
-function J(b){var h={};if(b){var e=b.indexOf("#");0<=e&&(h.hash=b.substr(e),b=b.substr(0,e));e=b.indexOf("?");0<=e&&(h.search=b.substr(e),b=b.substr(0,e));b&&(h.pathname=b)}return h}
-function createBrowserHistory(b){function h(){var c=p.location,a=m.state||{};return[a.idx,C({pathname:c.pathname,search:c.search,hash:c.hash,state:a.usr||null,key:a.key||"default"})]}function e(c){return"string"===typeof c?c:I(c)}function x(c,a){void 0===a&&(a=null);return C((0,_babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__["default"])({pathname:q.pathname,hash:"",search:""},"string"===typeof c?J(c):c,{state:a,key:H()}))}function z(c){t=c;c=h();v=c[0];q=c[1];d.call({action:t,location:q})}function A(c,a){function f(){A(c,a)}var l=r.Push,k=x(c,
-a);if(!g.length||(g.call({action:l,location:k,retry:f}),!1)){var n=[{usr:k.state,key:k.key,idx:v+1},e(k)];k=n[0];n=n[1];try{m.pushState(k,"",n)}catch(G){p.location.assign(n)}z(l)}}function y(c,a){function f(){y(c,a)}var l=r.Replace,k=x(c,a);g.length&&(g.call({action:l,location:k,retry:f}),1)||(k=[{usr:k.state,key:k.key,idx:v},e(k)],m.replaceState(k[0],"",k[1]),z(l))}function w(c){m.go(c)}void 0===b&&(b={});b=b.window;var p=void 0===b?document.defaultView:b,m=p.history,u=null;p.addEventListener("popstate",
-function(){if(u)g.call(u),u=null;else{var c=r.Pop,a=h(),f=a[0];a=a[1];if(g.length)if(null!=f){var l=v-f;l&&(u={action:c,location:a,retry:function(){w(-1*l)}},w(l))}else true?D(!1,"You are trying to block a POP navigation to a location that was not created by the history library. The block will fail silently in production, but in general you should do all navigation with the history library (instead of using window.history.pushState directly) to avoid this situation."):
-0;else z(c)}});var t=r.Pop;b=h();var v=b[0],q=b[1],d=F(),g=F();null==v&&(v=0,m.replaceState((0,_babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__["default"])({},m.state,{idx:v}),""));return{get action(){return t},get location(){return q},createHref:e,push:A,replace:y,go:w,back:function(){w(-1)},forward:function(){w(1)},listen:function(c){return d.push(c)},block:function(c){var a=g.push(c);1===g.length&&p.addEventListener("beforeunload",E);return function(){a();g.length||p.removeEventListener("beforeunload",E)}}}};
-function createHashHistory(b){function h(){var a=J(m.location.hash.substr(1)),f=a.pathname,l=a.search;a=a.hash;var k=u.state||{};return[k.idx,C({pathname:void 0===f?"/":f,search:void 0===l?"":l,hash:void 0===a?"":a,state:k.usr||null,key:k.key||"default"})]}function e(){if(t)c.call(t),t=null;else{var a=r.Pop,f=h(),l=f[0];f=f[1];if(c.length)if(null!=l){var k=q-l;k&&(t={action:a,location:f,retry:function(){p(-1*k)}},p(k))}else true?D(!1,"You are trying to block a POP navigation to a location that was not created by the history library. The block will fail silently in production, but in general you should do all navigation with the history library (instead of using window.history.pushState directly) to avoid this situation."):
-0;else A(a)}}function x(a){var f=document.querySelector("base"),l="";f&&f.getAttribute("href")&&(f=m.location.href,l=f.indexOf("#"),l=-1===l?f:f.slice(0,l));return l+"#"+("string"===typeof a?a:I(a))}function z(a,f){void 0===f&&(f=null);return C((0,_babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__["default"])({pathname:d.pathname,hash:"",search:""},"string"===typeof a?J(a):a,{state:f,key:H()}))}function A(a){v=a;a=h();q=a[0];d=a[1];g.call({action:v,location:d})}function y(a,f){function l(){y(a,f)}var k=r.Push,n=z(a,f); true?
-D("/"===n.pathname.charAt(0),"Relative pathnames are not supported in hash history.push("+JSON.stringify(a)+")"):0;if(!c.length||(c.call({action:k,location:n,retry:l}),!1)){var G=[{usr:n.state,key:n.key,idx:q+1},x(n)];n=G[0];G=G[1];try{u.pushState(n,"",G)}catch(K){m.location.assign(G)}A(k)}}function w(a,f){function l(){w(a,f)}var k=r.Replace,n=z(a,f); true?D("/"===n.pathname.charAt(0),"Relative pathnames are not supported in hash history.replace("+JSON.stringify(a)+
-")"):0;c.length&&(c.call({action:k,location:n,retry:l}),1)||(n=[{usr:n.state,key:n.key,idx:q},x(n)],u.replaceState(n[0],"",n[1]),A(k))}function p(a){u.go(a)}void 0===b&&(b={});b=b.window;var m=void 0===b?document.defaultView:b,u=m.history,t=null;m.addEventListener("popstate",e);m.addEventListener("hashchange",function(){var a=h()[1];I(a)!==I(d)&&e()});var v=r.Pop;b=h();var q=b[0],d=b[1],g=F(),c=F();null==q&&(q=0,u.replaceState((0,_babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__["default"])({},u.state,{idx:q}),""));return{get action(){return v},get location(){return d},
-createHref:x,push:y,replace:w,go:p,back:function(){p(-1)},forward:function(){p(1)},listen:function(a){return g.push(a)},block:function(a){var f=c.push(a);1===c.length&&m.addEventListener("beforeunload",E);return function(){f();c.length||m.removeEventListener("beforeunload",E)}}}};
-function createMemoryHistory(b){function h(d,g){void 0===g&&(g=null);return C((0,_babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__["default"])({pathname:t.pathname,search:"",hash:""},"string"===typeof d?J(d):d,{state:g,key:H()}))}function e(d,g,c){return!q.length||(q.call({action:d,location:g,retry:c}),!1)}function x(d,g){u=d;t=g;v.call({action:u,location:t})}function z(d,g){var c=r.Push,a=h(d,g); true?D("/"===t.pathname.charAt(0),"Relative pathnames are not supported in memory history.push("+JSON.stringify(d)+")"):
-0;e(c,a,function(){z(d,g)})&&(m+=1,p.splice(m,p.length,a),x(c,a))}function A(d,g){var c=r.Replace,a=h(d,g); true?D("/"===t.pathname.charAt(0),"Relative pathnames are not supported in memory history.replace("+JSON.stringify(d)+")"):0;e(c,a,function(){A(d,g)})&&(p[m]=a,x(c,a))}function y(d){var g=Math.min(Math.max(m+d,0),p.length-1),c=r.Pop,a=p[g];e(c,a,function(){y(d)})&&(m=g,x(c,a))}void 0===b&&(b={});var w=b;b=w.initialEntries;w=w.initialIndex;var p=(void 0===
-b?["/"]:b).map(function(d){var g=C((0,_babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__["default"])({pathname:"/",search:"",hash:"",state:null,key:H()},"string"===typeof d?J(d):d)); true?D("/"===g.pathname.charAt(0),"Relative pathnames are not supported in createMemoryHistory({ initialEntries }) (invalid entry: "+JSON.stringify(d)+")"):0;return g}),m=Math.min(Math.max(null==w?p.length-1:w,0),p.length-1),u=r.Pop,t=p[m],v=F(),q=F();return{get index(){return m},get action(){return u},get location(){return t},createHref:function(d){return"string"===
-typeof d?d:I(d)},push:z,replace:A,go:y,back:function(){y(-1)},forward:function(){y(1)},listen:function(d){return v.push(d)},block:function(d){return q.push(d)}}};
+
+
+/**
+ * Actions represent the type of change to a location value.
+ *
+ * @see https://github.com/remix-run/history/tree/main/docs/api-reference.md#action
+ */
+var Action;
+
+(function (Action) {
+  /**
+   * A POP indicates a change to an arbitrary index in the history stack, such
+   * as a back or forward navigation. It does not describe the direction of the
+   * navigation, only that the current index changed.
+   *
+   * Note: This is the default action for newly created history objects.
+   */
+  Action["Pop"] = "POP";
+  /**
+   * A PUSH indicates a new entry being added to the history stack, such as when
+   * a link is clicked and a new page loads. When this happens, all subsequent
+   * entries in the stack are lost.
+   */
+
+  Action["Push"] = "PUSH";
+  /**
+   * A REPLACE indicates the entry at the current index in the history stack
+   * being replaced by a new one.
+   */
+
+  Action["Replace"] = "REPLACE";
+})(Action || (Action = {}));
+
+var readOnly =  true ? function (obj) {
+  return Object.freeze(obj);
+} : 0;
+
+function warning(cond, message) {
+  if (!cond) {
+    // eslint-disable-next-line no-console
+    if (typeof console !== 'undefined') console.warn(message);
+
+    try {
+      // Welcome to debugging history!
+      //
+      // This error is thrown as a convenience so you can more easily
+      // find the source for a warning that appears in the console by
+      // enabling "pause on exceptions" in your JavaScript debugger.
+      throw new Error(message); // eslint-disable-next-line no-empty
+    } catch (e) {}
+  }
+}
+
+var BeforeUnloadEventType = 'beforeunload';
+var HashChangeEventType = 'hashchange';
+var PopStateEventType = 'popstate';
+/**
+ * Browser history stores the location in regular URLs. This is the standard for
+ * most web apps, but it requires some configuration on the server to ensure you
+ * serve the same app at multiple URLs.
+ *
+ * @see https://github.com/remix-run/history/tree/main/docs/api-reference.md#createbrowserhistory
+ */
+
+function createBrowserHistory(options) {
+  if (options === void 0) {
+    options = {};
+  }
+
+  var _options = options,
+      _options$window = _options.window,
+      window = _options$window === void 0 ? document.defaultView : _options$window;
+  var globalHistory = window.history;
+
+  function getIndexAndLocation() {
+    var _window$location = window.location,
+        pathname = _window$location.pathname,
+        search = _window$location.search,
+        hash = _window$location.hash;
+    var state = globalHistory.state || {};
+    return [state.idx, readOnly({
+      pathname: pathname,
+      search: search,
+      hash: hash,
+      state: state.usr || null,
+      key: state.key || 'default'
+    })];
+  }
+
+  var blockedPopTx = null;
+
+  function handlePop() {
+    if (blockedPopTx) {
+      blockers.call(blockedPopTx);
+      blockedPopTx = null;
+    } else {
+      var nextAction = Action.Pop;
+
+      var _getIndexAndLocation = getIndexAndLocation(),
+          nextIndex = _getIndexAndLocation[0],
+          nextLocation = _getIndexAndLocation[1];
+
+      if (blockers.length) {
+        if (nextIndex != null) {
+          var delta = index - nextIndex;
+
+          if (delta) {
+            // Revert the POP
+            blockedPopTx = {
+              action: nextAction,
+              location: nextLocation,
+              retry: function retry() {
+                go(delta * -1);
+              }
+            };
+            go(delta);
+          }
+        } else {
+          // Trying to POP to a location with no index. We did not create
+          // this location, so we can't effectively block the navigation.
+           true ? warning(false, // TODO: Write up a doc that explains our blocking strategy in
+          // detail and link to it here so people can understand better what
+          // is going on and how to avoid it.
+          "You are trying to block a POP navigation to a location that was not " + "created by the history library. The block will fail silently in " + "production, but in general you should do all navigation with the " + "history library (instead of using window.history.pushState directly) " + "to avoid this situation.") : 0;
+        }
+      } else {
+        applyTx(nextAction);
+      }
+    }
+  }
+
+  window.addEventListener(PopStateEventType, handlePop);
+  var action = Action.Pop;
+
+  var _getIndexAndLocation2 = getIndexAndLocation(),
+      index = _getIndexAndLocation2[0],
+      location = _getIndexAndLocation2[1];
+
+  var listeners = createEvents();
+  var blockers = createEvents();
+
+  if (index == null) {
+    index = 0;
+    globalHistory.replaceState((0,_babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__["default"])({}, globalHistory.state, {
+      idx: index
+    }), '');
+  }
+
+  function createHref(to) {
+    return typeof to === 'string' ? to : createPath(to);
+  } // state defaults to `null` because `window.history.state` does
+
+
+  function getNextLocation(to, state) {
+    if (state === void 0) {
+      state = null;
+    }
+
+    return readOnly((0,_babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__["default"])({
+      pathname: location.pathname,
+      hash: '',
+      search: ''
+    }, typeof to === 'string' ? parsePath(to) : to, {
+      state: state,
+      key: createKey()
+    }));
+  }
+
+  function getHistoryStateAndUrl(nextLocation, index) {
+    return [{
+      usr: nextLocation.state,
+      key: nextLocation.key,
+      idx: index
+    }, createHref(nextLocation)];
+  }
+
+  function allowTx(action, location, retry) {
+    return !blockers.length || (blockers.call({
+      action: action,
+      location: location,
+      retry: retry
+    }), false);
+  }
+
+  function applyTx(nextAction) {
+    action = nextAction;
+
+    var _getIndexAndLocation3 = getIndexAndLocation();
+
+    index = _getIndexAndLocation3[0];
+    location = _getIndexAndLocation3[1];
+    listeners.call({
+      action: action,
+      location: location
+    });
+  }
+
+  function push(to, state) {
+    var nextAction = Action.Push;
+    var nextLocation = getNextLocation(to, state);
+
+    function retry() {
+      push(to, state);
+    }
+
+    if (allowTx(nextAction, nextLocation, retry)) {
+      var _getHistoryStateAndUr = getHistoryStateAndUrl(nextLocation, index + 1),
+          historyState = _getHistoryStateAndUr[0],
+          url = _getHistoryStateAndUr[1]; // TODO: Support forced reloading
+      // try...catch because iOS limits us to 100 pushState calls :/
+
+
+      try {
+        globalHistory.pushState(historyState, '', url);
+      } catch (error) {
+        // They are going to lose state here, but there is no real
+        // way to warn them about it since the page will refresh...
+        window.location.assign(url);
+      }
+
+      applyTx(nextAction);
+    }
+  }
+
+  function replace(to, state) {
+    var nextAction = Action.Replace;
+    var nextLocation = getNextLocation(to, state);
+
+    function retry() {
+      replace(to, state);
+    }
+
+    if (allowTx(nextAction, nextLocation, retry)) {
+      var _getHistoryStateAndUr2 = getHistoryStateAndUrl(nextLocation, index),
+          historyState = _getHistoryStateAndUr2[0],
+          url = _getHistoryStateAndUr2[1]; // TODO: Support forced reloading
+
+
+      globalHistory.replaceState(historyState, '', url);
+      applyTx(nextAction);
+    }
+  }
+
+  function go(delta) {
+    globalHistory.go(delta);
+  }
+
+  var history = {
+    get action() {
+      return action;
+    },
+
+    get location() {
+      return location;
+    },
+
+    createHref: createHref,
+    push: push,
+    replace: replace,
+    go: go,
+    back: function back() {
+      go(-1);
+    },
+    forward: function forward() {
+      go(1);
+    },
+    listen: function listen(listener) {
+      return listeners.push(listener);
+    },
+    block: function block(blocker) {
+      var unblock = blockers.push(blocker);
+
+      if (blockers.length === 1) {
+        window.addEventListener(BeforeUnloadEventType, promptBeforeUnload);
+      }
+
+      return function () {
+        unblock(); // Remove the beforeunload listener so the document may
+        // still be salvageable in the pagehide event.
+        // See https://html.spec.whatwg.org/#unloading-documents
+
+        if (!blockers.length) {
+          window.removeEventListener(BeforeUnloadEventType, promptBeforeUnload);
+        }
+      };
+    }
+  };
+  return history;
+}
+/**
+ * Hash history stores the location in window.location.hash. This makes it ideal
+ * for situations where you don't want to send the location to the server for
+ * some reason, either because you do cannot configure it or the URL space is
+ * reserved for something else.
+ *
+ * @see https://github.com/remix-run/history/tree/main/docs/api-reference.md#createhashhistory
+ */
+
+function createHashHistory(options) {
+  if (options === void 0) {
+    options = {};
+  }
+
+  var _options2 = options,
+      _options2$window = _options2.window,
+      window = _options2$window === void 0 ? document.defaultView : _options2$window;
+  var globalHistory = window.history;
+
+  function getIndexAndLocation() {
+    var _parsePath = parsePath(window.location.hash.substr(1)),
+        _parsePath$pathname = _parsePath.pathname,
+        pathname = _parsePath$pathname === void 0 ? '/' : _parsePath$pathname,
+        _parsePath$search = _parsePath.search,
+        search = _parsePath$search === void 0 ? '' : _parsePath$search,
+        _parsePath$hash = _parsePath.hash,
+        hash = _parsePath$hash === void 0 ? '' : _parsePath$hash;
+
+    var state = globalHistory.state || {};
+    return [state.idx, readOnly({
+      pathname: pathname,
+      search: search,
+      hash: hash,
+      state: state.usr || null,
+      key: state.key || 'default'
+    })];
+  }
+
+  var blockedPopTx = null;
+
+  function handlePop() {
+    if (blockedPopTx) {
+      blockers.call(blockedPopTx);
+      blockedPopTx = null;
+    } else {
+      var nextAction = Action.Pop;
+
+      var _getIndexAndLocation4 = getIndexAndLocation(),
+          nextIndex = _getIndexAndLocation4[0],
+          nextLocation = _getIndexAndLocation4[1];
+
+      if (blockers.length) {
+        if (nextIndex != null) {
+          var delta = index - nextIndex;
+
+          if (delta) {
+            // Revert the POP
+            blockedPopTx = {
+              action: nextAction,
+              location: nextLocation,
+              retry: function retry() {
+                go(delta * -1);
+              }
+            };
+            go(delta);
+          }
+        } else {
+          // Trying to POP to a location with no index. We did not create
+          // this location, so we can't effectively block the navigation.
+           true ? warning(false, // TODO: Write up a doc that explains our blocking strategy in
+          // detail and link to it here so people can understand better
+          // what is going on and how to avoid it.
+          "You are trying to block a POP navigation to a location that was not " + "created by the history library. The block will fail silently in " + "production, but in general you should do all navigation with the " + "history library (instead of using window.history.pushState directly) " + "to avoid this situation.") : 0;
+        }
+      } else {
+        applyTx(nextAction);
+      }
+    }
+  }
+
+  window.addEventListener(PopStateEventType, handlePop); // popstate does not fire on hashchange in IE 11 and old (trident) Edge
+  // https://developer.mozilla.org/de/docs/Web/API/Window/popstate_event
+
+  window.addEventListener(HashChangeEventType, function () {
+    var _getIndexAndLocation5 = getIndexAndLocation(),
+        nextLocation = _getIndexAndLocation5[1]; // Ignore extraneous hashchange events.
+
+
+    if (createPath(nextLocation) !== createPath(location)) {
+      handlePop();
+    }
+  });
+  var action = Action.Pop;
+
+  var _getIndexAndLocation6 = getIndexAndLocation(),
+      index = _getIndexAndLocation6[0],
+      location = _getIndexAndLocation6[1];
+
+  var listeners = createEvents();
+  var blockers = createEvents();
+
+  if (index == null) {
+    index = 0;
+    globalHistory.replaceState((0,_babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__["default"])({}, globalHistory.state, {
+      idx: index
+    }), '');
+  }
+
+  function getBaseHref() {
+    var base = document.querySelector('base');
+    var href = '';
+
+    if (base && base.getAttribute('href')) {
+      var url = window.location.href;
+      var hashIndex = url.indexOf('#');
+      href = hashIndex === -1 ? url : url.slice(0, hashIndex);
+    }
+
+    return href;
+  }
+
+  function createHref(to) {
+    return getBaseHref() + '#' + (typeof to === 'string' ? to : createPath(to));
+  }
+
+  function getNextLocation(to, state) {
+    if (state === void 0) {
+      state = null;
+    }
+
+    return readOnly((0,_babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__["default"])({
+      pathname: location.pathname,
+      hash: '',
+      search: ''
+    }, typeof to === 'string' ? parsePath(to) : to, {
+      state: state,
+      key: createKey()
+    }));
+  }
+
+  function getHistoryStateAndUrl(nextLocation, index) {
+    return [{
+      usr: nextLocation.state,
+      key: nextLocation.key,
+      idx: index
+    }, createHref(nextLocation)];
+  }
+
+  function allowTx(action, location, retry) {
+    return !blockers.length || (blockers.call({
+      action: action,
+      location: location,
+      retry: retry
+    }), false);
+  }
+
+  function applyTx(nextAction) {
+    action = nextAction;
+
+    var _getIndexAndLocation7 = getIndexAndLocation();
+
+    index = _getIndexAndLocation7[0];
+    location = _getIndexAndLocation7[1];
+    listeners.call({
+      action: action,
+      location: location
+    });
+  }
+
+  function push(to, state) {
+    var nextAction = Action.Push;
+    var nextLocation = getNextLocation(to, state);
+
+    function retry() {
+      push(to, state);
+    }
+
+     true ? warning(nextLocation.pathname.charAt(0) === '/', "Relative pathnames are not supported in hash history.push(" + JSON.stringify(to) + ")") : 0;
+
+    if (allowTx(nextAction, nextLocation, retry)) {
+      var _getHistoryStateAndUr3 = getHistoryStateAndUrl(nextLocation, index + 1),
+          historyState = _getHistoryStateAndUr3[0],
+          url = _getHistoryStateAndUr3[1]; // TODO: Support forced reloading
+      // try...catch because iOS limits us to 100 pushState calls :/
+
+
+      try {
+        globalHistory.pushState(historyState, '', url);
+      } catch (error) {
+        // They are going to lose state here, but there is no real
+        // way to warn them about it since the page will refresh...
+        window.location.assign(url);
+      }
+
+      applyTx(nextAction);
+    }
+  }
+
+  function replace(to, state) {
+    var nextAction = Action.Replace;
+    var nextLocation = getNextLocation(to, state);
+
+    function retry() {
+      replace(to, state);
+    }
+
+     true ? warning(nextLocation.pathname.charAt(0) === '/', "Relative pathnames are not supported in hash history.replace(" + JSON.stringify(to) + ")") : 0;
+
+    if (allowTx(nextAction, nextLocation, retry)) {
+      var _getHistoryStateAndUr4 = getHistoryStateAndUrl(nextLocation, index),
+          historyState = _getHistoryStateAndUr4[0],
+          url = _getHistoryStateAndUr4[1]; // TODO: Support forced reloading
+
+
+      globalHistory.replaceState(historyState, '', url);
+      applyTx(nextAction);
+    }
+  }
+
+  function go(delta) {
+    globalHistory.go(delta);
+  }
+
+  var history = {
+    get action() {
+      return action;
+    },
+
+    get location() {
+      return location;
+    },
+
+    createHref: createHref,
+    push: push,
+    replace: replace,
+    go: go,
+    back: function back() {
+      go(-1);
+    },
+    forward: function forward() {
+      go(1);
+    },
+    listen: function listen(listener) {
+      return listeners.push(listener);
+    },
+    block: function block(blocker) {
+      var unblock = blockers.push(blocker);
+
+      if (blockers.length === 1) {
+        window.addEventListener(BeforeUnloadEventType, promptBeforeUnload);
+      }
+
+      return function () {
+        unblock(); // Remove the beforeunload listener so the document may
+        // still be salvageable in the pagehide event.
+        // See https://html.spec.whatwg.org/#unloading-documents
+
+        if (!blockers.length) {
+          window.removeEventListener(BeforeUnloadEventType, promptBeforeUnload);
+        }
+      };
+    }
+  };
+  return history;
+}
+/**
+ * Memory history stores the current location in memory. It is designed for use
+ * in stateful non-browser environments like tests and React Native.
+ *
+ * @see https://github.com/remix-run/history/tree/main/docs/api-reference.md#creatememoryhistory
+ */
+
+function createMemoryHistory(options) {
+  if (options === void 0) {
+    options = {};
+  }
+
+  var _options3 = options,
+      _options3$initialEntr = _options3.initialEntries,
+      initialEntries = _options3$initialEntr === void 0 ? ['/'] : _options3$initialEntr,
+      initialIndex = _options3.initialIndex;
+  var entries = initialEntries.map(function (entry) {
+    var location = readOnly((0,_babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__["default"])({
+      pathname: '/',
+      search: '',
+      hash: '',
+      state: null,
+      key: createKey()
+    }, typeof entry === 'string' ? parsePath(entry) : entry));
+     true ? warning(location.pathname.charAt(0) === '/', "Relative pathnames are not supported in createMemoryHistory({ initialEntries }) (invalid entry: " + JSON.stringify(entry) + ")") : 0;
+    return location;
+  });
+  var index = clamp(initialIndex == null ? entries.length - 1 : initialIndex, 0, entries.length - 1);
+  var action = Action.Pop;
+  var location = entries[index];
+  var listeners = createEvents();
+  var blockers = createEvents();
+
+  function createHref(to) {
+    return typeof to === 'string' ? to : createPath(to);
+  }
+
+  function getNextLocation(to, state) {
+    if (state === void 0) {
+      state = null;
+    }
+
+    return readOnly((0,_babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__["default"])({
+      pathname: location.pathname,
+      search: '',
+      hash: ''
+    }, typeof to === 'string' ? parsePath(to) : to, {
+      state: state,
+      key: createKey()
+    }));
+  }
+
+  function allowTx(action, location, retry) {
+    return !blockers.length || (blockers.call({
+      action: action,
+      location: location,
+      retry: retry
+    }), false);
+  }
+
+  function applyTx(nextAction, nextLocation) {
+    action = nextAction;
+    location = nextLocation;
+    listeners.call({
+      action: action,
+      location: location
+    });
+  }
+
+  function push(to, state) {
+    var nextAction = Action.Push;
+    var nextLocation = getNextLocation(to, state);
+
+    function retry() {
+      push(to, state);
+    }
+
+     true ? warning(location.pathname.charAt(0) === '/', "Relative pathnames are not supported in memory history.push(" + JSON.stringify(to) + ")") : 0;
+
+    if (allowTx(nextAction, nextLocation, retry)) {
+      index += 1;
+      entries.splice(index, entries.length, nextLocation);
+      applyTx(nextAction, nextLocation);
+    }
+  }
+
+  function replace(to, state) {
+    var nextAction = Action.Replace;
+    var nextLocation = getNextLocation(to, state);
+
+    function retry() {
+      replace(to, state);
+    }
+
+     true ? warning(location.pathname.charAt(0) === '/', "Relative pathnames are not supported in memory history.replace(" + JSON.stringify(to) + ")") : 0;
+
+    if (allowTx(nextAction, nextLocation, retry)) {
+      entries[index] = nextLocation;
+      applyTx(nextAction, nextLocation);
+    }
+  }
+
+  function go(delta) {
+    var nextIndex = clamp(index + delta, 0, entries.length - 1);
+    var nextAction = Action.Pop;
+    var nextLocation = entries[nextIndex];
+
+    function retry() {
+      go(delta);
+    }
+
+    if (allowTx(nextAction, nextLocation, retry)) {
+      index = nextIndex;
+      applyTx(nextAction, nextLocation);
+    }
+  }
+
+  var history = {
+    get index() {
+      return index;
+    },
+
+    get action() {
+      return action;
+    },
+
+    get location() {
+      return location;
+    },
+
+    createHref: createHref,
+    push: push,
+    replace: replace,
+    go: go,
+    back: function back() {
+      go(-1);
+    },
+    forward: function forward() {
+      go(1);
+    },
+    listen: function listen(listener) {
+      return listeners.push(listener);
+    },
+    block: function block(blocker) {
+      return blockers.push(blocker);
+    }
+  };
+  return history;
+} ////////////////////////////////////////////////////////////////////////////////
+// UTILS
+////////////////////////////////////////////////////////////////////////////////
+
+function clamp(n, lowerBound, upperBound) {
+  return Math.min(Math.max(n, lowerBound), upperBound);
+}
+
+function promptBeforeUnload(event) {
+  // Cancel the event.
+  event.preventDefault(); // Chrome (and legacy IE) requires returnValue to be set.
+
+  event.returnValue = '';
+}
+
+function createEvents() {
+  var handlers = [];
+  return {
+    get length() {
+      return handlers.length;
+    },
+
+    push: function push(fn) {
+      handlers.push(fn);
+      return function () {
+        handlers = handlers.filter(function (handler) {
+          return handler !== fn;
+        });
+      };
+    },
+    call: function call(arg) {
+      handlers.forEach(function (fn) {
+        return fn && fn(arg);
+      });
+    }
+  };
+}
+
+function createKey() {
+  return Math.random().toString(36).substr(2, 8);
+}
+/**
+ * Creates a string URL path from the given pathname, search, and hash components.
+ *
+ * @see https://github.com/remix-run/history/tree/main/docs/api-reference.md#createpath
+ */
+
+
+function createPath(_ref) {
+  var _ref$pathname = _ref.pathname,
+      pathname = _ref$pathname === void 0 ? '/' : _ref$pathname,
+      _ref$search = _ref.search,
+      search = _ref$search === void 0 ? '' : _ref$search,
+      _ref$hash = _ref.hash,
+      hash = _ref$hash === void 0 ? '' : _ref$hash;
+  if (search && search !== '?') pathname += search.charAt(0) === '?' ? search : '?' + search;
+  if (hash && hash !== '#') pathname += hash.charAt(0) === '#' ? hash : '#' + hash;
+  return pathname;
+}
+/**
+ * Parses a string URL path into its separate pathname, search, and hash components.
+ *
+ * @see https://github.com/remix-run/history/tree/main/docs/api-reference.md#parsepath
+ */
+
+function parsePath(path) {
+  var parsedPath = {};
+
+  if (path) {
+    var hashIndex = path.indexOf('#');
+
+    if (hashIndex >= 0) {
+      parsedPath.hash = path.substr(hashIndex);
+      path = path.substr(0, hashIndex);
+    }
+
+    var searchIndex = path.indexOf('?');
+
+    if (searchIndex >= 0) {
+      parsedPath.search = path.substr(searchIndex);
+      path = path.substr(0, searchIndex);
+    }
+
+    if (path) {
+      parsedPath.pathname = path;
+    }
+  }
+
+  return parsedPath;
+}
+
+
 //# sourceMappingURL=index.js.map
 
 
@@ -71124,6 +71908,7 @@ const JournalPage_1 = __importDefault(__webpack_require__(/*! ./JournalPage */ "
 const react_1 = __importStar(__webpack_require__(/*! react */ "./node_modules/react/index.js"));
 const journalReducer_1 = __importStar(__webpack_require__(/*! ../reducers/journalReducer */ "./src/dtc_assets/src/reducers/journalReducer.jsx"));
 const journalPageMappers_1 = __webpack_require__(/*! ../mappers/journalPageMappers */ "./src/dtc_assets/src/mappers/journalPageMappers.jsx");
+const react_router_dom_1 = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router-dom/index.js");
 __webpack_require__(/*! ./Journal.scss */ "./src/dtc_assets/src/Components/Journal.scss");
 const App_1 = __webpack_require__(/*! ../App */ "./src/dtc_assets/src/App.jsx");
 const InputBox_1 = __importDefault(__webpack_require__(/*! ./Fields/InputBox */ "./src/dtc_assets/src/Components/Fields/InputBox.jsx"));
@@ -71139,8 +71924,8 @@ const Journal = (props) => {
         console.log(journal);
         if ("err" in journal) {
             actor.create({
-                userName: "admin",
-                email: "thedigitaltimecapsule2022@gmail.com"
+                userName: [],
+                email: []
             }).then((result) => {
                 console.log(result);
             });
@@ -71305,6 +72090,14 @@ const Journal = (props) => {
         }));
     };
     return (react_1.default.createElement(react_1.default.Fragment, null,
+        react_1.default.createElement("div", { className: 'linkDiv_Journal' },
+            react_1.default.createElement("nav", { className: 'navBar_Journal' },
+                react_1.default.createElement("div", { className: "linkContainer" },
+                    react_1.default.createElement("div", { className: "timeCapsuleLinkDiv" },
+                        react_1.default.createElement(react_router_dom_1.Link, { className: "navLink_Journal", to: "/wallet" }, "DTC Wallet")),
+                    react_1.default.createElement("div", { className: "accountIconLinkDiv" },
+                        react_1.default.createElement(react_router_dom_1.Link, { className: "navLink_Journal", to: '/account' },
+                            react_1.default.createElement("img", { src: "../../assets/account-icon.png", alt: "image preview", className: "accountIcon_Journal" })))))),
         react_1.default.createElement("div", null,
             (getIndexOfVisiblePage() < 0) ?
                 displayJournalTable() :
@@ -71538,6 +72331,7 @@ const InputBox_1 = __importDefault(__webpack_require__(/*! ./Fields/InputBox */ 
 const Wallet_jsx_1 = __webpack_require__(/*! ../Wallet.jsx */ "./src/dtc_assets/src/Wallet.jsx");
 const Utils_jsx_1 = __webpack_require__(/*! ../Utils.jsx */ "./src/dtc_assets/src/Utils.jsx");
 __webpack_require__(/*! ./ModalContentOnSend.scss */ "./src/dtc_assets/src/Components/ModalContentOnSend.scss");
+const Constants_1 = __webpack_require__(/*! ../Constants */ "./src/dtc_assets/src/Constants.jsx");
 const ModalContentOnSend = (props) => {
     const { setShowModal, showModal } = props;
     const [recipientAddress, setRecipientAddress] = (0, react_1.useState)('');
@@ -71548,7 +72342,7 @@ const ModalContentOnSend = (props) => {
     };
     const onSendConfirm = async () => {
         console.log((0, Utils_jsx_1.fromHexString)(recipientAddress));
-        const status = await actor.transferICP(parseInt(amountToSend), (0, Utils_jsx_1.fromHexString)(recipientAddress));
+        const status = await actor.transferICP(parseInt(amountToSend * Constants_1.e8sInOneICP), (0, Utils_jsx_1.fromHexString)(recipientAddress));
         console.log(status);
     };
     return (react_1.default.createElement("div", { className: "sendContentDiv" },
@@ -71613,8 +72407,8 @@ const SubcriptionPage = (props) => {
         console.log(journal);
         if ("err" in journal) {
             actor.create({
-                userName: "admin",
-                email: "admin@test.com"
+                userName: [],
+                email: []
             }).then((result) => {
                 console.log(result);
             });
@@ -71771,8 +72565,10 @@ const react_1 = __importStar(__webpack_require__(/*! react */ "./node_modules/re
 const Wallet_1 = __webpack_require__(/*! ../Wallet */ "./src/dtc_assets/src/Wallet.jsx");
 const Utils_1 = __webpack_require__(/*! ../Utils */ "./src/dtc_assets/src/Utils.jsx");
 const journalReducer_1 = __webpack_require__(/*! ../reducers/journalReducer */ "./src/dtc_assets/src/reducers/journalReducer.jsx");
+const react_router_dom_1 = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router-dom/index.js");
 const WalletModal_1 = __webpack_require__(/*! ./WalletModal */ "./src/dtc_assets/src/Components/WalletModal.jsx");
 __webpack_require__(/*! ./WalletPage.scss */ "./src/dtc_assets/src/Components/WalletPage.scss");
+const Constants_1 = __webpack_require__(/*! ../Constants */ "./src/dtc_assets/src/Constants.jsx");
 const WalletPage = (props) => {
     const { journalState, dispatch } = props;
     const { actor, authClient } = (0, react_1.useContext)(Wallet_1.AppContext);
@@ -71785,8 +72581,8 @@ const WalletPage = (props) => {
         console.log(journal);
         if ("err" in journal) {
             actor.create({
-                userName: "admin",
-                email: "admin@test.com"
+                userName: [],
+                email: []
             }).then((result) => {
                 console.log(result);
             });
@@ -71806,13 +72602,22 @@ const WalletPage = (props) => {
     }, [actor, authClient]);
     console.log(journalState.walletData);
     return (react_1.default.createElement("div", { className: "container" },
+        react_1.default.createElement("div", { className: 'linkDiv_Wallet' },
+            react_1.default.createElement("nav", { className: 'navBar_Wallet' },
+                react_1.default.createElement("div", { className: "linkContainer" },
+                    react_1.default.createElement("div", { className: "timeCapsuleLinkDiv" },
+                        react_1.default.createElement(react_router_dom_1.Link, { className: "navLink_Wallet", to: "/app" }, "Time Capsule")),
+                    react_1.default.createElement("div", { className: "accountIconLinkDiv" },
+                        react_1.default.createElement(react_router_dom_1.Link, { className: "navLink_Wallet", to: '/account' },
+                            react_1.default.createElement("img", { src: "../../assets/account-icon.png", alt: "image preview", className: "accountIcon_Wallet" })))))),
         react_1.default.createElement("div", { className: "background center" },
             react_1.default.createElement("div", { className: 'scrollable' },
                 react_1.default.createElement("div", { className: 'transparentDiv' },
                     react_1.default.createElement("div", { className: 'infoDiv' },
                         react_1.default.createElement("div", { className: "balanceDiv" },
                             "Wallet Balance: ",
-                            journalState.walletData.balance),
+                            journalState.walletData.balance / Constants_1.e8sInOneICP,
+                            " ICP"),
                         react_1.default.createElement("div", { className: 'walletAddressDiv' },
                             "Wallet Address: ",
                             journalState.walletData.address),
@@ -71834,9 +72639,10 @@ exports["default"] = WalletPage;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.monthInDays = exports.dayInNanoSeconds = void 0;
+exports.e8sInOneICP = exports.monthInDays = exports.dayInNanoSeconds = void 0;
 exports.dayInNanoSeconds = 86400000000000;
 exports.monthInDays = 30;
+exports.e8sInOneICP = 100000000;
 
 
 /***/ }),
@@ -72246,6 +73052,7 @@ exports.types = {
     CHANGE_NAME: "CHANGE_NAME",
     CHANGE_ENTRY_TITLE: "CHANGE_ENTRY_TITLE",
     CHANGE_EMAIL: "CHANGE_EMAIL",
+    CHANGE_USERNAME: "CHANGE_USERNAME",
     CHANGE_RECIPIENT_EMAIL_ONE: "CHANGE_RECIPIENT_EMAIL_ONE",
     CHANGE_RECIPIENT_EMAIL_TWO: "CHANGE_RECIPIENT_EMAIL_TWO",
     CHANGE_RECIPIENT_EMAIL_THREE: "CHANGE_RECIPIENT_EMAIL_THREE"
@@ -72320,6 +73127,18 @@ const changeValue = (state = exports.initialState, action) => {
             state.bio = {
                 ...state.bio,
                 email: payload
+            };
+            state.metaData = {
+                ...state.metaData,
+                email: payload
+            };
+            return {
+                ...state
+            };
+        case exports.types.CHANGE_USERNAME:
+            state.metaData = {
+                ...state.metaData,
+                userName: payload
             };
             return {
                 ...state
@@ -75374,8 +76193,8 @@ const idlFactory = ({ IDL }) => {
   const AccountIdentifier = IDL.Vec(IDL.Nat8);
   const Tokens = IDL.Record({ 'e8s' : IDL.Nat64 });
   const ProfileInput = IDL.Record({
-    'userName' : IDL.Text,
-    'email' : IDL.Text,
+    'userName' : IDL.Opt(IDL.Text),
+    'email' : IDL.Opt(IDL.Text),
   });
   const AmountAccepted = IDL.Record({ 'accepted' : IDL.Nat64 });
   const Error = IDL.Variant({
@@ -75384,6 +76203,7 @@ const idlFactory = ({ IDL }) => {
     'NotAuthorized' : IDL.Null,
     'AlreadyExists' : IDL.Null,
     'NoInputGiven' : IDL.Null,
+    'InsufficientFunds' : IDL.Null,
   });
   const Result_5 = IDL.Variant({ 'ok' : AmountAccepted, 'err' : Error });
   const Result = IDL.Variant({ 'ok' : IDL.Null, 'err' : Error });
@@ -75416,9 +76236,9 @@ const idlFactory = ({ IDL }) => {
   });
   const Result_2 = IDL.Variant({
     'ok' : IDL.Record({
-      'userName' : IDL.Text,
+      'userName' : IDL.Opt(IDL.Text),
       'balance' : Tokens,
-      'email' : IDL.Text,
+      'email' : IDL.Opt(IDL.Text),
       'address' : IDL.Vec(IDL.Nat8),
       'userJournalData' : IDL.Tuple(
         IDL.Vec(IDL.Tuple(IDL.Nat, JournalEntry)),
@@ -75502,7 +76322,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 // CANISTER_ID is replaced by webpack based on node environment
-const canisterId = "renrk-eyaaa-aaaaa-aaada-cai";
+const canisterId = "t6rzw-2iaaa-aaaaa-aaama-cai";
 
 /**
  * 
