@@ -28,14 +28,28 @@ const JournalPage = (props) => {
         submissionsMade
     } = useContext(AppContext);
 
+    const retrieveChunk = async (fileId,chunkIndex) => {
+
+        return await actor.readEntryFileChunk(fileId, chunkIndex);
+    }; 
+
     useEffect(async () => {
         if(journalPageData.file1ID !== 'empty'){
-            const file1Blob = await actor.readEntryFile(journalPageData.file1ID);
+            let index = 0;
+            let promises = [];
+
+            const file1BlobSizeObj = await actor.readEntryFileSize(journalPageData.file1ID);
+            const file1BlobSize = parseInt(file1BlobSizeObj.ok);
+            while(index < file1BlobSize){
+                promises.push(retrieveChunk(journalPageData.file1ID, index));
+                index += 1;
+            };
+            const file1Blob = await Promise.all(promises); 
             console.log(file1Blob);
         };
     
         if(journalPageData.file2ID !== 'empty'){
-            const file2Blob = await actor.readEntryFile(journalPageData.file2ID);
+            const file2Blob = await actor.readEntryFileSize(journalPageData.file2ID);
             console.log(file2Blob);
         };
     },[journalPageData.file1ID, journalPageData.file2ID]);

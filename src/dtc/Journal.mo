@@ -258,7 +258,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         }
     };
 
-    public func readJournalFile (fileId : Text) : async Result.Result<(Trie.Trie<Nat,Blob>),Error> {
+    public func readJournalFileChunk (fileId : Text, chunkId: Nat) : async Result.Result<(Blob),Error> {
 
         let file = Trie.find(
             files,
@@ -271,7 +271,38 @@ shared(msg) actor class Journal (principal : Principal) = this {
                 #err(#NotFound);
             };
             case (? existingFile){
-                #ok(existingFile);
+                let existingFileChunk = Trie.find(
+                    existingFile,
+                    natKey(chunkId),
+                    Nat.equal
+                );
+                switch(existingFileChunk){
+                    case null{
+                        #err(#NotFound);
+                    };
+                    case (? existingChunk){
+                        #ok(existingChunk);
+                    }
+                };
+            };
+        };
+    };
+
+    public func readJournalFileSize (fileId : Text) : async Result.Result<(Nat),Error> {
+
+        let file = Trie.find(
+            files,
+            textKey(fileId),
+            Text.equal,
+        );
+
+        switch(file){
+            case null{
+                #err(#NotFound);
+            };
+            case (? existingFile){
+                let existingFileArraySize = Iter.size(Trie.iter(existingFile));
+                #ok(existingFileArraySize);
             };
         };
     };

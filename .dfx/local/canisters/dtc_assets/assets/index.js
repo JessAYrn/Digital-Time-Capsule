@@ -71834,6 +71834,11 @@ const FileUpload = (props) => {
             }
             setFileSrc(await displayUploadedFile(file));
             setValue(file);
+            dispatch({
+                payload: `fileUploadedAtTime:${Date.now()}`,
+                actionType: dispatchAction,
+                index: index
+            });
         }
         catch (e) {
             console.warn(e.message);
@@ -72283,14 +72288,27 @@ const JournalPage = (props) => {
     const [file2, setFile2] = (0, react_1.useState)(null);
     const { journalReducerDispatchFunction, index, journalPageData, journalSize, closePage } = props;
     const { actor, setSubmissionsMade, submissionsMade } = (0, react_1.useContext)(App_1.AppContext);
+    const retrieveChunk = async (fileId, chunkIndex) => {
+        return await actor.readEntryFileChunk(fileId, chunkIndex);
+    };
     (0, react_1.useEffect)(async () => {
-        if (journalPageData.file1ID) {
-            const file1Blob = await actor.readEntryFile(journalPageData.file1ID);
+        if (journalPageData.file1ID !== 'empty') {
+            let index = 0;
+            let promises = [];
+            const file1BlobSizeObj = await actor.readEntryFileSize(journalPageData.file1ID);
+            const file1BlobSize = parseInt(file1BlobSizeObj.ok);
+            while (index < file1BlobSize) {
+                promises.push(retrieveChunk(journalPageData.file1ID, index));
+                index += 1;
+            }
+            ;
+            const file1Blob = await Promise.all(promises);
+            console.log(file1BlobSize.ok);
             console.log(file1Blob);
         }
         ;
-        if (journalPageData.file2ID) {
-            const file2Blob = await actor.readEntryFile(journalPageData.file2ID);
+        if (journalPageData.file2ID !== 'empty') {
+            const file2Blob = await actor.readEntryFileSize(journalPageData.file2ID);
             console.log(file2Blob);
         }
         ;
@@ -72333,10 +72351,15 @@ const JournalPage = (props) => {
         console.log(results);
     };
     const handleSubmit = (0, react_1.useCallback)(async () => {
-        await mapAndSendFileToApi("test11", file1);
+        if (journalPageData.file1ID !== 'empty') {
+            await mapAndSendFileToApi(journalPageData.file1ID, file1);
+        }
+        ;
+        if (journalPageData.file2ID !== 'empty') {
+            await mapAndSendFileToApi(journalPageData.file2ID, file2);
+        }
         await mapAndSendEntryToApi(index, journalPageData);
         setSubmissionsMade(submissionsMade + 1);
-        // await mapAndSendFileToApi("test2", file2);
     }, [journalPageData, file1, file2]);
     console.log(journalPageData);
     return (react_1.default.createElement("div", { className: "journalPageContainer" },
@@ -72349,8 +72372,8 @@ const JournalPage = (props) => {
             react_1.default.createElement(InputBox_1.default, { label: "Location: ", rows: "1", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_LOCATION, index: index, value: (journalPageData) ? journalPageData.location : '' }),
             react_1.default.createElement(InputBox_1.default, { divClassName: "entry", label: "Entry: ", rows: "59", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_ENTRY, index: index, value: (journalPageData) ? journalPageData.entry : '' })),
         react_1.default.createElement("div", { className: "journalImages" },
-            react_1.default.createElement(FileUpload_1.default, { label: 'file1', value: file1, setValue: setFile1, index: index }),
-            react_1.default.createElement(FileUpload_1.default, { label: 'file2', value: file2, setValue: setFile2, index: index })),
+            react_1.default.createElement(FileUpload_1.default, { label: 'file1', dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_FILE1_ID, value: file1, setValue: setFile1, index: index }),
+            react_1.default.createElement(FileUpload_1.default, { label: 'file2', dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_FILE1_ID, value: file2, setValue: setFile2, index: index })),
         react_1.default.createElement("div", { className: 'recipientEmailsDiv' },
             react_1.default.createElement(InputBox_1.default, { label: "1st Recipient Email: ", rows: "1", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_RECIPIENT_EMAIL_ONE, index: index, value: (journalPageData) ? journalPageData.emailOne : '' }),
             react_1.default.createElement(InputBox_1.default, { label: "2nd Recipient Email: ", rows: "1", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_RECIPIENT_EMAIL_TWO, index: index, value: (journalPageData) ? journalPageData.emailTwo : '' }),
@@ -73170,7 +73193,9 @@ const mapApiObjectToFrontEndObject = (backEndObj) => {
         emailOne: backEndObj.emailOne,
         emailTwo: backEndObj.emailTwo,
         emailThree: backEndObj.emailThree,
-        sent: backEndObj.sent
+        sent: backEndObj.sent,
+        file1ID: backEndObj.file1ID,
+        file2ID: backEndObj.file2ID
     };
 };
 exports.mapApiObjectToFrontEndObject = mapApiObjectToFrontEndObject;
@@ -76388,9 +76413,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 const idlFactory = ({ IDL }) => {
   const List = IDL.Rec();
-  const List_1 = IDL.Rec();
   const Trie = IDL.Rec();
-  const Trie_1 = IDL.Rec();
   const AccountIdentifier = IDL.Vec(IDL.Nat8);
   const Tokens = IDL.Record({ 'e8s' : IDL.Nat64 });
   const AmountAccepted = IDL.Record({ 'accepted' : IDL.Nat64 });
@@ -76403,7 +76426,7 @@ const idlFactory = ({ IDL }) => {
     'NoInputGiven' : IDL.Null,
     'InsufficientFunds' : IDL.Null,
   });
-  const Result_6 = IDL.Variant({ 'ok' : AmountAccepted, 'err' : Error });
+  const Result_7 = IDL.Variant({ 'ok' : AmountAccepted, 'err' : Error });
   const Result = IDL.Variant({ 'ok' : IDL.Null, 'err' : Error });
   const JournalEntry = IDL.Record({
     'unlockTime' : IDL.Int,
@@ -76419,30 +76442,16 @@ const idlFactory = ({ IDL }) => {
     'file1ID' : IDL.Text,
     'file2ID' : IDL.Text,
   });
-  const Result_5 = IDL.Variant({
+  const Result_6 = IDL.Variant({
     'ok' : IDL.Vec(
       IDL.Tuple(IDL.Text, IDL.Vec(IDL.Tuple(IDL.Nat, JournalEntry)))
     ),
     'err' : Error,
   });
   const EntryKey = IDL.Record({ 'entryKey' : IDL.Nat });
-  const Result_4 = IDL.Variant({ 'ok' : JournalEntry, 'err' : Error });
-  const Branch_1 = IDL.Record({
-    'left' : Trie_1,
-    'size' : IDL.Nat,
-    'right' : Trie_1,
-  });
-  const Hash = IDL.Nat32;
-  const Key = IDL.Record({ 'key' : IDL.Nat, 'hash' : Hash });
-  List_1.fill(IDL.Opt(IDL.Tuple(IDL.Tuple(Key, IDL.Vec(IDL.Nat8)), List_1)));
-  const AssocList_1 = IDL.Opt(
-    IDL.Tuple(IDL.Tuple(Key, IDL.Vec(IDL.Nat8)), List_1)
-  );
-  const Leaf_1 = IDL.Record({ 'size' : IDL.Nat, 'keyvals' : AssocList_1 });
-  Trie_1.fill(
-    IDL.Variant({ 'branch' : Branch_1, 'leaf' : Leaf_1, 'empty' : IDL.Null })
-  );
-  const Result_3 = IDL.Variant({ 'ok' : Trie_1, 'err' : Error });
+  const Result_5 = IDL.Variant({ 'ok' : JournalEntry, 'err' : Error });
+  const Result_4 = IDL.Variant({ 'ok' : IDL.Vec(IDL.Nat8), 'err' : Error });
+  const Result_3 = IDL.Variant({ 'ok' : IDL.Nat, 'err' : Error });
   const Bio = IDL.Record({
     'dob' : IDL.Text,
     'pob' : IDL.Text,
@@ -76480,6 +76489,8 @@ const idlFactory = ({ IDL }) => {
     'size' : IDL.Nat,
     'right' : Trie,
   });
+  const Hash = IDL.Nat32;
+  const Key = IDL.Record({ 'key' : IDL.Nat, 'hash' : Hash });
   List.fill(IDL.Opt(IDL.Tuple(IDL.Tuple(Key, JournalEntry), List)));
   const AssocList = IDL.Opt(IDL.Tuple(IDL.Tuple(Key, JournalEntry), List));
   const Leaf = IDL.Record({ 'size' : IDL.Nat, 'keyvals' : AssocList });
@@ -76494,16 +76505,17 @@ const idlFactory = ({ IDL }) => {
   const User = IDL.Service({
     'canisterAccount' : IDL.Func([], [AccountIdentifier], ['query']),
     'canisterBalance' : IDL.Func([], [Tokens], []),
-    'create' : IDL.Func([], [Result_6], []),
+    'create' : IDL.Func([], [Result_7], []),
     'createJournalEntryFile' : IDL.Func(
         [IDL.Text, IDL.Nat, IDL.Vec(IDL.Nat8)],
         [Result],
         [],
       ),
     'delete' : IDL.Func([], [Result], []),
-    'getEntriesToBeSent' : IDL.Func([], [Result_5], []),
-    'readEntry' : IDL.Func([EntryKey], [Result_4], []),
-    'readEntryFile' : IDL.Func([IDL.Text], [Result_3], []),
+    'getEntriesToBeSent' : IDL.Func([], [Result_6], []),
+    'readEntry' : IDL.Func([EntryKey], [Result_5], []),
+    'readEntryFileChunk' : IDL.Func([IDL.Text, IDL.Nat], [Result_4], []),
+    'readEntryFileSize' : IDL.Func([IDL.Text], [Result_3], []),
     'readJournal' : IDL.Func([], [Result_2], []),
     'transferICP' : IDL.Func([IDL.Nat64, AccountIdentifier], [Result], []),
     'updateBio' : IDL.Func([Bio], [Result], []),
@@ -76543,7 +76555,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 // CANISTER_ID is replaced by webpack based on node environment
-const canisterId = "qaa6y-5yaaa-aaaaa-aaafa-cai";
+const canisterId = "wflfh-4yaaa-aaaaa-aaata-cai";
 
 /**
  * 

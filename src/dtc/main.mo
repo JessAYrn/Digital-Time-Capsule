@@ -305,7 +305,7 @@ shared (msg) actor class User(){
 
     };
 
-    public shared(msg) func readEntryFile(fileId: Text) : async Result.Result<(Trie.Trie<Nat,Blob>),Error>{
+    public shared(msg) func readEntryFileChunk(fileId: Text, chunkId: Nat) : async Result.Result<(Blob),Error>{
         let callerId = msg.caller;
 
         let result = Trie.find(
@@ -320,8 +320,29 @@ shared (msg) actor class User(){
             };
             case ( ? existingProfile){
                 let userJournal = existingProfile.journal;
-                let entryFile = await userJournal.readJournalFile(fileId);
+                let entryFile = await userJournal.readJournalFileChunk(fileId, chunkId);
                 entryFile;
+            };
+        }
+    };
+
+    public shared(msg) func readEntryFileSize(fileId: Text) : async Result.Result<(Nat),Error>{
+        let callerId = msg.caller;
+
+        let result = Trie.find(
+            profiles,
+            key(callerId),
+            Principal.equal
+        );
+
+        switch(result){
+            case null{
+                #err(#NotFound);
+            };
+            case ( ? existingProfile){
+                let userJournal = existingProfile.journal;
+                let entryFileSize = await userJournal.readJournalFileSize(fileId);
+                entryFileSize;
             };
         }
     };

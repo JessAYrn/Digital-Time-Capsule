@@ -1,8 +1,6 @@
 export const idlFactory = ({ IDL }) => {
   const List = IDL.Rec();
-  const List_1 = IDL.Rec();
   const Trie = IDL.Rec();
-  const Trie_1 = IDL.Rec();
   const AccountIdentifier = IDL.Vec(IDL.Nat8);
   const Tokens = IDL.Record({ 'e8s' : IDL.Nat64 });
   const AmountAccepted = IDL.Record({ 'accepted' : IDL.Nat64 });
@@ -15,7 +13,7 @@ export const idlFactory = ({ IDL }) => {
     'NoInputGiven' : IDL.Null,
     'InsufficientFunds' : IDL.Null,
   });
-  const Result_6 = IDL.Variant({ 'ok' : AmountAccepted, 'err' : Error });
+  const Result_7 = IDL.Variant({ 'ok' : AmountAccepted, 'err' : Error });
   const Result = IDL.Variant({ 'ok' : IDL.Null, 'err' : Error });
   const JournalEntry = IDL.Record({
     'unlockTime' : IDL.Int,
@@ -31,30 +29,16 @@ export const idlFactory = ({ IDL }) => {
     'file1ID' : IDL.Text,
     'file2ID' : IDL.Text,
   });
-  const Result_5 = IDL.Variant({
+  const Result_6 = IDL.Variant({
     'ok' : IDL.Vec(
       IDL.Tuple(IDL.Text, IDL.Vec(IDL.Tuple(IDL.Nat, JournalEntry)))
     ),
     'err' : Error,
   });
   const EntryKey = IDL.Record({ 'entryKey' : IDL.Nat });
-  const Result_4 = IDL.Variant({ 'ok' : JournalEntry, 'err' : Error });
-  const Branch_1 = IDL.Record({
-    'left' : Trie_1,
-    'size' : IDL.Nat,
-    'right' : Trie_1,
-  });
-  const Hash = IDL.Nat32;
-  const Key = IDL.Record({ 'key' : IDL.Nat, 'hash' : Hash });
-  List_1.fill(IDL.Opt(IDL.Tuple(IDL.Tuple(Key, IDL.Vec(IDL.Nat8)), List_1)));
-  const AssocList_1 = IDL.Opt(
-    IDL.Tuple(IDL.Tuple(Key, IDL.Vec(IDL.Nat8)), List_1)
-  );
-  const Leaf_1 = IDL.Record({ 'size' : IDL.Nat, 'keyvals' : AssocList_1 });
-  Trie_1.fill(
-    IDL.Variant({ 'branch' : Branch_1, 'leaf' : Leaf_1, 'empty' : IDL.Null })
-  );
-  const Result_3 = IDL.Variant({ 'ok' : Trie_1, 'err' : Error });
+  const Result_5 = IDL.Variant({ 'ok' : JournalEntry, 'err' : Error });
+  const Result_4 = IDL.Variant({ 'ok' : IDL.Vec(IDL.Nat8), 'err' : Error });
+  const Result_3 = IDL.Variant({ 'ok' : IDL.Nat, 'err' : Error });
   const Bio = IDL.Record({
     'dob' : IDL.Text,
     'pob' : IDL.Text,
@@ -92,6 +76,8 @@ export const idlFactory = ({ IDL }) => {
     'size' : IDL.Nat,
     'right' : Trie,
   });
+  const Hash = IDL.Nat32;
+  const Key = IDL.Record({ 'key' : IDL.Nat, 'hash' : Hash });
   List.fill(IDL.Opt(IDL.Tuple(IDL.Tuple(Key, JournalEntry), List)));
   const AssocList = IDL.Opt(IDL.Tuple(IDL.Tuple(Key, JournalEntry), List));
   const Leaf = IDL.Record({ 'size' : IDL.Nat, 'keyvals' : AssocList });
@@ -106,16 +92,17 @@ export const idlFactory = ({ IDL }) => {
   const User = IDL.Service({
     'canisterAccount' : IDL.Func([], [AccountIdentifier], ['query']),
     'canisterBalance' : IDL.Func([], [Tokens], []),
-    'create' : IDL.Func([], [Result_6], []),
+    'create' : IDL.Func([], [Result_7], []),
     'createJournalEntryFile' : IDL.Func(
         [IDL.Text, IDL.Nat, IDL.Vec(IDL.Nat8)],
         [Result],
         [],
       ),
     'delete' : IDL.Func([], [Result], []),
-    'getEntriesToBeSent' : IDL.Func([], [Result_5], []),
-    'readEntry' : IDL.Func([EntryKey], [Result_4], []),
-    'readEntryFile' : IDL.Func([IDL.Text], [Result_3], []),
+    'getEntriesToBeSent' : IDL.Func([], [Result_6], []),
+    'readEntry' : IDL.Func([EntryKey], [Result_5], []),
+    'readEntryFileChunk' : IDL.Func([IDL.Text, IDL.Nat], [Result_4], []),
+    'readEntryFileSize' : IDL.Func([IDL.Text], [Result_3], []),
     'readJournal' : IDL.Func([], [Result_2], []),
     'transferICP' : IDL.Func([IDL.Nat64, AccountIdentifier], [Result], []),
     'updateBio' : IDL.Func([Bio], [Result], []),

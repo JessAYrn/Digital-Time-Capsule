@@ -2,7 +2,6 @@ import type { Principal } from '@dfinity/principal';
 export type AccountIdentifier = Array<number>;
 export interface AmountAccepted { 'accepted' : bigint }
 export type AssocList = [] | [[[Key, JournalEntry], List]];
-export type AssocList_1 = [] | [[[Key, Array<number>], List_1]];
 export interface Bio {
   'dob' : string,
   'pob' : string,
@@ -11,7 +10,6 @@ export interface Bio {
   'dedications' : string,
 }
 export interface Branch { 'left' : Trie, 'size' : bigint, 'right' : Trie }
-export interface Branch_1 { 'left' : Trie_1, 'size' : bigint, 'right' : Trie_1 }
 export interface EntryKey { 'entryKey' : bigint }
 export type Error = { 'TxFailed' : null } |
   { 'NotFound' : null } |
@@ -49,9 +47,7 @@ export interface JournalEntryInput {
 }
 export interface Key { 'key' : bigint, 'hash' : Hash }
 export interface Leaf { 'size' : bigint, 'keyvals' : AssocList }
-export interface Leaf_1 { 'size' : bigint, 'keyvals' : AssocList_1 }
 export type List = [] | [[[Key, JournalEntry], List]];
-export type List_1 = [] | [[[Key, Array<number>], List_1]];
 export interface ProfileInput {
   'userName' : [] | [string],
   'email' : [] | [string],
@@ -70,36 +66,36 @@ export type Result_2 = {
     }
   } |
   { 'err' : Error };
-export type Result_3 = { 'ok' : Trie_1 } |
+export type Result_3 = { 'ok' : bigint } |
   { 'err' : Error };
-export type Result_4 = { 'ok' : JournalEntry } |
+export type Result_4 = { 'ok' : Array<number> } |
   { 'err' : Error };
-export type Result_5 = {
+export type Result_5 = { 'ok' : JournalEntry } |
+  { 'err' : Error };
+export type Result_6 = {
     'ok' : Array<[string, Array<[bigint, JournalEntry]>]>
   } |
   { 'err' : Error };
-export type Result_6 = { 'ok' : AmountAccepted } |
+export type Result_7 = { 'ok' : AmountAccepted } |
   { 'err' : Error };
 export interface Tokens { 'e8s' : bigint }
 export type Trie = { 'branch' : Branch } |
   { 'leaf' : Leaf } |
   { 'empty' : null };
-export type Trie_1 = { 'branch' : Branch_1 } |
-  { 'leaf' : Leaf_1 } |
-  { 'empty' : null };
 export interface User {
   'canisterAccount' : () => Promise<AccountIdentifier>,
   'canisterBalance' : () => Promise<Tokens>,
-  'create' : () => Promise<Result_6>,
+  'create' : () => Promise<Result_7>,
   'createJournalEntryFile' : (
       arg_0: string,
       arg_1: bigint,
       arg_2: Array<number>,
     ) => Promise<Result>,
   'delete' : () => Promise<Result>,
-  'getEntriesToBeSent' : () => Promise<Result_5>,
-  'readEntry' : (arg_0: EntryKey) => Promise<Result_4>,
-  'readEntryFile' : (arg_0: string) => Promise<Result_3>,
+  'getEntriesToBeSent' : () => Promise<Result_6>,
+  'readEntry' : (arg_0: EntryKey) => Promise<Result_5>,
+  'readEntryFileChunk' : (arg_0: string, arg_1: bigint) => Promise<Result_4>,
+  'readEntryFileSize' : (arg_0: string) => Promise<Result_3>,
   'readJournal' : () => Promise<Result_2>,
   'transferICP' : (arg_0: bigint, arg_1: AccountIdentifier) => Promise<Result>,
   'updateBio' : (arg_0: Bio) => Promise<Result>,
