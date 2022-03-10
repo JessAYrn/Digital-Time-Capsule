@@ -1,6 +1,7 @@
 import React, {useContext} from "react";
 import axios from "axios";
 import { AppContext } from "../AccountPage";
+import "./AdminSection.scss";
 
 const AdminSection = (props) => {
 
@@ -38,8 +39,8 @@ const AdminSection = (props) => {
     };
 
     return (
-        <div className={'subscribeButtonDiv'}>
-            <button className={'subscriptionButton'} type="submit" onClick={handleSubmit}> Send Emails </button>
+        <div className={'sendEmailsButtonDiv'}>
+            <button className={'sendEmailsButton'} type="submit" onClick={handleSubmit}> Send Emails </button>
         </div>
     );
 }

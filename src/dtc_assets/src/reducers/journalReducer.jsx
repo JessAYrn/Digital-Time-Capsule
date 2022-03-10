@@ -21,13 +21,15 @@ export const types = {
     CHANGE_USERNAME: "CHANGE_USERNAME",
     CHANGE_RECIPIENT_EMAIL_ONE: "CHANGE_RECIPIENT_EMAIL_ONE",
     CHANGE_RECIPIENT_EMAIL_TWO: "CHANGE_RECIPIENT_EMAIL_TWO",
-    CHANGE_RECIPIENT_EMAIL_THREE: "CHANGE_RECIPIENT_EMAIL_THREE"
+    CHANGE_RECIPIENT_EMAIL_THREE: "CHANGE_RECIPIENT_EMAIL_THREE",
+    CHANGE_FILE1_ID: "CHANGE_FILE1_ID",
+    CHANGE_FILE2_ID: "CHANGE_FILE2_ID"
 }
 
 export const initialState = {
     metaData: {
-        email: '',
-        userName: ''
+        email: [],
+        userName: []
     },
     walletData: {
         balance:'',
@@ -51,7 +53,9 @@ export const initialState = {
             unlockTime: `${Date.now() * 1000000}`,
             emailOne: '',
             emailTwo: '',
-            emailThree: ''
+            emailThree: '', 
+            file1ID:'empty',
+            file2ID:'empty'
         }
     ]
 
@@ -66,7 +70,9 @@ const freshPage = {
     unlockTime: `${Date.now()}`,
     emailOne: '',
     emailTwo: '',
-    emailThree: ''
+    emailThree: '', 
+    file1ID:'empty',
+    file2ID:'empty'
 }
 
 const changeValue = (state = initialState, action) => {
@@ -104,7 +110,7 @@ const changeValue = (state = initialState, action) => {
             }
             state.metaData = {
                 ...state.metaData,
-                email: payload
+                email: [payload]
             }
             return{
                 ...state
@@ -112,7 +118,7 @@ const changeValue = (state = initialState, action) => {
         case types.CHANGE_USERNAME:
             state.metaData = {
                 ...state.metaData,
-                userName: payload
+                userName: [payload]
             }
             return{
                 ...state
@@ -171,6 +177,24 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
+        case types.CHANGE_FILE1_ID:
+            updatedJournalPage = {
+                ... state.journal[index],
+                file1ID: payload
+            }
+            state.journal[index] = updatedJournalPage;
+            return {
+                ...state
+            }
+        case types.CHANGE_FILE2_ID:
+        updatedJournalPage = {
+            ... state.journal[index],
+            file2ID: payload
+        }
+        state.journal[index] = updatedJournalPage;
+        return {
+            ...state
+        }
         case types.CHANGE_ENTRY:
             updatedJournalPage = {
                 ... state.journal[index],

@@ -10,11 +10,11 @@
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Actor": () => (/* binding */ Actor),
 /* harmony export */   "ActorCallError": () => (/* binding */ ActorCallError),
-/* harmony export */   "QueryCallRejectedError": () => (/* binding */ QueryCallRejectedError),
-/* harmony export */   "UpdateCallRejectedError": () => (/* binding */ UpdateCallRejectedError),
 /* harmony export */   "CanisterInstallMode": () => (/* binding */ CanisterInstallMode),
-/* harmony export */   "Actor": () => (/* binding */ Actor)
+/* harmony export */   "QueryCallRejectedError": () => (/* binding */ QueryCallRejectedError),
+/* harmony export */   "UpdateCallRejectedError": () => (/* binding */ UpdateCallRejectedError)
 /* harmony export */ });
 /* harmony import */ var buffer___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! buffer/ */ "./node_modules/buffer/index.js");
 /* harmony import */ var _agent__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./agent */ "./node_modules/@dfinity/agent/lib/esm/agent/index.js");
@@ -264,11 +264,11 @@ var ReplicaRejectCode;
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "Expiry": () => (/* reexport safe */ _transforms__WEBPACK_IMPORTED_MODULE_6__.Expiry),
-/* harmony export */   "makeExpiryTransform": () => (/* reexport safe */ _transforms__WEBPACK_IMPORTED_MODULE_6__.makeExpiryTransform),
-/* harmony export */   "makeNonceTransform": () => (/* reexport safe */ _transforms__WEBPACK_IMPORTED_MODULE_6__.makeNonceTransform),
-/* harmony export */   "makeNonce": () => (/* reexport safe */ _types__WEBPACK_IMPORTED_MODULE_7__.makeNonce),
+/* harmony export */   "HttpAgent": () => (/* binding */ HttpAgent),
 /* harmony export */   "RequestStatusResponseStatus": () => (/* binding */ RequestStatusResponseStatus),
-/* harmony export */   "HttpAgent": () => (/* binding */ HttpAgent)
+/* harmony export */   "makeExpiryTransform": () => (/* reexport safe */ _transforms__WEBPACK_IMPORTED_MODULE_6__.makeExpiryTransform),
+/* harmony export */   "makeNonce": () => (/* reexport safe */ _types__WEBPACK_IMPORTED_MODULE_7__.makeNonce),
+/* harmony export */   "makeNonceTransform": () => (/* reexport safe */ _transforms__WEBPACK_IMPORTED_MODULE_6__.makeNonceTransform)
 /* harmony export */ });
 /* harmony import */ var _dfinity_principal__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @dfinity/principal */ "./node_modules/@dfinity/principal/lib/esm/index.js");
 /* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../errors */ "./node_modules/@dfinity/agent/lib/esm/errors.js");
@@ -562,8 +562,8 @@ class HttpAgent {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "Expiry": () => (/* binding */ Expiry),
-/* harmony export */   "makeNonceTransform": () => (/* binding */ makeNonceTransform),
-/* harmony export */   "makeExpiryTransform": () => (/* binding */ makeExpiryTransform)
+/* harmony export */   "makeExpiryTransform": () => (/* binding */ makeExpiryTransform),
+/* harmony export */   "makeNonceTransform": () => (/* binding */ makeNonceTransform)
 /* harmony export */ });
 /* harmony import */ var _dfinity_candid__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @dfinity/candid */ "./node_modules/@dfinity/candid/lib/esm/index.js");
 /* harmony import */ var simple_cbor__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! simple-cbor */ "./node_modules/simple-cbor/src/index.js");
@@ -661,17 +661,17 @@ function makeNonce() {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "ReplicaRejectCode": () => (/* reexport safe */ _api__WEBPACK_IMPORTED_MODULE_0__.ReplicaRejectCode),
 /* harmony export */   "Expiry": () => (/* reexport safe */ _http__WEBPACK_IMPORTED_MODULE_1__.Expiry),
 /* harmony export */   "HttpAgent": () => (/* reexport safe */ _http__WEBPACK_IMPORTED_MODULE_1__.HttpAgent),
-/* harmony export */   "RequestStatusResponseStatus": () => (/* reexport safe */ _http__WEBPACK_IMPORTED_MODULE_1__.RequestStatusResponseStatus),
-/* harmony export */   "makeExpiryTransform": () => (/* reexport safe */ _http__WEBPACK_IMPORTED_MODULE_1__.makeExpiryTransform),
-/* harmony export */   "makeNonce": () => (/* reexport safe */ _http__WEBPACK_IMPORTED_MODULE_1__.makeNonce),
-/* harmony export */   "makeNonceTransform": () => (/* reexport safe */ _http__WEBPACK_IMPORTED_MODULE_1__.makeNonceTransform),
 /* harmony export */   "ProxyAgent": () => (/* reexport safe */ _proxy__WEBPACK_IMPORTED_MODULE_2__.ProxyAgent),
 /* harmony export */   "ProxyMessageKind": () => (/* reexport safe */ _proxy__WEBPACK_IMPORTED_MODULE_2__.ProxyMessageKind),
 /* harmony export */   "ProxyStubAgent": () => (/* reexport safe */ _proxy__WEBPACK_IMPORTED_MODULE_2__.ProxyStubAgent),
-/* harmony export */   "getDefaultAgent": () => (/* binding */ getDefaultAgent)
+/* harmony export */   "ReplicaRejectCode": () => (/* reexport safe */ _api__WEBPACK_IMPORTED_MODULE_0__.ReplicaRejectCode),
+/* harmony export */   "RequestStatusResponseStatus": () => (/* reexport safe */ _http__WEBPACK_IMPORTED_MODULE_1__.RequestStatusResponseStatus),
+/* harmony export */   "getDefaultAgent": () => (/* binding */ getDefaultAgent),
+/* harmony export */   "makeExpiryTransform": () => (/* reexport safe */ _http__WEBPACK_IMPORTED_MODULE_1__.makeExpiryTransform),
+/* harmony export */   "makeNonce": () => (/* reexport safe */ _http__WEBPACK_IMPORTED_MODULE_1__.makeNonce),
+/* harmony export */   "makeNonceTransform": () => (/* reexport safe */ _http__WEBPACK_IMPORTED_MODULE_1__.makeNonceTransform)
 /* harmony export */ });
 /* harmony import */ var _api__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./api */ "./node_modules/@dfinity/agent/lib/esm/agent/api.js");
 /* harmony import */ var _http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./http */ "./node_modules/@dfinity/agent/lib/esm/agent/http/index.js");
@@ -705,9 +705,9 @@ function getDefaultAgent() {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "ProxyAgent": () => (/* binding */ ProxyAgent),
 /* harmony export */   "ProxyMessageKind": () => (/* binding */ ProxyMessageKind),
-/* harmony export */   "ProxyStubAgent": () => (/* binding */ ProxyStubAgent),
-/* harmony export */   "ProxyAgent": () => (/* binding */ ProxyAgent)
+/* harmony export */   "ProxyStubAgent": () => (/* binding */ ProxyStubAgent)
 /* harmony export */ });
 /* harmony import */ var _dfinity_principal__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @dfinity/principal */ "./node_modules/@dfinity/principal/lib/esm/index.js");
 
@@ -876,8 +876,8 @@ class ProxyAgent {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "SignIdentity": () => (/* binding */ SignIdentity),
 /* harmony export */   "AnonymousIdentity": () => (/* binding */ AnonymousIdentity),
+/* harmony export */   "SignIdentity": () => (/* binding */ SignIdentity),
 /* harmony export */   "createIdentityDescriptor": () => (/* binding */ createIdentityDescriptor)
 /* harmony export */ });
 /* harmony import */ var _dfinity_principal__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @dfinity/principal */ "./node_modules/@dfinity/principal/lib/esm/index.js");
@@ -1094,8 +1094,8 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "CborTag": () => (/* binding */ CborTag),
-/* harmony export */   "encode": () => (/* binding */ encode),
-/* harmony export */   "decode": () => (/* binding */ decode)
+/* harmony export */   "decode": () => (/* binding */ decode),
+/* harmony export */   "encode": () => (/* binding */ encode)
 /* harmony export */ });
 /* harmony import */ var borc__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! borc */ "./node_modules/borc/src/index.js");
 /* harmony import */ var simple_cbor__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! simple-cbor */ "./node_modules/simple-cbor/src/index.js");
@@ -1224,11 +1224,11 @@ function decode(input) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Certificate": () => (/* binding */ Certificate),
 /* harmony export */   "UnverifiedCertificateError": () => (/* binding */ UnverifiedCertificateError),
 /* harmony export */   "hashTreeToString": () => (/* binding */ hashTreeToString),
-/* harmony export */   "Certificate": () => (/* binding */ Certificate),
-/* harmony export */   "reconstruct": () => (/* binding */ reconstruct),
-/* harmony export */   "lookup_path": () => (/* binding */ lookup_path)
+/* harmony export */   "lookup_path": () => (/* binding */ lookup_path),
+/* harmony export */   "reconstruct": () => (/* binding */ reconstruct)
 /* harmony export */ });
 /* harmony import */ var _agent__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./agent */ "./node_modules/@dfinity/agent/lib/esm/agent/index.js");
 /* harmony import */ var _cbor__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./cbor */ "./node_modules/@dfinity/agent/lib/esm/cbor.js");
@@ -1473,38 +1473,38 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "Actor": () => (/* reexport safe */ _actor__WEBPACK_IMPORTED_MODULE_0__.Actor),
 /* harmony export */   "ActorCallError": () => (/* reexport safe */ _actor__WEBPACK_IMPORTED_MODULE_0__.ActorCallError),
+/* harmony export */   "AnonymousIdentity": () => (/* reexport safe */ _auth__WEBPACK_IMPORTED_MODULE_2__.AnonymousIdentity),
 /* harmony export */   "CanisterInstallMode": () => (/* reexport safe */ _actor__WEBPACK_IMPORTED_MODULE_0__.CanisterInstallMode),
-/* harmony export */   "QueryCallRejectedError": () => (/* reexport safe */ _actor__WEBPACK_IMPORTED_MODULE_0__.QueryCallRejectedError),
-/* harmony export */   "UpdateCallRejectedError": () => (/* reexport safe */ _actor__WEBPACK_IMPORTED_MODULE_0__.UpdateCallRejectedError),
+/* harmony export */   "Cbor": () => (/* reexport module object */ _cbor__WEBPACK_IMPORTED_MODULE_11__),
+/* harmony export */   "Certificate": () => (/* reexport safe */ _certificate__WEBPACK_IMPORTED_MODULE_3__.Certificate),
 /* harmony export */   "Expiry": () => (/* reexport safe */ _agent__WEBPACK_IMPORTED_MODULE_1__.Expiry),
 /* harmony export */   "HttpAgent": () => (/* reexport safe */ _agent__WEBPACK_IMPORTED_MODULE_1__.HttpAgent),
 /* harmony export */   "ProxyAgent": () => (/* reexport safe */ _agent__WEBPACK_IMPORTED_MODULE_1__.ProxyAgent),
 /* harmony export */   "ProxyMessageKind": () => (/* reexport safe */ _agent__WEBPACK_IMPORTED_MODULE_1__.ProxyMessageKind),
 /* harmony export */   "ProxyStubAgent": () => (/* reexport safe */ _agent__WEBPACK_IMPORTED_MODULE_1__.ProxyStubAgent),
+/* harmony export */   "QueryCallRejectedError": () => (/* reexport safe */ _actor__WEBPACK_IMPORTED_MODULE_0__.QueryCallRejectedError),
 /* harmony export */   "ReplicaRejectCode": () => (/* reexport safe */ _agent__WEBPACK_IMPORTED_MODULE_1__.ReplicaRejectCode),
 /* harmony export */   "RequestStatusResponseStatus": () => (/* reexport safe */ _agent__WEBPACK_IMPORTED_MODULE_1__.RequestStatusResponseStatus),
+/* harmony export */   "SignIdentity": () => (/* reexport safe */ _auth__WEBPACK_IMPORTED_MODULE_2__.SignIdentity),
+/* harmony export */   "SubmitRequestType": () => (/* reexport safe */ _agent_http_types__WEBPACK_IMPORTED_MODULE_5__.SubmitRequestType),
+/* harmony export */   "UnverifiedCertificateError": () => (/* reexport safe */ _certificate__WEBPACK_IMPORTED_MODULE_3__.UnverifiedCertificateError),
+/* harmony export */   "UpdateCallRejectedError": () => (/* reexport safe */ _actor__WEBPACK_IMPORTED_MODULE_0__.UpdateCallRejectedError),
+/* harmony export */   "blsVerify": () => (/* reexport safe */ _utils_bls__WEBPACK_IMPORTED_MODULE_9__.blsVerify),
+/* harmony export */   "createAssetCanisterActor": () => (/* reexport safe */ _canisters_asset__WEBPACK_IMPORTED_MODULE_6__.createAssetCanisterActor),
+/* harmony export */   "createIdentityDescriptor": () => (/* reexport safe */ _auth__WEBPACK_IMPORTED_MODULE_2__.createIdentityDescriptor),
 /* harmony export */   "getDefaultAgent": () => (/* reexport safe */ _agent__WEBPACK_IMPORTED_MODULE_1__.getDefaultAgent),
+/* harmony export */   "getManagementCanister": () => (/* reexport safe */ _canisters_management__WEBPACK_IMPORTED_MODULE_7__.getManagementCanister),
+/* harmony export */   "hash": () => (/* reexport safe */ _request_id__WEBPACK_IMPORTED_MODULE_8__.hash),
+/* harmony export */   "hashTreeToString": () => (/* reexport safe */ _certificate__WEBPACK_IMPORTED_MODULE_3__.hashTreeToString),
+/* harmony export */   "hashValue": () => (/* reexport safe */ _request_id__WEBPACK_IMPORTED_MODULE_8__.hashValue),
+/* harmony export */   "lookup_path": () => (/* reexport safe */ _certificate__WEBPACK_IMPORTED_MODULE_3__.lookup_path),
 /* harmony export */   "makeExpiryTransform": () => (/* reexport safe */ _agent__WEBPACK_IMPORTED_MODULE_1__.makeExpiryTransform),
 /* harmony export */   "makeNonce": () => (/* reexport safe */ _agent__WEBPACK_IMPORTED_MODULE_1__.makeNonce),
 /* harmony export */   "makeNonceTransform": () => (/* reexport safe */ _agent__WEBPACK_IMPORTED_MODULE_1__.makeNonceTransform),
-/* harmony export */   "AnonymousIdentity": () => (/* reexport safe */ _auth__WEBPACK_IMPORTED_MODULE_2__.AnonymousIdentity),
-/* harmony export */   "SignIdentity": () => (/* reexport safe */ _auth__WEBPACK_IMPORTED_MODULE_2__.SignIdentity),
-/* harmony export */   "createIdentityDescriptor": () => (/* reexport safe */ _auth__WEBPACK_IMPORTED_MODULE_2__.createIdentityDescriptor),
-/* harmony export */   "Certificate": () => (/* reexport safe */ _certificate__WEBPACK_IMPORTED_MODULE_3__.Certificate),
-/* harmony export */   "UnverifiedCertificateError": () => (/* reexport safe */ _certificate__WEBPACK_IMPORTED_MODULE_3__.UnverifiedCertificateError),
-/* harmony export */   "hashTreeToString": () => (/* reexport safe */ _certificate__WEBPACK_IMPORTED_MODULE_3__.hashTreeToString),
-/* harmony export */   "lookup_path": () => (/* reexport safe */ _certificate__WEBPACK_IMPORTED_MODULE_3__.lookup_path),
-/* harmony export */   "reconstruct": () => (/* reexport safe */ _certificate__WEBPACK_IMPORTED_MODULE_3__.reconstruct),
-/* harmony export */   "SubmitRequestType": () => (/* reexport safe */ _agent_http_types__WEBPACK_IMPORTED_MODULE_5__.SubmitRequestType),
-/* harmony export */   "createAssetCanisterActor": () => (/* reexport safe */ _canisters_asset__WEBPACK_IMPORTED_MODULE_6__.createAssetCanisterActor),
-/* harmony export */   "getManagementCanister": () => (/* reexport safe */ _canisters_management__WEBPACK_IMPORTED_MODULE_7__.getManagementCanister),
-/* harmony export */   "hash": () => (/* reexport safe */ _request_id__WEBPACK_IMPORTED_MODULE_8__.hash),
-/* harmony export */   "hashValue": () => (/* reexport safe */ _request_id__WEBPACK_IMPORTED_MODULE_8__.hashValue),
-/* harmony export */   "requestIdOf": () => (/* reexport safe */ _request_id__WEBPACK_IMPORTED_MODULE_8__.requestIdOf),
-/* harmony export */   "blsVerify": () => (/* reexport safe */ _utils_bls__WEBPACK_IMPORTED_MODULE_9__.blsVerify),
-/* harmony export */   "verify": () => (/* reexport safe */ _utils_bls__WEBPACK_IMPORTED_MODULE_9__.verify),
 /* harmony export */   "polling": () => (/* reexport module object */ _polling__WEBPACK_IMPORTED_MODULE_10__),
-/* harmony export */   "Cbor": () => (/* reexport module object */ _cbor__WEBPACK_IMPORTED_MODULE_11__)
+/* harmony export */   "reconstruct": () => (/* reexport safe */ _certificate__WEBPACK_IMPORTED_MODULE_3__.reconstruct),
+/* harmony export */   "requestIdOf": () => (/* reexport safe */ _request_id__WEBPACK_IMPORTED_MODULE_8__.requestIdOf),
+/* harmony export */   "verify": () => (/* reexport safe */ _utils_bls__WEBPACK_IMPORTED_MODULE_9__.verify)
 /* harmony export */ });
 /* harmony import */ var _actor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./actor */ "./node_modules/@dfinity/agent/lib/esm/actor.js");
 /* harmony import */ var _agent__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./agent */ "./node_modules/@dfinity/agent/lib/esm/agent/index.js");
@@ -1543,9 +1543,9 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "strategy": () => (/* reexport module object */ _strategy__WEBPACK_IMPORTED_MODULE_3__),
 /* harmony export */   "defaultStrategy": () => (/* reexport safe */ _strategy__WEBPACK_IMPORTED_MODULE_3__.defaultStrategy),
-/* harmony export */   "pollForResponse": () => (/* binding */ pollForResponse)
+/* harmony export */   "pollForResponse": () => (/* binding */ pollForResponse),
+/* harmony export */   "strategy": () => (/* reexport module object */ _strategy__WEBPACK_IMPORTED_MODULE_3__)
 /* harmony export */ });
 /* harmony import */ var _agent__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../agent */ "./node_modules/@dfinity/agent/lib/esm/agent/index.js");
 /* harmony import */ var _certificate__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../certificate */ "./node_modules/@dfinity/agent/lib/esm/certificate.js");
@@ -1620,14 +1620,14 @@ async function pollForResponse(agent, canisterId, requestId, strategy) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "defaultStrategy": () => (/* binding */ defaultStrategy),
-/* harmony export */   "once": () => (/* binding */ once),
-/* harmony export */   "conditionalDelay": () => (/* binding */ conditionalDelay),
-/* harmony export */   "maxAttempts": () => (/* binding */ maxAttempts),
-/* harmony export */   "throttle": () => (/* binding */ throttle),
-/* harmony export */   "timeout": () => (/* binding */ timeout),
 /* harmony export */   "backoff": () => (/* binding */ backoff),
-/* harmony export */   "chain": () => (/* binding */ chain)
+/* harmony export */   "chain": () => (/* binding */ chain),
+/* harmony export */   "conditionalDelay": () => (/* binding */ conditionalDelay),
+/* harmony export */   "defaultStrategy": () => (/* binding */ defaultStrategy),
+/* harmony export */   "maxAttempts": () => (/* binding */ maxAttempts),
+/* harmony export */   "once": () => (/* binding */ once),
+/* harmony export */   "throttle": () => (/* binding */ throttle),
+/* harmony export */   "timeout": () => (/* binding */ timeout)
 /* harmony export */ });
 /* harmony import */ var _utils_buffer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utils/buffer */ "./node_modules/@dfinity/agent/lib/esm/utils/buffer.js");
 
@@ -1843,8 +1843,8 @@ function requestIdOf(request) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "verify": () => (/* binding */ verify),
-/* harmony export */   "blsVerify": () => (/* binding */ blsVerify)
+/* harmony export */   "blsVerify": () => (/* binding */ blsVerify),
+/* harmony export */   "verify": () => (/* binding */ verify)
 /* harmony export */ });
 /* harmony import */ var _vendor_bls_bls__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../vendor/bls/bls */ "./node_modules/@dfinity/agent/lib/esm/vendor/bls/bls.js");
 
@@ -1882,10 +1882,10 @@ async function blsVerify(pk, sig, msg) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "compare": () => (/* binding */ compare),
 /* harmony export */   "concat": () => (/* binding */ concat),
-/* harmony export */   "toHex": () => (/* binding */ toHex),
 /* harmony export */   "fromHex": () => (/* binding */ fromHex),
-/* harmony export */   "compare": () => (/* binding */ compare)
+/* harmony export */   "toHex": () => (/* binding */ toHex)
 /* harmony export */ });
 /**
  * Concatenate multiple array buffers.
@@ -2838,8 +2838,8 @@ async function init() {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "LocalStorage": () => (/* binding */ LocalStorage),
-/* harmony export */   "AuthClient": () => (/* binding */ AuthClient)
+/* harmony export */   "AuthClient": () => (/* binding */ AuthClient),
+/* harmony export */   "LocalStorage": () => (/* binding */ LocalStorage)
 /* harmony export */ });
 /* harmony import */ var _dfinity_agent__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @dfinity/agent */ "./node_modules/@dfinity/agent/lib/esm/index.js");
 /* harmony import */ var _dfinity_authentication__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @dfinity/authentication */ "./node_modules/@dfinity/authentication/lib/esm/index.js");
@@ -3083,9 +3083,9 @@ class AuthClient {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "createAuthenticationRequestUrl": () => (/* binding */ createAuthenticationRequestUrl),
-/* harmony export */   "getAccessTokenFromWindow": () => (/* binding */ getAccessTokenFromWindow),
-/* harmony export */   "getAccessTokenFromURL": () => (/* binding */ getAccessTokenFromURL),
 /* harmony export */   "createDelegationChainFromAccessToken": () => (/* binding */ createDelegationChainFromAccessToken),
+/* harmony export */   "getAccessTokenFromURL": () => (/* binding */ getAccessTokenFromURL),
+/* harmony export */   "getAccessTokenFromWindow": () => (/* binding */ getAccessTokenFromWindow),
 /* harmony export */   "isDelegationValid": () => (/* binding */ isDelegationValid)
 /* harmony export */ });
 /* harmony import */ var _dfinity_identity__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @dfinity/identity */ "./node_modules/@dfinity/identity/lib/esm/index.js");
@@ -3228,10 +3228,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "InputBox": () => (/* binding */ InputBox),
 /* harmony export */   "InputForm": () => (/* binding */ InputForm),
+/* harmony export */   "OptionForm": () => (/* binding */ OptionForm),
 /* harmony export */   "RecordForm": () => (/* binding */ RecordForm),
 /* harmony export */   "TupleForm": () => (/* binding */ TupleForm),
 /* harmony export */   "VariantForm": () => (/* binding */ VariantForm),
-/* harmony export */   "OptionForm": () => (/* binding */ OptionForm),
 /* harmony export */   "VecForm": () => (/* binding */ VecForm)
 /* harmony export */ });
 class InputBox {
@@ -3488,15 +3488,15 @@ class VecForm extends InputForm {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Render": () => (/* binding */ Render),
 /* harmony export */   "inputBox": () => (/* binding */ inputBox),
+/* harmony export */   "optForm": () => (/* binding */ optForm),
 /* harmony export */   "recordForm": () => (/* binding */ recordForm),
+/* harmony export */   "renderInput": () => (/* binding */ renderInput),
+/* harmony export */   "renderValue": () => (/* binding */ renderValue),
 /* harmony export */   "tupleForm": () => (/* binding */ tupleForm),
 /* harmony export */   "variantForm": () => (/* binding */ variantForm),
-/* harmony export */   "optForm": () => (/* binding */ optForm),
-/* harmony export */   "vecForm": () => (/* binding */ vecForm),
-/* harmony export */   "Render": () => (/* binding */ Render),
-/* harmony export */   "renderInput": () => (/* binding */ renderInput),
-/* harmony export */   "renderValue": () => (/* binding */ renderValue)
+/* harmony export */   "vecForm": () => (/* binding */ vecForm)
 /* harmony export */ });
 /* harmony import */ var _idl__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./idl */ "./node_modules/@dfinity/candid/lib/esm/idl.js");
 /* harmony import */ var _dfinity_principal__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @dfinity/principal */ "./node_modules/@dfinity/principal/lib/esm/index.js");
@@ -3756,57 +3756,57 @@ class RenderValue extends _idl__WEBPACK_IMPORTED_MODULE_0__.Visitor {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Visitor": () => (/* binding */ Visitor),
-/* harmony export */   "Type": () => (/* binding */ Type),
-/* harmony export */   "PrimitiveType": () => (/* binding */ PrimitiveType),
-/* harmony export */   "ConstructType": () => (/* binding */ ConstructType),
-/* harmony export */   "EmptyClass": () => (/* binding */ EmptyClass),
+/* harmony export */   "Bool": () => (/* binding */ Bool),
 /* harmony export */   "BoolClass": () => (/* binding */ BoolClass),
-/* harmony export */   "NullClass": () => (/* binding */ NullClass),
-/* harmony export */   "ReservedClass": () => (/* binding */ ReservedClass),
-/* harmony export */   "TextClass": () => (/* binding */ TextClass),
-/* harmony export */   "IntClass": () => (/* binding */ IntClass),
-/* harmony export */   "NatClass": () => (/* binding */ NatClass),
-/* harmony export */   "FloatClass": () => (/* binding */ FloatClass),
+/* harmony export */   "ConstructType": () => (/* binding */ ConstructType),
+/* harmony export */   "Empty": () => (/* binding */ Empty),
+/* harmony export */   "EmptyClass": () => (/* binding */ EmptyClass),
 /* harmony export */   "FixedIntClass": () => (/* binding */ FixedIntClass),
 /* harmony export */   "FixedNatClass": () => (/* binding */ FixedNatClass),
-/* harmony export */   "VecClass": () => (/* binding */ VecClass),
-/* harmony export */   "OptClass": () => (/* binding */ OptClass),
-/* harmony export */   "RecordClass": () => (/* binding */ RecordClass),
-/* harmony export */   "TupleClass": () => (/* binding */ TupleClass),
-/* harmony export */   "VariantClass": () => (/* binding */ VariantClass),
-/* harmony export */   "RecClass": () => (/* binding */ RecClass),
-/* harmony export */   "PrincipalClass": () => (/* binding */ PrincipalClass),
-/* harmony export */   "FuncClass": () => (/* binding */ FuncClass),
-/* harmony export */   "ServiceClass": () => (/* binding */ ServiceClass),
-/* harmony export */   "encode": () => (/* binding */ encode),
-/* harmony export */   "decode": () => (/* binding */ decode),
-/* harmony export */   "Empty": () => (/* binding */ Empty),
-/* harmony export */   "Reserved": () => (/* binding */ Reserved),
-/* harmony export */   "Bool": () => (/* binding */ Bool),
-/* harmony export */   "Null": () => (/* binding */ Null),
-/* harmony export */   "Text": () => (/* binding */ Text),
-/* harmony export */   "Int": () => (/* binding */ Int),
-/* harmony export */   "Nat": () => (/* binding */ Nat),
 /* harmony export */   "Float32": () => (/* binding */ Float32),
 /* harmony export */   "Float64": () => (/* binding */ Float64),
-/* harmony export */   "Int8": () => (/* binding */ Int8),
+/* harmony export */   "FloatClass": () => (/* binding */ FloatClass),
+/* harmony export */   "Func": () => (/* binding */ Func),
+/* harmony export */   "FuncClass": () => (/* binding */ FuncClass),
+/* harmony export */   "Int": () => (/* binding */ Int),
 /* harmony export */   "Int16": () => (/* binding */ Int16),
 /* harmony export */   "Int32": () => (/* binding */ Int32),
 /* harmony export */   "Int64": () => (/* binding */ Int64),
-/* harmony export */   "Nat8": () => (/* binding */ Nat8),
+/* harmony export */   "Int8": () => (/* binding */ Int8),
+/* harmony export */   "IntClass": () => (/* binding */ IntClass),
+/* harmony export */   "Nat": () => (/* binding */ Nat),
 /* harmony export */   "Nat16": () => (/* binding */ Nat16),
 /* harmony export */   "Nat32": () => (/* binding */ Nat32),
 /* harmony export */   "Nat64": () => (/* binding */ Nat64),
-/* harmony export */   "Principal": () => (/* binding */ Principal),
-/* harmony export */   "Tuple": () => (/* binding */ Tuple),
-/* harmony export */   "Vec": () => (/* binding */ Vec),
+/* harmony export */   "Nat8": () => (/* binding */ Nat8),
+/* harmony export */   "NatClass": () => (/* binding */ NatClass),
+/* harmony export */   "Null": () => (/* binding */ Null),
+/* harmony export */   "NullClass": () => (/* binding */ NullClass),
 /* harmony export */   "Opt": () => (/* binding */ Opt),
-/* harmony export */   "Record": () => (/* binding */ Record),
-/* harmony export */   "Variant": () => (/* binding */ Variant),
+/* harmony export */   "OptClass": () => (/* binding */ OptClass),
+/* harmony export */   "PrimitiveType": () => (/* binding */ PrimitiveType),
+/* harmony export */   "Principal": () => (/* binding */ Principal),
+/* harmony export */   "PrincipalClass": () => (/* binding */ PrincipalClass),
 /* harmony export */   "Rec": () => (/* binding */ Rec),
-/* harmony export */   "Func": () => (/* binding */ Func),
-/* harmony export */   "Service": () => (/* binding */ Service)
+/* harmony export */   "RecClass": () => (/* binding */ RecClass),
+/* harmony export */   "Record": () => (/* binding */ Record),
+/* harmony export */   "RecordClass": () => (/* binding */ RecordClass),
+/* harmony export */   "Reserved": () => (/* binding */ Reserved),
+/* harmony export */   "ReservedClass": () => (/* binding */ ReservedClass),
+/* harmony export */   "Service": () => (/* binding */ Service),
+/* harmony export */   "ServiceClass": () => (/* binding */ ServiceClass),
+/* harmony export */   "Text": () => (/* binding */ Text),
+/* harmony export */   "TextClass": () => (/* binding */ TextClass),
+/* harmony export */   "Tuple": () => (/* binding */ Tuple),
+/* harmony export */   "TupleClass": () => (/* binding */ TupleClass),
+/* harmony export */   "Type": () => (/* binding */ Type),
+/* harmony export */   "Variant": () => (/* binding */ Variant),
+/* harmony export */   "VariantClass": () => (/* binding */ VariantClass),
+/* harmony export */   "Vec": () => (/* binding */ Vec),
+/* harmony export */   "VecClass": () => (/* binding */ VecClass),
+/* harmony export */   "Visitor": () => (/* binding */ Visitor),
+/* harmony export */   "decode": () => (/* binding */ decode),
+/* harmony export */   "encode": () => (/* binding */ encode)
 /* harmony export */ });
 /* harmony import */ var _dfinity_principal__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @dfinity/principal */ "./node_modules/@dfinity/principal/lib/esm/index.js");
 /* harmony import */ var _utils_buffer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./utils/buffer */ "./node_modules/@dfinity/candid/lib/esm/utils/buffer.js");
@@ -5215,32 +5215,32 @@ function Service(t) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Render": () => (/* reexport safe */ _candid_ui__WEBPACK_IMPORTED_MODULE_0__.Render),
-/* harmony export */   "inputBox": () => (/* reexport safe */ _candid_ui__WEBPACK_IMPORTED_MODULE_0__.inputBox),
-/* harmony export */   "optForm": () => (/* reexport safe */ _candid_ui__WEBPACK_IMPORTED_MODULE_0__.optForm),
-/* harmony export */   "recordForm": () => (/* reexport safe */ _candid_ui__WEBPACK_IMPORTED_MODULE_0__.recordForm),
-/* harmony export */   "renderInput": () => (/* reexport safe */ _candid_ui__WEBPACK_IMPORTED_MODULE_0__.renderInput),
-/* harmony export */   "renderValue": () => (/* reexport safe */ _candid_ui__WEBPACK_IMPORTED_MODULE_0__.renderValue),
-/* harmony export */   "tupleForm": () => (/* reexport safe */ _candid_ui__WEBPACK_IMPORTED_MODULE_0__.tupleForm),
-/* harmony export */   "variantForm": () => (/* reexport safe */ _candid_ui__WEBPACK_IMPORTED_MODULE_0__.variantForm),
-/* harmony export */   "vecForm": () => (/* reexport safe */ _candid_ui__WEBPACK_IMPORTED_MODULE_0__.vecForm),
+/* harmony export */   "IDL": () => (/* reexport module object */ _idl__WEBPACK_IMPORTED_MODULE_2__),
 /* harmony export */   "InputBox": () => (/* reexport safe */ _candid_core__WEBPACK_IMPORTED_MODULE_1__.InputBox),
 /* harmony export */   "InputForm": () => (/* reexport safe */ _candid_core__WEBPACK_IMPORTED_MODULE_1__.InputForm),
 /* harmony export */   "OptionForm": () => (/* reexport safe */ _candid_core__WEBPACK_IMPORTED_MODULE_1__.OptionForm),
 /* harmony export */   "RecordForm": () => (/* reexport safe */ _candid_core__WEBPACK_IMPORTED_MODULE_1__.RecordForm),
+/* harmony export */   "Render": () => (/* reexport safe */ _candid_ui__WEBPACK_IMPORTED_MODULE_0__.Render),
 /* harmony export */   "TupleForm": () => (/* reexport safe */ _candid_core__WEBPACK_IMPORTED_MODULE_1__.TupleForm),
 /* harmony export */   "VariantForm": () => (/* reexport safe */ _candid_core__WEBPACK_IMPORTED_MODULE_1__.VariantForm),
 /* harmony export */   "VecForm": () => (/* reexport safe */ _candid_core__WEBPACK_IMPORTED_MODULE_1__.VecForm),
-/* harmony export */   "IDL": () => (/* reexport module object */ _idl__WEBPACK_IMPORTED_MODULE_2__),
 /* harmony export */   "idlLabelToId": () => (/* reexport safe */ _utils_hash__WEBPACK_IMPORTED_MODULE_3__.idlLabelToId),
+/* harmony export */   "inputBox": () => (/* reexport safe */ _candid_ui__WEBPACK_IMPORTED_MODULE_0__.inputBox),
 /* harmony export */   "lebDecode": () => (/* reexport safe */ _utils_leb128__WEBPACK_IMPORTED_MODULE_4__.lebDecode),
 /* harmony export */   "lebEncode": () => (/* reexport safe */ _utils_leb128__WEBPACK_IMPORTED_MODULE_4__.lebEncode),
+/* harmony export */   "optForm": () => (/* reexport safe */ _candid_ui__WEBPACK_IMPORTED_MODULE_0__.optForm),
 /* harmony export */   "readIntLE": () => (/* reexport safe */ _utils_leb128__WEBPACK_IMPORTED_MODULE_4__.readIntLE),
 /* harmony export */   "readUIntLE": () => (/* reexport safe */ _utils_leb128__WEBPACK_IMPORTED_MODULE_4__.readUIntLE),
+/* harmony export */   "recordForm": () => (/* reexport safe */ _candid_ui__WEBPACK_IMPORTED_MODULE_0__.recordForm),
+/* harmony export */   "renderInput": () => (/* reexport safe */ _candid_ui__WEBPACK_IMPORTED_MODULE_0__.renderInput),
+/* harmony export */   "renderValue": () => (/* reexport safe */ _candid_ui__WEBPACK_IMPORTED_MODULE_0__.renderValue),
 /* harmony export */   "safeRead": () => (/* reexport safe */ _utils_leb128__WEBPACK_IMPORTED_MODULE_4__.safeRead),
 /* harmony export */   "safeReadUint8": () => (/* reexport safe */ _utils_leb128__WEBPACK_IMPORTED_MODULE_4__.safeReadUint8),
 /* harmony export */   "slebDecode": () => (/* reexport safe */ _utils_leb128__WEBPACK_IMPORTED_MODULE_4__.slebDecode),
 /* harmony export */   "slebEncode": () => (/* reexport safe */ _utils_leb128__WEBPACK_IMPORTED_MODULE_4__.slebEncode),
+/* harmony export */   "tupleForm": () => (/* reexport safe */ _candid_ui__WEBPACK_IMPORTED_MODULE_0__.tupleForm),
+/* harmony export */   "variantForm": () => (/* reexport safe */ _candid_ui__WEBPACK_IMPORTED_MODULE_0__.variantForm),
+/* harmony export */   "vecForm": () => (/* reexport safe */ _candid_ui__WEBPACK_IMPORTED_MODULE_0__.vecForm),
 /* harmony export */   "writeIntLE": () => (/* reexport safe */ _utils_leb128__WEBPACK_IMPORTED_MODULE_4__.writeIntLE),
 /* harmony export */   "writeUIntLE": () => (/* reexport safe */ _utils_leb128__WEBPACK_IMPORTED_MODULE_4__.writeUIntLE)
 /* harmony export */ });
@@ -5282,10 +5282,10 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "PipeArrayBuffer": () => (/* binding */ PipeArrayBuffer),
 /* harmony export */   "concat": () => (/* binding */ concat),
-/* harmony export */   "toHexString": () => (/* binding */ toHexString),
 /* harmony export */   "fromHexString": () => (/* binding */ fromHexString),
-/* harmony export */   "PipeArrayBuffer": () => (/* binding */ PipeArrayBuffer)
+/* harmony export */   "toHexString": () => (/* binding */ toHexString)
 /* harmony export */ });
 /**
  * Concatenate multiple array buffers.
@@ -5442,16 +5442,16 @@ function idlLabelToId(label) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "lebDecode": () => (/* binding */ lebDecode),
+/* harmony export */   "lebEncode": () => (/* binding */ lebEncode),
+/* harmony export */   "readIntLE": () => (/* binding */ readIntLE),
+/* harmony export */   "readUIntLE": () => (/* binding */ readUIntLE),
 /* harmony export */   "safeRead": () => (/* binding */ safeRead),
 /* harmony export */   "safeReadUint8": () => (/* binding */ safeReadUint8),
-/* harmony export */   "lebEncode": () => (/* binding */ lebEncode),
-/* harmony export */   "lebDecode": () => (/* binding */ lebDecode),
-/* harmony export */   "slebEncode": () => (/* binding */ slebEncode),
 /* harmony export */   "slebDecode": () => (/* binding */ slebDecode),
-/* harmony export */   "writeUIntLE": () => (/* binding */ writeUIntLE),
+/* harmony export */   "slebEncode": () => (/* binding */ slebEncode),
 /* harmony export */   "writeIntLE": () => (/* binding */ writeIntLE),
-/* harmony export */   "readUIntLE": () => (/* binding */ readUIntLE),
-/* harmony export */   "readIntLE": () => (/* binding */ readIntLE)
+/* harmony export */   "writeUIntLE": () => (/* binding */ writeUIntLE)
 /* harmony export */ });
 /* harmony import */ var _buffer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./buffer */ "./node_modules/@dfinity/candid/lib/esm/utils/buffer.js");
 /* eslint-disable no-constant-condition */
@@ -5947,16 +5947,16 @@ class DelegationIdentity extends _dfinity_agent__WEBPACK_IMPORTED_MODULE_0__.Sig
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "bufEquals": () => (/* binding */ bufEquals),
-/* harmony export */   "encodeLenBytes": () => (/* binding */ encodeLenBytes),
-/* harmony export */   "encodeLen": () => (/* binding */ encodeLen),
-/* harmony export */   "decodeLenBytes": () => (/* binding */ decodeLenBytes),
-/* harmony export */   "decodeLen": () => (/* binding */ decodeLen),
 /* harmony export */   "DER_COSE_OID": () => (/* binding */ DER_COSE_OID),
 /* harmony export */   "ED25519_OID": () => (/* binding */ ED25519_OID),
 /* harmony export */   "SECP256K1_OID": () => (/* binding */ SECP256K1_OID),
-/* harmony export */   "wrapDER": () => (/* binding */ wrapDER),
-/* harmony export */   "unwrapDER": () => (/* binding */ unwrapDER)
+/* harmony export */   "bufEquals": () => (/* binding */ bufEquals),
+/* harmony export */   "decodeLen": () => (/* binding */ decodeLen),
+/* harmony export */   "decodeLenBytes": () => (/* binding */ decodeLenBytes),
+/* harmony export */   "encodeLen": () => (/* binding */ encodeLen),
+/* harmony export */   "encodeLenBytes": () => (/* binding */ encodeLenBytes),
+/* harmony export */   "unwrapDER": () => (/* binding */ unwrapDER),
+/* harmony export */   "wrapDER": () => (/* binding */ wrapDER)
 /* harmony export */ });
 const bufEquals = (b1, b2) => {
     if (b1.byteLength !== b2.byteLength)
@@ -6138,8 +6138,8 @@ const unwrapDER = (derEncoded, oid) => {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Ed25519PublicKey": () => (/* binding */ Ed25519PublicKey),
-/* harmony export */   "Ed25519KeyIdentity": () => (/* binding */ Ed25519KeyIdentity)
+/* harmony export */   "Ed25519KeyIdentity": () => (/* binding */ Ed25519KeyIdentity),
+/* harmony export */   "Ed25519PublicKey": () => (/* binding */ Ed25519PublicKey)
 /* harmony export */ });
 /* harmony import */ var _dfinity_agent__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @dfinity/agent */ "./node_modules/@dfinity/agent/lib/esm/index.js");
 /* harmony import */ var tweetnacl__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! tweetnacl */ "./node_modules/tweetnacl/nacl-fast.js");
@@ -6265,8 +6265,8 @@ class Ed25519KeyIdentity extends _dfinity_agent__WEBPACK_IMPORTED_MODULE_0__.Sig
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Secp256k1PublicKey": () => (/* binding */ Secp256k1PublicKey),
 /* harmony export */   "Secp256k1KeyIdentity": () => (/* binding */ Secp256k1KeyIdentity),
+/* harmony export */   "Secp256k1PublicKey": () => (/* binding */ Secp256k1PublicKey),
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var secp256k1__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! secp256k1 */ "./node_modules/secp256k1/elliptic.js");
@@ -6637,18 +6637,18 @@ class WebAuthnIdentity extends _dfinity_agent__WEBPACK_IMPORTED_MODULE_0__.SignI
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "DER_COSE_OID": () => (/* reexport safe */ _identity_der__WEBPACK_IMPORTED_MODULE_4__.DER_COSE_OID),
+/* harmony export */   "Delegation": () => (/* reexport safe */ _identity_delegation__WEBPACK_IMPORTED_MODULE_2__.Delegation),
+/* harmony export */   "DelegationChain": () => (/* reexport safe */ _identity_delegation__WEBPACK_IMPORTED_MODULE_2__.DelegationChain),
+/* harmony export */   "DelegationIdentity": () => (/* reexport safe */ _identity_delegation__WEBPACK_IMPORTED_MODULE_2__.DelegationIdentity),
+/* harmony export */   "ED25519_OID": () => (/* reexport safe */ _identity_der__WEBPACK_IMPORTED_MODULE_4__.ED25519_OID),
 /* harmony export */   "Ed25519KeyIdentity": () => (/* reexport safe */ _identity_ed25519__WEBPACK_IMPORTED_MODULE_0__.Ed25519KeyIdentity),
 /* harmony export */   "Ed25519PublicKey": () => (/* reexport safe */ _identity_ed25519__WEBPACK_IMPORTED_MODULE_0__.Ed25519PublicKey),
 /* harmony export */   "Secp256k1KeyIdentity": () => (/* reexport safe */ _identity_secp256k1__WEBPACK_IMPORTED_MODULE_1__.Secp256k1KeyIdentity),
 /* harmony export */   "Secp256k1PublicKey": () => (/* reexport safe */ _identity_secp256k1__WEBPACK_IMPORTED_MODULE_1__.Secp256k1PublicKey),
-/* harmony export */   "Delegation": () => (/* reexport safe */ _identity_delegation__WEBPACK_IMPORTED_MODULE_2__.Delegation),
-/* harmony export */   "DelegationIdentity": () => (/* reexport safe */ _identity_delegation__WEBPACK_IMPORTED_MODULE_2__.DelegationIdentity),
-/* harmony export */   "DelegationChain": () => (/* reexport safe */ _identity_delegation__WEBPACK_IMPORTED_MODULE_2__.DelegationChain),
 /* harmony export */   "WebAuthnIdentity": () => (/* reexport safe */ _identity_webauthn__WEBPACK_IMPORTED_MODULE_3__.WebAuthnIdentity),
-/* harmony export */   "wrapDER": () => (/* reexport safe */ _identity_der__WEBPACK_IMPORTED_MODULE_4__.wrapDER),
 /* harmony export */   "unwrapDER": () => (/* reexport safe */ _identity_der__WEBPACK_IMPORTED_MODULE_4__.unwrapDER),
-/* harmony export */   "DER_COSE_OID": () => (/* reexport safe */ _identity_der__WEBPACK_IMPORTED_MODULE_4__.DER_COSE_OID),
-/* harmony export */   "ED25519_OID": () => (/* reexport safe */ _identity_der__WEBPACK_IMPORTED_MODULE_4__.ED25519_OID)
+/* harmony export */   "wrapDER": () => (/* reexport safe */ _identity_der__WEBPACK_IMPORTED_MODULE_4__.wrapDER)
 /* harmony export */ });
 /* harmony import */ var _identity_ed25519__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./identity/ed25519 */ "./node_modules/@dfinity/identity/lib/esm/identity/ed25519.js");
 /* harmony import */ var _identity_secp256k1__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./identity/secp256k1 */ "./node_modules/@dfinity/identity/lib/esm/identity/secp256k1.js");
@@ -6765,8 +6765,8 @@ class Principal {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "encode": () => (/* binding */ encode),
-/* harmony export */   "decode": () => (/* binding */ decode)
+/* harmony export */   "decode": () => (/* binding */ decode),
+/* harmony export */   "encode": () => (/* binding */ encode)
 /* harmony export */ });
 // tslint:disable:no-bitwise
 const alphabet = 'abcdefghijklmnopqrstuvwxyz234567';
@@ -7731,7 +7731,7 @@ var registerWrapper = function registerWrapper(stripe, startTime) {
 
   stripe._registerWrapper({
     name: 'stripe-js',
-    version: "1.23.0",
+    version: "1.24.0",
     startTime: startTime
   });
 };
@@ -23803,6 +23803,33 @@ function BufferBigIntNotDefined () {
 
 /***/ }),
 
+/***/ "./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/dtc_assets/src/Components/AdminSection.scss":
+/*!**************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/dtc_assets/src/Components/AdminSection.scss ***!
+  \**************************************************************************************************************************************/
+/***/ ((module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../node_modules/css-loader/dist/runtime/sourceMaps.js */ "./node_modules/css-loader/dist/runtime/sourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, ".sendEmailsButtonDiv {\n  width: 22%;\n  margin-left: 36%;\n  margin-bottom: -2rem;\n}\n.sendEmailsButtonDiv .sendEmailsButton {\n  border-radius: 10px;\n}", "",{"version":3,"sources":["webpack://./src/dtc_assets/src/Components/AdminSection.scss"],"names":[],"mappings":"AAAA;EACI,UAAA;EACA,gBAAA;EACA,oBAAA;AACJ;AAAI;EACI,mBAAA;AAER","sourcesContent":[".sendEmailsButtonDiv{\n    width: 22%;\n    margin-left: 36%;\n    margin-bottom: -2rem;\n    .sendEmailsButton{\n        border-radius: 10px;\n    }\n}"],"sourceRoot":""}]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ }),
+
 /***/ "./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/dtc_assets/src/Components/CardInput.scss":
 /*!***********************************************************************************************************************************!*\
   !*** ./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/dtc_assets/src/Components/CardInput.scss ***!
@@ -24066,7 +24093,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, ".subscriptionSectionContainer {\n  width: 66%;\n  border: solid 1px black;\n  border-radius: 10px;\n  margin-left: 17%;\n  margin-top: 2.5rem;\n}\n.subscriptionSectionContainer .logoDiv {\n  border: solid;\n  border-width: 2px;\n  border-color: black;\n  background-color: #e9e9e9;\n  max-width: 50%;\n  height: 40rem;\n  margin-left: 25%;\n  margin-top: 3.5rem;\n  margin-bottom: 3.5rem;\n}\n.subscriptionSectionContainer .logoDiv .subscriptionSection {\n  width: 90%;\n  margin-left: 5%;\n}\n.subscriptionSectionContainer .logoDiv .subscriptionSection .subscribeButtonDiv {\n  width: 9%;\n  margin-left: 39%;\n  margin-bottom: 1rem;\n}\n.subscriptionSectionContainer .logoDiv .subscriptionSection .subscribeButtonDiv .subscriptionButton {\n  border-radius: 10px;\n}", "",{"version":3,"sources":["webpack://./src/dtc_assets/src/Components/SubscriptionPage.scss"],"names":[],"mappings":"AAAA;EACI,UAAA;EACA,uBAAA;EACA,mBAAA;EACA,gBAAA;EACA,kBAAA;AACJ;AACI;EAEI,aAAA;EACA,iBAAA;EACA,mBAAA;EACA,yBAAA;EACA,cAAA;EACA,aAAA;EACA,gBAAA;EACA,kBAAA;EACA,qBAAA;AAAR;AAEQ;EACI,UAAA;EACA,eAAA;AAAZ;AAEY;EACI,SAAA;EACA,gBAAA;EACA,mBAAA;AAAhB;AAEgB;EACI,mBAAA;AAApB","sourcesContent":[".subscriptionSectionContainer{\n    width: 66%;\n    border: solid 1px black;\n    border-radius: 10px;\n    margin-left: 17%;\n    margin-top: 2.5rem;\n\n    .logoDiv{\n\n        border: solid;\n        border-width: 2px;\n        border-color: rgb(0, 0, 0);\n        background-color: rgb(233, 233, 233);\n        max-width: 50%;\n        height: 40rem;\n        margin-left:25%;\n        margin-top: 3.5rem;\n        margin-bottom: 3.5rem;\n\n        .subscriptionSection{\n            width: 90%;\n            margin-left: 5%;\n    \n            .subscribeButtonDiv{\n                width: 9%;\n                margin-left: 39%;\n                margin-bottom: 1rem;\n    \n                .subscriptionButton{\n                    border-radius: 10px;\n                }\n            }\n        }\n    }\n}"],"sourceRoot":""}]);
+___CSS_LOADER_EXPORT___.push([module.id, ".subscriptionSectionContainer {\n  width: 66%;\n  border: solid 1px black;\n  border-radius: 10px;\n  margin-left: 17%;\n  margin-top: 2.5rem;\n}\n.subscriptionSectionContainer .logoDiv {\n  border: solid;\n  border-width: 2px;\n  border-color: black;\n  background-color: #e9e9e9;\n  max-width: 50%;\n  height: 42rem;\n  margin-left: 25%;\n  margin-top: 3.5rem;\n  margin-bottom: 3.5rem;\n}\n.subscriptionSectionContainer .logoDiv .subscriptionSection {\n  width: 90%;\n  margin-left: 5%;\n}\n.subscriptionSectionContainer .logoDiv .subscriptionSection .subscribeButtonDiv {\n  width: 9%;\n  margin-left: 39%;\n  margin-bottom: 1rem;\n}\n.subscriptionSectionContainer .logoDiv .subscriptionSection .subscribeButtonDiv .subscriptionButton {\n  border-radius: 10px;\n}\n.subscriptionSectionContainer .logoDiv .subscriptionSection .updateButtonDiv {\n  width: 42%;\n  margin-left: 27.5%;\n  margin-bottom: 1rem;\n}\n.subscriptionSectionContainer .logoDiv .subscriptionSection .updateButtonDiv .updateButton {\n  border-radius: 10px;\n}", "",{"version":3,"sources":["webpack://./src/dtc_assets/src/Components/SubscriptionPage.scss"],"names":[],"mappings":"AAAA;EACI,UAAA;EACA,uBAAA;EACA,mBAAA;EACA,gBAAA;EACA,kBAAA;AACJ;AACI;EAEI,aAAA;EACA,iBAAA;EACA,mBAAA;EACA,yBAAA;EACA,cAAA;EACA,aAAA;EACA,gBAAA;EACA,kBAAA;EACA,qBAAA;AAAR;AAEQ;EACI,UAAA;EACA,eAAA;AAAZ;AAEY;EACI,SAAA;EACA,gBAAA;EACA,mBAAA;AAAhB;AAEgB;EACI,mBAAA;AAApB;AAIY;EACI,UAAA;EACA,kBAAA;EACA,mBAAA;AAFhB;AAIgB;EACI,mBAAA;AAFpB","sourcesContent":[".subscriptionSectionContainer{\n    width: 66%;\n    border: solid 1px black;\n    border-radius: 10px;\n    margin-left: 17%;\n    margin-top: 2.5rem;\n\n    .logoDiv{\n\n        border: solid;\n        border-width: 2px;\n        border-color: rgb(0, 0, 0);\n        background-color: rgb(233, 233, 233);\n        max-width: 50%;\n        height: 42rem;\n        margin-left:25%;\n        margin-top: 3.5rem;\n        margin-bottom: 3.5rem;\n\n        .subscriptionSection{\n            width: 90%;\n            margin-left: 5%;\n    \n            .subscribeButtonDiv{\n                width: 9%;\n                margin-left: 39%;\n                margin-bottom: 1rem;\n    \n                .subscriptionButton{\n                    border-radius: 10px;\n                }\n            }\n\n            .updateButtonDiv{\n                width: 42%;\n                margin-left: 27.5%;\n                margin-bottom: 1rem;\n    \n                .updateButton{\n                    border-radius: 10px;\n                }\n            }\n        }\n    }\n}"],"sourceRoot":""}]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -60740,10 +60767,10 @@ function createConnect(_temp) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
 /* harmony export */   "whenMapDispatchToPropsIsFunction": () => (/* binding */ whenMapDispatchToPropsIsFunction),
 /* harmony export */   "whenMapDispatchToPropsIsMissing": () => (/* binding */ whenMapDispatchToPropsIsMissing),
-/* harmony export */   "whenMapDispatchToPropsIsObject": () => (/* binding */ whenMapDispatchToPropsIsObject),
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */   "whenMapDispatchToPropsIsObject": () => (/* binding */ whenMapDispatchToPropsIsObject)
 /* harmony export */ });
 /* harmony import */ var _utils_bindActionCreators__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utils/bindActionCreators */ "./node_modules/react-redux/es/utils/bindActionCreators.js");
 /* harmony import */ var _wrapMapToProps__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./wrapMapToProps */ "./node_modules/react-redux/es/connect/wrapMapToProps.js");
@@ -60777,9 +60804,9 @@ function whenMapDispatchToPropsIsObject(mapDispatchToProps) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
 /* harmony export */   "whenMapStateToPropsIsFunction": () => (/* binding */ whenMapStateToPropsIsFunction),
-/* harmony export */   "whenMapStateToPropsIsMissing": () => (/* binding */ whenMapStateToPropsIsMissing),
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */   "whenMapStateToPropsIsMissing": () => (/* binding */ whenMapStateToPropsIsMissing)
 /* harmony export */ });
 /* harmony import */ var _wrapMapToProps__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./wrapMapToProps */ "./node_modules/react-redux/es/connect/wrapMapToProps.js");
 
@@ -60804,11 +60831,11 @@ function whenMapStateToPropsIsMissing(mapStateToProps) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
 /* harmony export */   "defaultMergeProps": () => (/* binding */ defaultMergeProps),
-/* harmony export */   "wrapMergePropsFunc": () => (/* binding */ wrapMergePropsFunc),
 /* harmony export */   "whenMergePropsIsFunction": () => (/* binding */ whenMergePropsIsFunction),
 /* harmony export */   "whenMergePropsIsOmitted": () => (/* binding */ whenMergePropsIsOmitted),
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */   "wrapMergePropsFunc": () => (/* binding */ wrapMergePropsFunc)
 /* harmony export */ });
 /* harmony import */ var _babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/esm/extends */ "./node_modules/@babel/runtime/helpers/esm/extends.js");
 /* harmony import */ var _utils_verifyPlainObject__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/verifyPlainObject */ "./node_modules/react-redux/es/utils/verifyPlainObject.js");
@@ -60860,9 +60887,9 @@ function whenMergePropsIsOmitted(mergeProps) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ finalPropsSelectorFactory),
 /* harmony export */   "impureFinalPropsSelectorFactory": () => (/* binding */ impureFinalPropsSelectorFactory),
-/* harmony export */   "pureFinalPropsSelectorFactory": () => (/* binding */ pureFinalPropsSelectorFactory),
-/* harmony export */   "default": () => (/* binding */ finalPropsSelectorFactory)
+/* harmony export */   "pureFinalPropsSelectorFactory": () => (/* binding */ pureFinalPropsSelectorFactory)
 /* harmony export */ });
 /* harmony import */ var _babel_runtime_helpers_esm_objectWithoutPropertiesLoose__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/esm/objectWithoutPropertiesLoose */ "./node_modules/@babel/runtime/helpers/esm/objectWithoutPropertiesLoose.js");
 /* harmony import */ var _verifySubselectors__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./verifySubselectors */ "./node_modules/react-redux/es/connect/verifySubselectors.js");
@@ -60998,8 +61025,8 @@ function verifySubselectors(mapStateToProps, mapDispatchToProps, mergeProps, dis
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "wrapMapToPropsConstant": () => (/* binding */ wrapMapToPropsConstant),
 /* harmony export */   "getDependsOnOwnProps": () => (/* binding */ getDependsOnOwnProps),
+/* harmony export */   "wrapMapToPropsConstant": () => (/* binding */ wrapMapToPropsConstant),
 /* harmony export */   "wrapMapToPropsFunc": () => (/* binding */ wrapMapToPropsFunc)
 /* harmony export */ });
 /* harmony import */ var _utils_verifyPlainObject__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utils/verifyPlainObject */ "./node_modules/react-redux/es/utils/verifyPlainObject.js");
@@ -61080,16 +61107,16 @@ function wrapMapToPropsFunc(mapToProps, methodName) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "Provider": () => (/* reexport safe */ _components_Provider__WEBPACK_IMPORTED_MODULE_0__["default"]),
-/* harmony export */   "connectAdvanced": () => (/* reexport safe */ _components_connectAdvanced__WEBPACK_IMPORTED_MODULE_1__["default"]),
 /* harmony export */   "ReactReduxContext": () => (/* reexport safe */ _components_Context__WEBPACK_IMPORTED_MODULE_2__.ReactReduxContext),
 /* harmony export */   "connect": () => (/* reexport safe */ _connect_connect__WEBPACK_IMPORTED_MODULE_3__["default"]),
-/* harmony export */   "useDispatch": () => (/* reexport safe */ _hooks_useDispatch__WEBPACK_IMPORTED_MODULE_4__.useDispatch),
+/* harmony export */   "connectAdvanced": () => (/* reexport safe */ _components_connectAdvanced__WEBPACK_IMPORTED_MODULE_1__["default"]),
 /* harmony export */   "createDispatchHook": () => (/* reexport safe */ _hooks_useDispatch__WEBPACK_IMPORTED_MODULE_4__.createDispatchHook),
-/* harmony export */   "useSelector": () => (/* reexport safe */ _hooks_useSelector__WEBPACK_IMPORTED_MODULE_5__.useSelector),
 /* harmony export */   "createSelectorHook": () => (/* reexport safe */ _hooks_useSelector__WEBPACK_IMPORTED_MODULE_5__.createSelectorHook),
-/* harmony export */   "useStore": () => (/* reexport safe */ _hooks_useStore__WEBPACK_IMPORTED_MODULE_6__.useStore),
 /* harmony export */   "createStoreHook": () => (/* reexport safe */ _hooks_useStore__WEBPACK_IMPORTED_MODULE_6__.createStoreHook),
-/* harmony export */   "shallowEqual": () => (/* reexport safe */ _utils_shallowEqual__WEBPACK_IMPORTED_MODULE_7__["default"])
+/* harmony export */   "shallowEqual": () => (/* reexport safe */ _utils_shallowEqual__WEBPACK_IMPORTED_MODULE_7__["default"]),
+/* harmony export */   "useDispatch": () => (/* reexport safe */ _hooks_useDispatch__WEBPACK_IMPORTED_MODULE_4__.useDispatch),
+/* harmony export */   "useSelector": () => (/* reexport safe */ _hooks_useSelector__WEBPACK_IMPORTED_MODULE_5__.useSelector),
+/* harmony export */   "useStore": () => (/* reexport safe */ _hooks_useStore__WEBPACK_IMPORTED_MODULE_6__.useStore)
 /* harmony export */ });
 /* harmony import */ var _components_Provider__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./components/Provider */ "./node_modules/react-redux/es/components/Provider.js");
 /* harmony import */ var _components_connectAdvanced__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./components/connectAdvanced */ "./node_modules/react-redux/es/components/connectAdvanced.js");
@@ -61464,6 +61491,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "Provider": () => (/* reexport safe */ _exports__WEBPACK_IMPORTED_MODULE_0__.Provider),
 /* harmony export */   "ReactReduxContext": () => (/* reexport safe */ _exports__WEBPACK_IMPORTED_MODULE_0__.ReactReduxContext),
+/* harmony export */   "batch": () => (/* reexport safe */ _utils_reactBatchedUpdates__WEBPACK_IMPORTED_MODULE_1__.unstable_batchedUpdates),
 /* harmony export */   "connect": () => (/* reexport safe */ _exports__WEBPACK_IMPORTED_MODULE_0__.connect),
 /* harmony export */   "connectAdvanced": () => (/* reexport safe */ _exports__WEBPACK_IMPORTED_MODULE_0__.connectAdvanced),
 /* harmony export */   "createDispatchHook": () => (/* reexport safe */ _exports__WEBPACK_IMPORTED_MODULE_0__.createDispatchHook),
@@ -61472,8 +61500,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "shallowEqual": () => (/* reexport safe */ _exports__WEBPACK_IMPORTED_MODULE_0__.shallowEqual),
 /* harmony export */   "useDispatch": () => (/* reexport safe */ _exports__WEBPACK_IMPORTED_MODULE_0__.useDispatch),
 /* harmony export */   "useSelector": () => (/* reexport safe */ _exports__WEBPACK_IMPORTED_MODULE_0__.useSelector),
-/* harmony export */   "useStore": () => (/* reexport safe */ _exports__WEBPACK_IMPORTED_MODULE_0__.useStore),
-/* harmony export */   "batch": () => (/* reexport safe */ _utils_reactBatchedUpdates__WEBPACK_IMPORTED_MODULE_1__.unstable_batchedUpdates)
+/* harmony export */   "useStore": () => (/* reexport safe */ _exports__WEBPACK_IMPORTED_MODULE_0__.useStore)
 /* harmony export */ });
 /* harmony import */ var _exports__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./exports */ "./node_modules/react-redux/es/exports.js");
 /* harmony import */ var _utils_reactBatchedUpdates__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./utils/reactBatchedUpdates */ "./node_modules/react-redux/es/utils/reactBatchedUpdates.js");
@@ -61638,8 +61665,8 @@ function createSubscription(store, parentSub) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "setBatch": () => (/* binding */ setBatch),
-/* harmony export */   "getBatch": () => (/* binding */ getBatch)
+/* harmony export */   "getBatch": () => (/* binding */ getBatch),
+/* harmony export */   "setBatch": () => (/* binding */ setBatch)
 /* harmony export */ });
 // Default to a dummy "batch" implementation that just runs the callback
 function defaultNoopBatch(callback) {
@@ -62127,8 +62154,13 @@ if (false) {} else {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "BrowserRouter": () => (/* binding */ BrowserRouter),
+/* harmony export */   "HashRouter": () => (/* binding */ HashRouter),
+/* harmony export */   "Link": () => (/* binding */ Link),
 /* harmony export */   "MemoryRouter": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.MemoryRouter),
+/* harmony export */   "NavLink": () => (/* binding */ NavLink),
 /* harmony export */   "Navigate": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.Navigate),
+/* harmony export */   "NavigationType": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.Action),
 /* harmony export */   "Outlet": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.Outlet),
 /* harmony export */   "Route": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.Route),
 /* harmony export */   "Router": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.Router),
@@ -62136,14 +62168,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "UNSAFE_LocationContext": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.UNSAFE_LocationContext),
 /* harmony export */   "UNSAFE_NavigationContext": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.UNSAFE_NavigationContext),
 /* harmony export */   "UNSAFE_RouteContext": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.UNSAFE_RouteContext),
+/* harmony export */   "createPath": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.createPath),
 /* harmony export */   "createRoutesFromChildren": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.createRoutesFromChildren),
+/* harmony export */   "createSearchParams": () => (/* binding */ createSearchParams),
 /* harmony export */   "generatePath": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.generatePath),
 /* harmony export */   "matchPath": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.matchPath),
 /* harmony export */   "matchRoutes": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.matchRoutes),
+/* harmony export */   "parsePath": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_2__.parsePath),
 /* harmony export */   "renderMatches": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.renderMatches),
 /* harmony export */   "resolvePath": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.resolvePath),
+/* harmony export */   "unstable_HistoryRouter": () => (/* binding */ HistoryRouter),
 /* harmony export */   "useHref": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.useHref),
 /* harmony export */   "useInRouterContext": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.useInRouterContext),
+/* harmony export */   "useLinkClickHandler": () => (/* binding */ useLinkClickHandler),
 /* harmony export */   "useLocation": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.useLocation),
 /* harmony export */   "useMatch": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.useMatch),
 /* harmony export */   "useNavigate": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.useNavigate),
@@ -62153,20 +62190,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "useParams": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.useParams),
 /* harmony export */   "useResolvedPath": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.useResolvedPath),
 /* harmony export */   "useRoutes": () => (/* reexport safe */ react_router__WEBPACK_IMPORTED_MODULE_1__.useRoutes),
-/* harmony export */   "BrowserRouter": () => (/* binding */ BrowserRouter),
-/* harmony export */   "HashRouter": () => (/* binding */ HashRouter),
-/* harmony export */   "Link": () => (/* binding */ Link),
-/* harmony export */   "NavLink": () => (/* binding */ NavLink),
-/* harmony export */   "createSearchParams": () => (/* binding */ createSearchParams),
-/* harmony export */   "unstable_HistoryRouter": () => (/* binding */ HistoryRouter),
-/* harmony export */   "useLinkClickHandler": () => (/* binding */ useLinkClickHandler),
 /* harmony export */   "useSearchParams": () => (/* binding */ useSearchParams)
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
-/* harmony import */ var history__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! history */ "./node_modules/history/index.js");
+/* harmony import */ var react_router__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react-router */ "./node_modules/history/index.js");
 /* harmony import */ var react_router__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-router */ "./node_modules/react-router/index.js");
 /**
- * React Router DOM v6.2.1
+ * React Router DOM v6.2.2
  *
  * Copyright (c) Remix Software Inc.
  *
@@ -62246,7 +62276,7 @@ function BrowserRouter(_ref) {
   let historyRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)();
 
   if (historyRef.current == null) {
-    historyRef.current = (0,history__WEBPACK_IMPORTED_MODULE_2__.createBrowserHistory)({
+    historyRef.current = (0,react_router__WEBPACK_IMPORTED_MODULE_2__.createBrowserHistory)({
       window
     });
   }
@@ -62279,7 +62309,7 @@ function HashRouter(_ref2) {
   let historyRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)();
 
   if (historyRef.current == null) {
-    historyRef.current = (0,history__WEBPACK_IMPORTED_MODULE_2__.createHashHistory)({
+    historyRef.current = (0,react_router__WEBPACK_IMPORTED_MODULE_2__.createHashHistory)({
       window
     });
   }
@@ -62464,7 +62494,7 @@ function useLinkClickHandler(to, _temp) {
       event.preventDefault(); // If the URL hasn't changed, a regular <a> will do a replace instead of
       // a push, so do the same here.
 
-      let replace = !!replaceProp || (0,history__WEBPACK_IMPORTED_MODULE_2__.createPath)(location) === (0,history__WEBPACK_IMPORTED_MODULE_2__.createPath)(path);
+      let replace = !!replaceProp || (0,react_router__WEBPACK_IMPORTED_MODULE_2__.createPath)(location) === (0,react_router__WEBPACK_IMPORTED_MODULE_2__.createPath)(path);
       navigate(to, {
         replace,
         state
@@ -62550,6 +62580,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "MemoryRouter": () => (/* binding */ MemoryRouter),
 /* harmony export */   "Navigate": () => (/* binding */ Navigate),
+/* harmony export */   "NavigationType": () => (/* reexport safe */ history__WEBPACK_IMPORTED_MODULE_1__.Action),
 /* harmony export */   "Outlet": () => (/* binding */ Outlet),
 /* harmony export */   "Route": () => (/* binding */ Route),
 /* harmony export */   "Router": () => (/* binding */ Router),
@@ -62557,10 +62588,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "UNSAFE_LocationContext": () => (/* binding */ LocationContext),
 /* harmony export */   "UNSAFE_NavigationContext": () => (/* binding */ NavigationContext),
 /* harmony export */   "UNSAFE_RouteContext": () => (/* binding */ RouteContext),
+/* harmony export */   "createPath": () => (/* reexport safe */ history__WEBPACK_IMPORTED_MODULE_1__.createPath),
 /* harmony export */   "createRoutesFromChildren": () => (/* binding */ createRoutesFromChildren),
 /* harmony export */   "generatePath": () => (/* binding */ generatePath),
 /* harmony export */   "matchPath": () => (/* binding */ matchPath),
 /* harmony export */   "matchRoutes": () => (/* binding */ matchRoutes),
+/* harmony export */   "parsePath": () => (/* reexport safe */ history__WEBPACK_IMPORTED_MODULE_1__.parsePath),
 /* harmony export */   "renderMatches": () => (/* binding */ renderMatches),
 /* harmony export */   "resolvePath": () => (/* binding */ resolvePath),
 /* harmony export */   "useHref": () => (/* binding */ useHref),
@@ -62578,7 +62611,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var history__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! history */ "./node_modules/history/index.js");
 /**
- * React Router v6.2.1
+ * React Router v6.2.2
  *
  * Copyright (c) Remix Software Inc.
  *
@@ -62587,6 +62620,7 @@ __webpack_require__.r(__webpack_exports__);
  *
  * @license MIT
  */
+
 
 
 
@@ -63305,7 +63339,7 @@ function matchRouteBranch(branch, pathname) {
     matches.push({
       params: matchedParams,
       pathname: joinPaths([matchedPathname, match.pathname]),
-      pathnameBase: joinPaths([matchedPathname, match.pathnameBase]),
+      pathnameBase: normalizePathname(joinPaths([matchedPathname, match.pathnameBase])),
       route
     });
 
@@ -63333,7 +63367,7 @@ function _renderMatches(matches, parentMatches) {
   if (matches == null) return null;
   return matches.reduceRight((outlet, match, index) => {
     return /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(RouteContext.Provider, {
-      children: match.route.element !== undefined ? match.route.element : /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(Outlet, null),
+      children: match.route.element !== undefined ? match.route.element : outlet,
       value: {
         outlet,
         matches: parentMatches.concat(matches.slice(0, index + 1))
@@ -63414,7 +63448,10 @@ function compilePath(path, caseSensitive, end) {
     : // Otherwise, match a word boundary or a proceeding /. The word boundary restricts
     // parent routes to matching only their own words and nothing more, e.g. parent
     // route "/home" should not match "/home2".
-    "(?:\\b|\\/|$)";
+    // Additionally, allow paths starting with `.`, `-`, `~`, and url-encoded entities,
+    // but do not consume the character in the matched path so they can match against
+    // nested paths.
+    "(?:(?=[.~-]|%[0-9A-F]{2})|\\b|\\/|$)";
   }
 
   let matcher = new RegExp(regexpSource, caseSensitive ? undefined : "i");
@@ -70259,6 +70296,61 @@ module.exports = Sister;
 
 /***/ }),
 
+/***/ "./src/dtc_assets/src/Components/AdminSection.scss":
+/*!*********************************************************!*\
+  !*** ./src/dtc_assets/src/Components/AdminSection.scss ***!
+  \*********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! !../../../../node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js */ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! !../../../../node_modules/style-loader/dist/runtime/styleDomAPI.js */ "./node_modules/style-loader/dist/runtime/styleDomAPI.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! !../../../../node_modules/style-loader/dist/runtime/insertBySelector.js */ "./node_modules/style-loader/dist/runtime/insertBySelector.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! !../../../../node_modules/style-loader/dist/runtime/setAttributesWithoutAttributes.js */ "./node_modules/style-loader/dist/runtime/setAttributesWithoutAttributes.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! !../../../../node_modules/style-loader/dist/runtime/insertStyleElement.js */ "./node_modules/style-loader/dist/runtime/insertStyleElement.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! !../../../../node_modules/style-loader/dist/runtime/styleTagTransform.js */ "./node_modules/style-loader/dist/runtime/styleTagTransform.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_AdminSection_scss__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! !!../../../../node_modules/css-loader/dist/cjs.js!../../../../node_modules/sass-loader/dist/cjs.js!./AdminSection.scss */ "./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/dtc_assets/src/Components/AdminSection.scss");
+
+      
+      
+      
+      
+      
+      
+      
+      
+      
+
+var options = {};
+
+options.styleTagTransform = (_node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5___default());
+options.setAttributes = (_node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3___default());
+
+      options.insert = _node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2___default().bind(null, "head");
+    
+options.domAPI = (_node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1___default());
+options.insertStyleElement = (_node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4___default());
+
+var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default()(_node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_AdminSection_scss__WEBPACK_IMPORTED_MODULE_6__["default"], options);
+
+
+
+
+       /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_AdminSection_scss__WEBPACK_IMPORTED_MODULE_6__["default"] && _node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_AdminSection_scss__WEBPACK_IMPORTED_MODULE_6__["default"].locals ? _node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_AdminSection_scss__WEBPACK_IMPORTED_MODULE_6__["default"].locals : undefined);
+
+
+/***/ }),
+
 /***/ "./src/dtc_assets/src/Components/CardInput.scss":
 /*!******************************************************!*\
   !*** ./src/dtc_assets/src/Components/CardInput.scss ***!
@@ -71296,7 +71388,11 @@ module.exports = styleTagTransform;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -71397,7 +71493,11 @@ exports["default"] = AccountPage;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -71501,7 +71601,11 @@ exports["default"] = App;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -71525,6 +71629,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const react_1 = __importStar(__webpack_require__(/*! react */ "./node_modules/react/index.js"));
 const axios_1 = __importDefault(__webpack_require__(/*! axios */ "./node_modules/axios/index.js"));
 const AccountPage_1 = __webpack_require__(/*! ../AccountPage */ "./src/dtc_assets/src/AccountPage.jsx");
+__webpack_require__(/*! ./AdminSection.scss */ "./src/dtc_assets/src/Components/AdminSection.scss");
 const AdminSection = (props) => {
     const { actor } = (0, react_1.useContext)(AccountPage_1.AppContext);
     const postEmail = async (emailAddress) => {
@@ -71546,8 +71651,8 @@ const AdminSection = (props) => {
         const results = await Promise.all(promises);
         console.log(results);
     };
-    return (react_1.default.createElement("div", { className: 'subscribeButtonDiv' },
-        react_1.default.createElement("button", { className: 'subscriptionButton', type: "submit", onClick: handleSubmit }, " Send Emails ")));
+    return (react_1.default.createElement("div", { className: 'sendEmailsButtonDiv' },
+        react_1.default.createElement("button", { className: 'sendEmailsButton', type: "submit", onClick: handleSubmit }, " Send Emails ")));
 };
 exports["default"] = AdminSection;
 
@@ -71604,7 +71709,11 @@ exports["default"] = CardInput;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -71667,7 +71776,11 @@ exports["default"] = DatePicker;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -71755,7 +71868,11 @@ exports["default"] = FileUpload;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -71823,7 +71940,11 @@ exports["default"] = InputBox;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -71883,7 +72004,11 @@ exports["default"] = Slider;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -71923,10 +72048,7 @@ const Journal = (props) => {
         const journal = await actor.readJournal();
         console.log(journal);
         if ("err" in journal) {
-            actor.create({
-                userName: [],
-                email: []
-            }).then((result) => {
+            actor.create().then((result) => {
                 console.log(result);
             });
         }
@@ -72122,7 +72244,11 @@ exports["default"] = Journal;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -72158,9 +72284,19 @@ const JournalPage = (props) => {
     const { journalReducerDispatchFunction, index, journalPageData, journalSize, closePage } = props;
     const { actor, setSubmissionsMade, submissionsMade } = (0, react_1.useContext)(App_1.AppContext);
     (0, react_1.useEffect)(async () => {
-        await actor.readJournal();
-    }, [actor, file1, file2]);
+        if (journalPageData.file1ID) {
+            const file1Blob = await actor.readEntryFile(journalPageData.file1ID);
+            console.log(file1Blob);
+        }
+        ;
+        if (journalPageData.file2ID) {
+            const file2Blob = await actor.readEntryFile(journalPageData.file2ID);
+            console.log(file2Blob);
+        }
+        ;
+    }, [journalPageData.file1ID, journalPageData.file2ID]);
     const uploadChunk = async (fileId, chunkId, fileChunk) => {
+        console.log(chunkId);
         return actor.createJournalEntryFile(fileId, chunkId, [...new Uint8Array(await fileChunk.arrayBuffer())]);
     };
     const mapAndSendEntryToApi = async (entryKey, journalEntry) => {
@@ -72172,7 +72308,9 @@ const JournalPage = (props) => {
                 lockTime: parseInt(journalEntry.lockTime),
                 emailOne: journalEntry.emailOne,
                 emailTwo: journalEntry.emailTwo,
-                emailThree: journalEntry.emailThree
+                emailThree: journalEntry.emailThree,
+                file1ID: journalEntry.file1ID,
+                file2ID: journalEntry.file2ID
             }];
         const entryKeyAsApiObject = (entryKey >= 0 && entryKey < journalSize) ? [{ entryKey: entryKey }] : [];
         actor.updateJournalEntry(entryKeyAsApiObject, entryAsApiObject);
@@ -72182,22 +72320,22 @@ const JournalPage = (props) => {
         const chunks = Math.ceil(fileSize / CHUNK_SIZE);
         let chunk = 0;
         let promises = [];
-        while (chunk <= chunks - 1) {
+        while (chunk < chunks) {
             const from = chunk * CHUNK_SIZE;
             const to = from + CHUNK_SIZE;
             const fileChunk = (to < fileSize - 1) ? file.slice(from, to) : file.slice(from);
-            const chunkId = `chunk-number-${chunk}`;
+            let chunkId = parseInt(chunk);
             promises.push(uploadChunk(fileId, chunkId, fileChunk));
             chunk += 1;
         }
         ;
         const results = await Promise.all(promises);
+        console.log(results);
     };
     const handleSubmit = (0, react_1.useCallback)(async () => {
+        await mapAndSendFileToApi("test11", file1);
         await mapAndSendEntryToApi(index, journalPageData);
         setSubmissionsMade(submissionsMade + 1);
-        console.log('Reading Journal: ', await actor.readJournal());
-        // await mapAndSendFileToApi("test1", file1);
         // await mapAndSendFileToApi("test2", file2);
     }, [journalPageData, file1, file2]);
     console.log(journalPageData);
@@ -72235,7 +72373,11 @@ exports["default"] = JournalPage;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -72305,7 +72447,11 @@ exports["default"] = LoginPage;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -72369,7 +72515,11 @@ exports["default"] = ModalContentOnSend;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -72402,14 +72552,15 @@ const AccountPage_1 = __webpack_require__(/*! ../AccountPage */ "./src/dtc_asset
 const SubcriptionPage = (props) => {
     const { journalState, dispatch } = props;
     const { actor, authClient } = (0, react_1.useContext)(AccountPage_1.AppContext);
+    const [email, setEmail] = (0, react_1.useState)('');
+    const [userName, setUserName] = (0, react_1.useState)('');
     (0, react_1.useEffect)(async () => {
         const journal = await actor.readJournal();
+        setEmail(journal.ok.email[0]);
+        setUserName(journal.ok.userName[0]);
         console.log(journal);
         if ("err" in journal) {
-            actor.create({
-                userName: [],
-                email: []
-            }).then((result) => {
+            actor.create().then((result) => {
                 console.log(result);
             });
         }
@@ -72423,6 +72574,17 @@ const SubcriptionPage = (props) => {
     }, [actor, authClient]);
     const stripe = (0, react_stripe_js_1.useStripe)();
     const elements = (0, react_stripe_js_1.useElements)();
+    const handleUpdate = async () => {
+        const profileInput = {
+            userName: (journalState.metaData.userName[0]) ? journalState.metaData.userName : [],
+            email: (journalState.metaData.email[0]) ? journalState.metaData.email : []
+        };
+        let result = await actor.updateProfile(profileInput);
+        console.log(result);
+        // if("err" in result){
+        //     showErrorMessage();
+        // };
+    };
     const handleSubmitPay = async (e) => {
         e.preventDefault();
         if (!stripe || !elements) {
@@ -72487,12 +72649,16 @@ const SubcriptionPage = (props) => {
         }
     };
     console.log(journalState.metaData);
+    console.log(userName);
     return (react_1.default.createElement("div", { className: 'subscriptionSectionContainer' },
         react_1.default.createElement("div", { className: 'logoDiv' },
             react_1.default.createElement("img", { className: 'logoImg', src: "dtc-logo-black.png", alt: "Logo" }),
             react_1.default.createElement("div", { className: 'subscriptionSection' },
                 react_1.default.createElement(InputBox_1.default, { divClassName: "email", label: "Email: ", rows: "1", dispatch: dispatch, dispatchAction: journalReducer_1.types.CHANGE_EMAIL, value: journalState.metaData.email }),
-                journalState.metaData.userName === 'admin' && react_1.default.createElement(AdminSection_1.default, null),
+                react_1.default.createElement(InputBox_1.default, { divClassName: "userName", label: "Username: ", rows: "1", dispatch: dispatch, dispatchAction: journalReducer_1.types.CHANGE_USERNAME, value: journalState.metaData.userName }),
+                react_1.default.createElement("div", { className: 'updateButtonDiv' },
+                    react_1.default.createElement("button", { className: 'updateButton', type: "submit", onClick: handleUpdate }, " Update Username & Email ")),
+                userName === 'admin' && react_1.default.createElement(AdminSection_1.default, null),
                 react_1.default.createElement(CardInput_1.default, null),
                 react_1.default.createElement("div", { className: 'subscribeButtonDiv' },
                     react_1.default.createElement("button", { className: 'subscriptionButton', type: "submit", onClick: handleSubmitSub }, " Subscribe "))))));
@@ -72543,7 +72709,11 @@ exports.Modal = Modal;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -72580,10 +72750,7 @@ const WalletPage = (props) => {
         const journal = await actor.readJournal();
         console.log(journal);
         if ("err" in journal) {
-            actor.create({
-                userName: [],
-                email: []
-            }).then((result) => {
+            actor.create().then((result) => {
                 console.log(result);
             });
         }
@@ -72752,7 +72919,11 @@ exports.fromHexString = fromHexString;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -72906,7 +73077,11 @@ exports["default"] = monitorReducerEnhancer;
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -73055,12 +73230,14 @@ exports.types = {
     CHANGE_USERNAME: "CHANGE_USERNAME",
     CHANGE_RECIPIENT_EMAIL_ONE: "CHANGE_RECIPIENT_EMAIL_ONE",
     CHANGE_RECIPIENT_EMAIL_TWO: "CHANGE_RECIPIENT_EMAIL_TWO",
-    CHANGE_RECIPIENT_EMAIL_THREE: "CHANGE_RECIPIENT_EMAIL_THREE"
+    CHANGE_RECIPIENT_EMAIL_THREE: "CHANGE_RECIPIENT_EMAIL_THREE",
+    CHANGE_FILE1_ID: "CHANGE_FILE1_ID",
+    CHANGE_FILE2_ID: "CHANGE_FILE2_ID"
 };
 exports.initialState = {
     metaData: {
-        email: '',
-        userName: ''
+        email: [],
+        userName: []
     },
     walletData: {
         balance: '',
@@ -73084,7 +73261,9 @@ exports.initialState = {
             unlockTime: `${Date.now() * 1000000}`,
             emailOne: '',
             emailTwo: '',
-            emailThree: ''
+            emailThree: '',
+            file1ID: 'empty',
+            file2ID: 'empty'
         }
     ]
 };
@@ -73097,7 +73276,9 @@ const freshPage = {
     unlockTime: `${Date.now()}`,
     emailOne: '',
     emailTwo: '',
-    emailThree: ''
+    emailThree: '',
+    file1ID: 'empty',
+    file2ID: 'empty'
 };
 const changeValue = (state = exports.initialState, action) => {
     const { actionType, payload, index } = action;
@@ -73130,7 +73311,7 @@ const changeValue = (state = exports.initialState, action) => {
             };
             state.metaData = {
                 ...state.metaData,
-                email: payload
+                email: [payload]
             };
             return {
                 ...state
@@ -73138,7 +73319,7 @@ const changeValue = (state = exports.initialState, action) => {
         case exports.types.CHANGE_USERNAME:
             state.metaData = {
                 ...state.metaData,
-                userName: payload
+                userName: [payload]
             };
             return {
                 ...state
@@ -73192,6 +73373,24 @@ const changeValue = (state = exports.initialState, action) => {
             updatedJournalPage = {
                 ...state.journal[index],
                 location: payload
+            };
+            state.journal[index] = updatedJournalPage;
+            return {
+                ...state
+            };
+        case exports.types.CHANGE_FILE1_ID:
+            updatedJournalPage = {
+                ...state.journal[index],
+                file1ID: payload
+            };
+            state.journal[index] = updatedJournalPage;
+            return {
+                ...state
+            };
+        case exports.types.CHANGE_FILE2_ID:
+            updatedJournalPage = {
+                ...state.journal[index],
+                file2ID: payload
             };
             state.journal[index] = updatedJournalPage;
             return {
@@ -76189,23 +76388,22 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 const idlFactory = ({ IDL }) => {
   const List = IDL.Rec();
+  const List_1 = IDL.Rec();
   const Trie = IDL.Rec();
+  const Trie_1 = IDL.Rec();
   const AccountIdentifier = IDL.Vec(IDL.Nat8);
   const Tokens = IDL.Record({ 'e8s' : IDL.Nat64 });
-  const ProfileInput = IDL.Record({
-    'userName' : IDL.Opt(IDL.Text),
-    'email' : IDL.Opt(IDL.Text),
-  });
   const AmountAccepted = IDL.Record({ 'accepted' : IDL.Nat64 });
   const Error = IDL.Variant({
     'TxFailed' : IDL.Null,
     'NotFound' : IDL.Null,
     'NotAuthorized' : IDL.Null,
     'AlreadyExists' : IDL.Null,
+    'UserNameTaken' : IDL.Null,
     'NoInputGiven' : IDL.Null,
     'InsufficientFunds' : IDL.Null,
   });
-  const Result_5 = IDL.Variant({ 'ok' : AmountAccepted, 'err' : Error });
+  const Result_6 = IDL.Variant({ 'ok' : AmountAccepted, 'err' : Error });
   const Result = IDL.Variant({ 'ok' : IDL.Null, 'err' : Error });
   const JournalEntry = IDL.Record({
     'unlockTime' : IDL.Int,
@@ -76218,15 +76416,33 @@ const idlFactory = ({ IDL }) => {
     'emailTwo' : IDL.Text,
     'location' : IDL.Text,
     'entryTitle' : IDL.Text,
+    'file1ID' : IDL.Text,
+    'file2ID' : IDL.Text,
   });
-  const Result_4 = IDL.Variant({
+  const Result_5 = IDL.Variant({
     'ok' : IDL.Vec(
       IDL.Tuple(IDL.Text, IDL.Vec(IDL.Tuple(IDL.Nat, JournalEntry)))
     ),
     'err' : Error,
   });
   const EntryKey = IDL.Record({ 'entryKey' : IDL.Nat });
-  const Result_3 = IDL.Variant({ 'ok' : JournalEntry, 'err' : Error });
+  const Result_4 = IDL.Variant({ 'ok' : JournalEntry, 'err' : Error });
+  const Branch_1 = IDL.Record({
+    'left' : Trie_1,
+    'size' : IDL.Nat,
+    'right' : Trie_1,
+  });
+  const Hash = IDL.Nat32;
+  const Key = IDL.Record({ 'key' : IDL.Nat, 'hash' : Hash });
+  List_1.fill(IDL.Opt(IDL.Tuple(IDL.Tuple(Key, IDL.Vec(IDL.Nat8)), List_1)));
+  const AssocList_1 = IDL.Opt(
+    IDL.Tuple(IDL.Tuple(Key, IDL.Vec(IDL.Nat8)), List_1)
+  );
+  const Leaf_1 = IDL.Record({ 'size' : IDL.Nat, 'keyvals' : AssocList_1 });
+  Trie_1.fill(
+    IDL.Variant({ 'branch' : Branch_1, 'leaf' : Leaf_1, 'empty' : IDL.Null })
+  );
+  const Result_3 = IDL.Variant({ 'ok' : Trie_1, 'err' : Error });
   const Bio = IDL.Record({
     'dob' : IDL.Text,
     'pob' : IDL.Text,
@@ -76256,14 +76472,14 @@ const idlFactory = ({ IDL }) => {
     'emailTwo' : IDL.Text,
     'location' : IDL.Text,
     'entryTitle' : IDL.Text,
+    'file1ID' : IDL.Text,
+    'file2ID' : IDL.Text,
   });
   const Branch = IDL.Record({
     'left' : Trie,
     'size' : IDL.Nat,
     'right' : Trie,
   });
-  const Hash = IDL.Nat32;
-  const Key = IDL.Record({ 'key' : IDL.Nat, 'hash' : Hash });
   List.fill(IDL.Opt(IDL.Tuple(IDL.Tuple(Key, JournalEntry), List)));
   const AssocList = IDL.Opt(IDL.Tuple(IDL.Tuple(Key, JournalEntry), List));
   const Leaf = IDL.Record({ 'size' : IDL.Nat, 'keyvals' : AssocList });
@@ -76271,18 +76487,23 @@ const idlFactory = ({ IDL }) => {
     IDL.Variant({ 'branch' : Branch, 'leaf' : Leaf, 'empty' : IDL.Null })
   );
   const Result_1 = IDL.Variant({ 'ok' : Trie, 'err' : Error });
+  const ProfileInput = IDL.Record({
+    'userName' : IDL.Opt(IDL.Text),
+    'email' : IDL.Opt(IDL.Text),
+  });
   const User = IDL.Service({
     'canisterAccount' : IDL.Func([], [AccountIdentifier], ['query']),
     'canisterBalance' : IDL.Func([], [Tokens], []),
-    'create' : IDL.Func([ProfileInput], [Result_5], []),
+    'create' : IDL.Func([], [Result_6], []),
     'createJournalEntryFile' : IDL.Func(
-        [IDL.Text, IDL.Text, IDL.Vec(IDL.Nat8)],
+        [IDL.Text, IDL.Nat, IDL.Vec(IDL.Nat8)],
         [Result],
         [],
       ),
     'delete' : IDL.Func([], [Result], []),
-    'getEntriesToBeSent' : IDL.Func([], [Result_4], []),
-    'readEntry' : IDL.Func([EntryKey], [Result_3], []),
+    'getEntriesToBeSent' : IDL.Func([], [Result_5], []),
+    'readEntry' : IDL.Func([EntryKey], [Result_4], []),
+    'readEntryFile' : IDL.Func([IDL.Text], [Result_3], []),
     'readJournal' : IDL.Func([], [Result_2], []),
     'transferICP' : IDL.Func([IDL.Nat64, AccountIdentifier], [Result], []),
     'updateBio' : IDL.Func([Bio], [Result], []),
@@ -76309,10 +76530,10 @@ const init = ({ IDL }) => { return []; };
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "idlFactory": () => (/* reexport safe */ _dtc_did_js__WEBPACK_IMPORTED_MODULE_1__.idlFactory),
 /* harmony export */   "canisterId": () => (/* binding */ canisterId),
 /* harmony export */   "createActor": () => (/* binding */ createActor),
-/* harmony export */   "dtc": () => (/* binding */ dtc)
+/* harmony export */   "dtc": () => (/* binding */ dtc),
+/* harmony export */   "idlFactory": () => (/* reexport safe */ _dtc_did_js__WEBPACK_IMPORTED_MODULE_1__.idlFactory)
 /* harmony export */ });
 /* harmony import */ var _dfinity_agent__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @dfinity/agent */ "./node_modules/@dfinity/agent/lib/esm/index.js");
 /* harmony import */ var _dtc_did_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./dtc.did.js */ "./src/declarations/dtc/dtc.did.js");
@@ -76322,7 +76543,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 // CANISTER_ID is replaced by webpack based on node environment
-const canisterId = "t6rzw-2iaaa-aaaaa-aaama-cai";
+const canisterId = "qaa6y-5yaaa-aaaaa-aaafa-cai";
 
 /**
  * 

@@ -18,6 +18,7 @@ import Array "mo:base/Array";
 import Int "mo:base/Int";
 import Text "mo:base/Text";
 import Account "./Account";
+import Bool "mo:base/Bool";
 
 shared (msg) actor class User(){
 
@@ -59,6 +60,8 @@ shared (msg) actor class User(){
         emailOne: Text;
         emailTwo: Text;
         emailThree: Text;
+        file1ID: Text;
+        file2ID: Text;
     };
 
     type JournalEntryInput = {
@@ -70,6 +73,8 @@ shared (msg) actor class User(){
         emailOne: Text;
         emailTwo: Text;
         emailThree: Text;
+        file1ID: Text;
+        file2ID: Text;
     };
 
     type Bio = {
@@ -88,6 +93,7 @@ shared (msg) actor class User(){
         #NoInputGiven;
         #InsufficientFunds;
         #TxFailed;
+        #UserNameTaken;
     };
 
     //Application State
@@ -102,6 +108,44 @@ shared (msg) actor class User(){
     private var Gas: Nat64 = 10000;
     
     private var Fee : Nat64 = 10000000 + Gas;
+
+    private func isUserNameAvailable(userName: ?Text, callerId: Principal) : Bool {
+        switch(userName){
+            case null{
+                true
+            };
+            case (? userNameValue){
+                var index = 0;
+                let numberOfProfiles = Trie.size(profiles);
+                let profilesIter = Trie.iter(profiles);
+                let profilesArray = Iter.toArray(profilesIter);
+                let ArrayBuffer = Buffer.Buffer<(Principal,Profile)>(1);
+
+                while(index < numberOfProfiles){
+                    let userProfile = profilesArray[index];
+                    switch(userProfile.1.userName){
+                        case null{
+                            index += 1;
+                        };
+                        case (? username){
+                            if((username == userNameValue)){
+                                if(userProfile.1.id != callerId){
+                                    ArrayBuffer.add(userProfile);
+                                };
+                            };
+                            index += 1;
+                        };
+                    };
+                };
+
+                if(ArrayBuffer.size() > 0){
+                    false
+                } else {
+                    true
+                }
+            };
+        };
+    };
 
     private func getAdminAccountId () : async Result.Result<Account.AccountIdentifier, Error> {
         var index = 0;
@@ -138,7 +182,7 @@ shared (msg) actor class User(){
     };
 
     //Result.Result returns a varient type that has attributes from success case(the first input) and from your error case (your second input). both inputs must be varient types. () is a unit type.
-    public shared(msg) func create (profile: ProfileInput) : async Result.Result<AmountAccepted,Error> {
+    public shared(msg) func create () : async Result.Result<AmountAccepted,Error> {
 
         let callerId = msg.caller;
 
@@ -162,8 +206,8 @@ shared (msg) actor class User(){
 
                 let userProfile: Profile = {
                     journal = newUserJournal;
-                    email = profile.email;
-                    userName = profile.userName;
+                    email = null;
+                    userName = null;
                     id = callerId;
                 };
 
@@ -261,6 +305,27 @@ shared (msg) actor class User(){
 
     };
 
+    public shared(msg) func readEntryFile(fileId: Text) : async Result.Result<(Trie.Trie<Nat,Blob>),Error>{
+        let callerId = msg.caller;
+
+        let result = Trie.find(
+            profiles,
+            key(callerId),
+            Principal.equal
+        );
+
+        switch(result){
+            case null{
+                #err(#NotFound);
+            };
+            case ( ? existingProfile){
+                let userJournal = existingProfile.journal;
+                let entryFile = await userJournal.readJournalFile(fileId);
+                entryFile;
+            };
+        }
+    };
+
     public shared(msg) func updateBio(bio: Bio) : async Result.Result<(), Error> {
         let callerId = msg.caller;
         
@@ -337,7 +402,7 @@ shared (msg) actor class User(){
      
     };
 
-    public shared(msg) func createJournalEntryFile(fileId: Text, chunkId: Text, blobChunk: Blob): async Result.Result<(), Error>{
+    public shared(msg) func createJournalEntryFile(fileId: Text, chunkId: Nat, blobChunk: Blob): async Result.Result<(), Error>{
         let callerId = msg.caller;
 
         let result = Trie.find(
@@ -381,20 +446,25 @@ shared (msg) actor class User(){
             };
             case(? v) {
 
-                let userProfile : Profile = {
-                    journal = v.journal;
-                    email = profile.email;
-                    userName = profile.userName;
-                    id = callerId;
-                };
+                let userNameAvailable = isUserNameAvailable(profile.userName, callerId);
+                if(userNameAvailable == true){
+                    let userProfile : Profile = {
+                        journal = v.journal;
+                        email = profile.email;
+                        userName = profile.userName;
+                        id = callerId;
+                    };
 
-                profiles := Trie.replace(
-                    profiles,       //Target trie
-                    key(callerId), //Key
-                    Principal.equal,      //Equality Checker
-                    ?userProfile        //The profile that you mean to use to overWrite the existing profile
-                ).0;                // The result is a tuple where the 0th entry is the resulting profiles trie
-                #ok(());
+                    profiles := Trie.replace(
+                        profiles,       //Target trie
+                        key(callerId), //Key
+                        Principal.equal,      //Equality Checker
+                        ?userProfile        //The profile that you mean to use to overWrite the existing profile
+                    ).0;                // The result is a tuple where the 0th entry is the resulting profiles trie
+                    #ok(());
+                } else {
+                    #err(#UserNameTaken);
+                }
             };
         };
     };

@@ -31,6 +31,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
         emailOne: Text;
         emailTwo: Text;
         emailThree: Text;
+        file1ID: Text;
+        file2ID: Text;
     }; 
 
     type JournalEntryInput = {
@@ -42,6 +44,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
         emailOne: Text;
         emailTwo: Text;
         emailThree: Text;
+        file1ID: Text;
+        file2ID: Text;
     }; 
 
     type JournalFile = {
@@ -72,7 +76,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     private stable var journal : Trie.Trie<Nat, JournalEntry> = Trie.empty();
 
-    private stable var files : Trie.Trie2D<Text,Text,Blob> = Trie.empty();
+    private stable var files : Trie.Trie2D<Text,Nat,Blob> = Trie.empty();
 
     private stable var biography : Bio = {
         name = "";
@@ -122,6 +126,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
             emailOne = journalEntry.emailOne;
             emailTwo = journalEntry.emailTwo;
             emailThree = journalEntry.emailThree;
+            file1ID = journalEntry.file1ID;
+            file2ID = journalEntry.file2ID;
         };
         
         let (newJournal, oldJournal) = Trie.put(
@@ -141,7 +147,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     };
 
-    public func createFile(fileId: Text ,chunkId : Text, blobChunk : Blob) : async Result.Result<(), Error> {
+    public func createFile(fileId: Text ,chunkId : Nat, blobChunk : Blob) : async Result.Result<(), Error> {
 
         let existingFile = Trie.find(
             files,
@@ -155,15 +161,37 @@ shared(msg) actor class Journal (principal : Principal) = this {
                     files,
                     textKey(fileId),
                     Text.equal,
-                    textKey(chunkId),
-                    Text.equal,
+                    natKey(chunkId),
+                    Nat.equal,
                     blobChunk
                 );
                 files := updatedFiles;
                 #ok(());
             };
             case (? fileExists){
-                #err(#AlreadyExists);
+                let existingFileChunk = Trie.find(
+                    fileExists,
+                    natKey(chunkId),
+                    Nat.equal
+                );
+
+                switch(existingFileChunk){
+                    case null{
+                        let updatedFiles = Trie.put2D(
+                            files,
+                            textKey(fileId),
+                            Text.equal,
+                            natKey(chunkId),
+                            Nat.equal,
+                            blobChunk
+                        );
+                        files := updatedFiles;
+                        #ok(());
+                    };
+                    case (? fileChunk){
+                        #err(#AlreadyExists);
+                    };
+                };
             };
         };
     };
@@ -192,6 +220,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
                         emailOne = x.1.emailOne;
                         emailTwo = x.1.emailTwo;
                         emailThree = x.1.emailThree;
+                        file1ID = x.1.file1ID;
+                        file2ID = x.1.file2ID;
                     };
 
                     let (newJournal, oldJournal) = Trie.put(
@@ -228,7 +258,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         }
     };
 
-    public func readJournalFile (fileId : Text) : async Result.Result<(Trie.Trie<Text,Blob>),Error> {
+    public func readJournalFile (fileId : Text) : async Result.Result<(Trie.Trie<Nat,Blob>),Error> {
 
         let file = Trie.find(
             files,
@@ -278,6 +308,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
                     emailOne = journalEntry.emailOne;
                     emailTwo = journalEntry.emailTwo;
                     emailThree = journalEntry.emailThree;
+                    file1ID = v.file1ID;
+                    file2ID = v.file2ID;
                 };
 
                 let (newJournal, oldEntryValue) = Trie.put(
@@ -296,7 +328,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     };
 
-    public func updateJournalEntryFile(fileId: Text, chunkId: Text, blobChunk : Blob) : async Result.Result<(),Error> {
+    public func updateJournalEntryFile(fileId: Text, chunkId: Nat, blobChunk : Blob) : async Result.Result<(),Error> {
 
         let file = Trie.find(
             files,
@@ -313,8 +345,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
                     files,
                     textKey(fileId),
                     Text.equal,
-                    textKey(chunkId),
-                    Text.equal,
+                    natKey(chunkId),
+                    Nat.equal,
                     blobChunk
                 );
 

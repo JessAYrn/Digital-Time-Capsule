@@ -28,13 +28,21 @@ const JournalPage = (props) => {
         submissionsMade
     } = useContext(AppContext);
 
-    useEffect( async () => {
-        
-        await actor.readJournal();
-    }, [actor, file1, file2]);
-
+    useEffect(async () => {
+        if(journalPageData.file1ID !== 'empty'){
+            const file1Blob = await actor.readEntryFile(journalPageData.file1ID);
+            console.log(file1Blob);
+        };
+    
+        if(journalPageData.file2ID !== 'empty'){
+            const file2Blob = await actor.readEntryFile(journalPageData.file2ID);
+            console.log(file2Blob);
+        };
+    },[journalPageData.file1ID, journalPageData.file2ID]);
+    
+   
     const uploadChunk = async (fileId, chunkId, fileChunk) => {
-
+        console.log(chunkId);
         return actor.createJournalEntryFile(
             fileId, 
             chunkId, 
@@ -53,7 +61,9 @@ const JournalPage = (props) => {
             lockTime: parseInt(journalEntry.lockTime),
             emailOne: journalEntry.emailOne,
             emailTwo: journalEntry.emailTwo,
-            emailThree: journalEntry.emailThree
+            emailThree: journalEntry.emailThree,
+            file1ID: journalEntry.file1ID,
+            file2ID: journalEntry.file2ID
         }];
 
         const entryKeyAsApiObject = (entryKey >= 0 && entryKey < journalSize ) ? [{entryKey: entryKey}] : [];
@@ -76,30 +86,35 @@ const JournalPage = (props) => {
         let promises = [];
 
 
-        while(chunk <= chunks - 1){    
+        while(chunk < chunks){    
             
             const from = chunk * CHUNK_SIZE;
             const to = from + CHUNK_SIZE;
 
             const fileChunk = (to < fileSize -1) ? file.slice(from,to ) : file.slice(from);
 
-            const chunkId = `chunk-number-${chunk}`;
+            let chunkId = parseInt(chunk);
             promises.push(uploadChunk(fileId, chunkId, fileChunk));
 
             chunk += 1;
         };
 
-        const results = await Promise.all(promises);    
+        const results = await Promise.all(promises);  
+
+        console.log(results);
     };
 
 
 
     const handleSubmit = useCallback(async () => {
+        if(journalPageData.file1ID !== 'empty'){
+            await mapAndSendFileToApi(journalPageData.file1ID, file1);
+        };
+        if(journalPageData.file2ID !== 'empty') {
+            await mapAndSendFileToApi(journalPageData.file2ID, file2);
+        }
         await mapAndSendEntryToApi(index, journalPageData);
         setSubmissionsMade(submissionsMade + 1);
-        console.log('Reading Journal: ',await actor.readJournal());
-        // await mapAndSendFileToApi("test1", file1);
-        // await mapAndSendFileToApi("test2", file2);
 
     }, [journalPageData, file1, file2]);
 
@@ -149,12 +164,16 @@ const JournalPage = (props) => {
             <div className={"journalImages"}>
                 <FileUpload
                     label={'file1'}
+                    dispatch={journalReducerDispatchFunction}
+                    dispatchAction={types.CHANGE_FILE1_ID}
                     value={file1}
                     setValue={setFile1}
                     index={index}
                 />
                 <FileUpload
                     label={'file2'}
+                    dispatch={journalReducerDispatchFunction}
+                    dispatchAction={types.CHANGE_FILE1_ID}
                     value={file2}
                     setValue={setFile2}
                     index={index}

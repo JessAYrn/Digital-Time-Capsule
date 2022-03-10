@@ -25,10 +25,7 @@ const WalletPage = (props) => {
         const journal = await actor.readJournal();
         console.log(journal);
         if("err" in journal){
-            actor.create({
-                userName: [],
-                email: []
-        }).then((result) => {
+            actor.create().then((result) => {
                 console.log(result);
             });
         } else {

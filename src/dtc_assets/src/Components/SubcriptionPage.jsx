@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect, useContext, useState} from 'react';
 import axios from 'axios';
 import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
 import  InputBox  from './Fields/InputBox';
@@ -17,15 +17,16 @@ const SubcriptionPage = (props) => {
     } = props;
 
     const { actor, authClient } = useContext(AppContext);
+    const [email, setEmail] = useState('');
+    const [userName, setUserName] = useState('');
 
     useEffect(async () => {
         const journal = await actor.readJournal();
+        setEmail(journal.ok.email[0]);
+        setUserName(journal.ok.userName[0]);
         console.log(journal);
         if("err" in journal){
-            actor.create({
-                userName: [],
-                email: []
-        }).then((result) => {
+            actor.create().then((result) => {
                 console.log(result);
             });
         } else {
@@ -40,6 +41,21 @@ const SubcriptionPage = (props) => {
 
     const stripe = useStripe();
     const elements = useElements();
+
+    const handleUpdate = async () => {
+
+        const profileInput = {
+            userName: (journalState.metaData.userName[0]) ? journalState.metaData.userName: [],
+            email: (journalState.metaData.email[0]) ? journalState.metaData.email: []
+        };
+
+        let result = await actor.updateProfile(profileInput);
+        console.log(result);
+        // if("err" in result){
+        //     showErrorMessage();
+        // };
+
+    };
 
     const handleSubmitPay = async (e) => {
         e.preventDefault();
@@ -124,6 +140,7 @@ const SubcriptionPage = (props) => {
 
     }; 
     console.log(journalState.metaData);
+    console.log(userName);
 
 return(
     <div className='subscriptionSectionContainer'>
@@ -138,7 +155,18 @@ return(
                     dispatchAction={types.CHANGE_EMAIL}
                     value={journalState.metaData.email}
                 />
-                {journalState.metaData.userName === 'admin' && <AdminSection/>}
+                <InputBox
+                    divClassName={"userName"}
+                    label={"Username: "}
+                    rows={"1"}
+                    dispatch={dispatch}
+                    dispatchAction={types.CHANGE_USERNAME}
+                    value={journalState.metaData.userName}
+                />
+                <div className={'updateButtonDiv'}>
+                    <button className={'updateButton'} type="submit" onClick={handleUpdate}> Update Username & Email </button>
+                </div>
+                {userName === 'admin' && <AdminSection/>}
                 <CardInput/>
                 <div className={'subscribeButtonDiv'}>
                     <button className={'subscriptionButton'} type="submit" onClick={handleSubmitSub}> Subscribe </button>

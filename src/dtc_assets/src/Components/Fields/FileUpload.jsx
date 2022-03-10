@@ -46,6 +46,11 @@ const FileUpload = (props) => {
             }
             setFileSrc(await displayUploadedFile(file));
             setValue(file);
+            dispatch({
+                payload: `fileUploadedAtTime:${Date.now()}`,
+                actionType: dispatchAction,
+                index: index
+            })
         } catch(e) {
             console.warn(e.message);
         }

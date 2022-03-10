@@ -100,11 +100,11 @@ npm start
 ## Command for minting ICP
 
 ```
-dfx canister call ledger transfer 'record {memo = 1234; amount = record { e8s=10_000_000_000 }; fee = record { e8s=0 }; from_subaccount = null; to =  '$(python3 -c 'print("vec{" + ";".join([str(b) for b in bytes.fromhex("'$LEDGER_ACC'")]) + "}")')'; created_at_time = null }' 
+dfx canister call ledger transfer 'record {memo = 1234; amount = record { e8s=10_000_000_000 }; fee = record { e8s=10_000 }; from_subaccount = null; to =  '$(python3 -c 'print("vec{" + ";".join([str(b) for b in bytes.fromhex("'$LEDGER_ACC'")]) + "}")')'; created_at_time = null }' 
 
 ```
 
-## Command for view ICP balance 
+## Command to view ICP balance 
 
 ```
 dfx canister call ledger account_balance '(record { account = '$(python3 -c 'print("vec{" + ";".join([str(b) for b in bytes.fromhex("'$LEDGER_ACC'")]) + "}")')' })'

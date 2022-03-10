@@ -2,16 +2,23 @@ type User =
  service {
    canisterAccount: () -> (AccountIdentifier) query;
    canisterBalance: () -> (Tokens);
-   create: (ProfileInput) -> (Result_5);
-   createJournalEntryFile: (text, text, blob) -> (Result);
+   create: () -> (Result_6);
+   createJournalEntryFile: (text, nat, blob) -> (Result);
    delete: () -> (Result);
-   getEntriesToBeSent: () -> (Result_4);
-   readEntry: (EntryKey) -> (Result_3);
+   getEntriesToBeSent: () -> (Result_5);
+   readEntry: (EntryKey) -> (Result_4);
+   readEntryFile: (text) -> (Result_3);
    readJournal: () -> (Result_2);
    transferICP: (nat64, AccountIdentifier) -> (Result);
    updateBio: (Bio) -> (Result);
    updateJournalEntry: (opt EntryKey, opt JournalEntryInput) -> (Result_1);
    updateProfile: (ProfileInput) -> (Result);
+ };
+type Trie_1 = 
+ variant {
+   branch: Branch_1;
+   "empty";
+   leaf: Leaf_1;
  };
 type Trie = 
  variant {
@@ -20,12 +27,12 @@ type Trie =
    leaf: Leaf;
  };
 type Tokens = record {e8s: nat64;};
-type Result_5 = 
+type Result_6 = 
  variant {
    err: Error;
    ok: AmountAccepted;
  };
-type Result_4 = 
+type Result_5 = 
  variant {
    err: Error;
    ok: vec record {
@@ -36,10 +43,15 @@ type Result_4 =
                  };
            };
  };
-type Result_3 = 
+type Result_4 = 
  variant {
    err: Error;
    ok: JournalEntry;
+ };
+type Result_3 = 
+ variant {
+   err: Error;
+   ok: Trie_1;
  };
 type Result_2 = 
  variant {
@@ -74,6 +86,14 @@ type ProfileInput =
    email: opt text;
    userName: opt text;
  };
+type List_1 = 
+ opt record {
+       record {
+         Key;
+         blob;
+       };
+       List_1;
+     };
 type List = 
  opt record {
        record {
@@ -82,6 +102,11 @@ type List =
        };
        List;
      };
+type Leaf_1 = 
+ record {
+   keyvals: AssocList_1;
+   size: nat;
+ };
 type Leaf = 
  record {
    keyvals: AssocList;
@@ -99,6 +124,8 @@ type JournalEntryInput =
    emailThree: text;
    emailTwo: text;
    entryTitle: text;
+   file1ID: text;
+   file2ID: text;
    location: text;
    lockTime: int;
    "text": text;
@@ -110,6 +137,8 @@ type JournalEntry =
    emailThree: text;
    emailTwo: text;
    entryTitle: text;
+   file1ID: text;
+   file2ID: text;
    location: text;
    lockTime: int;
    sent: bool;
@@ -125,8 +154,15 @@ type Error =
    NotAuthorized;
    NotFound;
    TxFailed;
+   UserNameTaken;
  };
 type EntryKey = record {entryKey: nat;};
+type Branch_1 = 
+ record {
+   left: Trie_1;
+   right: Trie_1;
+   size: nat;
+ };
 type Branch = 
  record {
    left: Trie;
@@ -141,6 +177,14 @@ type Bio =
    pob: text;
    preface: text;
  };
+type AssocList_1 = 
+ opt record {
+       record {
+         Key;
+         blob;
+       };
+       List_1;
+     };
 type AssocList = 
  opt record {
        record {
