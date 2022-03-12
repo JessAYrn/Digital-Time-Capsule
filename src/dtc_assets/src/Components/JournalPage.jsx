@@ -38,14 +38,25 @@ const JournalPage = (props) => {
             let index = 0;
             let promises = [];
 
-            const file1BlobSizeObj = await actor.readEntryFileSize(journalPageData.file1ID);
-            const file1BlobSize = parseInt(file1BlobSizeObj.ok);
-            while(index < file1BlobSize){
-                promises.push(retrieveChunk(journalPageData.file1ID, index));
-                index += 1;
-            };
-            const file1Blob = await Promise.all(promises); 
-            console.log(file1Blob);
+            const file1ChunkCounteObj = await actor.readEntryFileSize(journalPageData.file1ID);
+            const file1ChunkCount = parseInt(file1ChunkCounteObj.ok);
+            if( file1ChunkCount > 0){
+                while(index < file1ChunkCount){
+                    promises.push(retrieveChunk(journalPageData.file1ID, index));
+                    index += 1;
+                };
+                const file1Bytes = await Promise.all(promises);
+                let file1BytesArray =[];
+                file1Bytes.map((blobObj) => {
+                    file1BytesArray.push(blobObj.ok);
+                });
+                file1BytesArray = file1BytesArray.flat(1);
+                const file1ArrayBuffer = new Uint8Array(file1BytesArray).buffer;
+                const file1Blob = new Blob([file1ArrayBuffer], { type: "image/png" })
+                const file1AsFile = new File([file1Blob],journalPageData.file1ID, {type: "image/png", lastModified: Date.now()} )
+                setFile1(file1AsFile);
+                console.log(file1AsFile);
+            }
         };
     
         if(journalPageData.file2ID !== 'empty'){

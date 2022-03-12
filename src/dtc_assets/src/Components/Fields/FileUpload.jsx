@@ -38,6 +38,7 @@ const FileUpload = (props) => {
 
     const handleUpload = async () => {
         const file = inputRef.current.files[0] || value;
+        console.log(file);
         try{
             if(file.type.includes("image")){
                 setFileType("image");
