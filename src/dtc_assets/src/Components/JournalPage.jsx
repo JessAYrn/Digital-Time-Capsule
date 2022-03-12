@@ -34,15 +34,16 @@ const JournalPage = (props) => {
     }; 
 
     useEffect(async () => {
-        if(journalPageData.file1ID !== 'empty'){
+        console.log(journalPageData);
+        if(journalPageData.file1MetaData.fileName !== 'null'){
             let index = 0;
             let promises = [];
 
-            const file1ChunkCounteObj = await actor.readEntryFileSize(journalPageData.file1ID);
+            const file1ChunkCounteObj = await actor.readEntryFileSize(journalPageData.file1MetaData.fileName);
             const file1ChunkCount = parseInt(file1ChunkCounteObj.ok);
             if( file1ChunkCount > 0){
                 while(index < file1ChunkCount){
-                    promises.push(retrieveChunk(journalPageData.file1ID, index));
+                    promises.push(retrieveChunk(journalPageData.file1MetaData.fileName, index));
                     index += 1;
                 };
                 const file1Bytes = await Promise.all(promises);
@@ -52,18 +53,62 @@ const JournalPage = (props) => {
                 });
                 file1BytesArray = file1BytesArray.flat(1);
                 const file1ArrayBuffer = new Uint8Array(file1BytesArray).buffer;
-                const file1Blob = new Blob([file1ArrayBuffer], { type: "image/png" })
-                const file1AsFile = new File([file1Blob],journalPageData.file1ID, {type: "image/png", lastModified: Date.now()} )
+                const file1Blob = new Blob(
+                    [file1ArrayBuffer], 
+                    { 
+                        type: journalPageData.file1MetaData.fileType 
+                    }
+                );
+                const file1AsFile = new File(
+                    [file1Blob],
+                    journalPageData.file1MetaData.fileName, 
+                    {
+                        type: journalPageData.file1MetaData.fileType, 
+                        lastModified: parseInt(journalPageData.file1MetaData.lastModified)
+                    } 
+                );
                 setFile1(file1AsFile);
                 console.log(file1AsFile);
             }
         };
     
-        if(journalPageData.file2ID !== 'empty'){
-            const file2Blob = await actor.readEntryFileSize(journalPageData.file2ID);
-            console.log(file2Blob);
+        if(journalPageData.file2MetaData.fileName !== 'null'){
+            let index = 0;
+            let promises = [];
+
+            const file2ChunkCounteObj = await actor.readEntryFileSize(journalPageData.file2MetaData.fileName);
+            const file2ChunkCount = parseInt(file2ChunkCounteObj.ok);
+            if( file2ChunkCount > 0){
+                while(index < file2ChunkCount){
+                    promises.push(retrieveChunk(journalPageData.file2MetaData.fileName, index));
+                    index += 1;
+                };
+                const file2Bytes = await Promise.all(promises);
+                let file2BytesArray =[];
+                file2Bytes.map((blobObj) => {
+                    file2BytesArray.push(blobObj.ok);
+                });
+                file2BytesArray = file2BytesArray.flat(1);
+                const file2ArrayBuffer = new Uint8Array(file2BytesArray).buffer;
+                const file2Blob = new Blob(
+                    [file2ArrayBuffer], 
+                    { 
+                        type: journalPageData.file2MetaData.fileType 
+                    }
+                );
+                const file2AsFile = new File(
+                    [file2Blob],
+                    journalPageData.file2MetaData.fileName, 
+                    {
+                        type: journalPageData.file2MetaData.fileType, 
+                        lastModified: parseInt(journalPageData.file2MetaData.lastModified)
+                    } 
+                );
+                setFile2(file2AsFile);
+                console.log(file2AsFile);
+            }
         };
-    },[journalPageData.file1ID, journalPageData.file2ID]);
+    },[journalPageData.file1MetaData.fileName, journalPageData.file2MetaData.fileName]);
     
    
     const uploadChunk = async (fileId, chunkId, fileChunk) => {
@@ -87,8 +132,8 @@ const JournalPage = (props) => {
             emailOne: journalEntry.emailOne,
             emailTwo: journalEntry.emailTwo,
             emailThree: journalEntry.emailThree,
-            file1ID: journalEntry.file1ID,
-            file2ID: journalEntry.file2ID
+            file1MetaData: journalEntry.file1MetaData,
+            file2MetaData: journalEntry.file2MetaData
         }];
 
         const entryKeyAsApiObject = (entryKey >= 0 && entryKey < journalSize ) ? [{entryKey: entryKey}] : [];
@@ -132,11 +177,13 @@ const JournalPage = (props) => {
 
 
     const handleSubmit = useCallback(async () => {
-        if(journalPageData.file1ID !== 'empty'){
-            await mapAndSendFileToApi(journalPageData.file1ID, file1);
+
+        if(journalPageData.file1MetaData.fileName !== 'null'){
+            await mapAndSendFileToApi(journalPageData.file1MetaData.fileName, file1);
         };
-        if(journalPageData.file2ID !== 'empty') {
-            await mapAndSendFileToApi(journalPageData.file2ID, file2);
+        if(journalPageData.file2MetaData.fileName !== 'null') {
+            console.log(journalPageData.file2MetaData);
+            await mapAndSendFileToApi(journalPageData.file2MetaData.fileName, file2);
         }
         await mapAndSendEntryToApi(index, journalPageData);
         setSubmissionsMade(submissionsMade + 1);
@@ -190,7 +237,7 @@ const JournalPage = (props) => {
                 <FileUpload
                     label={'file1'}
                     dispatch={journalReducerDispatchFunction}
-                    dispatchAction={types.CHANGE_FILE1_ID}
+                    dispatchAction={types.CHANGE_FILE1_METADATA}
                     value={file1}
                     setValue={setFile1}
                     index={index}
@@ -198,7 +245,7 @@ const JournalPage = (props) => {
                 <FileUpload
                     label={'file2'}
                     dispatch={journalReducerDispatchFunction}
-                    dispatchAction={types.CHANGE_FILE1_ID}
+                    dispatchAction={types.CHANGE_FILE2_METADATA}
                     value={file2}
                     setValue={setFile2}
                     index={index}

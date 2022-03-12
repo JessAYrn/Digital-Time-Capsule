@@ -31,8 +31,16 @@ shared(msg) actor class Journal (principal : Principal) = this {
         emailOne: Text;
         emailTwo: Text;
         emailThree: Text;
-        file1ID: Text;
-        file2ID: Text;
+        file1MetaData: {
+            fileName: Text;
+            lastModified: Int;
+            fileType: Text;
+        };
+        file2MetaData: {
+            fileName: Text;
+            lastModified: Int;
+            fileType: Text;
+        };
     }; 
 
     type JournalEntryInput = {
@@ -44,8 +52,16 @@ shared(msg) actor class Journal (principal : Principal) = this {
         emailOne: Text;
         emailTwo: Text;
         emailThree: Text;
-        file1ID: Text;
-        file2ID: Text;
+        file1MetaData: {
+            fileName: Text;
+            lastModified: Int;
+            fileType: Text;
+        };
+        file2MetaData: {
+            fileName: Text;
+            lastModified: Int;
+            fileType: Text;
+        };
     }; 
 
     type JournalFile = {
@@ -126,8 +142,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
             emailOne = journalEntry.emailOne;
             emailTwo = journalEntry.emailTwo;
             emailThree = journalEntry.emailThree;
-            file1ID = journalEntry.file1ID;
-            file2ID = journalEntry.file2ID;
+            file1MetaData = journalEntry.file1MetaData;
+            file2MetaData = journalEntry.file2MetaData;
         };
         
         let (newJournal, oldJournal) = Trie.put(
@@ -220,8 +236,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
                         emailOne = x.1.emailOne;
                         emailTwo = x.1.emailTwo;
                         emailThree = x.1.emailThree;
-                        file1ID = x.1.file1ID;
-                        file2ID = x.1.file2ID;
+                        file1MetaData = x.1.file1MetaData;
+                        file2MetaData = x.1.file2MetaData;
                     };
 
                     let (newJournal, oldJournal) = Trie.put(
@@ -339,8 +355,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
                     emailOne = journalEntry.emailOne;
                     emailTwo = journalEntry.emailTwo;
                     emailThree = journalEntry.emailThree;
-                    file1ID = v.file1ID;
-                    file2ID = v.file2ID;
+                    file1MetaData = v.file1MetaData;
+                    file2MetaData = v.file2MetaData;
                 };
 
                 let (newJournal, oldEntryValue) = Trie.put(

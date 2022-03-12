@@ -22,8 +22,8 @@ export const types = {
     CHANGE_RECIPIENT_EMAIL_ONE: "CHANGE_RECIPIENT_EMAIL_ONE",
     CHANGE_RECIPIENT_EMAIL_TWO: "CHANGE_RECIPIENT_EMAIL_TWO",
     CHANGE_RECIPIENT_EMAIL_THREE: "CHANGE_RECIPIENT_EMAIL_THREE",
-    CHANGE_FILE1_ID: "CHANGE_FILE1_ID",
-    CHANGE_FILE2_ID: "CHANGE_FILE2_ID"
+    CHANGE_FILE1_METADATA: "CHANGE_FILE1_METADATA",
+    CHANGE_FILE2_METADATA: "CHANGE_FILE2_METADATA"
 }
 
 export const initialState = {
@@ -54,8 +54,16 @@ export const initialState = {
             emailOne: '',
             emailTwo: '',
             emailThree: '', 
-            file1ID:'empty',
-            file2ID:'empty'
+            file1MetaData:{
+                fileName: 'null',
+                lastModified: 0,
+                fileType: 'null'
+            },
+            file2MetaData:{
+                fileName: 'null',
+                lastModified: 0,
+                fileType: 'null'
+            }
         }
     ]
 
@@ -71,8 +79,16 @@ const freshPage = {
     emailOne: '',
     emailTwo: '',
     emailThree: '', 
-    file1ID:'empty',
-    file2ID:'empty'
+    file1MetaData:{
+        fileName: 'null',
+        lastModified: 0,
+        fileType: 'null'
+    },
+    file2MetaData:{
+        fileName: 'null',
+        lastModified: 0,
+        fileType: 'null'
+    }
 }
 
 const changeValue = (state = initialState, action) => {
@@ -177,19 +193,19 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
-        case types.CHANGE_FILE1_ID:
+        case types.CHANGE_FILE1_METADATA:
             updatedJournalPage = {
                 ... state.journal[index],
-                file1ID: payload
+                file1MetaData: payload
             }
             state.journal[index] = updatedJournalPage;
             return {
                 ...state
             }
-        case types.CHANGE_FILE2_ID:
+        case types.CHANGE_FILE2_METADATA:
         updatedJournalPage = {
             ... state.journal[index],
-            file2ID: payload
+            file2MetaData: payload
         }
         state.journal[index] = updatedJournalPage;
         return {

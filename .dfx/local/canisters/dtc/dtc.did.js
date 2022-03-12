@@ -17,17 +17,25 @@ export const idlFactory = ({ IDL }) => {
   const Result = IDL.Variant({ 'ok' : IDL.Null, 'err' : Error });
   const JournalEntry = IDL.Record({
     'unlockTime' : IDL.Int,
+    'file2MetaData' : IDL.Record({
+      'fileName' : IDL.Text,
+      'fileType' : IDL.Text,
+      'lastModified' : IDL.Int,
+    }),
     'emailThree' : IDL.Text,
     'date' : IDL.Text,
     'sent' : IDL.Bool,
     'text' : IDL.Text,
+    'file1MetaData' : IDL.Record({
+      'fileName' : IDL.Text,
+      'fileType' : IDL.Text,
+      'lastModified' : IDL.Int,
+    }),
     'lockTime' : IDL.Int,
     'emailOne' : IDL.Text,
     'emailTwo' : IDL.Text,
     'location' : IDL.Text,
     'entryTitle' : IDL.Text,
-    'file1ID' : IDL.Text,
-    'file2ID' : IDL.Text,
   });
   const Result_6 = IDL.Variant({
     'ok' : IDL.Vec(
@@ -60,16 +68,24 @@ export const idlFactory = ({ IDL }) => {
     'err' : Error,
   });
   const JournalEntryInput = IDL.Record({
+    'file2MetaData' : IDL.Record({
+      'fileName' : IDL.Text,
+      'fileType' : IDL.Text,
+      'lastModified' : IDL.Int,
+    }),
     'emailThree' : IDL.Text,
     'date' : IDL.Text,
     'text' : IDL.Text,
+    'file1MetaData' : IDL.Record({
+      'fileName' : IDL.Text,
+      'fileType' : IDL.Text,
+      'lastModified' : IDL.Int,
+    }),
     'lockTime' : IDL.Int,
     'emailOne' : IDL.Text,
     'emailTwo' : IDL.Text,
     'location' : IDL.Text,
     'entryTitle' : IDL.Text,
-    'file1ID' : IDL.Text,
-    'file2ID' : IDL.Text,
   });
   const Branch = IDL.Record({
     'left' : Trie,

@@ -48,7 +48,11 @@ const FileUpload = (props) => {
             setFileSrc(await displayUploadedFile(file));
             setValue(file);
             dispatch({
-                payload: `fileUploadedAtTime:${Date.now()}`,
+                payload: {
+                    fileName: `${file.name}-${Date.now()}`,
+                    lastModified: file.lastModified,
+                    fileType: file.type
+                },
                 actionType: dispatchAction,
                 index: index
             })

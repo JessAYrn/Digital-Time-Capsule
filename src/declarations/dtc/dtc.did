@@ -111,8 +111,16 @@ type JournalEntryInput =
    emailThree: text;
    emailTwo: text;
    entryTitle: text;
-   file1ID: text;
-   file2ID: text;
+   file1MetaData: record {
+                    fileName: text;
+                    fileType: text;
+                    lastModified: int;
+                  };
+   file2MetaData: record {
+                    fileName: text;
+                    fileType: text;
+                    lastModified: int;
+                  };
    location: text;
    lockTime: int;
    "text": text;
@@ -124,8 +132,16 @@ type JournalEntry =
    emailThree: text;
    emailTwo: text;
    entryTitle: text;
-   file1ID: text;
-   file2ID: text;
+   file1MetaData: record {
+                    fileName: text;
+                    fileType: text;
+                    lastModified: int;
+                  };
+   file2MetaData: record {
+                    fileName: text;
+                    fileType: text;
+                    lastModified: int;
+                  };
    location: text;
    lockTime: int;
    sent: bool;

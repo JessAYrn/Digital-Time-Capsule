@@ -71825,6 +71825,7 @@ const FileUpload = (props) => {
     }, [value]);
     const handleUpload = async () => {
         const file = inputRef.current.files[0] || value;
+        console.log(file);
         try {
             if (file.type.includes("image")) {
                 setFileType("image");
@@ -71835,7 +71836,11 @@ const FileUpload = (props) => {
             setFileSrc(await displayUploadedFile(file));
             setValue(file);
             dispatch({
-                payload: `fileUploadedAtTime:${Date.now()}`,
+                payload: {
+                    fileName: file.name,
+                    lastModified: file.lastModified,
+                    fileType: file.type
+                },
                 actionType: dispatchAction,
                 index: index
             });
@@ -72292,27 +72297,37 @@ const JournalPage = (props) => {
         return await actor.readEntryFileChunk(fileId, chunkIndex);
     };
     (0, react_1.useEffect)(async () => {
-        if (journalPageData.file1ID !== 'empty') {
+        if (journalPageData.file1MetaData.fileName) {
             let index = 0;
             let promises = [];
-            const file1BlobSizeObj = await actor.readEntryFileSize(journalPageData.file1ID);
-            const file1BlobSize = parseInt(file1BlobSizeObj.ok);
-            while (index < file1BlobSize) {
-                promises.push(retrieveChunk(journalPageData.file1ID, index));
-                index += 1;
+            const file1ChunkCounteObj = await actor.readEntryFileSize(journalPageData.file1MetaData.fileName);
+            const file1ChunkCount = parseInt(file1ChunkCounteObj.ok);
+            if (file1ChunkCount > 0) {
+                while (index < file1ChunkCount) {
+                    promises.push(retrieveChunk(journalPageData.file1MetaData.fileName, index));
+                    index += 1;
+                }
+                ;
+                const file1Bytes = await Promise.all(promises);
+                let file1BytesArray = [];
+                file1Bytes.map((blobObj) => {
+                    file1BytesArray.push(blobObj.ok);
+                });
+                file1BytesArray = file1BytesArray.flat(1);
+                const file1ArrayBuffer = new Uint8Array(file1BytesArray).buffer;
+                const file1Blob = new Blob([file1ArrayBuffer], { type: "image/png" });
+                const file1AsFile = new File([file1Blob], journalPageData.file1MetaData.fileName, { type: "image/png", lastModified: Date.now() });
+                setFile1(file1AsFile);
+                console.log(file1AsFile);
             }
-            ;
-            const file1Blob = await Promise.all(promises);
-            console.log(file1BlobSize.ok);
-            console.log(file1Blob);
         }
         ;
-        if (journalPageData.file2ID !== 'empty') {
-            const file2Blob = await actor.readEntryFileSize(journalPageData.file2ID);
+        if (journalPageData.file2MetaData.fileName) {
+            const file2Blob = await actor.readEntryFileSize(journalPageData.file2MetaData.fileName);
             console.log(file2Blob);
         }
         ;
-    }, [journalPageData.file1ID, journalPageData.file2ID]);
+    }, [journalPageData.file1MetaData, journalPageData.file2MetaData]);
     const uploadChunk = async (fileId, chunkId, fileChunk) => {
         console.log(chunkId);
         return actor.createJournalEntryFile(fileId, chunkId, [...new Uint8Array(await fileChunk.arrayBuffer())]);
@@ -72327,8 +72342,8 @@ const JournalPage = (props) => {
                 emailOne: journalEntry.emailOne,
                 emailTwo: journalEntry.emailTwo,
                 emailThree: journalEntry.emailThree,
-                file1ID: journalEntry.file1ID,
-                file2ID: journalEntry.file2ID
+                file1MetaData: journalEntry.file1MetaData,
+                file2MetaData: journalEntry.file2MetaData
             }];
         const entryKeyAsApiObject = (entryKey >= 0 && entryKey < journalSize) ? [{ entryKey: entryKey }] : [];
         actor.updateJournalEntry(entryKeyAsApiObject, entryAsApiObject);
@@ -72351,12 +72366,12 @@ const JournalPage = (props) => {
         console.log(results);
     };
     const handleSubmit = (0, react_1.useCallback)(async () => {
-        if (journalPageData.file1ID !== 'empty') {
-            await mapAndSendFileToApi(journalPageData.file1ID, file1);
+        if (journalPageData.file1MetaData) {
+            await mapAndSendFileToApi(journalPageData.file1MetaData.fileName, file1);
         }
         ;
-        if (journalPageData.file2ID !== 'empty') {
-            await mapAndSendFileToApi(journalPageData.file2ID, file2);
+        if (journalPageData.file2MetaData) {
+            await mapAndSendFileToApi(journalPageData.file2MetaData.fileName, file2);
         }
         await mapAndSendEntryToApi(index, journalPageData);
         setSubmissionsMade(submissionsMade + 1);
@@ -72372,8 +72387,8 @@ const JournalPage = (props) => {
             react_1.default.createElement(InputBox_1.default, { label: "Location: ", rows: "1", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_LOCATION, index: index, value: (journalPageData) ? journalPageData.location : '' }),
             react_1.default.createElement(InputBox_1.default, { divClassName: "entry", label: "Entry: ", rows: "59", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_ENTRY, index: index, value: (journalPageData) ? journalPageData.entry : '' })),
         react_1.default.createElement("div", { className: "journalImages" },
-            react_1.default.createElement(FileUpload_1.default, { label: 'file1', dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_FILE1_ID, value: file1, setValue: setFile1, index: index }),
-            react_1.default.createElement(FileUpload_1.default, { label: 'file2', dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_FILE1_ID, value: file2, setValue: setFile2, index: index })),
+            react_1.default.createElement(FileUpload_1.default, { label: 'file1', dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_FILE1_METADATA, value: file1, setValue: setFile1, index: index }),
+            react_1.default.createElement(FileUpload_1.default, { label: 'file2', dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_FILE2_METADATA, value: file2, setValue: setFile2, index: index })),
         react_1.default.createElement("div", { className: 'recipientEmailsDiv' },
             react_1.default.createElement(InputBox_1.default, { label: "1st Recipient Email: ", rows: "1", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_RECIPIENT_EMAIL_ONE, index: index, value: (journalPageData) ? journalPageData.emailOne : '' }),
             react_1.default.createElement(InputBox_1.default, { label: "2nd Recipient Email: ", rows: "1", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_RECIPIENT_EMAIL_TWO, index: index, value: (journalPageData) ? journalPageData.emailTwo : '' }),
@@ -73256,8 +73271,8 @@ exports.types = {
     CHANGE_RECIPIENT_EMAIL_ONE: "CHANGE_RECIPIENT_EMAIL_ONE",
     CHANGE_RECIPIENT_EMAIL_TWO: "CHANGE_RECIPIENT_EMAIL_TWO",
     CHANGE_RECIPIENT_EMAIL_THREE: "CHANGE_RECIPIENT_EMAIL_THREE",
-    CHANGE_FILE1_ID: "CHANGE_FILE1_ID",
-    CHANGE_FILE2_ID: "CHANGE_FILE2_ID"
+    CHANGE_FILE1_METADATA: "CHANGE_FILE1_METADATA",
+    CHANGE_FILE2_METADATA: "CHANGE_FILE2_METADATA"
 };
 exports.initialState = {
     metaData: {
@@ -73287,8 +73302,8 @@ exports.initialState = {
             emailOne: '',
             emailTwo: '',
             emailThree: '',
-            file1ID: 'empty',
-            file2ID: 'empty'
+            file1MetaData: {},
+            file2MetaData: {}
         }
     ]
 };
@@ -73302,8 +73317,8 @@ const freshPage = {
     emailOne: '',
     emailTwo: '',
     emailThree: '',
-    file1ID: 'empty',
-    file2ID: 'empty'
+    file1MetaData: {},
+    file2MetaData: {}
 };
 const changeValue = (state = exports.initialState, action) => {
     const { actionType, payload, index } = action;
@@ -73403,19 +73418,19 @@ const changeValue = (state = exports.initialState, action) => {
             return {
                 ...state
             };
-        case exports.types.CHANGE_FILE1_ID:
+        case exports.types.CHANGE_FILE1_METADATA:
             updatedJournalPage = {
                 ...state.journal[index],
-                file1ID: payload
+                file1MetaData: payload
             };
             state.journal[index] = updatedJournalPage;
             return {
                 ...state
             };
-        case exports.types.CHANGE_FILE2_ID:
+        case exports.types.CHANGE_FILE2_METADATA:
             updatedJournalPage = {
                 ...state.journal[index],
-                file2ID: payload
+                file2MetaData: payload
             };
             state.journal[index] = updatedJournalPage;
             return {
@@ -76430,17 +76445,25 @@ const idlFactory = ({ IDL }) => {
   const Result = IDL.Variant({ 'ok' : IDL.Null, 'err' : Error });
   const JournalEntry = IDL.Record({
     'unlockTime' : IDL.Int,
+    'file2MetaData' : IDL.Record({
+      'fileName' : IDL.Text,
+      'fileType' : IDL.Text,
+      'lastModified' : IDL.Int,
+    }),
     'emailThree' : IDL.Text,
     'date' : IDL.Text,
     'sent' : IDL.Bool,
     'text' : IDL.Text,
+    'file1MetaData' : IDL.Record({
+      'fileName' : IDL.Text,
+      'fileType' : IDL.Text,
+      'lastModified' : IDL.Int,
+    }),
     'lockTime' : IDL.Int,
     'emailOne' : IDL.Text,
     'emailTwo' : IDL.Text,
     'location' : IDL.Text,
     'entryTitle' : IDL.Text,
-    'file1ID' : IDL.Text,
-    'file2ID' : IDL.Text,
   });
   const Result_6 = IDL.Variant({
     'ok' : IDL.Vec(
@@ -76473,16 +76496,24 @@ const idlFactory = ({ IDL }) => {
     'err' : Error,
   });
   const JournalEntryInput = IDL.Record({
+    'file2MetaData' : IDL.Record({
+      'fileName' : IDL.Text,
+      'fileType' : IDL.Text,
+      'lastModified' : IDL.Int,
+    }),
     'emailThree' : IDL.Text,
     'date' : IDL.Text,
     'text' : IDL.Text,
+    'file1MetaData' : IDL.Record({
+      'fileName' : IDL.Text,
+      'fileType' : IDL.Text,
+      'lastModified' : IDL.Int,
+    }),
     'lockTime' : IDL.Int,
     'emailOne' : IDL.Text,
     'emailTwo' : IDL.Text,
     'location' : IDL.Text,
     'entryTitle' : IDL.Text,
-    'file1ID' : IDL.Text,
-    'file2ID' : IDL.Text,
   });
   const Branch = IDL.Record({
     'left' : Trie,
@@ -76555,7 +76586,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 // CANISTER_ID is replaced by webpack based on node environment
-const canisterId = "wflfh-4yaaa-aaaaa-aaata-cai";
+const canisterId = "x2dwq-7aaaa-aaaaa-aaaxq-cai";
 
 /**
  * 

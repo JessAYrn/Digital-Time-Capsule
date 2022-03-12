@@ -50,7 +50,7 @@ export const mapApiObjectToFrontEndObject = (backEndObj) => {
         emailTwo: backEndObj.emailTwo,
         emailThree: backEndObj.emailThree,
         sent : backEndObj.sent,
-        file1ID: backEndObj.file1ID,
-        file2ID: backEndObj.file2ID
+        file1MetaData: backEndObj.file1MetaData,
+        file2MetaData: backEndObj.file2MetaData
     }
 }

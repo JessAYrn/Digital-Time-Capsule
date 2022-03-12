@@ -21,29 +21,45 @@ export type Error = { 'TxFailed' : null } |
 export type Hash = number;
 export interface JournalEntry {
   'unlockTime' : bigint,
+  'file2MetaData' : {
+    'fileName' : string,
+    'fileType' : string,
+    'lastModified' : bigint,
+  },
   'emailThree' : string,
   'date' : string,
   'sent' : boolean,
   'text' : string,
+  'file1MetaData' : {
+    'fileName' : string,
+    'fileType' : string,
+    'lastModified' : bigint,
+  },
   'lockTime' : bigint,
   'emailOne' : string,
   'emailTwo' : string,
   'location' : string,
   'entryTitle' : string,
-  'file1ID' : string,
-  'file2ID' : string,
 }
 export interface JournalEntryInput {
+  'file2MetaData' : {
+    'fileName' : string,
+    'fileType' : string,
+    'lastModified' : bigint,
+  },
   'emailThree' : string,
   'date' : string,
   'text' : string,
+  'file1MetaData' : {
+    'fileName' : string,
+    'fileType' : string,
+    'lastModified' : bigint,
+  },
   'lockTime' : bigint,
   'emailOne' : string,
   'emailTwo' : string,
   'location' : string,
   'entryTitle' : string,
-  'file1ID' : string,
-  'file2ID' : string,
 }
 export interface Key { 'key' : bigint, 'hash' : Hash }
 export interface Leaf { 'size' : bigint, 'keyvals' : AssocList }
