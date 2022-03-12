@@ -32,6 +32,11 @@ const FileUpload = (props) => {
 
     useEffect( async () => {
         if(value){
+            if(value.type.includes("image")){
+                setFileType("image");
+            } else if(value.type.includes("video")){
+                setFileType("video");
+            }
             setFileSrc(await displayUploadedFile(value));
         }
     },[value]);
