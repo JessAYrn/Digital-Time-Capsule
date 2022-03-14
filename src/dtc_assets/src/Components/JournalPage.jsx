@@ -6,6 +6,7 @@ import {types} from "../reducers/journalReducer";
 import  {AppContext} from "../App";
 import "./JournalPage.scss";
 import DatePicker from "./Fields/DatePicker";
+import LoadScreen from "./LoadScreen";
 
 const CHUNK_SIZE = 1024 * 1024;
 
@@ -13,6 +14,7 @@ const JournalPage = (props) => {
 
     const [file1, setFile1] = useState(null);
     const [file2, setFile2] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     const {
         journalReducerDispatchFunction,
@@ -36,6 +38,7 @@ const JournalPage = (props) => {
     useEffect(async () => {
         console.log(journalPageData);
         if(journalPageData.file1MetaData.fileName !== 'null'){
+            setIsLoading(true);
             let index = 0;
             let promises = [];
 
@@ -73,6 +76,7 @@ const JournalPage = (props) => {
         };
     
         if(journalPageData.file2MetaData.fileName !== 'null'){
+            setIsLoading(true);
             let index = 0;
             let promises = [];
 
@@ -108,6 +112,7 @@ const JournalPage = (props) => {
                 console.log(file2AsFile);
             }
         };
+        setIsLoading(false);
     },[journalPageData.file1MetaData.fileName, journalPageData.file2MetaData.fileName]);
     
    
@@ -193,6 +198,8 @@ const JournalPage = (props) => {
     console.log(journalPageData);
 
     return (
+        isLoading ? 
+        <LoadScreen/> :
         <div className={"journalPageContainer"}>
             <div className={"logoDiv"}>
                 <img className={'backButtonImg'} src="back-icon.png" alt="Back Button" onClick={(e) => closePage(e)}/>
