@@ -7,6 +7,7 @@ import CardInput from './CardInput';
 import AdminSection from './AdminSection';
 import "./SubscriptionPage.scss";
 import { AppContext } from '../AccountPage';
+import LoadScreen from './LoadScreen';
 
 
 
@@ -17,18 +18,18 @@ const SubcriptionPage = (props) => {
     } = props;
 
     const { actor, authClient } = useContext(AppContext);
-    const [email, setEmail] = useState('');
     const [userName, setUserName] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(async () => {
+        setIsLoading(true);
         const journal = await actor.readJournal();
-        setEmail(journal.ok.email[0]);
         setUserName(journal.ok.userName[0]);
-        console.log(journal);
         if("err" in journal){
             actor.create().then((result) => {
                 console.log(result);
             });
+            setIsLoading(false);
         } else {
             const metaData = {email : journal.ok.email, userName: journal.ok.userName};
             
@@ -36,6 +37,7 @@ const SubcriptionPage = (props) => {
                 payload: metaData,
                 actionType: types.SET_METADATA
             });
+            setIsLoading(false);
         }
     },[actor, authClient]);
 
@@ -140,9 +142,10 @@ const SubcriptionPage = (props) => {
 
     }; 
     console.log(journalState.metaData);
-    console.log(userName);
 
 return(
+    isLoading ?
+    <LoadScreen/> :
     <div className='subscriptionSectionContainer'>
         <div className={'logoDiv'}>
             <img className={'logoImg'}src="dtc-logo-black.png" alt="Logo"/>
