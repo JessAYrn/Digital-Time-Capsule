@@ -265,6 +265,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "Expiry": () => (/* reexport safe */ _transforms__WEBPACK_IMPORTED_MODULE_6__.Expiry),
 /* harmony export */   "HttpAgent": () => (/* binding */ HttpAgent),
+/* harmony export */   "IdentityInvalidError": () => (/* binding */ IdentityInvalidError),
 /* harmony export */   "RequestStatusResponseStatus": () => (/* binding */ RequestStatusResponseStatus),
 /* harmony export */   "makeExpiryTransform": () => (/* reexport safe */ _transforms__WEBPACK_IMPORTED_MODULE_6__.makeExpiryTransform),
 /* harmony export */   "makeNonce": () => (/* reexport safe */ _types__WEBPACK_IMPORTED_MODULE_7__.makeNonce),
@@ -313,6 +314,12 @@ class HttpDefaultFetchError extends _errors__WEBPACK_IMPORTED_MODULE_1__.AgentEr
         this.message = message;
     }
 }
+class IdentityInvalidError extends _errors__WEBPACK_IMPORTED_MODULE_1__.AgentError {
+    constructor(message) {
+        super(message);
+        this.message = message;
+    }
+}
 function getDefaultFetch() {
     let defaultFetch;
     if (typeof window !== 'undefined') {
@@ -327,7 +334,7 @@ function getDefaultFetch() {
     else if (typeof __webpack_require__.g !== 'undefined') {
         // Node context
         if (__webpack_require__.g.fetch) {
-            defaultFetch = __webpack_require__.g.fetch;
+            defaultFetch = __webpack_require__.g.fetch.bind(__webpack_require__.g);
         }
         else {
             throw new HttpDefaultFetchError('Fetch implementation was not available. You appear to be in a Node.js context, but global.fetch was not available.');
@@ -335,7 +342,7 @@ function getDefaultFetch() {
     }
     else if (typeof self !== 'undefined') {
         if (self.fetch) {
-            defaultFetch = self.fetch;
+            defaultFetch = self.fetch.bind(self);
         }
     }
     if (defaultFetch) {
@@ -405,10 +412,16 @@ class HttpAgent {
         this._pipeline.splice(i >= 0 ? i : this._pipeline.length, 0, Object.assign(fn, { priority }));
     }
     async getPrincipal() {
+        if (!this._identity) {
+            throw new IdentityInvalidError("This identity has expired due this application's security policy. Please refresh your authentication.");
+        }
         return (await this._identity).getPrincipal();
     }
     async call(canisterId, options, identity) {
-        const id = (await (identity !== undefined ? await identity : await this._identity));
+        const id = await (identity !== undefined ? await identity : await this._identity);
+        if (!id) {
+            throw new IdentityInvalidError("This identity has expired due this application's security policy. Please refresh your authentication.");
+        }
         const canister = _dfinity_principal__WEBPACK_IMPORTED_MODULE_0__.Principal.from(canisterId);
         const ecid = options.effectiveCanisterId
             ? _dfinity_principal__WEBPACK_IMPORTED_MODULE_0__.Principal.from(options.effectiveCanisterId)
@@ -457,6 +470,9 @@ class HttpAgent {
     }
     async query(canisterId, fields, identity) {
         const id = await (identity !== undefined ? await identity : await this._identity);
+        if (!id) {
+            throw new IdentityInvalidError("This identity has expired due this application's security policy. Please refresh your authentication.");
+        }
         const canister = typeof canisterId === 'string' ? _dfinity_principal__WEBPACK_IMPORTED_MODULE_0__.Principal.fromText(canisterId) : canisterId;
         const sender = (id === null || id === void 0 ? void 0 : id.getPrincipal()) || _dfinity_principal__WEBPACK_IMPORTED_MODULE_0__.Principal.anonymous();
         const request = {
@@ -478,7 +494,7 @@ class HttpAgent {
             body: request,
         });
         // Apply transform for identity.
-        transformedRequest = await id.transformRequest(transformedRequest);
+        transformedRequest = await (id === null || id === void 0 ? void 0 : id.transformRequest(transformedRequest));
         const body = _cbor__WEBPACK_IMPORTED_MODULE_3__.encode(transformedRequest.body);
         const response = await this._fetch('' + new URL(`/api/v2/canister/${canister.toText()}/query`, this._host), Object.assign(Object.assign({}, transformedRequest.request), { body }));
         if (!response.ok) {
@@ -491,6 +507,9 @@ class HttpAgent {
     async readState(canisterId, fields, identity) {
         const canister = typeof canisterId === 'string' ? _dfinity_principal__WEBPACK_IMPORTED_MODULE_0__.Principal.fromText(canisterId) : canisterId;
         const id = await (identity !== undefined ? await identity : await this._identity);
+        if (!id) {
+            throw new IdentityInvalidError("This identity has expired due this application's security policy. Please refresh your authentication.");
+        }
         const sender = (id === null || id === void 0 ? void 0 : id.getPrincipal()) || _dfinity_principal__WEBPACK_IMPORTED_MODULE_0__.Principal.anonymous();
         // TODO: remove this any. This can be a Signed or UnSigned request.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -508,7 +527,7 @@ class HttpAgent {
             },
         });
         // Apply transform for identity.
-        transformedRequest = await id.transformRequest(transformedRequest);
+        transformedRequest = await (id === null || id === void 0 ? void 0 : id.transformRequest(transformedRequest));
         const body = _cbor__WEBPACK_IMPORTED_MODULE_3__.encode(transformedRequest.body);
         const response = await this._fetch('' + new URL(`/api/v2/canister/${canister}/read_state`, this._host), Object.assign(Object.assign({}, transformedRequest.request), { body }));
         if (!response.ok) {
@@ -539,6 +558,12 @@ class HttpAgent {
             this._rootKeyFetched = true;
         }
         return this.rootKey;
+    }
+    invalidateIdentity() {
+        this._identity = null;
+    }
+    replaceIdentity(identity) {
+        this._identity = Promise.resolve(identity);
     }
     _transform(request) {
         let p = Promise.resolve(request);
@@ -663,6 +688,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "Expiry": () => (/* reexport safe */ _http__WEBPACK_IMPORTED_MODULE_1__.Expiry),
 /* harmony export */   "HttpAgent": () => (/* reexport safe */ _http__WEBPACK_IMPORTED_MODULE_1__.HttpAgent),
+/* harmony export */   "IdentityInvalidError": () => (/* reexport safe */ _http__WEBPACK_IMPORTED_MODULE_1__.IdentityInvalidError),
 /* harmony export */   "ProxyAgent": () => (/* reexport safe */ _proxy__WEBPACK_IMPORTED_MODULE_2__.ProxyAgent),
 /* harmony export */   "ProxyMessageKind": () => (/* reexport safe */ _proxy__WEBPACK_IMPORTED_MODULE_2__.ProxyMessageKind),
 /* harmony export */   "ProxyStubAgent": () => (/* reexport safe */ _proxy__WEBPACK_IMPORTED_MODULE_2__.ProxyStubAgent),
@@ -1457,6 +1483,11 @@ __webpack_require__.r(__webpack_exports__);
  * @todo https://github.com/dfinity/agent-js/issues/420
  */
 class AgentError extends Error {
+    constructor(message) {
+        super(message);
+        this.message = message;
+        Object.setPrototypeOf(this, AgentError.prototype);
+    }
 }
 //# sourceMappingURL=errors.js.map
 
@@ -1479,6 +1510,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "Certificate": () => (/* reexport safe */ _certificate__WEBPACK_IMPORTED_MODULE_3__.Certificate),
 /* harmony export */   "Expiry": () => (/* reexport safe */ _agent__WEBPACK_IMPORTED_MODULE_1__.Expiry),
 /* harmony export */   "HttpAgent": () => (/* reexport safe */ _agent__WEBPACK_IMPORTED_MODULE_1__.HttpAgent),
+/* harmony export */   "IdentityInvalidError": () => (/* reexport safe */ _agent__WEBPACK_IMPORTED_MODULE_1__.IdentityInvalidError),
 /* harmony export */   "ProxyAgent": () => (/* reexport safe */ _agent__WEBPACK_IMPORTED_MODULE_1__.ProxyAgent),
 /* harmony export */   "ProxyMessageKind": () => (/* reexport safe */ _agent__WEBPACK_IMPORTED_MODULE_1__.ProxyMessageKind),
 /* harmony export */   "ProxyStubAgent": () => (/* reexport safe */ _agent__WEBPACK_IMPORTED_MODULE_1__.ProxyStubAgent),
@@ -1907,7 +1939,7 @@ function concat(...buffers) {
 function toHex(buffer) {
     return [...new Uint8Array(buffer)].map(x => x.toString(16).padStart(2, '0')).join('');
 }
-const hexRe = /^([0-9A-F]{2})*$/i.compile();
+const hexRe = new RegExp(/^([0-9A-F]{2})*$/i);
 /**
  * Transforms a hexadecimal string into an array buffer.
  * @param hex The hexadecimal string to use.
@@ -2839,6 +2871,7 @@ async function init() {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "AuthClient": () => (/* binding */ AuthClient),
+/* harmony export */   "ERROR_USER_INTERRUPT": () => (/* binding */ ERROR_USER_INTERRUPT),
 /* harmony export */   "LocalStorage": () => (/* binding */ LocalStorage)
 /* harmony export */ });
 /* harmony import */ var _dfinity_agent__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @dfinity/agent */ "./node_modules/@dfinity/agent/lib/esm/index.js");
@@ -2851,6 +2884,8 @@ const KEY_LOCALSTORAGE_KEY = 'identity';
 const KEY_LOCALSTORAGE_DELEGATION = 'delegation';
 const IDENTITY_PROVIDER_DEFAULT = 'https://identity.ic0.app';
 const IDENTITY_PROVIDER_ENDPOINT = '#authorize';
+const INTERRUPT_CHECK_INTERVAL = 500;
+const ERROR_USER_INTERRUPT = 'UserInterrupt';
 async function _deleteStorage(storage) {
     await storage.remove(KEY_LOCALSTORAGE_KEY);
     await storage.remove(KEY_LOCALSTORAGE_DELEGATION);
@@ -2967,6 +3002,7 @@ class AuthClient {
         (_a = this._idpWindow) === null || _a === void 0 ? void 0 : _a.close();
         onSuccess === null || onSuccess === void 0 ? void 0 : onSuccess();
         this._removeEventListener();
+        delete this._idpWindow;
     }
     getIdentity() {
         return this._identity;
@@ -2999,6 +3035,19 @@ class AuthClient {
         window.addEventListener('message', this._eventHandler);
         // Open a new window with the IDP provider.
         this._idpWindow = (_c = window.open(identityProviderUrl.toString(), 'idpWindow')) !== null && _c !== void 0 ? _c : undefined;
+        // Check if the _idpWindow is closed by user.
+        const checkInterruption = () => {
+            // The _idpWindow is opened and not yet closed by the client
+            if (this._idpWindow) {
+                if (this._idpWindow.closed) {
+                    this._handleFailure(ERROR_USER_INTERRUPT, options === null || options === void 0 ? void 0 : options.onError);
+                }
+                else {
+                    setTimeout(checkInterruption, INTERRUPT_CHECK_INTERVAL);
+                }
+            }
+        };
+        checkInterruption();
     }
     _getEventHandler(identityProviderUrl, options) {
         return async (event) => {
@@ -3046,6 +3095,7 @@ class AuthClient {
         (_a = this._idpWindow) === null || _a === void 0 ? void 0 : _a.close();
         onError === null || onError === void 0 ? void 0 : onError(errorMessage);
         this._removeEventListener();
+        delete this._idpWindow;
     }
     _removeEventListener() {
         if (this._eventHandler) {
@@ -72550,18 +72600,44 @@ exports["default"] = JournalPage;
 
 "use strict";
 
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const react_1 = __importDefault(__webpack_require__(/*! react */ "./node_modules/react/index.js"));
+const react_1 = __importStar(__webpack_require__(/*! react */ "./node_modules/react/index.js"));
+const App_1 = __webpack_require__(/*! ../App */ "./src/dtc_assets/src/App.jsx");
 __webpack_require__(/*! ./LoadScreen.scss */ "./src/dtc_assets/src/Components/LoadScreen.scss");
 const LoadScreen = () => {
+    const { authClient, setIsLoaded } = (0, react_1.useContext)(App_1.AppContext);
     return (react_1.default.createElement("div", { className: "container" },
         react_1.default.createElement("div", { className: "background" },
             react_1.default.createElement("div", { className: "loadContentContainer" },
                 react_1.default.createElement("div", { className: "loadContentDiv" },
-                    react_1.default.createElement("img", { src: "Loading.gif", alt: "Loading Screen" }))))));
+                    react_1.default.createElement("img", { src: "Loading.gif", alt: "Loading Screen" })),
+                react_1.default.createElement("button", { className: 'loginButtonDiv', onClick: async () => {
+                        await authClient.logout();
+                        setIsLoaded(false);
+                    } }, " Log Out ")))));
 };
 exports["default"] = LoadScreen;
 
@@ -76787,7 +76863,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 // CANISTER_ID is replaced by webpack based on node environment
-const canisterId = "x2dwq-7aaaa-aaaaa-aaaxq-cai";
+const canisterId = "rno2w-sqaaa-aaaaa-aaacq-cai";
 
 /**
  * 

@@ -1,8 +1,12 @@
-import React from "react";
+import React, {useContext} from "react";
+import { AppContext } from "../App";
 import "./LoadScreen.scss";
 
 
 const LoadScreen = () => {
+
+    const { authClient, setIsLoaded } = useContext(AppContext);
+
 
     return(
         <div className="container">
@@ -11,7 +15,11 @@ const LoadScreen = () => {
                     <div className="loadContentDiv">
                     <img src="Loading.gif" alt="Loading Screen" />
                     </div>
-                </div>
+                    <button className={'loginButtonDiv'} onClick={async () => {
+                        await authClient.logout();
+                        setIsLoaded(false);
+                    }} > Log Out </button> 
+                </div> 
             </div>
         </div>
     );
