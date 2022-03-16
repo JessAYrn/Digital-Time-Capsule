@@ -13,7 +13,7 @@ export const idlFactory = ({ IDL }) => {
     'NoInputGiven' : IDL.Null,
     'InsufficientFunds' : IDL.Null,
   });
-  const Result_7 = IDL.Variant({ 'ok' : AmountAccepted, 'err' : Error });
+  const Result_8 = IDL.Variant({ 'ok' : AmountAccepted, 'err' : Error });
   const Result = IDL.Variant({ 'ok' : IDL.Null, 'err' : Error });
   const JournalEntry = IDL.Record({
     'unlockTime' : IDL.Int,
@@ -37,16 +37,16 @@ export const idlFactory = ({ IDL }) => {
     'location' : IDL.Text,
     'entryTitle' : IDL.Text,
   });
-  const Result_6 = IDL.Variant({
+  const Result_7 = IDL.Variant({
     'ok' : IDL.Vec(
       IDL.Tuple(IDL.Text, IDL.Vec(IDL.Tuple(IDL.Nat, JournalEntry)))
     ),
     'err' : Error,
   });
   const EntryKey = IDL.Record({ 'entryKey' : IDL.Nat });
-  const Result_5 = IDL.Variant({ 'ok' : JournalEntry, 'err' : Error });
-  const Result_4 = IDL.Variant({ 'ok' : IDL.Vec(IDL.Nat8), 'err' : Error });
-  const Result_3 = IDL.Variant({ 'ok' : IDL.Nat, 'err' : Error });
+  const Result_6 = IDL.Variant({ 'ok' : JournalEntry, 'err' : Error });
+  const Result_5 = IDL.Variant({ 'ok' : IDL.Vec(IDL.Nat8), 'err' : Error });
+  const Result_4 = IDL.Variant({ 'ok' : IDL.Nat, 'err' : Error });
   const Bio = IDL.Record({
     'dob' : IDL.Text,
     'pob' : IDL.Text,
@@ -54,7 +54,7 @@ export const idlFactory = ({ IDL }) => {
     'name' : IDL.Text,
     'dedications' : IDL.Text,
   });
-  const Result_2 = IDL.Variant({
+  const Result_3 = IDL.Variant({
     'ok' : IDL.Record({
       'userName' : IDL.Opt(IDL.Text),
       'balance' : Tokens,
@@ -65,6 +65,10 @@ export const idlFactory = ({ IDL }) => {
         Bio,
       ),
     }),
+    'err' : Error,
+  });
+  const Result_2 = IDL.Variant({
+    'ok' : IDL.Tuple(IDL.Nat, IDL.Vec(IDL.Nat64)),
     'err' : Error,
   });
   const JournalEntryInput = IDL.Record({
@@ -108,18 +112,19 @@ export const idlFactory = ({ IDL }) => {
   const User = IDL.Service({
     'canisterAccount' : IDL.Func([], [AccountIdentifier], ['query']),
     'canisterBalance' : IDL.Func([], [Tokens], []),
-    'create' : IDL.Func([], [Result_7], []),
+    'create' : IDL.Func([], [Result_8], []),
     'createJournalEntryFile' : IDL.Func(
         [IDL.Text, IDL.Nat, IDL.Vec(IDL.Nat8)],
         [Result],
         [],
       ),
     'delete' : IDL.Func([], [Result], []),
-    'getEntriesToBeSent' : IDL.Func([], [Result_6], []),
-    'readEntry' : IDL.Func([EntryKey], [Result_5], []),
-    'readEntryFileChunk' : IDL.Func([IDL.Text, IDL.Nat], [Result_4], []),
-    'readEntryFileSize' : IDL.Func([IDL.Text], [Result_3], []),
-    'readJournal' : IDL.Func([], [Result_2], []),
+    'getEntriesToBeSent' : IDL.Func([], [Result_7], []),
+    'readEntry' : IDL.Func([EntryKey], [Result_6], []),
+    'readEntryFileChunk' : IDL.Func([IDL.Text, IDL.Nat], [Result_5], []),
+    'readEntryFileSize' : IDL.Func([IDL.Text], [Result_4], []),
+    'readJournal' : IDL.Func([], [Result_3], []),
+    'refillCanisterCycles' : IDL.Func([], [Result_2], []),
     'transferICP' : IDL.Func([IDL.Nat64, AccountIdentifier], [Result], []),
     'updateBio' : IDL.Func([Bio], [Result], []),
     'updateJournalEntry' : IDL.Func(

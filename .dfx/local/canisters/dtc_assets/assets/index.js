@@ -24019,6 +24019,33 @@ ___CSS_LOADER_EXPORT___.push([module.id, ".journalPageContainer .journalText {\n
 
 /***/ }),
 
+/***/ "./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/dtc_assets/src/Components/LoadScreen.scss":
+/*!************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/dtc_assets/src/Components/LoadScreen.scss ***!
+  \************************************************************************************************************************************/
+/***/ ((module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../node_modules/css-loader/dist/runtime/sourceMaps.js */ "./node_modules/css-loader/dist/runtime/sourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, ".loadContentContainer {\n  width: 100%;\n  height: 100%;\n}\n.loadContentContainer .loadContentDiv {\n  width: 50%;\n  height: 50%;\n  border: solid;\n  background-color: white;\n  border-radius: 10px;\n  margin-left: 25%;\n}", "",{"version":3,"sources":["webpack://./src/dtc_assets/src/Components/LoadScreen.scss"],"names":[],"mappings":"AAAA;EACI,WAAA;EACA,YAAA;AACJ;AACI;EACI,UAAA;EACA,WAAA;EACA,aAAA;EACA,uBAAA;EACA,mBAAA;EACA,gBAAA;AACR","sourcesContent":[".loadContentContainer{\n    width: 100%;\n    height: 100%;\n\n    .loadContentDiv{\n        width: 50%;\n        height: 50%;\n        border: solid;\n        background-color: white;\n        border-radius: 10px;\n        margin-left: 25%;\n    };\n};"],"sourceRoot":""}]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ }),
+
 /***/ "./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/dtc_assets/src/Components/LoginPage.scss":
 /*!***********************************************************************************************************************************!*\
   !*** ./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/dtc_assets/src/Components/LoginPage.scss ***!
@@ -70736,6 +70763,61 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
 
 /***/ }),
 
+/***/ "./src/dtc_assets/src/Components/LoadScreen.scss":
+/*!*******************************************************!*\
+  !*** ./src/dtc_assets/src/Components/LoadScreen.scss ***!
+  \*******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! !../../../../node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js */ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! !../../../../node_modules/style-loader/dist/runtime/styleDomAPI.js */ "./node_modules/style-loader/dist/runtime/styleDomAPI.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! !../../../../node_modules/style-loader/dist/runtime/insertBySelector.js */ "./node_modules/style-loader/dist/runtime/insertBySelector.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! !../../../../node_modules/style-loader/dist/runtime/setAttributesWithoutAttributes.js */ "./node_modules/style-loader/dist/runtime/setAttributesWithoutAttributes.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! !../../../../node_modules/style-loader/dist/runtime/insertStyleElement.js */ "./node_modules/style-loader/dist/runtime/insertStyleElement.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! !../../../../node_modules/style-loader/dist/runtime/styleTagTransform.js */ "./node_modules/style-loader/dist/runtime/styleTagTransform.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_LoadScreen_scss__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! !!../../../../node_modules/css-loader/dist/cjs.js!../../../../node_modules/sass-loader/dist/cjs.js!./LoadScreen.scss */ "./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/dtc_assets/src/Components/LoadScreen.scss");
+
+      
+      
+      
+      
+      
+      
+      
+      
+      
+
+var options = {};
+
+options.styleTagTransform = (_node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5___default());
+options.setAttributes = (_node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3___default());
+
+      options.insert = _node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2___default().bind(null, "head");
+    
+options.domAPI = (_node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1___default());
+options.insertStyleElement = (_node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4___default());
+
+var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default()(_node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_LoadScreen_scss__WEBPACK_IMPORTED_MODULE_6__["default"], options);
+
+
+
+
+       /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_LoadScreen_scss__WEBPACK_IMPORTED_MODULE_6__["default"] && _node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_LoadScreen_scss__WEBPACK_IMPORTED_MODULE_6__["default"].locals ? _node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_LoadScreen_scss__WEBPACK_IMPORTED_MODULE_6__["default"].locals : undefined);
+
+
+/***/ }),
+
 /***/ "./src/dtc_assets/src/Components/LoginPage.scss":
 /*!******************************************************!*\
   !*** ./src/dtc_assets/src/Components/LoginPage.scss ***!
@@ -71651,8 +71733,15 @@ const AdminSection = (props) => {
         const results = await Promise.all(promises);
         console.log(results);
     };
-    return (react_1.default.createElement("div", { className: 'sendEmailsButtonDiv' },
-        react_1.default.createElement("button", { className: 'sendEmailsButton', type: "submit", onClick: handleSubmit }, " Send Emails ")));
+    const handleSubmitRefill = async () => {
+        const result = await actor.refillCanisterCycles();
+        console.log(result);
+    };
+    return (react_1.default.createElement(react_1.default.Fragment, null,
+        react_1.default.createElement("div", { className: 'sendEmailsButtonDiv' },
+            react_1.default.createElement("button", { className: 'sendEmailsButton', type: "submit", onClick: handleSubmit }, " Send Emails ")),
+        react_1.default.createElement("div", { className: 'sendEmailsButtonDiv' },
+            react_1.default.createElement("button", { className: 'refillAllCanisterCycles', type: "submit", onClick: handleSubmitRefill }, " Refill All Canister Cycles "))));
 };
 exports["default"] = AdminSection;
 
@@ -71820,6 +71909,12 @@ const FileUpload = (props) => {
     const [fileType, setFileType] = (0, react_1.useState)("image");
     (0, react_1.useEffect)(async () => {
         if (value) {
+            if (value.type.includes("image")) {
+                setFileType("image");
+            }
+            else if (value.type.includes("video")) {
+                setFileType("video");
+            }
             setFileSrc(await displayUploadedFile(value));
         }
     }, [value]);
@@ -71837,7 +71932,7 @@ const FileUpload = (props) => {
             setValue(file);
             dispatch({
                 payload: {
-                    fileName: file.name,
+                    fileName: `${file.name}-${Date.now()}`,
                     lastModified: file.lastModified,
                     fileType: file.type
                 },
@@ -72048,18 +72143,22 @@ __webpack_require__(/*! ./Journal.scss */ "./src/dtc_assets/src/Components/Journ
 const App_1 = __webpack_require__(/*! ../App */ "./src/dtc_assets/src/App.jsx");
 const InputBox_1 = __importDefault(__webpack_require__(/*! ./Fields/InputBox */ "./src/dtc_assets/src/Components/Fields/InputBox.jsx"));
 const Constants_1 = __webpack_require__(/*! ../Constants */ "./src/dtc_assets/src/Constants.jsx");
+const LoadScreen_1 = __importDefault(__webpack_require__(/*! ./LoadScreen */ "./src/dtc_assets/src/Components/LoadScreen.jsx"));
 const Journal = (props) => {
     const [journalState, dispatch] = (0, react_1.useReducer)(journalReducer_1.default, journalReducer_1.initialState);
     const [pageIsVisibleArray, setPageIsVisibleArray] = (0, react_1.useState)(journalState.journal.map((page) => false));
     const [newPageAdded, setNewPageAdded] = (0, react_1.useState)(false);
     const [journalSize, setJournalSize] = (0, react_1.useState)(0);
+    const [isLoading, setIsLoading] = (0, react_1.useState)(false);
     const { actor, authClient, setIsLoaded, setSubmissionsMade, submissionsMade } = (0, react_1.useContext)(App_1.AppContext);
     (0, react_1.useEffect)(async () => {
+        setIsLoading(true);
         const journal = await actor.readJournal();
         console.log(journal);
         if ("err" in journal) {
             actor.create().then((result) => {
                 console.log(result);
+                setIsLoading(false);
             });
         }
         else {
@@ -72116,6 +72215,7 @@ const Journal = (props) => {
                 payload: journalEntries,
                 actionType: journalReducer_1.types.SET_JOURNAL
             });
+            setIsLoading(false);
         }
     }, [actor, submissionsMade, authClient]);
     (0, react_1.useEffect)(() => {
@@ -72221,23 +72321,25 @@ const Journal = (props) => {
             return false;
         }));
     };
-    return (react_1.default.createElement(react_1.default.Fragment, null,
-        react_1.default.createElement("div", { className: 'linkDiv_Journal' },
-            react_1.default.createElement("nav", { className: 'navBar_Journal' },
-                react_1.default.createElement("div", { className: "linkContainer" },
-                    react_1.default.createElement("div", { className: "timeCapsuleLinkDiv" },
-                        react_1.default.createElement(react_router_dom_1.Link, { className: "navLink_Journal", to: "/wallet" }, "DTC Wallet")),
-                    react_1.default.createElement("div", { className: "accountIconLinkDiv" },
-                        react_1.default.createElement(react_router_dom_1.Link, { className: "navLink_Journal", to: '/account' },
-                            react_1.default.createElement("img", { src: "../../assets/account-icon.png", alt: "image preview", className: "accountIcon_Journal" })))))),
-        react_1.default.createElement("div", null,
-            (getIndexOfVisiblePage() < 0) ?
-                displayJournalTable() :
-                react_1.default.createElement(JournalPage_1.default, { journalSize: journalSize, closePage: closePage, index: getIndexOfVisiblePage(), journalPageData: journalState.journal[getIndexOfVisiblePage()], journalReducerDispatchFunction: dispatch }),
-            react_1.default.createElement("button", { className: 'loginButtonDiv', onClick: async () => {
-                    await authClient.logout();
-                    setIsLoaded(false);
-                } }, " Log Out "))));
+    return (isLoading ?
+        react_1.default.createElement(LoadScreen_1.default, null) :
+        react_1.default.createElement(react_1.default.Fragment, null,
+            react_1.default.createElement("div", { className: 'linkDiv_Journal' },
+                react_1.default.createElement("nav", { className: 'navBar_Journal' },
+                    react_1.default.createElement("div", { className: "linkContainer" },
+                        react_1.default.createElement("div", { className: "timeCapsuleLinkDiv" },
+                            react_1.default.createElement(react_router_dom_1.Link, { className: "navLink_Journal", to: "/wallet" }, "DTC Wallet")),
+                        react_1.default.createElement("div", { className: "accountIconLinkDiv" },
+                            react_1.default.createElement(react_router_dom_1.Link, { className: "navLink_Journal", to: '/account' },
+                                react_1.default.createElement("img", { src: "../../assets/account-icon.png", alt: "image preview", className: "accountIcon_Journal" })))))),
+            react_1.default.createElement("div", null,
+                (getIndexOfVisiblePage() < 0) ?
+                    displayJournalTable() :
+                    react_1.default.createElement(JournalPage_1.default, { journalSize: journalSize, closePage: closePage, index: getIndexOfVisiblePage(), journalPageData: journalState.journal[getIndexOfVisiblePage()], journalReducerDispatchFunction: dispatch }),
+                react_1.default.createElement("button", { className: 'loginButtonDiv', onClick: async () => {
+                        await authClient.logout();
+                        setIsLoaded(false);
+                    } }, " Log Out "))));
 };
 exports["default"] = Journal;
 
@@ -72287,17 +72389,21 @@ const journalReducer_1 = __webpack_require__(/*! ../reducers/journalReducer */ "
 const App_1 = __webpack_require__(/*! ../App */ "./src/dtc_assets/src/App.jsx");
 __webpack_require__(/*! ./JournalPage.scss */ "./src/dtc_assets/src/Components/JournalPage.scss");
 const DatePicker_1 = __importDefault(__webpack_require__(/*! ./Fields/DatePicker */ "./src/dtc_assets/src/Components/Fields/DatePicker.jsx"));
+const LoadScreen_1 = __importDefault(__webpack_require__(/*! ./LoadScreen */ "./src/dtc_assets/src/Components/LoadScreen.jsx"));
 const CHUNK_SIZE = 1024 * 1024;
 const JournalPage = (props) => {
     const [file1, setFile1] = (0, react_1.useState)(null);
     const [file2, setFile2] = (0, react_1.useState)(null);
+    const [isLoading, setIsLoading] = (0, react_1.useState)(false);
     const { journalReducerDispatchFunction, index, journalPageData, journalSize, closePage } = props;
     const { actor, setSubmissionsMade, submissionsMade } = (0, react_1.useContext)(App_1.AppContext);
     const retrieveChunk = async (fileId, chunkIndex) => {
         return await actor.readEntryFileChunk(fileId, chunkIndex);
     };
     (0, react_1.useEffect)(async () => {
-        if (journalPageData.file1MetaData.fileName) {
+        console.log(journalPageData);
+        if (journalPageData.file1MetaData.fileName !== 'null') {
+            setIsLoading(true);
             let index = 0;
             let promises = [];
             const file1ChunkCounteObj = await actor.readEntryFileSize(journalPageData.file1MetaData.fileName);
@@ -72315,19 +72421,51 @@ const JournalPage = (props) => {
                 });
                 file1BytesArray = file1BytesArray.flat(1);
                 const file1ArrayBuffer = new Uint8Array(file1BytesArray).buffer;
-                const file1Blob = new Blob([file1ArrayBuffer], { type: "image/png" });
-                const file1AsFile = new File([file1Blob], journalPageData.file1MetaData.fileName, { type: "image/png", lastModified: Date.now() });
+                const file1Blob = new Blob([file1ArrayBuffer], {
+                    type: journalPageData.file1MetaData.fileType
+                });
+                const file1AsFile = new File([file1Blob], journalPageData.file1MetaData.fileName, {
+                    type: journalPageData.file1MetaData.fileType,
+                    lastModified: parseInt(journalPageData.file1MetaData.lastModified)
+                });
                 setFile1(file1AsFile);
                 console.log(file1AsFile);
             }
         }
         ;
-        if (journalPageData.file2MetaData.fileName) {
-            const file2Blob = await actor.readEntryFileSize(journalPageData.file2MetaData.fileName);
-            console.log(file2Blob);
+        if (journalPageData.file2MetaData.fileName !== 'null') {
+            setIsLoading(true);
+            let index = 0;
+            let promises = [];
+            const file2ChunkCounteObj = await actor.readEntryFileSize(journalPageData.file2MetaData.fileName);
+            const file2ChunkCount = parseInt(file2ChunkCounteObj.ok);
+            if (file2ChunkCount > 0) {
+                while (index < file2ChunkCount) {
+                    promises.push(retrieveChunk(journalPageData.file2MetaData.fileName, index));
+                    index += 1;
+                }
+                ;
+                const file2Bytes = await Promise.all(promises);
+                let file2BytesArray = [];
+                file2Bytes.map((blobObj) => {
+                    file2BytesArray.push(blobObj.ok);
+                });
+                file2BytesArray = file2BytesArray.flat(1);
+                const file2ArrayBuffer = new Uint8Array(file2BytesArray).buffer;
+                const file2Blob = new Blob([file2ArrayBuffer], {
+                    type: journalPageData.file2MetaData.fileType
+                });
+                const file2AsFile = new File([file2Blob], journalPageData.file2MetaData.fileName, {
+                    type: journalPageData.file2MetaData.fileType,
+                    lastModified: parseInt(journalPageData.file2MetaData.lastModified)
+                });
+                setFile2(file2AsFile);
+                console.log(file2AsFile);
+            }
         }
         ;
-    }, [journalPageData.file1MetaData, journalPageData.file2MetaData]);
+        setIsLoading(false);
+    }, [journalPageData.file1MetaData.fileName, journalPageData.file2MetaData.fileName]);
     const uploadChunk = async (fileId, chunkId, fileChunk) => {
         console.log(chunkId);
         return actor.createJournalEntryFile(fileId, chunkId, [...new Uint8Array(await fileChunk.arrayBuffer())]);
@@ -72366,37 +72504,66 @@ const JournalPage = (props) => {
         console.log(results);
     };
     const handleSubmit = (0, react_1.useCallback)(async () => {
-        if (journalPageData.file1MetaData) {
+        if (journalPageData.file1MetaData.fileName !== 'null') {
             await mapAndSendFileToApi(journalPageData.file1MetaData.fileName, file1);
         }
         ;
-        if (journalPageData.file2MetaData) {
+        if (journalPageData.file2MetaData.fileName !== 'null') {
+            console.log(journalPageData.file2MetaData);
             await mapAndSendFileToApi(journalPageData.file2MetaData.fileName, file2);
         }
         await mapAndSendEntryToApi(index, journalPageData);
         setSubmissionsMade(submissionsMade + 1);
     }, [journalPageData, file1, file2]);
     console.log(journalPageData);
-    return (react_1.default.createElement("div", { className: "journalPageContainer" },
-        react_1.default.createElement("div", { className: "logoDiv" },
-            react_1.default.createElement("img", { className: 'backButtonImg', src: "back-icon.png", alt: "Back Button", onClick: (e) => closePage(e) }),
-            react_1.default.createElement("img", { className: 'logoImg', src: "dtc-logo-black.png", alt: "Logo" })),
-        react_1.default.createElement(Slider_1.default, { min: 0, max: 120, dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_LOCK_TIME, index: index, value: (journalPageData) ? journalPageData.lockTime : '3' }),
-        react_1.default.createElement("div", { className: "journalText" },
-            react_1.default.createElement(DatePicker_1.default, { label: "Date: ", rows: "1", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_DATE, index: index, value: (journalPageData) ? journalPageData.date : '' }),
-            react_1.default.createElement(InputBox_1.default, { label: "Location: ", rows: "1", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_LOCATION, index: index, value: (journalPageData) ? journalPageData.location : '' }),
-            react_1.default.createElement(InputBox_1.default, { divClassName: "entry", label: "Entry: ", rows: "59", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_ENTRY, index: index, value: (journalPageData) ? journalPageData.entry : '' })),
-        react_1.default.createElement("div", { className: "journalImages" },
-            react_1.default.createElement(FileUpload_1.default, { label: 'file1', dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_FILE1_METADATA, value: file1, setValue: setFile1, index: index }),
-            react_1.default.createElement(FileUpload_1.default, { label: 'file2', dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_FILE2_METADATA, value: file2, setValue: setFile2, index: index })),
-        react_1.default.createElement("div", { className: 'recipientEmailsDiv' },
-            react_1.default.createElement(InputBox_1.default, { label: "1st Recipient Email: ", rows: "1", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_RECIPIENT_EMAIL_ONE, index: index, value: (journalPageData) ? journalPageData.emailOne : '' }),
-            react_1.default.createElement(InputBox_1.default, { label: "2nd Recipient Email: ", rows: "1", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_RECIPIENT_EMAIL_TWO, index: index, value: (journalPageData) ? journalPageData.emailTwo : '' }),
-            react_1.default.createElement(InputBox_1.default, { label: "3rd Recipient Email: ", rows: "1", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_RECIPIENT_EMAIL_THREE, index: index, value: (journalPageData) ? journalPageData.emailThree : '' })),
-        react_1.default.createElement("div", null,
-            react_1.default.createElement("button", { type: "submit", onClick: handleSubmit }, " Submit "))));
+    return (isLoading ?
+        react_1.default.createElement(LoadScreen_1.default, null) :
+        react_1.default.createElement("div", { className: "journalPageContainer" },
+            react_1.default.createElement("div", { className: "logoDiv" },
+                react_1.default.createElement("img", { className: 'backButtonImg', src: "back-icon.png", alt: "Back Button", onClick: (e) => closePage(e) }),
+                react_1.default.createElement("img", { className: 'logoImg', src: "dtc-logo-black.png", alt: "Logo" })),
+            react_1.default.createElement(Slider_1.default, { min: 0, max: 120, dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_LOCK_TIME, index: index, value: (journalPageData) ? journalPageData.lockTime : '3' }),
+            react_1.default.createElement("div", { className: "journalText" },
+                react_1.default.createElement(DatePicker_1.default, { label: "Date: ", rows: "1", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_DATE, index: index, value: (journalPageData) ? journalPageData.date : '' }),
+                react_1.default.createElement(InputBox_1.default, { label: "Location: ", rows: "1", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_LOCATION, index: index, value: (journalPageData) ? journalPageData.location : '' }),
+                react_1.default.createElement(InputBox_1.default, { divClassName: "entry", label: "Entry: ", rows: "59", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_ENTRY, index: index, value: (journalPageData) ? journalPageData.entry : '' })),
+            react_1.default.createElement("div", { className: "journalImages" },
+                react_1.default.createElement(FileUpload_1.default, { label: 'file1', dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_FILE1_METADATA, value: file1, setValue: setFile1, index: index }),
+                react_1.default.createElement(FileUpload_1.default, { label: 'file2', dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_FILE2_METADATA, value: file2, setValue: setFile2, index: index })),
+            react_1.default.createElement("div", { className: 'recipientEmailsDiv' },
+                react_1.default.createElement(InputBox_1.default, { label: "1st Recipient Email: ", rows: "1", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_RECIPIENT_EMAIL_ONE, index: index, value: (journalPageData) ? journalPageData.emailOne : '' }),
+                react_1.default.createElement(InputBox_1.default, { label: "2nd Recipient Email: ", rows: "1", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_RECIPIENT_EMAIL_TWO, index: index, value: (journalPageData) ? journalPageData.emailTwo : '' }),
+                react_1.default.createElement(InputBox_1.default, { label: "3rd Recipient Email: ", rows: "1", dispatch: journalReducerDispatchFunction, dispatchAction: journalReducer_1.types.CHANGE_RECIPIENT_EMAIL_THREE, index: index, value: (journalPageData) ? journalPageData.emailThree : '' })),
+            react_1.default.createElement("div", null,
+                react_1.default.createElement("button", { type: "submit", onClick: handleSubmit }, " Submit "))));
 };
 exports["default"] = JournalPage;
+
+
+/***/ }),
+
+/***/ "./src/dtc_assets/src/Components/LoadScreen.jsx":
+/*!******************************************************!*\
+  !*** ./src/dtc_assets/src/Components/LoadScreen.jsx ***!
+  \******************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const react_1 = __importDefault(__webpack_require__(/*! react */ "./node_modules/react/index.js"));
+__webpack_require__(/*! ./LoadScreen.scss */ "./src/dtc_assets/src/Components/LoadScreen.scss");
+const LoadScreen = () => {
+    return (react_1.default.createElement("div", { className: "container" },
+        react_1.default.createElement("div", { className: "background" },
+            react_1.default.createElement("div", { className: "loadContentContainer" },
+                react_1.default.createElement("div", { className: "loadContentDiv" },
+                    react_1.default.createElement("img", { src: "Loading.gif", alt: "Loading Screen" }))))));
+};
+exports["default"] = LoadScreen;
 
 
 /***/ }),
@@ -72587,20 +72754,21 @@ const CardInput_1 = __importDefault(__webpack_require__(/*! ./CardInput */ "./sr
 const AdminSection_1 = __importDefault(__webpack_require__(/*! ./AdminSection */ "./src/dtc_assets/src/Components/AdminSection.jsx"));
 __webpack_require__(/*! ./SubscriptionPage.scss */ "./src/dtc_assets/src/Components/SubscriptionPage.scss");
 const AccountPage_1 = __webpack_require__(/*! ../AccountPage */ "./src/dtc_assets/src/AccountPage.jsx");
+const LoadScreen_1 = __importDefault(__webpack_require__(/*! ./LoadScreen */ "./src/dtc_assets/src/Components/LoadScreen.jsx"));
 const SubcriptionPage = (props) => {
     const { journalState, dispatch } = props;
     const { actor, authClient } = (0, react_1.useContext)(AccountPage_1.AppContext);
-    const [email, setEmail] = (0, react_1.useState)('');
     const [userName, setUserName] = (0, react_1.useState)('');
+    const [isLoading, setIsLoading] = (0, react_1.useState)(false);
     (0, react_1.useEffect)(async () => {
+        setIsLoading(true);
         const journal = await actor.readJournal();
-        setEmail(journal.ok.email[0]);
         setUserName(journal.ok.userName[0]);
-        console.log(journal);
         if ("err" in journal) {
             actor.create().then((result) => {
                 console.log(result);
             });
+            setIsLoading(false);
         }
         else {
             const metaData = { email: journal.ok.email, userName: journal.ok.userName };
@@ -72608,6 +72776,7 @@ const SubcriptionPage = (props) => {
                 payload: metaData,
                 actionType: journalReducer_1.types.SET_METADATA
             });
+            setIsLoading(false);
         }
     }, [actor, authClient]);
     const stripe = (0, react_stripe_js_1.useStripe)();
@@ -72687,19 +72856,20 @@ const SubcriptionPage = (props) => {
         }
     };
     console.log(journalState.metaData);
-    console.log(userName);
-    return (react_1.default.createElement("div", { className: 'subscriptionSectionContainer' },
-        react_1.default.createElement("div", { className: 'logoDiv' },
-            react_1.default.createElement("img", { className: 'logoImg', src: "dtc-logo-black.png", alt: "Logo" }),
-            react_1.default.createElement("div", { className: 'subscriptionSection' },
-                react_1.default.createElement(InputBox_1.default, { divClassName: "email", label: "Email: ", rows: "1", dispatch: dispatch, dispatchAction: journalReducer_1.types.CHANGE_EMAIL, value: journalState.metaData.email }),
-                react_1.default.createElement(InputBox_1.default, { divClassName: "userName", label: "Username: ", rows: "1", dispatch: dispatch, dispatchAction: journalReducer_1.types.CHANGE_USERNAME, value: journalState.metaData.userName }),
-                react_1.default.createElement("div", { className: 'updateButtonDiv' },
-                    react_1.default.createElement("button", { className: 'updateButton', type: "submit", onClick: handleUpdate }, " Update Username & Email ")),
-                userName === 'admin' && react_1.default.createElement(AdminSection_1.default, null),
-                react_1.default.createElement(CardInput_1.default, null),
-                react_1.default.createElement("div", { className: 'subscribeButtonDiv' },
-                    react_1.default.createElement("button", { className: 'subscriptionButton', type: "submit", onClick: handleSubmitSub }, " Subscribe "))))));
+    return (isLoading ?
+        react_1.default.createElement(LoadScreen_1.default, null) :
+        react_1.default.createElement("div", { className: 'subscriptionSectionContainer' },
+            react_1.default.createElement("div", { className: 'logoDiv' },
+                react_1.default.createElement("img", { className: 'logoImg', src: "dtc-logo-black.png", alt: "Logo" }),
+                react_1.default.createElement("div", { className: 'subscriptionSection' },
+                    react_1.default.createElement(InputBox_1.default, { divClassName: "email", label: "Email: ", rows: "1", dispatch: dispatch, dispatchAction: journalReducer_1.types.CHANGE_EMAIL, value: journalState.metaData.email }),
+                    react_1.default.createElement(InputBox_1.default, { divClassName: "userName", label: "Username: ", rows: "1", dispatch: dispatch, dispatchAction: journalReducer_1.types.CHANGE_USERNAME, value: journalState.metaData.userName }),
+                    react_1.default.createElement("div", { className: 'updateButtonDiv' },
+                        react_1.default.createElement("button", { className: 'updateButton', type: "submit", onClick: handleUpdate }, " Update Username & Email ")),
+                    userName === 'admin' && react_1.default.createElement(AdminSection_1.default, null),
+                    react_1.default.createElement(CardInput_1.default, null),
+                    react_1.default.createElement("div", { className: 'subscribeButtonDiv' },
+                        react_1.default.createElement("button", { className: 'subscriptionButton', type: "submit", onClick: handleSubmitSub }, " Subscribe "))))));
 };
 exports["default"] = SubcriptionPage;
 
@@ -72768,6 +72938,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const react_1 = __importStar(__webpack_require__(/*! react */ "./node_modules/react/index.js"));
 const Wallet_1 = __webpack_require__(/*! ../Wallet */ "./src/dtc_assets/src/Wallet.jsx");
@@ -72777,20 +72950,24 @@ const react_router_dom_1 = __webpack_require__(/*! react-router-dom */ "./node_m
 const WalletModal_1 = __webpack_require__(/*! ./WalletModal */ "./src/dtc_assets/src/Components/WalletModal.jsx");
 __webpack_require__(/*! ./WalletPage.scss */ "./src/dtc_assets/src/Components/WalletPage.scss");
 const Constants_1 = __webpack_require__(/*! ../Constants */ "./src/dtc_assets/src/Constants.jsx");
+const LoadScreen_1 = __importDefault(__webpack_require__(/*! ./LoadScreen */ "./src/dtc_assets/src/Components/LoadScreen.jsx"));
 const WalletPage = (props) => {
     const { journalState, dispatch } = props;
     const { actor, authClient } = (0, react_1.useContext)(Wallet_1.AppContext);
     const [showModal, setShowModal] = (0, react_1.useState)(false);
+    const [isLoading, setIsLoading] = (0, react_1.useState)(false);
     const openModal = () => {
         setShowModal(true);
     };
     (0, react_1.useEffect)(async () => {
+        setIsLoading(true);
         const journal = await actor.readJournal();
         console.log(journal);
         if ("err" in journal) {
             actor.create().then((result) => {
                 console.log(result);
             });
+            setIsLoading(false);
         }
         else {
             console.log(journal.ok);
@@ -72803,32 +72980,35 @@ const WalletPage = (props) => {
                 payload: walletData,
                 actionType: journalReducer_1.types.SET_WALLET_DATA
             });
+            setIsLoading(false);
         }
     }, [actor, authClient]);
     console.log(journalState.walletData);
-    return (react_1.default.createElement("div", { className: "container" },
-        react_1.default.createElement("div", { className: 'linkDiv_Wallet' },
-            react_1.default.createElement("nav", { className: 'navBar_Wallet' },
-                react_1.default.createElement("div", { className: "linkContainer" },
-                    react_1.default.createElement("div", { className: "timeCapsuleLinkDiv" },
-                        react_1.default.createElement(react_router_dom_1.Link, { className: "navLink_Wallet", to: "/app" }, "Time Capsule")),
-                    react_1.default.createElement("div", { className: "accountIconLinkDiv" },
-                        react_1.default.createElement(react_router_dom_1.Link, { className: "navLink_Wallet", to: '/account' },
-                            react_1.default.createElement("img", { src: "../../assets/account-icon.png", alt: "image preview", className: "accountIcon_Wallet" })))))),
-        react_1.default.createElement("div", { className: "background center" },
-            react_1.default.createElement("div", { className: 'scrollable' },
-                react_1.default.createElement("div", { className: 'transparentDiv' },
-                    react_1.default.createElement("div", { className: 'infoDiv' },
-                        react_1.default.createElement("div", { className: "balanceDiv" },
-                            "Wallet Balance: ",
-                            journalState.walletData.balance / Constants_1.e8sInOneICP,
-                            " ICP"),
-                        react_1.default.createElement("div", { className: 'walletAddressDiv' },
-                            "Wallet Address: ",
-                            journalState.walletData.address),
-                        react_1.default.createElement("div", { className: "buttonsDiv" },
-                            react_1.default.createElement("button", { className: 'button', onClick: openModal }, " Send ")),
-                        react_1.default.createElement(WalletModal_1.Modal, { showModal: showModal, setShowModal: setShowModal })))))));
+    return (isLoading ?
+        react_1.default.createElement(LoadScreen_1.default, null) :
+        react_1.default.createElement("div", { className: "container" },
+            react_1.default.createElement("div", { className: 'linkDiv_Wallet' },
+                react_1.default.createElement("nav", { className: 'navBar_Wallet' },
+                    react_1.default.createElement("div", { className: "linkContainer" },
+                        react_1.default.createElement("div", { className: "timeCapsuleLinkDiv" },
+                            react_1.default.createElement(react_router_dom_1.Link, { className: "navLink_Wallet", to: "/app" }, "Time Capsule")),
+                        react_1.default.createElement("div", { className: "accountIconLinkDiv" },
+                            react_1.default.createElement(react_router_dom_1.Link, { className: "navLink_Wallet", to: '/account' },
+                                react_1.default.createElement("img", { src: "../../assets/account-icon.png", alt: "image preview", className: "accountIcon_Wallet" })))))),
+            react_1.default.createElement("div", { className: "background center" },
+                react_1.default.createElement("div", { className: 'scrollable' },
+                    react_1.default.createElement("div", { className: 'transparentDiv' },
+                        react_1.default.createElement("div", { className: 'infoDiv' },
+                            react_1.default.createElement("div", { className: "balanceDiv" },
+                                "Wallet Balance: ",
+                                journalState.walletData.balance / Constants_1.e8sInOneICP,
+                                " ICP"),
+                            react_1.default.createElement("div", { className: 'walletAddressDiv' },
+                                "Wallet Address: ",
+                                journalState.walletData.address),
+                            react_1.default.createElement("div", { className: "buttonsDiv" },
+                                react_1.default.createElement("button", { className: 'button', onClick: openModal }, " Send ")),
+                            react_1.default.createElement(WalletModal_1.Modal, { showModal: showModal, setShowModal: setShowModal })))))));
 };
 exports["default"] = WalletPage;
 
@@ -73209,8 +73389,8 @@ const mapApiObjectToFrontEndObject = (backEndObj) => {
         emailTwo: backEndObj.emailTwo,
         emailThree: backEndObj.emailThree,
         sent: backEndObj.sent,
-        file1ID: backEndObj.file1ID,
-        file2ID: backEndObj.file2ID
+        file1MetaData: backEndObj.file1MetaData,
+        file2MetaData: backEndObj.file2MetaData
     };
 };
 exports.mapApiObjectToFrontEndObject = mapApiObjectToFrontEndObject;
@@ -73302,8 +73482,16 @@ exports.initialState = {
             emailOne: '',
             emailTwo: '',
             emailThree: '',
-            file1MetaData: {},
-            file2MetaData: {}
+            file1MetaData: {
+                fileName: 'null',
+                lastModified: 0,
+                fileType: 'null'
+            },
+            file2MetaData: {
+                fileName: 'null',
+                lastModified: 0,
+                fileType: 'null'
+            }
         }
     ]
 };
@@ -73317,8 +73505,16 @@ const freshPage = {
     emailOne: '',
     emailTwo: '',
     emailThree: '',
-    file1MetaData: {},
-    file2MetaData: {}
+    file1MetaData: {
+        fileName: 'null',
+        lastModified: 0,
+        fileType: 'null'
+    },
+    file2MetaData: {
+        fileName: 'null',
+        lastModified: 0,
+        fileType: 'null'
+    }
 };
 const changeValue = (state = exports.initialState, action) => {
     const { actionType, payload, index } = action;
@@ -76441,7 +76637,7 @@ const idlFactory = ({ IDL }) => {
     'NoInputGiven' : IDL.Null,
     'InsufficientFunds' : IDL.Null,
   });
-  const Result_7 = IDL.Variant({ 'ok' : AmountAccepted, 'err' : Error });
+  const Result_8 = IDL.Variant({ 'ok' : AmountAccepted, 'err' : Error });
   const Result = IDL.Variant({ 'ok' : IDL.Null, 'err' : Error });
   const JournalEntry = IDL.Record({
     'unlockTime' : IDL.Int,
@@ -76465,16 +76661,16 @@ const idlFactory = ({ IDL }) => {
     'location' : IDL.Text,
     'entryTitle' : IDL.Text,
   });
-  const Result_6 = IDL.Variant({
+  const Result_7 = IDL.Variant({
     'ok' : IDL.Vec(
       IDL.Tuple(IDL.Text, IDL.Vec(IDL.Tuple(IDL.Nat, JournalEntry)))
     ),
     'err' : Error,
   });
   const EntryKey = IDL.Record({ 'entryKey' : IDL.Nat });
-  const Result_5 = IDL.Variant({ 'ok' : JournalEntry, 'err' : Error });
-  const Result_4 = IDL.Variant({ 'ok' : IDL.Vec(IDL.Nat8), 'err' : Error });
-  const Result_3 = IDL.Variant({ 'ok' : IDL.Nat, 'err' : Error });
+  const Result_6 = IDL.Variant({ 'ok' : JournalEntry, 'err' : Error });
+  const Result_5 = IDL.Variant({ 'ok' : IDL.Vec(IDL.Nat8), 'err' : Error });
+  const Result_4 = IDL.Variant({ 'ok' : IDL.Nat, 'err' : Error });
   const Bio = IDL.Record({
     'dob' : IDL.Text,
     'pob' : IDL.Text,
@@ -76482,7 +76678,7 @@ const idlFactory = ({ IDL }) => {
     'name' : IDL.Text,
     'dedications' : IDL.Text,
   });
-  const Result_2 = IDL.Variant({
+  const Result_3 = IDL.Variant({
     'ok' : IDL.Record({
       'userName' : IDL.Opt(IDL.Text),
       'balance' : Tokens,
@@ -76493,6 +76689,10 @@ const idlFactory = ({ IDL }) => {
         Bio,
       ),
     }),
+    'err' : Error,
+  });
+  const Result_2 = IDL.Variant({
+    'ok' : IDL.Tuple(IDL.Nat, IDL.Vec(IDL.Nat64)),
     'err' : Error,
   });
   const JournalEntryInput = IDL.Record({
@@ -76536,18 +76736,19 @@ const idlFactory = ({ IDL }) => {
   const User = IDL.Service({
     'canisterAccount' : IDL.Func([], [AccountIdentifier], ['query']),
     'canisterBalance' : IDL.Func([], [Tokens], []),
-    'create' : IDL.Func([], [Result_7], []),
+    'create' : IDL.Func([], [Result_8], []),
     'createJournalEntryFile' : IDL.Func(
         [IDL.Text, IDL.Nat, IDL.Vec(IDL.Nat8)],
         [Result],
         [],
       ),
     'delete' : IDL.Func([], [Result], []),
-    'getEntriesToBeSent' : IDL.Func([], [Result_6], []),
-    'readEntry' : IDL.Func([EntryKey], [Result_5], []),
-    'readEntryFileChunk' : IDL.Func([IDL.Text, IDL.Nat], [Result_4], []),
-    'readEntryFileSize' : IDL.Func([IDL.Text], [Result_3], []),
-    'readJournal' : IDL.Func([], [Result_2], []),
+    'getEntriesToBeSent' : IDL.Func([], [Result_7], []),
+    'readEntry' : IDL.Func([EntryKey], [Result_6], []),
+    'readEntryFileChunk' : IDL.Func([IDL.Text, IDL.Nat], [Result_5], []),
+    'readEntryFileSize' : IDL.Func([IDL.Text], [Result_4], []),
+    'readJournal' : IDL.Func([], [Result_3], []),
+    'refillCanisterCycles' : IDL.Func([], [Result_2], []),
     'transferICP' : IDL.Func([IDL.Nat64, AccountIdentifier], [Result], []),
     'updateBio' : IDL.Func([Bio], [Result], []),
     'updateJournalEntry' : IDL.Func(

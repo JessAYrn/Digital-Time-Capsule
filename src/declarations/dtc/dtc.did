@@ -2,14 +2,15 @@ type User =
  service {
    canisterAccount: () -> (AccountIdentifier) query;
    canisterBalance: () -> (Tokens);
-   create: () -> (Result_7);
+   create: () -> (Result_8);
    createJournalEntryFile: (text, nat, blob) -> (Result);
    delete: () -> (Result);
-   getEntriesToBeSent: () -> (Result_6);
-   readEntry: (EntryKey) -> (Result_5);
-   readEntryFileChunk: (text, nat) -> (Result_4);
-   readEntryFileSize: (text) -> (Result_3);
-   readJournal: () -> (Result_2);
+   getEntriesToBeSent: () -> (Result_7);
+   readEntry: (EntryKey) -> (Result_6);
+   readEntryFileChunk: (text, nat) -> (Result_5);
+   readEntryFileSize: (text) -> (Result_4);
+   readJournal: () -> (Result_3);
+   refillCanisterCycles: () -> (Result_2);
    transferICP: (nat64, AccountIdentifier) -> (Result);
    updateBio: (Bio) -> (Result);
    updateJournalEntry: (opt EntryKey, opt JournalEntryInput) -> (Result_1);
@@ -22,12 +23,12 @@ type Trie =
    leaf: Leaf;
  };
 type Tokens = record {e8s: nat64;};
-type Result_7 = 
+type Result_8 = 
  variant {
    err: Error;
    ok: AmountAccepted;
  };
-type Result_6 = 
+type Result_7 = 
  variant {
    err: Error;
    ok: vec record {
@@ -38,22 +39,22 @@ type Result_6 =
                  };
            };
  };
-type Result_5 = 
+type Result_6 = 
  variant {
    err: Error;
    ok: JournalEntry;
  };
-type Result_4 = 
+type Result_5 = 
  variant {
    err: Error;
    ok: blob;
  };
-type Result_3 = 
+type Result_4 = 
  variant {
    err: Error;
    ok: nat;
  };
-type Result_2 = 
+type Result_3 = 
  variant {
    err: Error;
    ok:
@@ -70,6 +71,14 @@ type Result_2 =
                        };
       userName: opt text;
     };
+ };
+type Result_2 = 
+ variant {
+   err: Error;
+   ok: record {
+         nat;
+         vec nat64;
+       };
  };
 type Result_1 = 
  variant {

@@ -197,6 +197,52 @@ shared (msg) actor class User(){
 
     };
 
+    public shared(msg) func refillCanisterCycles() : async Result.Result<((Nat,[Nat64])), Error> {
+        let callerId = msg.caller;
+
+        let result = Trie.find(
+            profiles,
+            key(callerId),
+            Principal.equal
+        );
+
+        switch(result){
+            case null{
+                #err(#NotAuthorized);
+            };
+            case(? profile){
+                switch(profile.userName){
+                    case null{
+                        #err(#NotAuthorized);
+                    };
+                    case (? existingUserName){
+                        if(existingUserName == "admin"){
+                            var index = 0;
+                            let numberOfProfiles = Trie.size(profiles);
+                            let profilesIter = Trie.iter(profiles);
+                            let profilesArray = Iter.toArray(profilesIter);
+                            let AmountAcceptedArrayBuffer = Buffer.Buffer<Nat64>(1);
+
+                            while(index < numberOfProfiles){
+                                let userProfile = profilesArray[index];
+                                Cycles.add(100_000_000_000);
+                                let amountAccepted = await userProfile.1.journal.wallet_receive();
+                                AmountAcceptedArrayBuffer.add(amountAccepted.accepted);
+
+                                index += 1;
+                            };
+
+                            #ok(Cycles.balance(), AmountAcceptedArrayBuffer.toArray());
+
+                        } else {
+                            #err(#NotAuthorized);
+                        }
+                    };
+                };
+            };
+        };
+    };
+
     //Result.Result returns a varient type that has attributes from success case(the first input) and from your error case (your second input). both inputs must be varient types. () is a unit type.
     public shared(msg) func create () : async Result.Result<AmountAccepted,Error> {
 

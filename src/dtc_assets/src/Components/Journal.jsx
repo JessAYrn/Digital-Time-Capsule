@@ -24,6 +24,7 @@ const Journal = (props) => {
         console.log(journal);
         if("err" in journal){
             actor.create().then((result) => {
+                console.log(result);
                 setIsLoading(false);
             });
         } else {

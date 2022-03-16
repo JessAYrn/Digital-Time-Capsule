@@ -72,7 +72,9 @@ export type Result = { 'ok' : null } |
   { 'err' : Error };
 export type Result_1 = { 'ok' : Trie } |
   { 'err' : Error };
-export type Result_2 = {
+export type Result_2 = { 'ok' : [bigint, Array<bigint>] } |
+  { 'err' : Error };
+export type Result_3 = {
     'ok' : {
       'userName' : [] | [string],
       'balance' : Tokens,
@@ -82,17 +84,17 @@ export type Result_2 = {
     }
   } |
   { 'err' : Error };
-export type Result_3 = { 'ok' : bigint } |
+export type Result_4 = { 'ok' : bigint } |
   { 'err' : Error };
-export type Result_4 = { 'ok' : Array<number> } |
+export type Result_5 = { 'ok' : Array<number> } |
   { 'err' : Error };
-export type Result_5 = { 'ok' : JournalEntry } |
+export type Result_6 = { 'ok' : JournalEntry } |
   { 'err' : Error };
-export type Result_6 = {
+export type Result_7 = {
     'ok' : Array<[string, Array<[bigint, JournalEntry]>]>
   } |
   { 'err' : Error };
-export type Result_7 = { 'ok' : AmountAccepted } |
+export type Result_8 = { 'ok' : AmountAccepted } |
   { 'err' : Error };
 export interface Tokens { 'e8s' : bigint }
 export type Trie = { 'branch' : Branch } |
@@ -101,18 +103,19 @@ export type Trie = { 'branch' : Branch } |
 export interface User {
   'canisterAccount' : () => Promise<AccountIdentifier>,
   'canisterBalance' : () => Promise<Tokens>,
-  'create' : () => Promise<Result_7>,
+  'create' : () => Promise<Result_8>,
   'createJournalEntryFile' : (
       arg_0: string,
       arg_1: bigint,
       arg_2: Array<number>,
     ) => Promise<Result>,
   'delete' : () => Promise<Result>,
-  'getEntriesToBeSent' : () => Promise<Result_6>,
-  'readEntry' : (arg_0: EntryKey) => Promise<Result_5>,
-  'readEntryFileChunk' : (arg_0: string, arg_1: bigint) => Promise<Result_4>,
-  'readEntryFileSize' : (arg_0: string) => Promise<Result_3>,
-  'readJournal' : () => Promise<Result_2>,
+  'getEntriesToBeSent' : () => Promise<Result_7>,
+  'readEntry' : (arg_0: EntryKey) => Promise<Result_6>,
+  'readEntryFileChunk' : (arg_0: string, arg_1: bigint) => Promise<Result_5>,
+  'readEntryFileSize' : (arg_0: string) => Promise<Result_4>,
+  'readJournal' : () => Promise<Result_3>,
+  'refillCanisterCycles' : () => Promise<Result_2>,
   'transferICP' : (arg_0: bigint, arg_1: AccountIdentifier) => Promise<Result>,
   'updateBio' : (arg_0: Bio) => Promise<Result>,
   'updateJournalEntry' : (

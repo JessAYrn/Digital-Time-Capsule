@@ -104,7 +104,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     private stable var journalEntryIndex : Nat = 0;
 
-    private var capacity = 1000000000000000000;
+    private var capacity = 1000000000000;
 
     private var nanosecondsInADay = 86400000000000;
 
