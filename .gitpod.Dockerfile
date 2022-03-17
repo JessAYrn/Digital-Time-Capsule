@@ -1,7 +1,7 @@
 FROM gitpod/workspace-full
 
 RUN sudo apt-get update
-RUN sudo apt-get install -y rsync vim tree curl build-essential make gcc sudo less git rsync
+RUN sudo apt-get install -y vim tree curl build-essential make gcc sudo less git rsync
 RUN sudo apt-get clean
 
 # DFX
