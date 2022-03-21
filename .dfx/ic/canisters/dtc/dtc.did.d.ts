@@ -19,6 +19,7 @@ export type Error = { 'TxFailed' : null } |
   { 'NoInputGiven' : null } |
   { 'InsufficientFunds' : null };
 export type Hash = number;
+export interface ICP { 'e8s' : bigint }
 export interface JournalEntry {
   'unlockTime' : bigint,
   'file2MetaData' : {
@@ -77,7 +78,7 @@ export type Result_2 = { 'ok' : [bigint, Array<bigint>] } |
 export type Result_3 = {
     'ok' : {
       'userName' : [] | [string],
-      'balance' : Tokens,
+      'balance' : ICP,
       'email' : [] | [string],
       'address' : Array<number>,
       'userJournalData' : [Array<[bigint, JournalEntry]>, Bio],
@@ -96,13 +97,12 @@ export type Result_7 = {
   { 'err' : Error };
 export type Result_8 = { 'ok' : AmountAccepted } |
   { 'err' : Error };
-export interface Tokens { 'e8s' : bigint }
 export type Trie = { 'branch' : Branch } |
   { 'leaf' : Leaf } |
   { 'empty' : null };
 export interface User {
   'canisterAccount' : () => Promise<AccountIdentifier>,
-  'canisterBalance' : () => Promise<Tokens>,
+  'canisterBalance' : () => Promise<ICP>,
   'create' : () => Promise<Result_8>,
   'createJournalEntryFile' : (
       arg_0: string,
@@ -111,6 +111,7 @@ export interface User {
     ) => Promise<Result>,
   'delete' : () => Promise<Result>,
   'getEntriesToBeSent' : () => Promise<Result_7>,
+  'mainCanisterCyclesBalance' : () => Promise<bigint>,
   'readEntry' : (arg_0: EntryKey) => Promise<Result_6>,
   'readEntryFileChunk' : (arg_0: string, arg_1: bigint) => Promise<Result_5>,
   'readEntryFileSize' : (arg_0: string) => Promise<Result_4>,
@@ -123,5 +124,6 @@ export interface User {
       arg_1: [] | [JournalEntryInput],
     ) => Promise<Result_1>,
   'updateProfile' : (arg_0: ProfileInput) => Promise<Result>,
+  'wallet_receive' : () => Promise<{ 'accepted' : bigint }>,
 }
 export interface _SERVICE extends User {}

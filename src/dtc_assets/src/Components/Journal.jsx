@@ -21,6 +21,8 @@ const Journal = (props) => {
     useEffect(async () => {
         setIsLoading(true);
         const journal = await actor.readJournal();
+        const cyclesBalance = await actor.mainCanisterCyclesBalance();
+        console.log("Cycles Balance: ",cyclesBalance);
         console.log(journal);
         if("err" in journal){
             actor.create().then((result) => {

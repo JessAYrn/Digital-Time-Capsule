@@ -1,4 +1,4 @@
-import Ledger "canister:ledger";
+import Ledger "Ledger";
 import Debug "mo:base/Debug";
 import Error "mo:base/Error";
 import Trie "mo:base/Trie";
@@ -111,6 +111,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
     private var daysInAMonth = 30;
 
     private var balance = Cycles.balance();
+
+    private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
 
     public shared(msg) func wallet_balance() : async Nat {
         return balance
@@ -463,7 +465,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     public func transferICP(amount: Nat64, recipientAccountId: Account.AccountIdentifier) : async Bool {
 
-        let res = await Ledger.transfer({
+        let res = await ledger.transfer({
           memo = Nat64.fromNat(10);
           from_subaccount = null;
           to = recipientAccountId;
@@ -497,8 +499,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
         userAccountId()
     };
 
-    public func canisterBalance() : async Ledger.Tokens {
-        await Ledger.account_balance({ account = userAccountId() })
+    public func canisterBalance() : async Ledger.ICP {
+        await ledger.account_balance({ account = userAccountId() })
     };
    
     private  func key(x: Principal) : Trie.Key<Principal> {

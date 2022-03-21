@@ -1,28 +1,9 @@
-type User = 
- service {
-   canisterAccount: () -> (AccountIdentifier) query;
-   canisterBalance: () -> (Tokens);
-   create: () -> (Result_8);
-   createJournalEntryFile: (text, nat, blob) -> (Result);
-   delete: () -> (Result);
-   getEntriesToBeSent: () -> (Result_7);
-   readEntry: (EntryKey) -> (Result_6);
-   readEntryFileChunk: (text, nat) -> (Result_5);
-   readEntryFileSize: (text) -> (Result_4);
-   readJournal: () -> (Result_3);
-   refillCanisterCycles: () -> (Result_2);
-   transferICP: (nat64, AccountIdentifier) -> (Result);
-   updateBio: (Bio) -> (Result);
-   updateJournalEntry: (opt EntryKey, opt JournalEntryInput) -> (Result_1);
-   updateProfile: (ProfileInput) -> (Result);
- };
 type Trie = 
  variant {
    branch: Branch;
    "empty";
    leaf: Leaf;
  };
-type Tokens = record {e8s: nat64;};
 type Result_8 = 
  variant {
    err: Error;
@@ -60,7 +41,7 @@ type Result_3 =
    ok:
     record {
       address: vec nat8;
-      balance: Tokens;
+      balance: ICP;
       email: opt text;
       userJournalData: record {
                          vec record {
@@ -157,6 +138,7 @@ type JournalEntry =
    "text": text;
    unlockTime: int;
  };
+type ICP = record {e8s: nat64;};
 type Hash = nat32;
 type Error = 
  variant {
@@ -193,4 +175,20 @@ type AssocList =
      };
 type AmountAccepted = record {accepted: nat64;};
 type AccountIdentifier = blob;
-service : () -> User
+service : {
+  canisterAccount: () -> (AccountIdentifier) query;
+  canisterBalance: () -> (ICP);
+  create: () -> (Result_8);
+  createJournalEntryFile: (text, nat, blob) -> (Result);
+  delete: () -> (Result);
+  getEntriesToBeSent: () -> (Result_7);
+  readEntry: (EntryKey) -> (Result_6);
+  readEntryFileChunk: (text, nat) -> (Result_5);
+  readEntryFileSize: (text) -> (Result_4);
+  readJournal: () -> (Result_3);
+  refillCanisterCycles: () -> (Result_2);
+  transferICP: (nat64, AccountIdentifier) -> (Result);
+  updateBio: (Bio) -> (Result);
+  updateJournalEntry: (opt EntryKey, opt JournalEntryInput) -> (Result_1);
+  updateProfile: (ProfileInput) -> (Result);
+}

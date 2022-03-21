@@ -1,4 +1,4 @@
-import Ledger "canister:ledger";
+import Ledger "Ledger";
 import Debug "mo:base/Debug";
 import Error "mo:base/Error";
 import Nat64 "mo:base/Nat64";
@@ -124,6 +124,24 @@ shared (msg) actor class User(){
     private var Gas: Nat64 = 10000;
     
     private var Fee : Nat64 = 10000000 + Gas;
+
+    private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
+
+    private var balance = Cycles.balance();
+
+    private var capacity = 1000000000000000;
+
+    public func wallet_receive() : async { accepted: Nat64 } {
+        let amount = Cycles.available();
+        let limit : Nat = capacity - balance;
+        let accepted = 
+            if (amount <= limit) amount
+            else limit;
+        let deposit = Cycles.accept(accepted);
+        assert (deposit == accepted);
+        balance += accepted;
+        { accepted = Nat64.fromNat(accepted) };
+    };
 
     private func isUserNameAvailable(userName: ?Text, callerId: Principal) : Bool {
         switch(userName){
@@ -262,7 +280,7 @@ shared (msg) actor class User(){
         // If there is an original value, do not update
         switch(existing) {
             case null {
-                Cycles.add(100_000_000_000);
+                Cycles.add(1_000_000_000_000);
                 let newUserJournal = await Journal.Journal(callerId);
                 let amountAccepted = await newUserJournal.wallet_receive();
 
@@ -296,7 +314,7 @@ shared (msg) actor class User(){
             {
                 userJournalData : ([(Nat,JournalEntry)], Bio);
                 email: ?Text;
-                balance : Ledger.Tokens;
+                balance : Ledger.ICP;
                 address: [Nat8];
                 userName: ?Text;
             }
@@ -650,8 +668,12 @@ shared (msg) actor class User(){
         myAccountId()
     };
 
-    public func canisterBalance() : async Ledger.Tokens {
-        await Ledger.account_balance({ account = myAccountId() })
+    public func mainCanisterCyclesBalance() : async Nat {
+        return Cycles.balance();
+    };
+
+    public func canisterBalance() : async Ledger.ICP {
+        await ledger.account_balance({ account = myAccountId() })
     };
 
     public shared(msg) func transferICP(amount: Nat64, canisterAccountId: Account.AccountIdentifier) : async Result.Result<(), Error> {
@@ -673,30 +695,34 @@ shared (msg) actor class User(){
             case (? profile){
                 let userJournal = profile.journal;
                 let userBalance = await userJournal.canisterBalance();
-                if(userBalance.e8s >= amount){
-                    let adminCanisterAccountIdVarient = await getAdminAccountId();
-                    let adminCanisterAccountId = Result.toOption(adminCanisterAccountIdVarient);
-                    switch(adminCanisterAccountId){
-                        case (? adminAccountId){
-                        
-                            let statusForFeeCollection = await userJournal.transferICP(feeMinusGas, adminAccountId);
-                            let statusForIcpTransfer = await userJournal.transferICP(amountMinusFeeAndGas, canisterAccountId);
-                            if(statusForFeeCollection == true){
-                               if(statusForIcpTransfer == true){
-                                   #ok(());
-                               } else {
-                                    #err(#TxFailed)
-                               }
-                            } else {
-                                #err(#TxFailed)
-                            }
-                        };
-                        case null {
-                            #err(#NotAuthorized);
-                        };
-                    };
-                } else {
+                if(userBalance.e8s < Fee){
                     #err(#InsufficientFunds)
+                } else {
+                    if(userBalance.e8s >= amount){
+                        let adminCanisterAccountIdVarient = await getAdminAccountId();
+                        let adminCanisterAccountId = Result.toOption(adminCanisterAccountIdVarient);
+                        switch(adminCanisterAccountId){
+                            case (? adminAccountId){
+                            
+                                let statusForFeeCollection = await userJournal.transferICP(feeMinusGas, adminAccountId);
+                                let statusForIcpTransfer = await userJournal.transferICP(amountMinusFeeAndGas, canisterAccountId);
+                                if(statusForFeeCollection == true){
+                                if(statusForIcpTransfer == true){
+                                    #ok(());
+                                } else {
+                                        #err(#TxFailed)
+                                }
+                                } else {
+                                    #err(#TxFailed)
+                                }
+                            };
+                            case null {
+                                #err(#NotAuthorized);
+                            };
+                        };
+                    } else {
+                        #err(#InsufficientFunds)
+                    }
                 }
 
             };

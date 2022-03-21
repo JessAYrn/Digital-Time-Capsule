@@ -50,6 +50,16 @@ delete the /dist file,
 delete the /.dfx file,
 delete the /src/declarations file
 
+add the follow property to the "canisters" object in the dfx.json file:
+
+```
+"ledger": {
+      "type": "custom",
+      "wasm": "ledger.wasm",
+      "candid": "ledger.public.did"
+    },
+```
+
 change the "candid": "ledger.public.did" line of the dfx.json file so that it reads "candid": "ledger.private.did"
 
 start local replica by running the following line:
@@ -80,6 +90,8 @@ dfx deploy ledger --argument '(record {minting_account = "'${MINT_ACC}'"; initia
 
 change the "candid": "ledger.private.did" line of the dfx.json file back so that it reads "candid": "ledger.public.did" again.
 
+Take the ledger canister-id and set it as the value of the CANISTER_ID variable in the Digital-Time-Capsule/src/dtc/ledger.mo file. 
+
 run the following commands in the Digital-Time-Capsule terminal: 
 
 npm i
@@ -95,6 +107,26 @@ dfx deploy
 then: 
 
 npm start
+
+## Deploying to the Mainnet
+
+first, be sure that you delete the following from the dfx.json file
+
+```
+"ledger": {
+      "type": "custom",
+      "wasm": "ledger.wasm",
+      "candid": "ledger.public.did"
+    },
+```
+
+Change the CANISTER_ID variable in the Digital-Time-Capsule/src/dtc/ledger.mo file to "ryjl3-tyaaa-aaaaa-aaaba-cai" (This is the canister-id of the ledger canister on the mainnet);
+
+run the following commands
+
+npm install
+
+dfx deploy --network ic 
 
 
 ## Command for minting ICP

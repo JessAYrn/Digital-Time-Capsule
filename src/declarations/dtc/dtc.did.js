@@ -2,7 +2,7 @@ export const idlFactory = ({ IDL }) => {
   const List = IDL.Rec();
   const Trie = IDL.Rec();
   const AccountIdentifier = IDL.Vec(IDL.Nat8);
-  const Tokens = IDL.Record({ 'e8s' : IDL.Nat64 });
+  const ICP = IDL.Record({ 'e8s' : IDL.Nat64 });
   const AmountAccepted = IDL.Record({ 'accepted' : IDL.Nat64 });
   const Error = IDL.Variant({
     'TxFailed' : IDL.Null,
@@ -57,7 +57,7 @@ export const idlFactory = ({ IDL }) => {
   const Result_3 = IDL.Variant({
     'ok' : IDL.Record({
       'userName' : IDL.Opt(IDL.Text),
-      'balance' : Tokens,
+      'balance' : ICP,
       'email' : IDL.Opt(IDL.Text),
       'address' : IDL.Vec(IDL.Nat8),
       'userJournalData' : IDL.Tuple(
@@ -111,7 +111,7 @@ export const idlFactory = ({ IDL }) => {
   });
   const User = IDL.Service({
     'canisterAccount' : IDL.Func([], [AccountIdentifier], ['query']),
-    'canisterBalance' : IDL.Func([], [Tokens], []),
+    'canisterBalance' : IDL.Func([], [ICP], []),
     'create' : IDL.Func([], [Result_8], []),
     'createJournalEntryFile' : IDL.Func(
         [IDL.Text, IDL.Nat, IDL.Vec(IDL.Nat8)],
@@ -120,6 +120,7 @@ export const idlFactory = ({ IDL }) => {
       ),
     'delete' : IDL.Func([], [Result], []),
     'getEntriesToBeSent' : IDL.Func([], [Result_7], []),
+    'mainCanisterCyclesBalance' : IDL.Func([], [IDL.Nat], []),
     'readEntry' : IDL.Func([EntryKey], [Result_6], []),
     'readEntryFileChunk' : IDL.Func([IDL.Text, IDL.Nat], [Result_5], []),
     'readEntryFileSize' : IDL.Func([IDL.Text], [Result_4], []),
@@ -133,6 +134,11 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'updateProfile' : IDL.Func([ProfileInput], [Result], []),
+    'wallet_receive' : IDL.Func(
+        [],
+        [IDL.Record({ 'accepted' : IDL.Nat64 })],
+        [],
+      ),
   });
   return User;
 };
