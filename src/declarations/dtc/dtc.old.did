@@ -182,6 +182,7 @@ service : {
   createJournalEntryFile: (text, nat, blob) -> (Result);
   delete: () -> (Result);
   getEntriesToBeSent: () -> (Result_7);
+  mainCanisterCyclesBalance: () -> (nat);
   readEntry: (EntryKey) -> (Result_6);
   readEntryFileChunk: (text, nat) -> (Result_5);
   readEntryFileSize: (text) -> (Result_4);
@@ -191,4 +192,5 @@ service : {
   updateBio: (Bio) -> (Result);
   updateJournalEntry: (opt EntryKey, opt JournalEntryInput) -> (Result_1);
   updateProfile: (ProfileInput) -> (Result);
+  wallet_receive: () -> (record {accepted: nat64;});
 }

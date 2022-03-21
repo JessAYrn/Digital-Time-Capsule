@@ -9,10 +9,17 @@
         margin-top: 37%;
     }
 
-    .imageDiv{
+    .journalImages{
         float: left;
-        margin-left: 6%;
-    }
+        width: 60%;
+        .imageDiv{
+            width: 23rem;
+            height: 28rem;
+            float: left;
+            margin-left: 1%;
+        }
+    }   
+
     .logoDiv{
         width: 100%;
         float: left;

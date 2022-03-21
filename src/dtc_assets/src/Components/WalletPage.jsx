@@ -61,7 +61,7 @@ const WalletPage = (props) => {
                         </div>
                         <div className="accountIconLinkDiv">
                             <Link className={"navLink_Wallet"} to='/account'>
-                                <img src={"../../assets/account-icon.png"} alt="image preview" className="accountIcon_Wallet"/> 
+                                <img src={"account-icon.png"} alt="image preview" className="accountIcon_Wallet"/> 
                             </Link>
                         </div>
                     </div>

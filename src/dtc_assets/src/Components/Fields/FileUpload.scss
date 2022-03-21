@@ -11,42 +11,35 @@
         font-family: 'Merriweather', serif;
     }
 
-    .imagePreview{
-        max-width: 23rem;
-        max-height: 35rem;
-        border: solid;
-        border-radius: 10px;
-
-        .inputBox{
-            padding-left: 2.5rem;
-            width: 75%;
-            .disabled{
-                background-color: rgb(245, 245, 245);
-            }
-            .enabled{
-                background-color: rgb(245, 245, 245);
-            }
+    .inputBox{
+        padding-left: 2.5rem;
+        width: 75%;
+        .disabled{
+            background-color: rgb(245, 245, 245);
         }
-
-        .imageInputButton{
-            padding-left: 37%;
-            width: 5rem;
-            margin-bottom: 1rem;
+        .enabled{
+            background-color: rgb(245, 245, 245);
         }
-
-        &__image{
-            max-width: 15rem;
-            max-height: 20rem;
-            padding: 1rem;
-        }
-
-        &__video{
-            max-width: 15rem;
-            height: 20rem;
-            margin-top: 1rem;
-            padding-left: 2.5rem;
-            padding-right: 2.5rem;
-        }
-    
     }
+
+    .imageInputButton{
+        padding-left: 37%;
+        width: 5rem;
+        margin-bottom: 1rem;
+    }
+
+    &__image{
+        max-width: 20rem;
+        max-height: 20rem;
+        padding: 1rem;
+    }
+
+    &__video{
+        max-width: 15rem;
+        height: 20rem;
+        margin-top: 1rem;
+        padding-left: 2.5rem;
+        padding-right: 2.5rem;
+    }
+    
 }
