@@ -1,5 +1,5 @@
 module {
-    public let CANISTER_ID : Text = "ryjl3-tyaaa-aaaaa-aaaba-cai";
+    public let CANISTER_ID : Text = "wckdt-raaaa-aaaaa-aaatq-cai";
 
     public type Result<T, E> = {
         #Ok  : T;
