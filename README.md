@@ -125,9 +125,14 @@ Change the CANISTER_ID variable in the Digital-Time-Capsule/src/dtc/ledger.mo fi
 run the following commands
 
 npm install
-
+// to deploy all canisters at once
 dfx deploy --network ic 
 
+// to deploy front-end canister only
+dfx deploy --network ic dtc_assets
+
+// to deploy back-end canister only
+dfx deploy --network ic dtc_assets
 
 ## Command for minting ICP
 
