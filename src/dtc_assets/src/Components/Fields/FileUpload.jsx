@@ -27,7 +27,7 @@ const FileUpload = (props) => {
         });
     }; 
 
-    const [fileSrc, setFileSrc]  = useState("../../../assets/AddImageIcon.png");
+    const [fileSrc, setFileSrc]  = useState("dtc-logo-black.png");
     const [fileType, setFileType] = useState("image");
 
     useEffect( async () => {
@@ -67,36 +67,29 @@ const FileUpload = (props) => {
     };
 
     return(
-        <div className={'imageDiv'}>
-            <div className={"imagePreview"} id={"imagePreview"}>
-                
-                { 
-                    (fileType === "image") ? 
-                        <img src={fileSrc} alt="image preview" className="imagePreview__image"/> :
-                        <video 
-                            width="320" 
-                            height="240" 
-                            className="imagePreview__video" 
-                            controls="controls"
-                        >
-                            <source src={fileSrc} type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'/>
-                            <source src={fileSrc} type='video/ogg; codecs="theora, vorbis"'/>
-                            <source src={fileSrc} type='video/webm'/>
-                            Your browser does not support the video tag.
-                        </video>                
-                }
-                <InputBox
-                    maxLength="34"
-                    label={""} 
-                />
-                {
-                    !fileSrc && 
-                    <span className="imagePreview__default-display">
-                        Image Preview
-                    </span>   
-                }
-                <input id={'uploadedImaged'} type="file" className={'imageInputButton'} ref={inputRef} onLoad={handleUpload} onChange={handleUpload}/>
-            </div>
+        <div className={'imageDiv'}>                
+            { 
+                (fileType === "image") ? 
+                    <img src={fileSrc} alt="image preview" className="imagePreview__image"/> :
+                    <video 
+                        width="320" 
+                        height="240" 
+                        className="imagePreview__video" 
+                        controls="controls"
+                    >
+                        <source src={fileSrc} type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'/>
+                        <source src={fileSrc} type='video/ogg; codecs="theora, vorbis"'/>
+                        <source src={fileSrc} type='video/webm'/>
+                        Your browser does not support the video tag.
+                    </video>                
+            }
+            {
+                !fileSrc && 
+                <span className="imagePreview__default-display">
+                    Image Preview
+                </span>   
+            }
+            <input id={'uploadedImaged'} type="file" className={'imageInputButton'} ref={inputRef} onLoad={handleUpload} onChange={handleUpload}/>
         </div>
     );
 }
