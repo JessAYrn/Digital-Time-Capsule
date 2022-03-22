@@ -1,6 +1,9 @@
 .tableDivContainer{
+  @media screen and (max-width: 480px) {
+    width: 100%;
+  };
   width: 55%;
-    float: left;
+  float: left;
   .tableDiv{
     width: 100%;
     float: left;
@@ -68,6 +71,9 @@
 
 .biographyDiv{
     .section1{
+      @media screen and (max-width: 480px) {
+        width: 100%;
+      };
       width: 33%;
       float: left;
       height: 22rem;
@@ -89,12 +95,20 @@
       }
     }
     .section2{
+      @media screen and (max-width: 480px) {
+        float: left;
+        width: 100%;
+        height: 6rem;
+      };
       width: 66%;
       float: left;
       height: 22rem;
     }
 
     .prefaceDiv{
+      @media screen and (max-width: 480px) {
+        width: 100%;
+      };
       margin-top: 2rem;
       margin-right: 5%;
       width: 33%;
@@ -123,17 +137,19 @@
   background-color: black;
   border: solid black;
   border-radius: 10px;
+  height: 35px;
   .navBar_Journal{
       width: 100%;
       color: white;
       .linkContainer{
-          width:20%;
-          padding-left: 80%;
+          width:100%;
+          padding-left: 2%;
           .timeCapsuleLinkDiv{
               float: left;
               border-radius: 10px;
               background-color: white;
-              width: 65%;
+              width: 175px;
+              margin-top: 2px;
               .navLink_Journal{
                   font-family: 'Julius Sans One', sans-serif;
                   padding-left: 10%;
@@ -141,6 +157,8 @@
               }
           }
           .accountIconLinkDiv{
+              float: right;
+              margin-right: 4%;
               .navLink_Journal{
                   font-family: 'Julius Sans One', sans-serif;
                   color: black;
@@ -153,5 +171,18 @@
               }
           }
       }
+  }
+}
+
+.submitAndLoginButtonsDiv{
+  width: 100%;
+  float: left;
+  .submitButton{
+    float: left;
+    margin: 15px;
+  };
+  .loginButton{
+    float: right;
+    margin: 15px;
   }
 }
