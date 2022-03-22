@@ -15,14 +15,27 @@ export type Error = { 'TxFailed' : null } |
   { 'NotFound' : null } |
   { 'NotAuthorized' : null } |
   { 'AlreadyExists' : null } |
-  { 'NoInputGiven' : null };
+  { 'UserNameTaken' : null } |
+  { 'NoInputGiven' : null } |
+  { 'InsufficientFunds' : null };
 export type Hash = number;
+export interface ICP { 'e8s' : bigint }
 export interface JournalEntry {
   'unlockTime' : bigint,
+  'file2MetaData' : {
+    'fileName' : string,
+    'fileType' : string,
+    'lastModified' : bigint,
+  },
   'emailThree' : string,
   'date' : string,
   'sent' : boolean,
   'text' : string,
+  'file1MetaData' : {
+    'fileName' : string,
+    'fileType' : string,
+    'lastModified' : bigint,
+  },
   'lockTime' : bigint,
   'emailOne' : string,
   'emailTwo' : string,
@@ -30,9 +43,19 @@ export interface JournalEntry {
   'entryTitle' : string,
 }
 export interface JournalEntryInput {
+  'file2MetaData' : {
+    'fileName' : string,
+    'fileType' : string,
+    'lastModified' : bigint,
+  },
   'emailThree' : string,
   'date' : string,
   'text' : string,
+  'file1MetaData' : {
+    'fileName' : string,
+    'fileType' : string,
+    'lastModified' : bigint,
+  },
   'lockTime' : bigint,
   'emailOne' : string,
   'emailTwo' : string,
@@ -42,46 +65,58 @@ export interface JournalEntryInput {
 export interface Key { 'key' : bigint, 'hash' : Hash }
 export interface Leaf { 'size' : bigint, 'keyvals' : AssocList }
 export type List = [] | [[[Key, JournalEntry], List]];
-export interface ProfileInput { 'userName' : string, 'email' : string }
+export interface ProfileInput {
+  'userName' : [] | [string],
+  'email' : [] | [string],
+}
 export type Result = { 'ok' : null } |
   { 'err' : Error };
 export type Result_1 = { 'ok' : Trie } |
   { 'err' : Error };
-export type Result_2 = {
+export type Result_2 = { 'ok' : [bigint, Array<bigint>] } |
+  { 'err' : Error };
+export type Result_3 = {
     'ok' : {
-      'userName' : string,
-      'balance' : Tokens,
-      'email' : string,
+      'userName' : [] | [string],
+      'balance' : ICP,
+      'email' : [] | [string],
       'address' : Array<number>,
       'userJournalData' : [Array<[bigint, JournalEntry]>, Bio],
     }
   } |
   { 'err' : Error };
-export type Result_3 = { 'ok' : JournalEntry } |
+export type Result_4 = { 'ok' : bigint } |
   { 'err' : Error };
-export type Result_4 = {
+export type Result_5 = { 'ok' : Array<number> } |
+  { 'err' : Error };
+export type Result_6 = { 'ok' : JournalEntry } |
+  { 'err' : Error };
+export type Result_7 = {
     'ok' : Array<[string, Array<[bigint, JournalEntry]>]>
   } |
   { 'err' : Error };
-export type Result_5 = { 'ok' : AmountAccepted } |
+export type Result_8 = { 'ok' : AmountAccepted } |
   { 'err' : Error };
-export interface Tokens { 'e8s' : bigint }
 export type Trie = { 'branch' : Branch } |
   { 'leaf' : Leaf } |
   { 'empty' : null };
 export interface User {
   'canisterAccount' : () => Promise<AccountIdentifier>,
-  'canisterBalance' : () => Promise<Tokens>,
-  'create' : (arg_0: ProfileInput) => Promise<Result_5>,
+  'canisterBalance' : () => Promise<ICP>,
+  'create' : () => Promise<Result_8>,
   'createJournalEntryFile' : (
       arg_0: string,
-      arg_1: string,
+      arg_1: bigint,
       arg_2: Array<number>,
     ) => Promise<Result>,
   'delete' : () => Promise<Result>,
-  'getEntriesToBeSent' : () => Promise<Result_4>,
-  'readEntry' : (arg_0: EntryKey) => Promise<Result_3>,
-  'readJournal' : () => Promise<Result_2>,
+  'getEntriesToBeSent' : () => Promise<Result_7>,
+  'mainCanisterCyclesBalance' : () => Promise<bigint>,
+  'readEntry' : (arg_0: EntryKey) => Promise<Result_6>,
+  'readEntryFileChunk' : (arg_0: string, arg_1: bigint) => Promise<Result_5>,
+  'readEntryFileSize' : (arg_0: string) => Promise<Result_4>,
+  'readJournal' : () => Promise<Result_3>,
+  'refillCanisterCycles' : () => Promise<Result_2>,
   'transferICP' : (arg_0: bigint, arg_1: AccountIdentifier) => Promise<Result>,
   'updateBio' : (arg_0: Bio) => Promise<Result>,
   'updateJournalEntry' : (
@@ -89,5 +124,6 @@ export interface User {
       arg_1: [] | [JournalEntryInput],
     ) => Promise<Result_1>,
   'updateProfile' : (arg_0: ProfileInput) => Promise<Result>,
+  'wallet_receive' : () => Promise<{ 'accepted' : bigint }>,
 }
 export interface _SERVICE extends User {}

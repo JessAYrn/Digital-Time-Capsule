@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { Modal } from './WalletModal';
 import './WalletPage.scss';
 import { e8sInOneICP } from '../Constants';
+import LoadScreen from './LoadScreen';
 
 const WalletPage = (props) => {
 
@@ -16,21 +17,21 @@ const WalletPage = (props) => {
 
     const { actor, authClient } = useContext(AppContext);
     const [showModal, setShowModal] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const openModal = () => {
         setShowModal(true);
     }
 
     useEffect(async () => {
+        setIsLoading(true);
         const journal = await actor.readJournal();
         console.log(journal);
         if("err" in journal){
-            actor.create({
-                userName: "admin",
-                email: "admin@test.com"
-        }).then((result) => {
+            actor.create().then((result) => {
                 console.log(result);
             });
+            setIsLoading(false);
         } else {
             console.log(journal.ok);
             console.log(toHexString(new Uint8Array( [...journal.ok.address])));
@@ -42,12 +43,15 @@ const WalletPage = (props) => {
                 payload: walletData,
                 actionType: types.SET_WALLET_DATA
             });
+            setIsLoading(false);
         }
     },[actor, authClient]);
 
     console.log(journalState.walletData);
 
     return (
+        isLoading ?
+        <LoadScreen/> :
         <div className={"container"}>
             <div className={'linkDiv_Wallet'}>
                 <nav className={'navBar_Wallet'}>
@@ -57,7 +61,7 @@ const WalletPage = (props) => {
                         </div>
                         <div className="accountIconLinkDiv">
                             <Link className={"navLink_Wallet"} to='/account'>
-                                <img src={"../../assets/account-icon.png"} alt="image preview" className="accountIcon_Wallet"/> 
+                                <img src={"account-icon.png"} alt="image preview" className="accountIcon_Wallet"/> 
                             </Link>
                         </div>
                     </div>

@@ -1,4 +1,4 @@
-import Ledger "canister:ledger";
+import Ledger "Ledger";
 import Debug "mo:base/Debug";
 import Error "mo:base/Error";
 import Nat64 "mo:base/Nat64";
@@ -18,6 +18,7 @@ import Array "mo:base/Array";
 import Int "mo:base/Int";
 import Text "mo:base/Text";
 import Account "./Account";
+import Bool "mo:base/Bool";
 
 shared (msg) actor class User(){
 
@@ -25,14 +26,14 @@ shared (msg) actor class User(){
 
     type Profile = {
         journal : Journal.Journal;
-        email: Text;
-        userName: Text;
+        email: ?Text;
+        userName: ?Text;
         id: Principal;
     };
 
     type ProfileInput = {
-        userName: Text;
-        email: Text;
+        userName: ?Text;
+        email: ?Text;
     };
 
     type AmountAccepted = {
@@ -59,6 +60,16 @@ shared (msg) actor class User(){
         emailOne: Text;
         emailTwo: Text;
         emailThree: Text;
+        file1MetaData: {
+            fileName: Text;
+            lastModified: Int;
+            fileType: Text;
+        };
+        file2MetaData: {
+            fileName: Text;
+            lastModified: Int;
+            fileType: Text;
+        };
     };
 
     type JournalEntryInput = {
@@ -70,6 +81,16 @@ shared (msg) actor class User(){
         emailOne: Text;
         emailTwo: Text;
         emailThree: Text;
+        file1MetaData: {
+            fileName: Text;
+            lastModified: Int;
+            fileType: Text;
+        };
+        file2MetaData: {
+            fileName: Text;
+            lastModified: Int;
+            fileType: Text;
+        };
     };
 
     type Bio = {
@@ -86,7 +107,9 @@ shared (msg) actor class User(){
         #AlreadyExists;
         #NotAuthorized;
         #NoInputGiven;
+        #InsufficientFunds;
         #TxFailed;
+        #UserNameTaken;
     };
 
     //Application State
@@ -96,13 +119,150 @@ shared (msg) actor class User(){
     //Trie.Trie is the data type. a Trie is a key/value map where Nat is the key and Profile is the data type
     // and it has been initialized as empty. hence the Trie.empty()
 
-    stable var profiles : Trie.Trie<Principal, Profile> = Trie.empty();
+    private stable var profiles : Trie.Trie<Principal, Profile> = Trie.empty();
 
+    private var Gas: Nat64 = 10000;
     
+    private var Fee : Nat64 = 10000000 + Gas;
 
+    private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
+
+    private var balance = Cycles.balance();
+
+    private var capacity = 1000000000000000;
+
+    public func wallet_receive() : async { accepted: Nat64 } {
+        let amount = Cycles.available();
+        let limit : Nat = capacity - balance;
+        let accepted = 
+            if (amount <= limit) amount
+            else limit;
+        let deposit = Cycles.accept(accepted);
+        assert (deposit == accepted);
+        balance += accepted;
+        { accepted = Nat64.fromNat(accepted) };
+    };
+
+    private func isUserNameAvailable(userName: ?Text, callerId: Principal) : Bool {
+        switch(userName){
+            case null{
+                true
+            };
+            case (? userNameValue){
+                var index = 0;
+                let numberOfProfiles = Trie.size(profiles);
+                let profilesIter = Trie.iter(profiles);
+                let profilesArray = Iter.toArray(profilesIter);
+                let ArrayBuffer = Buffer.Buffer<(Principal,Profile)>(1);
+
+                while(index < numberOfProfiles){
+                    let userProfile = profilesArray[index];
+                    switch(userProfile.1.userName){
+                        case null{
+                            index += 1;
+                        };
+                        case (? username){
+                            if((username == userNameValue)){
+                                if(userProfile.1.id != callerId){
+                                    ArrayBuffer.add(userProfile);
+                                };
+                            };
+                            index += 1;
+                        };
+                    };
+                };
+
+                if(ArrayBuffer.size() > 0){
+                    false
+                } else {
+                    true
+                }
+            };
+        };
+    };
+
+    private func getAdminAccountId () : async Result.Result<Account.AccountIdentifier, Error> {
+        var index = 0;
+        let numberOfProfiles = Trie.size(profiles);
+        let profilesIter = Trie.iter(profiles);
+        let profilesArray = Iter.toArray(profilesIter);
+        let AdminArrayBuffer = Buffer.Buffer<Blob>(1);
+
+        while(index < numberOfProfiles){
+            let userProfile = profilesArray[index];
+            switch(userProfile.1.userName){
+                case null{
+                    index += 1;
+                };
+                case (? username){
+                    if(username == "admin"){
+                        let userJournal = userProfile.1.journal;
+                        let userAccountId = await userJournal.canisterAccount();
+                        AdminArrayBuffer.add(userAccountId);
+                    };
+                    index += 1;
+                };
+            };
+        };
+
+        
+        if(AdminArrayBuffer.size() == 1){
+            let AdminArray = AdminArrayBuffer.toArray();
+            #ok(AdminArray[0]);
+        } else {
+            #err(#NotAuthorized);
+        }
+
+    };
+
+    public shared(msg) func refillCanisterCycles() : async Result.Result<((Nat,[Nat64])), Error> {
+        let callerId = msg.caller;
+
+        let result = Trie.find(
+            profiles,
+            key(callerId),
+            Principal.equal
+        );
+
+        switch(result){
+            case null{
+                #err(#NotAuthorized);
+            };
+            case(? profile){
+                switch(profile.userName){
+                    case null{
+                        #err(#NotAuthorized);
+                    };
+                    case (? existingUserName){
+                        if(existingUserName == "admin"){
+                            var index = 0;
+                            let numberOfProfiles = Trie.size(profiles);
+                            let profilesIter = Trie.iter(profiles);
+                            let profilesArray = Iter.toArray(profilesIter);
+                            let AmountAcceptedArrayBuffer = Buffer.Buffer<Nat64>(1);
+
+                            while(index < numberOfProfiles){
+                                let userProfile = profilesArray[index];
+                                Cycles.add(100_000_000_000);
+                                let amountAccepted = await userProfile.1.journal.wallet_receive();
+                                AmountAcceptedArrayBuffer.add(amountAccepted.accepted);
+
+                                index += 1;
+                            };
+
+                            #ok(Cycles.balance(), AmountAcceptedArrayBuffer.toArray());
+
+                        } else {
+                            #err(#NotAuthorized);
+                        }
+                    };
+                };
+            };
+        };
+    };
 
     //Result.Result returns a varient type that has attributes from success case(the first input) and from your error case (your second input). both inputs must be varient types. () is a unit type.
-    public shared(msg) func create (profile: ProfileInput) : async Result.Result<AmountAccepted,Error> {
+    public shared(msg) func create () : async Result.Result<AmountAccepted,Error> {
 
         let callerId = msg.caller;
 
@@ -120,14 +280,14 @@ shared (msg) actor class User(){
         // If there is an original value, do not update
         switch(existing) {
             case null {
-                Cycles.add(100_000_000_000);
+                Cycles.add(1_000_000_000_000);
                 let newUserJournal = await Journal.Journal(callerId);
                 let amountAccepted = await newUserJournal.wallet_receive();
 
                 let userProfile: Profile = {
                     journal = newUserJournal;
-                    email = profile.email;
-                    userName = profile.userName;
+                    email = null;
+                    userName = null;
                     id = callerId;
                 };
 
@@ -153,10 +313,10 @@ shared (msg) actor class User(){
     public shared(msg) func readJournal () : async Result.Result<(
             {
                 userJournalData : ([(Nat,JournalEntry)], Bio);
-                email: Text;
-                balance : Ledger.Tokens;
+                email: ?Text;
+                balance : Ledger.ICP;
                 address: [Nat8];
-                userName: Text;
+                userName: ?Text;
             }
         ), Error> {
 
@@ -223,6 +383,48 @@ shared (msg) actor class User(){
             };
         };
 
+    };
+
+    public shared(msg) func readEntryFileChunk(fileId: Text, chunkId: Nat) : async Result.Result<(Blob),Error>{
+        let callerId = msg.caller;
+
+        let result = Trie.find(
+            profiles,
+            key(callerId),
+            Principal.equal
+        );
+
+        switch(result){
+            case null{
+                #err(#NotFound);
+            };
+            case ( ? existingProfile){
+                let userJournal = existingProfile.journal;
+                let entryFile = await userJournal.readJournalFileChunk(fileId, chunkId);
+                entryFile;
+            };
+        }
+    };
+
+    public shared(msg) func readEntryFileSize(fileId: Text) : async Result.Result<(Nat),Error>{
+        let callerId = msg.caller;
+
+        let result = Trie.find(
+            profiles,
+            key(callerId),
+            Principal.equal
+        );
+
+        switch(result){
+            case null{
+                #err(#NotFound);
+            };
+            case ( ? existingProfile){
+                let userJournal = existingProfile.journal;
+                let entryFileSize = await userJournal.readJournalFileSize(fileId);
+                entryFileSize;
+            };
+        }
     };
 
     public shared(msg) func updateBio(bio: Bio) : async Result.Result<(), Error> {
@@ -301,7 +503,7 @@ shared (msg) actor class User(){
      
     };
 
-    public shared(msg) func createJournalEntryFile(fileId: Text, chunkId: Text, blobChunk: Blob): async Result.Result<(), Error>{
+    public shared(msg) func createJournalEntryFile(fileId: Text, chunkId: Nat, blobChunk: Blob): async Result.Result<(), Error>{
         let callerId = msg.caller;
 
         let result = Trie.find(
@@ -345,20 +547,25 @@ shared (msg) actor class User(){
             };
             case(? v) {
 
-                let userProfile : Profile = {
-                    journal = v.journal;
-                    email = profile.email;
-                    userName = profile.userName;
-                    id = callerId;
-                };
+                let userNameAvailable = isUserNameAvailable(profile.userName, callerId);
+                if(userNameAvailable == true){
+                    let userProfile : Profile = {
+                        journal = v.journal;
+                        email = profile.email;
+                        userName = profile.userName;
+                        id = callerId;
+                    };
 
-                profiles := Trie.replace(
-                    profiles,       //Target trie
-                    key(callerId), //Key
-                    Principal.equal,      //Equality Checker
-                    ?userProfile        //The profile that you mean to use to overWrite the existing profile
-                ).0;                // The result is a tuple where the 0th entry is the resulting profiles trie
-                #ok(());
+                    profiles := Trie.replace(
+                        profiles,       //Target trie
+                        key(callerId), //Key
+                        Principal.equal,      //Equality Checker
+                        ?userProfile        //The profile that you mean to use to overWrite the existing profile
+                    ).0;                // The result is a tuple where the 0th entry is the resulting profiles trie
+                    #ok(());
+                } else {
+                    #err(#UserNameTaken);
+                }
             };
         };
     };
@@ -411,28 +618,43 @@ shared (msg) actor class User(){
             };
             case( ? profile){
                 let callerUserName = profile.userName;
-                if(callerUserName == "admin"){
-                    var index = 0;
-                    let numberOfProfiles = Trie.size(profiles);
-                    let profilesIter = Trie.iter(profiles);
-                    let profilesArray = Iter.toArray(profilesIter);
-                    let AllEntriesToBeSentBuffer = Buffer.Buffer<(Text, [(Nat, JournalEntry)])>(1);
+                switch(callerUserName){
+                    case null {
+                        #err(#NotFound)
+                    };
+                    case(? userName){
+                        if(userName == "admin"){
+                            var index = 0;
+                            let numberOfProfiles = Trie.size(profiles);
+                            let profilesIter = Trie.iter(profiles);
+                            let profilesArray = Iter.toArray(profilesIter);
+                            let AllEntriesToBeSentBuffer = Buffer.Buffer<(Text, [(Nat, JournalEntry)])>(1);
 
-                    while(index < numberOfProfiles){
-                        let userProfile = profilesArray[index];
-                        let userEmail = userProfile.1.email;
-                        let userJournal = userProfile.1.journal;
-                        let userEntriesToBeSent = await userJournal.getEntriesToBeSent();
-                        if(userEntriesToBeSent != []){
-                            AllEntriesToBeSentBuffer.add((userEmail, userEntriesToBeSent))
-                        };
-                        index += 1;
+                            while(index < numberOfProfiles){
+                                let userProfile = profilesArray[index];
+                                switch(userProfile.1.email){
+                                    case null{
+                                        index += 1;
+                                    };
+                                    case (? email){
+                                        let userEmail = email;
+                                        let userJournal = userProfile.1.journal;
+                                        let userEntriesToBeSent = await userJournal.getEntriesToBeSent();
+                                        if(userEntriesToBeSent != []){
+                                            AllEntriesToBeSentBuffer.add((userEmail, userEntriesToBeSent))
+                                        };
+                                        index += 1;
+                                    };
+                                };
+                            };
+
+                            return #ok(AllEntriesToBeSentBuffer.toArray());
+                        } else {
+                            #err(#NotAuthorized);
+                        }
                     };
 
-                    return #ok(AllEntriesToBeSentBuffer.toArray());
-                } else {
-                    #err(#NotAuthorized);
-                }
+                };
             };
         };
 
@@ -446,13 +668,19 @@ shared (msg) actor class User(){
         myAccountId()
     };
 
-    public func canisterBalance() : async Ledger.Tokens {
-        await Ledger.account_balance({ account = myAccountId() })
+    public func mainCanisterCyclesBalance() : async Nat {
+        return Cycles.balance();
+    };
+
+    public func canisterBalance() : async Ledger.ICP {
+        await ledger.account_balance({ account = myAccountId() })
     };
 
     public shared(msg) func transferICP(amount: Nat64, canisterAccountId: Account.AccountIdentifier) : async Result.Result<(), Error> {
 
         let callerId = msg.caller;
+        let amountMinusFeeAndGas = amount - Fee - Gas;
+        let feeMinusGas = Fee - Gas;
 
         let userProfile = Trie.find(
             profiles,
@@ -466,12 +694,35 @@ shared (msg) actor class User(){
             }; 
             case (? profile){
                 let userJournal = profile.journal;
-
-                let status = await userJournal.transferICP(amount, canisterAccountId);
-                if(status == true){
-                    #ok(());
+                let userBalance = await userJournal.canisterBalance();
+                if(userBalance.e8s < Fee){
+                    #err(#InsufficientFunds)
                 } else {
-                    #err(#TxFailed)
+                    if(userBalance.e8s >= amount){
+                        let adminCanisterAccountIdVarient = await getAdminAccountId();
+                        let adminCanisterAccountId = Result.toOption(adminCanisterAccountIdVarient);
+                        switch(adminCanisterAccountId){
+                            case (? adminAccountId){
+                            
+                                let statusForFeeCollection = await userJournal.transferICP(feeMinusGas, adminAccountId);
+                                let statusForIcpTransfer = await userJournal.transferICP(amountMinusFeeAndGas, canisterAccountId);
+                                if(statusForFeeCollection == true){
+                                if(statusForIcpTransfer == true){
+                                    #ok(());
+                                } else {
+                                        #err(#TxFailed)
+                                }
+                                } else {
+                                    #err(#TxFailed)
+                                }
+                            };
+                            case null {
+                                #err(#NotAuthorized);
+                            };
+                        };
+                    } else {
+                        #err(#InsufficientFunds)
+                    }
                 }
 
             };

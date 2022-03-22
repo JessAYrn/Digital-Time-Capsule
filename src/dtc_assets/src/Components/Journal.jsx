@@ -7,7 +7,7 @@ import "./Journal.scss";
 import { AppContext } from "../App";
 import InputBox from "./Fields/InputBox";
 import { dayInNanoSeconds, monthInDays } from "../Constants";
-
+import LoadScreen from "./LoadScreen";
 
 const Journal = (props) => {
 
@@ -15,17 +15,19 @@ const Journal = (props) => {
     const [pageIsVisibleArray, setPageIsVisibleArray] = useState(journalState.journal.map((page) => false));
     const [newPageAdded, setNewPageAdded] = useState(false);
     const [journalSize, setJournalSize] = useState(0);
+    const [isLoading, setIsLoading] = useState(false);
     const {actor, authClient, setIsLoaded, setSubmissionsMade, submissionsMade} = useContext(AppContext);
 
     useEffect(async () => {
+        setIsLoading(true);
         const journal = await actor.readJournal();
+        const cyclesBalance = await actor.mainCanisterCyclesBalance();
+        console.log("Cycles Balance: ",cyclesBalance);
         console.log(journal);
         if("err" in journal){
-            actor.create({
-                userName: "admin",
-                email: "thedigitaltimecapsule2022@gmail.com"
-        }).then((result) => {
+            actor.create().then((result) => {
                 console.log(result);
+                setIsLoading(false);
             });
         } else {
             let journalEntries = journal.ok.userJournalData[0].map((arrayWithKeyAndPage) => {
@@ -81,6 +83,7 @@ const Journal = (props) => {
                 payload: journalEntries,
                 actionType: types.SET_JOURNAL
             })
+            setIsLoading(false);
         }
     },[actor, submissionsMade, authClient])
 
@@ -131,7 +134,7 @@ const Journal = (props) => {
             console.log(result);
         }
 
-        return(
+        return( 
             <div>
                 <div className={'biographyDiv'}>
                     <div className={'section1'}>
@@ -235,6 +238,8 @@ const Journal = (props) => {
     };
 
     return(
+        isLoading ? 
+        <LoadScreen/> :
         <React.Fragment>
             <div className={'linkDiv_Journal'}>
                 <nav className={'navBar_Journal'}>
@@ -244,7 +249,7 @@ const Journal = (props) => {
                         </div>
                         <div className="accountIconLinkDiv">
                             <Link className={"navLink_Journal"} to='/account'>
-                                <img src={"../../assets/account-icon.png"} alt="image preview" className="accountIcon_Journal"/> 
+                                <img src={"account-icon.png"} alt="image preview" className="accountIcon_Journal"/> 
                             </Link>
                         </div>
                     </div>
@@ -265,7 +270,7 @@ const Journal = (props) => {
                     setIsLoaded(false);
                 }} > Log Out </button>   
             </div>
-        </React.Fragment>
+        </React.Fragment>  
     );
 
 }

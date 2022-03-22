@@ -18,15 +18,18 @@ export const types = {
     CHANGE_NAME: "CHANGE_NAME",
     CHANGE_ENTRY_TITLE: "CHANGE_ENTRY_TITLE",
     CHANGE_EMAIL: "CHANGE_EMAIL",
+    CHANGE_USERNAME: "CHANGE_USERNAME",
     CHANGE_RECIPIENT_EMAIL_ONE: "CHANGE_RECIPIENT_EMAIL_ONE",
     CHANGE_RECIPIENT_EMAIL_TWO: "CHANGE_RECIPIENT_EMAIL_TWO",
-    CHANGE_RECIPIENT_EMAIL_THREE: "CHANGE_RECIPIENT_EMAIL_THREE"
+    CHANGE_RECIPIENT_EMAIL_THREE: "CHANGE_RECIPIENT_EMAIL_THREE",
+    CHANGE_FILE1_METADATA: "CHANGE_FILE1_METADATA",
+    CHANGE_FILE2_METADATA: "CHANGE_FILE2_METADATA"
 }
 
 export const initialState = {
     metaData: {
-        email: '',
-        userName: ''
+        email: [],
+        userName: []
     },
     walletData: {
         balance:'',
@@ -50,7 +53,17 @@ export const initialState = {
             unlockTime: `${Date.now() * 1000000}`,
             emailOne: '',
             emailTwo: '',
-            emailThree: ''
+            emailThree: '', 
+            file1MetaData:{
+                fileName: 'null',
+                lastModified: 0,
+                fileType: 'null'
+            },
+            file2MetaData:{
+                fileName: 'null',
+                lastModified: 0,
+                fileType: 'null'
+            }
         }
     ]
 
@@ -65,7 +78,17 @@ const freshPage = {
     unlockTime: `${Date.now()}`,
     emailOne: '',
     emailTwo: '',
-    emailThree: ''
+    emailThree: '', 
+    file1MetaData:{
+        fileName: 'null',
+        lastModified: 0,
+        fileType: 'null'
+    },
+    file2MetaData:{
+        fileName: 'null',
+        lastModified: 0,
+        fileType: 'null'
+    }
 }
 
 const changeValue = (state = initialState, action) => {
@@ -100,6 +123,18 @@ const changeValue = (state = initialState, action) => {
             state.bio = {
                 ...state.bio,
                 email: payload
+            }
+            state.metaData = {
+                ...state.metaData,
+                email: [payload]
+            }
+            return{
+                ...state
+            }
+        case types.CHANGE_USERNAME:
+            state.metaData = {
+                ...state.metaData,
+                userName: [payload]
             }
             return{
                 ...state
@@ -158,6 +193,24 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
+        case types.CHANGE_FILE1_METADATA:
+            updatedJournalPage = {
+                ... state.journal[index],
+                file1MetaData: payload
+            }
+            state.journal[index] = updatedJournalPage;
+            return {
+                ...state
+            }
+        case types.CHANGE_FILE2_METADATA:
+        updatedJournalPage = {
+            ... state.journal[index],
+            file2MetaData: payload
+        }
+        state.journal[index] = updatedJournalPage;
+        return {
+            ...state
+        }
         case types.CHANGE_ENTRY:
             updatedJournalPage = {
                 ... state.journal[index],

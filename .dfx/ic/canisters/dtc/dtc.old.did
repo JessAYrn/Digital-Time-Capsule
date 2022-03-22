@@ -1,23 +1,3 @@
-type User = 
- service {
-   canisterAccount: () -> (AccountIdentifier) query;
-   canisterBalance: () -> (ICP);
-   create: () -> (Result_8);
-   createJournalEntryFile: (text, nat, blob) -> (Result);
-   delete: () -> (Result);
-   getEntriesToBeSent: () -> (Result_7);
-   mainCanisterCyclesBalance: () -> (nat);
-   readEntry: (EntryKey) -> (Result_6);
-   readEntryFileChunk: (text, nat) -> (Result_5);
-   readEntryFileSize: (text) -> (Result_4);
-   readJournal: () -> (Result_3);
-   refillCanisterCycles: () -> (Result_2);
-   transferICP: (nat64, AccountIdentifier) -> (Result);
-   updateBio: (Bio) -> (Result);
-   updateJournalEntry: (opt EntryKey, opt JournalEntryInput) -> (Result_1);
-   updateProfile: (ProfileInput) -> (Result);
-   wallet_receive: () -> (record {accepted: nat64;});
- };
 type Trie = 
  variant {
    branch: Branch;
@@ -195,4 +175,22 @@ type AssocList =
      };
 type AmountAccepted = record {accepted: nat64;};
 type AccountIdentifier = blob;
-service : () -> User
+service : {
+  canisterAccount: () -> (AccountIdentifier) query;
+  canisterBalance: () -> (ICP);
+  create: () -> (Result_8);
+  createJournalEntryFile: (text, nat, blob) -> (Result);
+  delete: () -> (Result);
+  getEntriesToBeSent: () -> (Result_7);
+  mainCanisterCyclesBalance: () -> (nat);
+  readEntry: (EntryKey) -> (Result_6);
+  readEntryFileChunk: (text, nat) -> (Result_5);
+  readEntryFileSize: (text) -> (Result_4);
+  readJournal: () -> (Result_3);
+  refillCanisterCycles: () -> (Result_2);
+  transferICP: (nat64, AccountIdentifier) -> (Result);
+  updateBio: (Bio) -> (Result);
+  updateJournalEntry: (opt EntryKey, opt JournalEntryInput) -> (Result_1);
+  updateProfile: (ProfileInput) -> (Result);
+  wallet_receive: () -> (record {accepted: nat64;});
+}

@@ -1,4 +1,4 @@
-import Ledger "canister:ledger";
+import Ledger "Ledger";
 import Debug "mo:base/Debug";
 import Error "mo:base/Error";
 import Trie "mo:base/Trie";
@@ -31,6 +31,16 @@ shared(msg) actor class Journal (principal : Principal) = this {
         emailOne: Text;
         emailTwo: Text;
         emailThree: Text;
+        file1MetaData: {
+            fileName: Text;
+            lastModified: Int;
+            fileType: Text;
+        };
+        file2MetaData: {
+            fileName: Text;
+            lastModified: Int;
+            fileType: Text;
+        };
     }; 
 
     type JournalEntryInput = {
@@ -42,6 +52,16 @@ shared(msg) actor class Journal (principal : Principal) = this {
         emailOne: Text;
         emailTwo: Text;
         emailThree: Text;
+        file1MetaData: {
+            fileName: Text;
+            lastModified: Int;
+            fileType: Text;
+        };
+        file2MetaData: {
+            fileName: Text;
+            lastModified: Int;
+            fileType: Text;
+        };
     }; 
 
     type JournalFile = {
@@ -72,7 +92,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     private stable var journal : Trie.Trie<Nat, JournalEntry> = Trie.empty();
 
-    private stable var files : Trie.Trie2D<Text,Text,Blob> = Trie.empty();
+    private stable var files : Trie.Trie2D<Text,Nat,Blob> = Trie.empty();
 
     private stable var biography : Bio = {
         name = "";
@@ -84,13 +104,15 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     private stable var journalEntryIndex : Nat = 0;
 
-    private var capacity = 1000000000000000000;
+    private var capacity = 1000000000000;
 
     private var nanosecondsInADay = 86400000000000;
 
     private var daysInAMonth = 30;
 
     private var balance = Cycles.balance();
+
+    private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
 
     public shared(msg) func wallet_balance() : async Nat {
         return balance
@@ -122,6 +144,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
             emailOne = journalEntry.emailOne;
             emailTwo = journalEntry.emailTwo;
             emailThree = journalEntry.emailThree;
+            file1MetaData = journalEntry.file1MetaData;
+            file2MetaData = journalEntry.file2MetaData;
         };
         
         let (newJournal, oldJournal) = Trie.put(
@@ -141,7 +165,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     };
 
-    public func createFile(fileId: Text ,chunkId : Text, blobChunk : Blob) : async Result.Result<(), Error> {
+    public func createFile(fileId: Text ,chunkId : Nat, blobChunk : Blob) : async Result.Result<(), Error> {
 
         let existingFile = Trie.find(
             files,
@@ -155,15 +179,37 @@ shared(msg) actor class Journal (principal : Principal) = this {
                     files,
                     textKey(fileId),
                     Text.equal,
-                    textKey(chunkId),
-                    Text.equal,
+                    natKey(chunkId),
+                    Nat.equal,
                     blobChunk
                 );
                 files := updatedFiles;
                 #ok(());
             };
             case (? fileExists){
-                #err(#AlreadyExists);
+                let existingFileChunk = Trie.find(
+                    fileExists,
+                    natKey(chunkId),
+                    Nat.equal
+                );
+
+                switch(existingFileChunk){
+                    case null{
+                        let updatedFiles = Trie.put2D(
+                            files,
+                            textKey(fileId),
+                            Text.equal,
+                            natKey(chunkId),
+                            Nat.equal,
+                            blobChunk
+                        );
+                        files := updatedFiles;
+                        #ok(());
+                    };
+                    case (? fileChunk){
+                        #err(#AlreadyExists);
+                    };
+                };
             };
         };
     };
@@ -192,6 +238,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
                         emailOne = x.1.emailOne;
                         emailTwo = x.1.emailTwo;
                         emailThree = x.1.emailThree;
+                        file1MetaData = x.1.file1MetaData;
+                        file2MetaData = x.1.file2MetaData;
                     };
 
                     let (newJournal, oldJournal) = Trie.put(
@@ -228,7 +276,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         }
     };
 
-    public func readJournalFile (fileId : Text) : async Result.Result<(Trie.Trie<Text,Blob>),Error> {
+    public func readJournalFileChunk (fileId : Text, chunkId: Nat) : async Result.Result<(Blob),Error> {
 
         let file = Trie.find(
             files,
@@ -241,7 +289,38 @@ shared(msg) actor class Journal (principal : Principal) = this {
                 #err(#NotFound);
             };
             case (? existingFile){
-                #ok(existingFile);
+                let existingFileChunk = Trie.find(
+                    existingFile,
+                    natKey(chunkId),
+                    Nat.equal
+                );
+                switch(existingFileChunk){
+                    case null{
+                        #err(#NotFound);
+                    };
+                    case (? existingChunk){
+                        #ok(existingChunk);
+                    }
+                };
+            };
+        };
+    };
+
+    public func readJournalFileSize (fileId : Text) : async Result.Result<(Nat),Error> {
+
+        let file = Trie.find(
+            files,
+            textKey(fileId),
+            Text.equal,
+        );
+
+        switch(file){
+            case null{
+                #err(#NotFound);
+            };
+            case (? existingFile){
+                let existingFileArraySize = Iter.size(Trie.iter(existingFile));
+                #ok(existingFileArraySize);
             };
         };
     };
@@ -278,6 +357,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
                     emailOne = journalEntry.emailOne;
                     emailTwo = journalEntry.emailTwo;
                     emailThree = journalEntry.emailThree;
+                    file1MetaData = v.file1MetaData;
+                    file2MetaData = v.file2MetaData;
                 };
 
                 let (newJournal, oldEntryValue) = Trie.put(
@@ -296,7 +377,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     };
 
-    public func updateJournalEntryFile(fileId: Text, chunkId: Text, blobChunk : Blob) : async Result.Result<(),Error> {
+    public func updateJournalEntryFile(fileId: Text, chunkId: Nat, blobChunk : Blob) : async Result.Result<(),Error> {
 
         let file = Trie.find(
             files,
@@ -313,8 +394,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
                     files,
                     textKey(fileId),
                     Text.equal,
-                    textKey(chunkId),
-                    Text.equal,
+                    natKey(chunkId),
+                    Nat.equal,
                     blobChunk
                 );
 
@@ -384,7 +465,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     public func transferICP(amount: Nat64, recipientAccountId: Account.AccountIdentifier) : async Bool {
 
-        let res = await Ledger.transfer({
+        let res = await ledger.transfer({
           memo = Nat64.fromNat(10);
           from_subaccount = null;
           to = recipientAccountId;
@@ -418,8 +499,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
         userAccountId()
     };
 
-    public func canisterBalance() : async Ledger.Tokens {
-        await Ledger.account_balance({ account = userAccountId() })
+    public func canisterBalance() : async Ledger.ICP {
+        await ledger.account_balance({ account = userAccountId() })
     };
    
     private  func key(x: Principal) : Trie.Key<Principal> {

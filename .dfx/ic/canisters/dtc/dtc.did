@@ -1,17 +1,22 @@
 type User = 
  service {
    canisterAccount: () -> (AccountIdentifier) query;
-   canisterBalance: () -> (Tokens);
-   create: (ProfileInput) -> (Result_5);
-   createJournalEntryFile: (text, text, blob) -> (Result);
+   canisterBalance: () -> (ICP);
+   create: () -> (Result_8);
+   createJournalEntryFile: (text, nat, blob) -> (Result);
    delete: () -> (Result);
-   getEntriesToBeSent: () -> (Result_4);
-   readEntry: (EntryKey) -> (Result_3);
-   readJournal: () -> (Result_2);
+   getEntriesToBeSent: () -> (Result_7);
+   mainCanisterCyclesBalance: () -> (nat);
+   readEntry: (EntryKey) -> (Result_6);
+   readEntryFileChunk: (text, nat) -> (Result_5);
+   readEntryFileSize: (text) -> (Result_4);
+   readJournal: () -> (Result_3);
+   refillCanisterCycles: () -> (Result_2);
    transferICP: (nat64, AccountIdentifier) -> (Result);
    updateBio: (Bio) -> (Result);
    updateJournalEntry: (opt EntryKey, opt JournalEntryInput) -> (Result_1);
    updateProfile: (ProfileInput) -> (Result);
+   wallet_receive: () -> (record {accepted: nat64;});
  };
 type Trie = 
  variant {
@@ -19,13 +24,12 @@ type Trie =
    "empty";
    leaf: Leaf;
  };
-type Tokens = record {e8s: nat64;};
-type Result_5 = 
+type Result_8 = 
  variant {
    err: Error;
    ok: AmountAccepted;
  };
-type Result_4 = 
+type Result_7 = 
  variant {
    err: Error;
    ok: vec record {
@@ -36,19 +40,29 @@ type Result_4 =
                  };
            };
  };
-type Result_3 = 
+type Result_6 = 
  variant {
    err: Error;
    ok: JournalEntry;
  };
-type Result_2 = 
+type Result_5 = 
+ variant {
+   err: Error;
+   ok: blob;
+ };
+type Result_4 = 
+ variant {
+   err: Error;
+   ok: nat;
+ };
+type Result_3 = 
  variant {
    err: Error;
    ok:
     record {
       address: vec nat8;
-      balance: Tokens;
-      email: text;
+      balance: ICP;
+      email: opt text;
       userJournalData: record {
                          vec record {
                                nat;
@@ -56,8 +70,16 @@ type Result_2 =
                              };
                          Bio;
                        };
-      userName: text;
+      userName: opt text;
     };
+ };
+type Result_2 = 
+ variant {
+   err: Error;
+   ok: record {
+         nat;
+         vec nat64;
+       };
  };
 type Result_1 = 
  variant {
@@ -71,8 +93,8 @@ type Result =
  };
 type ProfileInput = 
  record {
-   email: text;
-   userName: text;
+   email: opt text;
+   userName: opt text;
  };
 type List = 
  opt record {
@@ -99,6 +121,16 @@ type JournalEntryInput =
    emailThree: text;
    emailTwo: text;
    entryTitle: text;
+   file1MetaData: record {
+                    fileName: text;
+                    fileType: text;
+                    lastModified: int;
+                  };
+   file2MetaData: record {
+                    fileName: text;
+                    fileType: text;
+                    lastModified: int;
+                  };
    location: text;
    lockTime: int;
    "text": text;
@@ -110,20 +142,33 @@ type JournalEntry =
    emailThree: text;
    emailTwo: text;
    entryTitle: text;
+   file1MetaData: record {
+                    fileName: text;
+                    fileType: text;
+                    lastModified: int;
+                  };
+   file2MetaData: record {
+                    fileName: text;
+                    fileType: text;
+                    lastModified: int;
+                  };
    location: text;
    lockTime: int;
    sent: bool;
    "text": text;
    unlockTime: int;
  };
+type ICP = record {e8s: nat64;};
 type Hash = nat32;
 type Error = 
  variant {
    AlreadyExists;
+   InsufficientFunds;
    NoInputGiven;
    NotAuthorized;
    NotFound;
    TxFailed;
+   UserNameTaken;
  };
 type EntryKey = record {entryKey: nat;};
 type Branch = 

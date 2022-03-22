@@ -6,6 +6,7 @@ import {types} from "../reducers/journalReducer";
 import  {AppContext} from "../App";
 import "./JournalPage.scss";
 import DatePicker from "./Fields/DatePicker";
+import LoadScreen from "./LoadScreen";
 
 const CHUNK_SIZE = 1024 * 1024;
 
@@ -13,6 +14,7 @@ const JournalPage = (props) => {
 
     const [file1, setFile1] = useState(null);
     const [file2, setFile2] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     const {
         journalReducerDispatchFunction,
@@ -28,13 +30,94 @@ const JournalPage = (props) => {
         submissionsMade
     } = useContext(AppContext);
 
-    useEffect( async () => {
-        
-        await actor.readJournal();
-    }, [actor, file1, file2]);
+    const retrieveChunk = async (fileId,chunkIndex) => {
 
+        return await actor.readEntryFileChunk(fileId, chunkIndex);
+    }; 
+
+    useEffect(async () => {
+        console.log(journalPageData);
+        if(journalPageData.file1MetaData.fileName !== 'null'){
+            setIsLoading(true);
+            let index = 0;
+            let promises = [];
+
+            const file1ChunkCounteObj = await actor.readEntryFileSize(journalPageData.file1MetaData.fileName);
+            const file1ChunkCount = parseInt(file1ChunkCounteObj.ok);
+            if( file1ChunkCount > 0){
+                while(index < file1ChunkCount){
+                    promises.push(retrieveChunk(journalPageData.file1MetaData.fileName, index));
+                    index += 1;
+                };
+                const file1Bytes = await Promise.all(promises);
+                let file1BytesArray =[];
+                file1Bytes.map((blobObj) => {
+                    file1BytesArray.push(blobObj.ok);
+                });
+                file1BytesArray = file1BytesArray.flat(1);
+                const file1ArrayBuffer = new Uint8Array(file1BytesArray).buffer;
+                const file1Blob = new Blob(
+                    [file1ArrayBuffer], 
+                    { 
+                        type: journalPageData.file1MetaData.fileType 
+                    }
+                );
+                const file1AsFile = new File(
+                    [file1Blob],
+                    journalPageData.file1MetaData.fileName, 
+                    {
+                        type: journalPageData.file1MetaData.fileType, 
+                        lastModified: parseInt(journalPageData.file1MetaData.lastModified)
+                    } 
+                );
+                setFile1(file1AsFile);
+                console.log(file1AsFile);
+            }
+        };
+    
+        if(journalPageData.file2MetaData.fileName !== 'null'){
+            setIsLoading(true);
+            let index = 0;
+            let promises = [];
+
+            const file2ChunkCounteObj = await actor.readEntryFileSize(journalPageData.file2MetaData.fileName);
+            const file2ChunkCount = parseInt(file2ChunkCounteObj.ok);
+            if( file2ChunkCount > 0){
+                while(index < file2ChunkCount){
+                    promises.push(retrieveChunk(journalPageData.file2MetaData.fileName, index));
+                    index += 1;
+                };
+                const file2Bytes = await Promise.all(promises);
+                let file2BytesArray =[];
+                file2Bytes.map((blobObj) => {
+                    file2BytesArray.push(blobObj.ok);
+                });
+                file2BytesArray = file2BytesArray.flat(1);
+                const file2ArrayBuffer = new Uint8Array(file2BytesArray).buffer;
+                const file2Blob = new Blob(
+                    [file2ArrayBuffer], 
+                    { 
+                        type: journalPageData.file2MetaData.fileType 
+                    }
+                );
+                const file2AsFile = new File(
+                    [file2Blob],
+                    journalPageData.file2MetaData.fileName, 
+                    {
+                        type: journalPageData.file2MetaData.fileType, 
+                        lastModified: parseInt(journalPageData.file2MetaData.lastModified)
+                    } 
+                );
+                setFile2(file2AsFile);
+                console.log(file2AsFile);
+            }
+        };
+        setIsLoading(false);
+    },[journalPageData.file1MetaData.fileName, journalPageData.file2MetaData.fileName]);
+    
+   
     const uploadChunk = async (fileId, chunkId, fileChunk) => {
-
+        console.log(chunkId);
         return actor.createJournalEntryFile(
             fileId, 
             chunkId, 
@@ -53,7 +136,9 @@ const JournalPage = (props) => {
             lockTime: parseInt(journalEntry.lockTime),
             emailOne: journalEntry.emailOne,
             emailTwo: journalEntry.emailTwo,
-            emailThree: journalEntry.emailThree
+            emailThree: journalEntry.emailThree,
+            file1MetaData: journalEntry.file1MetaData,
+            file2MetaData: journalEntry.file2MetaData
         }];
 
         const entryKeyAsApiObject = (entryKey >= 0 && entryKey < journalSize ) ? [{entryKey: entryKey}] : [];
@@ -76,36 +161,45 @@ const JournalPage = (props) => {
         let promises = [];
 
 
-        while(chunk <= chunks - 1){    
+        while(chunk < chunks){    
             
             const from = chunk * CHUNK_SIZE;
             const to = from + CHUNK_SIZE;
 
             const fileChunk = (to < fileSize -1) ? file.slice(from,to ) : file.slice(from);
 
-            const chunkId = `chunk-number-${chunk}`;
+            let chunkId = parseInt(chunk);
             promises.push(uploadChunk(fileId, chunkId, fileChunk));
 
             chunk += 1;
         };
 
-        const results = await Promise.all(promises);    
+        const results = await Promise.all(promises);  
+
+        console.log(results);
     };
 
 
 
     const handleSubmit = useCallback(async () => {
+
+        if(journalPageData.file1MetaData.fileName !== 'null'){
+            await mapAndSendFileToApi(journalPageData.file1MetaData.fileName, file1);
+        };
+        if(journalPageData.file2MetaData.fileName !== 'null') {
+            console.log(journalPageData.file2MetaData);
+            await mapAndSendFileToApi(journalPageData.file2MetaData.fileName, file2);
+        }
         await mapAndSendEntryToApi(index, journalPageData);
         setSubmissionsMade(submissionsMade + 1);
-        console.log('Reading Journal: ',await actor.readJournal());
-        // await mapAndSendFileToApi("test1", file1);
-        // await mapAndSendFileToApi("test2", file2);
 
     }, [journalPageData, file1, file2]);
 
     console.log(journalPageData);
 
     return (
+        isLoading ? 
+        <LoadScreen/> :
         <div className={"journalPageContainer"}>
             <div className={"logoDiv"}>
                 <img className={'backButtonImg'} src="back-icon.png" alt="Back Button" onClick={(e) => closePage(e)}/>
@@ -149,12 +243,16 @@ const JournalPage = (props) => {
             <div className={"journalImages"}>
                 <FileUpload
                     label={'file1'}
+                    dispatch={journalReducerDispatchFunction}
+                    dispatchAction={types.CHANGE_FILE1_METADATA}
                     value={file1}
                     setValue={setFile1}
                     index={index}
                 />
                 <FileUpload
                     label={'file2'}
+                    dispatch={journalReducerDispatchFunction}
+                    dispatchAction={types.CHANGE_FILE2_METADATA}
                     value={file2}
                     setValue={setFile2}
                     index={index}

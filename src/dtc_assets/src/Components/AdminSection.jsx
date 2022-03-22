@@ -1,6 +1,7 @@
 import React, {useContext} from "react";
 import axios from "axios";
 import { AppContext } from "../AccountPage";
+import "./AdminSection.scss";
 
 const AdminSection = (props) => {
 
@@ -37,10 +38,22 @@ const AdminSection = (props) => {
         
     };
 
+    const handleSubmitRefill = async () => {
+
+        const result = await actor.refillCanisterCycles();
+        console.log(result);
+    };
+
     return (
-        <div className={'subscribeButtonDiv'}>
-            <button className={'subscriptionButton'} type="submit" onClick={handleSubmit}> Send Emails </button>
-        </div>
+        <React.Fragment>
+            <div className={'sendEmailsButtonDiv'}>
+                <button className={'sendEmailsButton'} type="submit" onClick={handleSubmit}> Send Emails </button>
+            </div>
+            <div className={'sendEmailsButtonDiv'}>
+                <button className={'refillAllCanisterCycles'} type="submit" onClick={handleSubmitRefill}> Refill All Canister Cycles </button>
+            </div>
+        </React.Fragment>
+        
     );
 }
 

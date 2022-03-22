@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect, useContext, useState} from 'react';
 import axios from 'axios';
 import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
 import  InputBox  from './Fields/InputBox';
@@ -7,6 +7,7 @@ import CardInput from './CardInput';
 import AdminSection from './AdminSection';
 import "./SubscriptionPage.scss";
 import { AppContext } from '../AccountPage';
+import LoadScreen from './LoadScreen';
 
 
 
@@ -17,17 +18,18 @@ const SubcriptionPage = (props) => {
     } = props;
 
     const { actor, authClient } = useContext(AppContext);
+    const [userName, setUserName] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(async () => {
+        setIsLoading(true);
         const journal = await actor.readJournal();
-        console.log(journal);
+        setUserName(journal.ok.userName[0]);
         if("err" in journal){
-            actor.create({
-                userName: "admin",
-                email: "admin@test.com"
-        }).then((result) => {
+            actor.create().then((result) => {
                 console.log(result);
             });
+            setIsLoading(false);
         } else {
             const metaData = {email : journal.ok.email, userName: journal.ok.userName};
             
@@ -35,11 +37,27 @@ const SubcriptionPage = (props) => {
                 payload: metaData,
                 actionType: types.SET_METADATA
             });
+            setIsLoading(false);
         }
     },[actor, authClient]);
 
     const stripe = useStripe();
     const elements = useElements();
+
+    const handleUpdate = async () => {
+
+        const profileInput = {
+            userName: (journalState.metaData.userName[0]) ? journalState.metaData.userName: [],
+            email: (journalState.metaData.email[0]) ? journalState.metaData.email: []
+        };
+
+        let result = await actor.updateProfile(profileInput);
+        console.log(result);
+        // if("err" in result){
+        //     showErrorMessage();
+        // };
+
+    };
 
     const handleSubmitPay = async (e) => {
         e.preventDefault();
@@ -126,6 +144,8 @@ const SubcriptionPage = (props) => {
     console.log(journalState.metaData);
 
 return(
+    isLoading ?
+    <LoadScreen/> :
     <div className='subscriptionSectionContainer'>
         <div className={'logoDiv'}>
             <img className={'logoImg'}src="dtc-logo-black.png" alt="Logo"/>
@@ -138,7 +158,18 @@ return(
                     dispatchAction={types.CHANGE_EMAIL}
                     value={journalState.metaData.email}
                 />
-                {journalState.metaData.userName === 'admin' && <AdminSection/>}
+                <InputBox
+                    divClassName={"userName"}
+                    label={"Username: "}
+                    rows={"1"}
+                    dispatch={dispatch}
+                    dispatchAction={types.CHANGE_USERNAME}
+                    value={journalState.metaData.userName}
+                />
+                <div className={'updateButtonDiv'}>
+                    <button className={'updateButton'} type="submit" onClick={handleUpdate}> Update Username & Email </button>
+                </div>
+                {userName === 'admin' && <AdminSection/>}
                 <CardInput/>
                 <div className={'subscribeButtonDiv'}>
                     <button className={'subscriptionButton'} type="submit" onClick={handleSubmitSub}> Subscribe </button>
