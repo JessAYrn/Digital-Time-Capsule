@@ -249,7 +249,7 @@ const Journal = (props) => {
                         </div>
                         <div className="accountIconLinkDiv">
                             <Link className={"navLink_Journal"} to='/account'>
-                                <img src={"../../assets/account-icon.png"} alt="image preview" className="accountIcon_Journal"/> 
+                                <img src={"account-icon.png"} alt="image preview" className="accountIcon_Journal"/> 
                             </Link>
                         </div>
                     </div>
