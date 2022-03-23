@@ -11,6 +11,8 @@ import LoadScreen from "./LoadScreen";
 
 const Journal = (props) => {
 
+    const mql = window.matchMedia('(max-width: 480px)');
+
     const [journalState, dispatch] = useReducer(journalReducer, initialState);
     const [pageIsVisibleArray, setPageIsVisibleArray] = useState(journalState.journal.map((page) => false));
     const [newPageAdded, setNewPageAdded] = useState(false);
@@ -99,6 +101,17 @@ const Journal = (props) => {
         }));
     },[journalState.journal.length]);
 
+    const handleSubmit = async () => {
+        const result = await actor.updateBio({
+            dob: journalState.bio.dob,
+            pob: journalState.bio.pob,
+            name: journalState.bio.name,
+            dedications: journalState.bio.dedications,
+            preface: journalState.bio.preface
+        });
+        console.log(result);
+    }
+
     const displayJournalTable = () => {
 
         const openPage = (e, index, open) => {
@@ -123,20 +136,12 @@ const Journal = (props) => {
             openPage(null, journalState.journal.length - 1);
         }
 
-        const handleSubmit = async () => {
-            const result = await actor.updateBio({
-                dob: journalState.bio.dob,
-                pob: journalState.bio.pob,
-                name: journalState.bio.name,
-                dedications: journalState.bio.dedications,
-                preface: journalState.bio.preface
-            });
-            console.log(result);
-        }
-
         return( 
             <div>
                 <div className={'biographyDiv'}>
+                    {mql.matches && <div className={'section2'}>
+                        <img src="dtc-logo-black.png" alt="TDTC logo" />
+                    </div>}
                     <div className={'section1'}>
                         <InputBox
                             label={"This Journal Belongs To: "}
@@ -168,9 +173,9 @@ const Journal = (props) => {
                             value={journalState.bio.dedications}
                         />
                     </div>
-                    <div className={'section2'}>
+                    {!mql.matches && <div className={'section2'}>
                         <img src="dtc-logo-black.png" alt="TDTC logo" />
-                    </div>
+                    </div>}
                     <div className={'prefaceDiv'}>
                         <InputBox
                             divClassName={'preface'}
@@ -219,10 +224,6 @@ const Journal = (props) => {
                             <button className={'addNewEntryButton'} onClick={addJournalPage}> Create New Entry </button>
                         </div>
                     </div>
-                    <div>
-                        <button type="submit" onClick={handleSubmit}> Submit </button>
-                    </div>
-
                 </div>
             </div>
         );
@@ -257,18 +258,24 @@ const Journal = (props) => {
             </div>
             <div>
                 { (getIndexOfVisiblePage() < 0) ? 
-                    displayJournalTable() : 
+                     <React.Fragment>
+                        {displayJournalTable()}
+                        <div className={'submitAndLoginButtonsDiv'}>
+                            <button className={'submitButton'} type="submit" onClick={handleSubmit}> Submit </button>
+                            <button className={'loginButton'} onClick={async () => {
+                                await authClient.logout();
+                                setIsLoaded(false);
+                            }} > Log Out </button>  
+                        </div> 
+                    </React.Fragment>: 
                     <JournalPage
-                    journalSize={journalSize}
-                    closePage={closePage}
-                    index={getIndexOfVisiblePage()}
-                    journalPageData={journalState.journal[getIndexOfVisiblePage()]}
-                    journalReducerDispatchFunction={dispatch}
-                /> }
-                <button className={'loginButtonDiv'} onClick={async () => {
-                    await authClient.logout();
-                    setIsLoaded(false);
-                }} > Log Out </button>   
+                        journalSize={journalSize}
+                        closePage={closePage}
+                        index={getIndexOfVisiblePage()}
+                        journalPageData={journalState.journal[getIndexOfVisiblePage()]}
+                        journalReducerDispatchFunction={dispatch}
+                    /> 
+                }
             </div>
         </React.Fragment>  
     );

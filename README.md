@@ -153,3 +153,19 @@ export JESSE_ACC=73cee9e565a0eb00aafdefdd04a14f6e6339f0cc8715dba8d353d57e7fda6da
 ```
 
 <!-- this above command creates a variable named 'JESSE_ACC' and sets it equal to the long string of characters on the right side of the equal sign -->
+
+### command for retrieving the canister-id of the default identity's wallet: 
+
+dfx identity --network ic get-wallet
+
+### command for retrieving the principal of the default identity:
+
+dfx identity --network ic get-principal
+
+### command for viewing the principals of the controllers of the canister
+
+dfx canister --network ic info $(dfx identity --network ic get-wallet)
+
+### command for setting a new controller for a canister
+
+dfx canister --network ic update-settings --controller <PRINCIPAL_OF_NEW_CONTROLLER> <CANISTER_ID>
