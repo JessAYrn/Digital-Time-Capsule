@@ -34,7 +34,6 @@
     "nodemon": "^2.0.15",
     "process": "0.11.10",
     "redux-devtools-extension": "^2.13.9",
-    "remotedev-server": "^0.2.7",
     "sass": "^1.43.3",
     "sass-loader": "^12.2.0",
     "stream-browserify": "3.0.0",
