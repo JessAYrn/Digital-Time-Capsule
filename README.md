@@ -132,7 +132,7 @@ dfx deploy --network ic
 dfx deploy --network ic dtc_assets
 
 // to deploy back-end canister only
-dfx deploy --network ic dtc_assets
+dfx deploy --network ic dtc
 
 ## Command for minting ICP
 
