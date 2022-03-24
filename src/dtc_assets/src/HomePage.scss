@@ -23,6 +23,9 @@
                 padding-top: 4%;
                 padding-bottom: 4%;
                 .carouselDiv{
+                    @media screen and (max-width: 480px) {
+                        width: 408px;
+                    };
                     background-color: black;
                     border: solid black;
                     border-radius: 10px;
