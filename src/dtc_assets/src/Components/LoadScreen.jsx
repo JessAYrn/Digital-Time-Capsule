@@ -13,12 +13,15 @@ const LoadScreen = () => {
             <div className="background">
                 <div className="loadContentContainer">
                     <div className="loadContentDiv">
-                    <img src="Loading.gif" alt="Loading Screen" />
+                        <img src="Loading.gif" alt="Loading Screen" />
                     </div>
-                    <button className={'loginButtonDiv'} onClick={async () => {
+                    <div className="loadContentDiv">
+                        <img src="Loading.gif" alt="Loading Screen" />
+                    </div>
+                    {/* <button className={'loginButtonDiv'} onClick={async () => {
                         await authClient.logout();
                         setIsLoaded(false);
-                    }} > Log Out </button> 
+                    }} > Log Out </button>  */}
                 </div> 
             </div>
         </div>
