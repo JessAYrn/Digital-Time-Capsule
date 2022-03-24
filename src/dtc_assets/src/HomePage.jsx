@@ -6,9 +6,12 @@ import "./HomePage.scss";
 const getYoutubeId = require('get-youtube-id');
 
 const HomePage = () => {
+
+    const mql = window.matchMedia('(max-width: 480px)');
+
     const opts= {
-        height: 515,
-        width:925,
+        height: 508,
+        width: mql.matches ? 400 : 925,
         playerVars: {
             autoplay: 1
         }
@@ -23,16 +26,18 @@ const HomePage = () => {
         <div className="container">
             <div className={'linkDiv'}>
                 <nav className={'navBar'}>
-                    <Link className={"navLink"} to="app">Time Capsule</Link> |{" "}
-                    <Link className={"navLink"} to='account'>Account</Link> |{" "}
-                    <Link className={"navLink"} to='wallet'>Wallet</Link>
+                    <Link className={"navLink"} to="app">Time Capsule | </Link>
+                    <Link className={"navLink"} to='wallet'>Wallet | </Link>
+                    <Link className={"navLink"} to='account'>Account</Link>
                 </nav>
             </div>
             <div className="background center">
                 <div class={'scrollable'}>
-                    <div className={'transparentDiv'}>
+                    <div className={'transparentDiv__homePage'}>
                         <div className={'carouselDiv'}>
-                            <YouTube videoId={'hiB8OCPxF40'} opts={opts} onReady={onready}/>
+                            <div className={'videoContainerDiv'}>
+                                <YouTube videoId={'hiB8OCPxF40'} opts={opts} onReady={onready}/>
+                            </div>
                         </div>
                     </div>
                 </div>
