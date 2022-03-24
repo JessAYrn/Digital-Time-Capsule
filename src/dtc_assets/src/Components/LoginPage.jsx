@@ -43,10 +43,17 @@ const LoginPage = (props) => {
 
     return(
 
-        <div>
-            <div className={'loginPageDiv'}>
-            <img className={'logoImg'}src="dtc-logo-black.png" alt="Logo"/>
-            <button className={`loginButtonDiv__${(loginAttempted) ? "open" : 'closed'}`} onClick={handleClick}> {(loginAttempted) ? 'Open Journal' : 'Log In Using Internet Identity'} </button>
+        <div className={'container'}>
+            <div className={'background'}>
+                <div className={'loginPageDivContainer'}>
+                    <div className={'loginPageDiv'}>
+                        <img className={'logoImg'}src="dtc-logo-black.png" alt="Logo"/>
+                        <button className={`loginButtonDiv__${(loginAttempted) ? "open" : 'closed'}`} onClick={handleClick}> {(loginAttempted) ? 'Open Journal' : 'Log In Using Internet Identity'} </button>
+                        <div className={'icpLogoDiv'}>
+                            <img className={'logoImg'}src="logo.png" alt="Logo"/>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     );
