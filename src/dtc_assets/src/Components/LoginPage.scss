@@ -1,31 +1,74 @@
-.loginPageDiv{
-    border: solid;
-    border-width: 2px;
-    border-color: rgb(0, 0, 0);
-    background-color: rgb(233, 233, 233);
-    max-width: 50%;
-    height: 40rem;
-    margin-left:25%;
-    margin-top: 7rem;
+.loginPageDivContainer{
+    padding-top: 0.5rem;
+    .loginPageDiv{
+        @media screen and (max-width: 825px) {
+            margin-left: 5%;    
+            max-width: 90%;  
+        };
+        border: solid;
+        border-width: 2px;
+        border-color: rgb(0, 0, 0);
+        background-color: rgb(233, 233, 233);
+        max-width: 50%;
+        height: 28rem;
+        margin-left:25%;
+        margin-top: 7rem;
 
-    .open{
-        max-width: 27%;
-        max-height: 10%;
-        border-radius: 25px;
-    }
-
-    .loginButtonDiv__{
-        &open{
-            margin-left: 42.5%;
+        img{
+            @media screen and (max-width: 480px) {    
+                max-width: 55vw;
+                max-height: 55vw; 
+            };
+            @media screen and (min-width: 481px) and (max-width: 825px) {    
+                max-width: 35vw;
+                max-height: 35vw; 
+            };
+            max-width: 20vw;
+        }
+    
+        .open{
             max-width: 27%;
             max-height: 10%;
             border-radius: 25px;
         }
-        &closed{
-            margin-left: 36.5%;
-            max-width: 27%;
-            max-height: 10%;
-            border-radius: 25px;
+    
+        .loginButtonDiv__{
+            &open{
+                @media screen and (max-width: 480px) {    
+                    margin-left: 35%;
+                    max-width: 50%;
+                };
+                margin-left: 42.5%;
+                max-width: 27%;
+                max-height: 10%;
+                border-radius: 25px;
+            }
+            &closed{
+                @media screen and (max-width: 480px) {    
+                    margin-left: 25%;
+                    max-width: 50%;
+                };
+                margin-left: 36.5%;
+                max-width: 27%;
+                max-height: 10%;
+                border-radius: 25px;
+            }
+        }
+
+        .icpLogoDiv{
+            img{
+                @media screen and (max-width: 480px) {    
+                    max-width: 14vw;
+                    max-height: 14vw; 
+                };
+                @media screen and (min-width: 481px) and (max-width: 825px) {    
+                    max-width: 10vw;
+                    max-height: 10vw; 
+                };
+                max-width: 5vw;
+                max-height: 5vw;
+                margin-top: 35px;
+            }
         }
     }
 }
