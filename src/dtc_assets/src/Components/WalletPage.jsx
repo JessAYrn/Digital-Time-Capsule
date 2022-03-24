@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, {useCallback, useContext, useEffect, useState} from 'react';
 import { AppContext } from '../Wallet';
 import { toHexString } from '../Utils';
 import { types } from '../reducers/journalReducer';
@@ -9,6 +9,8 @@ import { e8sInOneICP } from '../Constants';
 import LoadScreen from './LoadScreen';
 
 const WalletPage = (props) => {
+
+    const mql = window.matchMedia('(max-width: 675px)');
 
     const {
         journalState,
@@ -21,7 +23,29 @@ const WalletPage = (props) => {
 
     const openModal = () => {
         setShowModal(true);
-    }
+    };
+
+    const copyWalletAddress = useCallback(() => {
+        const address = journalState.walletData.address;
+
+        const addressTextArea = document.createElement("input");
+
+        document.body.appendChild(addressTextArea);
+
+        addressTextArea.setAttribute("id", "addressTextArea_id");
+
+        document.getElementById("addressTextArea_id").value = address;
+
+
+        addressTextArea.select();
+
+        document.execCommand("copy");
+
+        document.body.removeChild(addressTextArea);
+
+        alert("Wallet Address Copied To Clip Board");
+
+    }, [journalState]);
 
     useEffect(async () => {
         setIsLoading(true);
@@ -75,7 +99,15 @@ const WalletPage = (props) => {
                                 Wallet Balance: {journalState.walletData.balance /  e8sInOneICP} ICP
                             </div>
                             <div className='walletAddressDiv'>
-                                Wallet Address: {journalState.walletData.address}
+                                <p className='firstPTag'>
+                                    Wallet Address:  
+                                </p>
+                                <p className='secondPTag'>
+                                    {journalState.walletData.address.slice(0,9)} ... {journalState.walletData.address.slice(-10)} 
+                                </p> 
+                            </div>
+                            <div className={"copyWalletAddressButton"}>
+                                <button className='button' onClick={copyWalletAddress}> Copy Wallet Address </button>
                             </div>
                             <div className="buttonsDiv" >
                                 <button className='button' onClick={openModal}> Send </button>
