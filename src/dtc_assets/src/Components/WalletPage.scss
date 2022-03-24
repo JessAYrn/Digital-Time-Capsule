@@ -13,6 +13,10 @@
             background-color: transparent;
 
             .transparentDiv{
+                @media screen and (max-width: 980px) {
+                    width: 95%;  
+                    padding-left: 2.5%;
+                };
                 width: 65%;
                 height: 75%;
                 padding-left: 17.5%;
@@ -23,7 +27,7 @@
                     border: solid black;
                     border-radius: 10px;
                     width: 100%;
-                    height: 100%;
+                    height: 68%;
                     .balanceDiv{
                         margin-top: 4rem;
                         padding-left: 2rem;
@@ -33,11 +37,27 @@
                     }
                     .walletAddressDiv{
                         margin-top: 6rem;
-                        padding-left: 2rem;
+                        padding-left: 1rem;
                         font-family: 'Julius Sans One', sans-serif;
                         font-size: 1rem;
                         color: rgb(163, 163, 163);
+                        .firstPTag{
+                            float: left;
+                            margin-right: 10px;
+                        };
+                        .secondPTag{
+                            float: left;
+                        };
+
                     }
+                    .copyWalletAddressButton{
+                        text-align: center;
+                        padding-top: 6px;
+                        .button{
+                            border-radius: 10px;
+                            width: 10rem
+                        };
+                    };
                     .buttonsDiv{
                         padding-top: 3rem;
                         padding-left: 3%;
@@ -63,17 +83,18 @@
         background-color: black;
         border: solid black;
         border-radius: 10px;
+        height: 35px;
         .navBar_Wallet{
             width: 100%;
             color: white;
             .linkContainer{
-                width:20%;
-                padding-left: 80%;
+                margin-top: 2px;
                 .timeCapsuleLinkDiv{
                     float: left;
                     border-radius: 10px;
                     background-color: white;
-                    width: 70%;
+                    margin-left: 2%;
+                    width: 195px;
                     .navLink_Wallet{
                         font-family: 'Julius Sans One', sans-serif;
                         padding-left: 10%;
@@ -81,6 +102,8 @@
                     }
                 }
                 .accountIconLinkDiv{
+                    float: right;
+                    padding-right: 2%;
                     .navLink_Wallet{
                         font-family: 'Julius Sans One', sans-serif;
                         color: black;
