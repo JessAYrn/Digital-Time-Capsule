@@ -67,29 +67,31 @@ const FileUpload = (props) => {
     };
 
     return(
-        <div className={'imageDiv'}>                
-            { 
-                (fileType === "image") ? 
-                    <img src={fileSrc} alt="image preview" className="imagePreview__image"/> :
-                    <video 
-                        width="320" 
-                        height="240" 
-                        className="imagePreview__video" 
-                        controls="controls"
-                    >
-                        <source src={fileSrc} type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'/>
-                        <source src={fileSrc} type='video/ogg; codecs="theora, vorbis"'/>
-                        <source src={fileSrc} type='video/webm'/>
-                        Your browser does not support the video tag.
-                    </video>                
-            }
-            {
-                !fileSrc && 
-                <span className="imagePreview__default-display">
-                    Image Preview
-                </span>   
-            }
-            <input id={'uploadedImaged'} type="file" className={'imageInputButton'} ref={inputRef} onLoad={handleUpload} onChange={handleUpload}/>
+        <div className={'imageDivContainer'}>   
+            <div className ={'imageDiv'}>
+                { 
+                    (fileType === "image") ? 
+                        <img src={fileSrc} alt="image preview" className="imagePreview__image"/> :
+                        <video 
+                            width="320" 
+                            height="240" 
+                            className="imagePreview__video" 
+                            controls="controls"
+                        >
+                            <source src={fileSrc} type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'/>
+                            <source src={fileSrc} type='video/ogg; codecs="theora, vorbis"'/>
+                            <source src={fileSrc} type='video/webm'/>
+                            Your browser does not support the video tag.
+                        </video>                
+                }
+                {
+                    !fileSrc && 
+                    <span className="imagePreview__default-display">
+                        Image Preview
+                    </span>   
+                }
+            </div> 
+            <input id={'uploadedImaged'} type="file" className={'imageInputButton'} ref={inputRef} onLoad={handleUpload} onChange={handleUpload}/>            
         </div>
     );
 }

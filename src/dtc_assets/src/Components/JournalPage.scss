@@ -1,5 +1,10 @@
 .journalPageContainer{
     .journalText{
+        @media screen and (max-width: 1200px) {    
+            width: 90%;
+            float: left;
+            margin-left: 5%
+        };
         width: 40%;
         float: left;
     }
@@ -10,14 +15,14 @@
     }
 
     .journalImages{
-        float: left;
-        width: 60%;
-        .imageDiv{
-            width: 23rem;
-            height: 28rem;
+        @media screen and (max-width: 1200px) {    
+            width: 90%;
             float: left;
-            margin-left: 1%;
-        }
+            margin-left: 5%
+        };
+        float: left;
+        margin-top: 2%;
+        width: 60%;
     }   
 
     .logoDiv{
