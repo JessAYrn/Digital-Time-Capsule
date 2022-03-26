@@ -90,32 +90,34 @@ const WalletPage = (props) => {
                         </div>
                     </div>
                 </nav>
-            </div>
+            </div> 
             <div className="background center">
-                <div className='scrollable'>
-                    <div className={'transparentDiv'}>
-                        <div className='infoDiv' >
-                            <div className="balanceDiv">
-                                Wallet Balance: {journalState.walletData.balance /  e8sInOneICP} ICP
-                            </div>
-                            <div className='walletAddressDiv'>
-                                <p className='firstPTag'>
-                                    Wallet Address:  
-                                </p>
-                                <p className='secondPTag'>
-                                    {journalState.walletData.address.slice(0,9)} ... {journalState.walletData.address.slice(-10)} 
-                                </p> 
-                            </div>
-                            <div className={"copyWalletAddressButton"}>
-                                <button className='button' onClick={copyWalletAddress}> Copy Wallet Address </button>
-                            </div>
-                            <div className="buttonsDiv" >
-                                <button className='button' onClick={openModal}> Send </button>
-                            </div>
-                            <Modal showModal={showModal} setShowModal={setShowModal} />
-                        </div>                
+                { showModal ? 
+                    <Modal showModal={showModal} setShowModal={setShowModal} /> :
+                    <div className='scrollable'>
+                        <div className={'transparentDiv'}>
+                            <div className='infoDiv' >
+                                <div className="balanceDiv">
+                                    Wallet Balance: {journalState.walletData.balance /  e8sInOneICP} ICP
+                                </div>
+                                <div className='walletAddressDiv'>
+                                    <p className='firstPTag'>
+                                        Wallet Address:  
+                                    </p>
+                                    <p className='secondPTag'>
+                                        {journalState.walletData.address.slice(0,9)} ... {journalState.walletData.address.slice(-10)} 
+                                    </p> 
+                                </div>
+                                <div className={"copyWalletAddressButton"}>
+                                    <button className='button' onClick={copyWalletAddress}> Copy Wallet Address </button>
+                                </div>
+                                <div className="buttonsDiv" >
+                                    <button className='button' onClick={openModal}> Send </button>
+                                </div>
+                            </div>                
+                        </div>
                     </div>
-                </div>
+                }
             </div>
         </div>
     );

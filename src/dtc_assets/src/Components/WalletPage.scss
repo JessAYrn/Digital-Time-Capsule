@@ -19,17 +19,20 @@
                 };
                 width: 65%;
                 height: 75%;
-                padding-left: 17.5%;
+                padding-left: 17.7%;
                 padding-top: 4%;
                 padding-bottom: 4%;
                 .infoDiv{
+                    @media screen and (max-width: 370px){
+                        height: 94%; 
+                    }
                     background: white;
-                    border: solid black;
+                    box-shadow: 0 5px 16px rgb(0 0 0 / 20%);
                     border-radius: 10px;
                     width: 100%;
-                    height: 78%;
+                    height: 500px;
                     .balanceDiv{
-                        margin-top: 4rem;
+                        padding-top: 7%;
                         padding-left: 5%;
                         font-family: 'Julius Sans One', sans-serif;
                         font-size: 1.75rem;
@@ -74,14 +77,6 @@
                             height: 3rem;
                         }
                     }
-                    .modalDiv{
-                        box-sizing: border-box;
-                        padding: 0;
-                        margin: 0;
-                        font-family: 'Julius Sans One', sans-serif;
-                        position: fixed;
-                    }
-                    
                 }
             }
         }
