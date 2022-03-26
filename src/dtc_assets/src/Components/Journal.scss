@@ -7,9 +7,9 @@
   .tableDiv{
     width: 100%;
     float: left;
-    border: solid 1px;
     border-radius: 10px;
     margin-top: 60px;
+    box-shadow: 0 5px 16px rgb(0 0 0 / 20%);
     .tableHeader{
       font-family: 'Julius Sans One', sans-serif;
       font-size: 1rem;
@@ -86,7 +86,6 @@
           }
         
           .disabled{
-              border-width: 1px 1px 1px !important;
               border-radius: 10px;
           }
           
@@ -122,7 +121,6 @@
           }
         
           .disabled{
-              border-width: 1px 1px 1px !important;
               border-radius: 10px;
           }
           
