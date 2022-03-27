@@ -695,8 +695,8 @@ shared (msg) actor class User(){
             case (? profile){
                 let userJournal = profile.journal;
                 let userBalance = await userJournal.canisterBalance();
-                if(userBalance.e8s < Fee){
-                    #err(#InsufficientFunds)
+                if(amount < Fee){
+                    #err(#TxFailed)
                 } else {
                     if(userBalance.e8s >= amount){
                         let adminCanisterAccountIdVarient = await getAdminAccountId();
@@ -707,11 +707,11 @@ shared (msg) actor class User(){
                                 let statusForFeeCollection = await userJournal.transferICP(feeMinusGas, adminAccountId);
                                 let statusForIcpTransfer = await userJournal.transferICP(amountMinusFeeAndGas, canisterAccountId);
                                 if(statusForFeeCollection == true){
-                                if(statusForIcpTransfer == true){
-                                    #ok(());
-                                } else {
+                                    if(statusForIcpTransfer == true){
+                                        #ok(());
+                                    } else {
                                         #err(#TxFailed)
-                                }
+                                    }
                                 } else {
                                     #err(#TxFailed)
                                 }
