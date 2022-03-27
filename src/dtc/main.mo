@@ -682,22 +682,24 @@ shared (msg) actor class User(){
         let amountMinusFeeAndGas = amount - Fee - Gas;
         let feeMinusGas = Fee - Gas;
 
-        let userProfile = Trie.find(
-            profiles,
-            key(callerId), //Key
-            Principal.equal 
-        );
+        if(amount <= Fee){
+            return #err(#TxFailed);
+        } else {
 
-        switch(userProfile) {
-            case null{
-                #err(#NotFound)
-            }; 
-            case (? profile){
-                let userJournal = profile.journal;
-                let userBalance = await userJournal.canisterBalance();
-                if(amount < Fee){
-                    #err(#TxFailed)
-                } else {
+            let userProfile = Trie.find(
+                profiles,
+                key(callerId), //Key
+                Principal.equal 
+            );
+
+            switch(userProfile) {
+                case null{
+                    #err(#NotFound)
+                }; 
+                case (? profile){
+                    let userJournal = profile.journal;
+                    let userBalance = await userJournal.canisterBalance();
+                
                     if(userBalance.e8s >= amount){
                         let adminCanisterAccountIdVarient = await getAdminAccountId();
                         let adminCanisterAccountId = Result.toOption(adminCanisterAccountIdVarient);
@@ -723,10 +725,11 @@ shared (msg) actor class User(){
                     } else {
                         #err(#InsufficientFunds)
                     }
-                }
+                    
 
+                };
             };
-        };
+        }
     };
 
     private  func key(x: Principal) : Trie.Key<Principal> {

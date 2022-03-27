@@ -38,7 +38,10 @@ const ModalContentOnSend = (props) => {
                     setSendSuccessful(false);
                 }
             }
-        );
+        ).catch(error => {
+            setResponseFromApi(true);
+            setSendSuccessful(false);
+        });
         setIsLoading(false);
     };
 
