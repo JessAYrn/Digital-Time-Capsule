@@ -1,12 +1,14 @@
 import React from 'react';
-import "./WalletModal.scss";
-import ModalContentOnSend from './ModalContentOnSend';
+import "./Modal.scss";
 
 export const Modal = (props) => {
 
     const {
         showModal,
-        setShowModal
+        setShowModal,
+        ChildComponent,
+        success,
+        setSuccess
     } = props;
 
 
@@ -17,7 +19,9 @@ export const Modal = (props) => {
                 <div className={'modalBackground'}>
                     <div className='modalTransparentDiv'>
                         <div className={'modalWrapper'}>
-                            <ModalContentOnSend
+                            <ChildComponent
+                                success={success}
+                                setSuccess={setSuccess}
                                 showModal={showModal}
                                 setShowModal={setShowModal}
                             />

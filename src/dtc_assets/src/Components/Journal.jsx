@@ -8,6 +8,8 @@ import { AppContext } from "../App";
 import InputBox from "./Fields/InputBox";
 import { dayInNanoSeconds, monthInDays } from "../Constants";
 import LoadScreen from "./LoadScreen";
+import { Modal } from "./Modal";
+import ModalContentSubmit from "./ModalContentOnSubmit";
 
 const Journal = (props) => {
 
@@ -16,6 +18,8 @@ const Journal = (props) => {
     const [journalState, dispatch] = useReducer(journalReducer, initialState);
     const [pageIsVisibleArray, setPageIsVisibleArray] = useState(journalState.journal.map((page) => false));
     const [newPageAdded, setNewPageAdded] = useState(false);
+    const [showModal, setShowModal] = useState(false);
+    const [submitSuccessful,setSubmitSuccessful] = useState(null);
     const [journalSize, setJournalSize] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const {actor, authClient, setIsLoaded, setSubmissionsMade, submissionsMade} = useContext(AppContext);
@@ -102,6 +106,7 @@ const Journal = (props) => {
     },[journalState.journal.length]);
 
     const handleSubmit = async () => {
+        setIsLoading(true);
         const result = await actor.updateBio({
             dob: journalState.bio.dob,
             pob: journalState.bio.pob,
@@ -109,6 +114,13 @@ const Journal = (props) => {
             dedications: journalState.bio.dedications,
             preface: journalState.bio.preface
         });
+        setIsLoading(false);
+        setShowModal(true);
+        if("ok" in result){
+            setSubmitSuccessful(true);
+        } else {
+            setSubmitSuccessful(false);
+        }
         console.log(result);
     }
 
@@ -240,7 +252,18 @@ const Journal = (props) => {
 
     return(
         isLoading ? 
-        <LoadScreen/> :
+        <LoadScreen/> : showModal ?
+        <div className={"container"}>
+            <div className={'background'}>
+                <Modal 
+                    showModal={showModal} 
+                    setShowModal={setShowModal} 
+                    ChildComponent={ModalContentSubmit}
+                    success={submitSuccessful}
+                    setSuccess={setSubmitSuccessful}
+                />
+            </div>
+        </div> :
         <React.Fragment>
             <div className={'linkDiv_Journal'}>
                 <nav className={'navBar_Journal'}>
@@ -267,7 +290,7 @@ const Journal = (props) => {
                                 setIsLoaded(false);
                             }} > Log Out </button>  
                         </div> 
-                    </React.Fragment>: 
+                    </React.Fragment> : 
                     <JournalPage
                         journalSize={journalSize}
                         closePage={closePage}
@@ -277,7 +300,7 @@ const Journal = (props) => {
                     /> 
                 }
             </div>
-        </React.Fragment>  
+        </React.Fragment> 
     );
 
 }

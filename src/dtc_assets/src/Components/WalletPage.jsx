@@ -3,10 +3,12 @@ import { AppContext } from '../Wallet';
 import { toHexString } from '../Utils';
 import { types } from '../reducers/journalReducer';
 import { Link } from "react-router-dom";
-import { Modal } from './WalletModal';
+import { Modal } from './Modal';
 import './WalletPage.scss';
 import { e8sInOneICP } from '../Constants';
 import LoadScreen from './LoadScreen';
+import ModalContentOnSend from './ModalContentOnSend';
+
 
 const WalletPage = (props) => {
 
@@ -93,7 +95,7 @@ const WalletPage = (props) => {
             </div> 
             <div className="background center">
                 { showModal ? 
-                    <Modal showModal={showModal} setShowModal={setShowModal} /> :
+                    <Modal showModal={showModal} setShowModal={setShowModal} ChildComponent={ModalContentOnSend} /> :
                     <div className='scrollable'>
                         <div className={'transparentDiv'}>
                             <div className='infoDiv' >
