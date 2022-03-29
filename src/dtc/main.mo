@@ -60,6 +60,7 @@ shared (msg) actor class User(){
         emailOne: Text;
         emailTwo: Text;
         emailThree: Text;
+        read: ?Bool;
         file1MetaData: {
             fileName: Text;
             lastModified: Int;

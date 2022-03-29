@@ -31,6 +31,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         emailOne: Text;
         emailTwo: Text;
         emailThree: Text;
+        read: ?Bool;
         file1MetaData: {
             fileName: Text;
             lastModified: Int;
@@ -141,6 +142,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
             lockTime = journalEntry.lockTime;
             unlockTime = Time.now() + nanosecondsInADay * daysInAMonth * journalEntry.lockTime;
             sent = false;
+            read = null;
             emailOne = journalEntry.emailOne;
             emailTwo = journalEntry.emailTwo;
             emailThree = journalEntry.emailThree;
@@ -235,6 +237,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
                         lockTime = x.1.lockTime;
                         unlockTime = x.1.unlockTime;
                         sent = true;
+                        read = x.1.read;
                         emailOne = x.1.emailOne;
                         emailTwo = x.1.emailTwo;
                         emailThree = x.1.emailThree;
@@ -354,6 +357,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
                     lockTime = journalEntry.lockTime;
                     unlockTime = v.unlockTime;
                     sent = false;
+                    read = null;
                     emailOne = journalEntry.emailOne;
                     emailTwo = journalEntry.emailTwo;
                     emailThree = journalEntry.emailThree;

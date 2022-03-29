@@ -29,6 +29,7 @@ export interface JournalEntry {
   },
   'emailThree' : string,
   'date' : string,
+  'read' : [] | [boolean],
   'sent' : boolean,
   'text' : string,
   'file1MetaData' : {
