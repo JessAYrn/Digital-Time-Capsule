@@ -274,6 +274,29 @@ shared(msg) actor class Journal (principal : Principal) = this {
                 #err(#NotFound);
             };
             case(? entryValue){
+                
+                let updatedEntryValue : JournalEntry = {
+                    entryTitle = entryValue.entryTitle;
+                    text = entryValue.text;
+                    location = entryValue.location;
+                    date = entryValue.date;
+                    lockTime = entryValue.lockTime;
+                    unlockTime = entryValue.unlockTime;
+                    sent = true;
+                    read = ?true;
+                    emailOne = entryValue.emailOne;
+                    emailTwo = entryValue.emailTwo;
+                    emailThree = entryValue.emailThree;
+                    file1MetaData = entryValue.file1MetaData;
+                    file2MetaData = entryValue.file2MetaData;
+                };
+
+                let previousEntryValue = Trie.replace(
+                    journal,
+                    natKey(key),
+                    Nat.equal,
+                    ?updatedEntryValue
+                );
                 #ok(entryValue);
             };
         }
