@@ -134,6 +134,7 @@ type JournalEntry =
                   };
    location: text;
    lockTime: int;
+   read: opt bool;
    sent: bool;
    "text": text;
    unlockTime: int;
