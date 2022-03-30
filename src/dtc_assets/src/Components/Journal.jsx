@@ -23,12 +23,12 @@ const Journal = (props) => {
     const [journalSize, setJournalSize] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const {actor, authClient, setIsLoaded, setSubmissionsMade, submissionsMade} = useContext(AppContext);
+    const [displayNotifications, setDisplayNotifications] = useState(false);
+    const [unreadJournalEntries, setUnreadJournalEntries] = useState([]);
 
     useEffect(async () => {
         setIsLoading(true);
         const journal = await actor.readJournal();
-        const cyclesBalance = await actor.mainCanisterCyclesBalance();
-        console.log("Cycles Balance: ",cyclesBalance);
         console.log(journal);
         if("err" in journal){
             actor.create().then((result) => {
@@ -41,7 +41,7 @@ const Journal = (props) => {
             });
 
 
-            journalEntries = journalEntries.sort(function(a,b) {
+            journalEntries = journalEntries.sort(function(a,b){
                 const dateForAArray = a.date.split('-');
                 const yearForA = parseInt(dateForAArray[0]);
                 const monthForA = parseInt(dateForAArray[1]);
@@ -72,6 +72,9 @@ const Journal = (props) => {
                     }
                 }
             });
+
+            console.log(journalEntries);
+            setUnreadJournalEntries(journalEntries.filter(entry => !entry.read && (Date.now() * 1000000 > parseInt(entry.unlockTime))));
 
             const journalBio = journal.ok.userJournalData[1];
             const metaData = {email : journal.ok.email, userName: journal.ok.userName};
@@ -250,6 +253,13 @@ const Journal = (props) => {
         }))
     };
 
+    const toggleDisplayNotifications = () => {
+        setDisplayNotifications(!displayNotifications);
+    };
+
+    const notificationIconSrc = unreadJournalEntries.length ? 'notification-icon-alert.png' : 'notification-icon.png';
+    console.log(unreadJournalEntries);
+
     return(
         isLoading ? 
         <LoadScreen/> : showModal ?
@@ -275,6 +285,9 @@ const Journal = (props) => {
                             <Link className={"navLink_Journal"} to='/account'>
                                 <img src={"account-icon.png"} alt="image preview" className="accountIcon_Journal"/> 
                             </Link>
+                        </div>
+                        <div className={"notificationIconDiv"}>
+                            <img src={notificationIconSrc} onClick={toggleDisplayNotifications}/>
                         </div>
                     </div>
                 </nav>
