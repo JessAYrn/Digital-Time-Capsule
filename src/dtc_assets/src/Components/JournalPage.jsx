@@ -231,7 +231,7 @@ const JournalPage = (props) => {
 
     }, [journalPageData, file1, file2]);
 
-    console.log(showModal);
+    console.log(journalPageData);
 
     return (
         isLoading ? 

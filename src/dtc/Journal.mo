@@ -291,13 +291,16 @@ shared(msg) actor class Journal (principal : Principal) = this {
                     file2MetaData = entryValue.file2MetaData;
                 };
 
-                let previousEntryValue = Trie.replace(
+                let (newJournal, oldJournal) = Trie.put(
                     journal,
                     natKey(key),
                     Nat.equal,
-                    ?updatedEntryValue
+                    updatedEntryValue
                 );
-                #ok(entryValue);
+
+                journal := newJournal;
+
+                #ok(updatedEntryValue);
             };
         }
     };

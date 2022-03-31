@@ -37,7 +37,7 @@ const Journal = (props) => {
             });
         } else {
             let journalEntries = journal.ok.userJournalData[0].map((arrayWithKeyAndPage) => {
-                return mapApiObjectToFrontEndObject(arrayWithKeyAndPage[1]);
+                return mapApiObjectToFrontEndObject(arrayWithKeyAndPage[0], arrayWithKeyAndPage[1]);
             });
 
 
@@ -129,7 +129,7 @@ const Journal = (props) => {
 
     const displayJournalTable = () => {
 
-        const openPage = (e, index, open) => {
+        const openPage = async (e, index, open) => {
             if(open){
                 setPageIsVisibleArray(pageIsVisibleArray.map((page, mapIndex) => {
                     if(index === mapIndex){
@@ -137,7 +137,10 @@ const Journal = (props) => {
                     } else {
                         return false;
                     }
-                }))
+                }));
+                const entryKey = journalState.journal[index].entryKey;
+                const result = await actor.readEntry({entryKey: entryKey});
+                console.log(result);
             } else {
                 () => {}
             }
