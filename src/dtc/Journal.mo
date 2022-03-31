@@ -134,7 +134,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     public func createEntry( journalEntry : JournalEntryInput) : async Result.Result<Trie.Trie<Nat, JournalEntry>, Error> {
 
-        let completeJournalEntry = {
+        let completeJournalEntry : JournalEntry = {
             entryTitle = journalEntry.entryTitle;
             text = journalEntry.text;
             location = journalEntry.location;
@@ -262,6 +262,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
     };
 
     public func readJournalEntry(key : Nat): async Result.Result<JournalEntry, Error> {
+
         let entry = Trie.find(
             journal,
             natKey(key),
@@ -275,7 +276,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
             };
             case(? entryValue){
                 
-                let updatedEntryValue : JournalEntry = {
+                let updatedEntryValue = {
                     entryTitle = entryValue.entryTitle;
                     text = entryValue.text;
                     location = entryValue.location;
