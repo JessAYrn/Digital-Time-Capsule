@@ -5,6 +5,7 @@ export const idlFactory = ({ IDL }) => {
   const ICP = IDL.Record({ 'e8s' : IDL.Nat64 });
   const AmountAccepted = IDL.Record({ 'accepted' : IDL.Nat64 });
   const Error = IDL.Variant({
+    'WalletBalanceTooLow' : IDL.Null,
     'TxFailed' : IDL.Null,
     'NotFound' : IDL.Null,
     'NotAuthorized' : IDL.Null,

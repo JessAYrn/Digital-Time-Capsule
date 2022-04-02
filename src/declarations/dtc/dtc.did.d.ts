@@ -11,7 +11,8 @@ export interface Bio {
 }
 export interface Branch { 'left' : Trie, 'size' : bigint, 'right' : Trie }
 export interface EntryKey { 'entryKey' : bigint }
-export type Error = { 'TxFailed' : null } |
+export type Error = { 'WalletBalanceTooLow' : null } |
+  { 'TxFailed' : null } |
   { 'NotFound' : null } |
   { 'NotAuthorized' : null } |
   { 'AlreadyExists' : null } |

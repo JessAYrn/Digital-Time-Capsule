@@ -40,7 +40,6 @@ const JournalPage = (props) => {
     }; 
 
     useEffect(async () => {
-        console.log(journalPageData);
         if(journalPageData.file1MetaData.fileName !== 'null'){
             setIsLoading(true);
             let index = 0;
@@ -75,7 +74,6 @@ const JournalPage = (props) => {
                     } 
                 );
                 setFile1(file1AsFile);
-                console.log(file1AsFile);
             }
         };
     
@@ -113,7 +111,6 @@ const JournalPage = (props) => {
                     } 
                 );
                 setFile2(file2AsFile);
-                console.log(file2AsFile);
             }
         };
         setIsLoading(false);
@@ -121,7 +118,6 @@ const JournalPage = (props) => {
     
    
     const uploadChunk = async (fileId, chunkId, fileChunk) => {
-        console.log(chunkId);
         return actor.createJournalEntryFile(
             fileId, 
             chunkId, 
@@ -147,10 +143,11 @@ const JournalPage = (props) => {
 
         const entryKeyAsApiObject = (entryKey >= 0 && entryKey < journalSize ) ? [{entryKey: entryKey}] : [];
         
-        return actor.updateJournalEntry(
+        let result = await actor.updateJournalEntry(
             entryKeyAsApiObject,
             entryAsApiObject
         );
+        return result;
 
     }
 
@@ -191,7 +188,6 @@ const JournalPage = (props) => {
         let result3 = null;
         if(journalPageData.file1MetaData.fileName !== 'null'){
             await mapAndSendFileToApi(journalPageData.file1MetaData.fileName, file1).then(res => {
-                console.log(res);
                 result1 = true;
                 res.map(status => {
                     if("err" in status){
@@ -202,7 +198,6 @@ const JournalPage = (props) => {
         };
         if(journalPageData.file2MetaData.fileName !== 'null') {
             await mapAndSendFileToApi(journalPageData.file2MetaData.fileName, file2).then(res => {
-                console.log(res);
                 result2 = true;
                 res.map(status => {
                     if("err" in status){
@@ -230,8 +225,6 @@ const JournalPage = (props) => {
         }
 
     }, [journalPageData, file1, file2]);
-
-    console.log(journalPageData);
 
     return (
         isLoading ? 

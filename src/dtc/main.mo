@@ -135,6 +135,7 @@ shared (msg) actor class User(){
         #InsufficientFunds;
         #TxFailed;
         #UserNameTaken;
+        #WalletBalanceTooLow
     };
 
     //Application State
@@ -482,6 +483,7 @@ shared (msg) actor class User(){
 
         let callerId = msg.caller;
         
+        
         let result = Trie.find(
             profiles,
             key(callerId),
@@ -493,35 +495,37 @@ shared (msg) actor class User(){
                 #err(#NotAuthorized);
             };
             case(?result){
-                switch(entryKey){
-                    case null{
-                        switch(entry){
-                            case null{
-                                #err(#NoInputGiven)
+                let journal = result.journal;
+                let icpBalance = await journal.canisterBalance();
+                if(icpBalance.e8s < 100_000_000){
+                    return #err(#WalletBalanceTooLow);
+                } else {
+                    switch(entryKey){
+                        case null{
+                            switch(entry){
+                                case null{
+                                    #err(#NoInputGiven)
+                                };
+                                case(?entryValue){
+                                    let status = await journal.createEntry(entryValue);
+                                    return status;
+                                };
                             };
-                            case(?entryValue){
-                                let journal = result.journal;
-                                let status = await journal.createEntry(entryValue);
-                                return status;
+                        };
+                        case (? entryKeyValue){
+                            switch(entry){
+                                case null {
+                                    let journalStatus = await journal.deleteJournalEntry(entryKeyValue.entryKey);
+                                    return journalStatus;
+                                };
+                                case (?entryValue){
+                                    let entryStatus = await journal.updateJournalEntry(entryKeyValue.entryKey, entryValue);
+                                    return entryStatus;
+                                };
                             };
                         };
                     };
-                    case (? entryKeyValue){
-                        switch(entry){
-                            case null {
-                                let journal = result.journal;
-                                let journalStatus = await journal.deleteJournalEntry(entryKeyValue.entryKey);
-                                return journalStatus;
-                            };
-                            case (?entryValue){
-                                let journal = result.journal;
-                                let entryStatus = await journal.updateJournalEntry(entryKeyValue.entryKey, entryValue);
-
-                                return entryStatus;
-                            };
-                        };
-                    };
-                };
+                }
             };
         };
 
@@ -543,8 +547,14 @@ shared (msg) actor class User(){
             };
             case (? v){
                 let journal = v.journal;
-                let status = await journal.createFile(fileId,chunkId, blobChunk);
-                return status;
+                let icpBalance = await journal.canisterBalance();
+                if(icpBalance.e8s < 100_000_000){
+                    return #err(#WalletBalanceTooLow);
+                } else {
+                    let journal = v.journal;
+                    let status = await journal.createFile(fileId,chunkId, blobChunk);
+                    return status;
+                }
             };
         };
     };

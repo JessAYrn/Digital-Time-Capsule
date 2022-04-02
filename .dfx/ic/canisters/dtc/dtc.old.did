@@ -16,14 +16,14 @@ type Result_7 =
              text;
              vec record {
                    nat;
-                   JournalEntryV2;
+                   JournalEntry;
                  };
            };
  };
 type Result_6 = 
  variant {
    err: Error;
-   ok: JournalEntryV2;
+   ok: JournalEntry;
  };
 type Result_5 = 
  variant {
@@ -46,7 +46,7 @@ type Result_3 =
       userJournalData: record {
                          vec record {
                                nat;
-                               JournalEntryV2;
+                               JournalEntry;
                              };
                          Bio;
                        };
@@ -80,7 +80,7 @@ type List =
  opt record {
        record {
          Key;
-         JournalEntryV2;
+         JournalEntry;
        };
        List;
      };
@@ -93,30 +93,6 @@ type Key =
  record {
    hash: Hash;
    key: nat;
- };
-type JournalEntryV2 = 
- record {
-   date: text;
-   emailOne: text;
-   emailThree: text;
-   emailTwo: text;
-   entryTitle: text;
-   file1MetaData: record {
-                    fileName: text;
-                    fileType: text;
-                    lastModified: int;
-                  };
-   file2MetaData: record {
-                    fileName: text;
-                    fileType: text;
-                    lastModified: int;
-                  };
-   location: text;
-   lockTime: int;
-   read: bool;
-   sent: bool;
-   "text": text;
-   unlockTime: int;
  };
 type JournalEntryInput = 
  record {
@@ -139,6 +115,30 @@ type JournalEntryInput =
    lockTime: int;
    "text": text;
  };
+type JournalEntry = 
+ record {
+   date: text;
+   emailOne: text;
+   emailThree: text;
+   emailTwo: text;
+   entryTitle: text;
+   file1MetaData: record {
+                    fileName: text;
+                    fileType: text;
+                    lastModified: int;
+                  };
+   file2MetaData: record {
+                    fileName: text;
+                    fileType: text;
+                    lastModified: int;
+                  };
+   location: text;
+   lockTime: int;
+   read: opt bool;
+   sent: bool;
+   "text": text;
+   unlockTime: int;
+ };
 type ICP = record {e8s: nat64;};
 type Hash = nat32;
 type Error = 
@@ -150,6 +150,7 @@ type Error =
    NotFound;
    TxFailed;
    UserNameTaken;
+   WalletBalanceTooLow;
  };
 type EntryKey = record {entryKey: nat;};
 type Branch = 
@@ -170,7 +171,7 @@ type AssocList =
  opt record {
        record {
          Key;
-         JournalEntryV2;
+         JournalEntry;
        };
        List;
      };

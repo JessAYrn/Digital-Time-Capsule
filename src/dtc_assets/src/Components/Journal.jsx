@@ -73,7 +73,6 @@ const Journal = (props) => {
                 }
             });
 
-            console.log(journalEntries);
             setUnreadJournalEntries(journalEntries.filter(entry => !entry.read && (Date.now() * 1000000 > parseInt(entry.unlockTime))));
 
             const journalBio = journal.ok.userJournalData[1];
@@ -124,7 +123,6 @@ const Journal = (props) => {
         } else {
             setSubmitSuccessful(false);
         }
-        console.log(result);
     }
 
     const displayJournalTable = () => {
@@ -140,7 +138,6 @@ const Journal = (props) => {
                 }));
                 const entryKey = journalState.journal[index].entryKey;
                 const result = await actor.readEntry({entryKey: entryKey});
-                console.log(result);
             } else {
                 () => {}
             }
@@ -261,7 +258,6 @@ const Journal = (props) => {
     };
 
     const notificationIconSrc = unreadJournalEntries.length ? 'notification-icon-alert.png' : 'notification-icon.png';
-    console.log(unreadJournalEntries);
 
     return(
         isLoading ? 
