@@ -133,7 +133,6 @@ type JournalEntryInput =
                   };
    location: text;
    lockTime: int;
-   read: opt bool;
    "text": text;
  };
 type JournalEntry = 

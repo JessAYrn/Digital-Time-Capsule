@@ -49,30 +49,6 @@ shared (msg) actor class User(){
         file2: ?Blob;
     };
 
-    type JournalEntryV2 = {
-        entryTitle: Text;
-        text: Text;
-        location: Text;
-        date: Text;
-        lockTime: Int;
-        unlockTime: Int;
-        sent: Bool;
-        emailOne: Text;
-        emailTwo: Text;
-        emailThree: Text;
-        read: Bool;
-        file1MetaData: {
-            fileName: Text;
-            lastModified: Int;
-            fileType: Text;
-        };
-        file2MetaData: {
-            fileName: Text;
-            lastModified: Int;
-            fileType: Text;
-        };
-    }; 
-
     type JournalEntry = {
         entryTitle: Text;
         text: Text;
@@ -337,7 +313,7 @@ shared (msg) actor class User(){
     //read Journal
     public shared(msg) func readJournal () : async Result.Result<(
             {
-                userJournalData : ([(Nat,JournalEntryV2)], Bio);
+                userJournalData : ([(Nat,JournalEntry)], Bio);
                 email: ?Text;
                 balance : Ledger.ICP;
                 address: [Nat8];
@@ -383,7 +359,7 @@ shared (msg) actor class User(){
         
     };
 
-    public shared(msg) func readEntry(entryKey: EntryKey) : async Result.Result<JournalEntryV2, Error> {
+    public shared(msg) func readEntry(entryKey: EntryKey) : async Result.Result<JournalEntry, Error> {
 
         //Reject Anonymous User
         //if(Principal.toText(msg.caller) == "2vxsx-fae"){
@@ -473,7 +449,7 @@ shared (msg) actor class User(){
         };
     };
 
-    public shared(msg) func updateJournalEntry(entryKey : ?EntryKey, entry : ?JournalEntryInput) : async Result.Result<Trie.Trie<Nat,JournalEntryV2>, Error> {
+    public shared(msg) func updateJournalEntry(entryKey : ?EntryKey, entry : ?JournalEntryInput) : async Result.Result<Trie.Trie<Nat,JournalEntry>, Error> {
 
         //Reject Anonymous User
         //if(Principal.toText(msg.caller) == "2vxsx-fae"){
@@ -627,7 +603,7 @@ shared (msg) actor class User(){
         };
     };
 
-    public shared(msg) func getEntriesToBeSent() : async Result.Result<[(Text,[(Nat, JournalEntryV2)])], Error>{
+    public shared(msg) func getEntriesToBeSent() : async Result.Result<[(Text,[(Nat, JournalEntry)])], Error>{
 
         let callerId = msg.caller;
         
@@ -653,7 +629,7 @@ shared (msg) actor class User(){
                             let numberOfProfiles = Trie.size(profiles);
                             let profilesIter = Trie.iter(profiles);
                             let profilesArray = Iter.toArray(profilesIter);
-                            let AllEntriesToBeSentBuffer = Buffer.Buffer<(Text, [(Nat, JournalEntryV2)])>(1);
+                            let AllEntriesToBeSentBuffer = Buffer.Buffer<(Text, [(Nat, JournalEntry)])>(1);
 
                             while(index < numberOfProfiles){
                                 let userProfile = profilesArray[index];

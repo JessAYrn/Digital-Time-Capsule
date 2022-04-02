@@ -80,7 +80,6 @@ export const idlFactory = ({ IDL }) => {
     }),
     'emailThree' : IDL.Text,
     'date' : IDL.Text,
-    'read' : IDL.Opt(IDL.Bool),
     'text' : IDL.Text,
     'file1MetaData' : IDL.Record({
       'fileName' : IDL.Text,

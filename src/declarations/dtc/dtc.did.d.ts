@@ -51,7 +51,6 @@ export interface JournalEntryInput {
   },
   'emailThree' : string,
   'date' : string,
-  'read' : [] | [boolean],
   'text' : string,
   'file1MetaData' : {
     'fileName' : string,
