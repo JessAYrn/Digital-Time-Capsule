@@ -16,9 +16,34 @@ import Buffer "mo:base/Buffer";
 import Int "mo:base/Int";
 import Account "./Account";
 import Bool "mo:base/Bool";
+import Option "mo:base/Option";
 
 shared(msg) actor class Journal (principal : Principal) = this {
     let callerId = msg.caller;
+
+    type JournalEntryV2 = {
+        entryTitle: Text;
+        text: Text;
+        location: Text;
+        date: Text;
+        lockTime: Int;
+        unlockTime: Int;
+        sent: Bool;
+        emailOne: Text;
+        emailTwo: Text;
+        emailThree: Text;
+        read: Bool;
+        file1MetaData: {
+            fileName: Text;
+            lastModified: Int;
+            fileType: Text;
+        };
+        file2MetaData: {
+            fileName: Text;
+            lastModified: Int;
+            fileType: Text;
+        };
+    }; 
 
     type JournalEntry = {
         entryTitle: Text;
@@ -93,6 +118,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     private stable var journal : Trie.Trie<Nat, JournalEntry> = Trie.empty();
 
+    private stable var journalV2 : Trie.Trie<Nat, JournalEntryV2> = Trie.empty();
+
     private stable var files : Trie.Trie2D<Text,Nat,Blob> = Trie.empty();
 
     private stable var biography : Bio = {
@@ -142,7 +169,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
             lockTime = journalEntry.lockTime;
             unlockTime = Time.now() + nanosecondsInADay * daysInAMonth * journalEntry.lockTime;
             sent = false;
-            read = ?false;
+            read = Option.make(false);
             emailOne = journalEntry.emailOne;
             emailTwo = journalEntry.emailTwo;
             emailThree = journalEntry.emailThree;
@@ -276,7 +303,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
             };
             case(? entryValue){
                 
-                let updatedEntryValue = {
+                let updatedEntryValue : JournalEntry = {
                     entryTitle = entryValue.entryTitle;
                     text = entryValue.text;
                     location = entryValue.location;
@@ -284,7 +311,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
                     lockTime = entryValue.lockTime;
                     unlockTime = entryValue.unlockTime;
                     sent = true;
-                    read = ?true;
+                    read = Option.make(true);
                     emailOne = entryValue.emailOne;
                     emailTwo = entryValue.emailTwo;
                     emailThree = entryValue.emailThree;
@@ -384,7 +411,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
                     lockTime = journalEntry.lockTime;
                     unlockTime = v.unlockTime;
                     sent = false;
-                    read = ?false;
+                    read = Option.make(false);
                     emailOne = journalEntry.emailOne;
                     emailTwo = journalEntry.emailTwo;
                     emailThree = journalEntry.emailThree;
@@ -399,7 +426,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
                     completeJournalEntry
                 );
 
-                journal := newJournal;
+                journal:= newJournal;
 
                 #ok(newJournal);
 
@@ -545,4 +572,36 @@ shared(msg) actor class Journal (principal : Principal) = this {
     private func textKey(x: Text) : Trie.Key<Text> {
         return {key = x; hash = Text.hash(x)}
     };
+
+    // system func postupgrade() {
+
+    //    let journalIter = Trie.iter(journal);
+    //    Iter.iterate<(Nat, JournalEntry)>(journalIter, func(x : (Nat, JournalEntry), _index) {
+
+    //        let completeJournalEntry : JournalEntryV2 = {
+    //             entryTitle = x.1.entryTitle;
+    //             text = x.1.text;
+    //             location = x.1.location;
+    //             date = x.1.date;
+    //             lockTime = x.1.lockTime;
+    //             unlockTime = x.1.unlockTime;
+    //             sent = false;
+    //             read = false;
+    //             emailOne = x.1.emailOne;
+    //             emailTwo = x.1.emailTwo;
+    //             emailThree = x.1.emailThree;
+    //             file1MetaData = x.1.file1MetaData;
+    //             file2MetaData = x.1.file2MetaData;
+    //         };
+
+    //         let (updatedJournal, previousValue) = Trie.put(
+    //             journalV2,
+    //             natKey(x.0),
+    //             Nat.equal,
+    //             completeJournalEntry  
+    //         );
+    //         journalV2 := updatedJournal;
+    //     });
+    // };
+
 }

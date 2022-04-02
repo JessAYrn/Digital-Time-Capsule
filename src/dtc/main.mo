@@ -49,6 +49,30 @@ shared (msg) actor class User(){
         file2: ?Blob;
     };
 
+    type JournalEntryV2 = {
+        entryTitle: Text;
+        text: Text;
+        location: Text;
+        date: Text;
+        lockTime: Int;
+        unlockTime: Int;
+        sent: Bool;
+        emailOne: Text;
+        emailTwo: Text;
+        emailThree: Text;
+        read: Bool;
+        file1MetaData: {
+            fileName: Text;
+            lastModified: Int;
+            fileType: Text;
+        };
+        file2MetaData: {
+            fileName: Text;
+            lastModified: Int;
+            fileType: Text;
+        };
+    }; 
+
     type JournalEntry = {
         entryTitle: Text;
         text: Text;
