@@ -8,7 +8,8 @@ export const Modal = (props) => {
         setShowModal,
         ChildComponent,
         success,
-        setSuccess
+        setSuccess,
+        tableContent
     } = props;
 
 
@@ -24,6 +25,7 @@ export const Modal = (props) => {
                                 setSuccess={setSuccess}
                                 showModal={showModal}
                                 setShowModal={setShowModal}
+                                tableContent={tableContent}
                             />
                         </div>
                     </div>
