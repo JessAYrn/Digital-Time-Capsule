@@ -10,6 +10,7 @@ import { dayInNanoSeconds, monthInDays } from "../Constants";
 import LoadScreen from "./LoadScreen";
 import { Modal } from "./Modal";
 import ModalContentSubmit from "./ModalContentOnSubmit";
+import ModalContentNotifications from "./ModalContentNotifications";
 
 const Journal = (props) => {
 
@@ -73,9 +74,12 @@ const Journal = (props) => {
                 }
             });
 
-            setUnreadJournalEntries(journalEntries.filter(entry => !entry.read && 
-                (Date.now() * 1000000 > parseInt(entry.unlockTime)) &&  
-                parseInt(entry.lockTime) > 0));
+            setUnreadJournalEntries(
+                journalEntries.filter(entry => !entry.read && 
+                    (Date.now() * 1000000 > parseInt(entry.unlockTime)) 
+                    // parseInt(entry.lockTime) > 0
+                )
+            );
 
             const journalBio = journal.ok.userJournalData[1];
             const metaData = {email : journal.ok.email, userName: journal.ok.userName};
@@ -274,7 +278,13 @@ const Journal = (props) => {
                     setSuccess={setSubmitSuccessful}
                 />
             </div>
-        </div> :
+        </div> : displayNotifications ? 
+        <Modal 
+            showModal={displayNotifications} 
+            setShowModal={toggleDisplayNotifications} 
+            ChildComponent={ModalContentNotifications}
+            tableContent={unreadJournalEntries}
+        /> :
         <React.Fragment>
             <div className={'linkDiv_Journal'}>
                 <nav className={'navBar_Journal'}>
