@@ -50,7 +50,8 @@ export const mapApiObjectToFrontEndObject = (entryKey, backEndObj) => {
         emailTwo: backEndObj.emailTwo,
         emailThree: backEndObj.emailThree,
         sent : backEndObj.sent,
-        read : (backEndObj.read.length) ? backEndObj.read[0] : false,
+        read : backEndObj.read,
+        draft: backEndObj.draft,
         file1MetaData: backEndObj.file1MetaData,
         file2MetaData: backEndObj.file2MetaData,
         entryKey: parseInt(entryKey)

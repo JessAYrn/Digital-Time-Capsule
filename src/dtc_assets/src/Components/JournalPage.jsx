@@ -138,7 +138,8 @@ const JournalPage = (props) => {
             emailTwo: journalEntry.emailTwo,
             emailThree: journalEntry.emailThree,
             file1MetaData: journalEntry.file1MetaData,
-            file2MetaData: journalEntry.file2MetaData
+            file2MetaData: journalEntry.file2MetaData,
+            draft: journalEntry.draft
         }];
 
         const entryKeyAsApiObject = (entryKey >= 0 && entryKey < journalSize ) ? [{entryKey: entryKey}] : [];

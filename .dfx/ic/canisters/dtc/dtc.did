@@ -36,14 +36,14 @@ type Result_7 =
              text;
              vec record {
                    nat;
-                   JournalEntry;
+                   JournalEntryV2;
                  };
            };
  };
 type Result_6 = 
  variant {
    err: Error;
-   ok: JournalEntry;
+   ok: JournalEntryV2;
  };
 type Result_5 = 
  variant {
@@ -66,7 +66,7 @@ type Result_3 =
       userJournalData: record {
                          vec record {
                                nat;
-                               JournalEntry;
+                               JournalEntryV2;
                              };
                          Bio;
                        };
@@ -100,7 +100,7 @@ type List =
  opt record {
        record {
          Key;
-         JournalEntry;
+         JournalEntryV2;
        };
        List;
      };
@@ -114,9 +114,10 @@ type Key =
    hash: Hash;
    key: nat;
  };
-type JournalEntryInput = 
+type JournalEntryV2 = 
  record {
    date: text;
+   draft: bool;
    emailOne: text;
    emailThree: text;
    emailTwo: text;
@@ -133,31 +134,32 @@ type JournalEntryInput =
                   };
    location: text;
    lockTime: int;
-   "text": text;
- };
-type JournalEntry = 
- record {
-   date: text;
-   emailOne: text;
-   emailThree: text;
-   emailTwo: text;
-   entryTitle: text;
-   file1MetaData: record {
-                    fileName: text;
-                    fileType: text;
-                    lastModified: int;
-                  };
-   file2MetaData: record {
-                    fileName: text;
-                    fileType: text;
-                    lastModified: int;
-                  };
-   location: text;
-   lockTime: int;
-   read: opt bool;
+   read: bool;
    sent: bool;
    "text": text;
    unlockTime: int;
+ };
+type JournalEntryInput = 
+ record {
+   date: text;
+   draft: bool;
+   emailOne: text;
+   emailThree: text;
+   emailTwo: text;
+   entryTitle: text;
+   file1MetaData: record {
+                    fileName: text;
+                    fileType: text;
+                    lastModified: int;
+                  };
+   file2MetaData: record {
+                    fileName: text;
+                    fileType: text;
+                    lastModified: int;
+                  };
+   location: text;
+   lockTime: int;
+   "text": text;
  };
 type ICP = record {e8s: nat64;};
 type Hash = nat32;
@@ -191,7 +193,7 @@ type AssocList =
  opt record {
        record {
          Key;
-         JournalEntry;
+         JournalEntryV2;
        };
        List;
      };

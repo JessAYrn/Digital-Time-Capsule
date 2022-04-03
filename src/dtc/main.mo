@@ -19,6 +19,7 @@ import Int "mo:base/Int";
 import Text "mo:base/Text";
 import Account "./Account";
 import Bool "mo:base/Bool";
+import Option "mo:base/Option";
 
 
 shared (msg) actor class User(){
@@ -50,7 +51,7 @@ shared (msg) actor class User(){
         file2: ?Blob;
     };
 
-    type JournalEntry = {
+    type JournalEntryV2 = {
         entryTitle: Text;
         text: Text;
         location: Text;
@@ -61,7 +62,8 @@ shared (msg) actor class User(){
         emailOne: Text;
         emailTwo: Text;
         emailThree: Text;
-        read: ?Bool;
+        read: Bool;
+        draft: Bool;
         file1MetaData: {
             fileName: Text;
             lastModified: Int;
@@ -72,7 +74,7 @@ shared (msg) actor class User(){
             lastModified: Int;
             fileType: Text;
         };
-    };
+    }; 
 
     type JournalEntryInput = {
         entryTitle: Text;
@@ -83,6 +85,7 @@ shared (msg) actor class User(){
         emailOne: Text;
         emailTwo: Text;
         emailThree: Text;
+        draft: Bool;
         file1MetaData: {
             fileName: Text;
             lastModified: Int;
@@ -321,7 +324,7 @@ shared (msg) actor class User(){
     //read Journal
     public shared(msg) func readJournal () : async Result.Result<(
             {
-                userJournalData : ([(Nat,JournalEntry)], Bio);
+                userJournalData : ([(Nat,JournalEntryV2)], Bio);
                 email: ?Text;
                 balance : Ledger.ICP;
                 address: [Nat8];
@@ -367,7 +370,7 @@ shared (msg) actor class User(){
         
     };
 
-    public shared(msg) func readEntry(entryKey: EntryKey) : async Result.Result<JournalEntry, Error> {
+    public shared(msg) func readEntry(entryKey: EntryKey) : async Result.Result<JournalEntryV2, Error> {
 
         //Reject Anonymous User
         //if(Principal.toText(msg.caller) == "2vxsx-fae"){
@@ -457,7 +460,7 @@ shared (msg) actor class User(){
         };
     };
 
-    public shared(msg) func updateJournalEntry(entryKey : ?EntryKey, entry : ?JournalEntryInput) : async Result.Result<Trie.Trie<Nat,JournalEntry>, Error> {
+    public shared(msg) func updateJournalEntry(entryKey : ?EntryKey, entry : ?JournalEntryInput) : async Result.Result<Trie.Trie<Nat,JournalEntryV2>, Error> {
 
         //Reject Anonymous User
         //if(Principal.toText(msg.caller) == "2vxsx-fae"){
@@ -492,32 +495,17 @@ shared (msg) actor class User(){
                         };
                     };
                     case(? entryValue){
-                        let completeEntry  = {
-                            entryTitle = entryValue.entryTitle;
-                            text = entryValue.text;
-                            location = entryValue.location;
-                            date = entryValue.date;
-                            lockTime = entryValue.lockTime;
-                            unlockTime = Time.now() + nanosecondsInADay * daysInAMonth * entryValue.lockTime;
-                            sent = false;
-                            read = ?false;
-                            emailOne = entryValue.emailOne;
-                            emailTwo = entryValue.emailTwo;
-                            emailThree = entryValue.emailThree;
-                            file1MetaData = entryValue.file1MetaData;
-                            file2MetaData = entryValue.file2MetaData;
-                        };
                         let icpBalance = await journal.canisterBalance();
                         if(icpBalance.e8s < oneICP){
                             return #err(#WalletBalanceTooLow);
                         } else {
                             switch(entryKey){
                                 case null {
-                                    let status = await journal.createEntry(completeEntry);
+                                    let status = await journal.createEntry(entryValue);
                                     return status;
                                 };
                                 case (? entryKeyValue){
-                                    let entryStatus = await journal.updateJournalEntry(entryKeyValue.entryKey, completeEntry);
+                                    let entryStatus = await journal.updateJournalEntry(entryKeyValue.entryKey, entryValue);
                                     return entryStatus;
                                 };
                             };
@@ -634,7 +622,7 @@ shared (msg) actor class User(){
         };
     };
 
-    public shared(msg) func getEntriesToBeSent() : async Result.Result<[(Text,[(Nat, JournalEntry)])], Error>{
+    public shared(msg) func getEntriesToBeSent() : async Result.Result<[(Text,[(Nat, JournalEntryV2)])], Error>{
 
         let callerId = msg.caller;
         
@@ -660,7 +648,7 @@ shared (msg) actor class User(){
                             let numberOfProfiles = Trie.size(profiles);
                             let profilesIter = Trie.iter(profiles);
                             let profilesArray = Iter.toArray(profilesIter);
-                            let AllEntriesToBeSentBuffer = Buffer.Buffer<(Text, [(Nat, JournalEntry)])>(1);
+                            let AllEntriesToBeSentBuffer = Buffer.Buffer<(Text, [(Nat, JournalEntryV2)])>(1);
 
                             while(index < numberOfProfiles){
                                 let userProfile = profilesArray[index];
@@ -737,18 +725,29 @@ shared (msg) actor class User(){
                         let adminCanisterAccountId = Result.toOption(adminCanisterAccountIdVarient);
                         switch(adminCanisterAccountId){
                             case (? adminAccountId){
-                            
-                                let statusForFeeCollection = await userJournal.transferICP(feeMinusGas, adminAccountId);
-                                let statusForIcpTransfer = await userJournal.transferICP(amountMinusFeeAndGas, canisterAccountId);
-                                if(statusForFeeCollection == true){
-                                    if(statusForIcpTransfer == true){
-                                        #ok(());
-                                    } else {
-                                        #err(#TxFailed)
-                                    }
-                                } else {
-                                    #err(#TxFailed)
-                                }
+                                switch(profile.userName){
+                                    case null{
+                                        #err(#TxFailed);
+                                    };
+                                    case (? adminUserName){
+                                        if (adminUserName == "admin"){
+                                            let statusForIcpTransfer = await userJournal.transferICP(amount, canisterAccountId);
+                                            #ok(());
+                                        } else {
+                                            let statusForFeeCollection = await userJournal.transferICP(feeMinusGas, adminAccountId);
+                                            let statusForIcpTransfer = await userJournal.transferICP(amountMinusFeeAndGas, canisterAccountId);
+                                            if(statusForFeeCollection == true){
+                                                if(statusForIcpTransfer == true){
+                                                    #ok(());
+                                                } else {
+                                                    #err(#TxFailed);
+                                                }
+                                            } else {
+                                                #err(#TxFailed);
+                                            }
+                                        }
+                                    };
+                                };
                             };
                             case null {
                                 #err(#NotAuthorized);

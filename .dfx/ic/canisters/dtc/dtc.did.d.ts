@@ -1,7 +1,7 @@
 import type { Principal } from '@dfinity/principal';
 export type AccountIdentifier = Array<number>;
 export interface AmountAccepted { 'accepted' : bigint }
-export type AssocList = [] | [[[Key, JournalEntry], List]];
+export type AssocList = [] | [[[Key, JournalEntryV2], List]];
 export interface Bio {
   'dob' : string,
   'pob' : string,
@@ -21,29 +21,6 @@ export type Error = { 'WalletBalanceTooLow' : null } |
   { 'InsufficientFunds' : null };
 export type Hash = number;
 export interface ICP { 'e8s' : bigint }
-export interface JournalEntry {
-  'unlockTime' : bigint,
-  'file2MetaData' : {
-    'fileName' : string,
-    'fileType' : string,
-    'lastModified' : bigint,
-  },
-  'emailThree' : string,
-  'date' : string,
-  'read' : [] | [boolean],
-  'sent' : boolean,
-  'text' : string,
-  'file1MetaData' : {
-    'fileName' : string,
-    'fileType' : string,
-    'lastModified' : bigint,
-  },
-  'lockTime' : bigint,
-  'emailOne' : string,
-  'emailTwo' : string,
-  'location' : string,
-  'entryTitle' : string,
-}
 export interface JournalEntryInput {
   'file2MetaData' : {
     'fileName' : string,
@@ -61,12 +38,37 @@ export interface JournalEntryInput {
   'lockTime' : bigint,
   'emailOne' : string,
   'emailTwo' : string,
+  'draft' : boolean,
+  'location' : string,
+  'entryTitle' : string,
+}
+export interface JournalEntryV2 {
+  'unlockTime' : bigint,
+  'file2MetaData' : {
+    'fileName' : string,
+    'fileType' : string,
+    'lastModified' : bigint,
+  },
+  'emailThree' : string,
+  'date' : string,
+  'read' : boolean,
+  'sent' : boolean,
+  'text' : string,
+  'file1MetaData' : {
+    'fileName' : string,
+    'fileType' : string,
+    'lastModified' : bigint,
+  },
+  'lockTime' : bigint,
+  'emailOne' : string,
+  'emailTwo' : string,
+  'draft' : boolean,
   'location' : string,
   'entryTitle' : string,
 }
 export interface Key { 'key' : bigint, 'hash' : Hash }
 export interface Leaf { 'size' : bigint, 'keyvals' : AssocList }
-export type List = [] | [[[Key, JournalEntry], List]];
+export type List = [] | [[[Key, JournalEntryV2], List]];
 export interface ProfileInput {
   'userName' : [] | [string],
   'email' : [] | [string],
@@ -83,7 +85,7 @@ export type Result_3 = {
       'balance' : ICP,
       'email' : [] | [string],
       'address' : Array<number>,
-      'userJournalData' : [Array<[bigint, JournalEntry]>, Bio],
+      'userJournalData' : [Array<[bigint, JournalEntryV2]>, Bio],
     }
   } |
   { 'err' : Error };
@@ -91,10 +93,10 @@ export type Result_4 = { 'ok' : bigint } |
   { 'err' : Error };
 export type Result_5 = { 'ok' : Array<number> } |
   { 'err' : Error };
-export type Result_6 = { 'ok' : JournalEntry } |
+export type Result_6 = { 'ok' : JournalEntryV2 } |
   { 'err' : Error };
 export type Result_7 = {
-    'ok' : Array<[string, Array<[bigint, JournalEntry]>]>
+    'ok' : Array<[string, Array<[bigint, JournalEntryV2]>]>
   } |
   { 'err' : Error };
 export type Result_8 = { 'ok' : AmountAccepted } |

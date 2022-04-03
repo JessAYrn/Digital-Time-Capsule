@@ -16,7 +16,7 @@ export const idlFactory = ({ IDL }) => {
   });
   const Result_8 = IDL.Variant({ 'ok' : AmountAccepted, 'err' : Error });
   const Result = IDL.Variant({ 'ok' : IDL.Null, 'err' : Error });
-  const JournalEntry = IDL.Record({
+  const JournalEntryV2 = IDL.Record({
     'unlockTime' : IDL.Int,
     'file2MetaData' : IDL.Record({
       'fileName' : IDL.Text,
@@ -25,7 +25,7 @@ export const idlFactory = ({ IDL }) => {
     }),
     'emailThree' : IDL.Text,
     'date' : IDL.Text,
-    'read' : IDL.Opt(IDL.Bool),
+    'read' : IDL.Bool,
     'sent' : IDL.Bool,
     'text' : IDL.Text,
     'file1MetaData' : IDL.Record({
@@ -36,17 +36,18 @@ export const idlFactory = ({ IDL }) => {
     'lockTime' : IDL.Int,
     'emailOne' : IDL.Text,
     'emailTwo' : IDL.Text,
+    'draft' : IDL.Bool,
     'location' : IDL.Text,
     'entryTitle' : IDL.Text,
   });
   const Result_7 = IDL.Variant({
     'ok' : IDL.Vec(
-      IDL.Tuple(IDL.Text, IDL.Vec(IDL.Tuple(IDL.Nat, JournalEntry)))
+      IDL.Tuple(IDL.Text, IDL.Vec(IDL.Tuple(IDL.Nat, JournalEntryV2)))
     ),
     'err' : Error,
   });
   const EntryKey = IDL.Record({ 'entryKey' : IDL.Nat });
-  const Result_6 = IDL.Variant({ 'ok' : JournalEntry, 'err' : Error });
+  const Result_6 = IDL.Variant({ 'ok' : JournalEntryV2, 'err' : Error });
   const Result_5 = IDL.Variant({ 'ok' : IDL.Vec(IDL.Nat8), 'err' : Error });
   const Result_4 = IDL.Variant({ 'ok' : IDL.Nat, 'err' : Error });
   const Bio = IDL.Record({
@@ -63,7 +64,7 @@ export const idlFactory = ({ IDL }) => {
       'email' : IDL.Opt(IDL.Text),
       'address' : IDL.Vec(IDL.Nat8),
       'userJournalData' : IDL.Tuple(
-        IDL.Vec(IDL.Tuple(IDL.Nat, JournalEntry)),
+        IDL.Vec(IDL.Tuple(IDL.Nat, JournalEntryV2)),
         Bio,
       ),
     }),
@@ -90,6 +91,7 @@ export const idlFactory = ({ IDL }) => {
     'lockTime' : IDL.Int,
     'emailOne' : IDL.Text,
     'emailTwo' : IDL.Text,
+    'draft' : IDL.Bool,
     'location' : IDL.Text,
     'entryTitle' : IDL.Text,
   });
@@ -100,8 +102,8 @@ export const idlFactory = ({ IDL }) => {
   });
   const Hash = IDL.Nat32;
   const Key = IDL.Record({ 'key' : IDL.Nat, 'hash' : Hash });
-  List.fill(IDL.Opt(IDL.Tuple(IDL.Tuple(Key, JournalEntry), List)));
-  const AssocList = IDL.Opt(IDL.Tuple(IDL.Tuple(Key, JournalEntry), List));
+  List.fill(IDL.Opt(IDL.Tuple(IDL.Tuple(Key, JournalEntryV2), List)));
+  const AssocList = IDL.Opt(IDL.Tuple(IDL.Tuple(Key, JournalEntryV2), List));
   const Leaf = IDL.Record({ 'size' : IDL.Nat, 'keyvals' : AssocList });
   Trie.fill(
     IDL.Variant({ 'branch' : Branch, 'leaf' : Leaf, 'empty' : IDL.Null })

@@ -73,7 +73,9 @@ const Journal = (props) => {
                 }
             });
 
-            setUnreadJournalEntries(journalEntries.filter(entry => !entry.read && (Date.now() * 1000000 > parseInt(entry.unlockTime))));
+            setUnreadJournalEntries(journalEntries.filter(entry => !entry.read && 
+                (Date.now() * 1000000 > parseInt(entry.unlockTime)) &&  
+                parseInt(entry.lockTime) > 0));
 
             const journalBio = journal.ok.userJournalData[1];
             const metaData = {email : journal.ok.email, userName: journal.ok.userName};

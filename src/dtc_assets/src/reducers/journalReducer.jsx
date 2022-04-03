@@ -6,6 +6,7 @@ export const types = {
     SET_BIO: "SET_BIO",
     SET_METADATA: "SET_METADATA",
     SET_WALLET_DATA: "SET_WALLET_DATA",
+    CHANGE_DRAFT: "CHANGE_DRAFT",
     CHANGE_DATE: "CHANGE_DATE",
     CHANGE_LOCATION: "CHANGE_LOCATION",
     CHANGE_ENTRY: "CHANGE_ENTRY",
@@ -54,6 +55,7 @@ export const initialState = {
             emailOne: '',
             emailTwo: '',
             emailThree: '', 
+            draft: false,
             file1MetaData:{
                 fileName: 'null',
                 lastModified: 0,
@@ -79,6 +81,7 @@ const freshPage = {
     emailOne: '',
     emailTwo: '',
     emailThree: '', 
+    draft: false,
     file1MetaData:{
         fileName: 'null',
         lastModified: 0,
@@ -148,6 +151,15 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
+        case types.CHANGE_DRAFT:
+        updatedJournalPage = {
+            ... state.journal[index],
+            draft: payload
+        }
+        state.journal[index] = updatedJournalPage;
+        return {
+            ...state
+        }
         case types.CHANGE_ENTRY_TITLE:
             updatedJournalPage = {
                 ... state.journal[index],
