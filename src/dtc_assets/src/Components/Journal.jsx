@@ -76,8 +76,8 @@ const Journal = (props) => {
 
             setUnreadJournalEntries(
                 journalEntries.filter(entry => !entry.read && 
-                    (Date.now() * 1000000 > parseInt(entry.unlockTime)) 
-                    // parseInt(entry.lockTime) > 0
+                    (Date.now() * 1000000 > parseInt(entry.unlockTime)) &&
+                    parseInt(entry.lockTime) > 0
                 )
             );
 
