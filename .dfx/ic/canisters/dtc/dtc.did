@@ -1,0 +1,202 @@
+type User = 
+ service {
+   canisterAccount: () -> (AccountIdentifier) query;
+   canisterBalance: () -> (ICP);
+   create: () -> (Result_8);
+   createJournalEntryFile: (text, nat, blob) -> (Result);
+   delete: () -> (Result);
+   getEntriesToBeSent: () -> (Result_7);
+   mainCanisterCyclesBalance: () -> (nat);
+   readEntry: (EntryKey) -> (Result_6);
+   readEntryFileChunk: (text, nat) -> (Result_5);
+   readEntryFileSize: (text) -> (Result_4);
+   readJournal: () -> (Result_3);
+   refillCanisterCycles: () -> (Result_2);
+   transferICP: (nat64, AccountIdentifier) -> (Result);
+   updateBio: (Bio) -> (Result);
+   updateJournalEntry: (opt EntryKey, opt JournalEntryInput) -> (Result_1);
+   updateProfile: (ProfileInput) -> (Result);
+   wallet_receive: () -> (record {accepted: nat64;});
+ };
+type Trie = 
+ variant {
+   branch: Branch;
+   "empty";
+   leaf: Leaf;
+ };
+type Result_8 = 
+ variant {
+   err: Error;
+   ok: AmountAccepted;
+ };
+type Result_7 = 
+ variant {
+   err: Error;
+   ok: vec record {
+             text;
+             vec record {
+                   nat;
+                   JournalEntryV2;
+                 };
+           };
+ };
+type Result_6 = 
+ variant {
+   err: Error;
+   ok: JournalEntryV2;
+ };
+type Result_5 = 
+ variant {
+   err: Error;
+   ok: blob;
+ };
+type Result_4 = 
+ variant {
+   err: Error;
+   ok: nat;
+ };
+type Result_3 = 
+ variant {
+   err: Error;
+   ok:
+    record {
+      address: vec nat8;
+      balance: ICP;
+      email: opt text;
+      userJournalData: record {
+                         vec record {
+                               nat;
+                               JournalEntryV2;
+                             };
+                         Bio;
+                       };
+      userName: opt text;
+    };
+ };
+type Result_2 = 
+ variant {
+   err: Error;
+   ok: record {
+         nat;
+         vec nat64;
+       };
+ };
+type Result_1 = 
+ variant {
+   err: Error;
+   ok: Trie;
+ };
+type Result = 
+ variant {
+   err: Error;
+   ok;
+ };
+type ProfileInput = 
+ record {
+   email: opt text;
+   userName: opt text;
+ };
+type List = 
+ opt record {
+       record {
+         Key;
+         JournalEntryV2;
+       };
+       List;
+     };
+type Leaf = 
+ record {
+   keyvals: AssocList;
+   size: nat;
+ };
+type Key = 
+ record {
+   hash: Hash;
+   key: nat;
+ };
+type JournalEntryV2 = 
+ record {
+   date: text;
+   draft: bool;
+   emailOne: text;
+   emailThree: text;
+   emailTwo: text;
+   entryTitle: text;
+   file1MetaData: record {
+                    fileName: text;
+                    fileType: text;
+                    lastModified: int;
+                  };
+   file2MetaData: record {
+                    fileName: text;
+                    fileType: text;
+                    lastModified: int;
+                  };
+   location: text;
+   lockTime: int;
+   read: bool;
+   sent: bool;
+   "text": text;
+   unlockTime: int;
+ };
+type JournalEntryInput = 
+ record {
+   date: text;
+   draft: bool;
+   emailOne: text;
+   emailThree: text;
+   emailTwo: text;
+   entryTitle: text;
+   file1MetaData: record {
+                    fileName: text;
+                    fileType: text;
+                    lastModified: int;
+                  };
+   file2MetaData: record {
+                    fileName: text;
+                    fileType: text;
+                    lastModified: int;
+                  };
+   location: text;
+   lockTime: int;
+   "text": text;
+ };
+type ICP = record {e8s: nat64;};
+type Hash = nat32;
+type Error = 
+ variant {
+   AlreadyExists;
+   InsufficientFunds;
+   NoInputGiven;
+   NotAuthorized;
+   NotFound;
+   TxFailed;
+   UserNameTaken;
+   WalletBalanceTooLow;
+ };
+type EntryKey = record {entryKey: nat;};
+type Branch = 
+ record {
+   left: Trie;
+   right: Trie;
+   size: nat;
+ };
+type Bio = 
+ record {
+   dedications: text;
+   dob: text;
+   name: text;
+   pob: text;
+   preface: text;
+ };
+type AssocList = 
+ opt record {
+       record {
+         Key;
+         JournalEntryV2;
+       };
+       List;
+     };
+type AmountAccepted = record {accepted: nat64;};
+type AccountIdentifier = blob;
+service : () -> User
