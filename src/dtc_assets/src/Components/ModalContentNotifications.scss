@@ -4,7 +4,7 @@
     .tableDiv{
       width: 100%;
       float: left;
-      height: 500px;
+      height: 465px;
       border-radius: 10px;
       box-shadow: 0 5px 16px rgb(0 0 0 / 20%);
       .tableHeader{
@@ -28,7 +28,7 @@
         }
       }
       .scrollable{
-        height: 445px;
+        height: 430px;
         overflow-y: auto;
         width: 100%;
         .table{
@@ -54,8 +54,8 @@
     }
   
     .addNewEntryButtonDiv{
-      width: 50%;
-      margin-left: 24%;
+      width: 90%;
+      margin-left: 5%;
       float: left;
       .addNewEntryButton{
         background-color: rgb(230, 230, 230);
