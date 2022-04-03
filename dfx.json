@@ -4,9 +4,7 @@
       "main": "src/dtc/main.mo",
       "type": "motoko"
     },
-    "default": {
-      "ic": "bs4fi-aaaaa-aaaap-qaabq-cai"
-    },
+    
     "dtc_assets": {
       "dependencies": [
         "dtc"
@@ -27,7 +25,7 @@
       "packtool": ""
     }
   },
-  "dfx": "0.9.2",
+  "dfx": "0.9.3",
   "networks": {
     "local": {
       "bind": "127.0.0.1:8000",

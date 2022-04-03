@@ -191,6 +191,7 @@ const JournalPage = (props) => {
                 result1 = true;
                 res.map(status => {
                     if("err" in status){
+                        console.log(status);
                         result1 = false;
                     }
                 });
@@ -201,6 +202,7 @@ const JournalPage = (props) => {
                 result2 = true;
                 res.map(status => {
                     if("err" in status){
+                        console.log(status);
                         result2 = false;
                     }
                 });

@@ -20,6 +20,7 @@ import Text "mo:base/Text";
 import Account "./Account";
 import Bool "mo:base/Bool";
 
+
 shared (msg) actor class User(){
 
     let callerId = msg.caller;
@@ -48,30 +49,6 @@ shared (msg) actor class User(){
         file1: ?Blob;
         file2: ?Blob;
     };
-
-    type JournalEntryV2 = {
-        entryTitle: Text;
-        text: Text;
-        location: Text;
-        date: Text;
-        lockTime: Int;
-        unlockTime: Int;
-        sent: Bool;
-        emailOne: Text;
-        emailTwo: Text;
-        emailThree: Text;
-        read: Bool;
-        file1MetaData: {
-            fileName: Text;
-            lastModified: Int;
-            fileType: Text;
-        };
-        file2MetaData: {
-            fileName: Text;
-            lastModified: Int;
-            fileType: Text;
-        };
-    }; 
 
     type JournalEntry = {
         entryTitle: Text;
@@ -155,7 +132,13 @@ shared (msg) actor class User(){
 
     private var balance = Cycles.balance();
 
+    private var oneICP : Nat64 = 10_000_000;
+
     private var capacity = 1000000000000000;
+
+    private var nanosecondsInADay = 86400000000000;
+
+    private var daysInAMonth = 30;
 
     public func wallet_receive() : async { accepted: Nat64 } {
         let amount = Cycles.available();
@@ -496,39 +479,53 @@ shared (msg) actor class User(){
             };
             case(?result){
                 let journal = result.journal;
-                let icpBalance = await journal.canisterBalance();
-                if(icpBalance.e8s < 100_000_000){
-                    return #err(#WalletBalanceTooLow);
-                } else {
-                    switch(entryKey){
-                        case null{
-                            switch(entry){
-                                case null{
-                                    #err(#NoInputGiven)
-                                };
-                                case(?entryValue){
-                                    let status = await journal.createEntry(entryValue);
-                                    return status;
-                                };
+                switch(entry){
+                    case null{
+                        switch(entryKey){
+                            case null{
+                                #err(#NoInputGiven);
+                            };
+                            case(? entryKeyValue){
+                                let journalStatus = await journal.deleteJournalEntry(entryKeyValue.entryKey);
+                                return journalStatus;
                             };
                         };
-                        case (? entryKeyValue){
-                            switch(entry){
+                    };
+                    case(? entryValue){
+                        let completeEntry  = {
+                            entryTitle = entryValue.entryTitle;
+                            text = entryValue.text;
+                            location = entryValue.location;
+                            date = entryValue.date;
+                            lockTime = entryValue.lockTime;
+                            unlockTime = Time.now() + nanosecondsInADay * daysInAMonth * entryValue.lockTime;
+                            sent = false;
+                            read = ?false;
+                            emailOne = entryValue.emailOne;
+                            emailTwo = entryValue.emailTwo;
+                            emailThree = entryValue.emailThree;
+                            file1MetaData = entryValue.file1MetaData;
+                            file2MetaData = entryValue.file2MetaData;
+                        };
+                        let icpBalance = await journal.canisterBalance();
+                        if(icpBalance.e8s < oneICP){
+                            return #err(#WalletBalanceTooLow);
+                        } else {
+                            switch(entryKey){
                                 case null {
-                                    let journalStatus = await journal.deleteJournalEntry(entryKeyValue.entryKey);
-                                    return journalStatus;
+                                    let status = await journal.createEntry(completeEntry);
+                                    return status;
                                 };
-                                case (?entryValue){
-                                    let entryStatus = await journal.updateJournalEntry(entryKeyValue.entryKey, entryValue);
+                                case (? entryKeyValue){
+                                    let entryStatus = await journal.updateJournalEntry(entryKeyValue.entryKey, completeEntry);
                                     return entryStatus;
                                 };
                             };
-                        };
+                        }
                     };
                 }
             };
         };
-
      
     };
 
@@ -548,7 +545,7 @@ shared (msg) actor class User(){
             case (? v){
                 let journal = v.journal;
                 let icpBalance = await journal.canisterBalance();
-                if(icpBalance.e8s < 100_000_000){
+                if(icpBalance.e8s < oneICP){
                     return #err(#WalletBalanceTooLow);
                 } else {
                     let journal = v.journal;

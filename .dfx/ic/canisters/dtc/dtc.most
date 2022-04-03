@@ -1,7 +1,62 @@
+// Version: 1.0.0
+type AccountIdentifier = Blob;
+type AssocList<K, V> = List<(K, V)>;
+type AssocList__1<K, V> = AssocList<K, V>;
+type Bio =
+  {dedications : Text; dob : Text; name : Text; pob : Text; preface : Text};
 type Branch<K, V> = {left : Trie<K, V>; right : Trie<K, V>; size : Nat};
-type Leaf<K, V> = {keyvals : AssocList/1<Key<K>, V>; size : Nat};
+type Error__7 = {#AlreadyExists; #NotFound};
+type Hash = Nat32;
+type ICP = {e8s : Nat64};
+type Journal =
+  actor {
+    canisterAccount : shared query () -> async AccountIdentifier;
+    canisterBalance : shared () -> async ICP;
+    createEntry :
+      shared JournalEntry -> async Result<Trie<Nat, JournalEntry>, Error__7>;
+    createFile : shared (Text, Nat, Blob) -> async Result<(), Error__7>;
+    deleteJournalEntry :
+      shared Nat -> async Result<Trie<Nat, JournalEntry>, Error__7>;
+    deleteJournalEntryFile : shared Text -> async Result<(), Error__7>;
+    getEntriesToBeSent : shared () -> async [(Nat, JournalEntry)];
+    readJournal : shared () -> async ([(Nat, JournalEntry)], Bio);
+    readJournalEntry : shared Nat -> async Result<JournalEntry, Error__7>;
+    readJournalFileChunk : shared (Text, Nat) -> async Result<Blob, Error__7>;
+    readJournalFileSize : shared Text -> async Result<Nat, Error__7>;
+    transferICP : shared (Nat64, AccountIdentifier) -> async Bool;
+    updateBio : shared Bio -> async Result<(), Error__7>;
+    updateJournalEntry :
+      shared (Nat, JournalEntry) ->
+        async Result<Trie<Nat, JournalEntry>, Error__7>;
+    updateJournalEntryFile :
+      shared (Text, Nat, Blob) -> async Result<(), Error__7>;
+    wallet_balance : shared () -> async Nat;
+    wallet_receive : shared () -> async {accepted : Nat64}
+  };
+type JournalEntry =
+  {
+    date : Text;
+    emailOne : Text;
+    emailThree : Text;
+    emailTwo : Text;
+    entryTitle : Text;
+    file1MetaData : {fileName : Text; fileType : Text; lastModified : Int};
+    file2MetaData : {fileName : Text; fileType : Text; lastModified : Int};
+    location : Text;
+    lockTime : Int;
+    read : ?Bool;
+    sent : Bool;
+    text : Text;
+    unlockTime : Int
+  };
+type Journal__1 = Journal;
+type Key<K> = {hash : Hash; key : K};
+type Leaf<K, V> = {keyvals : AssocList__1<Key<K>, V>; size : Nat};
+type List<T> = ?(T, List<T>);
 type Profile =
-  {email : ?Text; id : Principal; journal : Journal/1; userName : ?Text};
+  {email : ?Text; id : Principal; journal : Journal__1; userName : ?Text};
+type Result<Ok, Err> = {#err : Err; #ok : Ok};
+type Trie<K, V> = {#branch : Branch<K, V>; #empty; #leaf : Leaf<K, V>};
 actor {
   stable var profiles :
     {

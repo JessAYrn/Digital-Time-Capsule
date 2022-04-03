@@ -25,8 +25,11 @@ const ModalContentSubmit = (props) => {
                 </div> :
                 <div className={"submitFailed"}> 
                     <h1>
-                        Submit Failed
+                        Submit Failed:
                     </h1>
+                    <h4>
+                        you must have atleast 1 ICP in your wallet in order to submit an entry
+                    </h4>
                 </div>
             }
             <div className={'buttonDiv'}>

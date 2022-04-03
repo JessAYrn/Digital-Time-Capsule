@@ -69,27 +69,6 @@ shared(msg) actor class Journal (principal : Principal) = this {
         };
     }; 
 
-    type JournalEntryInput = {
-        entryTitle: Text;
-        text: Text;
-        location: Text;
-        date: Text;
-        lockTime: Int;
-        emailOne: Text;
-        emailTwo: Text;
-        emailThree: Text;
-        file1MetaData: {
-            fileName: Text;
-            lastModified: Int;
-            fileType: Text;
-        };
-        file2MetaData: {
-            fileName: Text;
-            lastModified: Int;
-            fileType: Text;
-        };
-    }; 
-
     type JournalFile = {
         file: Trie.Trie<Text, Blob>;
     };
@@ -134,10 +113,6 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     private var capacity = 1000000000000;
 
-    private var nanosecondsInADay = 86400000000000;
-
-    private var daysInAMonth = 30;
-
     private var balance = Cycles.balance();
 
     private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
@@ -159,29 +134,13 @@ shared(msg) actor class Journal (principal : Principal) = this {
         { accepted = Nat64.fromNat(accepted) };
     };
 
-    public func createEntry( journalEntry : JournalEntryInput) : async Result.Result<Trie.Trie<Nat, JournalEntry>, Error> {
-
-        let completeJournalEntry : JournalEntry = {
-            entryTitle = journalEntry.entryTitle;
-            text = journalEntry.text;
-            location = journalEntry.location;
-            date = journalEntry.date;
-            lockTime = journalEntry.lockTime;
-            unlockTime = Time.now() + nanosecondsInADay * daysInAMonth * journalEntry.lockTime;
-            sent = false;
-            read = Option.make(false);
-            emailOne = journalEntry.emailOne;
-            emailTwo = journalEntry.emailTwo;
-            emailThree = journalEntry.emailThree;
-            file1MetaData = journalEntry.file1MetaData;
-            file2MetaData = journalEntry.file2MetaData;
-        };
+    public func createEntry( journalEntry : JournalEntry) : async Result.Result<Trie.Trie<Nat, JournalEntry>, Error> {
         
         let (newJournal, oldJournal) = Trie.put(
             journal,
             natKey(journalEntryIndex),
             Nat.equal,
-            completeJournalEntry
+            journalEntry
         );
 
         journal := newJournal;
@@ -389,7 +348,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
 
 
-    public func updateJournalEntry(key: Nat, journalEntry: JournalEntryInput) : async Result.Result<Trie.Trie<Nat,JournalEntry>,Error> {
+    public func updateJournalEntry(key: Nat, journalEntry: JournalEntry) : async Result.Result<Trie.Trie<Nat,JournalEntry>,Error> {
 
         let entry = Trie.find(
             journal,
@@ -403,27 +362,11 @@ shared(msg) actor class Journal (principal : Principal) = this {
             };
             case (? v){
 
-                let completeJournalEntry = {
-                    entryTitle = journalEntry.entryTitle;
-                    text = journalEntry.text;
-                    location = journalEntry.location;
-                    date = journalEntry.date;
-                    lockTime = journalEntry.lockTime;
-                    unlockTime = v.unlockTime;
-                    sent = false;
-                    read = Option.make(false);
-                    emailOne = journalEntry.emailOne;
-                    emailTwo = journalEntry.emailTwo;
-                    emailThree = journalEntry.emailThree;
-                    file1MetaData = v.file1MetaData;
-                    file2MetaData = v.file2MetaData;
-                };
-
                 let (newJournal, oldEntryValue) = Trie.put(
                     journal,
                     natKey(key),
                     Nat.equal,
-                    completeJournalEntry
+                    journalEntry
                 );
 
                 journal:= newJournal;
