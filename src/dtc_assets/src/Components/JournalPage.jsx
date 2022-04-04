@@ -19,6 +19,7 @@ const JournalPage = (props) => {
     const [isLoading, setIsLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [submitSuccessful,setSubmitSuccessful] = useState(null);
+    const [isDisabled, setIsDisabled] = useState(false);
 
     const {
         journalReducerDispatchFunction,
@@ -40,6 +41,9 @@ const JournalPage = (props) => {
     }; 
 
     useEffect(async () => {
+        if(!journalPageData.draft){
+            setIsDisabled(true);
+        }
         if(journalPageData.file1MetaData.fileName !== 'null'){
             setIsLoading(true);
             let index = 0;
@@ -126,7 +130,7 @@ const JournalPage = (props) => {
 
     };
 
-    const mapAndSendEntryToApi = async (entryKey, journalEntry) => {
+    const mapAndSendEntryToApi = async (entryKey, journalEntry, isDraft) => {
 
         const entryAsApiObject = [{
             entryTitle: journalEntry.title,
@@ -139,7 +143,7 @@ const JournalPage = (props) => {
             emailThree: journalEntry.emailThree,
             file1MetaData: journalEntry.file1MetaData,
             file2MetaData: journalEntry.file2MetaData,
-            draft: journalEntry.draft
+            draft: isDraft
         }];
 
         const entryKeyAsApiObject = (entryKey >= 0 && entryKey < journalSize ) ? [{entryKey: entryKey}] : [];
@@ -209,7 +213,7 @@ const JournalPage = (props) => {
                 });
             });
         }
-        await mapAndSendEntryToApi(index, journalPageData).then(res => {
+        await mapAndSendEntryToApi(index, journalPageData, false).then(res => {
             if("err" in res){
                 result3 = false;
             } else {
@@ -251,6 +255,7 @@ const JournalPage = (props) => {
                     <Slider
                         min={0}
                         max={120}
+                        disabled={isDisabled}
                         dispatch={journalReducerDispatchFunction}
                         dispatchAction={types.CHANGE_LOCK_TIME}
                         index={index}
@@ -260,6 +265,7 @@ const JournalPage = (props) => {
                         <DatePicker
                             label={"Date: "}
                             rows={"1"}
+                            disabled={isDisabled}
                             dispatch={journalReducerDispatchFunction}
                             dispatchAction={types.CHANGE_DATE}
                             index={index}
@@ -268,6 +274,7 @@ const JournalPage = (props) => {
                         <InputBox
                             label={"Location: "}
                             rows={"1"}
+                            disabled={isDisabled}
                             dispatch={journalReducerDispatchFunction}
                             dispatchAction={types.CHANGE_LOCATION}
                             index={index}
@@ -277,6 +284,7 @@ const JournalPage = (props) => {
                             divClassName={"entry"}
                             label={"Entry: "}
                             rows={"59"}
+                            disabled={isDisabled}
                             dispatch={journalReducerDispatchFunction}
                             dispatchAction={types.CHANGE_ENTRY}
                             index={index}
@@ -289,6 +297,7 @@ const JournalPage = (props) => {
                             dispatch={journalReducerDispatchFunction}
                             dispatchAction={types.CHANGE_FILE1_METADATA}
                             value={file1}
+                            disabled={isDisabled}
                             setValue={setFile1}
                             index={index}
                         />
@@ -297,11 +306,12 @@ const JournalPage = (props) => {
                             dispatch={journalReducerDispatchFunction}
                             dispatchAction={types.CHANGE_FILE2_METADATA}
                             value={file2}
+                            disabled={isDisabled}
                             setValue={setFile2}
                             index={index}
                         />
                     </div>
-                    <div className={'recipientEmailsDiv'}>
+                    {/* <div className={'recipientEmailsDiv'}>
                         <InputBox
                             label={"1st Recipient Email: "}
                             rows={"1"}
@@ -326,9 +336,9 @@ const JournalPage = (props) => {
                             index={index}
                             value={(journalPageData) ? journalPageData.emailThree : ''}
                         />
-                    </div>
-                    <div>
-                        <button type="submit" onClick={handleSubmit}> Submit </button>
+                    </div> */}
+                    <div className={"submitButtonDiv"}>
+                        <button className={'button'} type="submit" onClick={handleSubmit} disabled={isDisabled}> Submit </button>
                     </div>
                     
                 </div>

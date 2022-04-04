@@ -90,7 +90,15 @@ const FileUpload = (props) => {
                     </span>   
                 }
             </div> 
-            <input id={'uploadedImaged'} type="file" className={'imageInputButton'} ref={inputRef} onLoad={handleUpload} onChange={handleUpload}/>            
+            <input 
+                disabled={disabled}
+                id={'uploadedImaged'} 
+                type="file" 
+                className={'imageInputButton'} 
+                ref={inputRef} 
+                onLoad={handleUpload} 
+                onChange={handleUpload}
+            />            
         </div>
     );
 }

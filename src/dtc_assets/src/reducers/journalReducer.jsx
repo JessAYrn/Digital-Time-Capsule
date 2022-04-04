@@ -55,7 +55,7 @@ export const initialState = {
             emailOne: '',
             emailTwo: '',
             emailThree: '', 
-            draft: false,
+            draft: true,
             file1MetaData:{
                 fileName: 'null',
                 lastModified: 0,
@@ -81,7 +81,7 @@ const freshPage = {
     emailOne: '',
     emailTwo: '',
     emailThree: '', 
-    draft: false,
+    draft: true,
     file1MetaData:{
         fileName: 'null',
         lastModified: 0,

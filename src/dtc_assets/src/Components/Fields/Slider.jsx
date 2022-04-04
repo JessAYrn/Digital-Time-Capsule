@@ -7,6 +7,7 @@ const Slider = (props) => {
         max,
         dispatch,
         dispatchAction,
+        disabled,
         index,
         value
     } = props;
@@ -47,6 +48,7 @@ const Slider = (props) => {
             </div>
             <div className={"sliderInputDiv"}>
                 <input 
+                    disabled={disabled}
                     type="range" 
                     min={min} 
                     max={max} 
