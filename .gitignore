@@ -1,2 +1,7 @@
 node_modules
-dfx
+
+#ignore dfx.json file
+dfx.json
+
+#ignore canister_ids.json
+canister_ids.json
