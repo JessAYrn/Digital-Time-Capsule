@@ -135,7 +135,7 @@ shared (msg) actor class User(){
 
     private var balance = Cycles.balance();
 
-    private var oneICP : Nat64 = 10_000_000;
+    private var oneICP : Nat64 = 100_000_000;
 
     private var capacity = 1000000000000000;
 
