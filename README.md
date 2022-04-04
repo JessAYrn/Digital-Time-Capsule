@@ -15,7 +15,7 @@ dfx start --clean --background
 In a different terminal, run the following command to install the Internet Identity canister:
 
 
-II_ENV=development dfx deploy --no-wallet --argument '(null)'.
+II_FETCH_ROOT_KEY=1 dfx deploy --no-wallet --argument '(null)'
 
 THE BUILD SHOULD FAIL THE FIRST TIME. WHEN IT DOES, PERFORM THE FOLLOWING STEPS
 

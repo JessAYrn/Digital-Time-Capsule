@@ -43,7 +43,6 @@ const FileUpload = (props) => {
 
     const handleUpload = async () => {
         const file = inputRef.current.files[0] || value;
-        console.log(file);
         try{
             if(file.type.includes("image")){
                 setFileType("image");
@@ -91,7 +90,15 @@ const FileUpload = (props) => {
                     </span>   
                 }
             </div> 
-            <input id={'uploadedImaged'} type="file" className={'imageInputButton'} ref={inputRef} onLoad={handleUpload} onChange={handleUpload}/>            
+            <input 
+                disabled={disabled}
+                id={'uploadedImaged'} 
+                type="file" 
+                className={'imageInputButton'} 
+                ref={inputRef} 
+                onLoad={handleUpload} 
+                onChange={handleUpload}
+            />            
         </div>
     );
 }

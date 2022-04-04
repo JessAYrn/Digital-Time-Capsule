@@ -1,4 +1,13 @@
 .journalPageContainer{
+    .submitButtonDiv{
+        width: 100%;
+        .button{
+            width: 80%;
+            margin-left: 10%;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+    }
     .journalText{
         @media screen and (max-width: 1200px) {    
             width: 90%;

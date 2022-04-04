@@ -19,6 +19,8 @@ import Int "mo:base/Int";
 import Text "mo:base/Text";
 import Account "./Account";
 import Bool "mo:base/Bool";
+import Option "mo:base/Option";
+
 
 shared (msg) actor class User(){
 
@@ -49,7 +51,7 @@ shared (msg) actor class User(){
         file2: ?Blob;
     };
 
-    type JournalEntry = {
+    type JournalEntryV2 = {
         entryTitle: Text;
         text: Text;
         location: Text;
@@ -60,6 +62,8 @@ shared (msg) actor class User(){
         emailOne: Text;
         emailTwo: Text;
         emailThree: Text;
+        read: Bool;
+        draft: Bool;
         file1MetaData: {
             fileName: Text;
             lastModified: Int;
@@ -70,7 +74,7 @@ shared (msg) actor class User(){
             lastModified: Int;
             fileType: Text;
         };
-    };
+    }; 
 
     type JournalEntryInput = {
         entryTitle: Text;
@@ -81,6 +85,7 @@ shared (msg) actor class User(){
         emailOne: Text;
         emailTwo: Text;
         emailThree: Text;
+        draft: Bool;
         file1MetaData: {
             fileName: Text;
             lastModified: Int;
@@ -110,6 +115,7 @@ shared (msg) actor class User(){
         #InsufficientFunds;
         #TxFailed;
         #UserNameTaken;
+        #WalletBalanceTooLow
     };
 
     //Application State
@@ -129,7 +135,13 @@ shared (msg) actor class User(){
 
     private var balance = Cycles.balance();
 
+    private var oneICP : Nat64 = 10_000_000;
+
     private var capacity = 1000000000000000;
+
+    private var nanosecondsInADay = 86400000000000;
+
+    private var daysInAMonth = 30;
 
     public func wallet_receive() : async { accepted: Nat64 } {
         let amount = Cycles.available();
@@ -312,7 +324,7 @@ shared (msg) actor class User(){
     //read Journal
     public shared(msg) func readJournal () : async Result.Result<(
             {
-                userJournalData : ([(Nat,JournalEntry)], Bio);
+                userJournalData : ([(Nat,JournalEntryV2)], Bio);
                 email: ?Text;
                 balance : Ledger.ICP;
                 address: [Nat8];
@@ -358,7 +370,7 @@ shared (msg) actor class User(){
         
     };
 
-    public shared(msg) func readEntry(entryKey: EntryKey) : async Result.Result<JournalEntry, Error> {
+    public shared(msg) func readEntry(entryKey: EntryKey) : async Result.Result<JournalEntryV2, Error> {
 
         //Reject Anonymous User
         //if(Principal.toText(msg.caller) == "2vxsx-fae"){
@@ -448,7 +460,7 @@ shared (msg) actor class User(){
         };
     };
 
-    public shared(msg) func updateJournalEntry(entryKey : ?EntryKey, entry : ?JournalEntryInput) : async Result.Result<Trie.Trie<Nat,JournalEntry>, Error> {
+    public shared(msg) func updateJournalEntry(entryKey : ?EntryKey, entry : ?JournalEntryInput) : async Result.Result<Trie.Trie<Nat,JournalEntryV2>, Error> {
 
         //Reject Anonymous User
         //if(Principal.toText(msg.caller) == "2vxsx-fae"){
@@ -456,6 +468,7 @@ shared (msg) actor class User(){
         //};
 
         let callerId = msg.caller;
+        
         
         let result = Trie.find(
             profiles,
@@ -468,38 +481,39 @@ shared (msg) actor class User(){
                 #err(#NotAuthorized);
             };
             case(?result){
-                switch(entryKey){
+                let journal = result.journal;
+                switch(entry){
                     case null{
-                        switch(entry){
+                        switch(entryKey){
                             case null{
-                                #err(#NoInputGiven)
+                                #err(#NoInputGiven);
                             };
-                            case(?entryValue){
-                                let journal = result.journal;
-                                let status = await journal.createEntry(entryValue);
-                                return status;
-                            };
-                        };
-                    };
-                    case (? entryKeyValue){
-                        switch(entry){
-                            case null {
-                                let journal = result.journal;
+                            case(? entryKeyValue){
                                 let journalStatus = await journal.deleteJournalEntry(entryKeyValue.entryKey);
                                 return journalStatus;
                             };
-                            case (?entryValue){
-                                let journal = result.journal;
-                                let entryStatus = await journal.updateJournalEntry(entryKeyValue.entryKey, entryValue);
-
-                                return entryStatus;
-                            };
                         };
                     };
-                };
+                    case(? entryValue){
+                        let icpBalance = await journal.canisterBalance();
+                        if(icpBalance.e8s < oneICP){
+                            return #err(#WalletBalanceTooLow);
+                        } else {
+                            switch(entryKey){
+                                case null {
+                                    let status = await journal.createEntry(entryValue);
+                                    return status;
+                                };
+                                case (? entryKeyValue){
+                                    let entryStatus = await journal.updateJournalEntry(entryKeyValue.entryKey, entryValue);
+                                    return entryStatus;
+                                };
+                            };
+                        }
+                    };
+                }
             };
         };
-
      
     };
 
@@ -518,8 +532,14 @@ shared (msg) actor class User(){
             };
             case (? v){
                 let journal = v.journal;
-                let status = await journal.createFile(fileId,chunkId, blobChunk);
-                return status;
+                let icpBalance = await journal.canisterBalance();
+                if(icpBalance.e8s < oneICP){
+                    return #err(#WalletBalanceTooLow);
+                } else {
+                    let journal = v.journal;
+                    let status = await journal.createFile(fileId,chunkId, blobChunk);
+                    return status;
+                }
             };
         };
     };
@@ -602,7 +622,7 @@ shared (msg) actor class User(){
         };
     };
 
-    public shared(msg) func getEntriesToBeSent() : async Result.Result<[(Text,[(Nat, JournalEntry)])], Error>{
+    public shared(msg) func getEntriesToBeSent() : async Result.Result<[(Text,[(Nat, JournalEntryV2)])], Error>{
 
         let callerId = msg.caller;
         
@@ -628,7 +648,7 @@ shared (msg) actor class User(){
                             let numberOfProfiles = Trie.size(profiles);
                             let profilesIter = Trie.iter(profiles);
                             let profilesArray = Iter.toArray(profilesIter);
-                            let AllEntriesToBeSentBuffer = Buffer.Buffer<(Text, [(Nat, JournalEntry)])>(1);
+                            let AllEntriesToBeSentBuffer = Buffer.Buffer<(Text, [(Nat, JournalEntryV2)])>(1);
 
                             while(index < numberOfProfiles){
                                 let userProfile = profilesArray[index];
@@ -682,39 +702,52 @@ shared (msg) actor class User(){
         let amountMinusFeeAndGas = amount - Fee - Gas;
         let feeMinusGas = Fee - Gas;
 
-        let userProfile = Trie.find(
-            profiles,
-            key(callerId), //Key
-            Principal.equal 
-        );
+        if(amount <= Fee){
+            return #err(#TxFailed);
+        } else {
 
-        switch(userProfile) {
-            case null{
-                #err(#NotFound)
-            }; 
-            case (? profile){
-                let userJournal = profile.journal;
-                let userBalance = await userJournal.canisterBalance();
-                if(userBalance.e8s < Fee){
-                    #err(#InsufficientFunds)
-                } else {
+            let userProfile = Trie.find(
+                profiles,
+                key(callerId), //Key
+                Principal.equal 
+            );
+
+            switch(userProfile) {
+                case null{
+                    #err(#NotFound)
+                }; 
+                case (? profile){
+                    let userJournal = profile.journal;
+                    let userBalance = await userJournal.canisterBalance();
+                
                     if(userBalance.e8s >= amount){
                         let adminCanisterAccountIdVarient = await getAdminAccountId();
                         let adminCanisterAccountId = Result.toOption(adminCanisterAccountIdVarient);
                         switch(adminCanisterAccountId){
                             case (? adminAccountId){
-                            
-                                let statusForFeeCollection = await userJournal.transferICP(feeMinusGas, adminAccountId);
-                                let statusForIcpTransfer = await userJournal.transferICP(amountMinusFeeAndGas, canisterAccountId);
-                                if(statusForFeeCollection == true){
-                                if(statusForIcpTransfer == true){
-                                    #ok(());
-                                } else {
-                                        #err(#TxFailed)
-                                }
-                                } else {
-                                    #err(#TxFailed)
-                                }
+                                switch(profile.userName){
+                                    case null{
+                                        #err(#TxFailed);
+                                    };
+                                    case (? adminUserName){
+                                        if (adminUserName == "admin"){
+                                            let statusForIcpTransfer = await userJournal.transferICP(amount, canisterAccountId);
+                                            #ok(());
+                                        } else {
+                                            let statusForFeeCollection = await userJournal.transferICP(feeMinusGas, adminAccountId);
+                                            let statusForIcpTransfer = await userJournal.transferICP(amountMinusFeeAndGas, canisterAccountId);
+                                            if(statusForFeeCollection == true){
+                                                if(statusForIcpTransfer == true){
+                                                    #ok(());
+                                                } else {
+                                                    #err(#TxFailed);
+                                                }
+                                            } else {
+                                                #err(#TxFailed);
+                                            }
+                                        }
+                                    };
+                                };
                             };
                             case null {
                                 #err(#NotAuthorized);
@@ -723,10 +756,11 @@ shared (msg) actor class User(){
                     } else {
                         #err(#InsufficientFunds)
                     }
-                }
+                    
 
+                };
             };
-        };
+        }
     };
 
     private  func key(x: Principal) : Trie.Key<Principal> {

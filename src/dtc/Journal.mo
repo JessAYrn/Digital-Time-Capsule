@@ -16,11 +16,12 @@ import Buffer "mo:base/Buffer";
 import Int "mo:base/Int";
 import Account "./Account";
 import Bool "mo:base/Bool";
+import Option "mo:base/Option";
 
 shared(msg) actor class Journal (principal : Principal) = this {
     let callerId = msg.caller;
 
-    type JournalEntry = {
+    type JournalEntryV2 = {
         entryTitle: Text;
         text: Text;
         location: Text;
@@ -31,6 +32,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
         emailOne: Text;
         emailTwo: Text;
         emailThree: Text;
+        read: Bool;
+        draft: Bool;
         file1MetaData: {
             fileName: Text;
             lastModified: Int;
@@ -52,6 +55,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         emailOne: Text;
         emailTwo: Text;
         emailThree: Text;
+        draft: Bool;
         file1MetaData: {
             fileName: Text;
             lastModified: Int;
@@ -62,7 +66,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
             lastModified: Int;
             fileType: Text;
         };
-    }; 
+    };
 
     type JournalFile = {
         file: Trie.Trie<Text, Blob>;
@@ -89,8 +93,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
     //Trie.Trie is the data type. a Trie is a key/value map where Nat is the key and Profile is the data type
     // and it has been initialized as empty. hence the Trie.empty()
 
-
-    private stable var journal : Trie.Trie<Nat, JournalEntry> = Trie.empty();
+    private stable var journalV2 : Trie.Trie<Nat, JournalEntryV2> = Trie.empty();
 
     private stable var files : Trie.Trie2D<Text,Nat,Blob> = Trie.empty();
 
@@ -131,9 +134,9 @@ shared(msg) actor class Journal (principal : Principal) = this {
         { accepted = Nat64.fromNat(accepted) };
     };
 
-    public func createEntry( journalEntry : JournalEntryInput) : async Result.Result<Trie.Trie<Nat, JournalEntry>, Error> {
+    public func createEntry( journalEntry : JournalEntryInput) : async Result.Result<Trie.Trie<Nat, JournalEntryV2>, Error> {
 
-        let completeJournalEntry = {
+        let completeEntry  = {
             entryTitle = journalEntry.entryTitle;
             text = journalEntry.text;
             location = journalEntry.location;
@@ -141,6 +144,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
             lockTime = journalEntry.lockTime;
             unlockTime = Time.now() + nanosecondsInADay * daysInAMonth * journalEntry.lockTime;
             sent = false;
+            read = false;
+            draft = journalEntry.draft;
             emailOne = journalEntry.emailOne;
             emailTwo = journalEntry.emailTwo;
             emailThree = journalEntry.emailThree;
@@ -149,17 +154,17 @@ shared(msg) actor class Journal (principal : Principal) = this {
         };
         
         let (newJournal, oldJournal) = Trie.put(
-            journal,
+            journalV2,
             natKey(journalEntryIndex),
             Nat.equal,
-            completeJournalEntry
+            completeEntry
         );
 
-        journal := newJournal;
+        journalV2 := newJournal;
 
         journalEntryIndex += 1;
 
-        #ok(journal);
+        #ok(journalV2);
             
         
 
@@ -214,16 +219,16 @@ shared(msg) actor class Journal (principal : Principal) = this {
         };
     };
 
-    public func readJournal() : async ([(Nat,JournalEntry)], Bio) {
-        let journalAsArray = Iter.toArray(Trie.iter(journal));
+    public func readJournal() : async ([(Nat,JournalEntryV2)], Bio) {
+        let journalAsArray = Iter.toArray(Trie.iter(journalV2));
         return ((journalAsArray), biography);
     };
 
-    public func getEntriesToBeSent() : async ([(Nat, JournalEntry)]) {
-        let journalIter = Trie.iter(journal);
-        let entriesToBeSentBuffer = Buffer.Buffer<(Nat, JournalEntry)>(1);
+    public func getEntriesToBeSent() : async ([(Nat, JournalEntryV2)]) {
+        let journalIter = Trie.iter(journalV2);
+        let entriesToBeSentBuffer = Buffer.Buffer<(Nat, JournalEntryV2)>(1);
 
-        Iter.iterate<(Nat, JournalEntry)>(journalIter, func(x : (Nat, JournalEntry), _index) {
+        Iter.iterate<(Nat, JournalEntryV2)>(journalIter, func(x : (Nat, JournalEntryV2), _index) {
             if(x.1.sent == false){
                 if(Time.now() >= x.1.unlockTime){
                     entriesToBeSentBuffer.add(x);
@@ -235,6 +240,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
                         lockTime = x.1.lockTime;
                         unlockTime = x.1.unlockTime;
                         sent = true;
+                        read = x.1.read;
+                        draft = x.1.draft;
                         emailOne = x.1.emailOne;
                         emailTwo = x.1.emailTwo;
                         emailThree = x.1.emailThree;
@@ -243,13 +250,13 @@ shared(msg) actor class Journal (principal : Principal) = this {
                     };
 
                     let (newJournal, oldJournal) = Trie.put(
-                        journal,
+                        journalV2,
                         natKey(x.0),
                         Nat.equal,
                         updatedJournalEntry
                     );
 
-                    journal := newJournal;
+                    journalV2 := newJournal;
                 };
             };
         });
@@ -258,9 +265,10 @@ shared(msg) actor class Journal (principal : Principal) = this {
         return entriestoBeSentArray;
     };
 
-    public func readJournalEntry(key : Nat): async Result.Result<JournalEntry, Error> {
+    public func readJournalEntry(key : Nat): async Result.Result<JournalEntryV2, Error> {
+
         let entry = Trie.find(
-            journal,
+            journalV2,
             natKey(key),
             Nat.equal
         );
@@ -271,7 +279,34 @@ shared(msg) actor class Journal (principal : Principal) = this {
                 #err(#NotFound);
             };
             case(? entryValue){
-                #ok(entryValue);
+                
+                let updatedEntryValue : JournalEntryV2 = {
+                    entryTitle = entryValue.entryTitle;
+                    text = entryValue.text;
+                    location = entryValue.location;
+                    date = entryValue.date;
+                    lockTime = entryValue.lockTime;
+                    unlockTime = entryValue.unlockTime;
+                    sent = true;
+                    read = true;
+                    draft = entryValue.draft;
+                    emailOne = entryValue.emailOne;
+                    emailTwo = entryValue.emailTwo;
+                    emailThree = entryValue.emailThree;
+                    file1MetaData = entryValue.file1MetaData;
+                    file2MetaData = entryValue.file2MetaData;
+                };
+
+                let (newJournal, oldJournal) = Trie.put(
+                    journalV2,
+                    natKey(key),
+                    Nat.equal,
+                    updatedEntryValue
+                );
+
+                journalV2 := newJournal;
+
+                #ok(updatedEntryValue);
             };
         }
     };
@@ -332,10 +367,10 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
 
 
-    public func updateJournalEntry(key: Nat, journalEntry: JournalEntryInput) : async Result.Result<Trie.Trie<Nat,JournalEntry>,Error> {
+    public func updateJournalEntry(key: Nat, journalEntry: JournalEntryInput) : async Result.Result<Trie.Trie<Nat,JournalEntryV2>,Error> {
 
         let entry = Trie.find(
-            journal,
+            journalV2,
             natKey(key),
             Nat.equal
         );
@@ -346,29 +381,31 @@ shared(msg) actor class Journal (principal : Principal) = this {
             };
             case (? v){
 
-                let completeJournalEntry = {
+                let completeEntry  = {
                     entryTitle = journalEntry.entryTitle;
                     text = journalEntry.text;
                     location = journalEntry.location;
                     date = journalEntry.date;
                     lockTime = journalEntry.lockTime;
-                    unlockTime = v.unlockTime;
+                    unlockTime = Time.now() + nanosecondsInADay * daysInAMonth * journalEntry.lockTime;
                     sent = false;
+                    read = false;
+                    draft = journalEntry.draft;
                     emailOne = journalEntry.emailOne;
                     emailTwo = journalEntry.emailTwo;
                     emailThree = journalEntry.emailThree;
-                    file1MetaData = v.file1MetaData;
-                    file2MetaData = v.file2MetaData;
+                    file1MetaData = journalEntry.file1MetaData;
+                    file2MetaData = journalEntry.file2MetaData;
                 };
 
                 let (newJournal, oldEntryValue) = Trie.put(
-                    journal,
+                    journalV2,
                     natKey(key),
                     Nat.equal,
-                    completeJournalEntry
+                    completeEntry
                 );
 
-                journal := newJournal;
+                journalV2:= newJournal;
 
                 #ok(newJournal);
 
@@ -409,9 +446,9 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
 
 
-    public func deleteJournalEntry(key: Nat) : async Result.Result<Trie.Trie<Nat,JournalEntry>,Error> {
+    public func deleteJournalEntry(key: Nat) : async Result.Result<Trie.Trie<Nat,JournalEntryV2>,Error> {
         let entry = Trie.find(
-            journal,
+            journalV2,
             natKey(key),
             Nat.equal,
         );
@@ -422,13 +459,13 @@ shared(msg) actor class Journal (principal : Principal) = this {
             };
             case (? v){
                 let updatedJournal = Trie.replace(
-                    journal,
+                    journalV2,
                     natKey(key),
                     Nat.equal,
                     null
                 );
 
-                journal := updatedJournal.0;
+                journalV2 := updatedJournal.0;
                 #ok(updatedJournal.0);
 
             };
@@ -514,4 +551,36 @@ shared(msg) actor class Journal (principal : Principal) = this {
     private func textKey(x: Text) : Trie.Key<Text> {
         return {key = x; hash = Text.hash(x)}
     };
+
+    // system func postupgrade() {
+
+    //    let journalIter = Trie.iter(journal);
+    //    Iter.iterate<(Nat, JournalEntry)>(journalIter, func(x : (Nat, JournalEntry), _index) {
+
+    //        let completeJournalEntry : JournalEntryV2 = {
+    //             entryTitle = x.1.entryTitle;
+    //             text = x.1.text;
+    //             location = x.1.location;
+    //             date = x.1.date;
+    //             lockTime = x.1.lockTime;
+    //             unlockTime = x.1.unlockTime;
+    //             sent = false;
+    //             read = false;
+    //             emailOne = x.1.emailOne;
+    //             emailTwo = x.1.emailTwo;
+    //             emailThree = x.1.emailThree;
+    //             file1MetaData = x.1.file1MetaData;
+    //             file2MetaData = x.1.file2MetaData;
+    //         };
+
+    //         let (updatedJournal, previousValue) = Trie.put(
+    //             journalV2,
+    //             natKey(x.0),
+    //             Nat.equal,
+    //             completeJournalEntry  
+    //         );
+    //         journalV2 := updatedJournal;
+    //     });
+    // };
+
 }

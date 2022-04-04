@@ -154,6 +154,21 @@
                   text-decoration: none;
               }
           }
+          .notificationIconDiv{
+            width: 33px;
+            height: 32px;
+            background: white;
+            border-radius: 10px;
+            float: right;
+            margin-right: 5px;
+            
+            img{
+              max-width: 70px;
+              max-height: 70px;
+              margin-left: -19px;
+              margin-top: -19px;
+            }
+          }
           .accountIconLinkDiv{
               float: right;
               margin-right: 4%;

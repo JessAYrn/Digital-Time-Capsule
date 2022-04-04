@@ -38,7 +38,7 @@ export const mapAndSendJournalPageRequestToApi = async (key, pageData, files, ac
 
 };
 
-export const mapApiObjectToFrontEndObject = (backEndObj) => {
+export const mapApiObjectToFrontEndObject = (entryKey, backEndObj) => {
     return {
         date: backEndObj.date,
         title: backEndObj.entryTitle,
@@ -50,7 +50,10 @@ export const mapApiObjectToFrontEndObject = (backEndObj) => {
         emailTwo: backEndObj.emailTwo,
         emailThree: backEndObj.emailThree,
         sent : backEndObj.sent,
+        read : backEndObj.read,
+        draft: backEndObj.draft,
         file1MetaData: backEndObj.file1MetaData,
-        file2MetaData: backEndObj.file2MetaData
-    }
+        file2MetaData: backEndObj.file2MetaData,
+        entryKey: parseInt(entryKey)
+    };
 }

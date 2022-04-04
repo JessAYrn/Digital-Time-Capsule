@@ -8,6 +8,9 @@ import { AppContext } from "../App";
 import InputBox from "./Fields/InputBox";
 import { dayInNanoSeconds, monthInDays } from "../Constants";
 import LoadScreen from "./LoadScreen";
+import { Modal } from "./Modal";
+import ModalContentSubmit from "./ModalContentOnSubmit";
+import ModalContentNotifications from "./ModalContentNotifications";
 
 const Journal = (props) => {
 
@@ -16,15 +19,17 @@ const Journal = (props) => {
     const [journalState, dispatch] = useReducer(journalReducer, initialState);
     const [pageIsVisibleArray, setPageIsVisibleArray] = useState(journalState.journal.map((page) => false));
     const [newPageAdded, setNewPageAdded] = useState(false);
+    const [showModal, setShowModal] = useState(false);
+    const [submitSuccessful,setSubmitSuccessful] = useState(null);
     const [journalSize, setJournalSize] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const {actor, authClient, setIsLoaded, setSubmissionsMade, submissionsMade} = useContext(AppContext);
+    const [displayNotifications, setDisplayNotifications] = useState(false);
+    const [unreadJournalEntries, setUnreadJournalEntries] = useState([]);
 
     useEffect(async () => {
         setIsLoading(true);
         const journal = await actor.readJournal();
-        const cyclesBalance = await actor.mainCanisterCyclesBalance();
-        console.log("Cycles Balance: ",cyclesBalance);
         console.log(journal);
         if("err" in journal){
             actor.create().then((result) => {
@@ -33,11 +38,11 @@ const Journal = (props) => {
             });
         } else {
             let journalEntries = journal.ok.userJournalData[0].map((arrayWithKeyAndPage) => {
-                return mapApiObjectToFrontEndObject(arrayWithKeyAndPage[1]);
+                return mapApiObjectToFrontEndObject(arrayWithKeyAndPage[0], arrayWithKeyAndPage[1]);
             });
 
 
-            journalEntries = journalEntries.sort(function(a,b) {
+            journalEntries = journalEntries.sort(function(a,b){
                 const dateForAArray = a.date.split('-');
                 const yearForA = parseInt(dateForAArray[0]);
                 const monthForA = parseInt(dateForAArray[1]);
@@ -68,6 +73,13 @@ const Journal = (props) => {
                     }
                 }
             });
+
+            setUnreadJournalEntries(
+                journalEntries.filter(entry => !entry.read && 
+                    (Date.now() * 1000000 > parseInt(entry.unlockTime)) &&
+                    parseInt(entry.lockTime) > 0
+                )
+            );
 
             const journalBio = journal.ok.userJournalData[1];
             const metaData = {email : journal.ok.email, userName: journal.ok.userName};
@@ -102,6 +114,7 @@ const Journal = (props) => {
     },[journalState.journal.length]);
 
     const handleSubmit = async () => {
+        setIsLoading(true);
         const result = await actor.updateBio({
             dob: journalState.bio.dob,
             pob: journalState.bio.pob,
@@ -109,12 +122,18 @@ const Journal = (props) => {
             dedications: journalState.bio.dedications,
             preface: journalState.bio.preface
         });
-        console.log(result);
+        setIsLoading(false);
+        setShowModal(true);
+        if("ok" in result){
+            setSubmitSuccessful(true);
+        } else {
+            setSubmitSuccessful(false);
+        }
     }
 
     const displayJournalTable = () => {
 
-        const openPage = (e, index, open) => {
+        const openPage = async (e, index, open) => {
             if(open){
                 setPageIsVisibleArray(pageIsVisibleArray.map((page, mapIndex) => {
                     if(index === mapIndex){
@@ -122,7 +141,9 @@ const Journal = (props) => {
                     } else {
                         return false;
                     }
-                }))
+                }));
+                const entryKey = journalState.journal[index].entryKey;
+                const result = await actor.readEntry({entryKey: entryKey});
             } else {
                 () => {}
             }
@@ -238,9 +259,32 @@ const Journal = (props) => {
         }))
     };
 
+    const toggleDisplayNotifications = () => {
+        setDisplayNotifications(!displayNotifications);
+    };
+
+    const notificationIconSrc = unreadJournalEntries.length ? 'notification-icon-alert.png' : 'notification-icon.png';
+
     return(
         isLoading ? 
-        <LoadScreen/> :
+        <LoadScreen/> : showModal ?
+        <div className={"container"}>
+            <div className={'background'}>
+                <Modal 
+                    showModal={showModal} 
+                    setShowModal={setShowModal} 
+                    ChildComponent={ModalContentSubmit}
+                    success={submitSuccessful}
+                    setSuccess={setSubmitSuccessful}
+                />
+            </div>
+        </div> : displayNotifications ? 
+        <Modal 
+            showModal={displayNotifications} 
+            setShowModal={toggleDisplayNotifications} 
+            ChildComponent={ModalContentNotifications}
+            tableContent={unreadJournalEntries}
+        /> :
         <React.Fragment>
             <div className={'linkDiv_Journal'}>
                 <nav className={'navBar_Journal'}>
@@ -252,6 +296,9 @@ const Journal = (props) => {
                             <Link className={"navLink_Journal"} to='/account'>
                                 <img src={"account-icon.png"} alt="image preview" className="accountIcon_Journal"/> 
                             </Link>
+                        </div>
+                        <div className={"notificationIconDiv"}>
+                            <img src={notificationIconSrc} onClick={toggleDisplayNotifications}/>
                         </div>
                     </div>
                 </nav>
@@ -267,7 +314,7 @@ const Journal = (props) => {
                                 setIsLoaded(false);
                             }} > Log Out </button>  
                         </div> 
-                    </React.Fragment>: 
+                    </React.Fragment> : 
                     <JournalPage
                         journalSize={journalSize}
                         closePage={closePage}
@@ -277,7 +324,7 @@ const Journal = (props) => {
                     /> 
                 }
             </div>
-        </React.Fragment>  
+        </React.Fragment> 
     );
 
 }
