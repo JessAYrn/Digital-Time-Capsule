@@ -63,6 +63,9 @@ const FileUpload = (props) => {
         } catch(e) {
             console.warn(e.message);
         }
+        if(setPageChangesMade){
+            setPageChangesMade(true);
+        }
     };
 
     return(

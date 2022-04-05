@@ -9,6 +9,7 @@ const Slider = (props) => {
         dispatchAction,
         disabled,
         index,
+        setChangesWereMade,
         value
     } = props;
 
@@ -24,6 +25,9 @@ const Slider = (props) => {
     };
 
     const onChange = () =>{
+        if(setChangesWereMade){
+            setChangesWereMade(true);
+        };
         setSliderValue(inputRef.current.value);
         dispatch({
             payload: inputRef.current.value,
