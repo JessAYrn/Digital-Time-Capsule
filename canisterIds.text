@@ -1,0 +1,22 @@
+//Production Canister Id's
+{
+  "dtc": {
+    "ic": "hxx6x-baaaa-aaaap-qaaxq-cai"
+  },
+  "dtc_assets": {
+    "ic": "fkkq7-siaaa-aaaap-qaaya-cai"
+  },
+  "default": {
+    "ic": "bs4fi-aaaaa-aaaap-qaabq-cai"
+  }
+}
+
+//Test Canister Id's
+{
+  "dtc": {
+    "ic": "cxi6d-5iaaa-aaaap-qaaka-cai"
+  },
+  "dtc_assets": {
+    "ic": "cqjyx-qqaaa-aaaap-qaakq-cai"
+  }
+} 
