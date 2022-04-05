@@ -230,6 +230,11 @@ const JournalPage = (props) => {
         setShowModal(true);
         if(result){
             setIsDisabled(true);
+            journalReducerDispatchFunction({
+                payload: false,
+                actionType: types.CHANGE_DRAFT,
+                index: index
+            });
             setSubmitSuccessful(true);
         } else {
             setSubmitSuccessful(false);
