@@ -10,6 +10,7 @@ const DatePicker = (props) => {
         disabled,
         divClassName,
         dispatchAction,
+        setChangesWereMade,
         dispatch,
         index,
         value
@@ -24,6 +25,9 @@ const DatePicker = (props) => {
     };
 
     const onChnage = () => {
+        if(setChangesWereMade){
+            setChangesWereMade(true);
+        }
         dispatch({
             payload: inputRef.current.value,
             actionType: dispatchAction,

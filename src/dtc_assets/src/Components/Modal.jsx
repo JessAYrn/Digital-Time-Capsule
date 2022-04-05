@@ -9,7 +9,9 @@ export const Modal = (props) => {
         ChildComponent,
         success,
         setSuccess,
-        tableContent
+        tableContent,
+        handleSubmit,
+        closePage
     } = props;
 
 
@@ -24,8 +26,10 @@ export const Modal = (props) => {
                                 success={success}
                                 setSuccess={setSuccess}
                                 showModal={showModal}
+                                closePage={closePage}
                                 setShowModal={setShowModal}
                                 tableContent={tableContent}
+                                handleSubmit={handleSubmit}
                             />
                         </div>
                     </div>

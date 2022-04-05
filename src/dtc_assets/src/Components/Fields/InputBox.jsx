@@ -15,6 +15,7 @@ const InputBox = (props) => {
         dispatchAction,
         dispatch,
         index,
+        setChangesWereMade,
         value,
         setParentState
         // dispatchAction //the action that is to take place in order to dispatch the field change to the redux store
@@ -28,6 +29,9 @@ const InputBox = (props) => {
     };
 
     const onChnage = () => {
+        if(setChangesWereMade){
+            setChangesWereMade(true);
+        }
         if(dispatch){
             dispatch({
                 payload: inputRef.current.value,

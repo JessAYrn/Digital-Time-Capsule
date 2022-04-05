@@ -7,9 +7,13 @@ const ModalContentSubmit = (props) => {
         success,
         setSuccess,
         setShowModal,
+        closePage
     } = props;
 
     const onClick = () => {
+        if(closePage){
+            closePage();
+        }
         setShowModal(false);
         setSuccess(null);
     };
