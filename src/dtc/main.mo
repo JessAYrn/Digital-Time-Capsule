@@ -725,29 +725,23 @@ shared (msg) actor class User(){
                         let adminCanisterAccountId = Result.toOption(adminCanisterAccountIdVarient);
                         switch(adminCanisterAccountId){
                             case (? adminAccountId){
-                                switch(profile.userName){
-                                    case null{
-                                        #err(#TxFailed);
-                                    };
-                                    case (? adminUserName){
-                                        if (adminUserName == "admin"){
-                                            let statusForIcpTransfer = await userJournal.transferICP(amount, canisterAccountId);
+                                let userName = Option.get(profile.userName, "noName");
+                                if (userName == "admin"){
+                                    let statusForIcpTransfer = await userJournal.transferICP(amount, canisterAccountId);
+                                    #ok(());
+                                } else {
+                                    let statusForFeeCollection = await userJournal.transferICP(feeMinusGas, adminAccountId);
+                                    let statusForIcpTransfer = await userJournal.transferICP(amountMinusFeeAndGas, canisterAccountId);
+                                    if(statusForFeeCollection == true){
+                                        if(statusForIcpTransfer == true){
                                             #ok(());
                                         } else {
-                                            let statusForFeeCollection = await userJournal.transferICP(feeMinusGas, adminAccountId);
-                                            let statusForIcpTransfer = await userJournal.transferICP(amountMinusFeeAndGas, canisterAccountId);
-                                            if(statusForFeeCollection == true){
-                                                if(statusForIcpTransfer == true){
-                                                    #ok(());
-                                                } else {
-                                                    #err(#TxFailed);
-                                                }
-                                            } else {
-                                                #err(#TxFailed);
-                                            }
+                                            #err(#TxFailed);
                                         }
-                                    };
-                                };
+                                    } else {
+                                        #err(#TxFailed);
+                                    }
+                                }
                             };
                             case null {
                                 #err(#NotAuthorized);
