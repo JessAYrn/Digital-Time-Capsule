@@ -1,0 +1,17 @@
+{
+  "short_name": "DTC",
+  "name": "The Digital Time Capsule",
+  "icons": [
+    {
+      "src": "../assets/dtc-logo-white.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#3367D6",
+  "display": "standalone",
+  "scope": "/",
+  "theme_color": "#3367D6",
+  "description": "Document you legacy"
+}
