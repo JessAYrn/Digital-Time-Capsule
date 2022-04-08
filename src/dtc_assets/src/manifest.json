@@ -3,7 +3,7 @@
   "name": "The Digital Time Capsule",
   "icons": [
     {
-      "src": "../assets/dtc-logo-white.png",
+      "src": "https://cqjyx-qqaaa-aaaap-qaakq-cai.ic0.app/src/dtc_assets/src/assets/dtc-logo-white.png",
       "type": "image/png",
       "sizes": "512x512"
     }
