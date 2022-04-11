@@ -115,6 +115,8 @@ export interface User {
     ) => Promise<Result>,
   'delete' : () => Promise<Result>,
   'getEntriesToBeSent' : () => Promise<Result_7>,
+  'getProfilesSize' : () => Promise<bigint>,
+  'getTotalValueLocked' : () => Promise<bigint>,
   'mainCanisterCyclesBalance' : () => Promise<bigint>,
   'readEntry' : (arg_0: EntryKey) => Promise<Result_6>,
   'readEntryFileChunk' : (arg_0: string, arg_1: bigint) => Promise<Result_5>,
