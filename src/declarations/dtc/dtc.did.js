@@ -125,7 +125,7 @@ export const idlFactory = ({ IDL }) => {
     'delete' : IDL.Func([], [Result], []),
     'getEntriesToBeSent' : IDL.Func([], [Result_7], []),
     'getProfilesSize' : IDL.Func([], [IDL.Nat], []),
-    'getTotalValueLocked' : IDL.Func([], [IDL.Nat64], []),
+    'getTotalValueLocked' : IDL.Func([], [IDL.Nat], []),
     'mainCanisterCyclesBalance' : IDL.Func([], [IDL.Nat], []),
     'readEntry' : IDL.Func([EntryKey], [Result_6], []),
     'readEntryFileChunk' : IDL.Func([IDL.Text, IDL.Nat], [Result_5], []),

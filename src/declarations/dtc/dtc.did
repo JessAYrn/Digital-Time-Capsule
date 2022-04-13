@@ -7,7 +7,7 @@ type User =
    delete: () -> (Result);
    getEntriesToBeSent: () -> (Result_7);
    getProfilesSize: () -> (nat);
-   getTotalValueLocked: () -> (nat64);
+   getTotalValueLocked: () -> (nat);
    mainCanisterCyclesBalance: () -> (nat);
    readEntry: (EntryKey) -> (Result_6);
    readEntryFileChunk: (text, nat) -> (Result_5);
