@@ -187,7 +187,7 @@ service : {
   delete: () -> (Result);
   getEntriesToBeSent: () -> (Result_7);
   getProfilesSize: () -> (nat);
-  getTotalValueLocked: () -> (nat);
+  getTotalValueLocked: () -> (nat64);
   mainCanisterCyclesBalance: () -> (nat);
   readEntry: (EntryKey) -> (Result_6);
   readEntryFileChunk: (text, nat) -> (Result_5);
