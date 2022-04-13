@@ -277,7 +277,7 @@ shared (msg) actor class User(){
         return Trie.size(profiles);
     };
 
-    public func getTotalValueLocked () : async Nat64 {
+    public func getTotalValueLocked () : async Nat {
         var index = 0;
         var totalValueLocked : Nat64 = 0;
         let numberOfProfiles = Trie.size(profiles);
@@ -292,7 +292,7 @@ shared (msg) actor class User(){
             index += 1;
         };
 
-        return totalValueLocked;
+        return Nat64.toNat(totalValueLocked);
 
     };
 
