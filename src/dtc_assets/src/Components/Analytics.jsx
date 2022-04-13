@@ -11,15 +11,26 @@ const Analytics = () => {
 
     useEffect( async () => {
 
-        const icpTotal = await actor.getTotalValueLocked();
-        setTotalValue(pasreInt(icpTotal.e8s));
+        await actor.getTotalValueLocked().then((icpTotal) => {
+            setTotalValue(parseInt(icpTotal));
+        });
 
-        const profilesTrieSize = await actor.getProfilesSize();
-        setJournalCount(parseInt(profilesTrieSize));
+        await actor.getProfilesSize().then((profilesTrieSize) => {
+            setJournalCount(parseInt(profilesTrieSize));
+        });
     }, [authClient, actor]);
 
     console.log('TotalValueLocked: ', totalValue);
     console.log('JournalCount: ', jounralCount);
+
+    return(
+        <div className={'transparentDiv__homePage'}>
+            <div className={'carouselDiv'}>
+                <div className={'videoContainerDiv'}>
+                </div>
+            </div>
+        </div>
+    )
 
 }
 

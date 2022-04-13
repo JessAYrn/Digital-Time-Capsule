@@ -289,6 +289,7 @@ shared (msg) actor class User(){
             let userJournal = userProfile.journal;
             let userBalance = await userJournal.canisterBalance();
             totalValueLocked += userBalance.e8s;
+            index += 1;
         };
 
         return totalValueLocked;

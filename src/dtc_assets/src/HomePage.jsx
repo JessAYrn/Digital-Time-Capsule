@@ -97,7 +97,7 @@ const HomePage = () => {
                         </div>
                         <div className="background center">
                             <div class={'scrollable'}>
-                                {/* <Analytics/> */}
+                                <Analytics/>
                                 <div className={'transparentDiv__homePage'}>
                                     <div className={'carouselDiv'}>
                                         <div className={'videoContainerDiv'}>
