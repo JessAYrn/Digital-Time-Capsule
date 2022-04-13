@@ -186,6 +186,7 @@ service : {
   createJournalEntryFile: (text, nat, blob) -> (Result);
   delete: () -> (Result);
   getEntriesToBeSent: () -> (Result_7);
+  getProfilesSize: () -> (nat);
   mainCanisterCyclesBalance: () -> (nat);
   readEntry: (EntryKey) -> (Result_6);
   readEntryFileChunk: (text, nat) -> (Result_5);
