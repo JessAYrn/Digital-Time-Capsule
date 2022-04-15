@@ -98,13 +98,13 @@ const HomePage = () => {
                         <div className="background center">
                             <div class={'scrollable'}>
                                 <Analytics/>
-                                <div className={'transparentDiv__homePage'}>
+                                {/* <div className={'transparentDiv__homePage'}>
                                     <div className={'carouselDiv'}>
                                         <div className={'videoContainerDiv'}>
                                             <YouTube videoId={'hiB8OCPxF40'} opts={opts} onReady={onready}/>
                                         </div>
                                     </div>
-                                </div>
+                                </div> */}
                             </div>
                         </div>
                     </div> : 
