@@ -277,25 +277,6 @@ shared (msg) actor class User(){
         return Trie.size(profiles);
     };
 
-    public func getTotalValueLocked () : async Nat {
-        var index = 0;
-        var totalValueLocked : Nat64 = 0;
-        let numberOfProfiles = Trie.size(profiles);
-        let profilesIter = Trie.iter(profiles);
-        let profilesArray = Iter.toArray(profilesIter);
-
-        while(index < numberOfProfiles){
-            let userProfile = profilesArray[index].1;
-            let userJournal = userProfile.journal;
-            let userBalance = await userJournal.canisterBalance();
-            totalValueLocked += userBalance.e8s;
-            index += 1;
-        };
-
-        return Nat64.toNat(totalValueLocked);
-
-    };
-
     //Result.Result returns a varient type that has attributes from success case(the first input) and from your error case (your second input). both inputs must be varient types. () is a unit type.
     public shared(msg) func create () : async Result.Result<AmountAccepted,Error> {
 
