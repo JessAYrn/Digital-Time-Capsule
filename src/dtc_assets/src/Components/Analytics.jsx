@@ -6,14 +6,16 @@ import "./Analytics.scss"
 const Analytics = () => {
 
     const [jounralCount, setJournalCount] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     const {actor, authClient, setIsLoaded} = useContext(AppContext);
 
     useEffect( async () => {
-
+        setIsLoading(true);
         await actor.getProfilesSize().then((profilesTrieSize) => {
             setJournalCount(parseInt(profilesTrieSize));
         });
+        setIsLoading(false);
     }, [authClient, actor]);
 
     console.log('JournalCount: ', jounralCount);
@@ -27,9 +29,12 @@ const Analytics = () => {
                             <h3 className={'infoH3'}>
                                 Journals Created: 
                             </h3>
-                            <h1 className={'infoH1'}>
-                                {jounralCount}
-                            </h1>
+                            { isLoading ? 
+                                <img src="Loading.gif" alt="Loading Screen" /> : 
+                                <h1 className={'infoH1'}>
+                                    {jounralCount}
+                                </h1>
+                            }   
                         </div>
                     </div>
                 </div>
