@@ -154,6 +154,21 @@
                   text-decoration: none;
               }
           }
+          .dashboardIconDiv{
+            width: 33px;
+            height: 32px;
+            background: white;
+            border-radius: 10px;
+            float: right;
+            margin-right: 5px;
+            
+            img{
+              max-width: 30px;
+              max-height: 30px;
+              margin-left: 1px;
+              margin-top: 0px;
+            }
+          }
           .notificationIconDiv{
             width: 33px;
             height: 32px;
