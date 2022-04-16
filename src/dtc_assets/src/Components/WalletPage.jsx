@@ -90,6 +90,11 @@ const WalletPage = (props) => {
                                 <img src={"account-icon.png"} alt="image preview" className="accountIcon_Wallet"/> 
                             </Link>
                         </div>
+                        <div className="dashboardIconDiv">
+                            <Link className={"navLink_Journal"} to='/'>
+                                <img src={"dashboard-icon.png"} alt="image preview" className="dashboardIcon_Wallet"/> 
+                            </Link>
+                        </div>
                     </div>
                 </nav>
             </div> 

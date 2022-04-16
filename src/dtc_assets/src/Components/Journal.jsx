@@ -300,6 +300,11 @@ const Journal = (props) => {
                         <div className={"notificationIconDiv"}>
                             <img src={notificationIconSrc} onClick={toggleDisplayNotifications}/>
                         </div>
+                        <div className="dashboardIconDiv">
+                            <Link className={"navLink_Journal"} to='/'>
+                                <img src={"dashboard-icon.png"} alt="image preview" className="dashboardIcon_Journal"/> 
+                            </Link>
+                        </div>
                     </div>
                 </nav>
             </div>
