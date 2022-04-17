@@ -129,7 +129,7 @@ shared (msg) actor class User(){
 
     private var Gas: Nat64 = 10000;
     
-    private var Fee : Nat64 = 10000000 + Gas;
+    private var Fee : Nat64 = 9980000 + Gas;
 
     private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
 
