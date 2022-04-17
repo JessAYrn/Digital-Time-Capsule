@@ -168,6 +168,36 @@
     }
 }
 
+.summaryContentDiv{
+    h6{
+        margin-top: -22px;
+    }
+    padding-top: 1%;
+    width: 90%;
+    margin-left: 5%;
+
+    .recipientAdressDiv{
+        padding-left: 10%;
+        width: 80%;
+    
+    }
+    
+    .ammountDiv{
+        padding-top: 1%;
+        padding-left: 10%;
+        width: 80%;
+    }
+
+    .ModalContentOnSendButtons{
+        text-align: center;
+        .button{
+            border-radius: 10px;
+            width: 10rem;
+            height: 3rem;
+        }
+    }
+}
+
 .loadGif{
     @media screen and (max-width: 470px) {    
         padding-top: 45%;

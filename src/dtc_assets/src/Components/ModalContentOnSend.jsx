@@ -13,17 +13,27 @@ const ModalContentOnSend = (props) => {
         showModal
     } = props;
 
+    const fee = 0.1;
+
     const [recipientAddress, setRecipientAddress] = useState('');
     const [amountToSend, setAmountToSend] = useState('');
     const [sendSuccessful, setSendSuccessful] = useState(false);
     const [responseFromApi, setResponseFromApi] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [showSummary, setShowSummary] = useState(false);
     const {actor} = useContext(AppContext);
 
 
     const onCancel = () => {
+        setShowSummary(false);
+        setSendSuccessful(false);
+        setResponseFromApi(false);
         setShowModal(false);
     };
+
+    const showTxSummary = () => {
+        setShowSummary(true);
+    }
 
     const onSendConfirm = async () => {
         console.log(fromHexString(recipientAddress));
@@ -46,13 +56,89 @@ const ModalContentOnSend = (props) => {
     };
 
     const onClick = () => {
+        setShowSummary(false);
         setSendSuccessful(false);
         setResponseFromApi(false);
         setShowModal(false);
 
     };
-    console.log("ResponseFromApi: ",responseFromApi);
-    console.log("Send Successful: ",sendSuccessful)
+
+    const ApiResponseContent = () => {
+        
+        return(
+            <div className={'ApiResponseModalContentContainer'}>
+                <div className={`ApiResponseModalContentDiv__${sendSuccessful ? 'success' : 'fail'}`}>
+                    { sendSuccessful ?
+                    <>
+                        <h2 className={"onSendResponsMessage"}>
+                            Payment Successfully Sent
+                        </h2>
+                        <img className={'checkMarkImg'} src="check-mark.png" alt="Check Mark" />
+                    </>
+                        :
+                        <h2>
+                            Error Occurred
+                        </h2>
+                    }
+                </div>
+
+                <div className={'buttonDiv'}>
+                    <button className='button' onClick={onClick}> OK </button> 
+                </div> 
+            </div> 
+        );
+    }
+
+    const SummaryContent = () => {
+
+        return(
+            <div className={'summaryContentDiv'}>
+                <div className="recipientAdressDiv">
+                    <h5> Recipient Address: </h5>
+                    <h6> {recipientAddress.slice(0,9)} ... {recipientAddress.slice(-10)}  </h6>
+                </div>
+                <div className="ammountDiv">
+                    <h5> Transaction Fee: </h5>
+                    <h6> {fee} ICP </h6>
+                </div>
+                <div className="ammountDiv">
+                    <h5> Send Amount: </h5>
+                    <h6> {amountToSend - fee} ICP </h6>
+                </div>
+                <div className='ModalContentOnSendButtons'>
+                    <button className='button' onClick={onSendConfirm}> Send </button>
+                    <button className='button' onClick={onCancel}> Cancel </button> 
+                </div> 
+            </div>
+        )
+    }
+
+    const InputTransaction = () => {
+        return (
+            <div className="sendContentDiv">
+                <div className="recipientAdressDiv">
+                    <InputBox
+                        label={"Recipient Address: "}
+                        rows={"1"}
+                        setParentState={setRecipientAddress}
+                        value={ showModal ? recipientAddress : ''}
+                    />
+                </div>
+                <div className="ammountDiv">
+                    <InputBox
+                        label={"Amount: "}
+                        rows={"1"}
+                        setParentState={setAmountToSend}
+                        value={showModal ? amountToSend : 0}
+                    />
+                </div>
+                <div className='ModalContentOnSendButtons'>
+                    <button className='button' onClick={showTxSummary}> Summary </button>
+                    <button className='button' onClick={onCancel}> Cancel </button> 
+                </div> 
+            </div>
+        )
+    }
 
     return(
         <React.Fragment>
@@ -62,49 +148,14 @@ const ModalContentOnSend = (props) => {
                 </> :
                 <>
                     { responseFromApi ? 
-                        <div className={'ApiResponseModalContentContainer'}>
-                            <div className={`ApiResponseModalContentDiv__${sendSuccessful ? 'success' : 'fail'}`}>
-                                { sendSuccessful ?
-                                <>
-                                    <h2 className={"onSendResponsMessage"}>
-                                        Payment Successfully Sent
-                                    </h2>
-                                    <img className={'checkMarkImg'} src="check-mark.png" alt="Check Mark" />
-                                </>
-                                    :
-                                    <h2>
-                                        Error Occurred
-                                    </h2>
-                                }
-                            </div>
-
-                            <div className={'buttonDiv'}>
-                                <button className='button' onClick={onClick}> OK </button> 
-                            </div> 
-                        </div> :
-                        <div className="sendContentDiv">
-                            <div className="recipientAdressDiv">
-                                <InputBox
-                                    label={"Recipient Address: "}
-                                    rows={"1"}
-                                    setParentState={setRecipientAddress}
-                                    value={ showModal ? recipientAddress : ''}
-                                />
-                            </div>
-                            <div className="ammountDiv">
-                                <InputBox
-                                    label={"Amount: "}
-                                    rows={"1"}
-                                    setParentState={setAmountToSend}
-                                    value={showModal ? amountToSend : 0}
-                                />
-                            </div>
-                            <div className='ModalContentOnSendButtons'>
-                                <button className='button' onClick={onSendConfirm}> Send </button>
-                                <button className='button' onClick={onCancel}> Cancel </button> 
-                            </div>
-
-                        </div>
+                        ApiResponseContent() :
+                        <>
+                            { showSummary ? 
+                                SummaryContent() :
+                                InputTransaction()
+                            }
+                        </>
+                        
                     }
                 </>
             }
