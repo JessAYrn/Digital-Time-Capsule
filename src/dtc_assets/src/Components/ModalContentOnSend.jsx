@@ -3,7 +3,6 @@ import InputBox from "./Fields/InputBox";
 import { AppContext } from "../Wallet.jsx";
 import { fromHexString } from "../Utils.jsx";
 import "./ModalContentOnSend.scss";
-import { e8sInOneICP } from "../Constants";
 import { toE8s, fromE8s } from "../Utils.jsx";
 
 
