@@ -4,6 +4,7 @@ import { AppContext } from "../Wallet.jsx";
 import { fromHexString } from "../Utils.jsx";
 import "./ModalContentOnSend.scss";
 import { e8sInOneICP } from "../Constants";
+import { toE8s, fromE8s } from "../Utils.jsx";
 
 
 const ModalContentOnSend = (props) => {
@@ -39,7 +40,7 @@ const ModalContentOnSend = (props) => {
         console.log(fromHexString(recipientAddress));
         setIsLoading(true);
         await actor.transferICP(
-            parseInt(amountToSend * e8sInOneICP), fromHexString(recipientAddress)
+            parseInt(toE8s(amountToSend)), fromHexString(recipientAddress)
             ).then((status) => {
                 setResponseFromApi(true);
                 if("ok" in status){
@@ -103,7 +104,7 @@ const ModalContentOnSend = (props) => {
                 </div>
                 <div className="ammountDiv">
                     <h5> Send Amount: </h5>
-                    <h6> {amountToSend - fee} ICP </h6>
+                    <h6> {fromE8s(toE8s(amountToSend) - toE8s(fee))} ICP </h6>
                 </div>
                 <div className='ModalContentOnSendButtons'>
                     <button className='button' onClick={onSendConfirm}> Send </button>

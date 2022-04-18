@@ -1,3 +1,4 @@
+import { e8sInOneICP } from "./Constants";
 
 export const toHexString = (byteArray)  =>{
     return Array.from(byteArray, function(byte) {
@@ -11,3 +12,11 @@ export const fromHexString = (hex) => {
     bytes.push(parseInt(hex.substr(c, 2), 16));
     return bytes;
 };
+
+export const toE8s = (number) => {
+  return number * e8sInOneICP
+}
+
+export const fromE8s = (number) => {
+  return number / e8sInOneICP
+}
