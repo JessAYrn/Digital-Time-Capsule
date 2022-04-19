@@ -23,7 +23,7 @@ import Bool "mo:base/Bool";
 import Option "mo:base/Option";
 
 
-shared (msg) actor class User(){
+shared (msg) actor class User() = this {
 
     let callerId = msg.caller;
 
