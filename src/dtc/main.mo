@@ -1,4 +1,5 @@
 import Ledger "Ledger";
+import LedgerCandid "LedgerCandid";
 import Debug "mo:base/Debug";
 import Error "mo:base/Error";
 import Nat64 "mo:base/Nat64";
@@ -759,6 +760,28 @@ shared (msg) actor class User(){
                 };
             };
         }
+    };
+
+    public shared(msg) func readTransaction(indexKey : Nat) : async Ledger.Result<Ledger.Result<LedgerCandid.Block, LedgerCandid.CanisterId>, Text>{
+        let callerId = msg.caller;
+        
+        let callerProfile = Trie.find(
+            profiles,
+            key(callerId), //Key
+            Principal.equal 
+        );
+
+        switch(callerProfile){
+            case null{
+                #Err("no profile found");
+            }; 
+            case ( ? profile){
+                let userJournal = profile.journal;
+                let tx = await userJournal.readWalletTransaction(indexKey);
+                return tx;
+            };
+        };
+
     };
 
     private  func key(x: Principal) : Trie.Key<Principal> {
