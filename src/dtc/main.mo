@@ -107,6 +107,14 @@ shared (msg) actor class User() = this {
         preface: Text;
     };
 
+    type Transaction = {
+        balanceDelta: Nat64;
+        increase: Bool;
+        recipient: Account.AccountIdentifier;
+        timeStamp: Int;
+        remainingBalance: Ledger.ICP;
+    };
+
     // This "Error" type is known as a varient. The attributes of varients are tagged with the hashtag and there is no need to specify the data type of the attribute because varients only attributes of a specific data type. 
     type Error ={
         #NotFound;
@@ -762,7 +770,7 @@ shared (msg) actor class User() = this {
         }
     };
 
-    public shared(msg) func readTransaction(indexKey : Nat) : async Ledger.Result<Ledger.Result<LedgerCandid.Block, LedgerCandid.CanisterId>, Text>{
+    public shared(msg) func readTransaction() : async Result.Result<Trie.Trie<Nat, Transaction>, Error> {
         let callerId = msg.caller;
         
         let callerProfile = Trie.find(
@@ -773,12 +781,12 @@ shared (msg) actor class User() = this {
 
         switch(callerProfile){
             case null{
-                #Err("no profile found");
+                #err(#NotFound);
             }; 
             case ( ? profile){
                 let userJournal = profile.journal;
-                let tx = await userJournal.readWalletTransaction(indexKey);
-                return tx;
+                let tx = await userJournal.readWalletTxHistory();
+                return #ok(tx);
             };
         };
 

@@ -86,6 +86,14 @@ shared(msg) actor class Journal (principal : Principal) = this {
         preface: Text;
     };
 
+    type Transaction = {
+        balanceDelta: Nat64;
+        increase: Bool;
+        recipient: Account.AccountIdentifier;
+        timeStamp: Int;
+        remainingBalance: Ledger.ICP;
+    };
+
 
     //Application State
     //stable makes it so that the variable persists across updates to the canister
@@ -98,7 +106,9 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     private stable var files : Trie.Trie2D<Text,Nat,Blob> = Trie.empty();
 
-    private stable var txBlockIndices : Trie.Trie<Nat, Nat64> = Trie.empty();
+    private stable var txHistory : Trie.Trie<Nat, Transaction> = Trie.empty();
+
+    private stable var icpBalance : Ledger.ICP = { e8s = 0} ;
 
     private stable var biography : Bio = {
         name = "";
@@ -110,7 +120,9 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     private stable var journalEntryIndex : Nat = 0;
 
-    private stable var blockTrieIndex : Nat = 0;
+    private stable var txTrieIndex : Nat = 0;
+
+    private var txFee : Nat64 = 10_000;
 
     private var capacity = 1000000000000;
 
@@ -121,8 +133,6 @@ shared(msg) actor class Journal (principal : Principal) = this {
     private var balance = Cycles.balance();
 
     private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
-
-    private let ledgerC : LedgerCandid.Interface = actor(Principal.toText(Principal.fromActor(this)));
 
     public shared(msg) func wallet_balance() : async Nat {
         return balance
@@ -514,21 +524,32 @@ shared(msg) actor class Journal (principal : Principal) = this {
           from_subaccount = null;
           to = recipientAccountId;
           amount = { e8s = amount };
-          fee = { e8s = 10_000 };
+          fee = { e8s = txFee };
           created_at_time = ?{ timestamp_nanos = Nat64.fromNat(Int.abs(Time.now())) };
         });
 
         switch (res) {
           case (#Ok(blockIndex)) {
+
+            let newBalance = await ledger.account_balance({ account = userAccountId() });
+
+            let tx : Transaction = {
+                balanceDelta = amount + txFee ;
+                increase = false;
+                recipient = recipientAccountId;
+                timeStamp = Int.abs(Time.now());
+                remainingBalance = newBalance;
+            };
               
-            let (updatedTxBlockIndices, existingTxBlockIndices) = Trie.put(
-                txBlockIndices,
-                natKey(blockTrieIndex),
+            let (updatedTxHistory, existingTx) = Trie.put(
+                txHistory,
+                natKey(txTrieIndex),
                 Nat.equal,
-                blockIndex
+                tx
             );
-            txBlockIndices := updatedTxBlockIndices;
-            blockTrieIndex += 1;
+            icpBalance := newBalance;
+            txHistory := updatedTxHistory;
+            txTrieIndex += 1;
 
             Debug.print("Paid reward to " # debug_show principal # " in block " # debug_show blockIndex);
             return true;
@@ -544,22 +565,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
         };
     };
 
-    public func readWalletTransaction(key: Nat) : async Ledger.Result<Ledger.Result<LedgerCandid.Block, LedgerCandid.CanisterId>, Text> {
-        let blockIndex = Trie.find(
-            txBlockIndices,
-            natKey(key),
-            Nat.equal
-        );
-
-        switch(blockIndex){
-            case null{
-                #Err("no block index found");
-            };
-            case ( ? index){
-                let tx = await ledgerC.block(index);
-                return tx;
-            };
-        };
+    public shared func readWalletTxHistory() : async Trie.Trie<Nat, Transaction> {
+        return txHistory;
     };
 
     private func userAccountId() : Account.AccountIdentifier {
