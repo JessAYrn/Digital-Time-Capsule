@@ -587,35 +587,4 @@ shared(msg) actor class Journal (principal : Principal) = this {
         return {key = x; hash = Text.hash(x)}
     };
 
-    // system func postupgrade() {
-
-    //    let journalIter = Trie.iter(journal);
-    //    Iter.iterate<(Nat, JournalEntry)>(journalIter, func(x : (Nat, JournalEntry), _index) {
-
-    //        let completeJournalEntry : JournalEntryV2 = {
-    //             entryTitle = x.1.entryTitle;
-    //             text = x.1.text;
-    //             location = x.1.location;
-    //             date = x.1.date;
-    //             lockTime = x.1.lockTime;
-    //             unlockTime = x.1.unlockTime;
-    //             sent = false;
-    //             read = false;
-    //             emailOne = x.1.emailOne;
-    //             emailTwo = x.1.emailTwo;
-    //             emailThree = x.1.emailThree;
-    //             file1MetaData = x.1.file1MetaData;
-    //             file2MetaData = x.1.file2MetaData;
-    //         };
-
-    //         let (updatedJournal, previousValue) = Trie.put(
-    //             journalV2,
-    //             natKey(x.0),
-    //             Nat.equal,
-    //             completeJournalEntry  
-    //         );
-    //         journalV2 := updatedJournal;
-    //     });
-    // };
-
 }
