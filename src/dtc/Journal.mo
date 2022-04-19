@@ -1,4 +1,5 @@
 import Ledger "Ledger";
+import LedgerCandid "LedgerCandid";
 import Debug "mo:base/Debug";
 import Error "mo:base/Error";
 import Trie "mo:base/Trie";
@@ -97,6 +98,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     private stable var files : Trie.Trie2D<Text,Nat,Blob> = Trie.empty();
 
+    private stable var txBlockIndices : Trie.Trie<Nat, Nat64> = Trie.empty();
+
     private stable var biography : Bio = {
         name = "";
         dob = "";
@@ -107,6 +110,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     private stable var journalEntryIndex : Nat = 0;
 
+    private stable var blockTrieIndex : Nat = 0;
+
     private var capacity = 1000000000000;
 
     private var nanosecondsInADay = 86400000000000;
@@ -116,6 +121,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
     private var balance = Cycles.balance();
 
     private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
+
+    private let ledgerC : LedgerCandid.Interface = actor(Principal.toText(Principal.fromActor(this)));
 
     public shared(msg) func wallet_balance() : async Nat {
         return balance
@@ -513,6 +520,16 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
         switch (res) {
           case (#Ok(blockIndex)) {
+              
+            let (updatedTxBlockIndices, existingTxBlockIndices) = Trie.put(
+                txBlockIndices,
+                natKey(blockTrieIndex),
+                Nat.equal,
+                blockIndex
+            );
+            txBlockIndices := updatedTxBlockIndices;
+            blockTrieIndex += 1;
+
             Debug.print("Paid reward to " # debug_show principal # " in block " # debug_show blockIndex);
             return true;
           };
@@ -524,6 +541,24 @@ shared(msg) actor class Journal (principal : Principal) = this {
             throw Error.reject("Unexpected error: " # debug_show other);
             return false;
           };
+        };
+    };
+
+    public func readWalletTransaction(key: Nat) : async Ledger.Result<Ledger.Result<LedgerCandid.Block, LedgerCandid.CanisterId>, Text> {
+        let blockIndex = Trie.find(
+            txBlockIndices,
+            natKey(key),
+            Nat.equal
+        );
+
+        switch(blockIndex){
+            case null{
+                #Err("no block index found");
+            };
+            case ( ? index){
+                let tx = await ledgerC.block(index);
+                return tx;
+            };
         };
     };
 
