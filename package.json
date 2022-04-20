@@ -28,7 +28,6 @@
     "copy-webpack-plugin": "^9.0.1",
     "css-loader": "^6.4.0",
     "events": "3.3.0",
-    
     "html-webpack-plugin": "5.3.1",
     "mini-css-extract-plugin": "^2.4.3",
     "node-sass": "^7.0.1",
@@ -64,6 +63,7 @@
     "babel-preset-es2021": "^1.0.0",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
+    "fs-web": "^1.0.1",
     "get-youtube-id": "^1.0.1",
     "jsonwebtoken": "^8.5.1",
     "nvm": "^0.0.4",

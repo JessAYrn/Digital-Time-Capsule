@@ -3,6 +3,8 @@ import axios from "axios";
 import { AppContext } from "../AccountPage";
 import "./AdminSection.scss";
 
+import {readFile} from 'fs-web';
+
 const AdminSection = (props) => {
 
     const { actor } = useContext(AppContext);
@@ -18,6 +20,13 @@ const AdminSection = (props) => {
 
         return res;
     };
+
+    const loadWasm = async (type) => {
+        console.log("Working Directory: ",`${process.cwd()}.dfx/ic/canisters/${type}/${type}.wasm`);
+        const buffer = await readFile(`${process.cwd()}.dfx/ic/canisters/${type}/${type}.wasm`);
+        return [...new Uint8Array(buffer)];
+    };
+
 
     const handleSubmit = async () => {
 
@@ -44,6 +53,17 @@ const AdminSection = (props) => {
         console.log(result);
     };
 
+    const handleUpgrade = async () => {
+
+        // data or storage
+        const type = process.argv.find((arg) => arg.indexOf('--type=') > -1)?.replace('--type=', '') ?? 'dtc';
+
+        const wasmModule = await loadWasm(type);
+        
+        // const result = await actor.installCode();
+        console.log("wasm module: ",wasmModule);
+    };
+
     return (
         <React.Fragment>
             <div className={'sendEmailsButtonDiv'}>
@@ -51,6 +71,9 @@ const AdminSection = (props) => {
             </div>
             <div className={'sendEmailsButtonDiv'}>
                 <button className={'refillAllCanisterCycles'} type="submit" onClick={handleSubmitRefill}> Refill All Canister Cycles </button>
+            </div>
+            <div className={'sendEmailsButtonDiv'}>
+                <button className={'upgradeUserJournalWasm'} type="submit" onClick={handleUpgrade}> Upgrade User Journal Wasm </button>
             </div>
         </React.Fragment>
         

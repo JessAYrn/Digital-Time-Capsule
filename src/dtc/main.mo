@@ -21,6 +21,8 @@ import Text "mo:base/Text";
 import Account "./Account";
 import Bool "mo:base/Bool";
 import Option "mo:base/Option";
+import IC "ic.types";
+
 
 
 shared (msg) actor class User() = this {
@@ -135,6 +137,8 @@ shared (msg) actor class User() = this {
     // and it has been initialized as empty. hence the Trie.empty()
 
     private stable var profiles : Trie.Trie<Principal, Profile> = Trie.empty();
+
+    private let ic : IC.Self = actor "aaaaa-aa";
 
     private var Gas: Nat64 = 10000;
     
@@ -570,7 +574,7 @@ shared (msg) actor class User() = this {
         let result = Trie.find(
             profiles,       //Target Trie
             key(callerId), //Key
-            Principal.equal       //Equality Checker
+            Principal.equal      //Equality Checker
         );
 
         switch (result){
@@ -790,6 +794,52 @@ shared (msg) actor class User() = this {
             };
         };
 
+    };
+
+    public shared(msg) func installCode(owner: Blob, wasmModule: Blob): async() {
+        let callerId = msg.caller;
+
+        let profile = Trie.find(
+            profiles,
+            key(callerId),
+            Principal.equal
+        );
+
+        switch(profile){
+            case null{
+                throw Error.reject("Unauthorized access. Caller is not an admin.");
+            };
+            case ( ? existingProfile){
+
+                if (Option.get(existingProfile.userName, "null") == "admin") {
+                    var index = 0;
+                    let numberOfProfiles = Trie.size(profiles);
+                    let profilesIter = Trie.iter(profiles);
+                    let profilesArray = Iter.toArray(profilesIter);
+
+                    while(index < numberOfProfiles){
+                        let userProfile = profilesArray[index].1;
+                        let userJournal = userProfile.journal;
+                        let journalCanisterId = Principal.fromActor(userJournal);
+
+                        await ic.install_code({
+                            arg = owner;
+                            wasm_module = wasmModule;
+                            mode = #upgrade;
+                            canister_id = journalCanisterId;
+                        });
+
+
+                        index += 1;
+                    };
+                } else {
+                    throw Error.reject("Unauthorized access. Caller is not an admin.");
+
+                }
+
+            };
+
+        };
     };
 
     private  func key(x: Principal) : Trie.Key<Principal> {

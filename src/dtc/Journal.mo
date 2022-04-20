@@ -565,7 +565,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         };
     };
 
-    public shared func readWalletTxHistory() : async Trie.Trie<Nat, Transaction> {
+    public shared(msg) func readWalletTxHistory() : async Trie.Trie<Nat, Transaction> {
         return txHistory;
     };
 
