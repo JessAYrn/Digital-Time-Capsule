@@ -1,11 +1,11 @@
 {
+  "default": {
+    "ic": "qy4mt-3aaaa-aaaap-qadlq-cai"
+  },
   "dtc": {
-    "ic": "cxi6d-5iaaa-aaaap-qaaka-cai"
+    "ic": "rvsi5-uiaaa-aaaap-qadma-cai"
   },
   "dtc_assets": {
-    "ic": "cqjyx-qqaaa-aaaap-qaakq-cai"
-  },
-  "default": {
-    "ic": "bs4fi-aaaaa-aaaap-qaabq-cai"
+    "ic": "rstoj-zqaaa-aaaap-qadmq-cai"
   }
 }
