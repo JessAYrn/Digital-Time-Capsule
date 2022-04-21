@@ -796,7 +796,7 @@ shared (msg) actor class User() = this {
 
     };
 
-    public shared(msg) func installCode(owner: Blob, wasmModule: Blob): async() {
+    public shared(msg) func getPrincipalsList() : async [Principal] {
         let callerId = msg.caller;
 
         let profile = Trie.find(
@@ -812,26 +812,73 @@ shared (msg) actor class User() = this {
             case ( ? existingProfile){
 
                 if (Option.get(existingProfile.userName, "null") == "admin") {
+
                     var index = 0;
                     let numberOfProfiles = Trie.size(profiles);
                     let profilesIter = Trie.iter(profiles);
                     let profilesArray = Iter.toArray(profilesIter);
+                    let ArrayBuffer = Buffer.Buffer<(Principal)>(1);
 
                     while(index < numberOfProfiles){
-                        let userProfile = profilesArray[index].1;
-                        let userJournal = userProfile.journal;
-                        let journalCanisterId = Principal.fromActor(userJournal);
-
-                        await ic.install_code({
-                            arg = owner;
-                            wasm_module = wasmModule;
-                            mode = #upgrade;
-                            canister_id = journalCanisterId;
-                        });
-
-
+                        let userProfile = profilesArray[index];
+                        let userPrincipal = userProfile.0;
+                        ArrayBuffer.add(userPrincipal);
                         index += 1;
                     };
+
+                    return ArrayBuffer.toArray();
+
+                } else {
+                    throw Error.reject("Unauthorized access. Caller is not an admin.");
+
+                }
+
+            };
+        };
+
+    };
+
+    public shared(msg) func installCode( userPrincipal: Principal, args: Blob, wasmModule: Blob): async() {
+        let callerId = msg.caller;
+
+        let profile = Trie.find(
+            profiles,
+            key(callerId),
+            Principal.equal
+        );
+
+        switch(profile){
+            case null{
+                throw Error.reject("Unauthorized access. Caller is not an admin.");
+            };
+            case ( ? existingProfile){
+
+                if (Option.get(existingProfile.userName, "null") == "admin") {
+
+                    let theUserProfile = Trie.find(
+                        profiles,
+                        key(userPrincipal),
+                        Principal.equal
+                    );
+
+                    switch(theUserProfile){
+                        case null{
+                            throw Error.reject("No profile for this principal.");
+                        };
+                        case ( ? existingProfile){
+                            let userJournal = existingProfile.journal;
+                            let journalCanisterId = Principal.fromActor(userJournal);
+
+                            await ic.install_code({
+                                arg = args;
+                                wasm_module = wasmModule;
+                                mode = #upgrade;
+                                canister_id = journalCanisterId;
+                            });
+
+                        };
+                    };
+
                 } else {
                     throw Error.reject("Unauthorized access. Caller is not an admin.");
 
