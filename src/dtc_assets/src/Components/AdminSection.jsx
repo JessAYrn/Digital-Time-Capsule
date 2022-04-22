@@ -68,6 +68,15 @@ const AdminSection = (props) => {
         console.log(result);
     };
 
+    const upgradeJournalData = async (principal, wasmModule) => {
+
+        console.log(`Upgrading: ${principal.toText()}`);
+        const arg = IDL.encode([IDL.Principal], [principal]);
+        await actor.installCode(principal, [...arg], wasmModule);
+        console.log(`Done: ${principal.toText()}`);
+
+    };
+
     const handleUpgrade = async () => {
 
         let promises =[];
@@ -76,15 +85,9 @@ const AdminSection = (props) => {
 
         const principalsList = await actor.getPrincipalsList();
 
-        principalsList.forEach((principal) => {
-            console.log(`Upgrading: ${principal.toText()}`);
-            const arg = IDL.encode([IDL.Principal], [principal]);
-            promises.push(actor.installCode(principal, [...arg], wasmModule));
-            console.log(`Done: ${principal.toText()}`);
-        });
+        principalsList.forEach((principal) => promises.push(upgradeJournalData(principal, wasmModule)));
 
         await Promise.all(promises);
-
 
         console.log("wasm module: ",wasmModule);
     };
