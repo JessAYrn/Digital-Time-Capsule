@@ -112,7 +112,7 @@ shared (msg) actor class User() = this {
     type Transaction = {
         balanceDelta: Nat64;
         increase: Bool;
-        recipient: Account.AccountIdentifier;
+        recipient: ?Account.AccountIdentifier;
         timeStamp: Int;
         remainingBalance: Ledger.ICP;
     };
@@ -774,7 +774,7 @@ shared (msg) actor class User() = this {
         }
     };
 
-    public shared(msg) func readTransaction() : async Result.Result<Trie.Trie<Nat, Transaction>, Error> {
+    public shared(msg) func readTransaction() : async Result.Result<[(Nat,Transaction)], Error> {
         let callerId = msg.caller;
         
         let callerProfile = Trie.find(
