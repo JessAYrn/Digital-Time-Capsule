@@ -3,3 +3,4 @@ node_modules
 dist
 src/declarations
 .DS_Store
+canisterIds.text
