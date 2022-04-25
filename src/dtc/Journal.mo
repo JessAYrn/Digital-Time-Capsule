@@ -1,4 +1,5 @@
 import Ledger "Ledger";
+import LedgerCandid "LedgerCandid";
 import Debug "mo:base/Debug";
 import Error "mo:base/Error";
 import Trie "mo:base/Trie";
@@ -85,6 +86,14 @@ shared(msg) actor class Journal (principal : Principal) = this {
         preface: Text;
     };
 
+    type Transaction = {
+        balanceDelta: Nat64;
+        increase: Bool;
+        recipient: ?Account.AccountIdentifier;
+        timeStamp: Int;
+        remainingBalance: Ledger.ICP;
+    };
+
 
     //Application State
     //stable makes it so that the variable persists across updates to the canister
@@ -97,6 +106,10 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     private stable var files : Trie.Trie2D<Text,Nat,Blob> = Trie.empty();
 
+    private stable var txHistory : Trie.Trie<Nat, Transaction> = Trie.empty();
+
+    private stable var icpBalance : Ledger.ICP = { e8s = 0} ;
+
     private stable var biography : Bio = {
         name = "";
         dob = "";
@@ -106,6 +119,10 @@ shared(msg) actor class Journal (principal : Principal) = this {
     };
 
     private stable var journalEntryIndex : Nat = 0;
+
+    private stable var txTrieIndex : Nat = 0;
+
+    private var txFee : Nat64 = 10_000;
 
     private var capacity = 1000000000000;
 
@@ -507,12 +524,33 @@ shared(msg) actor class Journal (principal : Principal) = this {
           from_subaccount = null;
           to = recipientAccountId;
           amount = { e8s = amount };
-          fee = { e8s = 10_000 };
+          fee = { e8s = txFee };
           created_at_time = ?{ timestamp_nanos = Nat64.fromNat(Int.abs(Time.now())) };
         });
 
         switch (res) {
           case (#Ok(blockIndex)) {
+
+            let newBalance = await ledger.account_balance({ account = userAccountId() });
+
+            let tx : Transaction = {
+                balanceDelta = amount + txFee ;
+                increase = false;
+                recipient = ?recipientAccountId;
+                timeStamp = Int.abs(Time.now());
+                remainingBalance = newBalance;
+            };
+              
+            let (updatedTxHistory, existingTx) = Trie.put(
+                txHistory,
+                natKey(txTrieIndex),
+                Nat.equal,
+                tx
+            );
+            icpBalance := newBalance;
+            txHistory := updatedTxHistory;
+            txTrieIndex += 1;
+
             Debug.print("Paid reward to " # debug_show principal # " in block " # debug_show blockIndex);
             return true;
           };
@@ -525,6 +563,64 @@ shared(msg) actor class Journal (principal : Principal) = this {
             return false;
           };
         };
+    };
+
+    public shared(msg) func readWalletTxHistory() : async [(Nat,Transaction)] {
+        let currentIcpBalance = await canisterBalance();
+        let lastKnowBalance = icpBalance;
+
+        if(currentIcpBalance.e8s != lastKnowBalance.e8s){
+            let currentTime = Int.abs(Time.now());
+
+            if(Nat64.lessOrEqual(currentIcpBalance.e8s, lastKnowBalance.e8s) == true){
+                
+                let changeInIcpBalance: Nat64 = lastKnowBalance.e8s - currentIcpBalance.e8s;
+
+                let tx : Transaction = {
+                    balanceDelta = changeInIcpBalance;
+                    increase = false;
+                    recipient = null;
+                    timeStamp = currentTime;
+                    remainingBalance = currentIcpBalance;
+                };
+
+                let (updatedTxHistory, existingTx) = Trie.put(
+                    txHistory,
+                    natKey(txTrieIndex),
+                    Nat.equal,
+                    tx
+                );
+                icpBalance := currentIcpBalance;
+                txHistory := updatedTxHistory;
+                txTrieIndex += 1;
+
+            } else {
+
+                let changeInIcpBalance: Nat64 = currentIcpBalance.e8s - lastKnowBalance.e8s;
+
+                let tx : Transaction = {
+                    balanceDelta = changeInIcpBalance;
+                    increase = true;
+                    recipient = null;
+                    timeStamp = currentTime;
+                    remainingBalance = currentIcpBalance;
+                };
+
+                let (updatedTxHistory, existingTx) = Trie.put(
+                    txHistory,
+                    natKey(txTrieIndex),
+                    Nat.equal,
+                    tx
+                );
+                icpBalance := currentIcpBalance;
+                txHistory := updatedTxHistory;
+                txTrieIndex += 1;
+            };
+
+        }; 
+
+        Iter.toArray(Trie.iter(txHistory));
+
     };
 
     private func userAccountId() : Account.AccountIdentifier {
@@ -551,36 +647,5 @@ shared(msg) actor class Journal (principal : Principal) = this {
     private func textKey(x: Text) : Trie.Key<Text> {
         return {key = x; hash = Text.hash(x)}
     };
-
-    // system func postupgrade() {
-
-    //    let journalIter = Trie.iter(journal);
-    //    Iter.iterate<(Nat, JournalEntry)>(journalIter, func(x : (Nat, JournalEntry), _index) {
-
-    //        let completeJournalEntry : JournalEntryV2 = {
-    //             entryTitle = x.1.entryTitle;
-    //             text = x.1.text;
-    //             location = x.1.location;
-    //             date = x.1.date;
-    //             lockTime = x.1.lockTime;
-    //             unlockTime = x.1.unlockTime;
-    //             sent = false;
-    //             read = false;
-    //             emailOne = x.1.emailOne;
-    //             emailTwo = x.1.emailTwo;
-    //             emailThree = x.1.emailThree;
-    //             file1MetaData = x.1.file1MetaData;
-    //             file2MetaData = x.1.file2MetaData;
-    //         };
-
-    //         let (updatedJournal, previousValue) = Trie.put(
-    //             journalV2,
-    //             natKey(x.0),
-    //             Nat.equal,
-    //             completeJournalEntry  
-    //         );
-    //         journalV2 := updatedJournal;
-    //     });
-    // };
 
 }

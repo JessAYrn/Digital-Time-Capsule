@@ -70,6 +70,8 @@ const WalletPage = (props) => {
                 actionType: types.SET_WALLET_DATA
             });
             setIsLoading(false);
+            const tx = await actor.readTransaction();
+            console.log(tx);
         }
     },[actor, authClient]);
 
