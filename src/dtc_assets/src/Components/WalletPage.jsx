@@ -1,10 +1,11 @@
 import React, {useCallback, useContext, useEffect, useState} from 'react';
 import { AppContext } from '../Wallet';
-import { toHexString } from '../Utils';
+import { nanoSecondsToMiliSeconds, toHexString } from '../Utils';
 import { types } from '../reducers/journalReducer';
 import { Link } from "react-router-dom";
 import { Modal } from './Modal';
 import './WalletPage.scss';
+import { fromE8s, toHexString, shortenHexString } from '../Utils';
 import { e8sInOneICP } from '../Constants';
 import LoadScreen from './LoadScreen';
 import ModalContentOnSend from './ModalContentOnSend';
@@ -22,9 +23,63 @@ const WalletPage = (props) => {
     const { actor, authClient } = useContext(AppContext);
     const [showModal, setShowModal] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [txHistory, setTxHistory] = useState([]);
 
     const openModal = () => {
         setShowModal(true);
+    };
+
+    const Transaction = (props) => {
+
+        const {
+            balanceDelta,
+            increase,
+            recipient,
+            remainingBalance,
+            timeStamp
+        } = props;
+        console.log(nanoSecondsToMiliSeconds(parseInt(timeStamp)));
+        const date = new Date(nanoSecondsToMiliSeconds(parseInt(timeStamp)));
+
+        return(
+                <div className='transactionHistoryDiv' >
+                    <div className="balanceDeltaDiv">
+                        <h4 className="balanceDeltaText">
+                            Change in balance: 
+                        </h4>
+                        <p className={`balanceDeltaValue${increase ? " increase" : " decrease"}`}> 
+                            {` ${increase ? "+ " : "- "}  ${fromE8s(parseInt(balanceDelta))} ICP`} 
+                        </p>
+                    </div>
+                    {
+                        (recipient.length) ? 
+                        <div className="balanceDeltaDiv">
+                            <h4 className="balanceDeltaText">
+                                Recipient Address: 
+                            </h4>
+                            <p className={`balanceDeltaValue${increase ? " increase" : " decrease"}`}> 
+                                {shortenHexString(toHexString(recipient[0]))} 
+                            </p>
+                        </div> : null 
+                    }
+                    <div className="dateDiv">
+                        <h4 className="dateText">
+                            Date: 
+                        </h4>
+                        <p className={`dateValue${increase ? " increase" : " decrease"}`}> 
+                            {date.toString()} 
+                        </p>
+                    </div>
+                    <div className="balanceDeltaDiv">
+                        <h4 className="balanceDeltaText">
+                            Remaining balance: 
+                        </h4>
+                        <p className={`balanceDeltaValue${increase ? " increase" : " decrease"}`}> 
+                            {` ${fromE8s(parseInt(remainingBalance.e8s))} ICP`} 
+                        </p>
+                    </div>
+                </div>                
+        )
     };
 
     const copyWalletAddress = useCallback(() => {
@@ -71,7 +126,17 @@ const WalletPage = (props) => {
             });
             setIsLoading(false);
             const tx = await actor.readTransaction();
-            console.log(tx);
+            const transactionHistory = tx.ok.sort(function(a,b){
+                const mapKeyOfA = parseInt(a[0]);
+                const mapKeyOfB = parseInt(b[0]);
+                if (mapKeyOfA > mapKeyOfB){
+                    return -1
+                } else {
+                    return 1
+                }
+            });
+            setTxHistory(transactionHistory);
+            console.log(transactionHistory);
         }
     },[actor, authClient]);
 
@@ -114,7 +179,7 @@ const WalletPage = (props) => {
                                         Wallet Address:  
                                     </p>
                                     <p className='secondPTag'>
-                                        {journalState.walletData.address.slice(0,9)} ... {journalState.walletData.address.slice(-10)} 
+                                        {shortenHexString(journalState.walletData.address)} 
                                     </p> 
                                 </div>
                                 <div className={"copyWalletAddressButton"}>
@@ -124,6 +189,21 @@ const WalletPage = (props) => {
                                     <button className='button' onClick={openModal}> Send </button>
                                 </div>
                             </div>                
+                        </div>
+                        <div className='transparentDiv'> 
+                            {
+                                txHistory.map((tx) => {
+                                    return(
+                                            <Transaction
+                                                balanceDelta={tx[1].balanceDelta}
+                                                increase={tx[1].increase}
+                                                recipient={tx[1].recipient}
+                                                remainingBalance={tx[1].remainingBalance}
+                                                timeStamp={tx[1].timeStamp}
+                                            />
+                                    );
+                                })
+                            }
                         </div>
                     </div>
                 }
