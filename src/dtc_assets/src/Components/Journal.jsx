@@ -11,6 +11,7 @@ import LoadScreen from "./LoadScreen";
 import { Modal } from "./Modal";
 import ModalContentSubmit from "./ModalContentOnSubmit";
 import ModalContentNotifications from "./ModalContentNotifications";
+import { milisecondsToNanoSeconds } from "../Utils";
 
 const Journal = (props) => {
 
@@ -76,7 +77,7 @@ const Journal = (props) => {
 
             setUnreadJournalEntries(
                 journalEntries.filter(entry => !entry.read && 
-                    (Date.now() * 1000000 > parseInt(entry.unlockTime)) &&
+                    (milisecondsToNanoSeconds(Date.now())> parseInt(entry.unlockTime)) &&
                     parseInt(entry.lockTime) > 0
                 )
             );
@@ -222,7 +223,7 @@ const Journal = (props) => {
                                 <table className={"table"}>
                                     { journalState.journal.map((page, index) => {
                                         const unlockTimeAsInt = page.unlockTime;
-                                        const currentTimeAsInt = Date.now() *1000000;
+                                        const currentTimeAsInt = milisecondsToNanoSeconds(Date.now());
                                         const open = (currentTimeAsInt >= unlockTimeAsInt);
                                         const remainingWaitTime = unlockTimeAsInt - currentTimeAsInt;
                                         const remainingWaitTimeInMonths = remainingWaitTime / (dayInNanoSeconds * monthInDays);
