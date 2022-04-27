@@ -21,6 +21,25 @@
                 height: 75%;
                 padding-left: 17.7%;
                 padding-top: 4%;
+                .loadGifContainer{
+                    @media screen and (max-width: 522px){
+                        margin-left: 25%;
+                    }
+                    margin-left: 35%;
+                    .loadGifDiv{
+                        background: white;
+                        box-shadow: 0 5px 16px rgb(0 0 0 / 20%);
+                        border-radius: 10px;
+                        width: 200px;
+                        height: 200px;
+                        img{
+                            max-width: 200px;
+                            max-height: 200px;
+                            display: block;
+                            margin: auto;
+                        }
+                    }
+                }
                 .transactionHistoryDiv{
                     @media screen and (max-width: 522px){
                         height: 100%;

@@ -24,6 +24,7 @@ const WalletPage = (props) => {
     const [showModal, setShowModal] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [txHistory, setTxHistory] = useState([]);
+    const [isTxHistoryLoading, setIsTxHistoryLoading] = useState(false);
 
     const openModal = () => {
         setShowModal(true);
@@ -125,6 +126,7 @@ const WalletPage = (props) => {
                 actionType: types.SET_WALLET_DATA
             });
             setIsLoading(false);
+            setIsTxHistoryLoading(true);
             const tx = await actor.readTransaction();
             const transactionHistory = tx.ok.sort(function(a,b){
                 const mapKeyOfA = parseInt(a[0]);
@@ -136,7 +138,7 @@ const WalletPage = (props) => {
                 }
             });
             setTxHistory(transactionHistory);
-            console.log(transactionHistory);
+            setIsTxHistoryLoading(false);
         }
     },[actor, authClient]);
 
@@ -191,7 +193,13 @@ const WalletPage = (props) => {
                             </div>                
                         </div>
                         <div className='transparentDiv'> 
-                            {
+                            { isTxHistoryLoading ? 
+                            <div className='loadGifContainer'>
+                                <div className='loadGifDiv'>
+                                    <img src="Loading.gif" alt="Loading Screen" />
+                                </div>
+                            </div>
+                                 :
                                 txHistory.map((tx) => {
                                     return(
                                             <Transaction
