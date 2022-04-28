@@ -26,6 +26,7 @@ const WalletPage = (props) => {
     const [isLoading, setIsLoading] = useState(false);
     const [txHistory, setTxHistory] = useState([]);
     const [isTxHistoryLoading, setIsTxHistoryLoading] = useState(false);
+    const [imgUrl, setImgUrl] = useState('');
 
     const openModal = () => {
         setShowModal(true);
@@ -33,7 +34,8 @@ const WalletPage = (props) => {
 
     const generateQrCode = async () => {
         try{
-           const response = await QRCode.toDataURL('test Code Generation');
+           const response = await QRCode.toDataURL(journalState.walletData.address);
+           setImgUrl(response);
            console.log(response);
         } catch (error){
             console.log(error);
@@ -136,7 +138,11 @@ const WalletPage = (props) => {
                 actionType: types.SET_WALLET_DATA
             });
             setIsLoading(false);
+
             setIsTxHistoryLoading(true);
+
+            await generateQrCode();
+
             const tx = await actor.readTransaction();
             const transactionHistory = tx.ok.sort(function(a,b){
                 const mapKeyOfA = parseInt(a[0]);
@@ -186,6 +192,12 @@ const WalletPage = (props) => {
                                 <div className="balanceDiv">
                                     Wallet Balance: {journalState.walletData.balance /  e8sInOneICP} ICP
                                 </div>
+                                { mql.matches ? 
+                                    <div className={'imgDiv'}>
+                                        <img src={imgUrl} alt='Wallet QR Code'/>
+                                    </div> : 
+                                    null
+                                }
                                 <div className={'walletInfoDiv'}>
                                     <div className='walletAddressDiv'>
                                         <p className='firstPTag'>
@@ -202,6 +214,12 @@ const WalletPage = (props) => {
                                         <button className='button' onClick={openModal}> Send </button>
                                     </div>
                                 </div>
+                                { !mql.matches ? 
+                                    <div className={'imgDiv'}>
+                                        <img src={imgUrl} alt='Wallet QR Code'/>
+                                    </div> : 
+                                    null
+                                }
                             </div>                
                         </div>
                         <div className='transparentDiv'> 
