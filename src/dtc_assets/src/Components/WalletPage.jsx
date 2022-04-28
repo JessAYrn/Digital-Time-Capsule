@@ -9,6 +9,7 @@ import { fromE8s, toHexString, shortenHexString } from '../Utils';
 import { e8sInOneICP } from '../Constants';
 import LoadScreen from './LoadScreen';
 import ModalContentOnSend from './ModalContentOnSend';
+import QRCode from 'qrcode';
 
 
 const WalletPage = (props) => {
@@ -176,19 +177,21 @@ const WalletPage = (props) => {
                                 <div className="balanceDiv">
                                     Wallet Balance: {journalState.walletData.balance /  e8sInOneICP} ICP
                                 </div>
-                                <div className='walletAddressDiv'>
-                                    <p className='firstPTag'>
-                                        Wallet Address:  
-                                    </p>
-                                    <p className='secondPTag'>
-                                        {shortenHexString(journalState.walletData.address)} 
-                                    </p> 
-                                </div>
-                                <div className={"copyWalletAddressButton"}>
-                                    <button className='button' onClick={copyWalletAddress}> Copy Wallet Address </button>
-                                </div>
-                                <div className="buttonsDiv" >
-                                    <button className='button' onClick={openModal}> Send </button>
+                                <div className={'walletInfoDiv'}>
+                                    <div className='walletAddressDiv'>
+                                        <p className='firstPTag'>
+                                            Wallet Address:  
+                                        </p>
+                                        <p className='secondPTag'>
+                                            {shortenHexString(journalState.walletData.address)} 
+                                        </p> 
+                                    </div>
+                                    <div className={"copyWalletAddressButton"}>
+                                        <button className='button' onClick={copyWalletAddress}> Copy Wallet Address </button>
+                                    </div>
+                                    <div className="buttonsDiv" >
+                                        <button className='button' onClick={openModal}> Send </button>
+                                    </div>
                                 </div>
                             </div>                
                         </div>
