@@ -31,6 +31,15 @@ const WalletPage = (props) => {
         setShowModal(true);
     };
 
+    const generateQrCode = async () => {
+        try{
+           const response = await QRCode.toDataURL('test Code Generation');
+           console.log(response);
+        } catch (error){
+            console.log(error);
+        }
+    };
+
     const Transaction = (props) => {
 
         const {
