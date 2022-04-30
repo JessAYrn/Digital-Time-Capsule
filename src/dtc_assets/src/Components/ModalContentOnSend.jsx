@@ -126,6 +126,7 @@ const ModalContentOnSend = (props) => {
             <>
                 <div className="cameraDiv">
                 <QrReader
+                    constraints = {{ facingMode: "environment" }}
                     onResult={(result, error) => {
                         if (!!result) {
                             setData(result?.text);
