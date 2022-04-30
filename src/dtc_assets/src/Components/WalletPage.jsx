@@ -194,7 +194,7 @@ const WalletPage = (props) => {
                                 </div>
                                 { mql.matches ? 
                                     <div className={'imgDiv'}>
-                                        <img src={imgUrl} alt='Wallet QR Code'/>
+                                        <img className='img' src={imgUrl} alt='Wallet QR Code'/>
                                     </div> : 
                                     null
                                 }

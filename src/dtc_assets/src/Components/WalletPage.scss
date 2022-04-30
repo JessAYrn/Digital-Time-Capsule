@@ -130,11 +130,18 @@
                         color: rgb(163, 163, 163);
                     }
                     .imgDiv{
-                        
-                        @media screen and (max-width: 1203px) {
+                        @media screen and (min-width: 3px) and (max-width: 692px) {
+                            margin-right: 0;
+                        };
+                        @media screen and (min-width: 693px) and (max-width: 777px) {
+                            margin-right: 3vw;
+                        };
+                        @media screen and (min-width: 778px) and (max-width: 980px) {
+                            margin-right: 13vw;
+                        };
+                        @media screen and (min-width: 676px) and (max-width: 1203px) {
                             width: 250px;
                             height: 250px;
-                            margin-right: 0px;
                         };
                         @media screen and (max-width: 675px){
                             width: 100%;
@@ -145,10 +152,14 @@
                         height: 300px;
                         float: right;
                         margin-right: 100px;
-                        img{
-                            @media screen and (max-width: 1203px) {
-                                width: 250px;
-                                height: 250px;
+                        .img{
+                            @media screen and (min-width: 475px) and (max-width: 1202px) {
+                                width: 35vw;
+                                height: 35vw;
+                            };
+                            @media screen and (max-width: 474px) {
+                                width: 35vw;
+                                height: 35vw;
                             };
                             width: 300px;
                             height: 300px;
@@ -167,8 +178,11 @@
                                 margin-left: 68px;
                                 margin-top: 8px;
                             }
-                            @media screen and (max-width: 675px){
-                                margin-top: 0;; 
+                            @media screen and (min-width: 475px) and (max-width: 675px){
+                                margin-top: 0; 
+                            }
+                            @media screen and (max-width: 474px){
+                                margin-top: -35px; 
                             }
                             width: 346px;
                             float: left;
@@ -179,12 +193,16 @@
                             font-size: 1rem;
                             color: rgb(163, 163, 163);
                             .firstPTag{
+                                @media screen and (max-width: 405px){
+                                    margin-left: 15px;
+                                }
                                 float: left;
                                 margin-right: 10px;
                             };
                             .secondPTag{
                                 @media screen and (max-width: 405px){
                                     margin-top: 0px;
+                                    margin-left: -14px;
                                 }
                                 float: left;
                                 padding-left: 2px;
