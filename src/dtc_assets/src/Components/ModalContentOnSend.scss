@@ -1,3 +1,50 @@
+.cameraDiv{
+    @media screen and (min-width: 1018px) and (max-width: 1200px) {    
+        margin-left: 28%;
+    };
+    @media screen and (min-width: 885px) and (max-width: 1017px) {    
+        margin-left: 26%;
+    };
+    @media screen and (min-width: 769px) and (max-width: 884px) {    
+        margin-left: 23%;
+    };
+    @media screen and (min-width: 680px) and (max-width: 768px) {    
+        margin-left: 19%;
+    };
+    @media screen and (min-width: 598px) and (max-width: 679px) {    
+        margin-left: 14%;
+    };
+    @media screen and (min-width: 530px) and (max-width: 597px) {    
+        margin-left: 8%;
+    };
+    @media screen and (min-width: 490px) and (max-width: 529px) {    
+        margin-left: 3%;
+    };
+    @media screen and (min-width: 477px) and (max-width: 489px) {    
+        margin-left: 2%;
+    };
+    @media screen and (min-width: 469px) and (max-width: 476px) {    
+        margin-left: 1%;
+    };
+    @media screen and (max-width: 468px) {    
+        margin-left: 0;
+        width: 100%;
+    };
+    width: 300px;
+    height: 300px;
+    margin-left: 33%;
+
+}
+.qrCancelButtonDiv{
+    width: 100%;
+    margin-top: 75px;
+
+    .button{
+        border-radius: 10px;
+        margin-left: 10%;
+        width: 80%;
+    }
+}
 .ApiResponseModalContentContainer{
     .ApiResponseModalContentDiv{
         &__success{
@@ -111,36 +158,6 @@
 }
 
 .sendContentDiv{
-    @media screen and (max-width: 470px) {    
-        padding-top: 45%;
-
-    };
-    @media screen and (min-width: 471px) and (max-width: 550px) {    
-        padding-top: 40%;
-
-    };
-    @media screen and (min-width: 551px) and (max-width: 630px) {    
-        padding-top: 27%;
-
-    };
-    @media screen and (min-width: 631px) and (max-width: 710px) {    
-        padding-top: 16%;
-
-    };
-    @media screen and (min-width: 711px) and (max-width: 790px) {    
-        padding-top: 13%;
-
-    };
-    @media screen and (min-width: 791px) and (max-width: 870px) {    
-        padding-top: 10%;
-
-    };
-    @media screen and (min-width: 871px) and (max-width: 950px) {    
-        padding-top: 7%;
-    };
-    @media screen and (min-width: 951px) and (max-width: 1030px) {    
-        padding-top: 4%;
-    };
     width: 90%;
     margin-left: 5%;
 
@@ -155,6 +172,15 @@
         padding-top: 5%;
         padding-left: 10%;
         width: 80%;
+    }
+    .ModalContentOnSendQRButton{
+        text-align: center;
+        padding-top: 52px;
+        .button{
+            border-radius: 10px;
+            width: 10rem;
+            height: 2rem;
+        }
     }
 
     .ModalContentOnSendButtons{
