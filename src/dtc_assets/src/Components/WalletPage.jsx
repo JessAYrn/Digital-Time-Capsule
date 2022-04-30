@@ -9,6 +9,7 @@ import { fromE8s, toHexString, shortenHexString } from '../Utils';
 import { e8sInOneICP } from '../Constants';
 import LoadScreen from './LoadScreen';
 import ModalContentOnSend from './ModalContentOnSend';
+import QRCode from 'qrcode';
 
 
 const WalletPage = (props) => {
@@ -25,9 +26,20 @@ const WalletPage = (props) => {
     const [isLoading, setIsLoading] = useState(false);
     const [txHistory, setTxHistory] = useState([]);
     const [isTxHistoryLoading, setIsTxHistoryLoading] = useState(false);
+    const [imgUrl, setImgUrl] = useState('');
 
     const openModal = () => {
         setShowModal(true);
+    };
+
+    const generateQrCode = async () => {
+        try{
+           const response = await QRCode.toDataURL(journalState.walletData.address);
+           setImgUrl(response);
+           console.log(response);
+        } catch (error){
+            console.log(error);
+        }
     };
 
     const Transaction = (props) => {
@@ -126,7 +138,11 @@ const WalletPage = (props) => {
                 actionType: types.SET_WALLET_DATA
             });
             setIsLoading(false);
+
             setIsTxHistoryLoading(true);
+
+            await generateQrCode();
+
             const tx = await actor.readTransaction();
             const transactionHistory = tx.ok.sort(function(a,b){
                 const mapKeyOfA = parseInt(a[0]);
@@ -176,20 +192,34 @@ const WalletPage = (props) => {
                                 <div className="balanceDiv">
                                     Wallet Balance: {journalState.walletData.balance /  e8sInOneICP} ICP
                                 </div>
-                                <div className='walletAddressDiv'>
-                                    <p className='firstPTag'>
-                                        Wallet Address:  
-                                    </p>
-                                    <p className='secondPTag'>
-                                        {shortenHexString(journalState.walletData.address)} 
-                                    </p> 
+                                { mql.matches ? 
+                                    <div className={'imgDiv'}>
+                                        <img className='img' src={imgUrl} alt='Wallet QR Code'/>
+                                    </div> : 
+                                    null
+                                }
+                                <div className={'walletInfoDiv'}>
+                                    <div className='walletAddressDiv'>
+                                        <p className='firstPTag'>
+                                            Wallet Address:  
+                                        </p>
+                                        <p className='secondPTag'>
+                                            {shortenHexString(journalState.walletData.address)} 
+                                        </p> 
+                                    </div>
+                                    <div className={"copyWalletAddressButton"}>
+                                        <button className='button' onClick={copyWalletAddress}> Copy Wallet Address </button>
+                                    </div>
+                                    <div className="buttonsDiv" >
+                                        <button className='button' onClick={openModal}> Send </button>
+                                    </div>
                                 </div>
-                                <div className={"copyWalletAddressButton"}>
-                                    <button className='button' onClick={copyWalletAddress}> Copy Wallet Address </button>
-                                </div>
-                                <div className="buttonsDiv" >
-                                    <button className='button' onClick={openModal}> Send </button>
-                                </div>
+                                { !mql.matches ? 
+                                    <div className={'imgDiv'}>
+                                        <img src={imgUrl} alt='Wallet QR Code'/>
+                                    </div> : 
+                                    null
+                                }
                             </div>                
                         </div>
                         <div className='transparentDiv'> 
