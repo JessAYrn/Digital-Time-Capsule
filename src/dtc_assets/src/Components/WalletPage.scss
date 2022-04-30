@@ -168,6 +168,9 @@
                         }
                     }
                     .walletInfoDiv{
+                        @media screen and (max-width: 675px){
+                            height: 65%;
+                        }
                         width: 372px;
                         height: 81%;
                         float: left;
