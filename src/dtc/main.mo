@@ -146,6 +146,8 @@ shared (msg) actor class User() = this {
 
     private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
 
+    private let ledgerC : LedgerCandid.Interface = actor(LedgerCandid.CANISTER_ID);
+
     private var balance = Cycles.balance();
 
     private var oneICP : Nat64 = 100_000_000;
@@ -794,6 +796,60 @@ shared (msg) actor class User() = this {
             };
         };
 
+    };
+
+    public shared(msg) func getTxHistoryFromChain() : async Result.Result<[Ledger.Block], Error> {
+        let callerId = msg.caller;
+
+        let profile = Trie.find(
+            profiles,
+            key(callerId),
+            Principal.equal
+        );
+
+        switch(profile){
+            case null {
+                #err(#NotFound);
+            }; 
+            case (? userProfile){
+                let userJournal = userProfile.journal;
+
+                let tipOfChainIndex = await tipOfChainDetails();
+                let txHistory = await userJournal.getTxHistoryFromChain(tipOfChainIndex.0);
+
+                #ok(txHistory);
+            };
+        };
+    };
+
+    public shared func tipOfChainDetails() : async (Ledger.BlockIndex, LedgerCandid.Transaction) {
+        let tip = await ledgerC.tip_of_chain();
+        switch (tip) {
+            case (#Err(_)) {
+                assert(false);
+                loop {};
+            };
+            case (#Ok(t)) {
+                let block = await ledgerC.block(t.tip_index);
+                switch (block) {
+                    case (#Err(_)) {
+                        assert(false);
+                        loop {};
+                    };
+                    case (#Ok(r)) {
+                        switch (r) {
+                            case (#Err(_)) {
+                                assert(false);
+                                loop {};
+                            };
+                            case (#Ok(b)) {
+                                (t.tip_index, b.transaction);
+                            };
+                        };
+                    };
+                };
+            };
+        };
     };
 
     public shared(msg) func getPrincipalsList() : async [Principal] {
