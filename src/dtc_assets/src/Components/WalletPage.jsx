@@ -142,7 +142,8 @@ const WalletPage = (props) => {
             setIsTxHistoryLoading(true);
 
             await generateQrCode();
-
+            const txHistory = await actor.getTxHistoryFromChain();
+            console.log(txHistory);
             const tx = await actor.readTransaction();
             const transactionHistory = tx.ok.sort(function(a,b){
                 const mapKeyOfA = parseInt(a[0]);
