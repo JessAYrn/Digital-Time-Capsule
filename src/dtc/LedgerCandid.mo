@@ -1,6 +1,9 @@
 import Ledger "Ledger";
 
 module {
+
+    public let CANISTER_ID : Text = "ockk2-xaaaa-aaaai-aaaua-cai";
+
     public type Block = {
         parent_hash : Hash;
         timestamp   : Ledger.Timestamp;
