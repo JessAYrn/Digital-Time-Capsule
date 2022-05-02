@@ -30,9 +30,74 @@ module {
     // Sequence number of a block produced by the ledger.
     public type BlockIndex = Nat64;
 
+    public type Block = {
+        parent_hash : Hash;
+        timestamp   : Timestamp;
+        transaction : Transaction;
+    };
+
+    public type Hash = ?{
+        inner: Blob;
+    };
+
+    public type Transaction = {
+        transfer        : Transfer;
+        memo            : Memo;
+        created_at_time : Timestamp;
+    };
+
+    public type Transfer = {
+        #Burn : {
+            from   : AccountIdentifier;
+            amount : ICP;
+        };
+        #Mint : {
+            to     : AccountIdentifier;
+            amount : ICP;
+        };
+        #Send : {
+            from   : AccountIdentifier;
+            to     : AccountIdentifier;
+            amount : ICP;
+        };
+    };
+
     // An arbitrary number associated with a transaction.
     // The caller can set it in a `transfer` call as a correlation identifier.
     public type Memo = Nat64;
+
+    public type GetBlocksArgs = {
+        start : BlockIndex;
+        length : Nat64;
+    }; 
+
+    type QueryBlocksResponse = {
+        certificate : ?[Nat8];
+        blocks : [Block];
+        chain_length : Nat64;
+        first_block_index : BlockIndex;
+        archived_blocks : [{
+            callback : QueryArchiveFn;
+            start : BlockIndex;
+            length : Nat64;
+        }];
+    };
+
+    type BlockRange = {
+        blocks : [Block];
+    };
+
+    type QueryArchiveError = {
+        #BadFirstBlockIndex : {
+            requested_index : BlockIndex;
+            first_valid_index : BlockIndex;
+        };
+        #Other : { error_message : Text; error_code : Nat64; };
+    };
+
+    type QueryArchiveResult = Result<BlockRange, QueryArchiveError>;
+
+    type QueryArchiveFn = shared GetBlocksArgs -> async QueryArchiveResult;
 
     // Arguments for the `transfer` call.
     public type TransferArgs = {
@@ -83,5 +148,6 @@ module {
     public type Interface = actor {
         transfer        : TransferArgs       -> async TransferResult;
         account_balance : AccountBalanceArgs -> async ICP;
+        query_blocks : GetBlocksArgs -> async QueryBlocksResponse;
     };
 };
