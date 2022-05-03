@@ -1,6 +1,8 @@
 module {
     public let CANISTER_ID : Text = "ryjl3-tyaaa-aaaaa-aaaba-cai";
 
+    public let Canister_ID_INDEX : Text = "qjdve-lqaaa-aaaaa-aaaeq-cai";
+
     public type Result<T, E> = {
         #Ok  : T;
         #Err : E;
@@ -95,6 +97,14 @@ module {
         #Other : { error_message : Text; error_code : Nat64; };
     };
 
+    public type GetBlocksError = {
+        #BadFirstBlockIndex : {
+        requested_index : BlockIndex;
+        first_valid_index : BlockIndex;
+        };
+        #Other : { error_message : Text; error_code : Nat64 };
+    };
+
     type QueryArchiveResult = Result<BlockRange, QueryArchiveError>;
 
     type QueryArchiveFn = shared GetBlocksArgs -> async QueryArchiveResult;
@@ -139,6 +149,8 @@ module {
         #TxDuplicate : { duplicate_of: BlockIndex; };
     };
 
+    public type GetBlocksResult = Result<BlockRange,GetBlocksError>;
+
 
     // Arguments for the `account_balance` call.
     public type AccountBalanceArgs = {
@@ -148,6 +160,10 @@ module {
     public type Interface = actor {
         transfer        : TransferArgs       -> async TransferResult;
         account_balance : AccountBalanceArgs -> async ICP;
-        query_blocks : GetBlocksArgs -> async QueryBlocksResponse;
+        query_blocks : shared query GetBlocksArgs -> async QueryBlocksResponse;
+    };
+
+    public type InterfaceIndex = actor {
+        get_blocks : shared query GetBlocksArgs -> async GetBlocksResult;
     };
 };

@@ -146,6 +146,8 @@ shared (msg) actor class User() = this {
 
     private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
 
+    private let ledgerIndex : Ledger.InterfaceIndex = actor(Ledger.Canister_ID_INDEX);
+
     private let ledgerC : LedgerCandid.Interface = actor(LedgerCandid.CANISTER_ID);
 
     private var balance = Cycles.balance();
@@ -814,24 +816,25 @@ shared (msg) actor class User() = this {
             case (? userProfile){
 
                 let tipOfChainIndex = await tipOfChainDetails();
-                let txHistory = await getChainHistory(tipOfChainIndex.0);
+                let startIndex : Nat64 = tipOfChainIndex.0 - 1000;
+                let queryLength : Nat64 = 999;
+                let queryResult = await ledgerIndex.get_blocks({
+                    start = startIndex;
+                    length = queryLength;
+                });
 
-                #ok(txHistory);
+                switch (queryResult){
+                    case (#Err(_)) {
+                        assert(false);
+                        loop {};
+                    };
+                    case (#Ok(r)) {
+                        #ok(r.blocks)
+                    };
+
+                };
             };
         };
-    };
-
-    private shared func getChainHistory(tipBlockIndex : Ledger.BlockIndex ) : async [Ledger.Block]{
-
-        let startIndex : Nat64 = 750_000_000;
-        let queryLength : Nat64 = tipBlockIndex - startIndex;
-        let queryResult = await ledger.query_blocks({
-            start = startIndex;
-            length = queryLength;
-        });
-
-        queryResult.blocks;
-
     };
 
     public shared func tipOfChainDetails() : async (Ledger.BlockIndex, LedgerCandid.Transaction) {

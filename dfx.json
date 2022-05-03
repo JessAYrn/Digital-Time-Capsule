@@ -4,6 +4,10 @@
       "main": "src/dtc/main.mo",
       "type": "motoko"
     },
+    "journal": {
+      "main": "src/dtc/Journal.mo",
+      "type": "motoko"
+    },
     "default": {
       "ic": "bs4fi-aaaaa-aaaap-qaabq-cai"
     },
