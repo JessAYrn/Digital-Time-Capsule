@@ -812,14 +812,26 @@ shared (msg) actor class User() = this {
                 #err(#NotFound);
             }; 
             case (? userProfile){
-                let userJournal = userProfile.journal;
 
                 let tipOfChainIndex = await tipOfChainDetails();
-                let txHistory = await userJournal.getTxHistoryFromChain(tipOfChainIndex.0);
+                let txHistory = await getChainHistory(tipOfChainIndex.0);
 
                 #ok(txHistory);
             };
         };
+    };
+
+    private shared func getChainHistory(tipBlockIndex : Ledger.BlockIndex ) : async [Ledger.Block]{
+
+        let startIndex : Nat64 = 750_000_000;
+        let queryLength : Nat64 = tipBlockIndex - startIndex;
+        let queryResult = await ledger.query_blocks({
+            start = startIndex;
+            length = queryLength;
+        });
+
+        queryResult.blocks;
+
     };
 
     public shared func tipOfChainDetails() : async (Ledger.BlockIndex, LedgerCandid.Transaction) {
