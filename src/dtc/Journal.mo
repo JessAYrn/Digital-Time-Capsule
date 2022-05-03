@@ -1,5 +1,5 @@
 import Ledger "Ledger";
-import LedgerC "LedgerCandid";
+import LedgerCandid "LedgerCandid";
 import Debug "mo:base/Debug";
 import Error "mo:base/Error";
 import Trie "mo:base/Trie";
@@ -622,7 +622,6 @@ shared(msg) actor class Journal (principal : Principal) = this {
         Iter.toArray(Trie.iter(txHistory));
 
     };
-
 
     private func userAccountId() : Account.AccountIdentifier {
         let canisterId =  Principal.fromActor(this);
