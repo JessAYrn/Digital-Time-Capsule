@@ -20,20 +20,3 @@
     "ic": "cqjyx-qqaaa-aaaap-qaakq-cai"
   }
 }
-
-//Test#2 Canister Id's
-{
-    "default": {
-      "ic": "qy4mt-3aaaa-aaaap-qadlq-cai"
-    },
-    "dtc": {
-      "ic": "rvsi5-uiaaa-aaaap-qadma-cai"
-    },
-    "dtc_assets": {
-      "ic": "rstoj-zqaaa-aaaap-qadmq-cai"
-    },
-    "journal": {
-      "ic": "u4odv-6iaaa-aaaap-qadqa-cai"
-    }
-}
- 
