@@ -32,6 +32,12 @@ module {
     // Sequence number of a block produced by the ledger.
     public type BlockIndex = Nat64;
 
+    public type BlockArchive = {
+        parent_hash : ?[Nat8];
+        timestamp   : Timestamp;
+        transaction : TransactionArchive;
+    };
+
     public type Block = {
         parent_hash : Hash;
         timestamp   : Timestamp;
@@ -40,6 +46,27 @@ module {
 
     public type Hash = ?{
         inner: Blob;
+    };
+
+    public type TransactionArchive = {
+        operation       : ?Operation;
+        memo            : Memo;
+        created_at_time : Timestamp;
+    };
+
+    public type Tokens = {
+        e8s : Nat64;
+    };
+
+    public type Operation = {
+        #Burn : { from : AccountIdentifier; amount : Tokens };
+        #Mint : { to : AccountIdentifier; amount : Tokens };
+        #Transfer : {
+        to : AccountIdentifier;
+        fee : Tokens;
+        from : AccountIdentifier;
+        amount : Tokens;
+        };
     };
 
     public type Transaction = {
@@ -86,7 +113,7 @@ module {
     };
 
     type BlockRange = {
-        blocks : [Block];
+        blocks : [BlockArchive];
     };
 
     type QueryArchiveError = {

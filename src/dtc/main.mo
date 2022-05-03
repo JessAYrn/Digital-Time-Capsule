@@ -800,7 +800,7 @@ shared (msg) actor class User() = this {
 
     };
 
-    public shared(msg) func getTxHistoryFromChain() : async Result.Result<[Ledger.Block], Error> {
+    public shared(msg) func getTxHistoryFromChain(blockCountByThousand : Nat64) : async Result.Result<[Ledger.BlockArchive], Error> {
         let callerId = msg.caller;
 
         let profile = Trie.find(
@@ -816,8 +816,8 @@ shared (msg) actor class User() = this {
             case (? userProfile){
 
                 let tipOfChainIndex = await tipOfChainDetails();
-                let startIndex : Nat64 = tipOfChainIndex.0 - 1000;
-                let queryLength : Nat64 = 999;
+                let startIndex : Nat64 = 1;
+                let queryLength : Nat64 = 2;
                 let queryResult = await ledgerIndex.get_blocks({
                     start = startIndex;
                     length = queryLength;
