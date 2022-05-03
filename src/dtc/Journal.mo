@@ -623,19 +623,6 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     };
 
-    public shared func getTxHistoryFromChain(tipBlockIndex : Ledger.BlockIndex ) : async [Ledger.Block]{
-
-        let startIndex : Nat64 = 750_000_000;
-        let queryLength : Nat64 = tipBlockIndex - startIndex;
-        let queryResult = await ledger.query_blocks({
-            start = startIndex;
-            length = queryLength;
-        });
-
-        queryResult.blocks;
-
-    };
-
 
     private func userAccountId() : Account.AccountIdentifier {
         let canisterId =  Principal.fromActor(this);
