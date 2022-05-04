@@ -21,6 +21,7 @@ import Text "mo:base/Text";
 import Account "./Account";
 import Bool "mo:base/Bool";
 import Option "mo:base/Option";
+import Analytics "LedgerAnalytics";
 import IC "ic.types";
 
 
@@ -28,6 +29,8 @@ import IC "ic.types";
 shared (msg) actor class User() = this {
 
     let callerId = msg.caller;
+
+    type AnalyticsActor = Analytics.Analytics;
 
     type Profile = {
         journal : Journal.Journal;
@@ -117,6 +120,13 @@ shared (msg) actor class User() = this {
         remainingBalance: Ledger.ICP;
     };
 
+    type TransactionFromAnalytics = {
+        balanceDelta: Nat64;
+        recipient: ?Account.AccountIdentifier;
+        timeStamp: Nat64;
+        source: ?Account.AccountIdentifier;
+    };
+
     // This "Error" type is known as a varient. The attributes of varients are tagged with the hashtag and there is no need to specify the data type of the attribute because varients only attributes of a specific data type. 
     type Error ={
         #NotFound;
@@ -138,6 +148,10 @@ shared (msg) actor class User() = this {
 
     private stable var profiles : Trie.Trie<Principal, Profile> = Trie.empty();
 
+    private stable var analyticsActors : Trie.Trie<Nat, AnalyticsActor> = Trie.empty();
+
+    private stable var analyticsActorIndex : Nat = 0;
+
     private let ic : IC.Self = actor "aaaaa-aa";
 
     private var Gas: Nat64 = 10000;
@@ -149,8 +163,10 @@ shared (msg) actor class User() = this {
     private let ledgerIndex : Ledger.InterfaceIndex = actor(Ledger.Canister_ID_INDEX);
 
     private let ledgerC : LedgerCandid.Interface = actor(LedgerCandid.CANISTER_ID);
-
+ 
     private var balance = Cycles.balance();
+
+    private var maxNumOfAnalyticsActors : Nat = 1;
 
     private var oneICP : Nat64 = 100_000_000;
 
@@ -800,40 +816,89 @@ shared (msg) actor class User() = this {
 
     };
 
-    public shared(msg) func getTxHistoryFromChain(blockCountByThousand : Nat64) : async Result.Result<[Ledger.BlockArchive], Error> {
-        let callerId = msg.caller;
-
-        let profile = Trie.find(
-            profiles,
-            key(callerId),
-            Principal.equal
+    public shared func getLocalTxChainHistory() : async Result.Result<[(Nat, TransactionFromAnalytics)], Error> {
+        let analyticsActor = Trie.find(
+            analyticsActors,
+            natKey(maxNumOfAnalyticsActors),
+            Nat.equal
         );
 
-        switch(profile){
-            case null {
+        switch(analyticsActor){
+            case null{
                 #err(#NotFound);
-            }; 
-            case (? userProfile){
-
-                let tipOfChainIndex = await tipOfChainDetails();
-                let startIndex : Nat64 = 1;
-                let queryLength : Nat64 = 2;
-                let queryResult = await ledgerIndex.get_blocks({
-                    start = startIndex;
-                    length = queryLength;
-                });
-
-                switch (queryResult){
-                    case (#Err(_)) {
-                        assert(false);
-                        loop {};
-                    };
-                    case (#Ok(r)) {
-                        #ok(r.blocks)
-                    };
-
-                };
             };
+            case(? analytics){
+                let localLedgerHistory = await analytics.getLedgerTxHistory();
+                return #ok(localLedgerHistory);
+            };
+        };
+    };
+
+    private func updateLocalTxChainHistory() : async Result.Result<(), Error> {
+
+        //only creates new analytics canister if the number number of analytics canisters in the analyticsActors Trie is
+        // less than the maxNumOfAnalyticsActors variable;
+        await createNewAnalyticsCanister();
+        
+        //gets the most recently created analyticsActor from the Trie
+        let analyticsActor = Trie.find(
+            analyticsActors,
+            natKey(maxNumOfAnalyticsActors),
+            Nat.equal
+        );
+
+        switch(analyticsActor){
+            case null{
+                #err(#NotFound);
+            };
+            case(? analytics){
+                let tipOfChainInfo = await tipOfChainDetails();
+                let tipOfChainIndex = tipOfChainInfo.0;
+                let startIndex = await analytics.getStartIndexForQueary();
+
+                if(Int.max(0, Nat64.toNat(tipOfChainIndex) - Nat64.toNat(startIndex) - 2_000) == 0){
+                    #ok(());
+                } else {
+                    let queryLength : Nat64 = 1_000;
+                    let newStartIndex = startIndex + queryLength;
+
+                    let queryResult = await ledgerIndex.get_blocks({
+                        start = startIndex;
+                        length = queryLength;
+                    });
+
+                    switch (queryResult){
+                        case (#Err(_)) {
+                            assert(false);
+                            loop {};
+                        };
+                        case (#Ok(r)) {
+                            await analytics.updateLedgerTxHistory(newStartIndex, r.blocks);
+                            #ok(());
+
+                        };
+
+                    };
+                }
+            };
+        };
+            
+        
+    };
+
+    private func createNewAnalyticsCanister() : async () {
+
+        if(Trie.size(analyticsActors) < maxNumOfAnalyticsActors){
+            let firstAnalyticsActor = await Analytics.Analytics();
+            let (newTrie, oldTrie) = Trie.put(
+                analyticsActors, 
+                natKey(analyticsActorIndex),
+                Nat.equal,
+                firstAnalyticsActor
+            );
+            analyticsActors := newTrie;
+            analyticsActorIndex += 1;
+
         };
     };
 
@@ -962,5 +1027,9 @@ shared (msg) actor class User() = this {
 
     private  func key(x: Principal) : Trie.Key<Principal> {
         return {key = x; hash = Principal.hash(x)};
+    };
+
+    private func natKey(x: Nat) : Trie.Key<Nat> {
+        return {key = x; hash = Hash.hash(x)}
     };
 }
