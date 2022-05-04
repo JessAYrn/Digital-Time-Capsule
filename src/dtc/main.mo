@@ -817,9 +817,11 @@ shared (msg) actor class User() = this {
     };
 
     public shared func getLocalTxChainHistory() : async Result.Result<[(Nat, TransactionFromAnalytics)], Error> {
+        await updateLocalTxChainHistory();
+
         let analyticsActor = Trie.find(
             analyticsActors,
-            natKey(maxNumOfAnalyticsActors),
+            natKey(maxNumOfAnalyticsActors - 1),
             Nat.equal
         );
 
@@ -834,16 +836,12 @@ shared (msg) actor class User() = this {
         };
     };
 
-    private func updateLocalTxChainHistory() : async Result.Result<(), Error> {
+    public shared func getLocalTxChainHistoryStartIndex() : async Result.Result<Nat64, Error> {
+        await updateLocalTxChainHistory();
 
-        //only creates new analytics canister if the number number of analytics canisters in the analyticsActors Trie is
-        // less than the maxNumOfAnalyticsActors variable;
-        await createNewAnalyticsCanister();
-        
-        //gets the most recently created analyticsActor from the Trie
         let analyticsActor = Trie.find(
             analyticsActors,
-            natKey(maxNumOfAnalyticsActors),
+            natKey(maxNumOfAnalyticsActors - 1),
             Nat.equal
         );
 
@@ -852,12 +850,36 @@ shared (msg) actor class User() = this {
                 #err(#NotFound);
             };
             case(? analytics){
+                let currentStartIndex = await analytics.getStartIndexForQueary();
+                return #ok(currentStartIndex);
+            };
+        };
+    };
+
+    private func updateLocalTxChainHistory() : async () {
+
+        //only creates new analytics canister if the number number of analytics canisters in the analyticsActors Trie is
+        // less than the maxNumOfAnalyticsActors variable;
+        await createNewAnalyticsCanister();
+        
+        //gets the most recently created analyticsActor from the Trie
+        let analyticsActor = Trie.find(
+            analyticsActors,
+            natKey(maxNumOfAnalyticsActors - 1),
+            Nat.equal
+        );
+
+        switch(analyticsActor){
+            case null{
+
+            };
+            case(? analytics){
                 let tipOfChainInfo = await tipOfChainDetails();
                 let tipOfChainIndex = tipOfChainInfo.0;
                 let startIndex = await analytics.getStartIndexForQueary();
 
                 if(Int.max(0, Nat64.toNat(tipOfChainIndex) - Nat64.toNat(startIndex) - 2_000) == 0){
-                    #ok(());
+
                 } else {
                     let queryLength : Nat64 = 1_000;
                     let newStartIndex = startIndex + queryLength;
@@ -874,8 +896,6 @@ shared (msg) actor class User() = this {
                         };
                         case (#Ok(r)) {
                             await analytics.updateLedgerTxHistory(newStartIndex, r.blocks);
-                            #ok(());
-
                         };
 
                     };
@@ -889,7 +909,9 @@ shared (msg) actor class User() = this {
     private func createNewAnalyticsCanister() : async () {
 
         if(Trie.size(analyticsActors) < maxNumOfAnalyticsActors){
+            Cycles.add(1_000_000_000_000);
             let firstAnalyticsActor = await Analytics.Analytics();
+            let amountAccepted = await firstAnalyticsActor.wallet_receive();
             let (newTrie, oldTrie) = Trie.put(
                 analyticsActors, 
                 natKey(analyticsActorIndex),
