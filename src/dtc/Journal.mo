@@ -94,6 +94,13 @@ shared(msg) actor class Journal (principal : Principal) = this {
         remainingBalance: Ledger.ICP;
     };
 
+    type TransactionFromAnalytics = {
+        balanceDelta: Nat64;
+        recipient: ?Account.AccountIdentifier;
+        timeStamp: Nat64;
+        source: ?Account.AccountIdentifier;
+    };
+
 
     //Application State
     //stable makes it so that the variable persists across updates to the canister
@@ -108,6 +115,10 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     private stable var txHistory : Trie.Trie<Nat, Transaction> = Trie.empty();
 
+    private stable var txHistoryFromLedger : Trie.Trie<Nat, TransactionFromAnalytics> = Trie.empty();
+
+    private stable var startIndexForLocalLedgerQueary : Nat = 0;
+
     private stable var icpBalance : Ledger.ICP = { e8s = 0} ;
 
     private stable var biography : Bio = {
@@ -121,6 +132,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
     private stable var journalEntryIndex : Nat = 0;
 
     private stable var txTrieIndex : Nat = 0;
+
+    private stable var txFromLedgerTrieIndex : Nat = 0;
 
     private var txFee : Nat64 = 10_000;
 
@@ -236,7 +249,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         };
     };
 
-    public func readJournal() : async ([(Nat,JournalEntryV2)], Bio) {
+    public query func readJournal() : async ([(Nat,JournalEntryV2)], Bio) {
         let journalAsArray = Iter.toArray(Trie.iter(journalV2));
         return ((journalAsArray), biography);
     };
@@ -621,6 +634,67 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
         Iter.toArray(Trie.iter(txHistory));
 
+    };
+
+    public shared func updateTxHistoryFromLedger ( newStartIndex : Nat, blocks : [(Nat, TransactionFromAnalytics )] ) : async () {
+
+        let sortedBlocks = Array.sort(
+            blocks, 
+            func (
+                txA : (Nat, TransactionFromAnalytics), 
+                txB : (Nat, TransactionFromAnalytics)
+            ) : {#less; #equal; #greater} {
+                return Nat.compare(txA.0, txB.0);
+            }
+        );
+
+        let sortedBlocksIter = Iter.fromArray(sortedBlocks);
+
+        Iter.iterate<(Nat,TransactionFromAnalytics)>(sortedBlocksIter, func(tx : (Nat, TransactionFromAnalytics), _index) {
+            let sourceOfTx = Option.get(tx.1.source, null);
+            let recipientOfTx = Option.get(tx.1.recipient, null);
+            let userAccountIdBlob : Account.AccountIdentifier = userAccountId();
+
+            if(sourceOfTx == userAccountIdBlob){
+                let (newTrie, oldTrie) = Trie.put(
+                    txHistoryFromLedger,
+                    natKey(txFromLedgerTrieIndex),
+                    Nat.equal,
+                    tx.1
+                );
+
+                txHistoryFromLedger := newTrie;
+                txFromLedgerTrieIndex += 1; 
+                txHistory := Trie.empty();
+            } else {
+                if(recipientOfTx == userAccountIdBlob){
+                    let (newTrie, oldTrie) = Trie.put(
+                        txHistoryFromLedger,
+                        natKey(txFromLedgerTrieIndex),
+                        Nat.equal,
+                        tx.1
+                    );
+
+                    txHistoryFromLedger := newTrie;
+                    txFromLedgerTrieIndex += 1; 
+                    txHistory := Trie.empty();
+                };
+            };
+
+
+        });
+
+        startIndexForLocalLedgerQueary := newStartIndex
+
+    };
+
+    public query func getStartIndexForQueary() : async Nat {
+        return startIndexForLocalLedgerQueary;
+    };
+
+    public query func getTxHistoryFromLedger() : async [(Nat, TransactionFromAnalytics)]{
+        let ledgerArray =  Iter.toArray(Trie.iter(txHistoryFromLedger));
+        return ledgerArray;
     };
 
     private func userAccountId() : Account.AccountIdentifier {

@@ -68,8 +68,19 @@ shared(msg) actor class Analytics () = this {
         return startIndexForQueary;
     };
 
-    public query func getLedgerTxHistory() : async [(Nat, Transaction)]{
-        return Iter.toArray(Trie.iter(ledgerTxHistory));
+    public query func getLedgerTxHistory(startIndex : Nat ) : async [(Nat, Transaction)]{
+        let ledgerTxHistoryIter = Trie.iter(ledgerTxHistory);
+        let ArrayBuffer = Buffer.Buffer<(Nat,Transaction)>(1);
+
+        Iter.iterate<(Nat, Transaction)>(ledgerTxHistoryIter, func(tx : (Nat, Transaction), _index) {
+
+            if(Nat.greaterOrEqual(tx.0, startIndex) == true){
+                ArrayBuffer.add(tx);
+            };
+
+        });
+        let array = ArrayBuffer.toArray();
+        return array;
     };
 
     public shared(msg) func updateLedgerTxHistory (newStartIndex : Nat64, newChainData : [Ledger.BlockArchive]) : async () {

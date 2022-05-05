@@ -816,8 +816,7 @@ shared (msg) actor class User() = this {
 
     };
 
-    public shared func getLocalTxChainHistory() : async Result.Result<[(Nat, TransactionFromAnalytics)], Error> {
-        await updateLocalTxChainHistory();
+    public shared func getLocalTxChainHistory(startIndex : Nat) : async Result.Result<[(Nat, TransactionFromAnalytics)], Error> {
 
         let analyticsActor = Trie.find(
             analyticsActors,
@@ -830,14 +829,13 @@ shared (msg) actor class User() = this {
                 #err(#NotFound);
             };
             case(? analytics){
-                let localLedgerHistory = await analytics.getLedgerTxHistory();
+                let localLedgerHistory = await analytics.getLedgerTxHistory(startIndex);
                 return #ok(localLedgerHistory);
             };
         };
     };
 
     public shared func getLocalTxChainHistoryStartIndex() : async Result.Result<Nat64, Error> {
-        await updateLocalTxChainHistory();
 
         let analyticsActor = Trie.find(
             analyticsActors,
@@ -1048,6 +1046,12 @@ shared (msg) actor class User() = this {
 
         };
     };
+
+    // will implement this method when the app's usesage increases
+    // system func heartbeat() : async () {
+    //     await updateLocalTxChainHistory();
+    // };
+
 
     private  func key(x: Principal) : Trie.Key<Principal> {
         return {key = x; hash = Principal.hash(x)};
