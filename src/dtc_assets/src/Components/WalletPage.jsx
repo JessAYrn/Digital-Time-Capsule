@@ -143,8 +143,9 @@ const WalletPage = (props) => {
 
             await generateQrCode();
             const txHistory = await actor.getLocalTxChainHistory();
+            const localChainIndex = await actor.getLocalTxChainHistoryStartIndex();
             const tipOfChainDetails = await actor.tipOfChainDetails();
-            console.log('tipOfChain: ', tipOfChainDetails, ' txHistory: ', txHistory);
+            console.log('tipOfChain: ', tipOfChainDetails, ' txHistory: ', txHistory, ' localChainStartIndex: ',localChainIndex);
             const tx = await actor.readTransaction();
             const transactionHistory = tx.ok.sort(function(a,b){
                 const mapKeyOfA = parseInt(a[0]);
