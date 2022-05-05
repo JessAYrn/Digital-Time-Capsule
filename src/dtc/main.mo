@@ -906,7 +906,8 @@ shared (msg) actor class User() = this {
             
         
     };
-
+    //only creates new analytics canister if the number number of analytics canisters in the analyticsActors Trie is
+    // less than the maxNumOfAnalyticsActors variable;
     private func createNewAnalyticsCanister() : async () {
 
         if(Trie.size(analyticsActors) < maxNumOfAnalyticsActors){
