@@ -1027,7 +1027,16 @@ shared (msg) actor class User() = this {
     };
 
     system func heartbeat() : async () {
-        await updateLocalTxChainHistory();
+
+        if(remainder == moduloNum){
+            //deleteLocalTxChainHistory();
+
+            remainder := 0;
+        } else {
+            await updateLocalTxChainHistory();
+            await updateUserTxChainHistory();
+            remainder += 1;
+        }
     };
 
 
