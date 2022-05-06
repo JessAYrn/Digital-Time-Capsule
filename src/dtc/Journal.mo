@@ -688,7 +688,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     };
 
-    public query func getStartIndexForQueary() : async Nat {
+    public query func getStartIndexForQuery() : async Nat {
         return startIndexForLocalLedgerQueary;
     };
 

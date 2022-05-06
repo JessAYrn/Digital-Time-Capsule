@@ -19,7 +19,7 @@ import Account "./Account";
 import Bool "mo:base/Bool";
 import Option "mo:base/Option";
 
-shared(msg) actor class Analytics () = this {
+shared(msg) actor class Analytics ( controllerPrincipal : Principal) = this {
     let callerId = msg.caller;
 
     type Error = {
@@ -68,9 +68,10 @@ shared(msg) actor class Analytics () = this {
         return startIndexForQueary;
     };
 
-    public query func getLedgerTxHistory(startIndex : Nat ) : async [(Nat, Transaction)]{
+    public query func getLedgerTxHistory(startIndex : Nat ) : async ([(Nat, Transaction)], Nat) {
         let ledgerTxHistoryIter = Trie.iter(ledgerTxHistory);
         let ArrayBuffer = Buffer.Buffer<(Nat,Transaction)>(1);
+        var iterationsCount : Nat = 0;
 
         Iter.iterate<(Nat, Transaction)>(ledgerTxHistoryIter, func(tx : (Nat, Transaction), _index) {
 
@@ -78,9 +79,11 @@ shared(msg) actor class Analytics () = this {
                 ArrayBuffer.add(tx);
             };
 
+            iterationsCount += 1;
+
         });
         let array = ArrayBuffer.toArray();
-        return array;
+        return (array, iterationsCount);
     };
 
     public shared(msg) func updateLedgerTxHistory (newStartIndex : Nat64, newChainData : [Ledger.BlockArchive]) : async () {

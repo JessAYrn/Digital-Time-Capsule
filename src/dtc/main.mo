@@ -152,6 +152,8 @@ shared (msg) actor class User() = this {
 
     private stable var analyticsActorIndex : Nat = 0;
 
+    private stable var remainder : Nat = 0;
+
     private let ic : IC.Self = actor "aaaaa-aa";
 
     private var Gas: Nat64 = 10000;
@@ -171,6 +173,8 @@ shared (msg) actor class User() = this {
     private var oneICP : Nat64 = 100_000_000;
 
     private var capacity = 1000000000000000;
+
+    private let moduloNum : Nat = 997;
 
     private var nanosecondsInADay = 86400000000000;
 
@@ -216,7 +220,6 @@ shared (msg) actor class User() = this {
                         };
                     };
                 };
-
                 if(ArrayBuffer.size() > 0){
                     false
                 } else {
@@ -232,7 +235,6 @@ shared (msg) actor class User() = this {
         let profilesIter = Trie.iter(profiles);
         let profilesArray = Iter.toArray(profilesIter);
         let AdminArrayBuffer = Buffer.Buffer<Blob>(1);
-
         while(index < numberOfProfiles){
             let userProfile = profilesArray[index];
             switch(userProfile.1.userName){
@@ -249,26 +251,21 @@ shared (msg) actor class User() = this {
                 };
             };
         };
-
-        
         if(AdminArrayBuffer.size() == 1){
             let AdminArray = AdminArrayBuffer.toArray();
             #ok(AdminArray[0]);
         } else {
             #err(#NotAuthorized);
         }
-
     };
 
     public shared(msg) func refillCanisterCycles() : async Result.Result<((Nat,[Nat64])), Error> {
         let callerId = msg.caller;
-
         let result = Trie.find(
             profiles,
             key(callerId),
             Principal.equal
         );
-
         switch(result){
             case null{
                 #err(#NotAuthorized);
@@ -285,18 +282,14 @@ shared (msg) actor class User() = this {
                             let profilesIter = Trie.iter(profiles);
                             let profilesArray = Iter.toArray(profilesIter);
                             let AmountAcceptedArrayBuffer = Buffer.Buffer<Nat64>(1);
-
                             while(index < numberOfProfiles){
                                 let userProfile = profilesArray[index];
                                 Cycles.add(100_000_000_000);
                                 let amountAccepted = await userProfile.1.journal.wallet_receive();
                                 AmountAcceptedArrayBuffer.add(amountAccepted.accepted);
-
                                 index += 1;
                             };
-
                             #ok(Cycles.balance(), AmountAcceptedArrayBuffer.toArray());
-
                         } else {
                             #err(#NotAuthorized);
                         }
@@ -498,21 +491,17 @@ shared (msg) actor class User() = this {
     };
 
     public shared(msg) func updateJournalEntry(entryKey : ?EntryKey, entry : ?JournalEntryInput) : async Result.Result<Trie.Trie<Nat,JournalEntryV2>, Error> {
-
         //Reject Anonymous User
         //if(Principal.toText(msg.caller) == "2vxsx-fae"){
         //    return #err(#NotAuthorized);
         //};
 
         let callerId = msg.caller;
-        
-        
         let result = Trie.find(
             profiles,
             key(callerId),
             Principal.equal
         );
-
         switch(result){
             case null{
                 #err(#NotAuthorized);
@@ -551,18 +540,15 @@ shared (msg) actor class User() = this {
                 }
             };
         };
-     
     };
 
     public shared(msg) func createJournalEntryFile(fileId: Text, chunkId: Nat, blobChunk: Blob): async Result.Result<(), Error>{
         let callerId = msg.caller;
-
         let result = Trie.find(
             profiles,
             key(callerId),
             Principal.equal
         );
-
         switch(result){
             case null{
                 return #err(#NotFound)
@@ -583,27 +569,22 @@ shared (msg) actor class User() = this {
 
     //update profile
     public shared(msg) func updateProfile(profile: ProfileInput) : async Result.Result<(),Error> {
-        
         //Reject Anonymous User
         //if(Principal.toText(msg.caller) == "2vxsx-fae"){
         //    return #err(#NotAuthorized)
         //};
-
         let callerId = msg.caller;
-
         let result = Trie.find(
             profiles,       //Target Trie
             key(callerId), //Key
             Principal.equal      //Equality Checker
         );
-
         switch (result){
             //Preventing updates to profiles that haven't been created yet
             case null {
                 #err(#NotFound);
             };
             case(? v) {
-
                 let userNameAvailable = isUserNameAvailable(profile.userName, callerId);
                 if(userNameAvailable == true){
                     let userProfile : Profile = {
@@ -612,7 +593,6 @@ shared (msg) actor class User() = this {
                         userName = profile.userName;
                         id = callerId;
                     };
-
                     profiles := Trie.replace(
                         profiles,       //Target trie
                         key(callerId), //Key
@@ -629,19 +609,16 @@ shared (msg) actor class User() = this {
 
     //delete profile
     public shared(msg) func delete() : async Result.Result<(), Error> {
-        
         let callerId = msg.caller;
         //Reject Anonymous User
         //if(Principal.toText(callerId) == "2vxsx-fae"){
         //    return #err(#NotAuthorized)
         //};
-
         let result = Trie.find(
             profiles,       //Target Trie
             key(callerId), //Key
             Principal.equal       //Equality Checker
         );
-
         switch (result){
             //Preventing updates to profiles that haven't been created yet
             case null {
@@ -660,15 +637,12 @@ shared (msg) actor class User() = this {
     };
 
     public shared(msg) func getEntriesToBeSent() : async Result.Result<[(Text,[(Nat, JournalEntryV2)])], Error>{
-
         let callerId = msg.caller;
-        
         let callerProfile = Trie.find(
             profiles,
             key(callerId), //Key
             Principal.equal 
         );
-
         switch(callerProfile){
             case null{
                 #err(#NotFound)
@@ -686,7 +660,6 @@ shared (msg) actor class User() = this {
                             let profilesIter = Trie.iter(profiles);
                             let profilesArray = Iter.toArray(profilesIter);
                             let AllEntriesToBeSentBuffer = Buffer.Buffer<(Text, [(Nat, JournalEntryV2)])>(1);
-
                             while(index < numberOfProfiles){
                                 let userProfile = profilesArray[index];
                                 switch(userProfile.1.email){
@@ -704,13 +677,11 @@ shared (msg) actor class User() = this {
                                     };
                                 };
                             };
-
                             return #ok(AllEntriesToBeSentBuffer.toArray());
                         } else {
                             #err(#NotAuthorized);
                         }
                     };
-
                 };
             };
         };
@@ -734,21 +705,17 @@ shared (msg) actor class User() = this {
     };
 
     public shared(msg) func transferICP(amount: Nat64, canisterAccountId: Account.AccountIdentifier) : async Result.Result<(), Error> {
-
         let callerId = msg.caller;
         let amountMinusFeeAndGas = amount - Fee - Gas;
         let feeMinusGas = Fee - Gas;
-
         if(amount <= Fee){
             return #err(#TxFailed);
         } else {
-
             let userProfile = Trie.find(
                 profiles,
                 key(callerId), //Key
                 Principal.equal 
             );
-
             switch(userProfile) {
                 case null{
                     #err(#NotFound)
@@ -756,7 +723,6 @@ shared (msg) actor class User() = this {
                 case (? profile){
                     let userJournal = profile.journal;
                     let userBalance = await userJournal.canisterBalance();
-                
                     if(userBalance.e8s >= amount){
                         let adminCanisterAccountIdVarient = await getAdminAccountId();
                         let adminCanisterAccountId = Result.toOption(adminCanisterAccountIdVarient);
@@ -787,8 +753,6 @@ shared (msg) actor class User() = this {
                     } else {
                         #err(#InsufficientFunds)
                     }
-                    
-
                 };
             };
         }
@@ -796,13 +760,11 @@ shared (msg) actor class User() = this {
 
     public shared(msg) func readTransaction() : async Result.Result<[(Nat,Transaction)], Error> {
         let callerId = msg.caller;
-        
         let callerProfile = Trie.find(
             profiles,
             key(callerId), //Key
             Principal.equal 
         );
-
         switch(callerProfile){
             case null{
                 #err(#NotFound);
@@ -813,36 +775,32 @@ shared (msg) actor class User() = this {
                 return #ok(tx);
             };
         };
-
     };
 
     public shared func getLocalTxChainHistory(startIndex : Nat) : async Result.Result<[(Nat, TransactionFromAnalytics)], Error> {
-
         let analyticsActor = Trie.find(
             analyticsActors,
             natKey(maxNumOfAnalyticsActors - 1),
             Nat.equal
         );
-
         switch(analyticsActor){
             case null{
                 #err(#NotFound);
             };
             case(? analytics){
-                let localLedgerHistory = await analytics.getLedgerTxHistory(startIndex);
+                let result = await analytics.getLedgerTxHistory(startIndex);
+                let localLedgerHistory = result.0;
                 return #ok(localLedgerHistory);
             };
         };
     };
 
     public shared func getLocalTxChainHistoryStartIndex() : async Result.Result<Nat64, Error> {
-
         let analyticsActor = Trie.find(
             analyticsActors,
             natKey(maxNumOfAnalyticsActors - 1),
             Nat.equal
         );
-
         switch(analyticsActor){
             case null{
                 #err(#NotFound);
@@ -854,19 +812,70 @@ shared (msg) actor class User() = this {
         };
     };
 
-    private func updateLocalTxChainHistory() : async () {
+    private func updateUserTxChainHistory() : async () {
+        //construct an array of the key, value pairs with a remainder that matches the argument
+        //it is these key, value pairs that are to be updated
+        let sizeOfProfilesTrie : Nat = Trie.size(profiles);
+        var profileIndex : Nat = remainder;
+        let ArrayBuffer = Buffer.Buffer<Nat>(1);
+        while (profileIndex < sizeOfProfilesTrie){
+            ArrayBuffer.add(profileIndex);
+            profileIndex += moduloNum;
+        };
 
+
+        let array = ArrayBuffer.toArray();
+        let arraySize = ArrayBuffer.size();
+        var arrayIndex : Nat = 0;
+        
+
+        while(arrayIndex < arraySize){
+            let profileIndexFromArray = array[arrayIndex];
+            let userProfile = Trie.nth(profiles, profileIndexFromArray);
+            switch(userProfile){
+                case null{
+
+                };
+                case(? kvPair){
+                    let keyWithHash = kvPair.0;
+                    let theUsersProfile = kvPair.1;
+                    let userJournal = theUsersProfile.journal;
+                    let startIndex = await userJournal.getStartIndexForQuery();
+                    //gets the most recently created analyticsActor from the Trie
+                    let analyticsActor = Trie.find(
+                        analyticsActors,
+                        natKey(maxNumOfAnalyticsActors - 1),
+                        Nat.equal
+                    );
+                    switch(analyticsActor){
+                        case null{
+
+                        };
+                        case(? analytics){
+                            let result = await analytics.getLedgerTxHistory(startIndex);
+                            let relevantBlocks = result.0;
+                            let iterationsCount = result.1;
+                            let newStartIndex = iterationsCount + startIndex;
+                            await userJournal.updateTxHistoryFromLedger(newStartIndex, relevantBlocks);
+                        };
+                    };
+                };
+            };
+            arrayIndex += 1;
+        };
+    };
+
+
+    private func updateLocalTxChainHistory() : async () {
         //only creates new analytics canister if the number number of analytics canisters in the analyticsActors Trie is
         // less than the maxNumOfAnalyticsActors variable;
-        await createNewAnalyticsCanister();
-        
+        await createNewAnalyticsCanister(Principal.fromActor(this));
         //gets the most recently created analyticsActor from the Trie
         let analyticsActor = Trie.find(
             analyticsActors,
             natKey(maxNumOfAnalyticsActors - 1),
             Nat.equal
         );
-
         switch(analyticsActor){
             case null{
 
@@ -876,18 +885,14 @@ shared (msg) actor class User() = this {
                 let tipOfChainIndex = tipOfChainInfo.0;
                 let startIndex = await analytics.getStartIndexForQueary();
                 let tipOfArchiveChainIndex : Nat64 = tipOfChainIndex - 2_000;
-
                 if(Int.max(0, Nat64.toNat(tipOfArchiveChainIndex) - Nat64.toNat(startIndex)) == 0){
-
                 } else {
                     let queryLength : Nat64 = Nat64.min(1_000, tipOfArchiveChainIndex - startIndex);
                     let newStartIndex = startIndex + queryLength;
-
                     let queryResult = await ledgerIndex.get_blocks({
                         start = startIndex;
                         length = queryLength;
                     });
-
                     switch (queryResult){
                         case (#Err(_)) {
                             assert(false);
@@ -896,21 +901,17 @@ shared (msg) actor class User() = this {
                         case (#Ok(r)) {
                             await analytics.updateLedgerTxHistory(newStartIndex, r.blocks);
                         };
-
                     };
                 }
             };
         };
-            
-        
     };
     //only creates new analytics canister if the number number of analytics canisters in the analyticsActors Trie is
     // less than the maxNumOfAnalyticsActors variable;
-    private func createNewAnalyticsCanister() : async () {
-
+    private func createNewAnalyticsCanister(controllerPrincipal : Principal) : async () {
         if(Trie.size(analyticsActors) < maxNumOfAnalyticsActors){
             Cycles.add(1_000_000_000_000);
-            let firstAnalyticsActor = await Analytics.Analytics();
+            let firstAnalyticsActor = await Analytics.Analytics(controllerPrincipal);
             let amountAccepted = await firstAnalyticsActor.wallet_receive();
             let (newTrie, oldTrie) = Trie.put(
                 analyticsActors, 
@@ -920,7 +921,6 @@ shared (msg) actor class User() = this {
             );
             analyticsActors := newTrie;
             analyticsActorIndex += 1;
-
         };
     };
 
@@ -956,69 +956,54 @@ shared (msg) actor class User() = this {
 
     public shared(msg) func getPrincipalsList() : async [Principal] {
         let callerId = msg.caller;
-
         let profile = Trie.find(
             profiles,
             key(callerId),
             Principal.equal
         );
-
         switch(profile){
             case null{
                 throw Error.reject("Unauthorized access. Caller is not an admin.");
             };
             case ( ? existingProfile){
-
                 if (Option.get(existingProfile.userName, "null") == "admin") {
-
                     var index = 0;
                     let numberOfProfiles = Trie.size(profiles);
                     let profilesIter = Trie.iter(profiles);
                     let profilesArray = Iter.toArray(profilesIter);
                     let ArrayBuffer = Buffer.Buffer<(Principal)>(1);
-
                     while(index < numberOfProfiles){
                         let userProfile = profilesArray[index];
                         let userPrincipal = userProfile.0;
                         ArrayBuffer.add(userPrincipal);
                         index += 1;
                     };
-
                     return ArrayBuffer.toArray();
-
                 } else {
                     throw Error.reject("Unauthorized access. Caller is not an admin.");
-
                 }
-
             };
         };
-
     };
 
     public shared(msg) func installCode( userPrincipal: Principal, args: Blob, wasmModule: Blob): async() {
         let callerId = msg.caller;
-
         let profile = Trie.find(
             profiles,
             key(callerId),
             Principal.equal
         );
-
         switch(profile){
             case null{
                 throw Error.reject("Unauthorized access. Caller is not an admin.");
             };
             case ( ? existingProfile){
-
                 if (Option.get(existingProfile.userName, "null") == "admin") {
-
                     let theUserProfile = Trie.find(
                         profiles,
                         key(userPrincipal),
                         Principal.equal
                     );
-
                     switch(theUserProfile){
                         case null{
                             throw Error.reject("No profile for this principal.");
@@ -1026,31 +1011,24 @@ shared (msg) actor class User() = this {
                         case ( ? existingProfile){
                             let userJournal = existingProfile.journal;
                             let journalCanisterId = Principal.fromActor(userJournal);
-
                             await ic.install_code({
                                 arg = args;
                                 wasm_module = wasmModule;
                                 mode = #upgrade;
                                 canister_id = journalCanisterId;
                             });
-
                         };
                     };
-
                 } else {
                     throw Error.reject("Unauthorized access. Caller is not an admin.");
-
                 }
-
             };
-
         };
     };
 
-    // will implement this method when the app's usesage increases
-    // system func heartbeat() : async () {
-    //     await updateLocalTxChainHistory();
-    // };
+    system func heartbeat() : async () {
+        await updateLocalTxChainHistory();
+    };
 
 
     private  func key(x: Principal) : Trie.Key<Principal> {
