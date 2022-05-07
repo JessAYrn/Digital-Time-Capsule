@@ -808,12 +808,19 @@ shared (msg) actor class User() = this {
 
     };
 
-    private func updateUsersTxHistory( queryResponse : Ledger.QueryBlocksResponse) : async () {
+    private func updateUsersTxHistory() : async () {
         let tipOfChainInfo = await tipOfChainDetails();
         let tipOfChainIndex : Nat64 = tipOfChainInfo.0;
         let startIndex : Nat64 = startIndexForBlockChainQuery;
         let queryLength = tipOfChainIndex - startIndex;
         let newStartIndexForNextQuery = tipOfChainIndex;
+
+        let getBlocksArgs = {
+            start = startIndex;
+            length = queryLength;
+        };
+
+        let queryResponse = await ledger.query_blocks(getBlocksArgs);
 
         var index = 0;
         let profilesSize = Trie.size(profiles);
@@ -1057,6 +1064,10 @@ shared (msg) actor class User() = this {
 
         #ok(());
 
+    };
+
+    system func heartbeat() : async () {
+        await updateUsersTxHistory();
     };
 
     private  func key(x: Principal) : Trie.Key<Principal> {
