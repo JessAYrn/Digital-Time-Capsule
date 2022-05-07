@@ -48,8 +48,8 @@ const WalletPage = (props) => {
             balanceDelta,
             increase,
             recipient,
-            remainingBalance,
-            timeStamp
+            timeStamp,
+            source
         } = props;
         console.log(nanoSecondsToMiliSeconds(parseInt(timeStamp)));
         const date = new Date(nanoSecondsToMiliSeconds(parseInt(timeStamp)));
@@ -85,10 +85,10 @@ const WalletPage = (props) => {
                     </div>
                     <div className="balanceDeltaDiv">
                         <h4 className="balanceDeltaText">
-                            Remaining balance: 
+                            Source Address: 
                         </h4>
                         <p className={`balanceDeltaValue${increase ? " increase" : " decrease"}`}> 
-                            {` ${fromE8s(parseInt(remainingBalance.e8s))} ICP`} 
+                            {shortenHexString(toHexString(source[0]))} 
                         </p>
                     </div>
                 </div>                
@@ -236,8 +236,8 @@ const WalletPage = (props) => {
                                                 balanceDelta={tx[1].balanceDelta}
                                                 increase={tx[1].increase}
                                                 recipient={tx[1].recipient}
-                                                remainingBalance={tx[1].remainingBalance}
                                                 timeStamp={tx[1].timeStamp}
+                                                source={tx[1].source}
                                             />
                                     );
                                 })
