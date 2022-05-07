@@ -834,7 +834,7 @@ shared (msg) actor class User() = this {
             let userProfileAndPrincipal = profilesArray[index];
             let userProfile = userProfileAndPrincipal.1;
             let userJournal = userProfile.journal;
-            let userAccountId = Option.get(userProfile.accountId, null);
+            let userAccountId = userProfile.accountId;
 
             let blocksArray = queryResponse.blocks;
             let blocksArraySize = Iter.size(Iter.fromArray(blocksArray));
@@ -857,31 +857,38 @@ shared (msg) actor class User() = this {
                                 let fee = r.fee.e8s;
                                 let timeOfCreation = transaction.created_at_time.timestamp_nanos;
 
+                                switch(userAccountId){
+                                    case null{
 
-                                if(userAccountId == recipient){                                    
-                                    let tx : Transaction = {
-                                        balanceDelta = amount + fee;
-                                        increase = true;
-                                        recipient = ?recipient;
-                                        timeStamp = ?timeOfCreation;
-                                        source = ?source;
                                     };
+                                    case(? existingUAID){
+                                        if(Blob.equal(existingUAID, recipient) == true){                                    
+                                            let tx : Transaction = {
+                                                balanceDelta = amount + fee;
+                                                increase = true;
+                                                recipient = ?recipient;
+                                                timeStamp = ?timeOfCreation;
+                                                source = ?source;
+                                            };
 
-                                    await userJournal.updateTxHistory(tx);
+                                            await userJournal.updateTxHistory(tx);
 
-                                } else {
-                                    if(userAccountId == source){
-                                        let tx : Transaction = {
-                                            balanceDelta = amount + fee;
-                                            increase = false;
-                                            recipient = ?recipient;
-                                            timeStamp = ?timeOfCreation;
-                                            source = ?source;
-                                        };
+                                        } else {
+                                            if(Blob.equal(existingUAID, source)){
+                                                let tx : Transaction = {
+                                                    balanceDelta = amount + fee;
+                                                    increase = false;
+                                                    recipient = ?recipient;
+                                                    timeStamp = ?timeOfCreation;
+                                                    source = ?source;
+                                                };
 
-                                        await userJournal.updateTxHistory(tx);
-                                    }
-                                }
+                                                await userJournal.updateTxHistory(tx);
+                                            }
+                                        }
+                                    };
+                                };
+
                             };
                             case(#Burn(r)){
 

@@ -36,7 +36,6 @@ const WalletPage = (props) => {
         try{
            const response = await QRCode.toDataURL(journalState.walletData.address);
            setImgUrl(response);
-           console.log(response);
         } catch (error){
             console.log(error);
         }
@@ -153,6 +152,7 @@ const WalletPage = (props) => {
                     return 1
                 }
             });
+            console.log(transactionHistory);
             setTxHistory(transactionHistory);
             setIsTxHistoryLoading(false);
         }
