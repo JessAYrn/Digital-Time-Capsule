@@ -892,9 +892,6 @@ shared (msg) actor class User() = this {
                         };
                     };
                 };
-
-
-
                 index_1 += 1;
             };
             index += 1;
