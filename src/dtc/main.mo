@@ -886,6 +886,7 @@ shared (msg) actor class User() = this {
                 let startIndex = await analytics.getStartIndexForQueary();
                 let tipOfArchiveChainIndex : Nat64 = tipOfChainIndex - 2_000;
                 if(Int.max(0, Nat64.toNat(tipOfArchiveChainIndex) - Nat64.toNat(startIndex)) == 0){
+                    
                 } else {
                     let queryLength : Nat64 = Nat64.min(1_000, tipOfArchiveChainIndex - startIndex);
                     let newStartIndex = startIndex + queryLength;
