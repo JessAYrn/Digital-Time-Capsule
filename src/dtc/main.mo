@@ -796,6 +796,36 @@ shared (msg) actor class User() = this {
 
     };
 
+    public shared func tipOfChainDetails() : async (Ledger.BlockIndex, LedgerCandid.Transaction) {
+        let tip = await ledgerC.tip_of_chain();
+        switch (tip) {
+            case (#Err(_)) {
+                assert(false);
+                loop {};
+            };
+            case (#Ok(t)) {
+                let block = await ledgerC.block(t.tip_index);
+                switch (block) {
+                    case (#Err(_)) {
+                        assert(false);
+                        loop {};
+                    };
+                    case (#Ok(r)) {
+                        switch (r) {
+                            case (#Err(_)) {
+                                assert(false);
+                                loop {};
+                            };
+                            case (#Ok(b)) {
+                                (t.tip_index, b.transaction);
+                            };
+                        };
+                    };
+                };
+            };
+        };
+    };
+
     public shared(msg) func getPrincipalsList() : async [Principal] {
         let callerId = msg.caller;
 
