@@ -39,13 +39,17 @@ module {
     };
 
     public type Block = {
-        parent_hash : Hash;
-        timestamp   : Timestamp;
         transaction : Transaction;
+        timestamp : TimeStamp;
+        parent_hash : ?[Nat8];
     };
 
     public type Hash = ?{
         inner: Blob;
+    };
+
+    public type TimeStamp = {
+        timestamp_nanos : Nat64;
     };
 
     public type TransactionArchive = {
@@ -70,9 +74,9 @@ module {
     };
 
     public type Transaction = {
-        transfer        : Transfer;
-        memo            : Memo;
-        created_at_time : Timestamp;
+        memo : Memo;
+        operation : ?Operation;
+        created_at_time : TimeStamp;
     };
 
     public type Transfer = {
@@ -100,7 +104,7 @@ module {
         length : Nat64;
     }; 
 
-    type QueryBlocksResponse = {
+    public type QueryBlocksResponse = {
         certificate : ?[Nat8];
         blocks : [Block];
         chain_length : Nat64;
@@ -113,15 +117,15 @@ module {
     };
 
     type BlockRange = {
-        blocks : [BlockArchive];
+        blocks : [Block];
     };
 
-    type QueryArchiveError = {
+    public type QueryArchiveError = {
         #BadFirstBlockIndex : {
-            requested_index : BlockIndex;
-            first_valid_index : BlockIndex;
+        requested_index : BlockIndex;
+        first_valid_index : BlockIndex;
         };
-        #Other : { error_message : Text; error_code : Nat64; };
+        #Other : { error_message : Text; error_code : Nat64 };
     };
 
     public type GetBlocksError = {
@@ -132,9 +136,12 @@ module {
         #Other : { error_message : Text; error_code : Nat64 };
     };
 
-    type QueryArchiveResult = Result<BlockRange, QueryArchiveError>;
+    public type QueryArchiveResult = {
+        #Ok : BlockRange;
+        #Err : QueryArchiveError;
+    };
 
-    type QueryArchiveFn = shared GetBlocksArgs -> async QueryArchiveResult;
+    public type QueryArchiveFn = shared query GetBlocksArgs -> async QueryArchiveResult;
 
     // Arguments for the `transfer` call.
     public type TransferArgs = {

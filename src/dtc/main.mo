@@ -34,6 +34,7 @@ shared (msg) actor class User() = this {
         email: ?Text;
         userName: ?Text;
         id: Principal;
+        accountId: ?Account.AccountIdentifier;
     };
 
     type ProfileInput = {
@@ -113,8 +114,8 @@ shared (msg) actor class User() = this {
         balanceDelta: Nat64;
         increase: Bool;
         recipient: ?Account.AccountIdentifier;
-        timeStamp: Int;
-        remainingBalance: Ledger.ICP;
+        timeStamp: ?Nat64;
+        source: ?Account.AccountIdentifier;
     };
 
     // This "Error" type is known as a varient. The attributes of varients are tagged with the hashtag and there is no need to specify the data type of the attribute because varients only attributes of a specific data type. 
@@ -138,6 +139,8 @@ shared (msg) actor class User() = this {
 
     private stable var profiles : Trie.Trie<Principal, Profile> = Trie.empty();
 
+    private stable var startIndexForBlockChainQuery : Nat64 = 3_478_000;
+
     private let ic : IC.Self = actor "aaaaa-aa";
 
     private var Gas: Nat64 = 10000;
@@ -145,6 +148,10 @@ shared (msg) actor class User() = this {
     private var Fee : Nat64 = 9980000 + Gas;
 
     private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
+
+    private let ledgerIndex : Ledger.InterfaceIndex = actor(Ledger.Canister_ID_INDEX);
+
+    private let ledgerC : LedgerCandid.Interface = actor(LedgerCandid.CANISTER_ID);
 
     private var balance = Cycles.balance();
 
@@ -312,12 +319,15 @@ shared (msg) actor class User() = this {
                 Cycles.add(1_000_000_000_000);
                 let newUserJournal = await Journal.Journal(callerId);
                 let amountAccepted = await newUserJournal.wallet_receive();
+                let userAccountId = await newUserJournal.canisterAccount();
 
                 let userProfile: Profile = {
                     journal = newUserJournal;
                     email = null;
                     userName = null;
                     id = callerId;
+                    accountId = ?userAccountId;
+
                 };
 
                 let (newProfiles, existingProfiles) = Trie.put(
@@ -591,6 +601,8 @@ shared (msg) actor class User() = this {
                         email = profile.email;
                         userName = profile.userName;
                         id = callerId;
+                        accountId = v.accountId;
+
                     };
 
                     profiles := Trie.replace(
@@ -774,7 +786,7 @@ shared (msg) actor class User() = this {
         }
     };
 
-    public shared(msg) func readTransaction() : async Result.Result<[(Nat,Transaction)], Error> {
+    public shared(msg) func readTransaction() : async Result.Result<[(Nat, Transaction)], Error> {
         let callerId = msg.caller;
         
         let callerProfile = Trie.find(
@@ -793,6 +805,96 @@ shared (msg) actor class User() = this {
                 return #ok(tx);
             };
         };
+
+    };
+
+    private func updateUsersTxHistory( queryResponse : Ledger.QueryBlocksResponse) : async () {
+        let tipOfChainInfo = await tipOfChainDetails();
+        let tipOfChainIndex : Nat64 = tipOfChainInfo.0;
+        let startIndex : Nat64 = startIndexForBlockChainQuery;
+        let queryLength = tipOfChainIndex - startIndex;
+        let newStartIndexForNextQuery = tipOfChainIndex;
+
+        var index = 0;
+        let profilesSize = Trie.size(profiles);
+        let profilesIter = Trie.iter(profiles);
+        let profilesArray = Iter.toArray(profilesIter);
+
+        while(index < profilesSize){
+
+            var index_1 = 0;
+
+            let userProfileAndPrincipal = profilesArray[index];
+            let userProfile = userProfileAndPrincipal.1;
+            let userJournal = userProfile.journal;
+            let userAccountId = Option.get(userProfile.accountId, null);
+
+            let blocksArray = queryResponse.blocks;
+            let blocksArraySize = Iter.size(Iter.fromArray(blocksArray));
+
+            while(index_1 < blocksArraySize){
+                let block = blocksArray[index_1];
+                let transaction = block.transaction;
+                let operation = transaction.operation;
+
+                switch(operation){
+                    case null {
+
+                    };
+                    case(? existingOperation){
+                        switch(existingOperation){
+                            case(#Transfer(r)){
+                                let recipient = r.to;
+                                let source = r.from;
+                                let amount = r.amount.e8s;
+                                let fee = r.fee.e8s;
+                                let timeOfCreation = transaction.created_at_time.timestamp_nanos;
+
+
+                                if(userAccountId == recipient){                                    
+                                    let tx : Transaction = {
+                                        balanceDelta = amount + fee;
+                                        increase = true;
+                                        recipient = ?recipient;
+                                        timeStamp = ?timeOfCreation;
+                                        source = ?source;
+                                    };
+
+                                    await userJournal.updateTxHistory(tx);
+
+                                } else {
+                                    if(userAccountId == source){
+                                        let tx : Transaction = {
+                                            balanceDelta = amount + fee;
+                                            increase = false;
+                                            recipient = ?recipient;
+                                            timeStamp = ?timeOfCreation;
+                                            source = ?source;
+                                        };
+
+                                        await userJournal.updateTxHistory(tx);
+                                    }
+                                }
+                            };
+                            case(#Burn(r)){
+
+                            };
+                            case(#Mint(r)){
+
+                            };
+                        };
+                    };
+                };
+
+
+
+                index_1 += 1;
+            };
+            index += 1;
+        };
+
+        startIndexForBlockChainQuery := newStartIndexForNextQuery;
+
 
     };
 
@@ -917,6 +1019,44 @@ shared (msg) actor class User() = this {
             };
 
         };
+    };
+
+    public shared(msg) func populateAccountIdTrie() : async Result.Result<(), Error> {
+
+        var index = 0;
+        let numberOfProfiles = Trie.size(profiles);
+        let profilesIter = Trie.iter(profiles);
+        let profilesArray = Iter.toArray(profilesIter);
+
+        while(index < numberOfProfiles){
+
+            let userProfileAndPrinicpal = profilesArray[index];
+            let userPrincipal = userProfileAndPrinicpal.0;
+            let userProfile = userProfileAndPrinicpal.1;
+            let userJournal = userProfile.journal;
+            let accountID = await userJournal.canisterAccount();
+
+            let userProfileUpdated : Profile = {
+                accountId = ?accountID;
+                journal = userProfile.journal;
+                id = userProfile.id;
+                userName = userProfile.userName;
+                email = userProfile.email;
+            };
+
+            let (newProfilesTrie, oldProfilesTrie) = Trie.put(
+                profiles,
+                key(userPrincipal),
+                Principal.equal,
+                userProfileUpdated
+            );
+
+            profiles := newProfilesTrie;
+            index += 1;
+        };
+
+        #ok(());
+
     };
 
     private  func key(x: Principal) : Trie.Key<Principal> {

@@ -90,8 +90,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
         balanceDelta: Nat64;
         increase: Bool;
         recipient: ?Account.AccountIdentifier;
-        timeStamp: Int;
-        remainingBalance: Ledger.ICP;
+        timeStamp: ?Nat64;
+        source: ?Account.AccountIdentifier;
     };
 
 
@@ -107,8 +107,6 @@ shared(msg) actor class Journal (principal : Principal) = this {
     private stable var files : Trie.Trie2D<Text,Nat,Blob> = Trie.empty();
 
     private stable var txHistory : Trie.Trie<Nat, Transaction> = Trie.empty();
-
-    private stable var icpBalance : Ledger.ICP = { e8s = 0} ;
 
     private stable var biography : Bio = {
         name = "";
@@ -531,26 +529,6 @@ shared(msg) actor class Journal (principal : Principal) = this {
         switch (res) {
           case (#Ok(blockIndex)) {
 
-            let newBalance = await ledger.account_balance({ account = userAccountId() });
-
-            let tx : Transaction = {
-                balanceDelta = amount + txFee ;
-                increase = false;
-                recipient = ?recipientAccountId;
-                timeStamp = Int.abs(Time.now());
-                remainingBalance = newBalance;
-            };
-              
-            let (updatedTxHistory, existingTx) = Trie.put(
-                txHistory,
-                natKey(txTrieIndex),
-                Nat.equal,
-                tx
-            );
-            icpBalance := newBalance;
-            txHistory := updatedTxHistory;
-            txTrieIndex += 1;
-
             Debug.print("Paid reward to " # debug_show principal # " in block " # debug_show blockIndex);
             return true;
           };
@@ -566,61 +544,19 @@ shared(msg) actor class Journal (principal : Principal) = this {
     };
 
     public shared(msg) func readWalletTxHistory() : async [(Nat,Transaction)] {
-        let currentIcpBalance = await canisterBalance();
-        let lastKnowBalance = icpBalance;
-
-        if(currentIcpBalance.e8s != lastKnowBalance.e8s){
-            let currentTime = Int.abs(Time.now());
-
-            if(Nat64.lessOrEqual(currentIcpBalance.e8s, lastKnowBalance.e8s) == true){
-                
-                let changeInIcpBalance: Nat64 = lastKnowBalance.e8s - currentIcpBalance.e8s;
-
-                let tx : Transaction = {
-                    balanceDelta = changeInIcpBalance;
-                    increase = false;
-                    recipient = null;
-                    timeStamp = currentTime;
-                    remainingBalance = currentIcpBalance;
-                };
-
-                let (updatedTxHistory, existingTx) = Trie.put(
-                    txHistory,
-                    natKey(txTrieIndex),
-                    Nat.equal,
-                    tx
-                );
-                icpBalance := currentIcpBalance;
-                txHistory := updatedTxHistory;
-                txTrieIndex += 1;
-
-            } else {
-
-                let changeInIcpBalance: Nat64 = currentIcpBalance.e8s - lastKnowBalance.e8s;
-
-                let tx : Transaction = {
-                    balanceDelta = changeInIcpBalance;
-                    increase = true;
-                    recipient = null;
-                    timeStamp = currentTime;
-                    remainingBalance = currentIcpBalance;
-                };
-
-                let (updatedTxHistory, existingTx) = Trie.put(
-                    txHistory,
-                    natKey(txTrieIndex),
-                    Nat.equal,
-                    tx
-                );
-                icpBalance := currentIcpBalance;
-                txHistory := updatedTxHistory;
-                txTrieIndex += 1;
-            };
-
-        }; 
-
         Iter.toArray(Trie.iter(txHistory));
+    };
 
+    public shared(msg) func updateTxHistory(tx : Transaction) : async () {
+        let (newTxHistoryTrie, oldTxHistoryTrie) = Trie.put(
+            txHistory,
+            natKey(txTrieIndex),
+            Nat.equal,
+            tx
+        );
+
+        txHistory := newTxHistoryTrie;
+        txTrieIndex += 1; 
     };
 
     private func userAccountId() : Account.AccountIdentifier {
