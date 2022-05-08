@@ -156,13 +156,7 @@ const WalletPage = (props) => {
                     return 1
                 }
             });
-            let tocDetails = await actor.tipOfChainDetails();
-            let startIndex = await actor.getStartIndex();
-            let resultOfUpdatedProfiles = await actor.populateAccountIdTrie();
-            console.log('line 156: ', resultOfUpdatedProfiles);
-            console.log('line 157: ',transactionHistory);
-            console.log('tip of Chain: ',tocDetails);
-            console.log('startIndex: ', startIndex);
+            console.log('line 159: ',transactionHistory);
             setTxHistory(transactionHistory);
             setIsTxHistoryLoading(false);
         }

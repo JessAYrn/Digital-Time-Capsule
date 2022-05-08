@@ -1030,48 +1030,6 @@ shared (msg) actor class User() = this {
         };
     };
 
-    public shared(msg) func populateAccountIdTrie() : async Result.Result<(Trie.Trie<Principal, Profile>), Error> {
-
-        var index = 0;
-        let numberOfProfiles = Trie.size(profiles);
-        let profilesIter = Trie.iter(profiles);
-        let profilesArray = Iter.toArray(profilesIter);
-
-        while(index < numberOfProfiles){
-
-            let userProfileAndPrinicpal = profilesArray[index];
-            let userPrincipal = userProfileAndPrinicpal.0;
-            let userProfile = userProfileAndPrinicpal.1;
-            let userJournal = userProfile.journal;
-            let accountID = await userJournal.canisterAccount();
-
-            let userProfileUpdated : Profile = {
-                accountId = ?accountID;
-                journal = userProfile.journal;
-                id = userProfile.id;
-                userName = userProfile.userName;
-                email = userProfile.email;
-            };
-
-            let (newProfilesTrie, oldProfilesTrie) = Trie.put(
-                profiles,
-                key(userPrincipal),
-                Principal.equal,
-                userProfileUpdated
-            );
-
-            profiles := newProfilesTrie;
-            index += 1;
-        };
-
-        #ok((profiles));
-
-    };
-
-    public shared(msg) func getStartIndex() : async Nat64 {
-        return startIndexForBlockChainQuery;
-    };
-
     system func heartbeat() : async () {
 
         heartBeatCount += 1;
