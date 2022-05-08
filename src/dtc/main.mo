@@ -34,6 +34,7 @@ shared (msg) actor class User() = this {
         email: ?Text;
         userName: ?Text;
         id: Principal;
+        accountId: ?Account.AccountIdentifier;
     };
 
     type ProfileInput = {
@@ -113,8 +114,8 @@ shared (msg) actor class User() = this {
         balanceDelta: Nat64;
         increase: Bool;
         recipient: ?Account.AccountIdentifier;
-        timeStamp: Int;
-        remainingBalance: Ledger.ICP;
+        timeStamp: ?Nat64;
+        source: ?Account.AccountIdentifier;
     };
 
     // This "Error" type is known as a varient. The attributes of varients are tagged with the hashtag and there is no need to specify the data type of the attribute because varients only attributes of a specific data type. 
@@ -138,6 +139,8 @@ shared (msg) actor class User() = this {
 
     private stable var profiles : Trie.Trie<Principal, Profile> = Trie.empty();
 
+    private stable var startIndexForBlockChainQuery : Nat64 = 3_512_868;
+
     private let ic : IC.Self = actor "aaaaa-aa";
 
     private var Gas: Nat64 = 10000;
@@ -145,6 +148,10 @@ shared (msg) actor class User() = this {
     private var Fee : Nat64 = 9980000 + Gas;
 
     private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
+
+    private let ledgerIndex : Ledger.InterfaceIndex = actor(Ledger.Canister_ID_INDEX);
+
+    private let ledgerC : LedgerCandid.Interface = actor(LedgerCandid.CANISTER_ID);
 
     private var balance = Cycles.balance();
 
@@ -155,6 +162,10 @@ shared (msg) actor class User() = this {
     private var nanosecondsInADay = 86400000000000;
 
     private var daysInAMonth = 30;
+
+    private let heartBeatInterval : Nat64 = 100;
+    
+    private stable var heartBeatCount : Nat64 = 0;
 
     public func wallet_receive() : async { accepted: Nat64 } {
         let amount = Cycles.available();
@@ -312,12 +323,15 @@ shared (msg) actor class User() = this {
                 Cycles.add(1_000_000_000_000);
                 let newUserJournal = await Journal.Journal(callerId);
                 let amountAccepted = await newUserJournal.wallet_receive();
+                let userAccountId = await newUserJournal.canisterAccount();
 
                 let userProfile: Profile = {
                     journal = newUserJournal;
                     email = null;
                     userName = null;
                     id = callerId;
+                    accountId = ?userAccountId;
+
                 };
 
                 let (newProfiles, existingProfiles) = Trie.put(
@@ -591,6 +605,8 @@ shared (msg) actor class User() = this {
                         email = profile.email;
                         userName = profile.userName;
                         id = callerId;
+                        accountId = v.accountId;
+
                     };
 
                     profiles := Trie.replace(
@@ -774,7 +790,7 @@ shared (msg) actor class User() = this {
         }
     };
 
-    public shared(msg) func readTransaction() : async Result.Result<[(Nat,Transaction)], Error> {
+    public shared(msg) func readTransaction() : async Result.Result<[(Nat, Transaction)], Error> {
         let callerId = msg.caller;
         
         let callerProfile = Trie.find(
@@ -794,6 +810,131 @@ shared (msg) actor class User() = this {
             };
         };
 
+    };
+
+    private func updateUsersTxHistory() : async () {
+        let tipOfChainInfo = await tipOfChainDetails();
+        let tipOfChainIndex : Nat64 = tipOfChainInfo.0;
+        let startIndex : Nat64 = startIndexForBlockChainQuery;
+        let maxQueryLength : Nat64 = 1_000;
+        let newStartIndexForNextQuery = Nat64.min(tipOfChainIndex, startIndex + maxQueryLength);
+
+        let getBlocksArgs = {
+            start = startIndex;
+            length = maxQueryLength;
+        };
+
+        let queryResponse = await ledger.query_blocks(getBlocksArgs);
+        let blocksArray = queryResponse.blocks;
+        let blocksArraySize = Iter.size(Iter.fromArray(blocksArray));
+
+        var index = 0;
+
+        while(index < blocksArraySize){
+
+            let block = blocksArray[index];
+            let transaction = block.transaction;
+            let operation = transaction.operation;
+
+            switch(operation){
+                case null {
+
+                };
+                case(? existingOperation){
+                    switch(existingOperation){
+                        case(#Transfer(r)){
+                            let recipient = r.to;
+                            let source = r.from;
+                            let amount = r.amount.e8s;
+                            let fee = r.fee.e8s;
+                            let timeOfCreation = transaction.created_at_time.timestamp_nanos;
+
+                            let profilesSize = Trie.size(profiles);
+                            let profilesIter = Trie.iter(profiles);
+                            let profilesArray = Iter.toArray(profilesIter);
+
+                            var index_1 = 0;
+
+                            while(index_1 < profilesSize){
+                                let userProfileAndPrincipal = profilesArray[index_1];
+                                let userProfile = userProfileAndPrincipal.1;
+                                let userAccountId = userProfile.accountId;
+                                switch(userAccountId){
+                                    case null{
+
+                                    };
+                                    case(? existingUAID){
+                                        if(Blob.equal(existingUAID, recipient) == true){                                    
+                                            let tx : Transaction = {
+                                                balanceDelta = amount + fee;
+                                                increase = true;
+                                                recipient = ?recipient;
+                                                timeStamp = ?timeOfCreation;
+                                                source = ?source;
+                                            };
+                                            let userJournal = userProfile.journal;
+                                            await userJournal.updateTxHistory(tx);
+                                        } else {
+                                            if(Blob.equal(existingUAID, source)){
+                                                let tx : Transaction = {
+                                                    balanceDelta = amount + fee;
+                                                    increase = false;
+                                                    recipient = ?recipient;
+                                                    timeStamp = ?timeOfCreation;
+                                                    source = ?source;
+                                                };
+                                                let userJournal = userProfile.journal;
+                                                await userJournal.updateTxHistory(tx);
+                                            }
+                                        }
+                                    };
+                                };
+                                index_1 += 1;
+                            };
+
+                        };
+                        case(#Burn(r)){
+
+                        };
+                        case(#Mint(r)){
+
+                        };
+                    };
+                };
+            };
+            index += 1;
+        };
+        startIndexForBlockChainQuery := newStartIndexForNextQuery;
+    };
+
+    public shared func tipOfChainDetails() : async (Ledger.BlockIndex, LedgerCandid.Transaction) {
+        let tip = await ledgerC.tip_of_chain();
+        switch (tip) {
+            case (#Err(_)) {
+                assert(false);
+                loop {};
+            };
+            case (#Ok(t)) {
+                let block = await ledgerC.block(t.tip_index);
+                switch (block) {
+                    case (#Err(_)) {
+                        assert(false);
+                        loop {};
+                    };
+                    case (#Ok(r)) {
+                        switch (r) {
+                            case (#Err(_)) {
+                                assert(false);
+                                loop {};
+                            };
+                            case (#Ok(b)) {
+                                (t.tip_index, b.transaction);
+                            };
+                        };
+                    };
+                };
+            };
+        };
     };
 
     public shared(msg) func getPrincipalsList() : async [Principal] {
@@ -886,6 +1027,15 @@ shared (msg) actor class User() = this {
 
             };
 
+        };
+    };
+
+    system func heartbeat() : async () {
+
+        heartBeatCount += 1;
+
+        if(heartBeatCount % heartBeatInterval == 0){
+            await updateUsersTxHistory();
         };
     };
 

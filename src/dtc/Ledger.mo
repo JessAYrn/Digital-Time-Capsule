@@ -1,6 +1,8 @@
 module {
     public let CANISTER_ID : Text = "ryjl3-tyaaa-aaaaa-aaaba-cai";
 
+    public let Canister_ID_INDEX : Text = "qjdve-lqaaa-aaaaa-aaaeq-cai";
+
     public type Result<T, E> = {
         #Ok  : T;
         #Err : E;
@@ -30,9 +32,116 @@ module {
     // Sequence number of a block produced by the ledger.
     public type BlockIndex = Nat64;
 
+    public type BlockArchive = {
+        parent_hash : ?[Nat8];
+        timestamp   : Timestamp;
+        transaction : TransactionArchive;
+    };
+
+    public type Block = {
+        transaction : Transaction;
+        timestamp : TimeStamp;
+        parent_hash : ?[Nat8];
+    };
+
+    public type Hash = ?{
+        inner: Blob;
+    };
+
+    public type TimeStamp = {
+        timestamp_nanos : Nat64;
+    };
+
+    public type TransactionArchive = {
+        operation       : ?Operation;
+        memo            : Memo;
+        created_at_time : Timestamp;
+    };
+
+    public type Tokens = {
+        e8s : Nat64;
+    };
+
+    public type Operation = {
+        #Burn : { from : AccountIdentifier; amount : Tokens };
+        #Mint : { to : AccountIdentifier; amount : Tokens };
+        #Transfer : {
+        to : AccountIdentifier;
+        fee : Tokens;
+        from : AccountIdentifier;
+        amount : Tokens;
+        };
+    };
+
+    public type Transaction = {
+        memo : Memo;
+        operation : ?Operation;
+        created_at_time : TimeStamp;
+    };
+
+    public type Transfer = {
+        #Burn : {
+            from   : AccountIdentifier;
+            amount : ICP;
+        };
+        #Mint : {
+            to     : AccountIdentifier;
+            amount : ICP;
+        };
+        #Send : {
+            from   : AccountIdentifier;
+            to     : AccountIdentifier;
+            amount : ICP;
+        };
+    };
+
     // An arbitrary number associated with a transaction.
     // The caller can set it in a `transfer` call as a correlation identifier.
     public type Memo = Nat64;
+
+    public type GetBlocksArgs = {
+        start : BlockIndex;
+        length : Nat64;
+    }; 
+
+    public type QueryBlocksResponse = {
+        certificate : ?[Nat8];
+        blocks : [Block];
+        chain_length : Nat64;
+        first_block_index : BlockIndex;
+        archived_blocks : [{
+            callback : QueryArchiveFn;
+            start : BlockIndex;
+            length : Nat64;
+        }];
+    };
+
+    type BlockRange = {
+        blocks : [Block];
+    };
+
+    public type QueryArchiveError = {
+        #BadFirstBlockIndex : {
+        requested_index : BlockIndex;
+        first_valid_index : BlockIndex;
+        };
+        #Other : { error_message : Text; error_code : Nat64 };
+    };
+
+    public type GetBlocksError = {
+        #BadFirstBlockIndex : {
+        requested_index : BlockIndex;
+        first_valid_index : BlockIndex;
+        };
+        #Other : { error_message : Text; error_code : Nat64 };
+    };
+
+    public type QueryArchiveResult = {
+        #Ok : BlockRange;
+        #Err : QueryArchiveError;
+    };
+
+    public type QueryArchiveFn = shared query GetBlocksArgs -> async QueryArchiveResult;
 
     // Arguments for the `transfer` call.
     public type TransferArgs = {
@@ -74,6 +183,8 @@ module {
         #TxDuplicate : { duplicate_of: BlockIndex; };
     };
 
+    public type GetBlocksResult = Result<BlockRange,GetBlocksError>;
+
 
     // Arguments for the `account_balance` call.
     public type AccountBalanceArgs = {
@@ -83,5 +194,10 @@ module {
     public type Interface = actor {
         transfer        : TransferArgs       -> async TransferResult;
         account_balance : AccountBalanceArgs -> async ICP;
+        query_blocks : shared query GetBlocksArgs -> async QueryBlocksResponse;
+    };
+
+    public type InterfaceIndex = actor {
+        get_blocks : shared query GetBlocksArgs -> async GetBlocksResult;
     };
 };

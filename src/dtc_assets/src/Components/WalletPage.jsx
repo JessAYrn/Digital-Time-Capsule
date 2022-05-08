@@ -36,11 +36,12 @@ const WalletPage = (props) => {
         try{
            const response = await QRCode.toDataURL(journalState.walletData.address);
            setImgUrl(response);
-           console.log(response);
         } catch (error){
-            console.log(error);
+            console.log('line 40: ',error);
         }
     };
+
+    const unavailble = 'unavailble';
 
     const Transaction = (props) => {
 
@@ -48,11 +49,13 @@ const WalletPage = (props) => {
             balanceDelta,
             increase,
             recipient,
-            remainingBalance,
-            timeStamp
+            timeStamp,
+            source
         } = props;
-        console.log(nanoSecondsToMiliSeconds(parseInt(timeStamp)));
-        const date = new Date(nanoSecondsToMiliSeconds(parseInt(timeStamp)));
+        console.log('line 53: ',nanoSecondsToMiliSeconds(parseInt(timeStamp)));
+        const date = timeStamp ? new Date(nanoSecondsToMiliSeconds(parseInt(timeStamp))).toString() : unavailble;
+        const sourceOfTx = source ? shortenHexString(toHexString(source)) : unavailble;
+        const recipientOfTx = recipient ? shortenHexString(toHexString(recipient)) : unavailble;
 
         return(
                 <div className='transactionHistoryDiv' >
@@ -65,13 +68,13 @@ const WalletPage = (props) => {
                         </p>
                     </div>
                     {
-                        (recipient.length) ? 
+                        (recipientOfTx !== unavailble) ? 
                         <div className="balanceDeltaDiv">
                             <h4 className="balanceDeltaText">
                                 Recipient Address: 
                             </h4>
                             <p className={`balanceDeltaValue${increase ? " increase" : " decrease"}`}> 
-                                {shortenHexString(toHexString(recipient[0]))} 
+                                {recipientOfTx} 
                             </p>
                         </div> : null 
                     }
@@ -80,15 +83,15 @@ const WalletPage = (props) => {
                             Date: 
                         </h4>
                         <p className={`dateValue${increase ? " increase" : " decrease"}`}> 
-                            {date.toString()} 
+                            {date} 
                         </p>
                     </div>
                     <div className="balanceDeltaDiv">
                         <h4 className="balanceDeltaText">
-                            Remaining balance: 
+                            Source Address: 
                         </h4>
                         <p className={`balanceDeltaValue${increase ? " increase" : " decrease"}`}> 
-                            {` ${fromE8s(parseInt(remainingBalance.e8s))} ICP`} 
+                            {sourceOfTx} 
                         </p>
                     </div>
                 </div>                
@@ -120,15 +123,15 @@ const WalletPage = (props) => {
     useEffect(async () => {
         setIsLoading(true);
         const journal = await actor.readJournal();
-        console.log(journal);
+        console.log('line 122: ',journal);
         if("err" in journal){
             actor.create().then((result) => {
-                console.log(result);
+                console.log('line 125: ',result);
             });
             setIsLoading(false);
         } else {
-            console.log(journal.ok);
-            console.log(toHexString(new Uint8Array( [...journal.ok.address])));
+            console.log('line 129: ',journal.ok);
+            console.log('line 130: ',toHexString(new Uint8Array( [...journal.ok.address])));
             const walletData = { 
                 balance : parseInt(journal.ok.balance.e8s), 
                 address: toHexString(new Uint8Array( [...journal.ok.address])) };
@@ -153,12 +156,13 @@ const WalletPage = (props) => {
                     return 1
                 }
             });
+            console.log('line 159: ',transactionHistory);
             setTxHistory(transactionHistory);
             setIsTxHistoryLoading(false);
         }
     },[actor, authClient]);
 
-    console.log(journalState.walletData);
+    console.log('line 163: ',journalState.walletData);
 
     return (
         isLoading ?
@@ -235,9 +239,9 @@ const WalletPage = (props) => {
                                             <Transaction
                                                 balanceDelta={tx[1].balanceDelta}
                                                 increase={tx[1].increase}
-                                                recipient={tx[1].recipient}
-                                                remainingBalance={tx[1].remainingBalance}
-                                                timeStamp={tx[1].timeStamp}
+                                                recipient={tx[1].recipient[0]}
+                                                timeStamp={tx[1].timeStamp[0]}
+                                                source={tx[1].source[0]}
                                             />
                                     );
                                 })
