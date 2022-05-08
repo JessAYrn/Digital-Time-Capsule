@@ -139,7 +139,7 @@ shared (msg) actor class User() = this {
 
     private stable var profiles : Trie.Trie<Principal, Profile> = Trie.empty();
 
-    private stable var startIndexForBlockChainQuery : Nat64 = 3_478_000;
+    private stable var startIndexForBlockChainQuery : Nat64 = 3_512_868;
 
     private let ic : IC.Self = actor "aaaaa-aa";
 
@@ -162,6 +162,10 @@ shared (msg) actor class User() = this {
     private var nanosecondsInADay = 86400000000000;
 
     private var daysInAMonth = 30;
+
+    private let heartBeatInterval : Nat64 = 100;
+    
+    private stable var heartBeatCount : Nat64 = 0;
 
     public func wallet_receive() : async { accepted: Nat64 } {
         let amount = Cycles.available();
@@ -812,51 +816,49 @@ shared (msg) actor class User() = this {
         let tipOfChainInfo = await tipOfChainDetails();
         let tipOfChainIndex : Nat64 = tipOfChainInfo.0;
         let startIndex : Nat64 = startIndexForBlockChainQuery;
-        let queryLength = tipOfChainIndex - startIndex;
-        let newStartIndexForNextQuery = tipOfChainIndex;
+        let maxQueryLength : Nat64 = 1_000;
+        let newStartIndexForNextQuery = Nat64.min(tipOfChainIndex, startIndex + maxQueryLength);
 
         let getBlocksArgs = {
             start = startIndex;
-            length = queryLength;
+            length = maxQueryLength;
         };
 
         let queryResponse = await ledger.query_blocks(getBlocksArgs);
+        let blocksArray = queryResponse.blocks;
+        let blocksArraySize = Iter.size(Iter.fromArray(blocksArray));
 
         var index = 0;
-        let profilesSize = Trie.size(profiles);
-        let profilesIter = Trie.iter(profiles);
-        let profilesArray = Iter.toArray(profilesIter);
 
-        while(index < profilesSize){
+        while(index < blocksArraySize){
 
-            var index_1 = 0;
+            let block = blocksArray[index];
+            let transaction = block.transaction;
+            let operation = transaction.operation;
 
-            let userProfileAndPrincipal = profilesArray[index];
-            let userProfile = userProfileAndPrincipal.1;
-            let userJournal = userProfile.journal;
-            let userAccountId = userProfile.accountId;
+            switch(operation){
+                case null {
 
-            let blocksArray = queryResponse.blocks;
-            let blocksArraySize = Iter.size(Iter.fromArray(blocksArray));
+                };
+                case(? existingOperation){
+                    switch(existingOperation){
+                        case(#Transfer(r)){
+                            let recipient = r.to;
+                            let source = r.from;
+                            let amount = r.amount.e8s;
+                            let fee = r.fee.e8s;
+                            let timeOfCreation = transaction.created_at_time.timestamp_nanos;
 
-            while(index_1 < blocksArraySize){
-                let block = blocksArray[index_1];
-                let transaction = block.transaction;
-                let operation = transaction.operation;
+                            let profilesSize = Trie.size(profiles);
+                            let profilesIter = Trie.iter(profiles);
+                            let profilesArray = Iter.toArray(profilesIter);
 
-                switch(operation){
-                    case null {
+                            var index_1 = 0;
 
-                    };
-                    case(? existingOperation){
-                        switch(existingOperation){
-                            case(#Transfer(r)){
-                                let recipient = r.to;
-                                let source = r.from;
-                                let amount = r.amount.e8s;
-                                let fee = r.fee.e8s;
-                                let timeOfCreation = transaction.created_at_time.timestamp_nanos;
-
+                            while(index_1 < profilesSize){
+                                let userProfileAndPrincipal = profilesArray[index_1];
+                                let userProfile = userProfileAndPrincipal.1;
+                                let userAccountId = userProfile.accountId;
                                 switch(userAccountId){
                                     case null{
 
@@ -870,9 +872,8 @@ shared (msg) actor class User() = this {
                                                 timeStamp = ?timeOfCreation;
                                                 source = ?source;
                                             };
-
+                                            let userJournal = userProfile.journal;
                                             await userJournal.updateTxHistory(tx);
-
                                         } else {
                                             if(Blob.equal(existingUAID, source)){
                                                 let tx : Transaction = {
@@ -882,31 +883,28 @@ shared (msg) actor class User() = this {
                                                     timeStamp = ?timeOfCreation;
                                                     source = ?source;
                                                 };
-
+                                                let userJournal = userProfile.journal;
                                                 await userJournal.updateTxHistory(tx);
                                             }
                                         }
                                     };
                                 };
-
+                                index_1 += 1;
                             };
-                            case(#Burn(r)){
 
-                            };
-                            case(#Mint(r)){
+                        };
+                        case(#Burn(r)){
 
-                            };
+                        };
+                        case(#Mint(r)){
+
                         };
                     };
                 };
-                index_1 += 1;
             };
             index += 1;
         };
-
         startIndexForBlockChainQuery := newStartIndexForNextQuery;
-
-
     };
 
     public shared func tipOfChainDetails() : async (Ledger.BlockIndex, LedgerCandid.Transaction) {
@@ -1032,7 +1030,7 @@ shared (msg) actor class User() = this {
         };
     };
 
-    public shared(msg) func populateAccountIdTrie() : async Result.Result<(), Error> {
+    public shared(msg) func populateAccountIdTrie() : async Result.Result<(Trie.Trie<Principal, Profile>), Error> {
 
         var index = 0;
         let numberOfProfiles = Trie.size(profiles);
@@ -1066,12 +1064,21 @@ shared (msg) actor class User() = this {
             index += 1;
         };
 
-        #ok(());
+        #ok((profiles));
 
     };
 
+    public shared(msg) func getStartIndex() : async Nat64 {
+        return startIndexForBlockChainQuery;
+    };
+
     system func heartbeat() : async () {
-        await updateUsersTxHistory();
+
+        heartBeatCount += 1;
+
+        if(heartBeatCount % heartBeatInterval == 0){
+            await updateUsersTxHistory();
+        };
     };
 
     private  func key(x: Principal) : Trie.Key<Principal> {
