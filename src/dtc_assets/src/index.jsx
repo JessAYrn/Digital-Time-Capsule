@@ -11,6 +11,7 @@ import App from './App';
 import AccountPage from "./AccountPage"
 import configureStore from './configureStore';
 import WalletApp from './Wallet';
+import NFTapp from './NFTs';
 
 
 
@@ -26,6 +27,7 @@ ReactDOM.render(
             <Route path="/app" element={<App />}/>
             <Route path="/account" element={<AccountPage />}/>
             <Route path="/wallet" element={<WalletApp/>}/>
+            <Route path="/nft" element={<NFTapp/>}/>
         </Routes>
     </HashRouter>
 </Provider>

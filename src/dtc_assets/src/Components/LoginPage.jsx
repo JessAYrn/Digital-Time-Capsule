@@ -3,6 +3,8 @@ import { AppContext as JournalContext } from "../App";
 import { AppContext as AccountContext } from "../AccountPage";
 import { AppContext as WalletContex } from "../Wallet";
 import { AppContext as HomePageContext } from "../HomePage";
+import { AppContext as NftPageContext } from "../NFTs";
+import { UI_CONTEXTS } from "../Contexts";
 // import { AppContext as PodcastContext } from "../PodcastPage"
 import "./LoginPage.scss";
 
@@ -14,15 +16,17 @@ const LoginPage = (props) => {
     } = props
 
     let properContext;
-    if(context === 'journal'){
+    if(context === UI_CONTEXTS.JOURNAL){
         properContext = JournalContext
-    } else if(context === 'accountPage'){
+    } else if(context === UI_CONTEXTS.ACCOUNT_PAGE){
         properContext = AccountContext
-    } else if(context === 'wallet'){
+    } else if(context === UI_CONTEXTS.WALLET){
         properContext = WalletContex
-    } else if(context === 'homePage'){
+    } else if(context === UI_CONTEXTS.HOME_PAGE){
         properContext = HomePageContext
-    }
+    } else if(context === UI_CONTEXTS.NFT){
+        properContext = NftPageContext
+    } 
 
     const {    
             authClient, 

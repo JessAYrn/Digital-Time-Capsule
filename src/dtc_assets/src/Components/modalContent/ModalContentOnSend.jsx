@@ -1,9 +1,9 @@
 import React, {useState, useContext, useEffect} from "react";
-import InputBox from "./Fields/InputBox";
-import { AppContext } from "../Wallet.jsx";
-import { fromHexString } from "../Utils.jsx";
+import InputBox from "../Fields/InputBox";
+import { AppContext } from "../../Wallet.jsx";
+import { fromHexString } from "../../Utils.jsx";
 import "./ModalContentOnSend.scss";
-import { toE8s, fromE8s } from "../Utils.jsx";
+import { toE8s, fromE8s } from "../../Utils.jsx";
 import { QrReader } from 'react-qr-reader';
 
 

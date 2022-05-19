@@ -36,7 +36,7 @@ const AdminSection = (props) => {
         });
     }; 
 
-    const loadWasm = async () => {
+    const loadFile = async () => {
 
         const buffer = await getArrayBuffer(inputRef.current.files[0]);
         return [...new Uint8Array(buffer)];
@@ -77,11 +77,17 @@ const AdminSection = (props) => {
 
     };
 
+    const mint = async () => {
+
+        
+
+    };
+
     const handleUpgrade = async () => {
 
         let promises =[];
 
-        const wasmModule = await loadWasm();
+        const wasmModule = await loadFile();
 
         const principalsList = await actor.getPrincipalsList();
 
@@ -108,6 +114,9 @@ const AdminSection = (props) => {
             </div>
             <div className={'sendEmailsButtonDiv'}>
                 <button className={'upgradeUserJournalWasm'} type="submit" onClick={handleUpgrade}> Upgrade User Journal Wasm </button>
+            </div>
+            <div className={'sendEmailsButtonDiv'}>
+                <button className={'upgradeUserJournalWasm'} type="submit" onClick={mint}> Mint NFT </button>
             </div>
         </React.Fragment>
         

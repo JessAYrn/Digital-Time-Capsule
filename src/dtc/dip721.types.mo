@@ -48,7 +48,7 @@ module {
     public type Nft = {
     owner: Principal;
     id: TokenId;
-    metadata: MetadataDesc;
+    metadata: [MetadataKeyVal];
     };
 
     public type ExtendedMetadataResult = Result<{
@@ -56,7 +56,7 @@ module {
     token_id: TokenId;
     }, ApiError>;
 
-    public type MetadataResult = Result<MetadataDesc, ApiError>;
+    public type MetadataResult = Result<MetadataKeyVal, ApiError>;
 
     public type MetadataDesc = [MetadataPart];
 
@@ -72,8 +72,8 @@ module {
     };
 
     public type MetadataKeyVal = {
-    key: Text;
-    val: MetadataVal;
+    key: Nat;
+    val: Blob;
     };
 
     public type MetadataVal = {

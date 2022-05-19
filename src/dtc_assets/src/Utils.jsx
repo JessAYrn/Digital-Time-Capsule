@@ -33,3 +33,7 @@ export const milisecondsToNanoSeconds = (time) => {
 export const nanoSecondsToMiliSeconds = (time) => {
   return Math.floor(time / 1000000);
 }
+
+export const mapFileToNFT = (actor, file) => {
+  
+}

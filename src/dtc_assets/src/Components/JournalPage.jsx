@@ -7,9 +7,9 @@ import  {AppContext} from "../App";
 import "./JournalPage.scss";
 import DatePicker from "./Fields/DatePicker";
 import LoadScreen from "./LoadScreen";
-import ModalContentSubmit from "./ModalContentOnSubmit";
+import ModalContentSubmit from "./modalContent/ModalContentOnSubmit";
 import { Modal } from "./Modal";
-import ExitWithoutSubmitContent from "./ModalContentExitWithoutSubmitModal";
+import ExitWithoutSubmitContent from "./modalContent/ModalContentExitWithoutSubmitModal";
 
 const CHUNK_SIZE = 1024 * 1024;
 
