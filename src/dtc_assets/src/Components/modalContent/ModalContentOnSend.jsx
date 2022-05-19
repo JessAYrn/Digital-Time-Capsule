@@ -4,9 +4,7 @@ import { AppContext } from "../../Wallet.jsx";
 import { fromHexString } from "../../Utils.jsx";
 import "./ModalContentOnSend.scss";
 import { toE8s, fromE8s } from "../../Utils.jsx";
-import { QrReader } from 'react-qr-reader';
-
-
+import { QrReaderContent } from "../walletFunctions/ScanQrCode";
 
 const ModalContentOnSend = (props) => {
 
@@ -23,7 +21,6 @@ const ModalContentOnSend = (props) => {
     const [responseFromApi, setResponseFromApi] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [showSummary, setShowSummary] = useState(false);
-    const [data, setData] = useState('');
     const [showQrReader, setShowQrReader] = useState(false);
     const {actor} = useContext(AppContext);
 
@@ -38,10 +35,6 @@ const ModalContentOnSend = (props) => {
     const showTxSummary = () => {
         setShowSummary(true);
     }
-
-    useEffect(() => {
-        setRecipientAddress(data);
-    }, [data]);
 
     const onSendConfirm = async () => {
         console.log(fromHexString(recipientAddress));
@@ -121,32 +114,6 @@ const ModalContentOnSend = (props) => {
         )
     }
 
-    const QrReaderContent = () => {
-        return(
-            <>
-                <div className="cameraDiv">
-                <QrReader
-                    constraints = {{ facingMode: "environment" }}
-                    onResult={(result, error) => {
-                        if (!!result) {
-                            setData(result?.text);
-                            setShowQrReader(!showQrReader)
-                        }
-
-                        if (!!error) {
-                            console.info(error);
-                        }
-                        }}
-                        style={{ height: '50%' }}
-                />
-                </div>
-                <div className="qrCancelButtonDiv" >
-                    <button className='button' onClick={() => setShowQrReader(!showQrReader)}> Cancel </button>
-                </div>
-            </>
-        )
-    }
-
     const InputTransaction = () => {
         return (
             <div className="sendContentDiv">
@@ -190,7 +157,11 @@ const ModalContentOnSend = (props) => {
                             { showSummary ? 
                                 SummaryContent() :
                                     showQrReader ? 
-                                        <QrReaderContent/> :
+                                        <QrReaderContent
+                                            showQrReader={showQrReader}
+                                            setRecipientAddress={setRecipientAddress}
+                                            setShowQrReader={setShowQrReader}
+                                        /> :
                                         InputTransaction()
                             }
                         </>
