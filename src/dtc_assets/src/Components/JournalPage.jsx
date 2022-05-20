@@ -10,8 +10,8 @@ import LoadScreen from "./LoadScreen";
 import ModalContentSubmit from "./modalContent/ModalContentOnSubmit";
 import { Modal } from "./Modal";
 import ExitWithoutSubmitContent from "./modalContent/ModalContentExitWithoutSubmitModal";
-
-const CHUNK_SIZE = 1024 * 1024;
+import { CHUNK_SIZE } from "../Constants";
+import { fileToBlob } from "../Utils";
 
 const JournalPage = (props) => {
 
@@ -125,10 +125,11 @@ const JournalPage = (props) => {
     
    
     const uploadChunk = async (fileId, chunkId, fileChunk) => {
+        const fileChunkAsBlob = await fileToBlob(fileChunk)
         return actor.createJournalEntryFile(
             fileId, 
             chunkId, 
-            [...new Uint8Array(await fileChunk.arrayBuffer())]
+            fileChunkAsBlob
         );
 
     };

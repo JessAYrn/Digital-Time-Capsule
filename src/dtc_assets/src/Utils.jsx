@@ -37,3 +37,9 @@ export const nanoSecondsToMiliSeconds = (time) => {
 export const mapFileToNFT = (actor, file) => {
   
 }
+
+export const fileToBlob = async (file) => {
+
+  const buffer = await file.arrayBuffer();
+  return [...new Uint8Array(buffer)];
+};

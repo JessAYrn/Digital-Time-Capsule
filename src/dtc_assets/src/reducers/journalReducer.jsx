@@ -6,6 +6,7 @@ export const types = {
     SET_BIO: "SET_BIO",
     SET_METADATA: "SET_METADATA",
     SET_WALLET_DATA: "SET_WALLET_DATA",
+    SET_NFT_DATA: "SET_NFT_DATA",
     CHANGE_DRAFT: "CHANGE_DRAFT",
     CHANGE_DATE: "CHANGE_DATE",
     CHANGE_LOCATION: "CHANGE_LOCATION",
@@ -36,6 +37,13 @@ export const initialState = {
         balance:'',
         address:''
     },
+    nftData:[
+        { 
+            nftCollectionKey: 0,
+            tokenId: 0, 
+            tokenMetadataArraySize: 0
+        }
+    ],
     bio: {
         name: '',
         dob: '',
@@ -119,6 +127,11 @@ const changeValue = (state = initialState, action) => {
         }
         case types.SET_WALLET_DATA:
         state.walletData = payload;
+        return {
+            ...state
+        }
+        case types.SET_NFT_DATA:
+        state.nftData = payload;
         return {
             ...state
         }

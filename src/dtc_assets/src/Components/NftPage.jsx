@@ -1,6 +1,7 @@
 import React, {useEffect, useReducer, useState, useContext } from "react";
 import journalReducer, {initialState, types} from "../reducers/journalReducer";
 import { AppContext } from "../NFTs";
+import "./NftPage.scss";
 const NftPage = () => {
     const [journalState, dispatch] = useReducer(journalReducer, initialState);
     const [isLoading, setIsLoading] = useState(false);
@@ -8,23 +9,26 @@ const NftPage = () => {
 
     useEffect(async () => {
         setIsLoading(true);
-        const nftCollection = await actor.getUserNFTs();
+        const nftCollection = await actor.getUserNFTsInfo();
         console.log('line 11: ',nftCollection);
         if("err" in nftCollection){
             console.log('line 13: ',nftCollection);
             setIsLoading(false);
         } else {
             console.log(nftCollection);
-            // dispatch({
-            //     payload: walletData,
-            //     actionType: types.SET_WALLET_DATA
-            // });
+            dispatch({
+                payload: nftCollection,
+                actionType: types.SET_NFT_DATA
+            });
             setIsLoading(false);
         }
     },[actor, authClient]);
 
     return(
-        <div>  </div>
+        <div className='container'>
+            <div className={"background"}>
+            </div>
+        </div>
     );
 
 };
