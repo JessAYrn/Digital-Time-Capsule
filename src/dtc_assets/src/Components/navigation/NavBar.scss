@@ -1,0 +1,79 @@
+.linkDiv_Journal{
+    @media screen and (max-width: 480px) {
+        bottom:0;
+    };
+    @media screen and (min-width: 481px) {
+        top:0;
+    };
+    background-color: black;
+    border: solid black;
+    border-radius: 10px;
+    height: 35px;
+    margin-left: -10px;
+    width: 100%;
+    position:fixed;
+    .navBar_Journal{
+        width: 100%;
+        color: white;
+        .linkContainer{
+            width:100%;
+            padding-left: 2%;
+            .timeCapsuleLinkDiv{
+                float: left;
+                border-radius: 10px;
+                background-color: white;
+                width: 175px;
+                margin-top: 2px;
+                .navLink_Journal{
+                    font-family: 'Julius Sans One', sans-serif;
+                    padding-left: 10%;
+                    text-decoration: none;
+                }
+            }
+            .dashboardIconDiv{
+              width: 33px;
+              height: 32px;
+              background: white;
+              border-radius: 10px;
+              float: right;
+              margin-right: 5px;
+              
+              img{
+                max-width: 30px;
+                max-height: 30px;
+                margin-left: 1px;
+                margin-top: 0px;
+              }
+            }
+            .notificationIconDiv{
+              width: 33px;
+              height: 32px;
+              background: white;
+              border-radius: 10px;
+              float: right;
+              margin-right: 5px;
+              
+              img{
+                max-width: 70px;
+                max-height: 70px;
+                margin-left: -19px;
+                margin-top: -19px;
+              }
+            }
+            .accountIconLinkDiv{
+                float: right;
+                margin-right: 4%;
+                .navLink_Journal{
+                    font-family: 'Julius Sans One', sans-serif;
+                    color: black;
+                    text-decoration: none;
+    
+                    .accountIcon_Journal{
+                        height: 2rem;
+                        border-radius: 10px;
+                    }
+                }
+            }
+        }
+    }
+  }
