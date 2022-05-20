@@ -12,6 +12,7 @@ import AccountPage from "./AccountPage"
 import configureStore from './configureStore';
 import WalletApp from './Wallet';
 import NFTapp from './NFTs';
+import { NAV_LINKS } from './Constants';
 
 
 
@@ -23,11 +24,11 @@ ReactDOM.render(
 <Provider store={store}>
     <HashRouter>
         <Routes>
-            <Route path="/" element={<HomePage />}/>
-            <Route path="/app" element={<App />}/>
-            <Route path="/account" element={<AccountPage />}/>
-            <Route path="/wallet" element={<WalletApp/>}/>
-            <Route path="/nft" element={<NFTapp/>}/>
+            <Route path={NAV_LINKS.dashboard} element={<HomePage />}/>
+            <Route path={NAV_LINKS.journal} element={<App />}/>
+            <Route path={NAV_LINKS.account} element={<AccountPage />}/>
+            <Route path={NAV_LINKS.wallet} element={<WalletApp/>}/>
+            <Route path={NAV_LINKS.nft} element={<NFTapp/>}/>
         </Routes>
     </HashRouter>
 </Provider>

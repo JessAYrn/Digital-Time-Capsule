@@ -1,6 +1,7 @@
 .tableDivContainer{
   @media screen and (max-width: 480px) {
     width: 100%;
+    height: 600px;
   };
   width: 55%;
   float: left;
@@ -50,6 +51,22 @@
             padding: 0.5rem;
           }
         }
+        .tableRowForButton{
+          border-bottom: 0;
+          width: 100%;
+          padding-bottom: .5rem;
+          .tableCell{
+            width: 100%;
+            padding: 1px;
+            height: 50px;
+            .addNewEntryButton{
+              width: 50%;
+              margin-left: 24%;
+              float: left;
+              border-radius: 10px;
+            }
+          }
+        }
       }
   
     }
@@ -69,136 +86,66 @@
   }
 }
 
-.biographyDiv{
-    .section1{
-      @media screen and (max-width: 480px) {
-        width: 100%;
-      };
-      width: 33%;
-      float: left;
-      height: 22rem;
-      .inputBox{
-        .input-element-div__dedications{
-          
-          .enabled{
-            border-width: 1px 1px 1px !important;
-            border-radius: 10px;
-          }
-        
-          .disabled{
-              border-radius: 10px;
-          }
-          
-          
-        }
+.section1{
+  @media screen and (max-width: 480px) {
+    width: 100%;
+  };
+  @media screen and (min-width: 481px) {
+    margin-top: 35px;
+  };
+  width: 33%;
+  float: left;
+  height: 22rem;
+  .inputBox{
+    .input-element-div__dedications{
+      
+      .enabled{
+        border-width: 1px 1px 1px !important;
+        border-radius: 10px;
+      }
+    
+      .disabled{
+          border-radius: 10px;
       }
     }
-    .section2{
-      @media screen and (max-width: 480px) {
-        float: left;
-        width: 100%;
-        height: 6rem;
-      };
-      width: 66%;
-      float: left;
-      height: 22rem;
-    }
-
-    .prefaceDiv{
-      @media screen and (max-width: 480px) {
-        width: 100%;
-      };
-      margin-top: 2rem;
-      margin-right: 5%;
-      width: 33%;
-      float: left;
-      .inputBox{
-        .input-element-div__preface{
-          
-          .enabled{
-            border-width: 1px 1px 1px !important;
-            border-radius: 10px;
-          }
-        
-          .disabled{
-              border-radius: 10px;
-          }
-          
-          
-        }
-      }
-    }
-  
+  }
+}
+.section2{
+  @media screen and (max-width: 480px) {
+    float: left;
+    width: 100%;
+    height: 6rem;
+  };
+  @media screen and (min-width: 481px) {
+    margin-top: 35px;
+  };
+  width: 66%;
+  float: left;
+  height: 22rem;
 }
 
-.linkDiv_Journal{
-  background-color: black;
-  border: solid black;
-  border-radius: 10px;
-  height: 35px;
-  .navBar_Journal{
-      width: 100%;
-      color: white;
-      .linkContainer{
-          width:100%;
-          padding-left: 2%;
-          .timeCapsuleLinkDiv{
-              float: left;
-              border-radius: 10px;
-              background-color: white;
-              width: 175px;
-              margin-top: 2px;
-              .navLink_Journal{
-                  font-family: 'Julius Sans One', sans-serif;
-                  padding-left: 10%;
-                  text-decoration: none;
-              }
-          }
-          .dashboardIconDiv{
-            width: 33px;
-            height: 32px;
-            background: white;
-            border-radius: 10px;
-            float: right;
-            margin-right: 5px;
-            
-            img{
-              max-width: 30px;
-              max-height: 30px;
-              margin-left: 1px;
-              margin-top: 0px;
-            }
-          }
-          .notificationIconDiv{
-            width: 33px;
-            height: 32px;
-            background: white;
-            border-radius: 10px;
-            float: right;
-            margin-right: 5px;
-            
-            img{
-              max-width: 70px;
-              max-height: 70px;
-              margin-left: -19px;
-              margin-top: -19px;
-            }
-          }
-          .accountIconLinkDiv{
-              float: right;
-              margin-right: 4%;
-              .navLink_Journal{
-                  font-family: 'Julius Sans One', sans-serif;
-                  color: black;
-                  text-decoration: none;
-  
-                  .accountIcon_Journal{
-                      height: 2rem;
-                      border-radius: 10px;
-                  }
-              }
-          }
+.prefaceDiv{
+  @media screen and (max-width: 480px) {
+    width: 100%;
+  };
+  margin-top: 2rem;
+  margin-right: 5%;
+  width: 33%;
+  float: left;
+  .inputBox{
+    .input-element-div__preface{
+      
+      .enabled{
+        border-width: 1px 1px 1px !important;
+        border-radius: 10px;
       }
+    
+      .disabled{
+          border-radius: 10px;
+      }
+      
+      
+    }
   }
 }
 
