@@ -9,8 +9,8 @@ import InputBox from "./Fields/InputBox";
 import { dayInNanoSeconds, monthInDays } from "../Constants";
 import LoadScreen from "./LoadScreen";
 import { Modal } from "./Modal";
-import ModalContentSubmit from "./ModalContentOnSubmit";
-import ModalContentNotifications from "./ModalContentNotifications";
+import ModalContentSubmit from "./modalContent/ModalContentOnSubmit";
+import ModalContentNotifications from "./modalContent/ModalContentNotifications";
 import { milisecondsToNanoSeconds } from "../Utils";
 
 const Journal = (props) => {

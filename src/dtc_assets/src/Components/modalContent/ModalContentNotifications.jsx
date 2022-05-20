@@ -1,6 +1,6 @@
 import React from 'react';
 import "./ModalContentNotifications.scss";
-import { dayInNanoSeconds, monthInDays } from "../Constants";
+import { dayInNanoSeconds, monthInDays } from "../../Constants";
 
 
 const Notifications = (props) => {

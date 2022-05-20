@@ -3,8 +3,8 @@ import axios from "axios";
 import { AppContext } from "../AccountPage";
 import "./AdminSection.scss";
 import { IDL } from "@dfinity/candid";
-
-import {readFile} from 'fs-web';
+import { fileToBlob } from "../Utils";
+import { CHUNK_SIZE } from "../Constants";
 
 const AdminSection = (props) => {
     let inputRef = useRef();
@@ -23,25 +23,6 @@ const AdminSection = (props) => {
 
         return res;
     };
-
-    const getArrayBuffer = (inputFile) => {
-        const reader = new FileReader();
-
-        return new Promise((resolve, reject) => {
-            reader.onload = () => {
-                resolve(reader.result);
-            }
-            reader.readAsArrayBuffer(inputFile)
-        
-        });
-    }; 
-
-    const loadWasm = async () => {
-
-        const buffer = await getArrayBuffer(inputRef.current.files[0]);
-        return [...new Uint8Array(buffer)];
-    };
-
 
     const handleSubmit = async () => {
 
@@ -77,11 +58,59 @@ const AdminSection = (props) => {
 
     };
 
+    const createNewNftCollection = async () => {
+
+        const logoResult = {
+            logo_type: "Basic",
+            data: "Basic"
+        };
+
+        const init = {
+            logo: logoResult,
+            name: "OG Collection",
+            symbol: "OGC",
+            maxLimit : 250
+        };
+
+        const result = await actor.createNFTCollection(init);
+        console.log(result);
+    };
+
+    const mint = async () => {
+
+        const file = inputRef.current.files[0];
+        const fileSize = file.size;
+
+        const chunks = Math.ceil(fileSize/CHUNK_SIZE);
+        let chunk = 0;
+
+        let promises = [];
+
+
+        while(chunk < chunks){    
+            
+            const from = chunk * CHUNK_SIZE;
+            const to = from + CHUNK_SIZE;
+
+            const fileChunk = (to < fileSize -1) ? file.slice(from,to ) : file.slice(from);
+
+            let chunkId = parseInt(chunk);
+            const fileChunkAsBlob = await fileToBlob(fileChunk);
+            promises.push(actor.uploadNftChunk(0, {key: chunkId, val: fileChunkAsBlob}));
+
+            chunk += 1;
+        };
+
+        const results = await Promise.all(promises);  
+        const receipt = await actor.mintNft(0);
+        console.log(results, receipt);
+    };
+
     const handleUpgrade = async () => {
 
         let promises =[];
 
-        const wasmModule = await loadWasm();
+        const wasmModule = await fileToBlob(inputRef.current.files[0]);
 
         const principalsList = await actor.getPrincipalsList();
 
@@ -107,7 +136,13 @@ const AdminSection = (props) => {
                 />
             </div>
             <div className={'sendEmailsButtonDiv'}>
+                <button className={'upgradeUserJournalWasm'} type="submit" onClick={createNewNftCollection}> Create NFT Collection </button>
+            </div>
+            <div className={'sendEmailsButtonDiv'}>
                 <button className={'upgradeUserJournalWasm'} type="submit" onClick={handleUpgrade}> Upgrade User Journal Wasm </button>
+            </div>
+            <div className={'sendEmailsButtonDiv'}>
+                <button className={'upgradeUserJournalWasm'} type="submit" onClick={mint}> Mint NFT </button>
             </div>
         </React.Fragment>
         
