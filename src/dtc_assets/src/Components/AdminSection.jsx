@@ -6,6 +6,7 @@ import { IDL } from "@dfinity/candid";
 import { fileToBlob } from "../Utils";
 import { CHUNK_SIZE } from "../Constants";
 
+
 const AdminSection = (props) => {
     let inputRef = useRef();
 
