@@ -1,5 +1,4 @@
 import React, { createContext, useState, useEffect} from 'react';
-import { Link } from "react-router-dom";
 import YouTube from 'react-youtube';
 import {AuthClient} from "@dfinity/auth-client";
 import LoginPage from './Components/LoginPage';
@@ -7,6 +6,7 @@ import { canisterId, createActor } from '../../declarations/dtc/index';
 import { UI_CONTEXTS } from './Contexts';
 import Analytics from './Components/Analytics';
 import "./HomePage.scss";
+import { NavBar } from './Components/navigation/NavBar';
 
 const getYoutubeId = require('get-youtube-id');
 
@@ -88,14 +88,15 @@ const HomePage = () => {
                 isLoaded &&
                     isAuthenticated ? 
                     <div className="container">
-                        <div className={'linkDiv'}>
-                            <nav className={'navBar'}>
-                                <Link className={"navLink"} to="app">Time Capsule | </Link>
-                                <Link className={"navLink"} to='wallet'>Wallet | </Link>
-                                <Link className={"navLink"} to='account'>Account</Link>
-                            </nav>
-                        </div>
                         <div className="background center">
+                            <NavBar
+                                walletLink={true}
+                                journalLink={true}
+                                nftLink={false}
+                                accountLink={true}
+                                dashboardLink={false}
+                                notificationIcon={false}
+                            />
                             <div class={'scrollable'}>
                                 <Analytics/>
                                 {/* <div className={'transparentDiv__homePage'}>

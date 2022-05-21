@@ -141,13 +141,13 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     public shared(msg) func wallet_balance() : async Nat {
         let callerId = msg.caller;
-        if(
-            Principal.toText(callerId) != mainCanisterId and 
-            Principal.toText(callerId) != test1CanisterId and 
-            Principal.toText(callerId) != test2CanisterId
-        ) {
-            throw Error.reject("Unauthorized access.");
-        };
+        // if(
+        //     Principal.toText(callerId) != mainCanisterId and 
+        //     Principal.toText(callerId) != test1CanisterId and 
+        //     Principal.toText(callerId) != test2CanisterId
+        // ) {
+        //     throw Error.reject("Unauthorized access.");
+        // };
         return balance
     };
 
@@ -166,13 +166,13 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     public shared(msg) func createEntry( journalEntry : JournalEntryInput) : async Result.Result<Trie.Trie<Nat, JournalEntryV2>, Error> {
         let callerId = msg.caller;
-        if(
-            Principal.toText(callerId) != mainCanisterId and 
-            Principal.toText(callerId) != test1CanisterId and 
-            Principal.toText(callerId) != test2CanisterId
-        ) {
-            return #err(#NotAuthorized);
-        };
+        // if(
+        //     Principal.toText(callerId) != mainCanisterId and 
+        //     Principal.toText(callerId) != test1CanisterId and 
+        //     Principal.toText(callerId) != test2CanisterId
+        // ) {
+        //     return #err(#NotAuthorized);
+        // };
 
         let completeEntry  = {
             entryTitle = journalEntry.entryTitle;
@@ -207,13 +207,13 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     public shared(msg) func createFile(fileId: Text ,chunkId : Nat, blobChunk : Blob) : async Result.Result<(), Error> {
         let callerId = msg.caller;
-        if(
-            Principal.toText(callerId) != mainCanisterId and 
-            Principal.toText(callerId) != test1CanisterId and 
-            Principal.toText(callerId) != test2CanisterId
-        ) {
-            return #err(#NotAuthorized);
-        };
+        // if(
+        //     Principal.toText(callerId) != mainCanisterId and 
+        //     Principal.toText(callerId) != test1CanisterId and 
+        //     Principal.toText(callerId) != test2CanisterId
+        // ) {
+        //     return #err(#NotAuthorized);
+        // };
 
         let existingFile = Trie.find(
             files,
@@ -264,26 +264,26 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     public shared(msg) func readJournal() : async ([(Nat,JournalEntryV2)], Bio) {
         let callerId = msg.caller;
-        if(
-            Principal.toText(callerId) != mainCanisterId and 
-            Principal.toText(callerId) != test1CanisterId and 
-            Principal.toText(callerId) != test2CanisterId
-        ) {
-            throw Error.reject("Unauthorized access.");
-        };
+        // if(
+        //     Principal.toText(callerId) != mainCanisterId and 
+        //     Principal.toText(callerId) != test1CanisterId and 
+        //     Principal.toText(callerId) != test2CanisterId
+        // ) {
+        //     throw Error.reject("Unauthorized access.");
+        // };
         let journalAsArray = Iter.toArray(Trie.iter(journalV2));
         return ((journalAsArray), biography);
     };
 
     public shared(msg) func getEntriesToBeSent() : async ([(Nat, JournalEntryV2)]) {
         let callerId = msg.caller;
-        if(
-            Principal.toText(callerId) != mainCanisterId and 
-            Principal.toText(callerId) != test1CanisterId and 
-            Principal.toText(callerId) != test2CanisterId
-        ) {
-            throw Error.reject("Unauthorized access.");
-        };
+        // if(
+        //     Principal.toText(callerId) != mainCanisterId and 
+        //     Principal.toText(callerId) != test1CanisterId and 
+        //     Principal.toText(callerId) != test2CanisterId
+        // ) {
+        //     throw Error.reject("Unauthorized access.");
+        // };
 
         let journalIter = Trie.iter(journalV2);
         let entriesToBeSentBuffer = Buffer.Buffer<(Nat, JournalEntryV2)>(1);
@@ -328,13 +328,13 @@ shared(msg) actor class Journal (principal : Principal) = this {
     public shared(msg) func readJournalEntry(key : Nat): async Result.Result<JournalEntryV2, Error> {
 
         let callerId = msg.caller;
-        if(
-            Principal.toText(callerId) != mainCanisterId and 
-            Principal.toText(callerId) != test1CanisterId and 
-            Principal.toText(callerId) != test2CanisterId
-        ) {
-            return #err(#NotAuthorized);
-        };
+        // if(
+        //     Principal.toText(callerId) != mainCanisterId and 
+        //     Principal.toText(callerId) != test1CanisterId and 
+        //     Principal.toText(callerId) != test2CanisterId
+        // ) {
+        //     return #err(#NotAuthorized);
+        // };
 
         let entry = Trie.find(
             journalV2,
@@ -382,13 +382,13 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     public shared(msg) func readJournalFileChunk (fileId : Text, chunkId: Nat) : async Result.Result<(Blob),Error> {
         let callerId = msg.caller;
-        if(
-            Principal.toText(callerId) != mainCanisterId and 
-            Principal.toText(callerId) != test1CanisterId and 
-            Principal.toText(callerId) != test2CanisterId
-        ) {
-           return #err(#NotAuthorized);
-        };
+        // if(
+        //     Principal.toText(callerId) != mainCanisterId and 
+        //     Principal.toText(callerId) != test1CanisterId and 
+        //     Principal.toText(callerId) != test2CanisterId
+        // ) {
+        //    return #err(#NotAuthorized);
+        // };
 
         let file = Trie.find(
             files,
@@ -420,13 +420,13 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     public shared(msg) func readJournalFileSize (fileId : Text) : async Result.Result<(Nat),Error> {
         let callerId = msg.caller;
-        if(
-            Principal.toText(callerId) != mainCanisterId and 
-            Principal.toText(callerId) != test1CanisterId and 
-            Principal.toText(callerId) != test2CanisterId
-        ) {
-           return #err(#NotAuthorized);
-        };
+        // if(
+        //     Principal.toText(callerId) != mainCanisterId and 
+        //     Principal.toText(callerId) != test1CanisterId and 
+        //     Principal.toText(callerId) != test2CanisterId
+        // ) {
+        //    return #err(#NotAuthorized);
+        // };
 
         let file = Trie.find(
             files,
@@ -447,13 +447,13 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     public shared(msg) func updateBio(bio: Bio) : async Result.Result<(), Error>{
         let callerId = msg.caller;
-        if(
-            Principal.toText(callerId) != mainCanisterId and 
-            Principal.toText(callerId) != test1CanisterId and 
-            Principal.toText(callerId) != test2CanisterId
-        ) {
-           return #err(#NotAuthorized);
-        };
+        // if(
+        //     Principal.toText(callerId) != mainCanisterId and 
+        //     Principal.toText(callerId) != test1CanisterId and 
+        //     Principal.toText(callerId) != test2CanisterId
+        // ) {
+        //    return #err(#NotAuthorized);
+        // };
         biography := bio;
         #ok(());
     };
@@ -462,13 +462,13 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     public shared(msg) func updateJournalEntry(key: Nat, journalEntry: JournalEntryInput) : async Result.Result<Trie.Trie<Nat,JournalEntryV2>,Error> {
         let callerId = msg.caller;
-        if(
-            Principal.toText(callerId) != mainCanisterId and 
-            Principal.toText(callerId) != test1CanisterId and 
-            Principal.toText(callerId) != test2CanisterId
-        ) {
-           return #err(#NotAuthorized);
-        };
+        // if(
+        //     Principal.toText(callerId) != mainCanisterId and 
+        //     Principal.toText(callerId) != test1CanisterId and 
+        //     Principal.toText(callerId) != test2CanisterId
+        // ) {
+        //    return #err(#NotAuthorized);
+        // };
         let entry = Trie.find(
             journalV2,
             natKey(key),
@@ -516,13 +516,13 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     public shared(msg) func updateJournalEntryFile(fileId: Text, chunkId: Nat, blobChunk : Blob) : async Result.Result<(),Error> {
         let callerId = msg.caller;
-        if(
-            Principal.toText(callerId) != mainCanisterId and 
-            Principal.toText(callerId) != test1CanisterId and 
-            Principal.toText(callerId) != test2CanisterId
-        ) {
-           return #err(#NotAuthorized);
-        };
+        // if(
+        //     Principal.toText(callerId) != mainCanisterId and 
+        //     Principal.toText(callerId) != test1CanisterId and 
+        //     Principal.toText(callerId) != test2CanisterId
+        // ) {
+        //    return #err(#NotAuthorized);
+        // };
         let file = Trie.find(
             files,
             textKey(fileId),
@@ -555,13 +555,13 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     public shared(msg) func deleteJournalEntry(key: Nat) : async Result.Result<Trie.Trie<Nat,JournalEntryV2>,Error> {
         let callerId = msg.caller;
-        if(
-            Principal.toText(callerId) != mainCanisterId and 
-            Principal.toText(callerId) != test1CanisterId and 
-            Principal.toText(callerId) != test2CanisterId
-        ) {
-           return #err(#NotAuthorized);
-        };
+        // if(
+        //     Principal.toText(callerId) != mainCanisterId and 
+        //     Principal.toText(callerId) != test1CanisterId and 
+        //     Principal.toText(callerId) != test2CanisterId
+        // ) {
+        //    return #err(#NotAuthorized);
+        // };
         let entry = Trie.find(
             journalV2,
             natKey(key),
@@ -590,13 +590,13 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     public shared(msg) func deleteJournalEntryFile(fileId: Text) : async Result.Result<(),Error> {
         let callerId = msg.caller;
-        if(
-            Principal.toText(callerId) != mainCanisterId and 
-            Principal.toText(callerId) != test1CanisterId and 
-            Principal.toText(callerId) != test2CanisterId
-        ) {
-           return #err(#NotAuthorized);
-        };
+        // if(
+        //     Principal.toText(callerId) != mainCanisterId and 
+        //     Principal.toText(callerId) != test1CanisterId and 
+        //     Principal.toText(callerId) != test2CanisterId
+        // ) {
+        //    return #err(#NotAuthorized);
+        // };
         let entryFiles = Trie.find(
             files,
             textKey(fileId),
@@ -625,13 +625,13 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     public shared(msg) func transferICP(amount: Nat64, recipientAccountId: Account.AccountIdentifier) : async Bool {
         let callerId = msg.caller;
-        if(
-            Principal.toText(callerId) != mainCanisterId and 
-            Principal.toText(callerId) != test1CanisterId and 
-            Principal.toText(callerId) != test2CanisterId
-        ) {
-            throw Error.reject("Unauthorized access.");
-        };
+        // if(
+        //     Principal.toText(callerId) != mainCanisterId and 
+        //     Principal.toText(callerId) != test1CanisterId and 
+        //     Principal.toText(callerId) != test2CanisterId
+        // ) {
+        //     throw Error.reject("Unauthorized access.");
+        // };
 
         let res = await ledger.transfer({
           memo = Nat64.fromNat(10);
@@ -661,13 +661,13 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     public shared(msg) func readWalletTxHistory() : async [(Nat,Transaction)] {
         let callerId = msg.caller;
-        if(
-            Principal.toText(callerId) != mainCanisterId and 
-            Principal.toText(callerId) != test1CanisterId and 
-            Principal.toText(callerId) != test2CanisterId
-        ) {
-            throw Error.reject("Unauthorized access.");
-        };
+        // if(
+        //     Principal.toText(callerId) != mainCanisterId and 
+        //     Principal.toText(callerId) != test1CanisterId and 
+        //     Principal.toText(callerId) != test2CanisterId
+        // ) {
+        //     throw Error.reject("Unauthorized access.");
+        // };
         
         Iter.toArray(Trie.iter(txHistory));
     };
@@ -736,25 +736,25 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     public query(msg) func canisterAccount() : async Account.AccountIdentifier {
         let callerId = msg.caller;
-        if(
-            Principal.toText(callerId) != mainCanisterId and 
-            Principal.toText(callerId) != test1CanisterId and 
-            Principal.toText(callerId) != test2CanisterId
-        ) {
-            throw Error.reject("Unauthorized access.");
-        };
+        // if(
+        //     Principal.toText(callerId) != mainCanisterId and 
+        //     Principal.toText(callerId) != test1CanisterId and 
+        //     Principal.toText(callerId) != test2CanisterId
+        // ) {
+        //     throw Error.reject("Unauthorized access.");
+        // };
         userAccountId()
     };
 
     public shared(msg) func canisterBalance() : async Ledger.ICP {
         let callerId = msg.caller;
-        if(
-            Principal.toText(callerId) != mainCanisterId and 
-            Principal.toText(callerId) != test1CanisterId and 
-            Principal.toText(callerId) != test2CanisterId
-        ) {
-            throw Error.reject("Unauthorized access.");
-        };
+        // if(
+        //     Principal.toText(callerId) != mainCanisterId and 
+        //     Principal.toText(callerId) != test1CanisterId and 
+        //     Principal.toText(callerId) != test2CanisterId
+        // ) {
+        //     throw Error.reject("Unauthorized access.");
+        // };
         await ledger.account_balance({ account = userAccountId() })
     };
    

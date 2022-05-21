@@ -4,6 +4,11 @@
       "main": "src/dtc/main.mo",
       "type": "motoko"
     },
+    "ledger": {
+      "type": "custom",
+      "wasm": "ledger.wasm",
+      "candid": "ledger.public.did"
+    },
     "default": {
       "ic": "bs4fi-aaaaa-aaaap-qaabq-cai"
     },
