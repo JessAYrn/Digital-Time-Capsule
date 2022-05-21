@@ -5,6 +5,9 @@
 
         .logoDivContainer{
             padding-top: 3.5%;
+            @media screen and (max-width: 480px) {    
+                height: 950px;
+            };
             .logoDiv{
                 @media screen and (max-width: 426px) {    
                     max-width: 100%;
