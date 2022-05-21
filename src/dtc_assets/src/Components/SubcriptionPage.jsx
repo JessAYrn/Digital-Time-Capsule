@@ -8,6 +8,7 @@ import AdminSection from './AdminSection';
 import "./SubscriptionPage.scss";
 import { AppContext } from '../AccountPage';
 import LoadScreen from './LoadScreen';
+import { NavBar } from './navigation/NavBar';
 
 
 
@@ -148,6 +149,14 @@ return(
     <LoadScreen/> :
     <div className='container'>
         <div className={"background"}>
+            <NavBar
+                walletLink={true}
+                journalLink={true}
+                nftLink={false}
+                accountLink={false}
+                dashboardLink={true}
+                notificationIcon={false}
+            />
             <div className={"logoDivContainer"}>
                 <div className={'logoDiv'}>
                     <img className={'logoImg'}src="dtc-logo-black.png" alt="Logo"/>

@@ -17,27 +17,6 @@ In a different terminal, run the following command to install the Internet Ident
 
 II_FETCH_ROOT_KEY=1 dfx deploy --no-wallet --argument '(null)'
 
-THE BUILD SHOULD FAIL THE FIRST TIME. WHEN IT DOES, PERFORM THE FOLLOWING STEPS
-
-
-replace the "build" within the dfx.json file of the Internet-Identity repo from {"src/internet_identity/build.sh"} to {"cargo build --release --target wasm32-unknown-unknown"}
-
-next, delete the package-lock.json file and the node_modules file
-
-then run the following commands in the Internet-Identity project directory again
-
-npm i
-
-dfx start --clean --background
-
-In a different terminal, run the following command to install the Internet Identity canister:
-
-
-II_ENV=development dfx deploy --no-wallet --argument '(null)'
-
-
-THE BUILD SHOULD WORK THIS TIME
-
 ## Running the Digital-Time-Capsule repo locally
 
 in the Digital-Time-Capsule project 

@@ -7,11 +7,11 @@ import  {AppContext} from "../App";
 import "./JournalPage.scss";
 import DatePicker from "./Fields/DatePicker";
 import LoadScreen from "./LoadScreen";
-import ModalContentSubmit from "./ModalContentOnSubmit";
+import ModalContentSubmit from "./modalContent/ModalContentOnSubmit";
 import { Modal } from "./Modal";
-import ExitWithoutSubmitContent from "./ModalContentExitWithoutSubmitModal";
-
-const CHUNK_SIZE = 1024 * 1024;
+import ExitWithoutSubmitContent from "./modalContent/ModalContentExitWithoutSubmitModal";
+import { CHUNK_SIZE } from "../Constants";
+import { fileToBlob } from "../Utils";
 
 const JournalPage = (props) => {
 
@@ -125,10 +125,11 @@ const JournalPage = (props) => {
     
    
     const uploadChunk = async (fileId, chunkId, fileChunk) => {
+        const fileChunkAsBlob = await fileToBlob(fileChunk)
         return actor.createJournalEntryFile(
             fileId, 
             chunkId, 
-            [...new Uint8Array(await fileChunk.arrayBuffer())]
+            fileChunkAsBlob
         );
 
     };

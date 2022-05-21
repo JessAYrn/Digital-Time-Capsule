@@ -785,7 +785,7 @@ shared (msg) actor class User() = this {
         };
     };
 
-    public shared(msg) func mintNft(nftCollectionIndex: Nat, metadata: DIP721Types.MetadataDesc) : async DIP721Types.MintReceipt {
+    public shared(msg) func mintNft( nftCollectionIndex: Nat) : async DIP721Types.MintReceipt {
         let callerId = msg.caller;
 
         let userAccount = Trie.find(
@@ -808,17 +808,55 @@ shared (msg) actor class User() = this {
 
                     switch(result){
                         case null{
-                            #Err(#Unauthorized)
+                            #Err(#Other);
                         };
                         case(? existingCollection){
                             let collection = existingCollection.nftCollection;
-                            let receipt = await collection.mintDip721(callerId, metadata);
+                            let receipt = await collection.mintDip721(callerId);
                             return receipt;
                         };
                     };
 
                 } else {
                     #Err(#Unauthorized);
+                }
+            };
+        };
+    };
+
+    public shared(msg) func uploadNftChunk(nftCollectionIndex : Nat, metadata : DIP721Types.MetadataKeyVal) : async Result.Result<(), DIP721Types.ApiError>{
+        let callerId = msg.caller;
+
+        let userAccount = Trie.find(
+            profiles,
+            key(callerId),
+            Principal.equal
+        );
+
+        switch(userAccount){
+            case null{
+                #err(#Unauthorized);
+            };  
+            case(? exisitingAccount){
+                if(Option.get(exisitingAccount.userName, "null") == "admin"){
+                    let result = Trie.find(
+                        nftCollections,
+                        natKey(nftCollectionIndex),
+                        Nat.equal
+                    );
+
+                    switch(result){
+                        case null{
+                            #err(#Other);
+                        };
+                        case(? existingCollection){
+                            let collection = existingCollection.nftCollection;
+                            let receipt = await collection.uploadNftChunk(metadata);
+                            return receipt;
+                        };
+                    };
+                } else {
+                    #err(#Unauthorized);
                 }
             };
         };
@@ -867,38 +905,70 @@ shared (msg) actor class User() = this {
         };
     };
 
-    public shared(msg) func getUserNFTs() : async [(Nat, DIP721Types.MetadataResult)] {
+    public shared(msg) func getUserNFTsInfo() : async Result.Result<[{ nftCollectionKey : Nat; tokenId: Nat64; tokenMetadataArraySize: Nat; }], Error> {
         let callerId = msg.caller;
 
-        let nftCollectionsTrieSize = Trie.size(nftCollections);
-        let nftCollectionsIter = Trie.iter(nftCollections);
-        let nftCollectionsArray = Iter.toArray(nftCollectionsIter);
-        let ArrayBuffer = Buffer.Buffer<(Nat ,DIP721Types.MetadataResult)>(1);
+        let userProfile = Trie.find(
+            profiles,
+            key(callerId),
+            Principal.equal
+        );
 
-        var index = 0;
-
-        while(index < nftCollectionsTrieSize){
-            let collectionAndKey = nftCollectionsArray[index];
-            let collectionKey = collectionAndKey.0;
-            let collectionObject = collectionAndKey.1;
-            let collection = collectionObject.nftCollection;
-            let tokenIds = await collection.getTokenIdsForUserDip721(callerId);
-            let tokenIdsSize = Iter.size(Iter.fromArray(tokenIds));
-
-            var index_1 = 0;
-            
-            while(index_1 < tokenIdsSize){
-                let tokenId = tokenIds[index_1];
-                let nftMetaData = await collection.getMetadataDip721(tokenId);
-                ArrayBuffer.add((collectionKey, nftMetaData));
-
-                index_1 += 1;
+        switch(userProfile){
+            case null{
+                #err(#NotFound);
             };
+            case (? existingProfile){
+                let nftCollectionsTrieSize = Trie.size(nftCollections);
+                let nftCollectionsIter = Trie.iter(nftCollections);
+                let nftCollectionsArray = Iter.toArray(nftCollectionsIter);
+                let ArrayBuffer = Buffer.Buffer<{ nftCollectionKey : Nat; tokenId: Nat64; tokenMetadataArraySize: Nat; }>(1);
 
-            index += 1;
+                var index = 0;
+
+                while(index < nftCollectionsTrieSize){
+                    let collectionAndKey = nftCollectionsArray[index];
+                    let collectionKey = collectionAndKey.0;
+                    let collectionObject = collectionAndKey.1;
+                    let collection = collectionObject.nftCollection;
+                    let tokenIdsAndMetadataSizesArray = await collection.getTokenIdsAndMetadataArraySize(callerId);
+                    let tokenIdsCount = Iter.size(Iter.fromArray(tokenIdsAndMetadataSizesArray));
+
+                    var index_1 = 0;
+                    
+                    while(index_1 < tokenIdsCount){
+                        let tokenId = tokenIdsAndMetadataSizesArray[index_1].0;
+                        let metadataSize = tokenIdsAndMetadataSizesArray[index_1].1;
+                        ArrayBuffer.add({ nftCollectionKey = collectionKey; tokenId = tokenId; tokenMetadataArraySize = metadataSize; });
+
+                        index_1 += 1;
+                    };
+
+                    index += 1;
+                };
+
+                return #ok(ArrayBuffer.toArray());
+            };
         };
+    };
 
-        return ArrayBuffer.toArray();
+    public shared(msg) func getNftChunk( nftCollectionKey : Nat, tokenId: Nat64, chunkKey: Nat) : async DIP721Types.MetadataResult {
+        let callerId = msg.caller;
+        let result = Trie.find(
+            nftCollections,
+            natKey(nftCollectionKey),
+            Nat.equal
+        );
+        switch(result){
+            case null{
+                #Err(#Other);
+            };
+            case (? nftCollection){
+                let collection = nftCollection.nftCollection;
+                let nftChunk = await collection.getMetadataDip721Chunk(callerId, chunkKey, tokenId);
+                return nftChunk;
+            };
+        };
     };
 
     func myAccountId() : Account.AccountIdentifier {
