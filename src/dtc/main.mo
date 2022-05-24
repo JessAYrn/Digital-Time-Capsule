@@ -24,6 +24,7 @@ import Option "mo:base/Option";
 import IC "ic.types";
 import NFT "Dip-721-NFT-Container";
 import DIP721Types "dip721.types";
+import JournalTypes "journal.types";
 
 shared (msg) actor class User() = this {
 
@@ -44,98 +45,6 @@ shared (msg) actor class User() = this {
 
     type AmountAccepted = {
         accepted: Nat64
-    };
-
-    type EntryKey = {
-        entryKey: Nat;
-    };
-
-    type JournalFile = {
-        file1: ?Blob;
-        file2: ?Blob;
-    };
-
-    type JournalEntryV2 = {
-        entryTitle: Text;
-        text: Text;
-        location: Text;
-        date: Text;
-        lockTime: Int;
-        unlockTime: Int;
-        sent: Bool;
-        emailOne: Text;
-        emailTwo: Text;
-        emailThree: Text;
-        read: Bool;
-        draft: Bool;
-        file1MetaData: {
-            fileName: Text;
-            lastModified: Int;
-            fileType: Text;
-        };
-        file2MetaData: {
-            fileName: Text;
-            lastModified: Int;
-            fileType: Text;
-        };
-    }; 
-
-    type JournalEntryInput = {
-        entryTitle: Text;
-        text: Text;
-        location: Text;
-        date: Text;
-        lockTime: Int;
-        emailOne: Text;
-        emailTwo: Text;
-        emailThree: Text;
-        draft: Bool;
-        file1MetaData: {
-            fileName: Text;
-            lastModified: Int;
-            fileType: Text;
-        };
-        file2MetaData: {
-            fileName: Text;
-            lastModified: Int;
-            fileType: Text;
-        };
-    };
-
-    type Bio = {
-        name : Text;
-        dob: Text;
-        pob: Text;
-        dedications: Text;
-        preface: Text;
-    };
-
-    type Transaction = {
-        balanceDelta: Nat64;
-        increase: Bool;
-        recipient: ?Account.AccountIdentifier;
-        timeStamp: ?Nat64;
-        source: ?Account.AccountIdentifier;
-    };
-
-    // This "Error" type is known as a varient. The attributes of varients are tagged with the hashtag and there is no need to specify the data type of the attribute because varients only attributes of a specific data type. 
-    type Error ={
-        #NotFound;
-        #AlreadyExists;
-        #NotAuthorized;
-        #NoInputGiven;
-        #InsufficientFunds;
-        #TxFailed;
-        #UserNameTaken;
-        #WalletBalanceTooLow;
-        #ZeroAddress;
-    };
-
-    type ApiError = {
-        #Unauthorized;
-        #InvalidTokenId;
-        #ZeroAddress;
-        #Other;
     };
 
     type Nft = {
@@ -233,7 +142,7 @@ shared (msg) actor class User() = this {
         };
     };
 
-    private func getAdminAccountId () : async Result.Result<Account.AccountIdentifier, Error> {
+    private func getAdminAccountId () : async Result.Result<Account.AccountIdentifier, JournalTypes.Error> {
         var index = 0;
         let numberOfProfiles = Trie.size(profiles);
         let profilesIter = Trie.iter(profiles);
@@ -267,7 +176,7 @@ shared (msg) actor class User() = this {
 
     };
 
-    public shared(msg) func refillCanisterCycles() : async Result.Result<((Nat,[Nat64])), Error> {
+    public shared(msg) func refillCanisterCycles() : async Result.Result<((Nat,[Nat64])), JournalTypes.Error> {
         let callerId = msg.caller;
 
         let result = Trie.find(
@@ -321,7 +230,7 @@ shared (msg) actor class User() = this {
     //_______________________________________________________________________________________________________________________________________________________________________________________________
 
     //Result.Result returns a varient type that has attributes from success case(the first input) and from your error case (your second input). both inputs must be varient types. () is a unit type.
-    public shared(msg) func create () : async Result.Result<AmountAccepted,Error> {
+    public shared(msg) func create () : async Result.Result<AmountAccepted, JournalTypes.Error> {
 
         let callerId = msg.caller;
 
@@ -374,13 +283,13 @@ shared (msg) actor class User() = this {
     //read Journal
     public shared(msg) func readJournal () : async Result.Result<(
             {
-                userJournalData : ([(Nat,JournalEntryV2)], Bio);
+                userJournalData : ([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio);
                 email: ?Text;
                 balance : Ledger.ICP;
                 address: [Nat8];
                 userName: ?Text;
             }
-        ), Error> {
+        ), JournalTypes.Error> {
 
         //Reject Anonymous User
         //if(Principal.toText(msg.caller) == "2vxsx-fae"){
@@ -420,7 +329,7 @@ shared (msg) actor class User() = this {
         
     };
 
-    public shared(msg) func readEntry(entryKey: EntryKey) : async Result.Result<JournalEntryV2, Error> {
+    public shared(msg) func readEntry(entryKey: JournalTypes.EntryKey) : async Result.Result<JournalTypes.JournalEntry, JournalTypes.Error> {
 
         //Reject Anonymous User
         //if(Principal.toText(msg.caller) == "2vxsx-fae"){
@@ -447,7 +356,7 @@ shared (msg) actor class User() = this {
 
     };
 
-    public shared(msg) func readEntryFileChunk(fileId: Text, chunkId: Nat) : async Result.Result<(Blob),Error>{
+    public shared(msg) func readEntryFileChunk(fileId: Text, chunkId: Nat) : async Result.Result<(Blob),JournalTypes.Error>{
         let callerId = msg.caller;
 
         let result = Trie.find(
@@ -468,7 +377,7 @@ shared (msg) actor class User() = this {
         }
     };
 
-    public shared(msg) func readEntryFileSize(fileId: Text) : async Result.Result<(Nat),Error>{
+    public shared(msg) func readEntryFileSize(fileId: Text) : async Result.Result<(Nat),JournalTypes.Error>{
         let callerId = msg.caller;
 
         let result = Trie.find(
@@ -489,7 +398,7 @@ shared (msg) actor class User() = this {
         }
     };
 
-    public shared(msg) func updateBio(bio: Bio) : async Result.Result<(), Error> {
+    public shared(msg) func updateBio(bio: JournalTypes.Bio) : async Result.Result<(), JournalTypes.Error> {
         let callerId = msg.caller;
         
         let result = Trie.find(
@@ -510,7 +419,7 @@ shared (msg) actor class User() = this {
         };
     };
 
-    public shared(msg) func updateJournalEntry(entryKey : ?EntryKey, entry : ?JournalEntryInput) : async Result.Result<Trie.Trie<Nat,JournalEntryV2>, Error> {
+    public shared(msg) func updateJournalEntry(entryKey : ?JournalTypes.EntryKey, entry : ?JournalTypes.JournalEntryInput) : async Result.Result<Trie.Trie<Nat,JournalTypes.JournalEntry>, JournalTypes.Error> {
 
         //Reject Anonymous User
         //if(Principal.toText(msg.caller) == "2vxsx-fae"){
@@ -567,7 +476,7 @@ shared (msg) actor class User() = this {
      
     };
 
-    public shared(msg) func createJournalEntryFile(fileId: Text, chunkId: Nat, blobChunk: Blob): async Result.Result<(), Error>{
+    public shared(msg) func createJournalEntryFile(fileId: Text, chunkId: Nat, blobChunk: Blob): async Result.Result<(), JournalTypes.Error>{
         let callerId = msg.caller;
 
         let result = Trie.find(
@@ -595,7 +504,7 @@ shared (msg) actor class User() = this {
     };
 
     //update profile
-    public shared(msg) func updateProfile(profile: ProfileInput) : async Result.Result<(),Error> {
+    public shared(msg) func updateProfile(profile: ProfileInput) : async Result.Result<(),JournalTypes.Error> {
         
         //Reject Anonymous User
         //if(Principal.toText(msg.caller) == "2vxsx-fae"){
@@ -643,7 +552,7 @@ shared (msg) actor class User() = this {
     };
 
     //delete profile
-    public shared(msg) func delete() : async Result.Result<(), Error> {
+    public shared(msg) func delete() : async Result.Result<(), JournalTypes.Error> {
         
         let callerId = msg.caller;
         //Reject Anonymous User
@@ -674,7 +583,7 @@ shared (msg) actor class User() = this {
         };
     };
 
-    public shared(msg) func getEntriesToBeSent() : async Result.Result<[(Text,[(Nat, JournalEntryV2)])], Error>{
+    public shared(msg) func getEntriesToBeSent() : async Result.Result<[(Text,[(Nat, JournalTypes.JournalEntry)])], JournalTypes.Error>{
 
         let callerId = msg.caller;
         
@@ -700,7 +609,7 @@ shared (msg) actor class User() = this {
                             let numberOfProfiles = Trie.size(profiles);
                             let profilesIter = Trie.iter(profiles);
                             let profilesArray = Iter.toArray(profilesIter);
-                            let AllEntriesToBeSentBuffer = Buffer.Buffer<(Text, [(Nat, JournalEntryV2)])>(1);
+                            let AllEntriesToBeSentBuffer = Buffer.Buffer<(Text, [(Nat, JournalTypes.JournalEntry)])>(1);
 
                             while(index < numberOfProfiles){
                                 let userProfile = profilesArray[index];
@@ -735,7 +644,7 @@ shared (msg) actor class User() = this {
     //NFT Methods
     //______________________________________________________________________________________________________________________________________________
 
-    public shared(msg) func createNFTCollection(init : DIP721Types.Dip721NonFungibleToken) : async Result.Result<Nat64, Error> {
+    public shared(msg) func createNFTCollection(init : DIP721Types.Dip721NonFungibleToken) : async Result.Result<Nat64, JournalTypes.Error> {
 
         let callerId = msg.caller;
 
@@ -905,7 +814,7 @@ shared (msg) actor class User() = this {
         };
     };
 
-    public shared(msg) func getUserNFTsInfo() : async Result.Result<[{ nftCollectionKey : Nat; tokenId: Nat64; tokenMetadataArraySize: Nat; }], Error> {
+    public shared(msg) func getUserNFTsInfo() : async Result.Result<[{ nftCollectionKey : Nat; tokenId: Nat64; tokenMetadataArraySize: Nat; }], JournalTypes.Error> {
         let callerId = msg.caller;
 
         let userProfile = Trie.find(
@@ -987,7 +896,7 @@ shared (msg) actor class User() = this {
         await ledger.account_balance({ account = myAccountId() })
     };
 
-    public shared(msg) func transferICP(amount: Nat64, canisterAccountId: Account.AccountIdentifier) : async Result.Result<(), Error> {
+    public shared(msg) func transferICP(amount: Nat64, canisterAccountId: Account.AccountIdentifier) : async Result.Result<(), JournalTypes.Error> {
 
         let callerId = msg.caller;
         let amountMinusFeeAndGas = amount - Fee - Gas;
@@ -1048,7 +957,7 @@ shared (msg) actor class User() = this {
         }
     };
 
-    public shared(msg) func readTransaction() : async Result.Result<[(Nat, Transaction)], Error> {
+    public shared(msg) func readTransaction() : async Result.Result<[(Nat, JournalTypes.Transaction)], JournalTypes.Error> {
         let callerId = msg.caller;
         
         let callerProfile = Trie.find(
@@ -1123,7 +1032,7 @@ shared (msg) actor class User() = this {
                                     };
                                     case(? existingUAID){
                                         if(Blob.equal(existingUAID, recipient) == true){                                    
-                                            let tx : Transaction = {
+                                            let tx : JournalTypes.Transaction = {
                                                 balanceDelta = amount + fee;
                                                 increase = true;
                                                 recipient = ?recipient;
@@ -1134,7 +1043,7 @@ shared (msg) actor class User() = this {
                                             await userJournal.updateTxHistory(tx);
                                         } else {
                                             if(Blob.equal(existingUAID, source)){
-                                                let tx : Transaction = {
+                                                let tx : JournalTypes.Transaction = {
                                                     balanceDelta = amount + fee;
                                                     increase = false;
                                                     recipient = ?recipient;
