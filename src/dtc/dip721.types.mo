@@ -48,6 +48,7 @@ module {
     public type Nft = {
     owner: Principal;
     id: TokenId;
+    fileType: Text;
     metadata: [MetadataKeyVal];
     };
 
@@ -84,6 +85,12 @@ module {
     #Nat16Content: Nat16;
     #Nat32Content: Nat32;
     #Nat64Content: Nat64;
+    };
+
+    public type TokenMetaData = {
+        id: TokenId;
+        metaDataArraySize: Nat;
+        fileType: Text;
     };
 
     public type MintReceipt = Result<MintReceiptPart, ApiError>;

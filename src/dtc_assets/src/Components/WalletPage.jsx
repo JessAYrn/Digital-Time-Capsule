@@ -91,7 +91,7 @@ const WalletPage = (props) => {
                         <NavBar
                             walletLink={false}
                             journalLink={true}
-                            nftLink={false}
+                            nftLink={true}
                             accountLink={true}
                             dashboardLink={true}
                             notificationIcon={false}

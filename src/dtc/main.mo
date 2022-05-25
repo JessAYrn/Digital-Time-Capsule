@@ -694,7 +694,7 @@ shared (msg) actor class User() = this {
         };
     };
 
-    public shared(msg) func mintNft( nftCollectionIndex: Nat) : async DIP721Types.MintReceipt {
+    public shared(msg) func mintNft( nftCollectionIndex: Nat, file_type: Text) : async DIP721Types.MintReceipt {
         let callerId = msg.caller;
 
         let userAccount = Trie.find(
@@ -721,7 +721,7 @@ shared (msg) actor class User() = this {
                         };
                         case(? existingCollection){
                             let collection = existingCollection.nftCollection;
-                            let receipt = await collection.mintDip721(callerId);
+                            let receipt = await collection.mintDip721(callerId, file_type);
                             return receipt;
                         };
                     };
@@ -814,7 +814,7 @@ shared (msg) actor class User() = this {
         };
     };
 
-    public shared(msg) func getUserNFTsInfo() : async Result.Result<[{ nftCollectionKey : Nat; tokenId: Nat64; tokenMetadataArraySize: Nat; }], JournalTypes.Error> {
+    public shared(msg) func getUserNFTsInfo() : async Result.Result<[({nftCollectionKey: Nat}, DIP721Types.TokenMetaData)], JournalTypes.Error> {
         let callerId = msg.caller;
 
         let userProfile = Trie.find(
@@ -831,7 +831,7 @@ shared (msg) actor class User() = this {
                 let nftCollectionsTrieSize = Trie.size(nftCollections);
                 let nftCollectionsIter = Trie.iter(nftCollections);
                 let nftCollectionsArray = Iter.toArray(nftCollectionsIter);
-                let ArrayBuffer = Buffer.Buffer<{ nftCollectionKey : Nat; tokenId: Nat64; tokenMetadataArraySize: Nat; }>(1);
+                let ArrayBuffer = Buffer.Buffer<({nftCollectionKey: Nat}, DIP721Types.TokenMetaData)>(1);
 
                 var index = 0;
 
@@ -840,15 +840,24 @@ shared (msg) actor class User() = this {
                     let collectionKey = collectionAndKey.0;
                     let collectionObject = collectionAndKey.1;
                     let collection = collectionObject.nftCollection;
-                    let tokenIdsAndMetadataSizesArray = await collection.getTokenIdsAndMetadataArraySize(callerId);
-                    let tokenIdsCount = Iter.size(Iter.fromArray(tokenIdsAndMetadataSizesArray));
+                    let tokenMetadataInfoArray = await collection.getTokenMetadataInfo(callerId);
+                    let tokenIdsCount = Iter.size(Iter.fromArray(tokenMetadataInfoArray));
 
                     var index_1 = 0;
                     
                     while(index_1 < tokenIdsCount){
-                        let tokenId = tokenIdsAndMetadataSizesArray[index_1].0;
-                        let metadataSize = tokenIdsAndMetadataSizesArray[index_1].1;
-                        ArrayBuffer.add({ nftCollectionKey = collectionKey; tokenId = tokenId; tokenMetadataArraySize = metadataSize; });
+
+                        let tokenMetadataInfo = tokenMetadataInfoArray[index_1];
+                        let tokenId = tokenMetadataInfo.id;
+                        let metadataSize = tokenMetadataInfo.metaDataArraySize;
+                        let fileType = tokenMetadataInfo.fileType;
+                        let nftMetaData = {
+                            id = tokenId;
+                            metaDataArraySize = metadataSize;
+                            fileType = fileType;
+                        };
+
+                        ArrayBuffer.add(({ nftCollectionKey = collectionKey; }, nftMetaData));
 
                         index_1 += 1;
                     };

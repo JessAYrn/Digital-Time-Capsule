@@ -81,6 +81,7 @@ const AdminSection = (props) => {
 
         const file = inputRef.current.files[0];
         const fileSize = file.size;
+        const fileType = file.type;
 
         const chunks = Math.ceil(fileSize/CHUNK_SIZE);
         let chunk = 0;
@@ -101,9 +102,8 @@ const AdminSection = (props) => {
 
             chunk += 1;
         };
-
         const results = await Promise.all(promises);  
-        const receipt = await actor.mintNft(0);
+        const receipt = await actor.mintNft(0, fileType);
         console.log(results, receipt);
     };
 

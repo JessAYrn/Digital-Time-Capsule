@@ -63,6 +63,27 @@
                     }
                 }
             }
+            .nftLinkDiv{
+                float: left;
+                border-radius: 10px;
+                background-color: white;
+                width: 33px;
+                height: 32px;
+                .navLink_Journal{
+                    font-family: 'Julius Sans One', sans-serif;
+                    float: left;
+                    margin-top: -4px;
+                    text-decoration: none;
+                    img{
+                        max-width: 35px;
+                        max-height: 35px;
+                        display: block;
+                        margin: auto;
+                        margin-left: -1px;
+                        margin-top: 2px;
+                    }
+                }
+            }
             .dashboardIconDiv{
                 float: left;
                 width: 33px;
