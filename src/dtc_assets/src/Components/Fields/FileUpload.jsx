@@ -2,6 +2,8 @@ import React, {useRef, useState, useEffect} from 'react';
 import InputBox from './InputBox';
 import "./FileUpload.scss";
 import { useEffect } from '../../../../../dist/dtc_assets';
+import { deviceType } from '../../Utils';
+import { DEVICE_TYPES } from '../../Constants';
 
 const FileUpload = (props) => {
     const {
@@ -29,6 +31,9 @@ const FileUpload = (props) => {
 
     const [fileSrc, setFileSrc]  = useState("dtc-logo-black.png");
     const [fileType, setFileType] = useState("image/png");
+    const [typeOfDevice, setTypeOfDevice] = useState('');
+
+    setTypeOfDevice(deviceType());
 
     useEffect( async () => {
         if(value){
@@ -62,6 +67,7 @@ const FileUpload = (props) => {
 
     console.log(fileType);
     console.log(fileSrc);
+    console.log(typeOfDevice);
 
     return(
         <div className={'imageDivContainer'}>
@@ -69,15 +75,29 @@ const FileUpload = (props) => {
                     { 
                         (fileType.includes("image")) ? 
                             <img src={fileSrc} alt="image preview" className="imagePreview__image" autoplay="false" /> :
+                            (fileType.includes("quicktime") && (typeOfDevice !== DEVICE_TYPES.desktop)) ?
                             <video 
                                 width="320" 
                                 height="240" 
                                 className="imagePreview__video" 
-                                controls="controls"
+                                preload
+                                controls
+                                muted
+                                poster={'video-thumbnail.png'}
+                                src={fileSrc}
+                            ></video> :
+                            <video 
+                                width="320" 
+                                height="240" 
+                                className="imagePreview__video" 
+                                preload="metadata"
+                                controls
+                                muted
+                                playsinline
                             >
                                 <source src={fileSrc} type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'/>
                                 <source src={fileSrc} type='video/ogg; codecs="theora, vorbis"'/>
-                                <source src={fileSrc} type='video/webm'/>
+                                <source src={fileSrc} type='video/webm; codecs="vp8, vorbis"'/>
                                 <source src={fileSrc} type='video/mpeg'/>
                                 Your browser does not support the video tag.
                             </video>   
