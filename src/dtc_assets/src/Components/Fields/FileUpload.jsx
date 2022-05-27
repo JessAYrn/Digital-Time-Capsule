@@ -28,15 +28,11 @@ const FileUpload = (props) => {
     }; 
 
     const [fileSrc, setFileSrc]  = useState("dtc-logo-black.png");
-    const [fileType, setFileType] = useState("image");
+    const [fileType, setFileType] = useState("image/png");
 
     useEffect( async () => {
         if(value){
-            if(value.type.includes("image")){
-                setFileType("image");
-            } else if(value.type.includes("video")){
-                setFileType("video");
-            }
+            setFileType(value.type);
             setFileSrc(await displayUploadedFile(value));
         }
     },[value]);
@@ -44,11 +40,7 @@ const FileUpload = (props) => {
     const handleUpload = async () => {
         const file = inputRef.current.files[0] || value;
         try{
-            if(file.type.includes("image")){
-                setFileType("image");
-            } else if(file.type.includes("video")){
-                setFileType("video");
-            }
+            setFileType(file.type);
             setFileSrc(await displayUploadedFile(file));
             setValue(file);
             dispatch({
@@ -68,31 +60,35 @@ const FileUpload = (props) => {
         }
     };
 
+    console.log(fileType);
+    console.log(fileSrc);
+
     return(
-        <div className={'imageDivContainer'}>   
-            <div className ={'imageDiv'}>
-                { 
-                    (fileType === "image") ? 
-                        <img src={fileSrc} alt="image preview" className="imagePreview__image"/> :
-                        <video 
-                            width="320" 
-                            height="240" 
-                            className="imagePreview__video" 
-                            controls="controls"
-                        >
-                            <source src={fileSrc} type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'/>
-                            <source src={fileSrc} type='video/ogg; codecs="theora, vorbis"'/>
-                            <source src={fileSrc} type='video/webm'/>
-                            Your browser does not support the video tag.
-                        </video>                
-                }
-                {
-                    !fileSrc && 
-                    <span className="imagePreview__default-display">
-                        Image Preview
-                    </span>   
-                }
-            </div> 
+        <div className={'imageDivContainer'}>
+            <div className={'imageDiv'}>   
+                    { 
+                        (fileType.includes("image")) ? 
+                            <img src={fileSrc} alt="image preview" className="imagePreview__image" autoplay="false" /> :
+                            <video 
+                                width="320" 
+                                height="240" 
+                                className="imagePreview__video" 
+                                controls="controls"
+                            >
+                                <source src={fileSrc} type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'/>
+                                <source src={fileSrc} type='video/ogg; codecs="theora, vorbis"'/>
+                                <source src={fileSrc} type='video/webm'/>
+                                <source src={fileSrc} type='video/mpeg'/>
+                                Your browser does not support the video tag.
+                            </video>   
+                    }
+                    {
+                        !fileSrc && 
+                        <span className="imagePreview__default-display">
+                            Image Preview
+                        </span>   
+                    }           
+            </div>
             <input 
                 disabled={disabled}
                 id={'uploadedImaged'} 
@@ -101,7 +97,7 @@ const FileUpload = (props) => {
                 ref={inputRef} 
                 onLoad={handleUpload} 
                 onChange={handleUpload}
-            />            
+            /> 
         </div>
     );
 }

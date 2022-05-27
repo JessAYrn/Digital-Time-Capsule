@@ -258,7 +258,7 @@ const Journal = (props) => {
                         <NavBar
                             walletLink={true}
                             journalLink={false}
-                            nftLink={false}
+                            nftLink={true}
                             accountLink={true}
                             dashboardLink={true}
                             notificationIcon={true}

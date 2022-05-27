@@ -325,7 +325,7 @@ const JournalPage = (props) => {
                                 value={(journalPageData) ? journalPageData.entry : ''}
                             />
                         </div>
-                        <div className={"journalImages"}>
+                        <div className='fileContainer'>
                             <FileUpload
                                 label={'file1'}
                                 dispatch={journalReducerDispatchFunction}
@@ -336,6 +336,8 @@ const JournalPage = (props) => {
                                 setValue={setFile1}
                                 index={index}
                             />
+                        </div>
+                        <div className='fileContainer'>
                             <FileUpload
                                 label={'file2'}
                                 dispatch={journalReducerDispatchFunction}

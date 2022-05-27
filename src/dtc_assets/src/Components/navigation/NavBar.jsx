@@ -61,6 +61,14 @@ export const NavBar = (props) => {
                             </div>
                     }
                     {
+                        nftLink &&
+                            <div className="nftLinkDiv" style={{marginLeft: marginPxCount + 'px', marginRight: marginPxCount+ 'px'}}>
+                                <Link className={"navLink_Journal"} to={NAV_LINKS.nft}>
+                                    <img src={"nft-icon.png"} alt="image preview" className="nftIcon_Journal"/> 
+                                </Link>
+                            </div>
+                    }
+                    {
                         notificationIcon && 
                             <div className={"notificationIconDiv"} style={{marginLeft: marginPxCount + 'px', marginRight: marginPxCount+ 'px'}}>
                                 <img src={notificationIconSrc} onClick={toggleDisplayNotifications}/>
