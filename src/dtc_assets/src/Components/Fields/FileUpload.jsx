@@ -76,18 +76,20 @@ const FileUpload = (props) => {
                             <img src={fileSrc} alt="image preview" className="imagePreview__image" autoplay="false" /> :
                             (fileType.includes("quicktime") && (typeOfDevice !== DEVICE_TYPES.desktop)) ?
                             <video 
-                                width="320" 
-                                height="240" 
+                                width="330" 
+                                height="443" 
                                 className="imagePreview__video" 
                                 preload
+                                style={{borderRadius: 10 + 'px'}}
                                 controls
                                 muted
                                 poster={'video-thumbnail.png'}
                                 src={fileSrc}
                             ></video> :
                             <video 
-                                width="320" 
-                                height="240" 
+                                width="330" 
+                                height="443" 
+                                style={{borderRadius: 10 + 'px'}}
                                 className="imagePreview__video" 
                                 preload="metadata"
                                 controls
