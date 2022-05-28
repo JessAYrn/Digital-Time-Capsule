@@ -31,9 +31,8 @@ const FileUpload = (props) => {
 
     const [fileSrc, setFileSrc]  = useState("dtc-logo-black.png");
     const [fileType, setFileType] = useState("image/png");
-    const [typeOfDevice, setTypeOfDevice] = useState('');
 
-    setTypeOfDevice(deviceType());
+    const typeOfDevice = deviceType();
 
     useEffect( async () => {
         if(value){
