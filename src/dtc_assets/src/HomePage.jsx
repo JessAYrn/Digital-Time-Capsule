@@ -92,7 +92,7 @@ const HomePage = () => {
                             <NavBar
                                 walletLink={true}
                                 journalLink={true}
-                                nftLink={false}
+                                nftLink={true}
                                 accountLink={true}
                                 dashboardLink={false}
                                 notificationIcon={false}

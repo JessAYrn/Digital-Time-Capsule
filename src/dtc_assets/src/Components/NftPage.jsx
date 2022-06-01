@@ -1,6 +1,7 @@
 import React, {useEffect, useReducer, useState, useContext } from "react";
 import journalReducer, {initialState, types} from "../reducers/journalReducer";
 import { AppContext } from "../NFTs";
+import { NavBar } from "./navigation/NavBar";
 import "./NftPage.scss";
 const NftPage = () => {
     const [journalState, dispatch] = useReducer(journalReducer, initialState);
@@ -27,6 +28,14 @@ const NftPage = () => {
     return(
         <div className='container'>
             <div className={"background"}>
+            <NavBar
+                walletLink={true}
+                journalLink={true}
+                nftLink={false}
+                accountLink={true}
+                dashboardLink={true}
+                notificationIcon={false}
+            />
             </div>
         </div>
     );

@@ -13,3 +13,9 @@ export const NAV_LINKS = {
     account: '/account',
     dashboard: '/'
 };
+
+export const DEVICE_TYPES = {
+    mobile: "mobile",
+    tablet: "tablet",
+    desktop: "desktop"
+};

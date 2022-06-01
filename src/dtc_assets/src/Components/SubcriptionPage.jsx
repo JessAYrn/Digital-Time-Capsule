@@ -152,7 +152,7 @@ return(
             <NavBar
                 walletLink={true}
                 journalLink={true}
-                nftLink={false}
+                nftLink={true}
                 accountLink={false}
                 dashboardLink={true}
                 notificationIcon={false}

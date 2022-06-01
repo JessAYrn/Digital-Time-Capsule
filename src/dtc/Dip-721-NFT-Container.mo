@@ -111,6 +111,7 @@ shared actor class Dip721NFT(custodian: Principal, init : Types.Dip721NonFungibl
                 let update : Types.Nft = {
                     owner = to;
                     id = token.id;
+                    fileType = token.fileType;
                     metadata = token.metadata;
                 };
                 let (updatedNftsTrie, oldValueForThisKey) = Trie.put(
@@ -178,15 +179,25 @@ shared actor class Dip721NFT(custodian: Principal, init : Types.Dip721NonFungibl
         return maxLimit;
     };
 
-    public query func getTokenIdsAndMetadataArraySize(user: Principal) : async [(Types.TokenId, Nat)] {
+    public query func getTokenMetadataInfo(user: Principal) : async [Types.TokenMetaData] {
         let items = Trie.filter(nfts, func(key : Nat, token: Types.Nft) : Bool { token.owner == user });
         let itemsIter = Trie.iter(items);
-        let ArrayBuffer = Buffer.Buffer<(Types.TokenId, Nat)>(1);
+        let ArrayBuffer = Buffer.Buffer<Types.TokenMetaData>(1);
         Iter.iterate<(Nat,Types.Nft)>(itemsIter, func(x :(Nat, Types.Nft), _index) {
+
             let nft = x.1;
+            let nft_Id = nft.id;
             let nftMetadataArray = nft.metadata;
+            let nftFileType = nft.fileType;
             let nftMetadataArraySize = Iter.size(Iter.fromArray(nftMetadataArray));
-            ArrayBuffer.add((x.1.id, nftMetadataArraySize));
+            let nftMetaDataInfo : Types.TokenMetaData = { 
+                id = nft_Id; 
+                metaDataArraySize = nftMetadataArraySize; 
+                fileType = nftFileType; 
+            };
+            
+            ArrayBuffer.add(nftMetaDataInfo);
+
         });
         let tokenIds = ArrayBuffer.toArray();
         return tokenIds;
@@ -208,7 +219,7 @@ shared actor class Dip721NFT(custodian: Principal, init : Types.Dip721NonFungibl
         #ok(());
     };
 
-    public shared({ caller }) func mintDip721(to: Principal) : async Types.MintReceipt {
+    public shared({ caller }) func mintDip721(to: Principal, file_Type: Text) : async Types.MintReceipt {
         if (not List.some(custodians, func (custodian : Principal) : Bool { custodian == caller })) {
         return #Err(#Unauthorized);
         };
@@ -217,6 +228,7 @@ shared actor class Dip721NFT(custodian: Principal, init : Types.Dip721NonFungibl
         let nft : Types.Nft = {
             owner = to;
             id = newId;
+            fileType = file_Type;
             metadata = localFile;
         };
 

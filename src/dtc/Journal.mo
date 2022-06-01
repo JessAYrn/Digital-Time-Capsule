@@ -18,98 +18,18 @@ import Int "mo:base/Int";
 import Account "./Account";
 import Bool "mo:base/Bool";
 import Option "mo:base/Option";
+import JournalTypes "journal.types";
 
 shared(msg) actor class Journal (principal : Principal) = this {
     let callerId = msg.caller;
 
-    type JournalEntryV2 = {
-        entryTitle: Text;
-        text: Text;
-        location: Text;
-        date: Text;
-        lockTime: Int;
-        unlockTime: Int;
-        sent: Bool;
-        emailOne: Text;
-        emailTwo: Text;
-        emailThree: Text;
-        read: Bool;
-        draft: Bool;
-        file1MetaData: {
-            fileName: Text;
-            lastModified: Int;
-            fileType: Text;
-        };
-        file2MetaData: {
-            fileName: Text;
-            lastModified: Int;
-            fileType: Text;
-        };
-    }; 
-
-    type JournalEntryInput = {
-        entryTitle: Text;
-        text: Text;
-        location: Text;
-        date: Text;
-        lockTime: Int;
-        emailOne: Text;
-        emailTwo: Text;
-        emailThree: Text;
-        draft: Bool;
-        file1MetaData: {
-            fileName: Text;
-            lastModified: Int;
-            fileType: Text;
-        };
-        file2MetaData: {
-            fileName: Text;
-            lastModified: Int;
-            fileType: Text;
-        };
-    };
-
-    type JournalFile = {
-        file: Trie.Trie<Text, Blob>;
-    };
-
-    type Error ={
-        #NotFound;
-        #AlreadyExists;
-        #NotAuthorized;
-    };
-
-    type Bio = {
-        name : Text;
-        dob: Text;
-        pob: Text;
-        dedications: Text;
-        preface: Text;
-    };
-
-    type Transaction = {
-        balanceDelta: Nat64;
-        increase: Bool;
-        recipient: ?Account.AccountIdentifier;
-        timeStamp: ?Nat64;
-        source: ?Account.AccountIdentifier;
-    };
-
-
-    //Application State
-    //stable makes it so that the variable persists across updates to the canister
-    //var refers to the data being a variable
-    //profiles is the name of the variable
-    //Trie.Trie is the data type. a Trie is a key/value map where Nat is the key and Profile is the data type
-    // and it has been initialized as empty. hence the Trie.empty()
-
-    private stable var journalV2 : Trie.Trie<Nat, JournalEntryV2> = Trie.empty();
+    private stable var journalV2 : Trie.Trie<Nat, JournalTypes.JournalEntry> = Trie.empty();
 
     private stable var files : Trie.Trie2D<Text,Nat,Blob> = Trie.empty();
 
-    private stable var txHistory : Trie.Trie<Nat, Transaction> = Trie.empty();
+    private stable var txHistory : Trie.Trie<Nat, JournalTypes.Transaction> = Trie.empty();
 
-    private stable var biography : Bio = {
+    private stable var biography : JournalTypes.Bio = {
         name = "";
         dob = "";
         pob = "";
@@ -164,7 +84,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
         { accepted = Nat64.fromNat(accepted) };
     };
 
-    public shared(msg) func createEntry( journalEntry : JournalEntryInput) : async Result.Result<Trie.Trie<Nat, JournalEntryV2>, Error> {
+    public shared(msg) func createEntry( journalEntry : JournalTypes.JournalEntryInput) : 
+    async Result.Result<Trie.Trie<Nat, JournalTypes.JournalEntry>, JournalTypes.Error> {
         let callerId = msg.caller;
         if(
             Principal.toText(callerId) != mainCanisterId and 
@@ -205,7 +126,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         #ok(journalV2);
     };
 
-    public shared(msg) func createFile(fileId: Text ,chunkId : Nat, blobChunk : Blob) : async Result.Result<(), Error> {
+    public shared(msg) func createFile(fileId: Text ,chunkId : Nat, blobChunk : Blob) : async Result.Result<(), JournalTypes.Error> {
         let callerId = msg.caller;
         if(
             Principal.toText(callerId) != mainCanisterId and 
@@ -262,7 +183,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         };
     };
 
-    public shared(msg) func readJournal() : async ([(Nat,JournalEntryV2)], Bio) {
+    public shared(msg) func readJournal() : async ([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio) {
         let callerId = msg.caller;
         if(
             Principal.toText(callerId) != mainCanisterId and 
@@ -275,7 +196,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         return ((journalAsArray), biography);
     };
 
-    public shared(msg) func getEntriesToBeSent() : async ([(Nat, JournalEntryV2)]) {
+    public shared(msg) func getEntriesToBeSent() : async ([(Nat, JournalTypes.JournalEntry)]) {
         let callerId = msg.caller;
         if(
             Principal.toText(callerId) != mainCanisterId and 
@@ -286,9 +207,9 @@ shared(msg) actor class Journal (principal : Principal) = this {
         };
 
         let journalIter = Trie.iter(journalV2);
-        let entriesToBeSentBuffer = Buffer.Buffer<(Nat, JournalEntryV2)>(1);
+        let entriesToBeSentBuffer = Buffer.Buffer<(Nat, JournalTypes.JournalEntry)>(1);
 
-        Iter.iterate<(Nat, JournalEntryV2)>(journalIter, func(x : (Nat, JournalEntryV2), _index) {
+        Iter.iterate<(Nat, JournalTypes.JournalEntry)>(journalIter, func(x : (Nat, JournalTypes.JournalEntry), _index) {
             if(x.1.sent == false){
                 if(Time.now() >= x.1.unlockTime){
                     entriesToBeSentBuffer.add(x);
@@ -325,7 +246,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         return entriestoBeSentArray;
     };
 
-    public shared(msg) func readJournalEntry(key : Nat): async Result.Result<JournalEntryV2, Error> {
+    public shared(msg) func readJournalEntry(key : Nat): async Result.Result<JournalTypes.JournalEntry, JournalTypes.Error> {
 
         let callerId = msg.caller;
         if(
@@ -349,7 +270,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
             };
             case(? entryValue){
                 
-                let updatedEntryValue : JournalEntryV2 = {
+                let updatedEntryValue : JournalTypes.JournalEntry = {
                     entryTitle = entryValue.entryTitle;
                     text = entryValue.text;
                     location = entryValue.location;
@@ -380,7 +301,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         }
     };
 
-    public shared(msg) func readJournalFileChunk (fileId : Text, chunkId: Nat) : async Result.Result<(Blob),Error> {
+    public shared(msg) func readJournalFileChunk (fileId : Text, chunkId: Nat) : async Result.Result<(Blob),JournalTypes.Error> {
         let callerId = msg.caller;
         if(
             Principal.toText(callerId) != mainCanisterId and 
@@ -418,7 +339,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         };
     };
 
-    public shared(msg) func readJournalFileSize (fileId : Text) : async Result.Result<(Nat),Error> {
+    public shared(msg) func readJournalFileSize (fileId : Text) : async Result.Result<(Nat),JournalTypes.Error> {
         let callerId = msg.caller;
         if(
             Principal.toText(callerId) != mainCanisterId and 
@@ -445,7 +366,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         };
     };
 
-    public shared(msg) func updateBio(bio: Bio) : async Result.Result<(), Error>{
+    public shared(msg) func updateBio(bio: JournalTypes.Bio) : async Result.Result<(), JournalTypes.Error>{
         let callerId = msg.caller;
         if(
             Principal.toText(callerId) != mainCanisterId and 
@@ -460,7 +381,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
 
 
-    public shared(msg) func updateJournalEntry(key: Nat, journalEntry: JournalEntryInput) : async Result.Result<Trie.Trie<Nat,JournalEntryV2>,Error> {
+    public shared(msg) func updateJournalEntry(key: Nat, journalEntry: JournalTypes.JournalEntryInput) : async Result.Result<Trie.Trie<Nat,JournalTypes.JournalEntry>,JournalTypes.Error> {
         let callerId = msg.caller;
         if(
             Principal.toText(callerId) != mainCanisterId and 
@@ -514,7 +435,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     };
 
-    public shared(msg) func updateJournalEntryFile(fileId: Text, chunkId: Nat, blobChunk : Blob) : async Result.Result<(),Error> {
+    public shared(msg) func updateJournalEntryFile(fileId: Text, chunkId: Nat, blobChunk : Blob) : async Result.Result<(),JournalTypes.Error> {
         let callerId = msg.caller;
         if(
             Principal.toText(callerId) != mainCanisterId and 
@@ -553,7 +474,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
 
 
-    public shared(msg) func deleteJournalEntry(key: Nat) : async Result.Result<Trie.Trie<Nat,JournalEntryV2>,Error> {
+    public shared(msg) func deleteJournalEntry(key: Nat) : 
+    async Result.Result<Trie.Trie<Nat,JournalTypes.JournalEntry>,JournalTypes.Error> {
         let callerId = msg.caller;
         if(
             Principal.toText(callerId) != mainCanisterId and 
@@ -588,7 +510,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     };
 
-    public shared(msg) func deleteJournalEntryFile(fileId: Text) : async Result.Result<(),Error> {
+    public shared(msg) func deleteJournalEntryFile(fileId: Text) : async Result.Result<(),JournalTypes.Error> {
         let callerId = msg.caller;
         if(
             Principal.toText(callerId) != mainCanisterId and 
@@ -659,7 +581,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         };
     };
 
-    public shared(msg) func readWalletTxHistory() : async [(Nat,Transaction)] {
+    public shared(msg) func readWalletTxHistory() : async [(Nat,JournalTypes.Transaction)] {
         let callerId = msg.caller;
         if(
             Principal.toText(callerId) != mainCanisterId and 
@@ -672,7 +594,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         Iter.toArray(Trie.iter(txHistory));
     };
 
-    public shared(msg) func updateTxHistory(tx : Transaction) : async () {
+    public shared(msg) func updateTxHistory(tx : JournalTypes.Transaction) : async () {
         let callerId = msg.caller;
         if(
             Principal.toText(callerId) != mainCanisterId and 

@@ -1,52 +1,35 @@
 .imageDivContainer{
-    @media screen and (max-width: 900px){
-        width: 100%;
-    };
-    width: 49%;
-    height: 443px;
     float: left;
-    margin: 0.25%;
-    border: solid;
-    border:rgb(37, 37, 37);
-    background-color: rgb(245, 245, 245);
-    box-shadow: 0 5px 16px rgb(0 0 0 / 20%);
-
+    width: 330px;
+    border-radius: 10px;
+    height: 500px;
+    margin: auto;
+    padding-top: 27px;
+    margin-left: 11.5px;
+    margin-right: 11.5px;
     .imageDiv{
-        width: 90%;
-        height: 90%;
-        margin-left: 5%;
+        @media screen and (max-width: 900px){
+            width: 100%;
+        };
+        width: 100%;
+        height: 443px;
+        float: left;
+        display: flex;
+        margin: 0.25%;
+        border: solid;
+        border-radius: 15px;
+        border:rgb(37, 37, 37);
+        background-color: rgb(245, 245, 245);
+        box-shadow: 0 5px 16px rgb(0 0 0 / 20%);
         img{
-            @media screen and (max-width: 900px){
-                padding-top: 4%;
-            };
-            @media screen and (max-width: 1200px){
-                max-height: 90%;
-            };
-            padding-top: 8%;
             max-width: 100%;
-            height: 380px;
+            max-height: 100%;
+            border-radius: 15px;
         }
     }
-
-
     .imageInputButton{
         padding-left: 37%;
         width: 5rem;
         margin-bottom: 1rem;
     }
-
-    &__image{
-        max-width: 20rem;
-        max-height: 20rem;
-        padding: 1rem;
-    }
-
-    &__video{
-        max-width: 15rem;
-        height: 20rem;
-        margin-top: 1rem;
-        padding-left: 2.5rem;
-        padding-right: 2.5rem;
-    }
-    
 }

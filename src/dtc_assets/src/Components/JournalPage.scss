@@ -1,6 +1,7 @@
 .journalPageContainer{
     .submitButtonDiv{
         width: 100%;
+        float: left;
         .button{
             width: 80%;
             margin-left: 10%;
@@ -9,30 +10,60 @@
         }
     }
     .journalText{
-        @media screen and (max-width: 1200px) {    
+        @media screen and (max-width: 1260px) {    
             width: 90%;
             float: left;
             margin-left: 5%
         };
+        margin-left: 20px;
+        margin-right: 20px;
         width: 40%;
         float: left;
+    }
+    .fileContainer{
+        float: left;
+        @media screen and (min-width: 1205px) and (max-width: 1260px) {    
+            margin-left: 12.5%;
+        };
+        @media screen and (min-width: 1135px) and (max-width: 1204px) {    
+            margin-left: 12%;
+        };
+        @media screen and (min-width: 1065px) and (max-width: 1134px) {    
+            margin-left: 10%;
+        };
+        @media screen and (min-width: 995px) and (max-width: 1064px) {    
+            margin-left: 8.5%;
+        };
+        @media screen and (min-width: 915px) and (max-width: 994px) {    
+            margin-left: 6.5%;
+        };
+        @media screen and (min-width: 845px) and (max-width: 914px) {    
+            margin-left: 4.5%;
+        };
+        @media screen and (min-width: 775px) and (max-width: 844px) {    
+            margin-left: 3.5%;
+        };
+        @media screen and (min-width: 660px) and (max-width: 774px) {    
+            margin-left: 23%;
+        };
+        @media screen and (min-width: 590px) and (max-width: 659px) {    
+            margin-left: 20%;
+        };
+        @media screen and (min-width: 520px) and (max-width: 589px) {    
+            margin-left: 16%;
+        };
+        @media screen and (min-width: 450px) and (max-width: 519px) {    
+            margin-left: 12%;
+        };
+        @media screen and (min-width: 380px) and (max-width: 449px) {    
+            margin-left: 4%;
+        };
     }
 
     .recipientEmailsDiv{
         width: 40%;
         margin-top: 37%;
     }
-
-    .journalImages{
-        @media screen and (max-width: 1200px) {    
-            width: 90%;
-            float: left;
-            margin-left: 5%
-        };
-        float: left;
-        margin-top: 2%;
-        width: 60%;
-    }   
 
     .logoDiv{
         width: 100%;
