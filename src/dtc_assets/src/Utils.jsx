@@ -54,3 +54,7 @@ export const deviceType = () => {
     }
     return "desktop";
 };
+
+export const round2Decimals = (num) => {
+  return Math.round(num * 100) / 100
+}

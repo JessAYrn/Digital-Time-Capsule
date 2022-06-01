@@ -3,8 +3,11 @@ import "./FileUpload.scss";
 import { useEffect } from '../../../../../dist/dtc_assets';
 import { deviceType } from '../../Utils';
 import { DEVICE_TYPES } from '../../Constants';
+import { round2Decimals } from '../../Utils';
 
-const MAX_VIDEO_DURATION_IN_SECONDS = 30;
+const MAX_NUMBER_OF_BYTES = 21000000;
+const WIGGLE_ROOM =500000;
+const MEGABYTES = 1000000;
 
 const forbiddenFileTypes = [
     'application/pdf'
@@ -22,12 +25,13 @@ const FileUpload = (props) => {
         setValue,
         hasError,
         elementId,
+        setChangesWereMade
     } = props;
     let inputRef = useRef();
 
     const [fileSrc, setFileSrc]  = useState("dtc-logo-black.png");
     const [fileType, setFileType] = useState("image/png");
-    const [video, setVideo] = useState(null);
+    const [fileSize, setFileSize] = useState(0);
 
     const displayUploadedFile = (inputFile) => {
         const reader = new FileReader();
@@ -41,55 +45,11 @@ const FileUpload = (props) => {
         });
     }; 
 
-
-    useEffect(async () => {
-        if(fileType.includes('video')){
-            setVideo(document.getElementById(elementId));
-            if(video){
-                video.addEventListener('loadedmetadata', (event) => {
-                    if (video.readyState > 0 && video.duration > MAX_VIDEO_DURATION_IN_SECONDS){
-                        dispatch({
-                            payload: true,
-                            actionType: toggleErrorAction,
-                            index: index
-                        });
-                    } else {
-                        dispatch({
-                            payload: false,
-                            actionType: toggleErrorAction,
-                            index: index
-                        });
-                    }  
-                });
-            } else {
-                dispatch({
-                    payload: true,
-                    actionType: toggleErrorAction,
-                    index: index
-                });
-            }
-        } else {
-            if(forbiddenFileTypes.includes(fileType)){
-                dispatch({
-                    payload: true,
-                    actionType: toggleErrorAction,
-                    index: index
-                });
-            } else {
-                dispatch({
-                    payload: false,
-                    actionType: toggleErrorAction,
-                    index: index
-                });
-            }
-        }
-
-    }, [fileSrc, video]);
-
     const typeOfDevice = deviceType();
 
     useEffect( async () => {
         if(value){
+            setFileSize(value.size);
             setFileType(value.type);
             setFileSrc(await displayUploadedFile(value));
         }
@@ -97,25 +57,34 @@ const FileUpload = (props) => {
 
     const handleUpload = async () => {
         const file = inputRef.current.files[0] || value;
-        try{
-            setFileType(file.type);
-            setFileSrc(await displayUploadedFile(file));
-            setValue(file);
+        setFileSize(file.size);
+        if(file.size > MAX_NUMBER_OF_BYTES + WIGGLE_ROOM || forbiddenFileTypes.includes(file.type)){
             dispatch({
-                payload: {
-                    fileName: `${file.name}-${Date.now()}`,
-                    lastModified: file.lastModified,
-                    fileType: file.type,
-                    hasError: false
-                },
-                actionType: dispatchAction,
+                payload: true,
+                actionType: toggleErrorAction,
                 index: index
-            })
-        } catch(e) {
-            console.warn(e.message);
-        }
-        if(!!setPageChangesMade){
-            setPageChangesMade(true);
+            });
+        } else {
+            try{
+                setFileType(file.type);
+                setFileSrc(await displayUploadedFile(file));
+                setValue(file);
+                dispatch({
+                    payload: {
+                        fileName: `${file.name}-${Date.now()}`,
+                        lastModified: file.lastModified,
+                        fileType: file.type,
+                        hasError: false
+                    },
+                    actionType: dispatchAction,
+                    index: index
+                })
+            } catch(e) {
+                console.warn(e.message);
+            }
+            if(!!setChangesWereMade){
+                setChangesWereMade(true);
+            }
         }
     };
 
@@ -123,13 +92,20 @@ const FileUpload = (props) => {
         <div className={'imageDivContainer'}>
             <div className={'imageDiv'}>   
                     { (hasError) ?
+                    <>
                         <img 
                             id={elementId} 
                             src={'file-error.png'} 
                             alt="image preview" 
                             className="imagePreview__image" 
                             autoplay="false" 
-                        /> :
+                        />
+                        <div className={'errorMsg'}>
+                            Your file is {round2Decimals(fileSize / MEGABYTES)} MegaBytes. <br/>
+                            Please reduce file by {round2Decimals((fileSize - MAX_NUMBER_OF_BYTES) / MEGABYTES)} MegaBytes.
+                        </div>
+                    </>
+                         :
                         (fileType.includes("image")) ? 
                             <img 
                                 src={fileSrc} 

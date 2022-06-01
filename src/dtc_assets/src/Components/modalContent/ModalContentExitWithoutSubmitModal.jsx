@@ -29,7 +29,7 @@ const ExitWithoutSubmit = (props) => {
                     Error: cannot sumbit due to error with uploaded file
                 </h1>
                 <div className={'buttonDiv__ok'}>
-                    <button className='button' onClick={onClickSubmit}> OK </button> 
+                    <button className='button' onClick={onClickExit}> OK </button> 
                 </div>  
             </> :
             <>
