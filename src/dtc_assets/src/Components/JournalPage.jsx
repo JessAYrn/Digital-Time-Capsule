@@ -23,6 +23,8 @@ const JournalPage = (props) => {
     const [isDisabled, setIsDisabled] = useState(false);
     const [pageChangesMade, setPageChangesMade] = useState(false);
     const [showAreYouSureModal, setShowAreYouSureModal] = useState(false);
+    
+
 
     const {
         journalReducerDispatchFunction,
@@ -270,6 +272,10 @@ const JournalPage = (props) => {
                         <div className={'background'}>
                             <Modal 
                                 showModal={showAreYouSureModal} 
+                                hasError={
+                                    journalPageData.file1MetaData.hasError ||
+                                    journalPageData.file2MetaData.hasError
+                                }
                                 setShowModal={setShowAreYouSureModal} 
                                 ChildComponent={ExitWithoutSubmitContent}
                                 closePage={closePage}
@@ -328,55 +334,46 @@ const JournalPage = (props) => {
                         <div className='fileContainer'>
                             <FileUpload
                                 label={'file1'}
+                                elementId={'file1'}
+                                toggleErrorAction={types.CHANGE_FILE1_METADATA_ERROR_STATUS}
                                 dispatch={journalReducerDispatchFunction}
                                 dispatchAction={types.CHANGE_FILE1_METADATA}
                                 value={file1}
                                 setChangesWereMade={setPageChangesMade}
                                 disabled={isDisabled}
                                 setValue={setFile1}
+                                hasError={journalPageData.file1MetaData.hasError}
                                 index={index}
                             />
                         </div>
                         <div className='fileContainer'>
                             <FileUpload
                                 label={'file2'}
+                                elementId={'file2'}
+                                toggleErrorAction={types.CHANGE_FILE2_METADATA_ERROR_STATUS}
                                 dispatch={journalReducerDispatchFunction}
                                 dispatchAction={types.CHANGE_FILE2_METADATA}
                                 value={file2}
                                 setChangesWereMade={setPageChangesMade}
                                 disabled={isDisabled}
                                 setValue={setFile2}
+                                hasError={journalPageData.file2MetaData.hasError}
                                 index={index}
                             />
                         </div>
-                        {/* <div className={'recipientEmailsDiv'}>
-                            <InputBox
-                                label={"1st Recipient Email: "}
-                                rows={"1"}
-                                dispatch={journalReducerDispatchFunction}
-                                dispatchAction={types.CHANGE_RECIPIENT_EMAIL_ONE}
-                                index={index}
-                                value={(journalPageData) ? journalPageData.emailOne : ''}
-                            />
-                            <InputBox
-                                label={"2nd Recipient Email: "}
-                                rows={"1"}
-                                dispatch={journalReducerDispatchFunction}
-                                dispatchAction={types.CHANGE_RECIPIENT_EMAIL_TWO}
-                                index={index}
-                                value={(journalPageData) ? journalPageData.emailTwo : ''}
-                            />
-                            <InputBox
-                                label={"3rd Recipient Email: "}
-                                rows={"1"}
-                                dispatch={journalReducerDispatchFunction}
-                                dispatchAction={types.CHANGE_RECIPIENT_EMAIL_THREE}
-                                index={index}
-                                value={(journalPageData) ? journalPageData.emailThree : ''}
-                            />
-                        </div> */}
                         <div className={"submitButtonDiv"}>
-                            <button className={'button'} type="submit" onClick={handleSubmit} disabled={isDisabled}> Submit </button>
+                            <button 
+                                className={'button'} 
+                                type="submit" 
+                                onClick={handleSubmit} 
+                                disabled={
+                                    isDisabled || 
+                                    journalPageData.file2MetaData.hasError ||
+                                    journalPageData.file1MetaData.hasError
+                                }
+                            > 
+                                Submit 
+                            </button>
                         </div>
                         
                     </div>

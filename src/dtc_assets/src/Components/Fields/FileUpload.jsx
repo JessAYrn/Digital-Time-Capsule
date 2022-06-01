@@ -1,5 +1,4 @@
 import React, {useRef, useState, useEffect, useMemo} from 'react';
-import InputBox from './InputBox';
 import "./FileUpload.scss";
 import { useEffect } from '../../../../../dist/dtc_assets';
 import { deviceType } from '../../Utils';
@@ -16,16 +15,18 @@ const FileUpload = (props) => {
         label,
         disabled,
         dispatchAction,
+        toggleErrorAction,
         dispatch,
         index,
         value,
-        setValue
+        setValue,
+        hasError,
+        elementId,
     } = props;
     let inputRef = useRef();
 
     const [fileSrc, setFileSrc]  = useState("dtc-logo-black.png");
     const [fileType, setFileType] = useState("image/png");
-    const [hasError, setHasError] = useState(false);
     const [video, setVideo] = useState(null);
 
     const displayUploadedFile = (inputFile) => {
@@ -42,24 +43,44 @@ const FileUpload = (props) => {
 
 
     useEffect(async () => {
-        setVideo(document.querySelector('video'));
         if(fileType.includes('video')){
+            setVideo(document.getElementById(elementId));
             if(video){
                 video.addEventListener('loadedmetadata', (event) => {
                     if (video.readyState > 0 && video.duration > MAX_VIDEO_DURATION_IN_SECONDS){
-                        setHasError(true);
+                        dispatch({
+                            payload: true,
+                            actionType: toggleErrorAction,
+                            index: index
+                        });
                     } else {
-                        setHasError(false);
+                        dispatch({
+                            payload: false,
+                            actionType: toggleErrorAction,
+                            index: index
+                        });
                     }  
                 });
             } else {
-                setHasError(true);
+                dispatch({
+                    payload: true,
+                    actionType: toggleErrorAction,
+                    index: index
+                });
             }
         } else {
             if(forbiddenFileTypes.includes(fileType)){
-                setHasError(true);
+                dispatch({
+                    payload: true,
+                    actionType: toggleErrorAction,
+                    index: index
+                });
             } else {
-                setHasError(false);
+                dispatch({
+                    payload: false,
+                    actionType: toggleErrorAction,
+                    index: index
+                });
             }
         }
 
@@ -84,7 +105,8 @@ const FileUpload = (props) => {
                 payload: {
                     fileName: `${file.name}-${Date.now()}`,
                     lastModified: file.lastModified,
-                    fileType: file.type
+                    fileType: file.type,
+                    hasError: false
                 },
                 actionType: dispatchAction,
                 index: index
@@ -101,15 +123,28 @@ const FileUpload = (props) => {
         <div className={'imageDivContainer'}>
             <div className={'imageDiv'}>   
                     { (hasError) ?
-                        <img src={'file-error.png'} alt="image preview" className="imagePreview__image" autoplay="false" /> :
+                        <img 
+                            id={elementId} 
+                            src={'file-error.png'} 
+                            alt="image preview" 
+                            className="imagePreview__image" 
+                            autoplay="false" 
+                        /> :
                         (fileType.includes("image")) ? 
-                            <img src={fileSrc} alt="image preview" className="imagePreview__image" autoplay="false" /> :
+                            <img 
+                                src={fileSrc} 
+                                id={elementId}
+                                alt="image preview" 
+                                className="imagePreview__image" 
+                                autoplay="false" 
+                            /> :
                             (fileType.includes("quicktime") && (typeOfDevice !== DEVICE_TYPES.desktop)) ?
                             <video 
                                 width="330" 
                                 height="443" 
                                 className="imagePreview__video" 
                                 preload
+                                id={elementId}
                                 style={{borderRadius: 10 + 'px'}}
                                 controls
                                 muted
@@ -122,6 +157,7 @@ const FileUpload = (props) => {
                                 style={{borderRadius: 10 + 'px'}}
                                 className="imagePreview__video" 
                                 preload="metadata"
+                                id={elementId}
                                 controls
                                 muted
                                 playsinline
