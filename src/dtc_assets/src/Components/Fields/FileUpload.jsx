@@ -49,7 +49,6 @@ const FileUpload = (props) => {
 
     useEffect( async () => {
         if(value){
-            setFileSize(value.size);
             setFileType(value.type);
             setFileSrc(await displayUploadedFile(value));
         }
@@ -58,30 +57,29 @@ const FileUpload = (props) => {
     const handleUpload = async () => {
         const file = inputRef.current.files[0] || value;
         setFileSize(file.size);
-        if(file.size > MAX_NUMBER_OF_BYTES + WIGGLE_ROOM || forbiddenFileTypes.includes(file.type)){
+        if(
+            file.size > MAX_NUMBER_OF_BYTES + WIGGLE_ROOM || 
+            forbiddenFileTypes.includes(file.type)
+            ){
             dispatch({
                 payload: true,
                 actionType: toggleErrorAction,
                 index: index
             });
         } else {
-            try{
-                setFileType(file.type);
-                setFileSrc(await displayUploadedFile(file));
-                setValue(file);
-                dispatch({
-                    payload: {
-                        fileName: `${file.name}-${Date.now()}`,
-                        lastModified: file.lastModified,
-                        fileType: file.type,
-                        hasError: false
-                    },
-                    actionType: dispatchAction,
-                    index: index
-                })
-            } catch(e) {
-                console.warn(e.message);
-            }
+            setFileType(file.type);
+            setFileSrc(await displayUploadedFile(file));
+            setValue(file);
+            dispatch({
+                payload: {
+                    fileName: `${file.name}-${Date.now()}`,
+                    lastModified: file.lastModified,
+                    fileType: file.type,
+                    hasError: false
+                },
+                actionType: dispatchAction,
+                index: index
+            })
             if(!!setChangesWereMade){
                 setChangesWereMade(true);
             }
