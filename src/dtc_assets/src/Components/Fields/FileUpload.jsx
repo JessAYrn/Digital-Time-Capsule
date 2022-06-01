@@ -1,9 +1,15 @@
-import React, {useRef, useState, useEffect} from 'react';
+import React, {useRef, useState, useEffect, useMemo} from 'react';
 import InputBox from './InputBox';
 import "./FileUpload.scss";
 import { useEffect } from '../../../../../dist/dtc_assets';
 import { deviceType } from '../../Utils';
 import { DEVICE_TYPES } from '../../Constants';
+
+const MAX_VIDEO_DURATION_IN_SECONDS = 30;
+
+const forbiddenFileTypes = [
+    'application/pdf'
+];
 
 const FileUpload = (props) => {
     const {
@@ -17,6 +23,11 @@ const FileUpload = (props) => {
     } = props;
     let inputRef = useRef();
 
+    const [fileSrc, setFileSrc]  = useState("dtc-logo-black.png");
+    const [fileType, setFileType] = useState("image/png");
+    const [hasError, setHasError] = useState(false);
+    const [video, setVideo] = useState(null);
+
     const displayUploadedFile = (inputFile) => {
         const reader = new FileReader();
 
@@ -29,8 +40,30 @@ const FileUpload = (props) => {
         });
     }; 
 
-    const [fileSrc, setFileSrc]  = useState("dtc-logo-black.png");
-    const [fileType, setFileType] = useState("image/png");
+
+    useEffect(async () => {
+        setVideo(document.querySelector('video'));
+        if(fileType.includes('video')){
+            if(video){
+                video.addEventListener('loadedmetadata', (event) => {
+                    if (video.readyState > 0 && video.duration > MAX_VIDEO_DURATION_IN_SECONDS){
+                        setHasError(true);
+                    } else {
+                        setHasError(false);
+                    }  
+                });
+            } else {
+                setHasError(true);
+            }
+        } else {
+            if(forbiddenFileTypes.includes(fileType)){
+                setHasError(true);
+            } else {
+                setHasError(false);
+            }
+        }
+
+    }, [fileSrc, video]);
 
     const typeOfDevice = deviceType();
 
@@ -64,14 +97,11 @@ const FileUpload = (props) => {
         }
     };
 
-    console.log(fileType);
-    console.log(fileSrc);
-    console.log(typeOfDevice);
-
     return(
         <div className={'imageDivContainer'}>
             <div className={'imageDiv'}>   
-                    { 
+                    { (hasError) ?
+                        <img src={'file-error.png'} alt="image preview" className="imagePreview__image" autoplay="false" /> :
                         (fileType.includes("image")) ? 
                             <img src={fileSrc} alt="image preview" className="imagePreview__image" autoplay="false" /> :
                             (fileType.includes("quicktime") && (typeOfDevice !== DEVICE_TYPES.desktop)) ?
@@ -101,7 +131,8 @@ const FileUpload = (props) => {
                                 <source src={fileSrc} type='video/webm; codecs="vp8, vorbis"'/>
                                 <source src={fileSrc} type='video/mpeg'/>
                                 Your browser does not support the video tag.
-                            </video>   
+                            </video>  
+                    
                     }
                     {
                         !fileSrc && 
