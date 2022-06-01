@@ -11,6 +11,7 @@ export const Modal = (props) => {
         setSuccess,
         tableContent,
         handleSubmit,
+        hasError,
         closePage
     } = props;
 
@@ -23,6 +24,7 @@ export const Modal = (props) => {
                     <div className='modalTransparentDiv'>
                         <div className={'modalWrapper'}>
                             <ChildComponent
+                                hasError={hasError}
                                 success={success}
                                 setSuccess={setSuccess}
                                 showModal={showModal}

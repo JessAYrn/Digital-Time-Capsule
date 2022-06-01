@@ -1,21 +1,33 @@
-import React, {useRef, useState, useEffect} from 'react';
-import InputBox from './InputBox';
+import React, {useRef, useState, useEffect, useMemo} from 'react';
 import "./FileUpload.scss";
 import { useEffect } from '../../../../../dist/dtc_assets';
 import { deviceType } from '../../Utils';
 import { DEVICE_TYPES } from '../../Constants';
+
+const MAX_VIDEO_DURATION_IN_SECONDS = 30;
+
+const forbiddenFileTypes = [
+    'application/pdf'
+];
 
 const FileUpload = (props) => {
     const {
         label,
         disabled,
         dispatchAction,
+        toggleErrorAction,
         dispatch,
         index,
         value,
-        setValue
+        setValue,
+        hasError,
+        elementId,
     } = props;
     let inputRef = useRef();
+
+    const [fileSrc, setFileSrc]  = useState("dtc-logo-black.png");
+    const [fileType, setFileType] = useState("image/png");
+    const [video, setVideo] = useState(null);
 
     const displayUploadedFile = (inputFile) => {
         const reader = new FileReader();
@@ -29,8 +41,50 @@ const FileUpload = (props) => {
         });
     }; 
 
-    const [fileSrc, setFileSrc]  = useState("dtc-logo-black.png");
-    const [fileType, setFileType] = useState("image/png");
+
+    useEffect(async () => {
+        if(fileType.includes('video')){
+            setVideo(document.getElementById(elementId));
+            if(video){
+                video.addEventListener('loadedmetadata', (event) => {
+                    if (video.readyState > 0 && video.duration > MAX_VIDEO_DURATION_IN_SECONDS){
+                        dispatch({
+                            payload: true,
+                            actionType: toggleErrorAction,
+                            index: index
+                        });
+                    } else {
+                        dispatch({
+                            payload: false,
+                            actionType: toggleErrorAction,
+                            index: index
+                        });
+                    }  
+                });
+            } else {
+                dispatch({
+                    payload: true,
+                    actionType: toggleErrorAction,
+                    index: index
+                });
+            }
+        } else {
+            if(forbiddenFileTypes.includes(fileType)){
+                dispatch({
+                    payload: true,
+                    actionType: toggleErrorAction,
+                    index: index
+                });
+            } else {
+                dispatch({
+                    payload: false,
+                    actionType: toggleErrorAction,
+                    index: index
+                });
+            }
+        }
+
+    }, [fileSrc, video]);
 
     const typeOfDevice = deviceType();
 
@@ -51,7 +105,8 @@ const FileUpload = (props) => {
                 payload: {
                     fileName: `${file.name}-${Date.now()}`,
                     lastModified: file.lastModified,
-                    fileType: file.type
+                    fileType: file.type,
+                    hasError: false
                 },
                 actionType: dispatchAction,
                 index: index
@@ -64,22 +119,32 @@ const FileUpload = (props) => {
         }
     };
 
-    console.log(fileType);
-    console.log(fileSrc);
-    console.log(typeOfDevice);
-
     return(
         <div className={'imageDivContainer'}>
             <div className={'imageDiv'}>   
-                    { 
+                    { (hasError) ?
+                        <img 
+                            id={elementId} 
+                            src={'file-error.png'} 
+                            alt="image preview" 
+                            className="imagePreview__image" 
+                            autoplay="false" 
+                        /> :
                         (fileType.includes("image")) ? 
-                            <img src={fileSrc} alt="image preview" className="imagePreview__image" autoplay="false" /> :
+                            <img 
+                                src={fileSrc} 
+                                id={elementId}
+                                alt="image preview" 
+                                className="imagePreview__image" 
+                                autoplay="false" 
+                            /> :
                             (fileType.includes("quicktime") && (typeOfDevice !== DEVICE_TYPES.desktop)) ?
                             <video 
                                 width="330" 
                                 height="443" 
                                 className="imagePreview__video" 
                                 preload
+                                id={elementId}
                                 style={{borderRadius: 10 + 'px'}}
                                 controls
                                 muted
@@ -92,6 +157,7 @@ const FileUpload = (props) => {
                                 style={{borderRadius: 10 + 'px'}}
                                 className="imagePreview__video" 
                                 preload="metadata"
+                                id={elementId}
                                 controls
                                 muted
                                 playsinline
@@ -101,7 +167,8 @@ const FileUpload = (props) => {
                                 <source src={fileSrc} type='video/webm; codecs="vp8, vorbis"'/>
                                 <source src={fileSrc} type='video/mpeg'/>
                                 Your browser does not support the video tag.
-                            </video>   
+                            </video>  
+                    
                     }
                     {
                         !fileSrc && 
