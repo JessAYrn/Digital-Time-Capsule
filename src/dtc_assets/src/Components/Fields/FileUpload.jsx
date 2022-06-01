@@ -5,7 +5,7 @@ import { deviceType } from '../../Utils';
 import { DEVICE_TYPES } from '../../Constants';
 import { round2Decimals } from '../../Utils';
 
-const MAX_NUMBER_OF_BYTES = 21000000;
+const MAX_NUMBER_OF_BYTES = 35000000;
 const WIGGLE_ROOM =500000;
 const MEGABYTES = 1000000;
 
