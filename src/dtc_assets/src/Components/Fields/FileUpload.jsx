@@ -5,8 +5,7 @@ import { deviceType } from '../../Utils';
 import { DEVICE_TYPES } from '../../Constants';
 import { round2Decimals } from '../../Utils';
 
-const MAX_NUMBER_OF_BYTES = 35000000;
-const WIGGLE_ROOM =500000;
+const MAX_NUMBER_OF_BYTES = 7500000;
 const MEGABYTES = 1000000;
 
 const forbiddenFileTypes = [
@@ -56,18 +55,16 @@ const FileUpload = (props) => {
 
     const handleUpload = async () => {
         const file = inputRef.current.files[0] || value;
+        setFileType(file.type);
         setFileSize(file.size);
-        if(
-            file.size > MAX_NUMBER_OF_BYTES + WIGGLE_ROOM || 
-            forbiddenFileTypes.includes(file.type)
-            ){
+        if( file.size > MAX_NUMBER_OF_BYTES || forbiddenFileTypes.includes(file.type)){
             dispatch({
                 payload: true,
                 actionType: toggleErrorAction,
                 index: index
             });
+            document.getElementById('uploadedImaged').value = '';
         } else {
-            setFileType(file.type);
             setFileSrc(await displayUploadedFile(file));
             setValue(file);
             dispatch({
@@ -82,8 +79,9 @@ const FileUpload = (props) => {
             })
             if(!!setChangesWereMade){
                 setChangesWereMade(true);
-            }
+            } 
         }
+        
     };
 
     return(
@@ -99,7 +97,7 @@ const FileUpload = (props) => {
                             autoplay="false" 
                         />
                         <div className={'errorMsg'}>
-                            Your file is {round2Decimals(fileSize / MEGABYTES)} MegaBytes. <br/>
+                            Your file is {round2Decimals(fileSize / MEGABYTES)} MegaBytes after compression and upload. <br/>
                             Please reduce file by {round2Decimals((fileSize - MAX_NUMBER_OF_BYTES) / MEGABYTES)} MegaBytes.
                         </div>
                     </>

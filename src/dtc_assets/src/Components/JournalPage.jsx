@@ -366,11 +366,7 @@ const JournalPage = (props) => {
                                 className={'button'} 
                                 type="submit" 
                                 onClick={handleSubmit} 
-                                disabled={
-                                    isDisabled || 
-                                    journalPageData.file2MetaData.hasError ||
-                                    journalPageData.file1MetaData.hasError
-                                }
+                                disabled={isDisabled}
                             > 
                                 Submit 
                             </button>
