@@ -63,7 +63,7 @@ const FileUpload = (props) => {
                 actionType: toggleErrorAction,
                 index: index
             });
-            document.getElementById('uploadedImaged').value = '';
+            document.getElementById(`uploadedImaged__${elementId}`).value = '';
         } else {
             setFileSrc(await displayUploadedFile(file));
             setValue(file);
@@ -151,7 +151,7 @@ const FileUpload = (props) => {
             </div>
             <input 
                 disabled={disabled}
-                id={'uploadedImaged'} 
+                id={`uploadedImaged__${elementId}`} 
                 type="file" 
                 className={'imageInputButton'} 
                 ref={inputRef} 
