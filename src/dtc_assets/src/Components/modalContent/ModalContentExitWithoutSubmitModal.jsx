@@ -1,49 +1,36 @@
 import React from 'react';
+import { MODALS_TYPES } from '../../Constants';
 import "./ModalContentExitWithoutSubmitModal.scss";
 
 const ExitWithoutSubmit = (props) => {
 
     const{
-        showModal,
-        setShowModal,
+        setModalStatus,
         handleSubmit,
-        closePage,
-        hasError
+        closePage
     } = props;
 
     const onClickSubmit = () => {
-        setShowModal(false);
+        setModalStatus({show: false, which: MODALS_TYPES.onSubmit});
         handleSubmit();
     };
 
     const onClickExit = () => {
-        setShowModal(false);
+        setModalStatus({show: false, which: MODALS_TYPES.onSubmit});
         closePage();
     };
 
     return(
         <div className={'exitWithoutSubmitCotentDiv'}>  
-            { hasError ? 
-            <>
-                <h1>
-                    Error: cannot sumbit due to error with uploaded file
-                </h1>
-                <div className={'buttonDiv__ok'}>
-                    <button className='button' onClick={onClickExit}> OK </button> 
-                </div>  
-            </> :
-            <>
-                <h1>
-                    Would you like to submit this journal entry?
-                </h1>
-                <div className={'buttonDiv'}>
-                    <button className='button' onClick={onClickSubmit}> Yes, I almost forgot </button> 
-                </div>   
-                <div className={'buttonDiv'}>
-                    <button className='button' onClick={onClickExit}> No, Don't worry about it  </button> 
-                </div>  
-            </> 
-            }
+            <h1>
+                Would you like to submit this journal entry?
+            </h1>
+            <div className={'buttonDiv'}>
+                <button className='button' onClick={onClickSubmit}> Yes, I almost forgot </button> 
+            </div>   
+            <div className={'buttonDiv'}>
+                <button className='button' onClick={onClickExit}> No, Don't worry about it  </button> 
+            </div>  
         </div>
 
     )

@@ -25,9 +25,7 @@ export const types = {
     CHANGE_RECIPIENT_EMAIL_TWO: "CHANGE_RECIPIENT_EMAIL_TWO",
     CHANGE_RECIPIENT_EMAIL_THREE: "CHANGE_RECIPIENT_EMAIL_THREE",
     CHANGE_FILE1_METADATA: "CHANGE_FILE1_METADATA",
-    CHANGE_FILE2_METADATA: "CHANGE_FILE2_METADATA",
-    CHANGE_FILE1_METADATA_ERROR_STATUS: "CHANGE_FILE1_METADATA_ERROR_STATUS",
-    CHANGE_FILE2_METADATA_ERROR_STATUS: "CHANGE_FILE2_METADATA_ERROR_STATUS"
+    CHANGE_FILE2_METADATA: "CHANGE_FILE2_METADATA"
 
 }
 
@@ -70,14 +68,12 @@ export const initialState = {
             file1MetaData:{
                 fileName: 'null',
                 lastModified: 0,
-                fileType: 'null',
-                hasError: false
+                fileType: 'null'
             },
             file2MetaData:{
                 fileName: 'null',
                 lastModified: 0,
-                fileType: 'null',
-                hasError: false
+                fileType: 'null'
             }
         }
     ]
@@ -237,30 +233,6 @@ const changeValue = (state = initialState, action) => {
             ... state.journal[index],
             file2MetaData: payload
         }
-        state.journal[index] = updatedJournalPage;
-        return {
-            ...state
-        }
-        case types.CHANGE_FILE1_METADATA_ERROR_STATUS:
-            updatedJournalPage = {
-                ... state.journal[index],
-                file1MetaData: {
-                    ...state.journal[index].file1MetaData,
-                    hasError: payload
-                }
-            }
-            state.journal[index] = updatedJournalPage;
-            return {
-                ...state
-            }
-        case types.CHANGE_FILE2_METADATA_ERROR_STATUS:
-            updatedJournalPage = {
-                ... state.journal[index],
-                file2MetaData: {
-                    ...state.journal[index].file2MetaData,
-                    hasError: payload
-                }
-            }
         state.journal[index] = updatedJournalPage;
         return {
             ...state

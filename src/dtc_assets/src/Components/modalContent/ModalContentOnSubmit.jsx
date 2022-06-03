@@ -1,4 +1,5 @@
 import React from 'react';
+import { MODALS_TYPES } from '../../Constants';
 import "./ModalContentOnSubmit.scss";
 
 const ModalContentSubmit = (props) => {
@@ -6,7 +7,7 @@ const ModalContentSubmit = (props) => {
     const {
         success,
         setSuccess,
-        setShowModal,
+        setModalStatus,
         closePage
     } = props;
 
@@ -14,7 +15,7 @@ const ModalContentSubmit = (props) => {
         if(closePage){
             closePage();
         }
-        setShowModal(false);
+        setModalStatus({show: false, which: MODALS_TYPES.onSubmit});
         setSuccess(null);
     };
 

@@ -4,8 +4,8 @@ import "./Modal.scss";
 export const Modal = (props) => {
 
     const {
-        showModal,
-        setShowModal,
+        modalStatus,
+        setModalStatus,
         ChildComponent,
         success,
         setSuccess,
@@ -18,7 +18,7 @@ export const Modal = (props) => {
 
     return(
         <> 
-            { showModal ? 
+            { modalStatus.show ? 
             <div className="modalDiv" >
                 <div className={'modalBackground'}>
                     <div className='modalTransparentDiv'>
@@ -27,9 +27,9 @@ export const Modal = (props) => {
                                 hasError={hasError}
                                 success={success}
                                 setSuccess={setSuccess}
-                                showModal={showModal}
+                                modalStatus={modalStatus}
                                 closePage={closePage}
-                                setShowModal={setShowModal}
+                                setModalStatus={setModalStatus}
                                 tableContent={tableContent}
                                 handleSubmit={handleSubmit}
                             />

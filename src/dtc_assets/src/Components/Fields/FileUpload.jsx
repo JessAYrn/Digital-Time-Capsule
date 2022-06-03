@@ -3,10 +3,9 @@ import "./FileUpload.scss";
 import { useEffect } from '../../../../../dist/dtc_assets';
 import { deviceType } from '../../Utils';
 import { DEVICE_TYPES } from '../../Constants';
+import { MODALS_TYPES } from '../../Constants';
 import { round2Decimals } from '../../Utils';
-
-const MAX_NUMBER_OF_BYTES = 7500000;
-const MEGABYTES = 1000000;
+import { MAX_NUMBER_OF_BYTES } from '../../Constants';
 
 const forbiddenFileTypes = [
     'application/pdf'
@@ -19,10 +18,10 @@ const FileUpload = (props) => {
         dispatchAction,
         toggleErrorAction,
         dispatch,
+        setModalStatus,
         index,
         value,
         setValue,
-        hasError,
         elementId,
         setChangesWereMade
     } = props;
@@ -30,7 +29,6 @@ const FileUpload = (props) => {
 
     const [fileSrc, setFileSrc]  = useState("dtc-logo-black.png");
     const [fileType, setFileType] = useState("image/png");
-    const [fileSize, setFileSize] = useState(0);
 
     const displayUploadedFile = (inputFile) => {
         const reader = new FileReader();
@@ -55,16 +53,17 @@ const FileUpload = (props) => {
 
     const handleUpload = async () => {
         const file = inputRef.current.files[0] || value;
-        setFileType(file.type);
-        setFileSize(file.size);
         if( file.size > MAX_NUMBER_OF_BYTES || forbiddenFileTypes.includes(file.type)){
-            dispatch({
-                payload: true,
-                actionType: toggleErrorAction,
-                index: index
-            });
+            setFileSrc("dtc-logo-black.png");
+            setFileType(file.type);
             document.getElementById(`uploadedImaged__${elementId}`).value = '';
+            setModalStatus({
+                show: true, 
+                which: MODALS_TYPES.fileHasError,
+                fileSize : file.size
+            });
         } else {
+            setFileType(file.type);
             setFileSrc(await displayUploadedFile(file));
             setValue(file);
             dispatch({
@@ -72,7 +71,7 @@ const FileUpload = (props) => {
                     fileName: `${file.name}-${Date.now()}`,
                     lastModified: file.lastModified,
                     fileType: file.type,
-                    hasError: false
+                    errorStatus: {hasError: false, fileSize: 0}
                 },
                 actionType: dispatchAction,
                 index: index
@@ -87,21 +86,7 @@ const FileUpload = (props) => {
     return(
         <div className={'imageDivContainer'}>
             <div className={'imageDiv'}>   
-                    { (hasError) ?
-                    <>
-                        <img 
-                            id={elementId} 
-                            src={'file-error.png'} 
-                            alt="image preview" 
-                            className="imagePreview__image" 
-                            autoplay="false" 
-                        />
-                        <div className={'errorMsg'}>
-                            Your file is {round2Decimals(fileSize / MEGABYTES)} MegaBytes after compression and upload. <br/>
-                            Please reduce file by {round2Decimals((fileSize - MAX_NUMBER_OF_BYTES) / MEGABYTES)} MegaBytes.
-                        </div>
-                    </>
-                         :
+                    { 
                         (fileType.includes("image")) ? 
                             <img 
                                 src={fileSrc} 
@@ -149,15 +134,17 @@ const FileUpload = (props) => {
                         </span>   
                     }           
             </div>
-            <input 
-                disabled={disabled}
-                id={`uploadedImaged__${elementId}`} 
-                type="file" 
-                className={'imageInputButton'} 
-                ref={inputRef} 
-                onLoad={handleUpload} 
-                onChange={handleUpload}
-            /> 
+            { !disabled &&
+                <input 
+                    disabled={disabled}
+                    id={`uploadedImaged__${elementId}`} 
+                    type="file" 
+                    className={'imageInputButton'} 
+                    ref={inputRef} 
+                    onLoad={handleUpload} 
+                    onChange={handleUpload}
+                /> 
+            }
         </div>
     );
 }

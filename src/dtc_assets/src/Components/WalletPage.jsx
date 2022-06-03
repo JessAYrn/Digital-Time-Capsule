@@ -1,4 +1,4 @@
-import React, {useCallback, useContext, useEffect, useState} from 'react';
+import React, {useCallback, useContext, useEffect, useState, useMemo} from 'react';
 import { AppContext } from '../Wallet';
 import { toHexString } from '../Utils';
 import { types } from '../reducers/journalReducer';
@@ -6,7 +6,7 @@ import { NavBar } from './navigation/NavBar';
 import { Modal } from './Modal';
 import './WalletPage.scss';
 import { toHexString, shortenHexString } from '../Utils';
-import { e8sInOneICP } from '../Constants';
+import { e8sInOneICP, MODALS_TYPES } from '../Constants';
 import LoadScreen from './LoadScreen';
 import ModalContentOnSend from './modalContent/ModalContentOnSend';
 import { generateQrCode, RenderQrCode } from './walletFunctions/GenerateQrCode';
@@ -24,14 +24,14 @@ const WalletPage = (props) => {
     } = props;
 
     const { actor, authClient } = useContext(AppContext);
-    const [showModal, setShowModal] = useState(false);
+    const [modalStatus, setModalStatus] = useState({show: false, which: MODALS_TYPES.onSend});
     const [isLoading, setIsLoading] = useState(false);
     const [txHistory, setTxHistory] = useState([]);
     const [isTxHistoryLoading, setIsTxHistoryLoading] = useState(false);
     const [imgUrl, setImgUrl] = useState('');
 
     const openModal = () => {
-        setShowModal(true);
+        setModalStatus({show: true, which: MODALS_TYPES.onSend});
     };
 
     const copyWalletAddress = useCallback(() => copyWalletAddressHelper(journalState.walletData.address), [journalState]);
@@ -80,13 +80,22 @@ const WalletPage = (props) => {
 
     console.log('line 163: ',journalState.walletData);
 
+    const ChildComponent = useMemo(() => {
+
+        let ChildComp = ModalContentOnSend;
+        return ChildComp;
+    },[modalStatus]);
+
     return (
         isLoading ?
         <LoadScreen/> :
         <div className={"container"}>
             <div className="background center">
-                { showModal ? 
-                    <Modal showModal={showModal} setShowModal={setShowModal} ChildComponent={ModalContentOnSend} /> :
+                { modalStatus.show ? 
+                    <Modal 
+                        modalStatus={modalStatus} 
+                        setModalStatus={setModalStatus} 
+                        ChildComponent={ChildComponent} /> :
                     <>
                         <NavBar
                             walletLink={false}
