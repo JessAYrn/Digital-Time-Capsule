@@ -55,7 +55,7 @@ const FileUpload = (props) => {
         const file = inputRef.current.files[0] || value;
         if( file.size > MAX_NUMBER_OF_BYTES || forbiddenFileTypes.includes(file.type)){
             setFileSrc("dtc-logo-black.png");
-            setFileType(file.type);
+            setFileType("image/png");
             document.getElementById(`uploadedImaged__${elementId}`).value = '';
             setModalStatus({
                 show: true, 
