@@ -70,8 +70,7 @@ const FileUpload = (props) => {
                 payload: {
                     fileName: `${file.name}-${Date.now()}`,
                     lastModified: file.lastModified,
-                    fileType: file.type,
-                    errorStatus: {hasError: false, fileSize: 0}
+                    fileType: file.type
                 },
                 actionType: dispatchAction,
                 index: index
