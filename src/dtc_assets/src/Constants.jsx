@@ -30,5 +30,7 @@ export const MODALS_TYPES = {
     onSubmit: 'onSubmit'
 }
 
-export const MAX_NUMBER_OF_BYTES = 7500000;
+export const MAX_NUMBER_OF_BYTES = 21000000;
+
+export const MAX_DURATION_OF_VIDEO_IN_SECONDS = 60;
 

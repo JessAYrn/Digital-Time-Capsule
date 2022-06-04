@@ -1,8 +1,8 @@
 import React, {useRef, useState, useEffect, useMemo} from 'react';
 import "./FileUpload.scss";
 import { useEffect } from '../../../../../dist/dtc_assets';
-import { deviceType } from '../../Utils';
-import { DEVICE_TYPES } from '../../Constants';
+import { deviceType, getFileArrayBuffer } from '../../Utils';
+import { DEVICE_TYPES, MAX_DURATION_OF_VIDEO_IN_SECONDS } from '../../Constants';
 import { MODALS_TYPES } from '../../Constants';
 import { round2Decimals } from '../../Utils';
 import { MAX_NUMBER_OF_BYTES } from '../../Constants';
@@ -16,7 +16,6 @@ const FileUpload = (props) => {
         label,
         disabled,
         dispatchAction,
-        toggleErrorAction,
         dispatch,
         setModalStatus,
         index,
@@ -29,55 +28,83 @@ const FileUpload = (props) => {
 
     const [fileSrc, setFileSrc]  = useState("dtc-logo-black.png");
     const [fileType, setFileType] = useState("image/png");
-
-    const displayUploadedFile = (inputFile) => {
-        const reader = new FileReader();
-
-        return new Promise((resolve, reject) => {
-            reader.onload = () => {
-                resolve(reader.result);
-            }
-            reader.readAsDataURL(inputFile)
-        
-        });
-    }; 
-
+    var uploadedFile;
+    var obUrl;
+    
     const typeOfDevice = deviceType();
 
     useEffect( async () => {
         if(value){
-            setFileType(value.type);
-            setFileSrc(await displayUploadedFile(value));
+            processAndDisplayFile(value);
         }
     },[value]);
 
+    const getDuration = async (file) => {
+        obUrl = URL.createObjectURL(file);
+       
+        return new Promise((resolve) => {
+          const audio = document.createElement("audio");
+          audio.muted = true;
+          const source = document.createElement("source");
+          source.src = obUrl; //--> blob URL
+          audio.preload= "metadata";
+          audio.appendChild(source);
+          audio.onloadedmetadata = function(){
+             resolve(audio.duration)
+          };
+        });
+       }
+
+    const updateFileMetadataInStore = (file) => {
+        dispatch({
+            payload: {
+                fileName: `${file.name}-${Date.now()}`,
+                lastModified: file.lastModified,
+                fileType: file.type
+            },
+            actionType: dispatchAction,
+            index: index
+        })
+        if(!!setChangesWereMade){
+            setChangesWereMade(true);
+        } 
+    };
+
+    const processAndDisplayFile = async (file) => {
+        setFileType(file.type);
+        let fileAsBuffer = await getFileArrayBuffer(file);
+        let videoBlob = new Blob([new Uint8Array(fileAsBuffer)], { type: file.type });
+        let url = window.URL.createObjectURL(videoBlob);
+        setFileSrc(url);
+    };
+
     const handleUpload = async () => {
-        const file = inputRef.current.files[0] || value;
-        if( file.size > MAX_NUMBER_OF_BYTES || forbiddenFileTypes.includes(file.type)){
-            setFileSrc("dtc-logo-black.png");
-            setFileType("image/png");
-            document.getElementById(`uploadedImaged__${elementId}`).value = '';
-            setModalStatus({
-                show: true, 
-                which: MODALS_TYPES.fileHasError,
-                fileSize : file.size
-            });
+        uploadedFile = inputRef.current.files[0] || value;
+        
+        //check file extension for audio/video type
+        //this if statement will ultimately end up triggering the 
+        //canPlayThrough() function.
+        if(uploadedFile.name.match(/\.(avi|mp3|mp4|mpeg|ogg|webm|mov|MOV)$/i)){
+            const duration = await getDuration(uploadedFile);
+            if(duration > MAX_DURATION_OF_VIDEO_IN_SECONDS || forbiddenFileTypes.includes(uploadedFile.type)){
+                setFileSrc("dtc-logo-black.png");
+                setFileType("image/png");
+                setModalStatus({
+                    show: true, 
+                    which: MODALS_TYPES.fileHasError,
+                    fileSize : file.size
+                });
+                URL.revokeObjectURL(obUrl);
+            } else {
+                processAndDisplayFile(uploadedFile);
+                updateFileMetadataInStore(uploadedFile);
+                setValue(uploadedFile);
+            }
         } else {
-            setFileType(file.type);
-            setFileSrc(await displayUploadedFile(file));
-            setValue(file);
-            dispatch({
-                payload: {
-                    fileName: `${file.name}-${Date.now()}`,
-                    lastModified: file.lastModified,
-                    fileType: file.type
-                },
-                actionType: dispatchAction,
-                index: index
-            })
-            if(!!setChangesWereMade){
-                setChangesWereMade(true);
-            } 
+            //triggers useEffect which displays the video
+            processAndDisplayFile(uploadedFile);
+            updateFileMetadataInStore(uploadedFile);
+            setValue(uploadedFile);
         }
         
     };
