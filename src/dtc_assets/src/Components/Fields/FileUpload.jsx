@@ -92,7 +92,7 @@ const FileUpload = (props) => {
                 setModalStatus({
                     show: true, 
                     which: MODALS_TYPES.fileHasError,
-                    fileSize : file.size
+                    duration: duration
                 });
                 URL.revokeObjectURL(obUrl);
             } else {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { MEGABYTES, MAX_NUMBER_OF_BYTES } from '../../Constants';
+import { MEGABYTES, MAX_DURATION_OF_VIDEO_IN_SECONDS } from '../../Constants';
 import { MODALS_TYPES } from '../../Constants';
 import { round2Decimals } from '../../Utils';
 import "./ModalContentHasError.scss";
@@ -23,14 +23,13 @@ const FileHasError = (props) => {
                 
                 <li>
                     <h6 className={'h6'}>
-                        file must be less than or equal to { MAX_NUMBER_OF_BYTES / MEGABYTES} megabytes 
+                        file must be less than or equal to { MAX_DURATION_OF_VIDEO_IN_SECONDS - 1} seconds
                         after compression and upload.
                     </h6>
                 </li>
                 <li>
                     <h6 className={'h6'}>
-                        Your file is {round2Decimals(modalStatus.fileSize / MEGABYTES)} megabytes
-                        after compression and upload.
+                        Your file is {modalStatus.duration} seconds.
                     </h6>
                 </li>
                 <li>
