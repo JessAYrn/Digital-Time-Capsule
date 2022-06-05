@@ -1,5 +1,5 @@
 import React from 'react';
-import { MEGABYTES, MAX_DURATION_OF_VIDEO_IN_SECONDS } from '../../Constants';
+import { MAX_DURATION_OF_VIDEO_IN_SECONDS } from '../../Constants';
 import { MODALS_TYPES } from '../../Constants';
 import { round2Decimals } from '../../Utils';
 import "./ModalContentHasError.scss";
@@ -29,7 +29,7 @@ const FileHasError = (props) => {
                 </li>
                 <li>
                     <h6 className={'h6'}>
-                        Your file is {modalStatus.duration} seconds.
+                        Your file is {round2Decimals(modalStatus.duration)} seconds.
                     </h6>
                 </li>
                 <li>
