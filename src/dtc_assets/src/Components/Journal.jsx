@@ -1,5 +1,5 @@
 import JournalPage from "./JournalPage";
-import React, {useEffect, useReducer, useState, useContext } from "react";
+import React, {useEffect, useReducer, useState, useContext, useMemo } from "react";
 import journalReducer, {initialState, types} from "../reducers/journalReducer";
 import { mapApiObjectToFrontEndObject } from "../mappers/journalPageMappers";
 import "./Journal.scss";
@@ -12,6 +12,8 @@ import ModalContentSubmit from "./modalContent/ModalContentOnSubmit";
 import ModalContentNotifications from "./modalContent/ModalContentNotifications";
 import { milisecondsToNanoSeconds } from "../Utils";
 import { NavBar } from "./navigation/NavBar";
+import { MODALS_TYPES } from "../Constants";
+import { TEST_DATA_FOR_NOTIFICATIONS } from "../testData/notificationsTestData";
 
 const Journal = (props) => {
 
@@ -20,7 +22,7 @@ const Journal = (props) => {
     const [journalState, dispatch] = useReducer(journalReducer, initialState);
     const [pageIsVisibleArray, setPageIsVisibleArray] = useState(journalState.journal.map((page) => false));
     const [newPageAdded, setNewPageAdded] = useState(false);
-    const [showModal, setShowModal] = useState(false);
+    const [modalStatus, setModalStatus] = useState({show: false, which: MODALS_TYPES.onSubmit});
     const [submitSuccessful,setSubmitSuccessful] = useState(null);
     const [journalSize, setJournalSize] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
@@ -124,7 +126,7 @@ const Journal = (props) => {
             preface: journalState.bio.preface
         });
         setIsLoading(false);
-        setShowModal(true);
+        setModalStatus({show:true, which: MODALS_TYPES.onSubmit});
         if("ok" in result){
             setSubmitSuccessful(true);
         } else {
@@ -228,29 +230,34 @@ const Journal = (props) => {
     };
 
     const toggleDisplayNotifications = () => {
-        setDisplayNotifications(!displayNotifications);
+        setModalStatus({show: !modalStatus.show, which: MODALS_TYPES.notifications});
     };
+
+    const ChildComponent = useMemo(() => {
+
+        let ChildComp = ModalContentSubmit;
+        if(modalStatus.which === MODALS_TYPES.notifications) {
+            ChildComp = ModalContentNotifications;
+        }
+
+        return ChildComp;
+    },[modalStatus]);
 
     return(
         isLoading ? 
-        <LoadScreen/> : showModal ?
+        <LoadScreen/> : modalStatus.show ?
         <div className={"container"}>
             <div className={'background'}>
                 <Modal 
-                    showModal={showModal} 
-                    setShowModal={setShowModal} 
-                    ChildComponent={ModalContentSubmit}
+                    modalStatus={modalStatus} 
+                    setModalStatus={setModalStatus} 
+                    ChildComponent={ChildComponent}
                     success={submitSuccessful}
                     setSuccess={setSubmitSuccessful}
+                    tableContent={unreadJournalEntries}
                 />
             </div>
-        </div> : displayNotifications ? 
-        <Modal 
-            showModal={displayNotifications} 
-            setShowModal={toggleDisplayNotifications} 
-            ChildComponent={ModalContentNotifications}
-            tableContent={unreadJournalEntries}
-        /> :
+        </div> : 
         <React.Fragment>
             <>
                 { (getIndexOfVisiblePage() < 0) ? 

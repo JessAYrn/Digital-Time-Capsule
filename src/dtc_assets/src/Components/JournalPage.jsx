@@ -1,4 +1,4 @@
-import React, {useState, useContext, useEffect, useCallback} from "react";
+import React, {useState, useContext, useEffect, useMemo, useCallback} from "react";
 import FileUpload from "./Fields/FileUpload";
 import InputBox from "./Fields/InputBox";
 import Slider from "./Fields/Slider";
@@ -8,9 +8,10 @@ import "./JournalPage.scss";
 import DatePicker from "./Fields/DatePicker";
 import LoadScreen from "./LoadScreen";
 import ModalContentSubmit from "./modalContent/ModalContentOnSubmit";
+import ModalContentHasError from "./modalContent/ModalContentHasError";
 import { Modal } from "./Modal";
 import ExitWithoutSubmitContent from "./modalContent/ModalContentExitWithoutSubmitModal";
-import { CHUNK_SIZE } from "../Constants";
+import { CHUNK_SIZE, MODALS_TYPES } from "../Constants";
 import { fileToBlob } from "../Utils";
 
 const JournalPage = (props) => {
@@ -18,11 +19,13 @@ const JournalPage = (props) => {
     const [file1, setFile1] = useState(null);
     const [file2, setFile2] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [showModal, setShowModal] = useState(false);
+    const [modalStatus, setModalStatus] = useState({show: false, which: MODALS_TYPES.onSubmit});
     const [submitSuccessful,setSubmitSuccessful] = useState(null);
     const [isDisabled, setIsDisabled] = useState(false);
     const [pageChangesMade, setPageChangesMade] = useState(false);
     const [showAreYouSureModal, setShowAreYouSureModal] = useState(false);
+    
+
 
     const {
         journalReducerDispatchFunction,
@@ -228,7 +231,7 @@ const JournalPage = (props) => {
                        (result2 || (result2 === null)) && 
                        (result3 || (result3 === null));
         setIsLoading(false);
-        setShowModal(true);
+        setModalStatus({show: true, which: MODALS_TYPES.onSubmit});
         if(result){
             setIsDisabled(true);
             journalReducerDispatchFunction({
@@ -245,141 +248,132 @@ const JournalPage = (props) => {
 
     const handleClosePage = (e) => {
         if(pageChangesMade){
-            setShowAreYouSureModal(true);
+            setModalStatus({show: true, which: MODALS_TYPES.exitWithoutSubmit});
         } else {
             closePage(e)
         }
     }
 
+    const ChildComponent = useMemo(() => {
+
+        let ChildComp = ModalContentSubmit;
+        if(modalStatus.which === MODALS_TYPES.fileHasError) {
+            ChildComp = ModalContentHasError;
+        } else if(modalStatus.which === MODALS_TYPES.exitWithoutSubmit) {
+            ChildComp = ExitWithoutSubmitContent;
+        }
+
+        return ChildComp;
+    },[
+        journalPageData.file1MetaData.errorStatus,
+        journalPageData.file2MetaData.errorStatus,
+        modalStatus
+    ]);
+
     return (
         isLoading ? 
-            <LoadScreen/> : showModal ? 
+            <LoadScreen/> : modalStatus.show? 
                 <div className={"container"}>
                     <div className={'background'}>
                         <Modal 
-                            showModal={showModal} 
-                            setShowModal={setShowModal} 
-                            ChildComponent={ModalContentSubmit}
+                            modalStatus={modalStatus} 
+                            setModalStatus={setModalStatus} 
+                            ChildComponent={ChildComponent}
+                            handleSubmit={handleSubmit}
                             closePage={closePage}
                             success={submitSuccessful}
                             setSuccess={setSubmitSuccessful}
                         />
                     </div>
-                </div> : showAreYouSureModal ? 
-                    <div className={"container"}>
-                        <div className={'background'}>
-                            <Modal 
-                                showModal={showAreYouSureModal} 
-                                setShowModal={setShowAreYouSureModal} 
-                                ChildComponent={ExitWithoutSubmitContent}
-                                closePage={closePage}
-                                handleSubmit={handleSubmit}
-                            />
-                        </div>
-                    </div> :
-                    <div className={"journalPageContainer"}>
-                        <div className={"logoDiv"}>
-                            <img className={'backButtonImg'} src="back-icon.png" alt="Back Button" onClick={(e) => handleClosePage(e)}/>
-                            <img className={'logoImg'}src="dtc-logo-black.png" alt="Logo" />
-                        </div>
-                        <Slider
-                            min={0}
-                            max={120}
+                </div>  :
+                <div className={"journalPageContainer"}>
+                    <div className={"logoDiv"}>
+                        <img className={'backButtonImg'} src="back-icon.png" alt="Back Button" onClick={(e) => handleClosePage(e)}/>
+                        <img className={'logoImg'}src="dtc-logo-black.png" alt="Logo" />
+                    </div>
+                    <Slider
+                        min={0}
+                        max={120}
+                        setChangesWereMade={setPageChangesMade}
+                        disabled={isDisabled}
+                        dispatch={journalReducerDispatchFunction}
+                        dispatchAction={types.CHANGE_LOCK_TIME}
+                        index={index}
+                        value={(journalPageData) ? journalPageData.lockTime : '3'}
+                    />
+                    <div className={"journalText"} >
+                        <DatePicker
+                            label={"Date: "}
+                            rows={"1"}
+                            disabled={isDisabled}
+                            setChangesWereMade={setPageChangesMade}
+                            dispatch={journalReducerDispatchFunction}
+                            dispatchAction={types.CHANGE_DATE}
+                            index={index}
+                            value={(journalPageData) ? journalPageData.date : ''}
+                        />
+                        <InputBox
+                            label={"Location: "}
+                            rows={"1"}
+                            disabled={isDisabled}
+                            setChangesWereMade={setPageChangesMade}
+                            dispatch={journalReducerDispatchFunction}
+                            dispatchAction={types.CHANGE_LOCATION}
+                            index={index}
+                            value={(journalPageData) ? journalPageData.location : ''}
+                        />
+                        <InputBox
+                            divClassName={"entry"}
+                            label={"Entry: "}
+                            rows={"59"}
+                            disabled={isDisabled}
+                            setChangesWereMade={setPageChangesMade}
+                            dispatch={journalReducerDispatchFunction}
+                            dispatchAction={types.CHANGE_ENTRY}
+                            index={index}
+                            value={(journalPageData) ? journalPageData.entry : ''}
+                        />
+                    </div>
+                    <div className='fileContainer'>
+                        <FileUpload
+                            label={'file1'}
+                            elementId={'file1'}
+                            dispatch={journalReducerDispatchFunction}
+                            dispatchAction={types.CHANGE_FILE1_METADATA}
+                            value={file1}
+                            setModalStatus={setModalStatus} 
                             setChangesWereMade={setPageChangesMade}
                             disabled={isDisabled}
-                            dispatch={journalReducerDispatchFunction}
-                            dispatchAction={types.CHANGE_LOCK_TIME}
+                            setValue={setFile1}
                             index={index}
-                            value={(journalPageData) ? journalPageData.lockTime : '3'}
                         />
-                        <div className={"journalText"} >
-                            <DatePicker
-                                label={"Date: "}
-                                rows={"1"}
-                                disabled={isDisabled}
-                                setChangesWereMade={setPageChangesMade}
-                                dispatch={journalReducerDispatchFunction}
-                                dispatchAction={types.CHANGE_DATE}
-                                index={index}
-                                value={(journalPageData) ? journalPageData.date : ''}
-                            />
-                            <InputBox
-                                label={"Location: "}
-                                rows={"1"}
-                                disabled={isDisabled}
-                                setChangesWereMade={setPageChangesMade}
-                                dispatch={journalReducerDispatchFunction}
-                                dispatchAction={types.CHANGE_LOCATION}
-                                index={index}
-                                value={(journalPageData) ? journalPageData.location : ''}
-                            />
-                            <InputBox
-                                divClassName={"entry"}
-                                label={"Entry: "}
-                                rows={"59"}
-                                disabled={isDisabled}
-                                setChangesWereMade={setPageChangesMade}
-                                dispatch={journalReducerDispatchFunction}
-                                dispatchAction={types.CHANGE_ENTRY}
-                                index={index}
-                                value={(journalPageData) ? journalPageData.entry : ''}
-                            />
-                        </div>
-                        <div className='fileContainer'>
-                            <FileUpload
-                                label={'file1'}
-                                dispatch={journalReducerDispatchFunction}
-                                dispatchAction={types.CHANGE_FILE1_METADATA}
-                                value={file1}
-                                setChangesWereMade={setPageChangesMade}
-                                disabled={isDisabled}
-                                setValue={setFile1}
-                                index={index}
-                            />
-                        </div>
-                        <div className='fileContainer'>
-                            <FileUpload
-                                label={'file2'}
-                                dispatch={journalReducerDispatchFunction}
-                                dispatchAction={types.CHANGE_FILE2_METADATA}
-                                value={file2}
-                                setChangesWereMade={setPageChangesMade}
-                                disabled={isDisabled}
-                                setValue={setFile2}
-                                index={index}
-                            />
-                        </div>
-                        {/* <div className={'recipientEmailsDiv'}>
-                            <InputBox
-                                label={"1st Recipient Email: "}
-                                rows={"1"}
-                                dispatch={journalReducerDispatchFunction}
-                                dispatchAction={types.CHANGE_RECIPIENT_EMAIL_ONE}
-                                index={index}
-                                value={(journalPageData) ? journalPageData.emailOne : ''}
-                            />
-                            <InputBox
-                                label={"2nd Recipient Email: "}
-                                rows={"1"}
-                                dispatch={journalReducerDispatchFunction}
-                                dispatchAction={types.CHANGE_RECIPIENT_EMAIL_TWO}
-                                index={index}
-                                value={(journalPageData) ? journalPageData.emailTwo : ''}
-                            />
-                            <InputBox
-                                label={"3rd Recipient Email: "}
-                                rows={"1"}
-                                dispatch={journalReducerDispatchFunction}
-                                dispatchAction={types.CHANGE_RECIPIENT_EMAIL_THREE}
-                                index={index}
-                                value={(journalPageData) ? journalPageData.emailThree : ''}
-                            />
-                        </div> */}
-                        <div className={"submitButtonDiv"}>
-                            <button className={'button'} type="submit" onClick={handleSubmit} disabled={isDisabled}> Submit </button>
-                        </div>
-                        
                     </div>
+                    <div className='fileContainer'>
+                        <FileUpload
+                            label={'file2'}
+                            elementId={'file2'}
+                            dispatch={journalReducerDispatchFunction}
+                            dispatchAction={types.CHANGE_FILE2_METADATA}
+                            value={file2}
+                            setModalStatus={setModalStatus} 
+                            setChangesWereMade={setPageChangesMade}
+                            disabled={isDisabled}
+                            setValue={setFile2}
+                            index={index}
+                        />
+                    </div>
+                    <div className={"submitButtonDiv"}>
+                        <button 
+                            className={'button'} 
+                            type="submit" 
+                            onClick={handleSubmit} 
+                            disabled={isDisabled}
+                        > 
+                            Submit 
+                        </button>
+                    </div>
+                    
+                </div>
     )
 };
 

@@ -26,10 +26,19 @@
             max-height: 100%;
             border-radius: 15px;
         }
+        .errorMsg{
+            float: left;
+            color: red;
+            margin-left: -312px;
+            width: 330px;
+            margin-top: 351px;
+            font-size: 15px ;
+            text-align: center;
+        }
     }
     .imageInputButton{
-        padding-left: 37%;
-        width: 5rem;
+        padding-left: 108px;
+        width: 92px;
         margin-bottom: 1rem;
     }
 }

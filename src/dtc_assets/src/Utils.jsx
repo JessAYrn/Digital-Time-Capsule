@@ -54,3 +54,19 @@ export const deviceType = () => {
     }
     return "desktop";
 };
+
+export const round2Decimals = (num) => {
+  return Math.round(num * 100) / 100
+}
+
+export const getFileArrayBuffer = (inputFile) => {
+  const reader = new FileReader();
+
+  return new Promise((resolve, reject) => {
+      reader.onload = () => {
+          resolve(reader.result);
+      }
+      reader.readAsArrayBuffer(inputFile)
+  
+  });
+}; 

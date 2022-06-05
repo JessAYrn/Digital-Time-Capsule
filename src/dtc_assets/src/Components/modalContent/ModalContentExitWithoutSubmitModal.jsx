@@ -1,22 +1,22 @@
 import React from 'react';
+import { MODALS_TYPES } from '../../Constants';
 import "./ModalContentExitWithoutSubmitModal.scss";
 
 const ExitWithoutSubmit = (props) => {
 
     const{
-        showModal,
-        setShowModal,
+        setModalStatus,
         handleSubmit,
-        closePage,
+        closePage
     } = props;
 
     const onClickSubmit = () => {
-        setShowModal(false);
+        setModalStatus({show: false, which: MODALS_TYPES.onSubmit});
         handleSubmit();
     };
 
     const onClickExit = () => {
-        setShowModal(false);
+        setModalStatus({show: false, which: MODALS_TYPES.onSubmit});
         closePage();
     };
 
@@ -30,7 +30,7 @@ const ExitWithoutSubmit = (props) => {
             </div>   
             <div className={'buttonDiv'}>
                 <button className='button' onClick={onClickExit}> No, Don't worry about it  </button> 
-            </div>   
+            </div>  
         </div>
 
     )

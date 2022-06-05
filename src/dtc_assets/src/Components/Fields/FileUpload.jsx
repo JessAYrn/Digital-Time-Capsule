@@ -1,9 +1,15 @@
-import React, {useRef, useState, useEffect} from 'react';
-import InputBox from './InputBox';
+import React, {useRef, useState, useEffect, useMemo} from 'react';
 import "./FileUpload.scss";
 import { useEffect } from '../../../../../dist/dtc_assets';
-import { deviceType } from '../../Utils';
-import { DEVICE_TYPES } from '../../Constants';
+import { deviceType, getFileArrayBuffer } from '../../Utils';
+import { DEVICE_TYPES, MAX_DURATION_OF_VIDEO_IN_SECONDS } from '../../Constants';
+import { MODALS_TYPES } from '../../Constants';
+import { round2Decimals } from '../../Utils';
+import { MAX_NUMBER_OF_BYTES } from '../../Constants';
+
+const forbiddenFileTypes = [
+    'application/pdf'
+];
 
 const FileUpload = (props) => {
     const {
@@ -11,75 +17,117 @@ const FileUpload = (props) => {
         disabled,
         dispatchAction,
         dispatch,
+        setModalStatus,
         index,
         value,
-        setValue
+        setValue,
+        elementId,
+        setChangesWereMade
     } = props;
     let inputRef = useRef();
 
-    const displayUploadedFile = (inputFile) => {
-        const reader = new FileReader();
-
-        return new Promise((resolve, reject) => {
-            reader.onload = () => {
-                resolve(reader.result);
-            }
-            reader.readAsDataURL(inputFile)
-        
-        });
-    }; 
-
     const [fileSrc, setFileSrc]  = useState("dtc-logo-black.png");
     const [fileType, setFileType] = useState("image/png");
-
+    var uploadedFile;
+    var obUrl;
+    
     const typeOfDevice = deviceType();
 
     useEffect( async () => {
         if(value){
-            setFileType(value.type);
-            setFileSrc(await displayUploadedFile(value));
+            processAndDisplayFile(value);
         }
     },[value]);
 
-    const handleUpload = async () => {
-        const file = inputRef.current.files[0] || value;
-        try{
-            setFileType(file.type);
-            setFileSrc(await displayUploadedFile(file));
-            setValue(file);
-            dispatch({
-                payload: {
-                    fileName: `${file.name}-${Date.now()}`,
-                    lastModified: file.lastModified,
-                    fileType: file.type
-                },
-                actionType: dispatchAction,
-                index: index
-            })
-        } catch(e) {
-            console.warn(e.message);
-        }
-        if(!!setPageChangesMade){
-            setPageChangesMade(true);
-        }
+    const getDuration = async (file) => {
+        obUrl = URL.createObjectURL(file);
+       
+        return new Promise((resolve) => {
+          const audio = document.createElement("audio");
+          audio.muted = true;
+          const source = document.createElement("source");
+          source.src = obUrl; //--> blob URL
+          audio.preload= "metadata";
+          audio.appendChild(source);
+          audio.onloadedmetadata = function(){
+             resolve(audio.duration)
+          };
+        });
+       }
+
+    const updateFileMetadataInStore = (file) => {
+        dispatch({
+            payload: {
+                fileName: `${file.name}-${Date.now()}`,
+                lastModified: file.lastModified,
+                fileType: file.type
+            },
+            actionType: dispatchAction,
+            index: index
+        })
+        if(!!setChangesWereMade){
+            setChangesWereMade(true);
+        } 
     };
 
-    console.log(fileType);
-    console.log(fileSrc);
-    console.log(typeOfDevice);
+    const processAndDisplayFile = async (file) => {
+        setFileType(file.type);
+        let fileAsBuffer = await getFileArrayBuffer(file);
+        let videoBlob = new Blob([new Uint8Array(fileAsBuffer)], { type: file.type });
+        let url = window.URL.createObjectURL(videoBlob);
+        setFileSrc(url);
+    };
+
+    const handleUpload = async () => {
+        uploadedFile = inputRef.current.files[0] || value;
+        
+        //check file extension for audio/video type
+        //this if statement will ultimately end up triggering the 
+        //canPlayThrough() function.
+        if(uploadedFile.name.match(/\.(avi|mp3|mp4|mpeg|ogg|webm|mov|MOV)$/i)){
+            const duration = await getDuration(uploadedFile);
+            if(duration > MAX_DURATION_OF_VIDEO_IN_SECONDS || forbiddenFileTypes.includes(uploadedFile.type)){
+                setFileSrc("dtc-logo-black.png");
+                setFileType("image/png");
+                setModalStatus({
+                    show: true, 
+                    which: MODALS_TYPES.fileHasError,
+                    duration: duration
+                });
+                URL.revokeObjectURL(obUrl);
+            } else {
+                processAndDisplayFile(uploadedFile);
+                updateFileMetadataInStore(uploadedFile);
+                setValue(uploadedFile);
+            }
+        } else {
+            //triggers useEffect which displays the video
+            processAndDisplayFile(uploadedFile);
+            updateFileMetadataInStore(uploadedFile);
+            setValue(uploadedFile);
+        }
+        
+    };
 
     return(
         <div className={'imageDivContainer'}>
             <div className={'imageDiv'}>   
                     { 
                         (fileType.includes("image")) ? 
-                            <img src={fileSrc} alt="image preview" className="imagePreview__image" autoplay="false" /> :
+                            <img 
+                                src={fileSrc} 
+                                id={elementId}
+                                alt="image preview" 
+                                className="imagePreview__image" 
+                                autoplay="false" 
+                            /> :
                             (fileType.includes("quicktime") && (typeOfDevice !== DEVICE_TYPES.desktop)) ?
                             <video 
                                 width="330" 
                                 height="443" 
                                 className="imagePreview__video" 
                                 preload
+                                id={elementId}
                                 style={{borderRadius: 10 + 'px'}}
                                 controls
                                 muted
@@ -92,6 +140,7 @@ const FileUpload = (props) => {
                                 style={{borderRadius: 10 + 'px'}}
                                 className="imagePreview__video" 
                                 preload="metadata"
+                                id={elementId}
                                 controls
                                 muted
                                 playsinline
@@ -101,7 +150,8 @@ const FileUpload = (props) => {
                                 <source src={fileSrc} type='video/webm; codecs="vp8, vorbis"'/>
                                 <source src={fileSrc} type='video/mpeg'/>
                                 Your browser does not support the video tag.
-                            </video>   
+                            </video>  
+                    
                     }
                     {
                         !fileSrc && 
@@ -110,15 +160,17 @@ const FileUpload = (props) => {
                         </span>   
                     }           
             </div>
-            <input 
-                disabled={disabled}
-                id={'uploadedImaged'} 
-                type="file" 
-                className={'imageInputButton'} 
-                ref={inputRef} 
-                onLoad={handleUpload} 
-                onChange={handleUpload}
-            /> 
+            { !disabled &&
+                <input 
+                    disabled={disabled}
+                    id={`uploadedImaged__${elementId}`} 
+                    type="file" 
+                    className={'imageInputButton'} 
+                    ref={inputRef} 
+                    onLoad={handleUpload} 
+                    onChange={handleUpload}
+                /> 
+            }
         </div>
     );
 }

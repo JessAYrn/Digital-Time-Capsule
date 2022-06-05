@@ -5,12 +5,13 @@ import { fromHexString } from "../../Utils.jsx";
 import "./ModalContentOnSend.scss";
 import { toE8s, fromE8s } from "../../Utils.jsx";
 import { QrReaderContent } from "../walletFunctions/ScanQrCode";
+import { MODALS_TYPES } from "../../Constants";
 
 const ModalContentOnSend = (props) => {
 
     const {
-        setShowModal,
-        showModal
+        setModalStatus,
+        modalStatus
     } = props;
 
     const fee = 0.1;
@@ -29,7 +30,7 @@ const ModalContentOnSend = (props) => {
         setShowSummary(false);
         setSendSuccessful(false);
         setResponseFromApi(false);
-        setShowModal(false);
+        setModalStatus({show: false, which: MODALS_TYPES.onSend});
     };
 
     const showTxSummary = () => {
@@ -60,7 +61,7 @@ const ModalContentOnSend = (props) => {
         setShowSummary(false);
         setSendSuccessful(false);
         setResponseFromApi(false);
-        setShowModal(false);
+        setModalStatus({show: false, which:MODALS_TYPES.onSend});
 
     };
 
@@ -125,7 +126,7 @@ const ModalContentOnSend = (props) => {
                         label={"Recipient Address: "}
                         rows={"1"}
                         setParentState={setRecipientAddress}
-                        value={ showModal ? recipientAddress : ''}
+                        value={ modalStatus.show ? recipientAddress : ''}
                     />
                 </div>
                 <div className="ammountDiv">
@@ -133,7 +134,7 @@ const ModalContentOnSend = (props) => {
                         label={"Amount: "}
                         rows={"1"}
                         setParentState={setAmountToSend}
-                        value={showModal ? amountToSend : 0}
+                        value={modalStatus.show ? amountToSend : 0}
                     />
                 </div>
                 <div className='ModalContentOnSendButtons'>

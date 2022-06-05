@@ -1,14 +1,17 @@
 import React from 'react';
 import "./ModalContentNotifications.scss";
 import { dayInNanoSeconds, monthInDays } from "../../Constants";
-
+import { MODALS_TYPES } from '../../Constants';
 
 const Notifications = (props) => {
     const {
-        showModal,
-        setShowModal,
+        setModalStatus,
         tableContent
     } = props;
+
+    const onClick = () => {
+        setModalStatus({show: false, which: MODALS_TYPES.onSubmit})
+    }
 
 
     return (
@@ -44,7 +47,7 @@ const Notifications = (props) => {
                 </div>
             </div>
             <div className={'addNewEntryButtonDiv'}>
-                <button className={'addNewEntryButton'} onClick={setShowModal}> Close </button>
+                <button className={'addNewEntryButton'} onClick={onClick}> Close </button>
             </div>
         </div>
     )
