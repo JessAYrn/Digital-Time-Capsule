@@ -1,5 +1,4 @@
-import React, {useReducer, createContext, useState, useEffect} from 'react';
-import journalReducer, {initialState} from "./reducers/journalReducer";
+import React, { createContext, useState, useEffect} from 'react';
 import LoginPage from './Components/LoginPage';
 import {AuthClient} from "@dfinity/auth-client";
 import { canisterId, createActor } from '../../declarations/dtc/index';
@@ -20,7 +19,6 @@ export const AppContext = createContext({
 
 const WalletApp = () => {
 
-    const [journalState, dispatch] = useReducer(journalReducer, initialState);
     const [actor, setActor] = useState(undefined);
     const [authClient, setAuthClient] = useState(undefined);
     const [isLoaded, setIsLoaded] = useState(true);
@@ -69,10 +67,7 @@ const WalletApp = () => {
                 {
                     isLoaded &&
                         isAuthenticated ? 
-                        <WalletPage
-                            journalState={journalState}
-                            dispatch={dispatch}
-                        /> : 
+                        <WalletPage/> : 
                         <LoginPage
                             context={UI_CONTEXTS.WALLET}
                         /> 

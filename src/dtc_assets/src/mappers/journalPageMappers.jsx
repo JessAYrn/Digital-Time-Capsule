@@ -1,3 +1,6 @@
+import { milisecondsToNanoSeconds } from "../Utils";
+import { types } from "../reducers/journalReducer";
+import { TEST_DATA_FOR_NOTIFICATIONS } from "../testData/notificationsTestData";
 
 
 export const mapAndSendJournalPageRequestToApi = async (key, pageData, files, actor) => {
@@ -38,22 +41,70 @@ export const mapAndSendJournalPageRequestToApi = async (key, pageData, files, ac
 
 };
 
-export const mapApiObjectToFrontEndObject = (entryKey, backEndObj) => {
-    return {
-        date: backEndObj.date,
-        title: backEndObj.entryTitle,
-        location: backEndObj.location,
-        lockTime: parseInt(backEndObj.lockTime),
-        unlockTime: parseInt(backEndObj.unlockTime),
-        entry: backEndObj.text,
-        emailOne: backEndObj.emailOne,
-        emailTwo: backEndObj.emailTwo,
-        emailThree: backEndObj.emailThree,
-        sent : backEndObj.sent,
-        read : backEndObj.read,
-        draft: backEndObj.draft,
-        file1MetaData: backEndObj.file1MetaData,
-        file2MetaData: backEndObj.file2MetaData,
-        entryKey: parseInt(entryKey)
-    };
+export const mapApiObjectToFrontEndJournalEntriesObject = (journalDataFromApi) => {
+
+    let journalEntriesForFrontend = journalDataFromApi.ok.userJournalData[0].map((arrayWithKeyAndPage) => {
+        const backEndObj = arrayWithKeyAndPage[1];
+        const entryKey  = arrayWithKeyAndPage[0];
+        return {
+            date: backEndObj.date,
+            title: backEndObj.entryTitle,
+            location: backEndObj.location,
+            lockTime: parseInt(backEndObj.lockTime),
+            unlockTime: parseInt(backEndObj.unlockTime),
+            entry: backEndObj.text,
+            emailOne: backEndObj.emailOne,
+            emailTwo: backEndObj.emailTwo,
+            emailThree: backEndObj.emailThree,
+            sent : backEndObj.sent,
+            read : backEndObj.read,
+            draft: backEndObj.draft,
+            file1MetaData: backEndObj.file1MetaData,
+            file2MetaData: backEndObj.file2MetaData,
+            entryKey: parseInt(entryKey)
+        };
+    });
+    //sorting the entries by date of submission.
+    journalEntriesForFrontend = journalEntriesForFrontend.sort(function(a,b){
+        const dateForAArray = a.date.split('-');
+        const yearForA = parseInt(dateForAArray[0]);
+        const monthForA = parseInt(dateForAArray[1]);
+        const dayForA = parseInt(dateForAArray[2]);
+
+        const dateForBArray = b.date.split('-'); 
+        const yearForB = parseInt(dateForBArray[0]);
+        const monthForB = parseInt(dateForBArray[1]);
+        const dayForB = parseInt(dateForBArray[2]);
+
+        if(yearForA > yearForB){
+            return 1;
+        } else if(yearForA < yearForB){
+            return -1;
+        } else {
+            if(monthForA > monthForB){
+                return 1;
+            } else if(monthForA < monthForB){
+                return -1;
+            } else {
+                if(dayForA > dayForB){
+                    return 1;
+                } else if(dayForA < dayForB){
+                    return -1;
+                } else {
+                    return 0;
+                }
+            }
+        }
+    });
+
+
+    //filtering all of the unread journal entries
+    let unreadJournalEntriesForFronten = journalEntriesForFrontend.filter(entry => !entry.read && 
+        (milisecondsToNanoSeconds(Date.now())> parseInt(entry.unlockTime)) &&
+        parseInt(entry.lockTime) > 0
+    )
+
+    return { allEntries: journalEntriesForFrontend, unreadEntries: unreadJournalEntriesForFronten } ;
+
+
 }

@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useContext} from 'react';
+import React, {useState, useEffect, useReducer, useContext} from 'react';
 import { AppContext } from '../HomePage';
 import "./Analytics.scss"
 
@@ -6,6 +6,7 @@ import "./Analytics.scss"
 const Analytics = () => {
 
     const [jounralCount, setJournalCount] = useState(null);
+
     const [isLoading, setIsLoading] = useState(false);
 
     const {actor, authClient, setIsLoaded} = useContext(AppContext);

@@ -1,10 +1,13 @@
-import React, {useCallback, useContext, useEffect, useState, useMemo} from 'react';
+import React, {useCallback, useContext, useReducer, useEffect, useState, useMemo} from 'react';
+import { useLocation } from 'react-router-dom';
+import journalReducer, {initialState} from "../reducers/journalReducer";
 import { AppContext } from '../Wallet';
 import { toHexString } from '../Utils';
 import { types } from '../reducers/journalReducer';
 import { NavBar } from './navigation/NavBar';
 import { Modal } from './Modal';
 import './WalletPage.scss';
+import { mapApiObjectToFrontEndJournalEntriesObject } from '../mappers/journalPageMappers';
 import { toHexString, shortenHexString } from '../Utils';
 import { e8sInOneICP, MODALS_TYPES } from '../Constants';
 import LoadScreen from './LoadScreen';
@@ -16,13 +19,25 @@ import { testTx } from '../testData/Transactions';
 
 const WalletPage = (props) => {
 
+    const [journalState, dispatch] = useReducer(journalReducer, initialState);
+
+    //clears useLocation().state upon page refresh so that when the user refreshes the page,
+    //changes made to this route aren't overrided by the useLocation().state of the previous route.
+    window.onbeforeunload = window.history.replaceState(null, '');
+
+    //gets state from previous route
+    let location = useLocation();
+    //dispatch state from previous route to redux store if that state exists
+    if(location.state){
+        dispatch({
+            actionType: types.SET_ENTIRE_REDUX_STATE,
+            payload: location.state
+        });
+        //wipe previous location state to prevent infinite loop
+        location.state = null;
+    }
+
     const mql = window.matchMedia('(max-width: 675px)');
-
-    const {
-        journalState,
-        dispatch
-    } = props;
-
     const { actor, authClient } = useContext(AppContext);
     const [modalStatus, setModalStatus] = useState({show: false, which: MODALS_TYPES.onSend});
     const [isLoading, setIsLoading] = useState(false);
@@ -34,47 +49,90 @@ const WalletPage = (props) => {
         setModalStatus({show: true, which: MODALS_TYPES.onSend});
     };
 
+    const loadTxHistory = async () => {
+        setIsTxHistoryLoading(true);
+        setImgUrl(await generateQrCode(journalState.walletData.address));
+
+        const tx = await actor.readTransaction();
+        const transactionHistory = tx.ok.sort(function(a,b){
+            const mapKeyOfA = parseInt(a[0]);
+            const mapKeyOfB = parseInt(b[0]);
+            if (mapKeyOfA > mapKeyOfB){
+                return -1
+            } else {
+                return 1
+            }
+        });
+        console.log('line 159: ',transactionHistory);
+        setTxHistory(transactionHistory);
+        setIsTxHistoryLoading(false);
+    };
+
     const copyWalletAddress = useCallback(() => copyWalletAddressHelper(journalState.walletData.address), [journalState]);
 
+    //Loading Time Capsule Data
     useEffect(async () => {
-        setIsLoading(true);
-        const journal = await actor.readJournal();
-        console.log('line 122: ',journal);
-        if("err" in journal){
-            actor.create().then((result) => {
-                console.log('line 125: ',result);
-            });
-            setIsLoading(false);
+        if(journalState.reloadStatuses.walletData){
+            setIsLoading(true);
+            const walletDataFromApi = await actor.readWalletData();
+            console.log('line 122: ',walletDataFromApi);
+            if("err" in walletDataFromApi){
+                actor.create().then((result) => {
+                    console.log('line 125: ',result);
+                });
+                setIsLoading(false);
+            } else {
+                console.log('line 129: ',walletDataFromApi.ok);
+                console.log('line 130: ',toHexString(new Uint8Array( [...walletDataFromApi.ok.address])));
+                const walletData = { 
+                    balance : parseInt(walletDataFromApi.ok.balance.e8s), 
+                    address: toHexString(new Uint8Array( [...walletDataFromApi.ok.address])) };
+                
+                dispatch({
+                    payload: walletData,
+                    actionType: types.SET_WALLET_DATA
+                });
+                dispatch({
+                    actionType: types.SET_WALLET_DATA_RELOAD_STATUS,
+                    payload: false,
+                });
+                setIsLoading(false);
+                await loadTxHistory();
+
+                //Load Journal Data in the background
+                const journal = await actor.readJournal();
+                const journalEntriesObject = mapApiObjectToFrontEndJournalEntriesObject(journal);
+                let journalEntries = journalEntriesObject.allEntries;
+                let unreadEntries = journalEntriesObject.unreadEntries;
+
+                dispatch({
+                    payload: unreadEntries,
+                    actionType: types.SET_JOURNAL_UNREAD_ENTRIES
+                })
+
+                const journalBio = journal.ok.userJournalData[1];
+                const metaData = {email : journal.ok.email, userName: journal.ok.userName};
+                
+                dispatch({
+                    payload: metaData,
+                    actionType: types.SET_METADATA
+                })
+                dispatch({
+                    payload: journalBio,
+                    actionType: types.SET_BIO
+                })
+                dispatch({
+                    payload: journalEntries,
+                    actionType: types.SET_JOURNAL
+                });
+                dispatch({
+                    actionType: types.SET_JOURNAL_DATA_RELOAD_STATUS,
+                    payload: false,
+                });
+
+            }
         } else {
-            console.log('line 129: ',journal.ok);
-            console.log('line 130: ',toHexString(new Uint8Array( [...journal.ok.address])));
-            const walletData = { 
-                balance : parseInt(journal.ok.balance.e8s), 
-                address: toHexString(new Uint8Array( [...journal.ok.address])) };
-            
-            dispatch({
-                payload: walletData,
-                actionType: types.SET_WALLET_DATA
-            });
-            setIsLoading(false);
-
-            setIsTxHistoryLoading(true);
-
-            setImgUrl(await generateQrCode(journalState.walletData.address));
-
-            const tx = await actor.readTransaction();
-            const transactionHistory = tx.ok.sort(function(a,b){
-                const mapKeyOfA = parseInt(a[0]);
-                const mapKeyOfB = parseInt(b[0]);
-                if (mapKeyOfA > mapKeyOfB){
-                    return -1
-                } else {
-                    return 1
-                }
-            });
-            console.log('line 159: ',transactionHistory);
-            setTxHistory(transactionHistory);
-            setIsTxHistoryLoading(false);
+            await loadTxHistory();
         }
     },[actor, authClient]);
 
@@ -104,6 +162,7 @@ const WalletPage = (props) => {
                             accountLink={true}
                             dashboardLink={true}
                             notificationIcon={false}
+                            journalState={journalState}
                         />
                         <div className='scrollable'>
                             <div className={'transparentDiv'}>

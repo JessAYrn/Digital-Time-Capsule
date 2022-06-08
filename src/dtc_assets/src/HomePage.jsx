@@ -1,4 +1,6 @@
-import React, { createContext, useState, useEffect} from 'react';
+import React, { createContext, useReducer, useState, useEffect} from 'react';
+import { useLocation } from 'react-router-dom';
+import journalReducer, {initialState, types} from "./reducers/journalReducer";
 import YouTube from 'react-youtube';
 import {AuthClient} from "@dfinity/auth-client";
 import LoginPage from './Components/LoginPage';
@@ -22,6 +24,25 @@ export const AppContext = createContext({
 });
 
 const HomePage = () => {
+
+    const [journalState, dispatch] = useReducer(journalReducer, initialState);
+
+    //clears useLocation().state upon page refresh so that when the user refreshes the page,
+    //changes made to this route aren't overrided by the useLocation().state of the previous route.
+    window.onbeforeunload = window.history.replaceState(null, '');
+
+    //gets state from previous route
+    let location = useLocation();
+    //dispatch state from previous route to redux store if that state exists
+    if(location.state){
+        console.log('location state: ',location.state);
+        dispatch({
+            actionType: types.SET_ENTIRE_REDUX_STATE,
+            payload: location.state
+        });
+        //wipe previous location state to prevent infinite loop
+        location.state = null;
+    }
 
     const [actor, setActor] = useState(undefined);
     const [authClient, setAuthClient] = useState(undefined);
@@ -96,6 +117,7 @@ const HomePage = () => {
                                 accountLink={true}
                                 dashboardLink={false}
                                 notificationIcon={false}
+                                journalState={journalState}
                             />
                             <div class={'scrollable'}>
                                 <Analytics/>

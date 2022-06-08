@@ -1,5 +1,4 @@
 import React, {useReducer, createContext, useState, useEffect} from 'react';
-import journalReducer, {initialState} from "./reducers/journalReducer";
 import SubcriptionPage from './Components/SubcriptionPage';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
@@ -23,7 +22,6 @@ export const AppContext = createContext({
 
 const AccountPage = (props) => {
 
-    const [journalState, dispatch] = useReducer(journalReducer, initialState);
     const [actor, setActor] = useState(undefined);
     const [authClient, setAuthClient] = useState(undefined);
     const [isLoaded, setIsLoaded] = useState(true);
@@ -69,10 +67,7 @@ const AccountPage = (props) => {
                 {
                     isLoaded &&
                         isAuthenticated ? 
-                        <SubcriptionPage
-                            journalState={journalState}
-                            dispatch={dispatch}
-                        /> : 
+                        <SubcriptionPage/> : 
                         <LoginPage
                             context={UI_CONTEXTS.ACCOUNT_PAGE}
                         /> 

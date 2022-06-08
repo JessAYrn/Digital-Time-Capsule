@@ -1,7 +1,7 @@
 import JournalPage from "./JournalPage";
 import React, {useEffect, useReducer, useState, useContext, useMemo } from "react";
+import { useLocation } from "react-router-dom";
 import journalReducer, {initialState, types} from "../reducers/journalReducer";
-import { mapApiObjectToFrontEndObject } from "../mappers/journalPageMappers";
 import "./Journal.scss";
 import { AppContext } from "../App";
 import InputBox from "./Fields/InputBox";
@@ -13,6 +13,8 @@ import ModalContentNotifications from "./modalContent/ModalContentNotifications"
 import { milisecondsToNanoSeconds } from "../Utils";
 import { NavBar } from "./navigation/NavBar";
 import { MODALS_TYPES } from "../Constants";
+import { mapApiObjectToFrontEndJournalEntriesObject } from "../mappers/journalPageMappers";
+import { toHexString } from "../Utils";
 import { TEST_DATA_FOR_NOTIFICATIONS } from "../testData/notificationsTestData";
 
 const Journal = (props) => {
@@ -20,88 +22,103 @@ const Journal = (props) => {
     const mql = window.matchMedia('(max-width: 480px)');
 
     const [journalState, dispatch] = useReducer(journalReducer, initialState);
+
+    //clears useLocation().state upon page refresh so that when the user refreshes the page,
+    //changes made to this route aren't overrided by the useLocation().state of the previous route.
+    window.onbeforeunload = window.history.replaceState(null, '');
+
+    //gets state from previous route
+    const location = useLocation();
+    //dispatch state from previous route to redux store if that state exists
+    if(location.state){
+        dispatch({
+            actionType: types.SET_ENTIRE_REDUX_STATE,
+            payload: location.state
+        });
+        //wipe previous location state to prevent infinite loop
+        location.state = null;
+    }
     const [pageIsVisibleArray, setPageIsVisibleArray] = useState(journalState.journal.map((page) => false));
     const [newPageAdded, setNewPageAdded] = useState(false);
     const [modalStatus, setModalStatus] = useState({show: false, which: MODALS_TYPES.onSubmit});
     const [submitSuccessful,setSubmitSuccessful] = useState(null);
-    const [journalSize, setJournalSize] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const {actor, authClient, setIsLoaded, setSubmissionsMade, submissionsMade} = useContext(AppContext);
-    const [displayNotifications, setDisplayNotifications] = useState(false);
-    const [unreadJournalEntries, setUnreadJournalEntries] = useState([]);
 
     useEffect(async () => {
-        setIsLoading(true);
-        const journal = await actor.readJournal();
-        console.log(journal);
-        if("err" in journal){
-            actor.create().then((result) => {
-                console.log(result);
+        if(journalState.reloadStatuses.journalData){
+            setIsLoading(true);
+            const journal = await actor.readJournal();
+            if("err" in journal){
+                actor.create().then((result) => {
+                    console.log(result);
+                    setIsLoading(false);
+                });
+            } else {
+                const journalEntriesObject = mapApiObjectToFrontEndJournalEntriesObject(journal);
+                let journalEntries = journalEntriesObject.allEntries;
+                let unreadEntries = journalEntriesObject.unreadEntries;
+
+                dispatch({
+                    payload: unreadEntries,
+                    actionType: types.SET_JOURNAL_UNREAD_ENTRIES
+                })
+
+                const journalBio = journal.ok.userJournalData[1];
+                const metaData = {email : journal.ok.email, userName: journal.ok.userName};
+                
+                dispatch({
+                    payload: metaData,
+                    actionType: types.SET_METADATA
+                })
+                dispatch({
+                    payload: journalBio,
+                    actionType: types.SET_BIO
+                })
+                dispatch({
+                    payload: journalEntries,
+                    actionType: types.SET_JOURNAL
+                });
+                dispatch({
+                    actionType: types.SET_JOURNAL_DATA_RELOAD_STATUS,
+                    payload: false,
+                });
                 setIsLoading(false);
-            });
-        } else {
-            let journalEntries = journal.ok.userJournalData[0].map((arrayWithKeyAndPage) => {
-                return mapApiObjectToFrontEndObject(arrayWithKeyAndPage[0], arrayWithKeyAndPage[1]);
-            });
-
-
-            journalEntries = journalEntries.sort(function(a,b){
-                const dateForAArray = a.date.split('-');
-                const yearForA = parseInt(dateForAArray[0]);
-                const monthForA = parseInt(dateForAArray[1]);
-                const dayForA = parseInt(dateForAArray[2]);
-
-                const dateForBArray = b.date.split('-'); 
-                const yearForB = parseInt(dateForBArray[0]);
-                const monthForB = parseInt(dateForBArray[1]);
-                const dayForB = parseInt(dateForBArray[2]);
-
-                if(yearForA > yearForB){
-                    return 1;
-                } else if(yearForA < yearForB){
-                    return -1;
-                } else {
-                    if(monthForA > monthForB){
-                        return 1;
-                    } else if(monthForA < monthForB){
-                        return -1;
-                    } else {
-                        if(dayForA > dayForB){
-                            return 1;
-                        } else if(dayForA < dayForB){
-                            return -1;
-                        } else {
-                            return 0;
-                        }
-                    }
-                }
-            });
-
-            setUnreadJournalEntries(
-                journalEntries.filter(entry => !entry.read && 
-                    (milisecondsToNanoSeconds(Date.now())> parseInt(entry.unlockTime)) &&
-                    parseInt(entry.lockTime) > 0
-                )
-            );
-
-            const journalBio = journal.ok.userJournalData[1];
-            const metaData = {email : journal.ok.email, userName: journal.ok.userName};
-            
-            setJournalSize(journalEntries.length);
-            dispatch({
-                payload: metaData,
-                actionType: types.SET_METADATA
-            })
-            dispatch({
-                payload: journalBio,
-                actionType: types.SET_BIO
-            })
-            dispatch({
-                payload: journalEntries,
-                actionType: types.SET_JOURNAL
-            })
-            setIsLoading(false);
+            }
         }
+        if(journalState.reloadStatuses.nftData){
+            const nftCollection = await actor.getUserNFTsInfo();
+            console.log(nftCollection);
+            dispatch({
+                payload: nftCollection,
+                actionType: types.SET_NFT_DATA
+            });
+            dispatch({
+                payload: false,
+                actionType: types.SET_NFT_DATA_RELOAD_STATUS
+            });
+            
+        }
+        if(journalState.reloadStatuses.walletData){
+            //Load wallet data in background
+            const walletDataFromApi = await actor.readWalletData();
+            const walletData = { 
+                balance : parseInt(walletDataFromApi.ok.balance.e8s), 
+                address: toHexString(new Uint8Array( [...walletDataFromApi.ok.address])) 
+            };
+            
+            dispatch({
+                payload: walletData,
+                actionType: types.SET_WALLET_DATA
+            });
+
+            dispatch({
+                actionType: types.SET_WALLET_DATA_RELOAD_STATUS,
+                payload: false,
+            });
+        }
+
+
     },[actor, submissionsMade, authClient])
 
     useEffect(() => {
@@ -158,7 +175,9 @@ const Journal = (props) => {
         openPage(null, journalState.journal.length - 1);
     }
 
-    const putCreateEntryButtonInTable = mql.matches && journalSize < 6;
+    const putCreateEntryButtonInTable = mql.matches && journalState.journal.length < 6;
+
+    console.log(journalState);
 
     const displayJournalTable = () => {
 
@@ -254,7 +273,7 @@ const Journal = (props) => {
                     ChildComponent={ChildComponent}
                     success={submitSuccessful}
                     setSuccess={setSubmitSuccessful}
-                    tableContent={unreadJournalEntries}
+                    tableContent={journalState.unreadEntries}
                 />
             </div>
         </div> : 
@@ -269,8 +288,9 @@ const Journal = (props) => {
                             accountLink={true}
                             dashboardLink={true}
                             notificationIcon={true}
-                            unreadNotifications={unreadJournalEntries.length}
+                            unreadNotifications={journalState.unreadEntries.length}
                             toggleDisplayNotifications={toggleDisplayNotifications}
+                            journalState={journalState}
                         />
                         {   mql.matches &&
                             <div className={'submitAndLoginButtonsDiv'}>
@@ -345,7 +365,7 @@ const Journal = (props) => {
                         }
                     </React.Fragment> : 
                     <JournalPage
-                        journalSize={journalSize}
+                        journalSize={journalState.journal.length}
                         closePage={closePage}
                         index={getIndexOfVisiblePage()}
                         journalPageData={journalState.journal[getIndexOfVisiblePage()]}

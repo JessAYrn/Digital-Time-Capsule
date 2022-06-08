@@ -2,11 +2,16 @@ import { dayInNanoSeconds, monthInDays } from "../Constants"
 
 
 export const types = {
+    SET_ENTIRE_REDUX_STATE: "SET_ENTIRE_REDUX_STATE",
     SET_JOURNAL: "SET_JOURNAL",
+    SET_JOURNAL_UNREAD_ENTRIES:"SET_JOURNAL_UNREAD_ENTRIES",
     SET_BIO: "SET_BIO",
     SET_METADATA: "SET_METADATA",
     SET_WALLET_DATA: "SET_WALLET_DATA",
     SET_NFT_DATA: "SET_NFT_DATA",
+    SET_NFT_DATA_RELOAD_STATUS: "SET_NFT_DATA_RELOAD_STATUS",
+    SET_WALLET_DATA_RELOAD_STATUS: "SET_WALLET_DATA_RELOAD_STATUS",
+    SET_JOURNAL_DATA_RELOAD_STATUS: "SET_JOURNAL_DATA_RELOAD_STATUS",
     CHANGE_DRAFT: "CHANGE_DRAFT",
     CHANGE_DATE: "CHANGE_DATE",
     CHANGE_LOCATION: "CHANGE_LOCATION",
@@ -53,31 +58,13 @@ export const initialState = {
         preface:'',
         email: ''
     },
-    journal: [
-        {
-            date: '',
-            title: 'Loading...',
-            location: 'Loading...',
-            entry: 'Loading...',
-            lockTime: '3',
-            unlockTime: `${Date.now() * 1000000}`,
-            emailOne: '',
-            emailTwo: '',
-            emailThree: '', 
-            draft: true,
-            file1MetaData:{
-                fileName: 'null',
-                lastModified: 0,
-                fileType: 'null'
-            },
-            file2MetaData:{
-                fileName: 'null',
-                lastModified: 0,
-                fileType: 'null'
-            }
-        }
-    ]
-
+    journal: [],
+    unreadEntries:[],
+    reloadStatuses: {
+        nftData: true,
+        walletData: true,
+        journalData: true
+    }
 }
 
 const freshPage = {
@@ -111,11 +98,21 @@ const changeValue = (state = initialState, action) => {
     
 
     switch (actionType){
+        case types.SET_ENTIRE_REDUX_STATE:
+            state = payload;
+            return {
+                ...state
+            }
         case types.SET_JOURNAL:
             state.journal = payload;
             return {
                 ...state
             }
+        case types.SET_JOURNAL_UNREAD_ENTRIES:
+        state.unreadEntries = payload;
+        return {
+            ...state
+        }
         case types.SET_BIO:
             state.bio = payload;
             return {
@@ -133,6 +130,30 @@ const changeValue = (state = initialState, action) => {
         }
         case types.SET_NFT_DATA:
         state.nftData = payload;
+        return {
+            ...state
+        }
+        case types.SET_JOURNAL_DATA_RELOAD_STATUS:
+        state.reloadStatuses = {
+            ...state.reloadStatuses,
+            journalData: payload
+        };
+        return {
+            ...state
+        }
+        case types.SET_WALLET_DATA_RELOAD_STATUS:
+        state.reloadStatuses = {
+            ...state.reloadStatuses,
+            walletData: payload
+        };
+        return {
+            ...state
+        }
+        case types.SET_NFT_DATA_RELOAD_STATUS:
+        state.reloadStatuses = {
+            ...state.reloadStatuses,
+            nftData: payload
+        };
         return {
             ...state
         }
