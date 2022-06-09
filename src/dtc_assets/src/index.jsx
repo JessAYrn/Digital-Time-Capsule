@@ -8,7 +8,7 @@ import {
 } from "react-router-dom";
 import HomePage from './HomePage';
 import App from './App';
-import AccountPage from "./AccountPage"
+import AccountPage from "./Account"
 import configureStore from './configureStore';
 import WalletApp from './Wallet';
 import NFTapp from './NFTs';

@@ -153,7 +153,7 @@ const JournalPage = (props) => {
             draft: isDraft
         }];
 
-        const entryKeyAsApiObject = (entryKey >= 0 && entryKey < journalSize ) ? [{entryKey: entryKey}] : [];
+        const entryKeyAsApiObject = (entryKey >= 0 && entryKey < journalSize - 1 ) ? [{entryKey: entryKey}] : [];
         
         let result = await actor.updateJournalEntry(
             entryKeyAsApiObject,
@@ -222,6 +222,7 @@ const JournalPage = (props) => {
         }
         await mapAndSendEntryToApi(index, journalPageData, false).then(res => {
             if("err" in res){
+                console.log(res);
                 result3 = false;
             } else {
                 result3 = true;
@@ -231,7 +232,7 @@ const JournalPage = (props) => {
                        (result2 || (result2 === null)) && 
                        (result3 || (result3 === null));
         setIsLoading(false);
-        setModalStatus({show: true, which: MODALS_TYPES.onSubmit});
+        console.log('results from submit: ',result1,' ', result2,' ',result3);
         if(result){
             setIsDisabled(true);
             journalReducerDispatchFunction({
@@ -243,6 +244,7 @@ const JournalPage = (props) => {
         } else {
             setSubmitSuccessful(false);
         }
+        setModalStatus({show: true, which: MODALS_TYPES.onSubmit});
 
     }, [journalPageData, file1, file2]);
 

@@ -1,16 +1,15 @@
-import * as React from 'react';
-import { createContext, useState, useEffect, useReducer} from 'react';
-import { generateQrCode } from './Components/walletFunctions/GenerateQrCode';
+import React, {useReducer, createContext, useState, useEffect} from 'react';
+import journalReducer, { types, initialState } from './reducers/journalReducer';
+import SubcriptionPage from './Components/AccountPage';
 import { useLocation } from 'react-router-dom';
-import Journal from './Components/Journal';
-import {AuthClient} from "@dfinity/auth-client";
-import LoginPage from './Components/LoginPage';
-import { toHexString } from './Utils';
 import { mapApiObjectToFrontEndJournalEntriesObject } from './mappers/journalPageMappers';
+import { generateQrCode } from './Components/walletFunctions/GenerateQrCode';
+import { toHexString } from './Utils';
 import LoadScreen from './Components/LoadScreen';
+import LoginPage from './Components/LoginPage';
+import {AuthClient} from "@dfinity/auth-client";
 import { canisterId, createActor } from '../../declarations/dtc/index';
 import { UI_CONTEXTS } from './Contexts';
-import journalReducer, {initialState, types} from './reducers/journalReducer';
 
 export const AppContext = createContext({
     authClient: {}, 
@@ -23,13 +22,13 @@ export const AppContext = createContext({
     setActor: null
 });
 
-const App = () => {
+const AccountPage = (props) => {
+
     const [actor, setActor] = useState(undefined);
     const [journalState, dispatch] = useReducer(journalReducer, initialState);
     const [authClient, setAuthClient] = useState(undefined);
     const [isLoaded, setIsLoaded] = useState(true);
     const [loginAttempted, setLoginAttempted] = useState(false);
-    const [submissionsMade, setSubmissionsMade] = useState(0);
 
     // login function used when Authenticating the client (aka user)
     useEffect(() => {
@@ -67,12 +66,15 @@ const App = () => {
     const location = useLocation();
     //dispatch state from previous route to redux store if that state exists
     if(location.state){
+        console.log('location state:',location.state);
         dispatch({
             actionType: types.SET_ENTIRE_REDUX_STATE,
             payload: location.state
         });
         //wipe previous location state to prevent infinite loop
         location.state = null;
+        console.log('location state:',location.state);
+
     }
 
     useEffect(async () => {
@@ -147,7 +149,7 @@ const App = () => {
             const address = toHexString(new Uint8Array( [...walletDataFromApi.ok.address]))
             const walletData = { 
                 balance : parseInt(walletDataFromApi.ok.balance.e8s), 
-                address: address 
+                address: address
             };
 
             const qrCodeImgUrl = await generateQrCode(address);
@@ -166,48 +168,37 @@ const App = () => {
                 payload: false,
             });
         }
-
-
     },[actor, authClient]);
-
-    console.log('journalState from App component: ',journalState);
 
     return (
         <AppContext.Provider 
             value={{
                 authClient, 
-                setAuthClient, 
-                actor, 
-                setActor, 
                 setIsLoaded,
                 loginAttempted, 
                 setLoginAttempted, 
                 journalState,
                 dispatch,
-                submissionsMade,
-                setSubmissionsMade
+                actor
             }}
         >
-
             {
                 isLoaded &&
-                journalState.isAuthenticated ? 
-                journalState.isLoading ? 
-                    <LoadScreen/> :
-                        <Journal/> : 
-                            <LoginPage
-                                context={UI_CONTEXTS.JOURNAL}
-                            /> 
+                    journalState.isAuthenticated ? 
+                    journalState.isLoading ?
+                        <LoadScreen/> :
+                            <SubcriptionPage/> : 
+                                <LoginPage
+                                    context={UI_CONTEXTS.ACCOUNT_PAGE}
+                                /> 
             }
             {
                 !isLoaded && 
                     <h2> Load Screen </h2>
             }
-
         </AppContext.Provider>
     )
-}
 
-export default App;
+};
 
-//This is a test
+export default AccountPage;

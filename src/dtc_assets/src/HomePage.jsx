@@ -17,8 +17,8 @@ export const AppContext = createContext({
     setAuthClient: null,
     loginAttempted: undefined,
     setLoginAttempted: null,
-    isAuthenticated: null,
-    setIsAuthenticated: null,
+    journalState: null,
+    dispatch: () => {},
     actor: undefined,
     setActor: null
 });
@@ -47,7 +47,6 @@ const HomePage = () => {
     const [actor, setActor] = useState(undefined);
     const [authClient, setAuthClient] = useState(undefined);
     const [isLoaded, setIsLoaded] = useState(true);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [loginAttempted, setLoginAttempted] = useState(false);
 
     // login function used when Authenticating the client (aka user)
@@ -55,7 +54,10 @@ const HomePage = () => {
         AuthClient.create().then(async (client) => {
             setAuthClient(client);
             await client.isAuthenticated().then((result) => {
-                setIsAuthenticated(result);
+                dispatch({
+                    actionType: types.SET_IS_AUTHENTICATED,
+                    payload: result
+                });
             });
             setIsLoaded(true);
         });
@@ -95,19 +97,19 @@ const HomePage = () => {
             value={{
                 authClient, 
                 setAuthClient, 
-                setIsAuthenticated, 
                 actor, 
+                journalState,
+                dispatch,
                 setActor, 
                 setIsLoaded,
                 loginAttempted, 
                 setLoginAttempted, 
-                isAuthenticated
             }}
         >
 
             {           
                 isLoaded &&
-                    isAuthenticated ? 
+                    journalState.isAuthenticated ? 
                     <div className="container">
                         <div className="background center">
                             <NavBar

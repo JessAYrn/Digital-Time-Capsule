@@ -1,22 +1,29 @@
-import React, {useState, useEffect, useReducer, useContext} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import { AppContext } from '../HomePage';
+import { types } from '../reducers/journalReducer';
 import "./Analytics.scss"
 
 
 const Analytics = () => {
 
     const [jounralCount, setJournalCount] = useState(null);
-
-    const [isLoading, setIsLoading] = useState(false);
-
-    const {actor, authClient, setIsLoaded} = useContext(AppContext);
+    const {actor, authClient, journalState, dispatch, setIsLoaded} = useContext(AppContext);
 
     useEffect( async () => {
-        setIsLoading(true);
+        if(!actor){
+            return;
+        }
+        dispatch({ 
+            actionType: types.SET_IS_LOADING,
+            payload: true 
+        });
         await actor.getProfilesSize().then((profilesTrieSize) => {
             setJournalCount(parseInt(profilesTrieSize));
         });
-        setIsLoading(false);
+        dispatch({ 
+            actionType: types.SET_IS_LOADING,
+            payload: false 
+        });
     }, [authClient, actor]);
 
     console.log('JournalCount: ', jounralCount);
@@ -30,7 +37,7 @@ const Analytics = () => {
                             <h3 className={'infoH3'}>
                                 Journals Created: 
                             </h3>
-                            { isLoading ? 
+                            { journalState.isLoading ? 
                                 <img src="Loading.gif" alt="Loading Screen" /> : 
                                 <h1 className={'infoH1'}>
                                     {jounralCount}

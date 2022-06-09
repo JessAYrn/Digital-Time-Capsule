@@ -8,10 +8,15 @@ export const types = {
     SET_BIO: "SET_BIO",
     SET_METADATA: "SET_METADATA",
     SET_WALLET_DATA: "SET_WALLET_DATA",
+    SET_WALLET_QR_CODE_IMG_URL:"SET_WALLET_QR_CODE_IMG_URL",
     SET_NFT_DATA: "SET_NFT_DATA",
     SET_NFT_DATA_RELOAD_STATUS: "SET_NFT_DATA_RELOAD_STATUS",
     SET_WALLET_DATA_RELOAD_STATUS: "SET_WALLET_DATA_RELOAD_STATUS",
     SET_JOURNAL_DATA_RELOAD_STATUS: "SET_JOURNAL_DATA_RELOAD_STATUS",
+    SET_IS_AUTHENTICATED: "SET_IS_AUTHENTICATED",
+    SET_IS_LOADING:"SET_IS_LOADING",
+    SET_TX_HISTORY_DATA:"SET_TX_HISTORY_DATA",
+    SET_IS_TX_HISTORY_LOADING: "SET_IS_TX_HISTORY_LOADING",
     CHANGE_DRAFT: "CHANGE_DRAFT",
     CHANGE_DATE: "CHANGE_DATE",
     CHANGE_LOCATION: "CHANGE_LOCATION",
@@ -41,7 +46,12 @@ export const initialState = {
     },
     walletData: {
         balance:'',
-        address:''
+        address:'',
+        qrCodeImgUrl:'',
+        txHistory: {
+            isLoading: false,
+            data: []
+        }
     },
     nftData:[
         { 
@@ -64,7 +74,9 @@ export const initialState = {
         nftData: true,
         walletData: true,
         journalData: true
-    }
+    }, 
+    isAuthenticated: false,
+    isLoading: false
 }
 
 const freshPage = {
@@ -108,6 +120,16 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
+        case types.SET_IS_AUTHENTICATED:
+            state.isAuthenticated = payload;
+            return {
+                ...state
+            }
+        case types.SET_IS_LOADING:
+            state.isLoading = payload;
+            return {
+                ...state
+            }
         case types.SET_JOURNAL_UNREAD_ENTRIES:
         state.unreadEntries = payload;
         return {
@@ -124,7 +146,41 @@ const changeValue = (state = initialState, action) => {
             ...state
         }
         case types.SET_WALLET_DATA:
-        state.walletData = payload;
+        state.walletData = {
+            ...state.walletData,
+            balance: payload.balance,
+            address: payload.address
+        }
+        return {
+            ...state
+        }
+        case types.SET_WALLET_QR_CODE_IMG_URL:
+        state.walletData = {
+            ...state.walletData,
+            qrCodeImgUrl: payload
+        };
+        return {
+            ...state
+        }
+        case types.SET_IS_TX_HISTORY_LOADING:
+        state.walletData = {
+            ...state.walletData,
+            txHistory: {
+                ...state.walletData.txHistory,
+                isLoading: payload
+            }
+        };
+        return {
+            ...state
+        }
+        case types.SET_TX_HISTORY_DATA:
+        state.walletData = {
+            ...state.walletData,
+            txHistory: {
+                ...state.walletData.txHistory,
+                data: payload
+            }
+        };
         return {
             ...state
         }

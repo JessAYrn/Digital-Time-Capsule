@@ -1,125 +1,26 @@
 import JournalPage from "./JournalPage";
 import React, {useEffect, useReducer, useState, useContext, useMemo } from "react";
-import { useLocation } from "react-router-dom";
 import journalReducer, {initialState, types} from "../reducers/journalReducer";
 import "./Journal.scss";
 import { AppContext } from "../App";
 import InputBox from "./Fields/InputBox";
 import { dayInNanoSeconds, monthInDays } from "../Constants";
-import LoadScreen from "./LoadScreen";
 import { Modal } from "./Modal";
 import ModalContentSubmit from "./modalContent/ModalContentOnSubmit";
 import ModalContentNotifications from "./modalContent/ModalContentNotifications";
 import { milisecondsToNanoSeconds } from "../Utils";
 import { NavBar } from "./navigation/NavBar";
 import { MODALS_TYPES } from "../Constants";
-import { mapApiObjectToFrontEndJournalEntriesObject } from "../mappers/journalPageMappers";
-import { toHexString } from "../Utils";
 import { TEST_DATA_FOR_NOTIFICATIONS } from "../testData/notificationsTestData";
 
 const Journal = (props) => {
 
     const mql = window.matchMedia('(max-width: 480px)');
-
-    const [journalState, dispatch] = useReducer(journalReducer, initialState);
-
-    //clears useLocation().state upon page refresh so that when the user refreshes the page,
-    //changes made to this route aren't overrided by the useLocation().state of the previous route.
-    window.onbeforeunload = window.history.replaceState(null, '');
-
-    //gets state from previous route
-    const location = useLocation();
-    //dispatch state from previous route to redux store if that state exists
-    if(location.state){
-        dispatch({
-            actionType: types.SET_ENTIRE_REDUX_STATE,
-            payload: location.state
-        });
-        //wipe previous location state to prevent infinite loop
-        location.state = null;
-    }
+    const {actor, authClient, setIsLoaded, journalState, dispatch} = useContext(AppContext);
     const [pageIsVisibleArray, setPageIsVisibleArray] = useState(journalState.journal.map((page) => false));
     const [newPageAdded, setNewPageAdded] = useState(false);
     const [modalStatus, setModalStatus] = useState({show: false, which: MODALS_TYPES.onSubmit});
     const [submitSuccessful,setSubmitSuccessful] = useState(null);
-    const [isLoading, setIsLoading] = useState(false);
-    const {actor, authClient, setIsLoaded, setSubmissionsMade, submissionsMade} = useContext(AppContext);
-
-    useEffect(async () => {
-        if(journalState.reloadStatuses.journalData){
-            setIsLoading(true);
-            const journal = await actor.readJournal();
-            if("err" in journal){
-                actor.create().then((result) => {
-                    console.log(result);
-                    setIsLoading(false);
-                });
-            } else {
-                const journalEntriesObject = mapApiObjectToFrontEndJournalEntriesObject(journal);
-                let journalEntries = journalEntriesObject.allEntries;
-                let unreadEntries = journalEntriesObject.unreadEntries;
-
-                dispatch({
-                    payload: unreadEntries,
-                    actionType: types.SET_JOURNAL_UNREAD_ENTRIES
-                })
-
-                const journalBio = journal.ok.userJournalData[1];
-                const metaData = {email : journal.ok.email, userName: journal.ok.userName};
-                
-                dispatch({
-                    payload: metaData,
-                    actionType: types.SET_METADATA
-                })
-                dispatch({
-                    payload: journalBio,
-                    actionType: types.SET_BIO
-                })
-                dispatch({
-                    payload: journalEntries,
-                    actionType: types.SET_JOURNAL
-                });
-                dispatch({
-                    actionType: types.SET_JOURNAL_DATA_RELOAD_STATUS,
-                    payload: false,
-                });
-                setIsLoading(false);
-            }
-        }
-        if(journalState.reloadStatuses.nftData){
-            const nftCollection = await actor.getUserNFTsInfo();
-            console.log(nftCollection);
-            dispatch({
-                payload: nftCollection,
-                actionType: types.SET_NFT_DATA
-            });
-            dispatch({
-                payload: false,
-                actionType: types.SET_NFT_DATA_RELOAD_STATUS
-            });
-            
-        }
-        if(journalState.reloadStatuses.walletData){
-            //Load wallet data in background
-            const walletDataFromApi = await actor.readWalletData();
-            const walletData = { 
-                balance : parseInt(walletDataFromApi.ok.balance.e8s), 
-                address: toHexString(new Uint8Array( [...walletDataFromApi.ok.address])) 
-            };
-            
-            dispatch({
-                payload: walletData,
-                actionType: types.SET_WALLET_DATA
-            });
-
-            dispatch({
-                actionType: types.SET_WALLET_DATA_RELOAD_STATUS,
-                payload: false,
-            });
-        }
-
-
-    },[actor, submissionsMade, authClient])
 
     useEffect(() => {
         setPageIsVisibleArray(journalState.journal.map((page, index) => { 
@@ -134,7 +35,10 @@ const Journal = (props) => {
     },[journalState.journal.length]);
 
     const handleSubmit = async () => {
-        setIsLoading(true);
+        dispatch({
+            actionType: types.SET_IS_LOADING,
+            payload: true
+        });
         const result = await actor.updateBio({
             dob: journalState.bio.dob,
             pob: journalState.bio.pob,
@@ -142,7 +46,10 @@ const Journal = (props) => {
             dedications: journalState.bio.dedications,
             preface: journalState.bio.preface
         });
-        setIsLoading(false);
+        dispatch({
+            actionType: types.SET_IS_LOADING,
+            payload: false
+        });
         setModalStatus({show:true, which: MODALS_TYPES.onSubmit});
         if("ok" in result){
             setSubmitSuccessful(true);
@@ -263,8 +170,7 @@ const Journal = (props) => {
     },[modalStatus]);
 
     return(
-        isLoading ? 
-        <LoadScreen/> : modalStatus.show ?
+        modalStatus.show ?
         <div className={"container"}>
             <div className={'background'}>
                 <Modal 
@@ -296,6 +202,10 @@ const Journal = (props) => {
                             <div className={'submitAndLoginButtonsDiv'}>
                                 <button className={'addNewEntryButton'} onClick={addJournalPage}> Create New Entry </button>
                                 <button className={'loginButton'} onClick={async () => {
+                                    dispatch({
+                                        actionType: types.SET_ENTIRE_REDUX_STATE,
+                                        payload: initialState
+                                    });
                                     await authClient.logout();
                                     setIsLoaded(false);
                                 }} > Log Out </button>  
@@ -359,6 +269,10 @@ const Journal = (props) => {
                                 <button className={'submitButton'} type="submit" onClick={handleSubmit}> Submit </button>
                                 <button className={'loginButton'} onClick={async () => {
                                     await authClient.logout();
+                                    dispatch({
+                                        actionType: types.SET_IS_AUTHENTICATED,
+                                        payload: false
+                                    });
                                     setIsLoaded(false);
                                 }} > Log Out </button>  
                             </div> 

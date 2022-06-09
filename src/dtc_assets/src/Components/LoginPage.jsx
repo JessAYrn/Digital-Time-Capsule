@@ -1,6 +1,6 @@
 import React, {useContext} from "react";
 import { AppContext as JournalContext } from "../App";
-import { AppContext as AccountContext } from "../AccountPage";
+import { AppContext as AccountContext } from "../Account";
 import { AppContext as WalletContex } from "../Wallet";
 import { AppContext as HomePageContext } from "../HomePage";
 import { AppContext as NftPageContext } from "../NFTs";
