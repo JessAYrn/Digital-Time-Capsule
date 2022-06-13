@@ -203,6 +203,15 @@ shared actor class Dip721NFT(custodian: Principal, init : Types.Dip721NonFungibl
         return tokenIds;
     };
 
+    public shared({ caller }) func clearUnsubmittedFile() : async Result.Result<(), Types.ApiError> {
+        if (not List.some(custodians, func (custodian : Principal) : Bool { custodian == caller })) {
+        return #err(#Unauthorized);
+        };
+
+        localFile := [];
+        #ok(());
+    };
+
     public shared({ caller }) func uploadNftChunk(metadata: Types.MetadataKeyVal) : async Result.Result<(), Types.ApiError> {
         if (not List.some(custodians, func (custodian : Principal) : Bool { custodian == caller })) {
         return #err(#Unauthorized);

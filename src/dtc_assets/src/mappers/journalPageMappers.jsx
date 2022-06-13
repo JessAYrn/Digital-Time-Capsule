@@ -1,4 +1,5 @@
 import { milisecondsToNanoSeconds } from "../Utils";
+import { file1FileIndex, file2FileIndex } from "../Constants";
 import { types } from "../reducers/journalReducer";
 import { TEST_DATA_FOR_NOTIFICATIONS } from "../testData/notificationsTestData";
 
@@ -46,6 +47,23 @@ export const mapApiObjectToFrontEndJournalEntriesObject = (journalDataFromApi) =
     let journalEntriesForFrontend = journalDataFromApi.ok.userJournalData[0].map((arrayWithKeyAndPage) => {
         const backEndObj = arrayWithKeyAndPage[1];
         const entryKey  = arrayWithKeyAndPage[0];
+        const file1Data = {
+            metaData: {
+                ...backEndObj.file1MetaData,
+                fileIndex: file1FileIndex
+            },
+            isLoading: false
+        }
+
+        const file2Data = {
+            metaData: {
+                ...backEndObj.file2MetaData,
+                fileIndex: file2FileIndex
+            },
+            isLoading: false
+        }
+
+
         return {
             date: backEndObj.date,
             title: backEndObj.entryTitle,
@@ -59,8 +77,8 @@ export const mapApiObjectToFrontEndJournalEntriesObject = (journalDataFromApi) =
             sent : backEndObj.sent,
             read : backEndObj.read,
             draft: backEndObj.draft,
-            file1MetaData: backEndObj.file1MetaData,
-            file2MetaData: backEndObj.file2MetaData,
+            file1: file1Data,
+            file2: file2Data,
             entryKey: parseInt(entryKey)
         };
     });

@@ -497,7 +497,49 @@ shared (msg) actor class User() = this {
      
     };
 
-    public shared(msg) func createJournalEntryFile(fileId: Text, chunkId: Nat, blobChunk: Blob): async Result.Result<(), JournalTypes.Error>{
+    public shared(msg) func submitFile(localFileIndex: Nat, fileId : Text) : async Result.Result<(), JournalTypes.Error> {
+        let callerId = msg.caller;
+
+        let result = Trie.find(
+            profiles,
+            key(callerId),
+            Principal.equal
+        );
+
+        switch(result){
+            case null{
+                return #err(#NotFound)
+            };
+            case (? v){
+                let journal = v.journal;
+                let result = journal.submitFile(localFileIndex, fileId);
+                #ok(());
+            };
+        };
+    };
+
+    public shared(msg) func clearLocalFile(localFileIndex: Nat): async Result.Result<(), JournalTypes.Error>{
+        let callerId = msg.caller;
+
+        let result = Trie.find(
+            profiles,
+            key(callerId),
+            Principal.equal
+        );
+
+        switch(result){
+            case null{
+                return #err(#NotFound)
+            };
+            case (? v){
+                let journal = v.journal;
+                let result = journal.clearLocalFile(localFileIndex: Nat);
+                #ok(());
+            };
+        };
+    };
+
+    public shared(msg) func uploadJournalEntryFile(localFileIndex: Nat, chunkId: Nat, blobChunk: Blob): async Result.Result<(), JournalTypes.Error>{
         let callerId = msg.caller;
 
         let result = Trie.find(
@@ -516,8 +558,7 @@ shared (msg) actor class User() = this {
                 if(icpBalance.e8s < oneICP){
                     return #err(#WalletBalanceTooLow);
                 } else {
-                    let journal = v.journal;
-                    let status = await journal.createFile(fileId,chunkId, blobChunk);
+                    let status = await journal.uploadFileChunk(localFileIndex: Nat, chunkId, blobChunk);
                     return status;
                 }
             };

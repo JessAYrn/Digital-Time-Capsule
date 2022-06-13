@@ -34,8 +34,16 @@ export const types = {
     CHANGE_RECIPIENT_EMAIL_ONE: "CHANGE_RECIPIENT_EMAIL_ONE",
     CHANGE_RECIPIENT_EMAIL_TWO: "CHANGE_RECIPIENT_EMAIL_TWO",
     CHANGE_RECIPIENT_EMAIL_THREE: "CHANGE_RECIPIENT_EMAIL_THREE",
+    CHANGE_PAGE_IS_DISABLED_STATUS: "CHANGE_PAGE_IS_DISABLED_STATUS",
     CHANGE_FILE1_METADATA: "CHANGE_FILE1_METADATA",
-    CHANGE_FILE2_METADATA: "CHANGE_FILE2_METADATA"
+    CHANGE_FILE1_ERROR_STATUS: "CHANGE_FILE1_ERROR_STATUS",
+    CHANGE_FILE1_BLOB: "CHANGE_FILE1_BLOB",
+    CHANGE_FILE1_LOAD_STATUS: "CHANGE_FILE1_LOAD_STATUS",
+    CHANGE_FILE2_METADATA: "CHANGE_FILE2_METADATA",
+    CHANGE_FILE2_ERROR_STATUS: "CHANGE_FILE2_ERROR_STATUS",
+    CHANGE_FILE2_BLOB: "CHANGE_FILE2_BLOB",
+    CHANGE_FILE2_LOAD_STATUS: "CHANGE_FILE2_LOAD_STATUS",
+    REMOVE_UNSUBMITTED_PAGE: "REMOVE_UNSUBMITTED_PAGE"
 
 }
 
@@ -90,15 +98,28 @@ const freshPage = {
     emailTwo: '',
     emailThree: '', 
     draft: true,
-    file1MetaData:{
-        fileName: 'null',
-        lastModified: 0,
-        fileType: 'null'
+    isDisabled: false,
+    file1:{
+        metaData: {
+            fileName: 'null',
+            lastModified: 0,
+            fileType: 'null',
+            fileIndex: 0
+        },
+        error: false,
+        blob: null,
+        isLoading: false
     },
-    file2MetaData:{
-        fileName: 'null',
-        lastModified: 0,
-        fileType: 'null'
+    file2:{
+        metaData: {
+            fileName: 'null',
+            lastModified: 0,
+            fileType: 'null',
+            fileIndex: 1
+        },
+        error: false,
+        blob: null,
+        isLoading: false
     }
 }
 
@@ -117,6 +138,11 @@ const changeValue = (state = initialState, action) => {
             }
         case types.SET_JOURNAL:
             state.journal = payload;
+            return {
+                ...state
+            }
+        case types.REMOVE_UNSUBMITTED_PAGE:
+            state.journal.pop();
             return {
                 ...state
             }
@@ -242,6 +268,15 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
+        case types.CHANGE_PAGE_IS_DISABLED_STATUS:
+        updatedJournalPage = {
+            ... state.journal[index],
+            isDisabled: payload
+        }
+        state.journal[index] = updatedJournalPage;
+        return {
+            ...state
+        }
         case types.CHANGE_DRAFT:
         updatedJournalPage = {
             ... state.journal[index],
@@ -299,21 +334,99 @@ const changeValue = (state = initialState, action) => {
         case types.CHANGE_FILE1_METADATA:
             updatedJournalPage = {
                 ... state.journal[index],
-                file1MetaData: payload
+                file1: {
+                    ...state.journal[index].file1,
+                    metaData: payload
+                }
+            }
+            state.journal[index] = updatedJournalPage;
+            return {
+                ...state
+            }
+        case types.CHANGE_FILE1_ERROR_STATUS:
+            updatedJournalPage = {
+                ... state.journal[index],
+                file1: {
+                    ...state.journal[index].file1,
+                    error: payload
+                }
+            }
+            state.journal[index] = updatedJournalPage;
+            return {
+                ...state
+            }
+        case types.CHANGE_FILE1_BLOB:
+            updatedJournalPage = {
+                ... state.journal[index],
+                file1: {
+                    ...state.journal[index].file1,
+                    blob: payload
+                }
+            }
+            state.journal[index] = updatedJournalPage;
+            return {
+                ...state
+            }
+        case types.CHANGE_FILE1_LOAD_STATUS:
+            updatedJournalPage = {
+                ... state.journal[index],
+                file1: {
+                    ...state.journal[index].file1,
+                    isLoading: payload
+                }
             }
             state.journal[index] = updatedJournalPage;
             return {
                 ...state
             }
         case types.CHANGE_FILE2_METADATA:
-        updatedJournalPage = {
-            ... state.journal[index],
-            file2MetaData: payload
-        }
+            updatedJournalPage = {
+                ... state.journal[index],
+                file2: {
+                    ...state.journal[index].file2,
+                    metaData: payload
+                }
+            }
         state.journal[index] = updatedJournalPage;
         return {
             ...state
         }
+        case types.CHANGE_FILE2_ERROR_STATUS:
+            updatedJournalPage = {
+                ... state.journal[index],
+                file2: {
+                    ...state.journal[index].file2,
+                    error: payload
+                }
+            }
+            state.journal[index] = updatedJournalPage;
+            return {
+                ...state
+            }
+        case types.CHANGE_FILE2_BLOB:
+            updatedJournalPage = {
+                ... state.journal[index],
+                file2: {
+                    ...state.journal[index].file2,
+                    blob: payload
+                }
+            }
+            state.journal[index] = updatedJournalPage;
+            return {
+                ...state
+            }
+        case types.CHANGE_FILE2_LOAD_STATUS:
+            updatedJournalPage = {
+                ... state.journal[index],
+                file2: {
+                    ...state.journal[index].file2,
+                    isLoading: payload
+                }
+            }
+            state.journal[index] = updatedJournalPage;
+            return {
+                ...state
+            }
         case types.CHANGE_ENTRY:
             updatedJournalPage = {
                 ... state.journal[index],

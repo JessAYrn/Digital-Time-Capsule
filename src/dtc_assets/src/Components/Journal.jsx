@@ -1,6 +1,6 @@
 import JournalPage from "./JournalPage";
-import React, {useEffect, useReducer, useState, useContext, useMemo } from "react";
-import journalReducer, {initialState, types} from "../reducers/journalReducer";
+import React, {useEffect, useState, useContext, useMemo } from "react";
+import {initialState, types} from "../reducers/journalReducer";
 import "./Journal.scss";
 import { AppContext } from "../App";
 import InputBox from "./Fields/InputBox";
@@ -279,11 +279,8 @@ const Journal = (props) => {
                         }
                     </React.Fragment> : 
                     <JournalPage
-                        journalSize={journalState.journal.length}
                         closePage={closePage}
                         index={getIndexOfVisiblePage()}
-                        journalPageData={journalState.journal[getIndexOfVisiblePage()]}
-                        journalReducerDispatchFunction={dispatch}
                     /> 
                 }
             </>
