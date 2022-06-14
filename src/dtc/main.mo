@@ -1247,13 +1247,14 @@ shared (msg) actor class User() = this {
                         case ( ? existingProfile){
                             let userJournal = existingProfile.journal;
                             let journalCanisterId = Principal.fromActor(userJournal);
-
+                            await ic.stop_canister({canister_id = journalCanisterId});
                             await ic.install_code({
                                 arg = args;
                                 wasm_module = wasmModule;
                                 mode = #upgrade;
                                 canister_id = journalCanisterId;
                             });
+                            await ic.start_canister({canister_id = journalCanisterId});
 
                         };
                     };
