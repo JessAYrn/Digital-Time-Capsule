@@ -1,29 +1,19 @@
-import React, {useEffect, useReducer, useState, useContext } from "react";
-import journalReducer, {initialState, types} from "../reducers/journalReducer";
+import React, {useEffect, useState, useContext } from "react";
+import { UI_CONTEXTS } from "../Contexts";
 import { AppContext } from "../NFTs";
 import { NavBar } from "./navigation/NavBar";
 import "./NftPage.scss";
 const NftPage = () => {
-    const [journalState, dispatch] = useReducer(journalReducer, initialState);
-    const [isLoading, setIsLoading] = useState(false);
-    const {actor, authClient, setIsLoaded, setSubmissionsMade, submissionsMade} = useContext(AppContext);
 
-    useEffect(async () => {
-        setIsLoading(true);
-        const nftCollection = await actor.getUserNFTsInfo();
-        console.log('line 11: ',nftCollection);
-        if("err" in nftCollection){
-            console.log('line 13: ',nftCollection);
-            setIsLoading(false);
-        } else {
-            console.log(nftCollection);
-            dispatch({
-                payload: nftCollection,
-                actionType: types.SET_NFT_DATA
-            });
-            setIsLoading(false);
-        }
-    },[actor, authClient]);
+    const {
+        actor, 
+        authClient, 
+        setIsLoaded, 
+        setSubmissionsMade, 
+        submissionsMade,
+        journalState,
+        dispatch
+    } = useContext(AppContext);
 
     return(
         <div className='container'>
@@ -35,6 +25,7 @@ const NftPage = () => {
                 accountLink={true}
                 dashboardLink={true}
                 notificationIcon={false}
+                context={UI_CONTEXTS.NFT}
             />
             </div>
         </div>

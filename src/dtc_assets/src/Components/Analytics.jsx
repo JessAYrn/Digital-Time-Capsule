@@ -1,21 +1,25 @@
 import React, {useState, useEffect, useContext} from 'react';
 import { AppContext } from '../HomePage';
+import { types } from '../reducers/journalReducer';
 import "./Analytics.scss"
 
 
 const Analytics = () => {
 
     const [jounralCount, setJournalCount] = useState(null);
+    const {actor, authClient, journalState, dispatch, setIsLoaded} = useContext(AppContext);
     const [isLoading, setIsLoading] = useState(false);
 
-    const {actor, authClient, setIsLoaded} = useContext(AppContext);
-
     useEffect( async () => {
+        if(!actor){
+            return;
+        }
         setIsLoading(true);
         await actor.getProfilesSize().then((profilesTrieSize) => {
             setJournalCount(parseInt(profilesTrieSize));
         });
         setIsLoading(false);
+
     }, [authClient, actor]);
 
     console.log('JournalCount: ', jounralCount);

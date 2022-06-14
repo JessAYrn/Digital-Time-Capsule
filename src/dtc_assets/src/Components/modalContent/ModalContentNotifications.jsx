@@ -1,16 +1,19 @@
-import React from 'react';
+import React, { useContext} from 'react';
 import "./ModalContentNotifications.scss";
 import { dayInNanoSeconds, monthInDays } from "../../Constants";
+import { AppContext } from '../../App';
 import { MODALS_TYPES } from '../../Constants';
+import { types } from '../../reducers/journalReducer';
 
 const Notifications = (props) => {
-    const {
-        setModalStatus,
-        tableContent
-    } = props;
+
+    const { journalState, dispatch } = useContext(AppContext);
 
     const onClick = () => {
-        setModalStatus({show: false, which: MODALS_TYPES.onSubmit})
+        dispatch({
+            actionType: types.SET_MODAL_STATUS,
+            payload: {show: false, which: MODALS_TYPES.onSubmit}
+        })
     }
 
 
@@ -26,7 +29,7 @@ const Notifications = (props) => {
                 </table>
                 <div class='scrollable'>
                     <table className={"table"}>
-                        { tableContent.map((page, index) => {
+                        { journalState.unreadEntries.map((page, index) => {
                             const unlockTimeAsInt = page.unlockTime;
                             const currentTimeAsInt = Date.now() *1000000;
                             const open = (currentTimeAsInt >= unlockTimeAsInt);

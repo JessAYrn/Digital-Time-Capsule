@@ -1,17 +1,20 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import { MAX_DURATION_OF_VIDEO_IN_SECONDS } from '../../Constants';
+import { AppContext } from '../../App';
 import { MODALS_TYPES } from '../../Constants';
 import { round2Decimals } from '../../Utils';
 import "./ModalContentHasError.scss";
+import { types } from '../../reducers/journalReducer';
 const FileHasError = (props) => {
 
-    const{
-        setModalStatus,
-        modalStatus
-    } = props;
+    const { actor, journalState, dispatch } = useContext(AppContext);
+
 
     const onClickOk = () => {
-        setModalStatus({show: false, which: MODALS_TYPES.onSubmit});
+        dispatch({
+            actionType: types.SET_MODAL_STATUS,
+            payload: {show: false, which: MODALS_TYPES.onSubmit}
+        });
     };
 
     return(
@@ -29,7 +32,7 @@ const FileHasError = (props) => {
                 </li>
                 <li>
                     <h6 className={'h6'}>
-                        Your file is {round2Decimals(modalStatus.duration)} seconds.
+                        Your file is {round2Decimals(journalState.modalStatus.duration)} seconds.
                     </h6>
                 </li>
                 <li>

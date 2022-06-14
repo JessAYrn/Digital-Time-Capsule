@@ -1,123 +1,26 @@
 import JournalPage from "./JournalPage";
-import React, {useEffect, useReducer, useState, useContext, useMemo } from "react";
-import journalReducer, {initialState, types} from "../reducers/journalReducer";
-import { mapApiObjectToFrontEndObject } from "../mappers/journalPageMappers";
+import React, {useEffect, useState, useContext, useMemo } from "react";
+import {initialState, types} from "../reducers/journalReducer";
 import "./Journal.scss";
 import { AppContext } from "../App";
 import InputBox from "./Fields/InputBox";
 import { dayInNanoSeconds, monthInDays } from "../Constants";
-import LoadScreen from "./LoadScreen";
 import { Modal } from "./Modal";
-import ModalContentSubmit from "./modalContent/ModalContentOnSubmit";
-import ModalContentNotifications from "./modalContent/ModalContentNotifications";
 import { milisecondsToNanoSeconds } from "../Utils";
 import { NavBar } from "./navigation/NavBar";
 import { MODALS_TYPES } from "../Constants";
-import { TEST_DATA_FOR_NOTIFICATIONS } from "../testData/notificationsTestData";
+import { UI_CONTEXTS } from "../Contexts";
 
 const Journal = (props) => {
 
     const mql = window.matchMedia('(max-width: 480px)');
-
-    const [journalState, dispatch] = useReducer(journalReducer, initialState);
-    const [pageIsVisibleArray, setPageIsVisibleArray] = useState(journalState.journal.map((page) => false));
-    const [newPageAdded, setNewPageAdded] = useState(false);
-    const [modalStatus, setModalStatus] = useState({show: false, which: MODALS_TYPES.onSubmit});
-    const [submitSuccessful,setSubmitSuccessful] = useState(null);
-    const [journalSize, setJournalSize] = useState(0);
-    const [isLoading, setIsLoading] = useState(false);
-    const {actor, authClient, setIsLoaded, setSubmissionsMade, submissionsMade} = useContext(AppContext);
-    const [displayNotifications, setDisplayNotifications] = useState(false);
-    const [unreadJournalEntries, setUnreadJournalEntries] = useState([]);
-
-    useEffect(async () => {
-        setIsLoading(true);
-        const journal = await actor.readJournal();
-        console.log(journal);
-        if("err" in journal){
-            actor.create().then((result) => {
-                console.log(result);
-                setIsLoading(false);
-            });
-        } else {
-            let journalEntries = journal.ok.userJournalData[0].map((arrayWithKeyAndPage) => {
-                return mapApiObjectToFrontEndObject(arrayWithKeyAndPage[0], arrayWithKeyAndPage[1]);
-            });
-
-
-            journalEntries = journalEntries.sort(function(a,b){
-                const dateForAArray = a.date.split('-');
-                const yearForA = parseInt(dateForAArray[0]);
-                const monthForA = parseInt(dateForAArray[1]);
-                const dayForA = parseInt(dateForAArray[2]);
-
-                const dateForBArray = b.date.split('-'); 
-                const yearForB = parseInt(dateForBArray[0]);
-                const monthForB = parseInt(dateForBArray[1]);
-                const dayForB = parseInt(dateForBArray[2]);
-
-                if(yearForA > yearForB){
-                    return 1;
-                } else if(yearForA < yearForB){
-                    return -1;
-                } else {
-                    if(monthForA > monthForB){
-                        return 1;
-                    } else if(monthForA < monthForB){
-                        return -1;
-                    } else {
-                        if(dayForA > dayForB){
-                            return 1;
-                        } else if(dayForA < dayForB){
-                            return -1;
-                        } else {
-                            return 0;
-                        }
-                    }
-                }
-            });
-
-            setUnreadJournalEntries(
-                journalEntries.filter(entry => !entry.read && 
-                    (milisecondsToNanoSeconds(Date.now())> parseInt(entry.unlockTime)) &&
-                    parseInt(entry.lockTime) > 0
-                )
-            );
-
-            const journalBio = journal.ok.userJournalData[1];
-            const metaData = {email : journal.ok.email, userName: journal.ok.userName};
-            
-            setJournalSize(journalEntries.length);
-            dispatch({
-                payload: metaData,
-                actionType: types.SET_METADATA
-            })
-            dispatch({
-                payload: journalBio,
-                actionType: types.SET_BIO
-            })
-            dispatch({
-                payload: journalEntries,
-                actionType: types.SET_JOURNAL
-            })
-            setIsLoading(false);
-        }
-    },[actor, submissionsMade, authClient])
-
-    useEffect(() => {
-        setPageIsVisibleArray(journalState.journal.map((page, index) => { 
-
-            if((index === journalState.journal.length -1) && newPageAdded){
-                setNewPageAdded(false);
-                return true;
-            } else {
-                return false;
-            }
-        }));
-    },[journalState.journal.length]);
+    const {actor, authClient, setIsLoaded, journalState, dispatch} = useContext(AppContext);
 
     const handleSubmit = async () => {
-        setIsLoading(true);
+        dispatch({
+            actionType: types.SET_IS_LOADING,
+            payload: true
+        });
         const result = await actor.updateBio({
             dob: journalState.bio.dob,
             pob: journalState.bio.pob,
@@ -125,28 +28,31 @@ const Journal = (props) => {
             dedications: journalState.bio.dedications,
             preface: journalState.bio.preface
         });
-        setIsLoading(false);
-        setModalStatus({show:true, which: MODALS_TYPES.onSubmit});
+        dispatch({
+            actionType: types.SET_IS_LOADING,
+            payload: false
+        });
+        
         if("ok" in result){
-            setSubmitSuccessful(true);
+            dispatch({
+                actionType: types.SET_MODAL_STATUS,
+                payload: {show:true, which: MODALS_TYPES.onSubmit, success: true}
+            });
         } else {
-            setSubmitSuccessful(false);
+            dispatch({
+                actionType: types.SET_MODAL_STATUS,
+                payload: {show:true, which: MODALS_TYPES.onSubmit, success: false}
+            });
         }
     }
 
-    const openPage = async (e, index, open) => {
-        if(open){
-            setPageIsVisibleArray(pageIsVisibleArray.map((page, mapIndex) => {
-                if(index === mapIndex){
-                    return true;
-                } else {
-                    return false;
-                }
-            }));
-            const entryKey = journalState.journal[index].entryKey;
-            const result = await actor.readEntry({entryKey: entryKey});
-        } else {
-            () => {}
+    const openPage = async (e, index, unlocked) => {
+        if(unlocked){
+            dispatch({
+                actionType: types.CHANGE_PAGE_IS_OPEN,
+                payload: true,
+                index: index
+            });
         }
     };
 
@@ -154,11 +60,11 @@ const Journal = (props) => {
         dispatch({
             actionType: types.ADD_JOURNAL_PAGE
         });
-        setNewPageAdded(true);
-        openPage(null, journalState.journal.length - 1);
     }
 
-    const putCreateEntryButtonInTable = mql.matches && journalSize < 6;
+    const putCreateEntryButtonInTable = mql.matches && journalState.journal.length < 6;
+
+    console.log(journalState);
 
     const displayJournalTable = () => {
 
@@ -180,18 +86,18 @@ const Journal = (props) => {
                                 { journalState.journal.map((page, index) => {
                                     const unlockTimeAsInt = page.unlockTime;
                                     const currentTimeAsInt = milisecondsToNanoSeconds(Date.now());
-                                    const open = (currentTimeAsInt >= unlockTimeAsInt);
+                                    const unlocked = (currentTimeAsInt >= unlockTimeAsInt);
                                     const remainingWaitTime = unlockTimeAsInt - currentTimeAsInt;
                                     const remainingWaitTimeInMonths = remainingWaitTime / (dayInNanoSeconds * monthInDays);
                                     const timeLapsed = page.lockTime - remainingWaitTimeInMonths;
                                     const timeLapsedRound = Math.round(timeLapsed * 100) / 100;
-                                    const openButton = (open) ? 'Open' : 'Locked';
+                                    const openButton = (unlocked) ? 'Open' : 'Locked';
                                     return(
                                         <tr className={"tableRow "+index}>
                                             <td className={"tableCell "+index}>{page.date}</td>
                                             <td className={"tableCell "+index}>{page.location}</td>
                                             <td className={"tableCell "+index}> {timeLapsedRound} / {page.lockTime} mo.</td>
-                                            <td className={"tableCell "+index}> <button className={'openButton'} onClick={(e) => openPage(e, index, open)}> {openButton} </button> </td>
+                                            <td className={"tableCell "+index}> <button className={'openButton'} onClick={(e) => openPage(e, index, unlocked)}> {openButton} </button> </td>
                                         </tr>  
                                     );
                                 }) }
@@ -221,40 +127,23 @@ const Journal = (props) => {
     };
 
     const getIndexOfVisiblePage = () => {
-        return pageIsVisibleArray.findIndex(page => page === true);
+        return journalState.journal.findIndex(page => page.isOpen === true);
     }
-    const closePage = (e, index) => {
-        setPageIsVisibleArray(pageIsVisibleArray.map((page, mapIndex) => {
-                return false;
-        }))
-    };
 
     const toggleDisplayNotifications = () => {
-        setModalStatus({show: !modalStatus.show, which: MODALS_TYPES.notifications});
+        dispatch({
+            actionType: types.SET_MODAL_STATUS,
+            payload: {show: !journalState.modalStatus.show, which: MODALS_TYPES.notifications}
+        });
     };
 
-    const ChildComponent = useMemo(() => {
-
-        let ChildComp = ModalContentSubmit;
-        if(modalStatus.which === MODALS_TYPES.notifications) {
-            ChildComp = ModalContentNotifications;
-        }
-
-        return ChildComp;
-    },[modalStatus]);
-
     return(
-        isLoading ? 
-        <LoadScreen/> : modalStatus.show ?
+        journalState.modalStatus.show ?
         <div className={"container"}>
             <div className={'background'}>
                 <Modal 
-                    modalStatus={modalStatus} 
-                    setModalStatus={setModalStatus} 
-                    ChildComponent={ChildComponent}
-                    success={submitSuccessful}
-                    setSuccess={setSubmitSuccessful}
-                    tableContent={unreadJournalEntries}
+                    context={UI_CONTEXTS.JOURNAL}
+                    index={getIndexOfVisiblePage()}
                 />
             </div>
         </div> : 
@@ -269,13 +158,18 @@ const Journal = (props) => {
                             accountLink={true}
                             dashboardLink={true}
                             notificationIcon={true}
-                            unreadNotifications={unreadJournalEntries.length}
+                            unreadNotifications={journalState.unreadEntries.length}
                             toggleDisplayNotifications={toggleDisplayNotifications}
+                            context={UI_CONTEXTS.JOURNAL}
                         />
                         {   mql.matches &&
                             <div className={'submitAndLoginButtonsDiv'}>
                                 <button className={'addNewEntryButton'} onClick={addJournalPage}> Create New Entry </button>
                                 <button className={'loginButton'} onClick={async () => {
+                                    dispatch({
+                                        actionType: types.SET_ENTIRE_REDUX_STATE,
+                                        payload: initialState
+                                    });
                                     await authClient.logout();
                                     setIsLoaded(false);
                                 }} > Log Out </button>  
@@ -339,17 +233,17 @@ const Journal = (props) => {
                                 <button className={'submitButton'} type="submit" onClick={handleSubmit}> Submit </button>
                                 <button className={'loginButton'} onClick={async () => {
                                     await authClient.logout();
+                                    dispatch({
+                                        actionType: types.SET_IS_AUTHENTICATED,
+                                        payload: false
+                                    });
                                     setIsLoaded(false);
                                 }} > Log Out </button>  
                             </div> 
                         }
                     </React.Fragment> : 
                     <JournalPage
-                        journalSize={journalSize}
-                        closePage={closePage}
                         index={getIndexOfVisiblePage()}
-                        journalPageData={journalState.journal[getIndexOfVisiblePage()]}
-                        journalReducerDispatchFunction={dispatch}
                     /> 
                 }
             </>

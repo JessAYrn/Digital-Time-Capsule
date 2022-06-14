@@ -6,13 +6,9 @@ import "./ModalContentOnSend.scss";
 import { toE8s, fromE8s } from "../../Utils.jsx";
 import { QrReaderContent } from "../walletFunctions/ScanQrCode";
 import { MODALS_TYPES } from "../../Constants";
+import { types } from "../../reducers/journalReducer";
 
 const ModalContentOnSend = (props) => {
-
-    const {
-        setModalStatus,
-        modalStatus
-    } = props;
 
     const fee = 0.1;
 
@@ -23,14 +19,17 @@ const ModalContentOnSend = (props) => {
     const [isLoading, setIsLoading] = useState(false);
     const [showSummary, setShowSummary] = useState(false);
     const [showQrReader, setShowQrReader] = useState(false);
-    const {actor} = useContext(AppContext);
+    const {actor, journalState, dispatch} = useContext(AppContext);
 
 
     const onCancel = () => {
         setShowSummary(false);
         setSendSuccessful(false);
         setResponseFromApi(false);
-        setModalStatus({show: false, which: MODALS_TYPES.onSend});
+        dispatch({
+            actionType: types.SET_MODAL_STATUS,
+            payload: {show: false, which: MODALS_TYPES.onSend}
+        });
     };
 
     const showTxSummary = () => {
@@ -61,8 +60,10 @@ const ModalContentOnSend = (props) => {
         setShowSummary(false);
         setSendSuccessful(false);
         setResponseFromApi(false);
-        setModalStatus({show: false, which:MODALS_TYPES.onSend});
-
+        dispatch({
+            actionType: types.SET_MODAL_STATUS,
+            payload: {show: false, which:MODALS_TYPES.onSend}
+        });
     };
 
     const ApiResponseContent = () => {
@@ -126,7 +127,7 @@ const ModalContentOnSend = (props) => {
                         label={"Recipient Address: "}
                         rows={"1"}
                         setParentState={setRecipientAddress}
-                        value={ modalStatus.show ? recipientAddress : ''}
+                        value={ journalState.modalStatus.show ? recipientAddress : ''}
                     />
                 </div>
                 <div className="ammountDiv">
@@ -134,7 +135,7 @@ const ModalContentOnSend = (props) => {
                         label={"Amount: "}
                         rows={"1"}
                         setParentState={setAmountToSend}
-                        value={modalStatus.show ? amountToSend : 0}
+                        value={journalState.modalStatus.show ? amountToSend : 0}
                     />
                 </div>
                 <div className='ModalContentOnSendButtons'>

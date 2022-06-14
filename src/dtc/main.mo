@@ -285,8 +285,6 @@ shared (msg) actor class User() = this {
             {
                 userJournalData : ([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio);
                 email: ?Text;
-                balance : Ledger.ICP;
-                address: [Nat8];
                 userName: ?Text;
             }
         ), JournalTypes.Error> {
@@ -310,15 +308,11 @@ shared (msg) actor class User() = this {
             };
             case(? v){
                 let journal = v.journal; 
-                let userBalance = await journal.canisterBalance();
-                let userAccountId = await journal.canisterAccount();
                 let userJournalData = await journal.readJournal();
                 
                 return #ok({
                     userJournalData = userJournalData;
                     email = v.email;
-                    balance = userBalance;
-                    address = Blob.toArray(userAccountId);
                     userName = v.userName;
                 });
                 
@@ -327,6 +321,33 @@ shared (msg) actor class User() = this {
 
         // need to replace Journal with Journal(callerId)
         
+    };
+
+    public shared(msg) func readWalletData() : async Result.Result<({ balance : Ledger.ICP; address: [Nat8]; } ), JournalTypes.Error> {
+        let callerId = msg.caller;
+
+        let result = Trie.find(
+            profiles,
+            key(callerId),
+            Principal.equal
+        );
+
+            switch(result){
+            case null{
+                return #err(#NotFound);
+            };
+            case(? v){
+                let journal = v.journal; 
+                let userBalance = await journal.canisterBalance();
+                let userAccountId = await journal.canisterAccount();
+                
+                return #ok({
+                    balance = userBalance;
+                    address = Blob.toArray(userAccountId);
+                });
+                
+            };
+        };
     };
 
     public shared(msg) func readEntry(entryKey: JournalTypes.EntryKey) : async Result.Result<JournalTypes.JournalEntry, JournalTypes.Error> {
@@ -476,7 +497,49 @@ shared (msg) actor class User() = this {
      
     };
 
-    public shared(msg) func createJournalEntryFile(fileId: Text, chunkId: Nat, blobChunk: Blob): async Result.Result<(), JournalTypes.Error>{
+    public shared(msg) func submitFile(localFileIndex: Nat, fileId : Text) : async Result.Result<(), JournalTypes.Error> {
+        let callerId = msg.caller;
+
+        let result = Trie.find(
+            profiles,
+            key(callerId),
+            Principal.equal
+        );
+
+        switch(result){
+            case null{
+                return #err(#NotFound)
+            };
+            case (? v){
+                let journal = v.journal;
+                let result = journal.submitFile(localFileIndex, fileId);
+                #ok(());
+            };
+        };
+    };
+
+    public shared(msg) func clearLocalFile(localFileIndex: Nat): async Result.Result<(), JournalTypes.Error>{
+        let callerId = msg.caller;
+
+        let result = Trie.find(
+            profiles,
+            key(callerId),
+            Principal.equal
+        );
+
+        switch(result){
+            case null{
+                return #err(#NotFound)
+            };
+            case (? v){
+                let journal = v.journal;
+                let result = journal.clearLocalFile(localFileIndex: Nat);
+                #ok(());
+            };
+        };
+    };
+
+    public shared(msg) func uploadJournalEntryFile(localFileIndex: Nat, chunkId: Nat, blobChunk: Blob): async Result.Result<(), JournalTypes.Error>{
         let callerId = msg.caller;
 
         let result = Trie.find(
@@ -495,8 +558,7 @@ shared (msg) actor class User() = this {
                 if(icpBalance.e8s < oneICP){
                     return #err(#WalletBalanceTooLow);
                 } else {
-                    let journal = v.journal;
-                    let status = await journal.createFile(fileId,chunkId, blobChunk);
+                    let status = await journal.uploadFileChunk(localFileIndex: Nat, chunkId, blobChunk);
                     return status;
                 }
             };

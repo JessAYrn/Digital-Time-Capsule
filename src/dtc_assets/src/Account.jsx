@@ -1,16 +1,15 @@
-import React, { createContext, useState, useReducer, useEffect} from 'react';
-import LoginPage from './Components/LoginPage';
+import React, {useReducer, createContext, useState, useEffect} from 'react';
 import journalReducer, { types, initialState } from './reducers/journalReducer';
-import { generateQrCode } from './Components/walletFunctions/GenerateQrCode';
+import SubcriptionPage from './Components/AccountPage';
 import { useLocation } from 'react-router-dom';
 import { mapApiObjectToFrontEndJournalEntriesObject } from './mappers/journalPageMappers';
+import { generateQrCode } from './Components/walletFunctions/GenerateQrCode';
+import { toHexString } from './Utils';
 import LoadScreen from './Components/LoadScreen';
-import { toHexString } from '@dfinity/candid/lib/cjs/utils/buffer';
-import NftPage from './Components/NftPage';
+import LoginPage from './Components/LoginPage';
 import {AuthClient} from "@dfinity/auth-client";
 import { canisterId, createActor } from '../../declarations/dtc/index';
 import { UI_CONTEXTS } from './Contexts';
-
 
 export const AppContext = createContext({
     authClient: {}, 
@@ -23,8 +22,7 @@ export const AppContext = createContext({
     setActor: null
 });
 
-
-const NFTapp = () => {
+const AccountPage = (props) => {
 
     const [actor, setActor] = useState(undefined);
     const [journalState, dispatch] = useReducer(journalReducer, initialState);
@@ -44,7 +42,7 @@ const NFTapp = () => {
             });
             setIsLoaded(true);
         });
-    }, [isLoaded]);
+    }, [isLoaded])
 
     //Creating the canisterActor that enables us to be able to call the functions defined on the backend
     useEffect(() => {
@@ -68,26 +66,28 @@ const NFTapp = () => {
     const location = useLocation();
     //dispatch state from previous route to redux store if that state exists
     if(location.state){
+        console.log('location state:',location.state);
         dispatch({
             actionType: types.SET_ENTIRE_REDUX_STATE,
             payload: location.state
         });
         //wipe previous location state to prevent infinite loop
         location.state = null;
-    };
+        console.log('location state:',location.state);
+
+    }
 
     useEffect(async () => {
         if(!journalState.isAuthenticated || !actor){
             return
         };
-        if(journalState.reloadStatuses.nftData){
+        if(journalState.reloadStatuses.journalData){
             dispatch({
                 actionType: types.SET_IS_LOADING,
                 payload: true
             });
-            const nftCollection = await actor.getUserNFTsInfo();
-            console.log('line 11: ',nftCollection);
-            if("err" in nftCollection){
+            const journal = await actor.readJournal();
+            if("err" in journal){
                 actor.create().then((result) => {
                     console.log(result);
                     dispatch({
@@ -96,20 +96,52 @@ const NFTapp = () => {
                     });
                 });
             } else {
-                console.log(nftCollection);
+                const journalEntriesObject = mapApiObjectToFrontEndJournalEntriesObject(journal);
+                let journalEntries = journalEntriesObject.allEntries;
+                let unreadEntries = journalEntriesObject.unreadEntries;
+
                 dispatch({
-                    payload: nftCollection,
-                    actionType: types.SET_NFT_DATA
+                    payload: unreadEntries,
+                    actionType: types.SET_JOURNAL_UNREAD_ENTRIES
+                })
+
+                const journalBio = journal.ok.userJournalData[1];
+                const metaData = {email : journal.ok.email, userName: journal.ok.userName};
+                
+                dispatch({
+                    payload: metaData,
+                    actionType: types.SET_METADATA
+                })
+                dispatch({
+                    payload: journalBio,
+                    actionType: types.SET_BIO
+                })
+                dispatch({
+                    payload: journalEntries,
+                    actionType: types.SET_JOURNAL
                 });
                 dispatch({
+                    actionType: types.SET_JOURNAL_DATA_RELOAD_STATUS,
                     payload: false,
-                    actionType: types.SET_NFT_DATA_RELOAD_STATUS
                 });
                 dispatch({
                     actionType: types.SET_IS_LOADING,
                     payload: false
                 });
             }
+        }
+        if(journalState.reloadStatuses.nftData){
+            const nftCollection = await actor.getUserNFTsInfo();
+            console.log(nftCollection);
+            dispatch({
+                payload: nftCollection,
+                actionType: types.SET_NFT_DATA
+            });
+            dispatch({
+                payload: false,
+                actionType: types.SET_NFT_DATA_RELOAD_STATUS
+            });
+            
         }
         if(journalState.reloadStatuses.walletData){
             //Load wallet data in background
@@ -136,77 +168,37 @@ const NFTapp = () => {
                 payload: false,
             });
         }
-        if(journalState.reloadStatuses.journalData){
-            //Load Journal Data in the background
-            const journal = await actor.readJournal();
-
-            const journalEntriesObject = mapApiObjectToFrontEndJournalEntriesObject(journal);
-            let journalEntries = journalEntriesObject.allEntries;
-            let unreadEntries = journalEntriesObject.unreadEntries;
-
-            dispatch({
-                payload: unreadEntries,
-                actionType: types.SET_JOURNAL_UNREAD_ENTRIES
-            })
-
-            const journalBio = journal.ok.userJournalData[1];
-            const metaData = {email : journal.ok.email, userName: journal.ok.userName};
-            
-            dispatch({
-                payload: metaData,
-                actionType: types.SET_METADATA
-            })
-            dispatch({
-                payload: journalBio,
-                actionType: types.SET_BIO
-            })
-            dispatch({
-                payload: journalEntries,
-                actionType: types.SET_JOURNAL
-            });
-            dispatch({
-                actionType: types.SET_JOURNAL_DATA_RELOAD_STATUS,
-                payload: false,
-            });
-            
-        }
     },[actor, authClient]);
 
-
-
-    return(
-
+    return (
         <AppContext.Provider 
             value={{
                 authClient, 
                 setIsLoaded,
-                journalState,
-                dispatch,
                 loginAttempted, 
                 setLoginAttempted, 
+                journalState,
+                dispatch,
                 actor
             }}
         >
             {
                 isLoaded &&
                     journalState.isAuthenticated ? 
-                    journalState.isLoading ? 
+                    journalState.isLoading ?
                         <LoadScreen/> :
-                            <NftPage/> : 
-                            <LoginPage
-                                context={UI_CONTEXTS.NFT}
-                            /> 
+                            <SubcriptionPage/> : 
+                                <LoginPage
+                                    context={UI_CONTEXTS.ACCOUNT_PAGE}
+                                /> 
             }
             {
                 !isLoaded && 
                     <h2> Load Screen </h2>
             }
-
         </AppContext.Provider>
-
-    );
+    )
 
 };
 
-
-export default NFTapp;
+export default AccountPage;
