@@ -31,7 +31,6 @@ const JournalPage = (props) => {
     let journalSize = journalState.journal.length;
 
     const journalPageData = useMemo(() => {
-        console.log('journalPageData: ', journalState);
         return journalState.journal[index];
     }, [journalState.journal[index]])
 
@@ -108,7 +107,6 @@ const JournalPage = (props) => {
             actionType: types.SET_IS_LOADING,
             payload: false
         });
-        console.log('results from submit: ',result1,' ', result2,' ',result3);
         if(result){
             dispatch({
                 payload: false,

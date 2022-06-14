@@ -21,7 +21,18 @@ const InputBox = (props) => {
         // dispatchAction //the action that is to take place in order to dispatch the field change to the redux store
     } = props;
 
+    const [textValue, setTextValue] = useState(value);
+
     const onBlur = () => {
+        if(dispatch){
+            dispatch({
+                payload: inputRef.current.value,
+                actionType: dispatchAction,
+                index: index
+            });
+        } else {
+            setParentState(inputRef.current.value);
+        }
         setDisabledOrEnabled("disabled");
     };
     const onFocus = () => {
@@ -32,15 +43,8 @@ const InputBox = (props) => {
         if(setChangesWereMade){
             setChangesWereMade(true);
         }
-        if(dispatch){
-            dispatch({
-                payload: inputRef.current.value,
-                actionType: dispatchAction,
-                index: index
-            });
-        } else {
-            setParentState(inputRef.current.value);
-        }
+        setTextValue(inputRef.current.value);
+        
     }
 
     return(
@@ -54,7 +58,7 @@ const InputBox = (props) => {
                 cols={columns}
                 maxLength={maxLength}
                 className={disabledOrEnabled}
-                value={value}
+                value={textValue}
                 type="text" 
                 alt={label} 
                 ref={inputRef} 

@@ -64,8 +64,6 @@ const Journal = (props) => {
 
     const putCreateEntryButtonInTable = mql.matches && journalState.journal.length < 6;
 
-    console.log(journalState);
-
     const displayJournalTable = () => {
 
         return( 

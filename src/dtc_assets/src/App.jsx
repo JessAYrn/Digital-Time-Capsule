@@ -171,8 +171,6 @@ const App = () => {
 
     },[actor, authClient]);
 
-    console.log('journalState from App component: ',journalState);
-
     return (
         <AppContext.Provider 
             value={{
