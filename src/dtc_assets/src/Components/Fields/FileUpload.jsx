@@ -18,7 +18,6 @@ const forbiddenFileTypes = [
 const FileUpload = (props) => {
     const {
         label,
-        setModalStatus,
         index,
         elementId,
         setChangesWereMade,
@@ -31,7 +30,6 @@ const FileUpload = (props) => {
     const [constructedFile, setConstructedFile] = useState(null);
     const [fileSrc, setFileSrc]  = useState("dtc-logo-black.png");
     const [fileType, setFileType] = useState("image/png");
-    const [totalFileIntervals, setTotalFileIntervals] = useState(100);
 
     let AppContext;
     if(context === UI_CONTEXTS.JOURNAL){
@@ -43,7 +41,6 @@ const FileUpload = (props) => {
     const { actor, journalState, dispatch } = useContext(AppContext);
 
     let dispatchActionToChangeFileMetaData;
-    let dispatchActionToChangeFileErrorStatus;
     let dispatchActionToChangeFileBlob;
     let dispatchActionToChangeFileLoadStatus;
     let fileData;
@@ -52,14 +49,12 @@ const FileUpload = (props) => {
     if(fileIndex === journalState.journal[index].file1.metaData.fileIndex){
         fileData = journalState.journal[index].file1;
         dispatchActionToChangeFileMetaData = types.CHANGE_FILE1_METADATA;
-        dispatchActionToChangeFileErrorStatus = types.CHANGE_FILE1_ERROR_STATUS;
         dispatchActionToChangeFileBlob = types.CHANGE_FILE1_BLOB;
         dispatchActionToChangeFileLoadStatus = types.CHANGE_FILE1_LOAD_STATUS;
     }
     if(fileIndex === journalState.journal[index].file2.metaData.fileIndex){
         fileData = journalState.journal[index].file2;
         dispatchActionToChangeFileMetaData = types.CHANGE_FILE2_METADATA;
-        dispatchActionToChangeFileErrorStatus = types.CHANGE_FILE2_ERROR_STATUS;
         dispatchActionToChangeFileBlob = types.CHANGE_FILE2_BLOB;
         dispatchActionToChangeFileLoadStatus = types.CHANGE_FILE2_LOAD_STATUS;
     }
@@ -243,10 +238,13 @@ const FileUpload = (props) => {
             if(duration > MAX_DURATION_OF_VIDEO_IN_SECONDS || forbiddenFileTypes.includes(uploadedFile.type)){
                 setFileSrc("dtc-logo-black.png");
                 setFileType("image/png");
-                setModalStatus({
-                    show: true, 
-                    which: MODALS_TYPES.fileHasError,
-                    duration: duration
+                dispatch({
+                        actionType: types.SET_MODAL_STATUS,
+                        payload: {
+                            show: true, 
+                            which: MODALS_TYPES.fileHasError,
+                            duration: duration
+                        }
                 });
                 URL.revokeObjectURL(obUrl);
             } else {

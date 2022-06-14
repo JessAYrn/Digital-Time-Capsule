@@ -6,33 +6,15 @@ import { AppContext } from "../App";
 import InputBox from "./Fields/InputBox";
 import { dayInNanoSeconds, monthInDays } from "../Constants";
 import { Modal } from "./Modal";
-import ModalContentSubmit from "./modalContent/ModalContentOnSubmit";
-import ModalContentNotifications from "./modalContent/ModalContentNotifications";
 import { milisecondsToNanoSeconds } from "../Utils";
 import { NavBar } from "./navigation/NavBar";
 import { MODALS_TYPES } from "../Constants";
-import { TEST_DATA_FOR_NOTIFICATIONS } from "../testData/notificationsTestData";
+import { UI_CONTEXTS } from "../Contexts";
 
 const Journal = (props) => {
 
     const mql = window.matchMedia('(max-width: 480px)');
     const {actor, authClient, setIsLoaded, journalState, dispatch} = useContext(AppContext);
-    const [pageIsVisibleArray, setPageIsVisibleArray] = useState(journalState.journal.map((page) => false));
-    const [newPageAdded, setNewPageAdded] = useState(false);
-    const [modalStatus, setModalStatus] = useState({show: false, which: MODALS_TYPES.onSubmit});
-    const [submitSuccessful,setSubmitSuccessful] = useState(null);
-
-    useEffect(() => {
-        setPageIsVisibleArray(journalState.journal.map((page, index) => { 
-
-            if((index === journalState.journal.length -1) && newPageAdded){
-                setNewPageAdded(false);
-                return true;
-            } else {
-                return false;
-            }
-        }));
-    },[journalState.journal.length]);
 
     const handleSubmit = async () => {
         dispatch({
@@ -50,27 +32,27 @@ const Journal = (props) => {
             actionType: types.SET_IS_LOADING,
             payload: false
         });
-        setModalStatus({show:true, which: MODALS_TYPES.onSubmit});
+        
         if("ok" in result){
-            setSubmitSuccessful(true);
+            dispatch({
+                actionType: types.SET_MODAL_STATUS,
+                payload: {show:true, which: MODALS_TYPES.onSubmit, success: true}
+            });
         } else {
-            setSubmitSuccessful(false);
+            dispatch({
+                actionType: types.SET_MODAL_STATUS,
+                payload: {show:true, which: MODALS_TYPES.onSubmit, success: false}
+            });
         }
     }
 
-    const openPage = async (e, index, open) => {
-        if(open){
-            setPageIsVisibleArray(pageIsVisibleArray.map((page, mapIndex) => {
-                if(index === mapIndex){
-                    return true;
-                } else {
-                    return false;
-                }
-            }));
-            const entryKey = journalState.journal[index].entryKey;
-            const result = await actor.readEntry({entryKey: entryKey});
-        } else {
-            () => {}
+    const openPage = async (e, index, unlocked) => {
+        if(unlocked){
+            dispatch({
+                actionType: types.CHANGE_PAGE_IS_OPEN,
+                payload: true,
+                index: index
+            });
         }
     };
 
@@ -78,8 +60,6 @@ const Journal = (props) => {
         dispatch({
             actionType: types.ADD_JOURNAL_PAGE
         });
-        setNewPageAdded(true);
-        openPage(null, journalState.journal.length - 1);
     }
 
     const putCreateEntryButtonInTable = mql.matches && journalState.journal.length < 6;
@@ -106,18 +86,18 @@ const Journal = (props) => {
                                 { journalState.journal.map((page, index) => {
                                     const unlockTimeAsInt = page.unlockTime;
                                     const currentTimeAsInt = milisecondsToNanoSeconds(Date.now());
-                                    const open = (currentTimeAsInt >= unlockTimeAsInt);
+                                    const unlocked = (currentTimeAsInt >= unlockTimeAsInt);
                                     const remainingWaitTime = unlockTimeAsInt - currentTimeAsInt;
                                     const remainingWaitTimeInMonths = remainingWaitTime / (dayInNanoSeconds * monthInDays);
                                     const timeLapsed = page.lockTime - remainingWaitTimeInMonths;
                                     const timeLapsedRound = Math.round(timeLapsed * 100) / 100;
-                                    const openButton = (open) ? 'Open' : 'Locked';
+                                    const openButton = (unlocked) ? 'Open' : 'Locked';
                                     return(
                                         <tr className={"tableRow "+index}>
                                             <td className={"tableCell "+index}>{page.date}</td>
                                             <td className={"tableCell "+index}>{page.location}</td>
                                             <td className={"tableCell "+index}> {timeLapsedRound} / {page.lockTime} mo.</td>
-                                            <td className={"tableCell "+index}> <button className={'openButton'} onClick={(e) => openPage(e, index, open)}> {openButton} </button> </td>
+                                            <td className={"tableCell "+index}> <button className={'openButton'} onClick={(e) => openPage(e, index, unlocked)}> {openButton} </button> </td>
                                         </tr>  
                                     );
                                 }) }
@@ -147,39 +127,23 @@ const Journal = (props) => {
     };
 
     const getIndexOfVisiblePage = () => {
-        return pageIsVisibleArray.findIndex(page => page === true);
+        return journalState.journal.findIndex(page => page.isOpen === true);
     }
-    const closePage = (e, index) => {
-        setPageIsVisibleArray(pageIsVisibleArray.map((page, mapIndex) => {
-                return false;
-        }))
-    };
 
     const toggleDisplayNotifications = () => {
-        setModalStatus({show: !modalStatus.show, which: MODALS_TYPES.notifications});
+        dispatch({
+            actionType: types.SET_MODAL_STATUS,
+            payload: {show: !journalState.modalStatus.show, which: MODALS_TYPES.notifications}
+        });
     };
 
-    const ChildComponent = useMemo(() => {
-
-        let ChildComp = ModalContentSubmit;
-        if(modalStatus.which === MODALS_TYPES.notifications) {
-            ChildComp = ModalContentNotifications;
-        }
-
-        return ChildComp;
-    },[modalStatus]);
-
     return(
-        modalStatus.show ?
+        journalState.modalStatus.show ?
         <div className={"container"}>
             <div className={'background'}>
                 <Modal 
-                    modalStatus={modalStatus} 
-                    setModalStatus={setModalStatus} 
-                    ChildComponent={ChildComponent}
-                    success={submitSuccessful}
-                    setSuccess={setSubmitSuccessful}
-                    tableContent={journalState.unreadEntries}
+                    context={UI_CONTEXTS.JOURNAL}
+                    index={getIndexOfVisiblePage()}
                 />
             </div>
         </div> : 
@@ -196,7 +160,7 @@ const Journal = (props) => {
                             notificationIcon={true}
                             unreadNotifications={journalState.unreadEntries.length}
                             toggleDisplayNotifications={toggleDisplayNotifications}
-                            journalState={journalState}
+                            context={UI_CONTEXTS.JOURNAL}
                         />
                         {   mql.matches &&
                             <div className={'submitAndLoginButtonsDiv'}>
@@ -279,7 +243,6 @@ const Journal = (props) => {
                         }
                     </React.Fragment> : 
                     <JournalPage
-                        closePage={closePage}
                         index={getIndexOfVisiblePage()}
                     /> 
                 }

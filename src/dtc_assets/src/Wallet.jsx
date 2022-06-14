@@ -33,6 +33,26 @@ const WalletApp = () => {
     const [isLoaded, setIsLoaded] = useState(true);
     const [loginAttempted, setLoginAttempted] = useState(false);
 
+    //gets state from previous route
+    const location = useLocation();
+    console.log('location state: ',location.state);
+
+
+    //dispatch state from previous route to redux store if that state exists
+    if(location.state){
+        dispatch({
+            actionType: types.SET_ENTIRE_REDUX_STATE,
+            payload: location.state
+        });
+        //wipe previous location state to prevent infinite loop
+        location.state = null;
+
+    }
+
+    //clears useLocation().state upon page refresh so that when the user refreshes the page,
+    //changes made to this route aren't overrided by the useLocation().state of the previous route.
+    window.onbeforeunload = window.history.replaceState(null, '');
+
     // login function used when Authenticating the client (aka user)
     useEffect(() => {
         AuthClient.create().then(async (client) => {
@@ -61,22 +81,6 @@ const WalletApp = () => {
 
     }, [authClient]);
 
-    //clears useLocation().state upon page refresh so that when the user refreshes the page,
-    //changes made to this route aren't overrided by the useLocation().state of the previous route.
-    window.onbeforeunload = window.history.replaceState(null, '');
-
-    //gets state from previous route
-    let location = useLocation();
-    //dispatch state from previous route to redux store if that state exists
-    if(location.state){
-        dispatch({
-            actionType: types.SET_ENTIRE_REDUX_STATE,
-            payload: location.state
-        });
-        //wipe previous location state to prevent infinite loop
-        location.state = null;
-    }
-
     const loadTxHistory = async () => {
         if(!actor){
             return;
@@ -97,7 +101,6 @@ const WalletApp = () => {
                 return 1
             }
         });
-        console.log('line 159: ',transactionHistory);
         dispatch({
             actionType: types.SET_TX_HISTORY_DATA,
             payload: transactionHistory
@@ -120,7 +123,6 @@ const WalletApp = () => {
                 payload: true
             });
             const walletDataFromApi = await actor.readWalletData();
-            console.log('line 122: ',walletDataFromApi);
             if("err" in walletDataFromApi){
                 actor.create().then((result) => {
                     console.log('line 125: ',result);
@@ -130,8 +132,6 @@ const WalletApp = () => {
                     payload: false
                 });
             } else {
-                console.log('line 129: ',walletDataFromApi.ok);
-                console.log('line 130: ',toHexString(new Uint8Array( [...walletDataFromApi.ok.address])));
                 const address = toHexString(new Uint8Array( [...walletDataFromApi.ok.address]))
                 const walletData = { 
                     balance : parseInt(walletDataFromApi.ok.balance.e8s), 
@@ -193,8 +193,6 @@ const WalletApp = () => {
             await loadTxHistory(journalState.walletData.address);
         }
     },[actor, authClient]);
-
-
 
     return(
         <AppContext.Provider 

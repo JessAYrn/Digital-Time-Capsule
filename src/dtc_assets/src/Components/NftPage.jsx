@@ -1,4 +1,5 @@
 import React, {useEffect, useState, useContext } from "react";
+import { UI_CONTEXTS } from "../Contexts";
 import { AppContext } from "../NFTs";
 import { NavBar } from "./navigation/NavBar";
 import "./NftPage.scss";
@@ -24,7 +25,7 @@ const NftPage = () => {
                 accountLink={true}
                 dashboardLink={true}
                 notificationIcon={false}
-                journalState={journalState}
+                context={UI_CONTEXTS.NFT}
             />
             </div>
         </div>

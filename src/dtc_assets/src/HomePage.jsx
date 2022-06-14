@@ -119,7 +119,7 @@ const HomePage = () => {
                                 accountLink={true}
                                 dashboardLink={false}
                                 notificationIcon={false}
-                                journalState={journalState}
+                                context={UI_CONTEXTS.HOME_PAGE}
                             />
                             <div class={'scrollable'}>
                                 <Analytics/>

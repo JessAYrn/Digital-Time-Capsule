@@ -9,35 +9,30 @@ import ModalContentOnSend from './modalContent/ModalContentOnSend';
 import {  RenderQrCode } from './walletFunctions/GenerateQrCode';
 import { copyWalletAddressHelper } from './walletFunctions/CopyWalletAddress';
 import { Transaction } from './walletFunctions/Transaction';
+import { types } from '../reducers/journalReducer';
+import { UI_CONTEXTS } from '../Contexts';
 
 const WalletPage = (props) => {
 
     const mql = window.matchMedia('(max-width: 675px)');
     const { journalState, dispatch } = useContext(AppContext);
-    const [modalStatus, setModalStatus] = useState({show: false, which: MODALS_TYPES.onSend});
 
     const openModal = () => {
-        setModalStatus({show: true, which: MODALS_TYPES.onSend});
+        dispatch({
+            actionType: types.SET_MODAL_STATUS,
+            payload: {show: true, which: MODALS_TYPES.onSend}
+        });
     };
 
     const copyWalletAddress = useCallback(() => copyWalletAddressHelper(journalState.walletData.address), [journalState]);
 
-    console.log('line 163: ',journalState.walletData);
-
-    const ChildComponent = useMemo(() => {
-
-        let ChildComp = ModalContentOnSend;
-        return ChildComp;
-    },[modalStatus]);
-
     return (
         <div className={"container"}>
             <div className="background center">
-                { modalStatus.show ? 
+                { journalState.modalStatus.show ? 
                     <Modal 
-                        modalStatus={modalStatus} 
-                        setModalStatus={setModalStatus} 
-                        ChildComponent={ChildComponent} /> :
+                        context={UI_CONTEXTS.WALLET}
+                    /> :
                     <>
                         <NavBar
                             walletLink={false}
@@ -46,7 +41,7 @@ const WalletPage = (props) => {
                             accountLink={true}
                             dashboardLink={true}
                             notificationIcon={false}
-                            journalState={journalState}
+                            context={UI_CONTEXTS.WALLET}
                         />
                         <div className='scrollable'>
                             <div className={'transparentDiv'}>

@@ -1,4 +1,4 @@
-import React, {useState, useContext, useMemo, useCallback} from "react";
+import React, {useState, useContext, useMemo, useCallback, useEffect} from "react";
 import FileUpload from "./Fields/FileUpload";
 import InputBox from "./Fields/InputBox";
 import Slider from "./Fields/Slider";
@@ -16,13 +16,10 @@ import { MODALS_TYPES } from "../Constants";
 
 const JournalPage = (props) => {
 
-    const [modalStatus, setModalStatus] = useState({show: false, which: MODALS_TYPES.onSubmit});
-    const [submitSuccessful,setSubmitSuccessful] = useState(null);
     const [pageChangesMade, setPageChangesMade] = useState(false);
     
     const {
-        index,
-        closePage
+        index
     } = props;
 
     const { 
@@ -118,54 +115,44 @@ const JournalPage = (props) => {
                 actionType: types.CHANGE_DRAFT,
                 index: index
             });
-            setSubmitSuccessful(true);
+            dispatch({
+                actionType: types.SET_MODAL_STATUS,
+                payload: {show: true, which: MODALS_TYPES.onSubmit, success: true}
+            });
         } else {
-            setSubmitSuccessful(false);
+            dispatch({
+                actionType: types.SET_MODAL_STATUS,
+                payload: {show: true, which: MODALS_TYPES.onSubmit, success: false}
+            });
         }
-        setModalStatus({show: true, which: MODALS_TYPES.onSubmit});
 
     }, [journalPageData]);
 
+    useEffect(() => {
+        dispatch({
+            actionType: types.SET_HANDLE_PAGE_SUBMIT_FUNCTION,
+            payload: handleSubmit
+        });
+    },[handleSubmit])
+
     const handleClosePage = (e) => {
         if(pageChangesMade){
-            setModalStatus({show: true, which: MODALS_TYPES.exitWithoutSubmit});
+            dispatch({
+                actionType: types.SET_MODAL_STATUS,
+                payload: {show: true, which: MODALS_TYPES.exitWithoutSubmit}
+            });
         } else {
-            closePage(e)
+            dispatch({
+                actionType: types.CHANGE_PAGE_IS_OPEN,
+                payload: false,
+                index: index
+            })
         }
     }
 
-    const ChildComponent = useMemo(() => {
-
-        let ChildComp = ModalContentSubmit;
-        if(modalStatus.which === MODALS_TYPES.fileHasError) {
-            ChildComp = ModalContentHasError;
-        } else if(modalStatus.which === MODALS_TYPES.exitWithoutSubmit) {
-            ChildComp = ExitWithoutSubmitContent;
-        }
-
-        return ChildComp;
-    },[
-        journalPageData.file1.error,
-        journalPageData.file2.error,
-        modalStatus
-    ]);
-
     return (
         journalState.isLoading ? 
-            <LoadScreen/> : modalStatus.show? 
-                <div className={"container"}>
-                    <div className={'background'}>
-                        <Modal 
-                            modalStatus={modalStatus} 
-                            setModalStatus={setModalStatus} 
-                            ChildComponent={ChildComponent}
-                            handleSubmit={handleSubmit}
-                            closePage={closePage}
-                            success={submitSuccessful}
-                            setSuccess={setSubmitSuccessful}
-                        />
-                    </div>
-                </div>  :
+            <LoadScreen/> : 
                 <div className={"journalPageContainer"}>
                     <div className={"logoDiv"}>
                         <img className={'backButtonImg'} src="back-icon.png" alt="Back Button" onClick={(e) => handleClosePage(e)}/>
@@ -221,7 +208,6 @@ const JournalPage = (props) => {
                             disabled={!journalPageData.draft}
                             fileIndex={journalPageData.file1.metaData.fileIndex}
                             context={UI_CONTEXTS.JOURNAL}
-                            setModalStatus={setModalStatus} 
                             setChangesWereMade={setPageChangesMade}
                             index={index}
                         />
@@ -233,7 +219,6 @@ const JournalPage = (props) => {
                             disabled={!journalPageData.draft}
                             fileIndex={journalPageData.file2.metaData.fileIndex}
                             context={UI_CONTEXTS.JOURNAL}
-                            setModalStatus={setModalStatus} 
                             setChangesWereMade={setPageChangesMade}
                             index={index}
                         />

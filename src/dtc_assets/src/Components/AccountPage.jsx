@@ -5,6 +5,7 @@ import AdminSection from './AdminSection';
 import "./SubscriptionPage.scss";
 import { AppContext } from '../Account';
 import { NavBar } from './navigation/NavBar';
+import { UI_CONTEXTS } from '../Contexts';
 
 
 
@@ -42,7 +43,7 @@ return(
                 accountLink={false}
                 dashboardLink={true}
                 notificationIcon={false}
-                journalState={journalState}
+                context={UI_CONTEXTS.ACCOUNT_PAGE}
             />
             <div className={"logoDivContainer"}>
                 <div className={'logoDiv'}>

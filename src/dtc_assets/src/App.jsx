@@ -11,6 +11,7 @@ import LoadScreen from './Components/LoadScreen';
 import { canisterId, createActor } from '../../declarations/dtc/index';
 import { UI_CONTEXTS } from './Contexts';
 import journalReducer, {initialState, types} from './reducers/journalReducer';
+import { TEST_DATA_FOR_NOTIFICATIONS } from './testData/notificationsTestData';
 
 export const AppContext = createContext({
     authClient: {}, 
@@ -59,13 +60,13 @@ const App = () => {
 
     }, [authClient]);
 
-    //clears useLocation().state upon page refresh so that when the user refreshes the page,
-    //changes made to this route aren't overrided by the useLocation().state of the previous route.
+    // clears useLocation().state upon page refresh so that when the user refreshes the page,
+    // changes made to this route aren't overrided by the useLocation().state of the previous route.
     window.onbeforeunload = window.history.replaceState(null, '');
 
-    //gets state from previous route
+    // gets state from previous route
     const location = useLocation();
-    //dispatch state from previous route to redux store if that state exists
+    // dispatch state from previous route to redux store if that state exists
     if(location.state){
         dispatch({
             actionType: types.SET_ENTIRE_REDUX_STATE,

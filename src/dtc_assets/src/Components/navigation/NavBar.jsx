@@ -1,6 +1,12 @@
-import React from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import { useNavigate } from "react-router-dom";
 import { NAV_LINKS } from '../../Constants';
+import { UI_CONTEXTS } from '../../Contexts';
+import { AppContext as AccountContext} from '../../Account';
+import { AppContext as HomePageContext} from '../../HomePage';
+import { AppContext as NftContext} from '../../NFTs';
+import { AppContext as JournalContext} from '../../App';
+import { AppContext as WalletContext} from '../../Wallet';
 import "./NavBar.scss";
 
 export const NavBar = (props) => {
@@ -13,9 +19,32 @@ export const NavBar = (props) => {
         notificationIcon,
         unreadNotifications,
         toggleDisplayNotifications,
-        journalState
+        context
 
     } = props;
+
+    let AppContext;
+    if(context === UI_CONTEXTS.JOURNAL){
+        AppContext = JournalContext;
+    }
+    if(context === UI_CONTEXTS.NFT){
+        AppContext = NftContext
+    }
+    if(context === UI_CONTEXTS.HOME_PAGE){
+        AppContext = HomePageContext;
+    }
+    if(context === UI_CONTEXTS.WALLET){
+        AppContext = WalletContext
+    }
+    if(context === UI_CONTEXTS.ACCOUNT_PAGE){
+        AppContext = AccountContext;
+    }
+
+    const {
+        journalState,
+        dispatch
+    } = useContext(AppContext);
+
     let navigate = useNavigate();
 
 
@@ -36,21 +65,31 @@ export const NavBar = (props) => {
         };
     });
 
-    const  handleClickDashboard = () =>  {
-        navigate(NAV_LINKS.dashboard, { replace: false, state: journalState});
-    }
-    const  handleClickNFT = () =>  {
-        navigate(NAV_LINKS.nft, { replace: false, state: journalState});
-    }
-    const  handleClickWallet = () =>  {
-        navigate(NAV_LINKS.wallet, { replace: false, state: journalState});
-    }
-    const  handleClickJournal = () =>  {
-        navigate(NAV_LINKS.journal, { replace: false, state: journalState });
-    }
-    const  handleClickAccount = () =>  {
-        navigate(NAV_LINKS.account, { replace: false, state: journalState });
-    }
+    //must remove function from state because useNavigate will send a null state if there is a function in the state
+    let journalStateWithoutFunction = {
+        ...journalState,
+        handlePageSubmitFunction:''
+    };
+
+    const  handleClickDashboard = useCallback(() =>  {
+        navigate(NAV_LINKS.dashboard, { replace: false, state: journalStateWithoutFunction});
+    }, [journalState.reloadStatuses]);
+
+    const  handleClickNFT = useCallback(() =>  {
+        navigate(NAV_LINKS.nft, { replace: false, state: journalStateWithoutFunction});
+    },[journalState.reloadStatuses]);
+
+    const  handleClickWallet = useCallback(() =>  {
+        navigate(NAV_LINKS.wallet, { replace: false, state: journalStateWithoutFunction});
+    }, [journalState.reloadStatuses]);
+
+    const  handleClickJournal = useCallback(() =>  {
+        navigate(NAV_LINKS.journal, { replace: false, state: journalStateWithoutFunction });
+    }, [journalState.reloadStatuses]);
+
+    const  handleClickAccount = useCallback(() =>  {
+        navigate(NAV_LINKS.account, { replace: false, state: journalStateWithoutFunction });
+    },[journalState.reloadStatuses]);
     
 
     const pixelCountOfIcon = 33;

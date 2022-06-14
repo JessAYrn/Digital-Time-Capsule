@@ -7,9 +7,7 @@ import { types } from '../../reducers/journalReducer';
 const ExitWithoutSubmit = (props) => {
 
     const{
-        setModalStatus,
-        handleSubmit,
-        closePage
+        index
     } = props;
 
     const {
@@ -22,16 +20,26 @@ const ExitWithoutSubmit = (props) => {
 
 
     const onClickSubmit = () => {
-        setModalStatus({show: false, which: MODALS_TYPES.onSubmit});
-        handleSubmit();
+        dispatch({
+            actionType: types.SET_MODAL_STATUS,
+            payload: {show: false, which: MODALS_TYPES.onSubmit}
+        });
+        dispatch({
+            actionType: types.CHANGE_PAGE_IS_OPEN,
+            payload: false,
+            index: index
+        })
+        journalState.handlePageSubmitFunction();
     };
 
     const onClickExit = () => {
         dispatch({
             actionType: types.REMOVE_UNSUBMITTED_PAGE
-        })
-        setModalStatus({show: false, which: MODALS_TYPES.onSubmit});
-        closePage();
+        });
+        dispatch({
+            actionType: types.SET_MODAL_STATUS,
+            payload: {show: false, which: MODALS_TYPES.onSubmit}
+        });
     };
 
     return(

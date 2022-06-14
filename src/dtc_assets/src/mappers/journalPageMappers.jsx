@@ -79,6 +79,7 @@ export const mapApiObjectToFrontEndJournalEntriesObject = (journalDataFromApi) =
             draft: backEndObj.draft,
             file1: file1Data,
             file2: file2Data,
+            isOpen: false,
             entryKey: parseInt(entryKey)
         };
     });

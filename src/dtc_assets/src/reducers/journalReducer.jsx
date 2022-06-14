@@ -1,5 +1,4 @@
-import { dayInNanoSeconds, monthInDays } from "../Constants"
-
+import { dayInNanoSeconds, MODALS_TYPES } from "../Constants"
 
 export const types = {
     SET_ENTIRE_REDUX_STATE: "SET_ENTIRE_REDUX_STATE",
@@ -9,6 +8,7 @@ export const types = {
     SET_METADATA: "SET_METADATA",
     SET_WALLET_DATA: "SET_WALLET_DATA",
     SET_WALLET_QR_CODE_IMG_URL:"SET_WALLET_QR_CODE_IMG_URL",
+    SET_MODAL_STATUS: "SET_MODAL_STATUS",
     SET_NFT_DATA: "SET_NFT_DATA",
     SET_NFT_DATA_RELOAD_STATUS: "SET_NFT_DATA_RELOAD_STATUS",
     SET_WALLET_DATA_RELOAD_STATUS: "SET_WALLET_DATA_RELOAD_STATUS",
@@ -43,7 +43,9 @@ export const types = {
     CHANGE_FILE2_ERROR_STATUS: "CHANGE_FILE2_ERROR_STATUS",
     CHANGE_FILE2_BLOB: "CHANGE_FILE2_BLOB",
     CHANGE_FILE2_LOAD_STATUS: "CHANGE_FILE2_LOAD_STATUS",
-    REMOVE_UNSUBMITTED_PAGE: "REMOVE_UNSUBMITTED_PAGE"
+    CHANGE_PAGE_IS_OPEN: "CHANGE_PAGE_IS_OPEN",
+    REMOVE_UNSUBMITTED_PAGE: "REMOVE_UNSUBMITTED_PAGE",
+    SET_HANDLE_PAGE_SUBMIT_FUNCTION: "SET_HANDLE_PAGE_SUBMIT_FUNCTION"
 
 }
 
@@ -84,7 +86,12 @@ export const initialState = {
         journalData: true
     }, 
     isAuthenticated: false,
-    isLoading: false
+    isLoading: false,
+    modalStatus: {
+        show: false, 
+        which: MODALS_TYPES.onSubmit
+    },
+    handlePageSubmitFunction: () => {}
 }
 
 const freshPage = {
@@ -99,6 +106,7 @@ const freshPage = {
     emailThree: '', 
     draft: true,
     isDisabled: false,
+    isOpen: true,
     file1:{
         metaData: {
             fileName: 'null',
@@ -136,6 +144,16 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
+        case types.SET_MODAL_STATUS:
+            state.modalStatus = payload;
+            return {
+                ...state
+            }
+        case types.SET_HANDLE_PAGE_SUBMIT_FUNCTION:
+        state.handlePageSubmitFunction = payload;
+        return {
+            ...state
+        }
         case types.SET_JOURNAL:
             state.journal = payload;
             return {
@@ -295,6 +313,15 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
+        case types.CHANGE_PAGE_IS_OPEN:
+        updatedJournalPage = {
+            ... state.journal[index],
+            isOpen: payload
+        }
+        state.journal[index] = updatedJournalPage;
+        return {
+            ...state
+        }
         case types.CHANGE_RECIPIENT_EMAIL_ONE:
             updatedJournalPage = {
                 ... state.journal[index],
