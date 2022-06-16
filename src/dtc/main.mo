@@ -74,8 +74,6 @@ shared (msg) actor class User() = this {
 
     private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
 
-    private let ledgerIndex : Ledger.InterfaceIndex = actor(Ledger.Canister_ID_INDEX);
-
     private let ledgerC : LedgerCandid.Interface = actor(LedgerCandid.CANISTER_ID);
 
     private var balance = Cycles.balance();
@@ -1054,7 +1052,7 @@ shared (msg) actor class User() = this {
         let tipOfChainInfo = await tipOfChainDetails();
         let tipOfChainIndex : Nat64 = tipOfChainInfo.0;
         let startIndex : Nat64 = startIndexForBlockChainQuery;
-        let maxQueryLength : Nat64 = 1_000;
+        let maxQueryLength : Nat64 = 2_000;
         let newStartIndexForNextQuery = Nat64.min(tipOfChainIndex, startIndex + maxQueryLength);
 
         let getBlocksArgs = {
