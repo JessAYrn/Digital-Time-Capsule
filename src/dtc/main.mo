@@ -1055,6 +1055,8 @@ shared (msg) actor class User() = this {
         let maxQueryLength : Nat64 = 2_000;
         let newStartIndexForNextQuery = Nat64.min(tipOfChainIndex, startIndex + maxQueryLength);
 
+        startIndexForBlockChainQuery := newStartIndexForNextQuery;
+
         let getBlocksArgs = {
             start = startIndex;
             length = maxQueryLength;
@@ -1140,7 +1142,6 @@ shared (msg) actor class User() = this {
             };
             index += 1;
         };
-        startIndexForBlockChainQuery := newStartIndexForNextQuery;
     };
 
     public shared func tipOfChainDetails() : async (Ledger.BlockIndex, LedgerCandid.Transaction) {
