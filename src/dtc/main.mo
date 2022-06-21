@@ -1,5 +1,5 @@
-import Ledger "Ledger";
-import LedgerCandid "LedgerCandid";
+import Ledger "/Ledger/Ledger";
+import LedgerCandid "/Ledger/LedgerCandid";
 import Debug "mo:base/Debug";
 import Error "mo:base/Error";
 import Nat64 "mo:base/Nat64";
@@ -10,7 +10,7 @@ import Nat "mo:base/Nat";
 import Result "mo:base/Result";
 import Principal "mo:base/Principal"; 
 import Time "mo:base/Time";
-import Journal "Journal";
+import Journal "Journal/Journal";
 import Cycles "mo:base/ExperimentalCycles";
 import Buffer "mo:base/Buffer";
 import Blob "mo:base/Blob";
@@ -18,38 +18,20 @@ import Iter "mo:base/Iter";
 import Array "mo:base/Array";
 import Int "mo:base/Int";
 import Text "mo:base/Text";
-import Account "./Account";
+import Account "/Ledger/Account";
 import Bool "mo:base/Bool";
 import Option "mo:base/Option";
-import IC "ic.types";
-import NFT "Dip-721-NFT-Container";
-import DIP721Types "dip721.types";
-import JournalTypes "journal.types";
+import IC "/IC/ic.types";
+import NFT "/NFT/Dip-721-NFT-Container";
+import DIP721Types "/NFT/dip721.types";
+import JournalTypes "/Journal/journal.types";
+import MainMethods "/Main/MainHelperMethods";
+import JournalHelperMethods "/Main/JournalHelperMethods";
+import MainTypes "/Main/types";
 
 shared (msg) actor class User() = this {
 
     let callerId = msg.caller;
-
-    type Profile = {
-        journal : Journal.Journal;
-        email: ?Text;
-        userName: ?Text;
-        id: Principal;
-        accountId: ?Account.AccountIdentifier;
-    };
-
-    type ProfileInput = {
-        userName: ?Text;
-        email: ?Text;
-    };
-
-    type AmountAccepted = {
-        accepted: Nat64
-    };
-
-    type Nft = {
-       nftCollection: NFT.Dip721NFT;
-    };
 
     //Application State
     //stable makes it so that the variable persists across updates to the canister
@@ -58,9 +40,9 @@ shared (msg) actor class User() = this {
     //Trie.Trie is the data type. a Trie is a key/value map where Nat is the key and Profile is the data type
     // and it has been initialized as empty. hence the Trie.empty()
 
-    private stable var profiles : Trie.Trie<Principal, Profile> = Trie.empty();
+    private stable var profiles : Trie.Trie<Principal, MainTypes.Profile> = Trie.empty();
 
-    private stable var nftCollections : Trie.Trie<Nat, Nft> = Trie.empty();
+    private stable var nftCollections : Trie.Trie<Nat, MainTypes.Nft> = Trie.empty();
 
     private stable var nftCollectionsIndex : Nat = 0;
 
@@ -102,511 +84,52 @@ shared (msg) actor class User() = this {
         { accepted = Nat64.fromNat(accepted) };
     };
 
-    private func isUserNameAvailable(userName: ?Text, callerId: Principal) : Bool {
-        switch(userName){
-            case null{
-                true
-            };
-            case (? userNameValue){
-                var index = 0;
-                let numberOfProfiles = Trie.size(profiles);
-                let profilesIter = Trie.iter(profiles);
-                let profilesArray = Iter.toArray(profilesIter);
-                let ArrayBuffer = Buffer.Buffer<(Principal,Profile)>(1);
-
-                while(index < numberOfProfiles){
-                    let userProfile = profilesArray[index];
-                    switch(userProfile.1.userName){
-                        case null{
-                            index += 1;
-                        };
-                        case (? username){
-                            if((username == userNameValue)){
-                                if(userProfile.1.id != callerId){
-                                    ArrayBuffer.add(userProfile);
-                                };
-                            };
-                            index += 1;
-                        };
-                    };
-                };
-
-                if(ArrayBuffer.size() > 0){
-                    false
-                } else {
-                    true
-                }
-            };
-        };
-    };
-
     private func getAdminAccountId () : async Result.Result<Account.AccountIdentifier, JournalTypes.Error> {
-        var index = 0;
-        let numberOfProfiles = Trie.size(profiles);
-        let profilesIter = Trie.iter(profiles);
-        let profilesArray = Iter.toArray(profilesIter);
-        let AdminArrayBuffer = Buffer.Buffer<Blob>(1);
-
-        while(index < numberOfProfiles){
-            let userProfile = profilesArray[index];
-            switch(userProfile.1.userName){
-                case null{
-                    index += 1;
-                };
-                case (? username){
-                    if(username == "admin"){
-                        let userJournal = userProfile.1.journal;
-                        let userAccountId = await userJournal.canisterAccount();
-                        AdminArrayBuffer.add(userAccountId);
-                    };
-                    index += 1;
-                };
-            };
-        };
-
-        
-        if(AdminArrayBuffer.size() == 1){
-            let AdminArray = AdminArrayBuffer.toArray();
-            #ok(AdminArray[0]);
-        } else {
-            #err(#NotAuthorized);
-        }
-
+        let result = await MainMethods.getAdminAccountId(profiles);
+        return result;
     };
 
     public shared(msg) func refillCanisterCycles() : async Result.Result<((Nat,[Nat64])), JournalTypes.Error> {
         let callerId = msg.caller;
-
-        let result = Trie.find(
-            profiles,
-            key(callerId),
-            Principal.equal
-        );
-
-        switch(result){
-            case null{
-                #err(#NotAuthorized);
-            };
-            case(? profile){
-                switch(profile.userName){
-                    case null{
-                        #err(#NotAuthorized);
-                    };
-                    case (? existingUserName){
-                        if(existingUserName == "admin"){
-                            var index = 0;
-                            let numberOfProfiles = Trie.size(profiles);
-                            let profilesIter = Trie.iter(profiles);
-                            let profilesArray = Iter.toArray(profilesIter);
-                            let AmountAcceptedArrayBuffer = Buffer.Buffer<Nat64>(1);
-
-                            while(index < numberOfProfiles){
-                                let userProfile = profilesArray[index];
-                                Cycles.add(100_000_000_000);
-                                let amountAccepted = await userProfile.1.journal.wallet_receive();
-                                AmountAcceptedArrayBuffer.add(amountAccepted.accepted);
-
-                                index += 1;
-                            };
-
-                            #ok(Cycles.balance(), AmountAcceptedArrayBuffer.toArray());
-
-                        } else {
-                            #err(#NotAuthorized);
-                        }
-                    };
-                };
-            };
-        };
+        let result = await MainMethods.refillCanisterCycles(callerId, profiles);
+        return result;
     };
 
     public func getProfilesSize () : async Nat {
         return Trie.size(profiles);
     };
 
-    //Journal Methods
+    //Profile Methods
     //_______________________________________________________________________________________________________________________________________________________________________________________________
 
     //Result.Result returns a varient type that has attributes from success case(the first input) and from your error case (your second input). both inputs must be varient types. () is a unit type.
-    public shared(msg) func create () : async Result.Result<AmountAccepted, JournalTypes.Error> {
-
+    public shared(msg) func create () : async Result.Result<MainTypes.AmountAccepted, JournalTypes.Error> {
         let callerId = msg.caller;
-
-        //Reject Anonymous User
-        //if(Principal.toText(msg.caller) == "2vxsx-fae"){
-        //    return #err(#NotAuthorized);
-        //};
-
-        let existing = Trie.find(
-            profiles,       //Target Trie
-            key(callerId), //Key
-            Principal.equal
-        );
-
-        // If there is an original value, do not update
-        switch(existing) {
-            case null {
-                Cycles.add(1_000_000_000_000);
-                let newUserJournal = await Journal.Journal(callerId);
-                let amountAccepted = await newUserJournal.wallet_receive();
-                let userAccountId = await newUserJournal.canisterAccount();
-
-                let userProfile: Profile = {
-                    journal = newUserJournal;
-                    email = null;
-                    userName = null;
-                    id = callerId;
-                    accountId = ?userAccountId;
-
-                };
-
-                let (newProfiles, oldValueForThisKey) = Trie.put(
-                    profiles, 
-                    key(callerId),
-                    Principal.equal,
-                    userProfile
-                );
-
-                profiles := newProfiles;
-                //No need to write return when attribute of a varient is being returned
+        let result = await MainMethods.create(callerId, profiles);
+        switch(result){
+            case(#ok(r)){
+                let newProfilesTree = r.0;
+                let amountAccepted = r.1;
+                profiles := newProfilesTree;
                 return #ok(amountAccepted);
             };
-            case ( ? v) {
-                //No need to write return when attribute of a varient is being returned
-                return #err(#AlreadyExists);
-            }
-        };
-    };
-
-    //read Journal
-    public shared(msg) func readJournal () : async Result.Result<(
-            {
-                userJournalData : ([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio);
-                email: ?Text;
-                userName: ?Text;
-            }
-        ), JournalTypes.Error> {
-
-        //Reject Anonymous User
-        //if(Principal.toText(msg.caller) == "2vxsx-fae"){
-        //    return #err(#NotAuthorized);
-        //};
-
-        let callerId = msg.caller;
-
-        let result = Trie.find(
-            profiles,
-            key(callerId),
-            Principal.equal
-        );
-
-        switch(result){
-            case null{
-                return #err(#NotFound);
-            };
-            case(? v){
-                let journal = v.journal; 
-                let userJournalData = await journal.readJournal();
-                
-                return #ok({
-                    userJournalData = userJournalData;
-                    email = v.email;
-                    userName = v.userName;
-                });
-                
-            };
-        };
-
-        // need to replace Journal with Journal(callerId)
-        
-    };
-
-    public shared(msg) func readWalletData() : async Result.Result<({ balance : Ledger.ICP; address: [Nat8]; } ), JournalTypes.Error> {
-        let callerId = msg.caller;
-
-        let result = Trie.find(
-            profiles,
-            key(callerId),
-            Principal.equal
-        );
-
-            switch(result){
-            case null{
-                return #err(#NotFound);
-            };
-            case(? v){
-                let journal = v.journal; 
-                let userBalance = await journal.canisterBalance();
-                let userAccountId = await journal.canisterAccount();
-                
-                return #ok({
-                    balance = userBalance;
-                    address = Blob.toArray(userAccountId);
-                });
-                
-            };
-        };
-    };
-
-    public shared(msg) func readEntry(entryKey: JournalTypes.EntryKey) : async Result.Result<JournalTypes.JournalEntry, JournalTypes.Error> {
-
-        //Reject Anonymous User
-        //if(Principal.toText(msg.caller) == "2vxsx-fae"){
-        //    return #err(#NotAuthorized);
-        //};
-
-        let callerId = msg.caller;
-
-        let result = Trie.find(
-            profiles,
-            key(callerId),
-            Principal.equal
-        );
-        switch(result){
-            case null{
-                #err(#NotAuthorized)
-            };
-            case(? v){
-                let journal = v.journal;
-                let entry = await journal.readJournalEntry(entryKey.entryKey);
-                return entry;
-            };
-        };
-
-    };
-
-    public shared(msg) func readEntryFileChunk(fileId: Text, chunkId: Nat) : async Result.Result<(Blob),JournalTypes.Error>{
-        let callerId = msg.caller;
-
-        let result = Trie.find(
-            profiles,
-            key(callerId),
-            Principal.equal
-        );
-
-        switch(result){
-            case null{
-                #err(#NotFound);
-            };
-            case ( ? existingProfile){
-                let userJournal = existingProfile.journal;
-                let entryFile = await userJournal.readJournalFileChunk(fileId, chunkId);
-                entryFile;
-            };
-        }
-    };
-
-    public shared(msg) func readEntryFileSize(fileId: Text) : async Result.Result<(Nat),JournalTypes.Error>{
-        let callerId = msg.caller;
-
-        let result = Trie.find(
-            profiles,
-            key(callerId),
-            Principal.equal
-        );
-
-        switch(result){
-            case null{
-                #err(#NotFound);
-            };
-            case ( ? existingProfile){
-                let userJournal = existingProfile.journal;
-                let entryFileSize = await userJournal.readJournalFileSize(fileId);
-                entryFileSize;
-            };
-        }
-    };
-
-    public shared(msg) func updateBio(bio: JournalTypes.Bio) : async Result.Result<(), JournalTypes.Error> {
-        let callerId = msg.caller;
-        
-        let result = Trie.find(
-            profiles,
-            key(callerId),
-            Principal.equal
-        );
-
-        switch(result){
-            case null{
-                #err(#NotAuthorized);
-            };
-            case (? existingJournal){
-                let journal = existingJournal.journal;
-                let status = await journal.updateBio(bio);
-                return status;
-            };
-        };
-    };
-
-    public shared(msg) func updateJournalEntry(entryKey : ?JournalTypes.EntryKey, entry : ?JournalTypes.JournalEntryInput) : async Result.Result<Trie.Trie<Nat,JournalTypes.JournalEntry>, JournalTypes.Error> {
-
-        //Reject Anonymous User
-        //if(Principal.toText(msg.caller) == "2vxsx-fae"){
-        //    return #err(#NotAuthorized);
-        //};
-
-        let callerId = msg.caller;
-        
-        
-        let result = Trie.find(
-            profiles,
-            key(callerId),
-            Principal.equal
-        );
-
-        switch(result){
-            case null{
-                #err(#NotAuthorized);
-            };
-            case(?result){
-                let journal = result.journal;
-                switch(entry){
-                    case null{
-                        switch(entryKey){
-                            case null{
-                                #err(#NoInputGiven);
-                            };
-                            case(? entryKeyValue){
-                                let journalStatus = await journal.deleteJournalEntry(entryKeyValue.entryKey);
-                                return journalStatus;
-                            };
-                        };
-                    };
-                    case(? entryValue){
-                        let icpBalance = await journal.canisterBalance();
-                        if(icpBalance.e8s < oneICP){
-                            return #err(#WalletBalanceTooLow);
-                        } else {
-                            switch(entryKey){
-                                case null {
-                                    let status = await journal.createEntry(entryValue);
-                                    return status;
-                                };
-                                case (? entryKeyValue){
-                                    let entryStatus = await journal.updateJournalEntry(entryKeyValue.entryKey, entryValue);
-                                    return entryStatus;
-                                };
-                            };
-                        }
-                    };
-                }
-            };
-        };
-     
-    };
-
-    public shared(msg) func submitFile(localFileIndex: Nat, fileId : Text) : async Result.Result<(), JournalTypes.Error> {
-        let callerId = msg.caller;
-
-        let result = Trie.find(
-            profiles,
-            key(callerId),
-            Principal.equal
-        );
-
-        switch(result){
-            case null{
-                return #err(#NotFound)
-            };
-            case (? v){
-                let journal = v.journal;
-                let result = journal.submitFile(localFileIndex, fileId);
-                #ok(());
-            };
-        };
-    };
-
-    public shared(msg) func clearLocalFile(localFileIndex: Nat): async Result.Result<(), JournalTypes.Error>{
-        let callerId = msg.caller;
-
-        let result = Trie.find(
-            profiles,
-            key(callerId),
-            Principal.equal
-        );
-
-        switch(result){
-            case null{
-                return #err(#NotFound)
-            };
-            case (? v){
-                let journal = v.journal;
-                let result = journal.clearLocalFile(localFileIndex: Nat);
-                #ok(());
-            };
-        };
-    };
-
-    public shared(msg) func uploadJournalEntryFile(localFileIndex: Nat, chunkId: Nat, blobChunk: Blob): async Result.Result<(), JournalTypes.Error>{
-        let callerId = msg.caller;
-
-        let result = Trie.find(
-            profiles,
-            key(callerId),
-            Principal.equal
-        );
-
-        switch(result){
-            case null{
-                return #err(#NotFound)
-            };
-            case (? v){
-                let journal = v.journal;
-                let icpBalance = await journal.canisterBalance();
-                if(icpBalance.e8s < oneICP){
-                    return #err(#WalletBalanceTooLow);
-                } else {
-                    let status = await journal.uploadFileChunk(localFileIndex: Nat, chunkId, blobChunk);
-                    return status;
-                }
+            case(#err(e)){
+                return #err(e);
             };
         };
     };
 
     //update profile
-    public shared(msg) func updateProfile(profile: ProfileInput) : async Result.Result<(),JournalTypes.Error> {
-        
-        //Reject Anonymous User
-        //if(Principal.toText(msg.caller) == "2vxsx-fae"){
-        //    return #err(#NotAuthorized)
-        //};
-
+    public shared(msg) func updateProfile(profile: MainTypes.ProfileInput) : async Result.Result<(),JournalTypes.Error> {
         let callerId = msg.caller;
-
-        let result = Trie.find(
-            profiles,       //Target Trie
-            key(callerId), //Key
-            Principal.equal      //Equality Checker
-        );
-
-        switch (result){
-            //Preventing updates to profiles that haven't been created yet
-            case null {
-                #err(#NotFound);
+        let result = await MainMethods.updateProfile(callerId, profiles, profile);
+        switch(result){
+            case(#ok(newTree)){
+                profiles := newTree;
+                #ok(());
             };
-            case(? v) {
-
-                let userNameAvailable = isUserNameAvailable(profile.userName, callerId);
-                if(userNameAvailable == true){
-                    let userProfile : Profile = {
-                        journal = v.journal;
-                        email = profile.email;
-                        userName = profile.userName;
-                        id = callerId;
-                        accountId = v.accountId;
-
-                    };
-
-                    profiles := Trie.replace(
-                        profiles,       //Target trie
-                        key(callerId), //Key
-                        Principal.equal,      //Equality Checker
-                        ?userProfile        //The profile that you mean to use to overWrite the existing profile
-                    ).0;                // The result is a tuple where the 0th entry is the resulting profiles trie
-                    #ok(());
-                } else {
-                    #err(#UserNameTaken);
-                }
+            case(#err(e)){
+                #err(e);
             };
         };
     };
@@ -615,90 +138,89 @@ shared (msg) actor class User() = this {
     public shared(msg) func delete() : async Result.Result<(), JournalTypes.Error> {
         
         let callerId = msg.caller;
-        //Reject Anonymous User
-        //if(Principal.toText(callerId) == "2vxsx-fae"){
-        //    return #err(#NotAuthorized)
-        //};
-
-        let result = Trie.find(
-            profiles,       //Target Trie
-            key(callerId), //Key
-            Principal.equal       //Equality Checker
-        );
-
-        switch (result){
-            //Preventing updates to profiles that haven't been created yet
-            case null {
-                #err(#NotFound);
-            };
-            case(? v) {
-                profiles := Trie.replace(
-                    profiles,       //Target trie
-                    key(callerId), //Key
-                    Principal.equal,      //Equality Checker
-                    null            //The profile that you mean to use to overWrite the existing profile
-                ).0;                // The result is a tuple where the 0th entry is the resulting profiles trie
+        let result = await MainMethods.delete(callerId, profiles);
+        switch(result){
+            case(#ok(newTree)){
+                profiles := newTree;
                 #ok(());
             };
+            case(#err(e)){
+                #err(e);
+            };
         };
+    };
+    //Journal Methods
+    //_______________________________________________________________________________________________________________________________________________________________________________________________
+
+    //read Journal
+    public shared(msg) func readJournal () : async Result.Result<({
+            userJournalData : ([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio); email: ?Text; userName: ?Text;
+        }), JournalTypes.Error> {
+
+        let callerId = msg.caller;
+        let result = await JournalHelperMethods.readJournal(callerId, profiles);
+        return result; 
+    };
+
+    public shared(msg) func readWalletData() : async Result.Result<({ balance : Ledger.ICP; address: [Nat8]; } ), JournalTypes.Error> {
+        let callerId = msg.caller;
+        let result = await JournalHelperMethods.readWalletData(callerId, profiles);
+        return result;
+    };
+
+    public shared(msg) func readEntry(entryKey: JournalTypes.EntryKey) : async Result.Result<JournalTypes.JournalEntry, JournalTypes.Error> {
+        let callerId = msg.caller;
+        let result = await JournalHelperMethods.readEntry(callerId, profiles, entryKey);
+        return result;
+    };
+
+    public shared(msg) func readEntryFileChunk(fileId: Text, chunkId: Nat) : async Result.Result<(Blob),JournalTypes.Error>{
+        let callerId = msg.caller;
+        let result = await JournalHelperMethods.readEntryFileChunk(callerId, profiles, fileId, chunkId);
+        return result;
+    };
+
+    public shared(msg) func readEntryFileSize(fileId: Text) : async Result.Result<(Nat),JournalTypes.Error>{
+        let callerId = msg.caller;
+        let result = await JournalHelperMethods.readEntryFileSize(callerId, profiles, fileId);
+        return result;
+    };
+
+    public shared(msg) func updateBio(bio: JournalTypes.Bio) : async Result.Result<(), JournalTypes.Error> {
+        let callerId = msg.caller;
+        let result = await JournalHelperMethods.updateBio(callerId, profiles, bio);
+        return result;
+    };
+
+    public shared(msg) func updateJournalEntry(entryKey : ?JournalTypes.EntryKey, entry : ?JournalTypes.JournalEntryInput) : async Result.Result<Trie.Trie<Nat,JournalTypes.JournalEntry>, JournalTypes.Error> {
+        let callerId = msg.caller;
+        let result = await JournalHelperMethods.updateJournalEntry(callerId, profiles, entryKey, entry);
+        return result;
+    };
+
+    public shared(msg) func submitFile(localFileIndex: Nat, fileId : Text) : async Result.Result<(), JournalTypes.Error> {
+        let callerId = msg.caller;
+        let result = await JournalHelperMethods.submitFile(callerId, profiles, localFileIndex, fileId);
+        return result;
+    };
+
+    public shared(msg) func clearLocalFile(localFileIndex: Nat): async Result.Result<(), JournalTypes.Error>{
+        let callerId = msg.caller;
+        let result = await JournalHelperMethods.clearLocalFile(callerId, profiles, localFileIndex);
+        return result;
+    };
+
+    public shared(msg) func uploadJournalEntryFile(localFileIndex: Nat, chunkId: Nat, blobChunk: Blob): async Result.Result<(), JournalTypes.Error>{
+        let callerId = msg.caller;
+        let result = await JournalHelperMethods.uploadJournalEntryFile(callerId, profiles, localFileIndex, chunkId, blobChunk);
+        return result;
     };
 
     public shared(msg) func getEntriesToBeSent() : async Result.Result<[(Text,[(Nat, JournalTypes.JournalEntry)])], JournalTypes.Error>{
 
         let callerId = msg.caller;
-        
-        let callerProfile = Trie.find(
-            profiles,
-            key(callerId), //Key
-            Principal.equal 
-        );
-
-        switch(callerProfile){
-            case null{
-                #err(#NotFound)
-            };
-            case( ? profile){
-                let callerUserName = profile.userName;
-                switch(callerUserName){
-                    case null {
-                        #err(#NotFound)
-                    };
-                    case(? userName){
-                        if(userName == "admin"){
-                            var index = 0;
-                            let numberOfProfiles = Trie.size(profiles);
-                            let profilesIter = Trie.iter(profiles);
-                            let profilesArray = Iter.toArray(profilesIter);
-                            let AllEntriesToBeSentBuffer = Buffer.Buffer<(Text, [(Nat, JournalTypes.JournalEntry)])>(1);
-
-                            while(index < numberOfProfiles){
-                                let userProfile = profilesArray[index];
-                                switch(userProfile.1.email){
-                                    case null{
-                                        index += 1;
-                                    };
-                                    case (? email){
-                                        let userEmail = email;
-                                        let userJournal = userProfile.1.journal;
-                                        let userEntriesToBeSent = await userJournal.getEntriesToBeSent();
-                                        if(userEntriesToBeSent != []){
-                                            AllEntriesToBeSentBuffer.add((userEmail, userEntriesToBeSent))
-                                        };
-                                        index += 1;
-                                    };
-                                };
-                            };
-
-                            return #ok(AllEntriesToBeSentBuffer.toArray());
-                        } else {
-                            #err(#NotAuthorized);
-                        }
-                    };
-
-                };
-            };
-        };
-
+        let result = await JournalHelperMethods.getEntriesToBeSent(callerId, profiles);
+        return result;
     };
 
     //NFT Methods
@@ -730,7 +252,7 @@ shared (msg) actor class User() = this {
                             let newNftCollection = await NFT.Dip721NFT( Principal.fromActor(this) , init);
                             let amountAccepted = await newNftCollection.wallet_receive();
 
-                            let collection : Nft = {
+                            let collection : MainTypes.Nft = {
                                 nftCollection = newNftCollection
                             };
 

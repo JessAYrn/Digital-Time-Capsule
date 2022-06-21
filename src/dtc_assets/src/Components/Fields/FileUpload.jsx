@@ -170,7 +170,6 @@ const FileUpload = (props) => {
         let chunk = 0;
 
         let promises = [];
-        console.log('clearResult: ', fileData);
         const clearResult = await actor.clearLocalFile(fileData.metaData.fileIndex);
         while(chunk < chunks){    
             
@@ -186,7 +185,6 @@ const FileUpload = (props) => {
         };
 
         const results = await Promise.all(promises); 
-        console.log(results);
     };
 
     const getDuration = async (file) => {
@@ -285,7 +283,7 @@ const FileUpload = (props) => {
                                         id={elementId}
                                         alt="image preview" 
                                         className="imagePreview__image" 
-                                        autoplay="false" 
+                                        autoPlay="false" 
                                     /> :
                                     (fileType.includes("quicktime") && (typeOfDevice !== DEVICE_TYPES.desktop)) ?
                                     <video 
@@ -298,6 +296,7 @@ const FileUpload = (props) => {
                                         controls
                                         muted
                                         poster={'video-thumbnail.png'}
+                                        playsInline
                                         src={fileSrc}
                                     ></video> :
                                     <video 
@@ -309,7 +308,7 @@ const FileUpload = (props) => {
                                         id={elementId}
                                         controls
                                         muted
-                                        playsinline
+                                        playsInline
                                     >
                                         <source src={fileSrc} type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'/>
                                         <source src={fileSrc} type='video/ogg; codecs="theora, vorbis"'/>

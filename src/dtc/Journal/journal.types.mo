@@ -1,4 +1,4 @@
-import Account "./Account";
+import Account "../Ledger/Account";
 
 module {
     public type EntryKey = {
