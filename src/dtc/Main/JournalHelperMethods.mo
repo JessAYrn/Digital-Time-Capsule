@@ -306,13 +306,8 @@ module{
             };
             case (? v){
                 let journal = v.journal;
-                let icpBalance = await journal.canisterBalance();
-                if(icpBalance.e8s < oneICP){
-                    return #err(#WalletBalanceTooLow);
-                } else {
-                    let status = await journal.uploadFileChunk(localFileIndex: Nat, chunkId, blobChunk);
-                    return status;
-                }
+                let status = await journal.uploadFileChunk(localFileIndex: Nat, chunkId, blobChunk);
+                return status;
             };
         };
         

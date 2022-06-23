@@ -1,11 +1,12 @@
 import React, {useContext} from "react";
+import { initialState, types } from "../reducers/journalReducer";
 import { AppContext } from "../App";
 import "./LoadScreen.scss";
 
 
 const LoadScreen = () => {
 
-    const { authClient, setIsLoaded } = useContext(AppContext);
+    const { authClient, setIsLoaded, dispatch } = useContext(AppContext);
 
 
     return(
@@ -18,10 +19,14 @@ const LoadScreen = () => {
                     <div className="loadContentDiv">
                         <img src="Loading.gif" alt="Loading Screen" />
                     </div>
-                    {/* <button className={'loginButtonDiv'} onClick={async () => {
+                    {/* <button className={'loginButton'} onClick={async () => {
+                        dispatch({
+                            actionType: types.SET_ENTIRE_REDUX_STATE,
+                            payload: initialState
+                        });
                         await authClient.logout();
                         setIsLoaded(false);
-                    }} > Log Out </button>  */}
+                    }}> Log Out </button>   */}
                 </div> 
             </div>
         </div>

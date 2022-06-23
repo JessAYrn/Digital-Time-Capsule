@@ -185,6 +185,7 @@ const FileUpload = (props) => {
         };
 
         const results = await Promise.all(promises); 
+        console.log(results);
     };
 
     const getDuration = async (file) => {

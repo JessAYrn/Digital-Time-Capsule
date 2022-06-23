@@ -67,6 +67,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
 
+    private let oneICP : Nat64 = 100_000_000;
+
     public shared(msg) func wallet_balance() : async Nat {
         let callerId = msg.caller;
         if(
@@ -230,6 +232,11 @@ shared(msg) actor class Journal (principal : Principal) = this {
             return #err(#NotAuthorized);
         };
 
+        let icpBalance = await canisterBalance();
+        if(icpBalance.e8s < oneICP){
+            return #err(#WalletBalanceTooLow);
+        }; 
+
         if(Nat.equal(localFileIndex, localFileZeroIndex) == true){
             let (newLocalFile, oldValueForThisKey) = Trie.put(
                 localFile0,
@@ -255,8 +262,6 @@ shared(msg) actor class Journal (principal : Principal) = this {
         };
 
         #err(#NotFound);
-
-               
     };
 
     public shared(msg) func readJournal() : async ([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio) {
@@ -742,10 +747,12 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     public shared(msg) func canisterBalance() : async Ledger.ICP {
         let callerId = msg.caller;
+        let canisterId =  Principal.fromActor(this);
         if(
             Principal.toText(callerId) != mainCanisterId and 
             Principal.toText(callerId) != test1CanisterId and 
-            Principal.toText(callerId) != test2CanisterId
+            Principal.toText(callerId) != test2CanisterId and 
+            Principal.toText(callerId) !=  Principal.toText(canisterId)
         ) {
             throw Error.reject("Unauthorized access.");
         };

@@ -28,6 +28,7 @@ import JournalTypes "/Journal/journal.types";
 import MainMethods "/Main/MainHelperMethods";
 import JournalHelperMethods "/Main/JournalHelperMethods";
 import MainTypes "/Main/types";
+import TxHelperMethods "/Main/TransactionHelperMethods";
 
 shared (msg) actor class User() = this {
 
@@ -221,6 +222,39 @@ shared (msg) actor class User() = this {
         let callerId = msg.caller;
         let result = await JournalHelperMethods.getEntriesToBeSent(callerId, profiles);
         return result;
+    };
+    //Transaction Mehtods
+    //_______________________________________________________________________________________________________________________________________________
+
+    public shared(msg) func transferICP(amount: Nat64, canisterAccountId: Account.AccountIdentifier) : async Result.Result<(), JournalTypes.Error> {
+        let callerId = msg.caller;
+        let result = await TxHelperMethods.transferICP(callerId, profiles, amount, canisterAccountId);
+        return result;
+    };
+
+    public shared(msg) func readTransaction() : async Result.Result<[(Nat, JournalTypes.Transaction)], JournalTypes.Error> {
+        let callerId = msg.caller;
+        let result = await TxHelperMethods.readTransaction(callerId, profiles);
+        return result;
+    };
+
+    private func updateUsersTxHistory() : async () {
+        let tipOfChainInfo = await TxHelperMethods.tipOfChainDetails();
+        let tipOfChainIndex : Nat64 = tipOfChainInfo.0;
+        let startIndex : Nat64 = startIndexForBlockChainQuery;
+        let maxQueryLength : Nat64 = 2_000;
+        let newStartIndexForNextQuery = Nat64.min(tipOfChainIndex, startIndex + maxQueryLength);
+
+        startIndexForBlockChainQuery := newStartIndexForNextQuery;
+
+        let getBlocksArgs = {
+            start = startIndex;
+            length = maxQueryLength;
+        };
+
+        let queryResponse = await ledger.query_blocks(getBlocksArgs);
+
+        await TxHelperMethods.updateUsersTxHistory(queryResponse, profiles);
     };
 
     //NFT Methods
@@ -485,215 +519,6 @@ shared (msg) actor class User() = this {
 
     public func canisterBalance() : async Ledger.ICP {
         await ledger.account_balance({ account = myAccountId() })
-    };
-
-    public shared(msg) func transferICP(amount: Nat64, canisterAccountId: Account.AccountIdentifier) : async Result.Result<(), JournalTypes.Error> {
-
-        let callerId = msg.caller;
-        let amountMinusFeeAndGas = amount - Fee - Gas;
-        let feeMinusGas = Fee - Gas;
-
-        if(amount <= Fee){
-            return #err(#TxFailed);
-        } else {
-
-            let userProfile = Trie.find(
-                profiles,
-                key(callerId), //Key
-                Principal.equal 
-            );
-
-            switch(userProfile) {
-                case null{
-                    #err(#NotFound)
-                }; 
-                case (? profile){
-                    let userJournal = profile.journal;
-                    let userBalance = await userJournal.canisterBalance();
-                
-                    if(userBalance.e8s >= amount){
-                        let adminCanisterAccountIdVarient = await getAdminAccountId();
-                        let adminCanisterAccountId = Result.toOption(adminCanisterAccountIdVarient);
-                        switch(adminCanisterAccountId){
-                            case (? adminAccountId){
-                                let userName = Option.get(profile.userName, "noName");
-                                if (userName == "admin"){
-                                    let statusForIcpTransfer = await userJournal.transferICP(amount, canisterAccountId);
-                                    #ok(());
-                                } else {
-                                    let statusForFeeCollection = await userJournal.transferICP(feeMinusGas, adminAccountId);
-                                    let statusForIcpTransfer = await userJournal.transferICP(amountMinusFeeAndGas, canisterAccountId);
-                                    if(statusForFeeCollection == true){
-                                        if(statusForIcpTransfer == true){
-                                            #ok(());
-                                        } else {
-                                            #err(#TxFailed);
-                                        }
-                                    } else {
-                                        #err(#TxFailed);
-                                    }
-                                }
-                            };
-                            case null {
-                                #err(#NotAuthorized);
-                            };
-                        };
-                    } else {
-                        #err(#InsufficientFunds)
-                    }
-                    
-
-                };
-            };
-        }
-    };
-
-    public shared(msg) func readTransaction() : async Result.Result<[(Nat, JournalTypes.Transaction)], JournalTypes.Error> {
-        let callerId = msg.caller;
-        
-        let callerProfile = Trie.find(
-            profiles,
-            key(callerId), //Key
-            Principal.equal 
-        );
-
-        switch(callerProfile){
-            case null{
-                #err(#NotFound);
-            }; 
-            case ( ? profile){
-                let userJournal = profile.journal;
-                let tx = await userJournal.readWalletTxHistory();
-                return #ok(tx);
-            };
-        };
-
-    };
-
-    private func updateUsersTxHistory() : async () {
-        let tipOfChainInfo = await tipOfChainDetails();
-        let tipOfChainIndex : Nat64 = tipOfChainInfo.0;
-        let startIndex : Nat64 = startIndexForBlockChainQuery;
-        let maxQueryLength : Nat64 = 2_000;
-        let newStartIndexForNextQuery = Nat64.min(tipOfChainIndex, startIndex + maxQueryLength);
-
-        startIndexForBlockChainQuery := newStartIndexForNextQuery;
-
-        let getBlocksArgs = {
-            start = startIndex;
-            length = maxQueryLength;
-        };
-
-        let queryResponse = await ledger.query_blocks(getBlocksArgs);
-        let blocksArray = queryResponse.blocks;
-        let blocksArraySize = Iter.size(Iter.fromArray(blocksArray));
-
-        var index = 0;
-
-        while(index < blocksArraySize){
-
-            let block = blocksArray[index];
-            let transaction = block.transaction;
-            let operation = transaction.operation;
-
-            switch(operation){
-                case null {
-
-                };
-                case(? existingOperation){
-                    switch(existingOperation){
-                        case(#Transfer(r)){
-                            let recipient = r.to;
-                            let source = r.from;
-                            let amount = r.amount.e8s;
-                            let fee = r.fee.e8s;
-                            let timeOfCreation = transaction.created_at_time.timestamp_nanos;
-
-                            let profilesSize = Trie.size(profiles);
-                            let profilesIter = Trie.iter(profiles);
-                            let profilesArray = Iter.toArray(profilesIter);
-
-                            var index_1 = 0;
-
-                            while(index_1 < profilesSize){
-                                let userProfileAndPrincipal = profilesArray[index_1];
-                                let userProfile = userProfileAndPrincipal.1;
-                                let userAccountId = userProfile.accountId;
-                                switch(userAccountId){
-                                    case null{
-
-                                    };
-                                    case(? existingUAID){
-                                        if(Blob.equal(existingUAID, recipient) == true){                                    
-                                            let tx : JournalTypes.Transaction = {
-                                                balanceDelta = amount + fee;
-                                                increase = true;
-                                                recipient = ?recipient;
-                                                timeStamp = ?timeOfCreation;
-                                                source = ?source;
-                                            };
-                                            let userJournal = userProfile.journal;
-                                            await userJournal.updateTxHistory(tx);
-                                        } else {
-                                            if(Blob.equal(existingUAID, source)){
-                                                let tx : JournalTypes.Transaction = {
-                                                    balanceDelta = amount + fee;
-                                                    increase = false;
-                                                    recipient = ?recipient;
-                                                    timeStamp = ?timeOfCreation;
-                                                    source = ?source;
-                                                };
-                                                let userJournal = userProfile.journal;
-                                                await userJournal.updateTxHistory(tx);
-                                            }
-                                        }
-                                    };
-                                };
-                                index_1 += 1;
-                            };
-
-                        };
-                        case(#Burn(r)){
-
-                        };
-                        case(#Mint(r)){
-
-                        };
-                    };
-                };
-            };
-            index += 1;
-        };
-    };
-
-    public shared func tipOfChainDetails() : async (Ledger.BlockIndex, LedgerCandid.Transaction) {
-        let tip = await ledgerC.tip_of_chain();
-        switch (tip) {
-            case (#Err(_)) {
-                assert(false);
-                loop {};
-            };
-            case (#Ok(t)) {
-                let block = await ledgerC.block(t.tip_index);
-                switch (block) {
-                    case (#Err(_)) {
-                        assert(false);
-                        loop {};
-                    };
-                    case (#Ok(r)) {
-                        switch (r) {
-                            case (#Err(_)) {
-                                assert(false);
-                                loop {};
-                            };
-                            case (#Ok(b)) {
-                                (t.tip_index, b.transaction);
-                            };
-                        };
-                    };
-                };
-            };
-        };
     };
 
     public shared(msg) func getPrincipalsList() : async [Principal] {

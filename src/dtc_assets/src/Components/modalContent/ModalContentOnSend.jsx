@@ -10,7 +10,7 @@ import { types } from "../../reducers/journalReducer";
 
 const ModalContentOnSend = (props) => {
 
-    const fee = 0.1;
+    const fee = 0.0001;
 
     const [recipientAddress, setRecipientAddress] = useState('');
     const [amountToSend, setAmountToSend] = useState('');
