@@ -1,5 +1,5 @@
 module {
-    public let CANISTER_ID : Text = "r7inp-6aaaa-aaaaa-aaabq-cai";
+    public let CANISTER_ID : Text = "ryjl3-tyaaa-aaaaa-aaaba-cai";
 
     public let Canister_ID_INDEX : Text = "qjdve-lqaaa-aaaaa-aaaeq-cai";
 
