@@ -7,11 +7,6 @@
     "default": {
       "ic": "bs4fi-aaaaa-aaaap-qaabq-cai"
     },
-    "ledger": {
-      "type": "custom",
-      "wasm": "ledger.wasm",
-      "candid": "ledger.public.did"
-    },
     "dtc_assets": {
       "dependencies": [
         "dtc"
