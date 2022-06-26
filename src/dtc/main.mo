@@ -27,6 +27,7 @@ import DIP721Types "/NFT/dip721.types";
 import JournalTypes "/Journal/journal.types";
 import MainMethods "/Main/MainHelperMethods";
 import JournalHelperMethods "/Main/JournalHelperMethods";
+import NftHelperMethods "/Main/NftHelperMethods";
 import MainTypes "/Main/types";
 import TxHelperMethods "/Main/TransactionHelperMethods";
 
@@ -260,96 +261,44 @@ shared (msg) actor class User() = this {
     //NFT Methods
     //______________________________________________________________________________________________________________________________________________
 
-    public shared(msg) func createNFTCollection(init : DIP721Types.Dip721NonFungibleToken) : async Result.Result<Nat64, JournalTypes.Error> {
-
+    public shared(msg) func createNFTCollection(initInput : DIP721Types.Dip721NonFungibleTokenInput) : async Result.Result<Nat64, JournalTypes.Error> {
         let callerId = msg.caller;
-
-        let result = Trie.find(
+        let mainCanisterPrincipal = Principal.fromActor(this);
+        let result = await NftHelperMethods.createNFTCollection(
+            callerId, 
+            mainCanisterPrincipal,
             profiles,
-            key(callerId),
-            Principal.equal
+            initInput
         );
 
         switch(result){
-            case null{
-                #err(#NotFound);
+            case(#ok(collectionAndAmountAccepted)){
+                let collection = collectionAndAmountAccepted.0;
+                let amountAccepted = collectionAndAmountAccepted.1;
+                let (newNftTrie, oldValueForThisKey) = Trie.put(
+                    nftCollections,
+                    natKey(nftCollectionsIndex),
+                    Nat.equal,
+                    collection
+                );
+                nftCollections := newNftTrie;
+                nftCollectionsIndex += 1;
+                #ok(amountAccepted.accepted);
             };
-            case (? existingProfile){
-                let userName = existingProfile.userName;
-                switch(userName){
-                    case null{
-                        #err(#NotFound);
-                    };
-                    case(? existingUserName){
-                        if(existingUserName == "admin"){
-                            Cycles.add(1_000_000_000_000);
-                            let newNftCollection = await NFT.Dip721NFT( Principal.fromActor(this) , init);
-                            let amountAccepted = await newNftCollection.wallet_receive();
+            case(#err(e)){
 
-                            let collection : MainTypes.Nft = {
-                                nftCollection = newNftCollection
-                            };
-
-                            let (newNftTrie, oldValueForThisKey) = Trie.put(
-                                nftCollections,
-                                natKey(nftCollectionsIndex),
-                                Nat.equal,
-                                collection
-                            );
-
-                            nftCollections := newNftTrie;
-                            nftCollectionsIndex += 1;
-
-                            #ok(amountAccepted.accepted);
-                        } else {
-                            #err(#NotAuthorized);
-                        };
-                    };
-                };
+                return #err(e);
             };
         };
     };
 
-    public shared(msg) func mintNft( nftCollectionIndex: Nat, file_type: Text) : async DIP721Types.MintReceipt {
+    public shared(msg) func mintNft( nftCollectionIndex: Nat, file_type: Text, numberOfCopies: Nat) : async DIP721Types.MintReceipt {
         let callerId = msg.caller;
-
-        let userAccount = Trie.find(
-            profiles,
-            key(callerId),
-            Principal.equal
-        );
-
-        switch(userAccount){
-            case null{
-                #Err(#Unauthorized);
-            };  
-            case(? exisitingAccount){
-                if(Option.get(exisitingAccount.userName, "null") == "admin"){
-                    let result = Trie.find(
-                        nftCollections,
-                        natKey(nftCollectionIndex),
-                        Nat.equal
-                    );
-
-                    switch(result){
-                        case null{
-                            #Err(#Other);
-                        };
-                        case(? existingCollection){
-                            let collection = existingCollection.nftCollection;
-                            let receipt = await collection.mintDip721(callerId, file_type);
-                            return receipt;
-                        };
-                    };
-
-                } else {
-                    #Err(#Unauthorized);
-                }
-            };
-        };
+        let result = await NftHelperMethods.mintNft(callerId, profiles, nftCollections, nftCollectionIndex, file_type, numberOfCopies);
+        return result;
     };
 
-    public shared(msg) func uploadNftChunk(nftCollectionIndex : Nat, metadata : DIP721Types.MetadataKeyVal) : async Result.Result<(), DIP721Types.ApiError>{
+    public shared(msg) func uploadNftChunk(nftCollectionIndex : Nat, chunkId: Nat, blobChunk: Blob) : async Result.Result<(), DIP721Types.ApiError>{
         let callerId = msg.caller;
 
         let userAccount = Trie.find(
@@ -363,26 +312,22 @@ shared (msg) actor class User() = this {
                 #err(#Unauthorized);
             };  
             case(? exisitingAccount){
-                if(Option.get(exisitingAccount.userName, "null") == "admin"){
-                    let result = Trie.find(
-                        nftCollections,
-                        natKey(nftCollectionIndex),
-                        Nat.equal
-                    );
+                let result = Trie.find(
+                    nftCollections,
+                    natKey(nftCollectionIndex),
+                    Nat.equal
+                );
 
-                    switch(result){
-                        case null{
-                            #err(#Other);
-                        };
-                        case(? existingCollection){
-                            let collection = existingCollection.nftCollection;
-                            let receipt = await collection.uploadNftChunk(metadata);
-                            return receipt;
-                        };
+                switch(result){
+                    case null{
+                        #err(#Other);
                     };
-                } else {
-                    #err(#Unauthorized);
-                }
+                    case(? existingCollection){
+                        let collection = existingCollection.nftCollection;
+                        let receipt = await collection.uploadNftChunk(chunkId, blobChunk);
+                        return receipt;
+                    };
+                };
             };
         };
     };
@@ -462,22 +407,10 @@ shared (msg) actor class User() = this {
                     var index_1 = 0;
                     
                     while(index_1 < tokenIdsCount){
-
                         let tokenMetadataInfo = tokenMetadataInfoArray[index_1];
-                        let tokenId = tokenMetadataInfo.id;
-                        let metadataSize = tokenMetadataInfo.metaDataArraySize;
-                        let fileType = tokenMetadataInfo.fileType;
-                        let nftMetaData = {
-                            id = tokenId;
-                            metaDataArraySize = metadataSize;
-                            fileType = fileType;
-                        };
-
-                        ArrayBuffer.add(({ nftCollectionKey = collectionKey; }, nftMetaData));
-
+                        ArrayBuffer.add(({ nftCollectionKey = collectionKey; }, tokenMetadataInfo));
                         index_1 += 1;
                     };
-
                     index += 1;
                 };
 

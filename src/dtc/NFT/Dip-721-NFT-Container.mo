@@ -16,16 +16,22 @@ import Iter "mo:base/Iter";
 import Buffer "mo:base/Buffer";
 import Hash "mo:base/Hash";
 
-shared actor class Dip721NFT(custodian: Principal, init : Types.Dip721NonFungibleToken) = Self {
+shared actor class Dip721NFT(custodian: Principal) = this {
     stable var transactionId: Types.TransactionId = 0;
     stable var nfts : Trie.Trie<Nat,Types.Nft> = Trie.empty();
     stable var nftsTrieIndex : Nat = 0;
     stable var custodians = List.make<Principal>(custodian);
-    stable var logo : Types.LogoResult = init.logo;
-    stable var name : Text = init.name;
-    stable var symbol : Text = init.symbol;
-    stable var maxLimit : Nat16 = init.maxLimit;
-    stable var localFile : [Types.MetadataKeyVal] = [];
+    stable var logo : Types.LogoResult = {
+        logo_type = "null";
+        data = "null";
+    };
+    stable var name : Text = "null";
+    stable var symbol : Text = "null";
+    stable var maxLimit : Nat16 = 0;
+    stable var collectionIndex : Nat = 0;
+    stable var initArgsHaveBeenSet : Bool = false;
+
+    stable var localFile : Trie.Trie<Nat,Blob> = Trie.empty();
 
     private var balance = Cycles.balance();
 
@@ -33,6 +39,94 @@ shared actor class Dip721NFT(custodian: Principal, init : Types.Dip721NonFungibl
 
     // https://forum.dfinity.org/t/is-there-any-address-0-equivalent-at-dfinity-motoko/5445/3
     let null_address : Principal = Principal.fromText("aaaaa-aa");
+
+    public shared({ caller }) func setInitArgs(init: Types.Dip721NonFungibleToken) : async Result.Result<(),Types.ApiError> {
+        if (not List.some(custodians, func (custodian : Principal) : Bool { custodian == caller })) {
+            return #err(#Unauthorized);
+        };
+
+        let creatorOfCollectionAsList = List.make<Principal>(init.creatorOfCollection);
+        let newCustodiansList = List.append(custodians, creatorOfCollectionAsList);
+        custodians := newCustodiansList;
+        
+        if(not initArgsHaveBeenSet){
+            logo := init.logo;
+            name := init.name;
+            symbol := init.symbol;
+            maxLimit := init.maxLimit;
+            collectionIndex := init.collectionIndex;
+            initArgsHaveBeenSet := true;
+        };
+        #ok(());
+    };
+
+    public shared({ caller }) func clearUnsubmittedFile() : async Result.Result<(), Types.ApiError> {
+        if (not List.some(custodians, func (custodian : Principal) : Bool { custodian == caller })) {
+        return #err(#Unauthorized);
+        };
+
+        localFile := Trie.empty();
+        #ok(());
+    };
+
+    public shared({ caller }) func uploadNftChunk(chunkId: Nat, blobChunk: Blob) : async Result.Result<(), Types.ApiError> {
+        if (not List.some(custodians, func (custodian : Principal) : Bool { custodian == caller })) {
+            return #err(#Unauthorized);
+        };
+        
+        let (newTree, oldValueForThisKey) = Trie.put(
+            localFile,
+            natKey(chunkId),
+            Nat.equal,
+            blobChunk
+        );
+
+        localFile := newTree;
+        #ok(());
+    };
+
+    public shared({ caller }) func mintNft(owner: Principal, file_Type: Text, numberOfCopies: Nat) : async Types.MintReceipt {
+        if (not List.some(custodians, func (custodian : Principal) : Bool { custodian == caller })) {
+            return #Err(#Unauthorized);
+        };
+
+        let ArrayBuffer = Buffer.Buffer<Principal>(1);
+
+        var index = 0;
+        while(index < numberOfCopies){
+            ArrayBuffer.add(owner);
+            index += 1;
+        };
+
+        let owners = ArrayBuffer.toArray();
+
+        let newId = Nat64.fromNat(Trie.size(nfts));
+        let nft : Types.Nft = {
+            owners = owners;
+            id = newId;
+            fileType = file_Type;
+            nftData = localFile;
+        };
+
+        let (newNftsTrie, oldValueForThisKey) = Trie.put(
+            nfts,
+            natKey(nftsTrieIndex),
+            Nat.equal,
+            nft
+        );
+
+        nfts := newNftsTrie;
+
+        transactionId += 1;
+        nftsTrieIndex += 1;
+
+        localFile := Trie.empty();
+
+        return #Ok({
+            token_id = newId;
+            id = transactionId;
+        });
+    };
     
     private func getTokenById(token_id: Types.TokenId) : Result.Result<(Nat, Types.Nft),Types.ApiError>  {
         let nftsTrieIter = Trie.iter(nfts);
@@ -60,18 +154,25 @@ shared actor class Dip721NFT(custodian: Principal, init : Types.Dip721NonFungibl
 
     public query func balanceOfDip721(user: Principal) : async Nat64 {
         return Nat64.fromNat(
-        Trie.size(
-            Trie.filter(nfts, func(key : Nat, token: Types.Nft) : Bool { token.owner == user })
-        )
+            Trie.size(
+                Trie.filter(nfts, func(key : Nat, token: Types.Nft) : Bool {
+
+                    let ownerPrincipal = Array.find(token.owners,  func (owner : Principal) : Bool {
+                        user == owner;
+                    });
+
+                    return Option.isSome(ownerPrincipal);
+                })
+            )
         );
     };
 
-    public query func ownerOfDip721(token_id: Types.TokenId) : async Types.OwnerResult {
+    public query func ownersOfDip721(token_id: Types.TokenId) : async Types.OwnerResult {
         let itemAsOption = getTokenById(token_id);
         switch(itemAsOption){
             case(#ok(item)){
                 let token = item.1;
-                return #Ok(token.owner);
+                return #Ok(token.owners);
             };
             case(#err(_)){
                 return #Err(#InvalidTokenId);
@@ -94,37 +195,58 @@ shared actor class Dip721NFT(custodian: Principal, init : Types.Dip721NonFungibl
     func transferFrom(from: Principal, to: Principal, token_id: Types.TokenId, caller: Principal) : Types.TxReceipt {
         let item = getTokenById(token_id);
         switch (item) {
-        case (#err(_)) {
-            return #Err(#InvalidTokenId);
-        };
-        case (#ok(tokenWithKey)) {
-            let token = tokenWithKey.1;
-            let tokenKey = tokenWithKey.0;
-            if (
-            caller != token.owner and
-            not List.some(custodians, func (custodian : Principal) : Bool { custodian == caller })
-            ) {
-            return #Err(#Unauthorized);
-            } else if (Principal.notEqual(from, token.owner)) {
-            return #Err(#Other);
-            } else {
-                let update : Types.Nft = {
-                    owner = to;
-                    id = token.id;
-                    fileType = token.fileType;
-                    metadata = token.metadata;
-                };
-                let (updatedNftsTrie, oldValueForThisKey) = Trie.put(
-                    nfts,
-                    natKey(tokenKey),
-                    Nat.equal,
-                    update
-                );
-                nfts := updatedNftsTrie;
-                transactionId += 1;
-                return #Ok(transactionId);   
+            case (#err(_)) {
+                return #Err(#InvalidTokenId);
             };
-        };
+            case (#ok(tokenWithKey)) {
+                let token = tokenWithKey.1;
+                let tokenKey = tokenWithKey.0;
+
+                let ownersArraySearchResultAsOption = Array.find(token.owners,  func (owner : Principal) : Bool {
+                    from == owner;
+                });
+
+                if (
+                    Option.isNull(ownersArraySearchResultAsOption) or
+                    not List.some(custodians, func (custodian : Principal) : Bool { custodian == caller })
+                ) {
+                    return #Err(#Unauthorized);
+                } else if (Principal.notEqual(from, Option.get(ownersArraySearchResultAsOption, Principal.fromActor(this)))) {
+                    return #Err(#Other);
+                } else {
+                    
+                    let ownersIter = Iter.fromArray(token.owners);
+                    let ArrayBuffer = Buffer.Buffer<Principal>(1);
+                    var foundOne = false;
+                    
+                    Iter.iterate<Principal>(ownersIter, func (owner: Principal, _index){
+                        if (Principal.equal(owner, from) and foundOne == false){
+                            ArrayBuffer.add(to);
+                            foundOne := true;
+                        } else {
+                            ArrayBuffer.add(owner);
+                        }
+                    });
+
+                    let newOwnersArray = ArrayBuffer.toArray();
+
+                    let update : Types.Nft = {
+                        owners = newOwnersArray;
+                        id = token.id;
+                        fileType = token.fileType;
+                        nftData = token.nftData;
+                    };
+                    let (updatedNftsTrie, oldValueForThisKey) = Trie.put(
+                        nfts,
+                        natKey(tokenKey),
+                        Nat.equal,
+                        update
+                    );
+                    nfts := updatedNftsTrie;
+                    transactionId += 1;
+                    return #Ok(transactionId);   
+                };
+            };
         };
     };
 
@@ -162,12 +284,26 @@ shared actor class Dip721NFT(custodian: Principal, init : Types.Dip721NonFungibl
             };
             case (#ok(tokenWithKey)) {
                 let token = tokenWithKey.1;
-                if(Principal.equal(owner, token.owner)){
-                    let metadataIter = Iter.fromArray(token.metadata);
-                    let chunkIter = Iter.filter(metadataIter, func (x : Types.MetadataKeyVal) : Bool { x.key == chunkKey });
-                    let chunkAsArray = Iter.toArray(chunkIter);
-                    let chunk = chunkAsArray[0];
-                    return #Ok(chunk);
+
+                let ownersArraySearchResultAsOption = Array.find(token.owners,  func (tokenOwner : Principal) : Bool {
+                    owner == tokenOwner;
+                });
+
+                if(Principal.equal(owner, Option.get(ownersArraySearchResultAsOption, Principal.fromActor(this)))) {
+                    let chunk = Trie.find(
+                        token.nftData,
+                        natKey(chunkKey),
+                        Nat.equal
+                    );
+
+                    switch(chunk){
+                        case null {
+                            return #Err(#Other);
+                        };
+                        case (?result) {
+                            return #Ok(result);
+                        };
+                    };
                 } else {
                     return #Err(#Unauthorized);
                 }
@@ -180,20 +316,36 @@ shared actor class Dip721NFT(custodian: Principal, init : Types.Dip721NonFungibl
     };
 
     public query func getTokenMetadataInfo(user: Principal) : async [Types.TokenMetaData] {
-        let items = Trie.filter(nfts, func(key : Nat, token: Types.Nft) : Bool { token.owner == user });
+        let items = Trie.filter(nfts, func(key : Nat, token: Types.Nft) : Bool {
+            let ownerPrincipal = Array.find(token.owners,  func (owner : Principal) : Bool {
+                user == owner;
+            });
+            return Option.isSome(ownerPrincipal);
+        });
+
         let itemsIter = Trie.iter(items);
         let ArrayBuffer = Buffer.Buffer<Types.TokenMetaData>(1);
         Iter.iterate<(Nat,Types.Nft)>(itemsIter, func(x :(Nat, Types.Nft), _index) {
-
             let nft = x.1;
+
+            var numberOfCopiesOwnedByUser = 0;
+            let ownersArrayIter = Iter.fromArray(nft.owners);
+            Iter.iterate<Principal>(ownersArrayIter, func (principal : Principal, __index) {
+                if(Principal.equal(principal, user)){
+                    numberOfCopiesOwnedByUser += 1;
+                }
+            });
+
             let nft_Id = nft.id;
-            let nftMetadataArray = nft.metadata;
+            let nftDataTree = nft.nftData;
             let nftFileType = nft.fileType;
-            let nftMetadataArraySize = Iter.size(Iter.fromArray(nftMetadataArray));
+            let nftDataTrieSize = Trie.size(nftDataTree);
+            let numberOfCopiesOwned = numberOfCopiesOwnedByUser;
             let nftMetaDataInfo : Types.TokenMetaData = { 
                 id = nft_Id; 
-                metaDataArraySize = nftMetadataArraySize; 
+                nftDataTrieSize = nftDataTrieSize; 
                 fileType = nftFileType; 
+                numberOfCopiesOwned = numberOfCopiesOwned;
             };
             
             ArrayBuffer.add(nftMetaDataInfo);
@@ -201,64 +353,6 @@ shared actor class Dip721NFT(custodian: Principal, init : Types.Dip721NonFungibl
         });
         let tokenIds = ArrayBuffer.toArray();
         return tokenIds;
-    };
-
-    public shared({ caller }) func clearUnsubmittedFile() : async Result.Result<(), Types.ApiError> {
-        if (not List.some(custodians, func (custodian : Principal) : Bool { custodian == caller })) {
-        return #err(#Unauthorized);
-        };
-
-        localFile := [];
-        #ok(());
-    };
-
-    public shared({ caller }) func uploadNftChunk(metadata: Types.MetadataKeyVal) : async Result.Result<(), Types.ApiError> {
-        if (not List.some(custodians, func (custodian : Principal) : Bool { custodian == caller })) {
-        return #err(#Unauthorized);
-        };
-
-        let localFileIter = Iter.fromArray(localFile);
-        let ArrayBuffer = Buffer.Buffer<{key: Nat; val: Blob;}>(1);
-        Iter.iterate<Types.MetadataKeyVal>(localFileIter, func(x :Types.MetadataKeyVal, _index) {
-            ArrayBuffer.add(x);
-        });
-        ArrayBuffer.add(metadata);
-
-        localFile := ArrayBuffer.toArray();
-        #ok(());
-    };
-
-    public shared({ caller }) func mintDip721(to: Principal, file_Type: Text) : async Types.MintReceipt {
-        if (not List.some(custodians, func (custodian : Principal) : Bool { custodian == caller })) {
-        return #Err(#Unauthorized);
-        };
-
-        let newId = Nat64.fromNat(Trie.size(nfts));
-        let nft : Types.Nft = {
-            owner = to;
-            id = newId;
-            fileType = file_Type;
-            metadata = localFile;
-        };
-
-        let (newNftsTrie, oldValueForThisKey) = Trie.put(
-            nfts,
-            natKey(nftsTrieIndex),
-            Nat.equal,
-            nft
-        );
-
-        nfts := newNftsTrie;
-
-        transactionId += 1;
-        nftsTrieIndex += 1;
-
-        localFile := [];
-
-        return #Ok({
-            token_id = newId;
-            id = transactionId;
-        });
     };
 
     public func wallet_receive() : async { accepted: Nat64 } {

@@ -155,3 +155,7 @@ dfx canister --network ic info $(dfx identity --network ic get-wallet)
 
 dfx canister --network ic update-settings --controller <PRINCIPAL_OF_NEW_CONTROLLER> <CANISTER_ID>
 
+### Upgrade dfx SDK
+
+sude dfx upgrade
+
