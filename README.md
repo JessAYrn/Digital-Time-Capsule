@@ -6,14 +6,15 @@ in order to get the test Internet_Identity canister to work, you must do the fol
 
 To run the internet_identity canisters, proceed as follows after cloning the internet_identity repository
 
-Within the internet-identity project run the following commands:
+After checking out dfinity/internet-identity, run this in `./demos/using-dev-build`:
 
-npm i 
-
-dfx start --clean --background
+```
+dfx start --background --clean
+npm ci
+dfx deploy --no-wallet --argument '(null)'
+```
 
 In a different terminal, run the following command to install the Internet Identity canister:
-
 
 II_FETCH_ROOT_KEY=1 dfx deploy --no-wallet --argument '(null)'
 
@@ -77,16 +78,17 @@ npm i
 
 then:
 
-dfx start
-
-then, in a new terminal: 
-
 dfx deploy dtc
+
+then:
 
 dfx deploy dtc_assets
 
 then: 
+## the server only works in localhost with node versions up to 16. so you have to swtich to version 16
+nvm use 16.15.1
 
+then:
 npm start
 
 ## Deploying to the Mainnet
@@ -118,14 +120,14 @@ dfx deploy --network ic dtc
 ## Command for minting ICP
 
 ```
-dfx canister call ledger transfer 'record {memo = 1234; amount = record { e8s=10_000_000_000 }; fee = record { e8s=10_000 }; from_subaccount = null; to =  '$(python3 -c 'print("vec{" + ";".join([str(b) for b in bytes.fromhex("'$LEDGER_ACC'")]) + "}")')'; created_at_time = null }' 
+dfx canister call ledger transfer 'record {memo = 1234; amount = record { e8s=10_000_000_000 }; fee = record { e8s=10_000 }; from_subaccount = null; to =  '$(python3 -c 'print("vec{" + ";".join([str(b) for b in bytes.fromhex("'$JESSE_ACC'")]) + "}")')'; created_at_time = null }' 
 
 ```
 
 ## Command to view ICP balance 
 
 ```
-dfx canister call ledger account_balance '(record { account = '$(python3 -c 'print("vec{" + ";".join([str(b) for b in bytes.fromhex("'$LEDGER_ACC'")]) + "}")')' })'
+dfx canister call ledger account_balance '(record { account = '$(python3 -c 'print("vec{" + ";".join([str(b) for b in bytes.fromhex("'$JESSE_ACC'")]) + "}")')' })'
 ```
 
 ### Command for setting variable name for an account-id

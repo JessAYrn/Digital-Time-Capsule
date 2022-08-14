@@ -85,18 +85,16 @@ const NFTapp = () => {
                 actionType: types.SET_IS_LOADING,
                 payload: true
             });
-            const nftCollection = await actor.getUserNFTsInfo();
-            console.log('line 11: ',nftCollection);
+            let nftCollection = await actor.getUserNFTsInfo();
+            nftCollection = nftCollection.ok;
             if("err" in nftCollection){
                 actor.create().then((result) => {
-                    console.log(result);
                     dispatch({
                         actionType: types.SET_IS_LOADING,
                         payload: false
                     });
                 });
             } else {
-                console.log(nftCollection);
                 dispatch({
                     payload: nftCollection,
                     actionType: types.SET_NFT_DATA

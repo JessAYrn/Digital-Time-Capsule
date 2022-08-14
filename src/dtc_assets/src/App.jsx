@@ -88,7 +88,6 @@ const App = () => {
             const journal = await actor.readJournal();
             if("err" in journal){
                 actor.create().then((result) => {
-                    console.log(result);
                     dispatch({
                         actionType: types.SET_IS_LOADING,
                         payload: false
@@ -131,7 +130,6 @@ const App = () => {
         }
         if(journalState.reloadStatuses.nftData){
             const nftCollection = await actor.getUserNFTsInfo();
-            console.log(nftCollection);
             dispatch({
                 payload: nftCollection,
                 actionType: types.SET_NFT_DATA

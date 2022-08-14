@@ -22,7 +22,6 @@ module {
         name: Text;
         symbol: Text;
         maxLimit : Nat16;
-        collectionIndex : Nat;
     };
 
     public type ApiError = {

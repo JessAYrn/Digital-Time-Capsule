@@ -23,6 +23,7 @@ export const types = {
     CHANGE_ENTRY: "CHANGE_ENTRY",
     CHANGE_LOCK_TIME: "CHANGE_LOCK_TIME",
     ADD_JOURNAL_PAGE: "ADD_JOURNAL_PAGE",
+    ADD_NFT_FILE: "ADD_NFT_FILE",
     CHANGE_DOB: "CHANGE_DOB",
     CHANGE_POB: "CHANGE_POB",
     CHANGE_PREFACE: "CHANGE_PREFACE",
@@ -44,7 +45,9 @@ export const types = {
     CHANGE_FILE2_BLOB: "CHANGE_FILE2_BLOB",
     CHANGE_FILE2_LOAD_STATUS: "CHANGE_FILE2_LOAD_STATUS",
     CHANGE_PAGE_IS_OPEN: "CHANGE_PAGE_IS_OPEN",
+    CHANGE_NFT_FILE_LOAD_STATUS: "CHANGE_NFT_FILE_LOAD_STATUS",
     REMOVE_UNSUBMITTED_PAGE: "REMOVE_UNSUBMITTED_PAGE",
+    REMOVE_NFT_FILE:"REMOVE_NFT_FILE",
     SET_HANDLE_PAGE_SUBMIT_FUNCTION: "SET_HANDLE_PAGE_SUBMIT_FUNCTION"
 
 }
@@ -64,11 +67,14 @@ export const initialState = {
         }
     },
     nftData:[
-        { 
-            nftCollectionKey: 0,
-            tokenId: 0, 
-            tokenMetadataArraySize: 0
-        }
+        [ {nftCollectionKey: -1},
+            {
+                nftDataTrieSize: 0,
+                id: undefined,
+                fileType: 'null',
+                numberOfCopiesOwned: 0
+            }
+        ]  
     ],
     bio: {
         name: '',
@@ -136,7 +142,7 @@ const changeValue = (state = initialState, action) => {
     const {actionType, payload, index } = action;
 
     let updatedJournalPage;
-    
+    let updatedNftFile;
 
     switch (actionType){
         case types.SET_ENTIRE_REDUX_STATE:
@@ -161,6 +167,11 @@ const changeValue = (state = initialState, action) => {
             }
         case types.REMOVE_UNSUBMITTED_PAGE:
             state.journal.pop();
+            return {
+                ...state
+            }
+        case types.REMOVE_NFT_FILE:
+            state.nftData = state.nftData.splice(index, 1);
             return {
                 ...state
             }
@@ -454,6 +465,15 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
+        case types.CHANGE_NFT_FILE_LOAD_STATUS:
+            updatedNftFile = {
+                ... state.nftData[index],
+                isLoading: payload
+            }
+            state.journal[index] = updatedNftFile;
+            return {
+                ...state
+            }    
         case types.CHANGE_ENTRY:
             updatedJournalPage = {
                 ... state.journal[index],
@@ -477,6 +497,11 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
+        case types.ADD_NFT_FILE:
+        state.nftData.push(payload);
+        return {
+            ...state
+        }
         case types.CHANGE_NAME:
             state.bio = {
                 ...state.bio,

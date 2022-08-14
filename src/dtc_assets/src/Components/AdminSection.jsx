@@ -72,7 +72,7 @@ const AdminSection = (props) => {
             symbol: "OGC",
             maxLimit : 250
         };
-
+        
         const result = await actor.createNFTCollection(init);
         console.log(result);
     };
@@ -93,17 +93,14 @@ const AdminSection = (props) => {
             
             const from = chunk * CHUNK_SIZE;
             const to = from + CHUNK_SIZE;
-
             const fileChunk = (to < fileSize -1) ? file.slice(from,to ) : file.slice(from);
-
-            let chunkId = parseInt(chunk);
             const fileChunkAsBlob = await fileToBlob(fileChunk);
-            promises.push(actor.uploadNftChunk(0, {key: chunkId, val: fileChunkAsBlob}));
+            promises.push(actor.uploadNftChunk(0, chunk, fileChunkAsBlob));
 
             chunk += 1;
         };
         const results = await Promise.all(promises);  
-        const receipt = await actor.mintNft(0, fileType);
+        const receipt = await actor.mintNft(0, fileType, 1);
         console.log(results, receipt);
     };
 
