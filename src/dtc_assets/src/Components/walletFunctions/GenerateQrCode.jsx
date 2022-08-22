@@ -7,7 +7,6 @@ export const generateQrCode = async (walletAddress) => {
         
         return response;
      } catch (error){
-         console.log(error);
      }
 };
 

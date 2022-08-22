@@ -173,41 +173,6 @@ module{
         };
     };
 
-    public func getAdminAccountId ( profilesTree: MainTypes.ProfilesTree ) : 
-    async Result.Result<Account.AccountIdentifier, JournalTypes.Error> {
-
-        var index = 0;
-        let numberOfProfiles = Trie.size(profilesTree);
-        let profilesIter = Trie.iter(profilesTree);
-        let profilesArray = Iter.toArray(profilesIter);
-        let AdminArrayBuffer = Buffer.Buffer<Blob>(1);
-
-        while(index < numberOfProfiles){
-            let userProfile = profilesArray[index];
-            switch(userProfile.1.userName){
-                case null{
-                    index += 1;
-                };
-                case (? username){
-                    if(username == "admin"){
-                        let userJournal = userProfile.1.journal;
-                        let userAccountId = await userJournal.canisterAccount();
-                        AdminArrayBuffer.add(userAccountId);
-                    };
-                    index += 1;
-                };
-            };
-        };
-
-        
-        if(AdminArrayBuffer.size() == 1){
-            let AdminArray = AdminArrayBuffer.toArray();
-            #ok(AdminArray[0]);
-        } else {
-            #err(#NotAuthorized);
-        }
-    };
-
     public func refillCanisterCycles(callerId : Principal, profilesTree : MainTypes.ProfilesTree ) : 
     async Result.Result<((Nat,[Nat64])), JournalTypes.Error> {
         let result = Trie.find(

@@ -31,23 +31,18 @@ const AdminSection = (props) => {
         const emailAddressesArray = listOfCapsules.ok.map((profile) => {
             return profile[0];
         });
-        console.log(emailAddressesArray);
-
         let promises = [];
 
         emailAddressesArray.forEach(element => {
             promises.push(postEmail(element));
         });
 
-        const results = await Promise.all(promises);
-        console.log(results);
-        
+        const results = await Promise.all(promises);        
     };
 
     const handleSubmitRefill = async () => {
 
         const result = await actor.refillCanisterCycles();
-        console.log(result);
     };
 
     const upgradeJournalData = async (principal, wasmModule) => {
@@ -74,7 +69,6 @@ const AdminSection = (props) => {
         };
         
         const result = await actor.createNFTCollection(init);
-        console.log(result);
     };
 
     const mint = async () => {
@@ -101,22 +95,14 @@ const AdminSection = (props) => {
         };
         const results = await Promise.all(promises);  
         const receipt = await actor.mintNft(0, fileType, 1);
-        console.log(results, receipt);
     };
 
     const handleUpgrade = async () => {
-
         let promises =[];
-
         const wasmModule = await fileToBlob(inputRef.current.files[0]);
-
         const principalsList = await actor.getPrincipalsList();
-
         principalsList.forEach((principal) => promises.push(upgradeJournalData(principal, wasmModule)));
-
         await Promise.all(promises);
-
-        console.log("wasm module: ",wasmModule);
     };
 
     return (

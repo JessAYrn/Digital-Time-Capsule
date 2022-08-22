@@ -35,7 +35,6 @@ const WalletApp = () => {
 
     //gets state from previous route
     const location = useLocation();
-    console.log('location state: ',location.state);
 
 
     //dispatch state from previous route to redux store if that state exists
@@ -125,7 +124,6 @@ const WalletApp = () => {
             const walletDataFromApi = await actor.readWalletData();
             if("err" in walletDataFromApi){
                 actor.create().then((result) => {
-                    console.log('line 125: ',result);
                 });
                 dispatch({
                     actionType: types.SET_IS_LOADING,

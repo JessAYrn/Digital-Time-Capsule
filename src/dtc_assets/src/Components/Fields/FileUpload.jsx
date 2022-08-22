@@ -304,7 +304,6 @@ const FileUpload = (props) => {
                                         id={elementId}
                                         alt="image preview" 
                                         className="imagePreview__image" 
-                                        autoPlay="false" 
                                     /> :
                                     (fileType.includes("quicktime") && (typeOfDevice !== DEVICE_TYPES.desktop)) ?
                                     <video 

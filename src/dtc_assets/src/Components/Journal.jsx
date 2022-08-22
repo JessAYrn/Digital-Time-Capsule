@@ -1,5 +1,5 @@
 import JournalPage from "./JournalPage";
-import React, {useEffect, useState, useContext, useMemo } from "react";
+import React, { useContext } from "react";
 import {initialState, types} from "../reducers/journalReducer";
 import "./Journal.scss";
 import { AppContext } from "../App";
@@ -71,34 +71,38 @@ const Journal = (props) => {
                 <div className={'tableDivContainer'}>
                     <div className={'tableDiv'}>
                         <table className={"tableHeader"}>
-                            <tr className={"tableRow "}>
-                                <th className={"tableCell "}>DATE</th>
-                                <th className={"tableCell "}>LOCATION</th>
-                                <th className={"tableCell "}>TIME LAPSED</th>
-                                <th className={"tableCell "}></th>
+                            <tbody>
+                                <tr className={"tableRow "}>
+                                    <th className={"tableCell "}>DATE</th>
+                                    <th className={"tableCell "}>LOCATION</th>
+                                    <th className={"tableCell "}>TIME LAPSED</th>
+                                    <th className={"tableCell "}></th>
 
-                            </tr>
+                                </tr>
+                            </tbody>
                         </table>
-                        <div class='scrollable'>
+                        <div className='scrollable'>
                             <table className={"table"}>
-                                { journalState.journal.map((page, index) => {
-                                    const unlockTimeAsInt = page.unlockTime;
-                                    const currentTimeAsInt = milisecondsToNanoSeconds(Date.now());
-                                    const unlocked = (currentTimeAsInt >= unlockTimeAsInt);
-                                    const remainingWaitTime = unlockTimeAsInt - currentTimeAsInt;
-                                    const remainingWaitTimeInMonths = remainingWaitTime / (dayInNanoSeconds * monthInDays);
-                                    const timeLapsed = page.lockTime - remainingWaitTimeInMonths;
-                                    const timeLapsedRound = Math.round(timeLapsed * 100) / 100;
-                                    const openButton = (unlocked) ? 'Open' : 'Locked';
-                                    return(
-                                        <tr className={"tableRow "+index}>
-                                            <td className={"tableCell "+index}>{page.date}</td>
-                                            <td className={"tableCell "+index}>{page.location}</td>
-                                            <td className={"tableCell "+index}> {timeLapsedRound} / {page.lockTime} mo.</td>
-                                            <td className={"tableCell "+index}> <button className={'openButton'} onClick={(e) => openPage(e, index, unlocked)}> {openButton} </button> </td>
-                                        </tr>  
-                                    );
-                                }) }
+                                <tbody>
+                                    { journalState.journal.map((page, index) => {
+                                        const unlockTimeAsInt = page.unlockTime;
+                                        const currentTimeAsInt = milisecondsToNanoSeconds(Date.now());
+                                        const unlocked = (currentTimeAsInt >= unlockTimeAsInt);
+                                        const remainingWaitTime = unlockTimeAsInt - currentTimeAsInt;
+                                        const remainingWaitTimeInMonths = remainingWaitTime / (dayInNanoSeconds * monthInDays);
+                                        const timeLapsed = page.lockTime - remainingWaitTimeInMonths;
+                                        const timeLapsedRound = Math.round(timeLapsed * 100) / 100;
+                                        const openButton = (unlocked) ? 'Open' : 'Locked';
+                                        return(
+                                            <tr className={"tableRow "+index} key={index}>
+                                                <td className={"tableCell "+index}>{page.date}</td>
+                                                <td className={"tableCell "+index}>{page.location}</td>
+                                                <td className={"tableCell "+index}> {timeLapsedRound} / {page.lockTime} mo.</td>
+                                                <td className={"tableCell "+index}> <button className={'openButton'} onClick={(e) => openPage(e, index, unlocked)}> {openButton} </button> </td>
+                                            </tr>  
+                                        );
+                                    }) }
+                                </tbody>
                             </table>
                                 {
                                     (putCreateEntryButtonInTable) ?

@@ -21,9 +21,6 @@ const Analytics = () => {
         setIsLoading(false);
 
     }, [authClient, actor]);
-
-    console.log('JournalCount: ', jounralCount);
-
     return(
         <>
             <div className={'transparentDiv__homePage__journalsCount'}>

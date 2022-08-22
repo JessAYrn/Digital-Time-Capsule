@@ -13,26 +13,18 @@ const SubcriptionPage = (props) => {
 
     const { actor, journalState, dispatch } = useContext(AppContext);
     const [isLoading, setIsLoading] = useState(false);
-
-    console.log('journalState: ', journalState);
-
     const handleUpdate = async () => {
 
         const profileInput = {
             userName: (journalState.metaData.userName[0]) ? journalState.metaData.userName: [],
             email: (journalState.metaData.email[0]) ? journalState.metaData.email: []
         };
-        console.log("input: ",profileInput);
         let result = await actor.updateProfile(profileInput);
-        console.log(result);
         // if("err" in result){
         //     showErrorMessage();
         // };
 
     };
-
-    console.log(journalState.metaData);
-
 return(
     <div className='container'>
         <div className={"background"}>

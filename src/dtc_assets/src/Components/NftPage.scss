@@ -1,24 +1,16 @@
 .container{
-    height: 48rem;
+    height: auto;
+    .scrollable{
+        height: 90%; /* or any value */
+        overflow-y: auto;
+        width: 100%;
+        background-color: transparent;
 
-    .background {
-        background-image: url("../../assets/dtc-logo-black.png");
-        background-size: 160px;
-        height:100%;
-
-        .scrollable{
-            height: 90%; /* or any value */
-            overflow-y: auto;
-            width: 100%;
-            background-color: transparent;
-
-            .transparentDiv{
-                width: 95%;
-                height: 75%;
-                padding-left: 2.5%;
-                padding-top: 4%;
-            }
+        .transparentDiv{
+            width: 95%;
+            height: 75%;
+            padding-left: 2.5%;
+            padding-top: 4%;
         }
-
     }
 }

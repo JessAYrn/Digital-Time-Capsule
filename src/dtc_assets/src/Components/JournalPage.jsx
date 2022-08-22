@@ -7,10 +7,6 @@ import  {AppContext} from "../App";
 import "./JournalPage.scss";
 import DatePicker from "./Fields/DatePicker";
 import LoadScreen from "./LoadScreen";
-import ModalContentSubmit from "./modalContent/ModalContentOnSubmit";
-import ModalContentHasError from "./modalContent/ModalContentHasError";
-import { Modal } from "./Modal";
-import ExitWithoutSubmitContent from "./modalContent/ModalContentExitWithoutSubmitModal";
 import { UI_CONTEXTS } from "../Contexts";
 import { MODALS_TYPES } from "../Constants";
 
@@ -75,7 +71,6 @@ const JournalPage = (props) => {
                 ).then(res => {
                 result1 = true;
                 if("err" in res){
-                    console.log(res);
                     result1 = false;
                 }
             });
@@ -87,14 +82,12 @@ const JournalPage = (props) => {
                 ).then(res => {
                 result2 = true;
                 if("err" in res){
-                    console.log(res);
                     result2 = false;
                 }
             });
         };
         await mapAndSendEntryToApi(index, journalPageData, false).then(res => {
             if("err" in res){
-                console.log(res);
                 result3 = false;
             } else {
                 result3 = true;

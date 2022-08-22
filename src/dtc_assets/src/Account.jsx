@@ -66,14 +66,12 @@ const AccountPage = (props) => {
     const location = useLocation();
     //dispatch state from previous route to redux store if that state exists
     if(location.state){
-        console.log('location state:',location.state);
         dispatch({
             actionType: types.SET_ENTIRE_REDUX_STATE,
             payload: location.state
         });
         //wipe previous location state to prevent infinite loop
         location.state = null;
-        console.log('location state:',location.state);
 
     }
 
@@ -89,7 +87,6 @@ const AccountPage = (props) => {
             const journal = await actor.readJournal();
             if("err" in journal){
                 actor.create().then((result) => {
-                    console.log(result);
                     dispatch({
                         actionType: types.SET_IS_LOADING,
                         payload: false
@@ -132,7 +129,6 @@ const AccountPage = (props) => {
         }
         if(journalState.reloadStatuses.nftData){
             const nftCollection = await actor.getUserNFTsInfo();
-            console.log(nftCollection);
             dispatch({
                 payload: nftCollection,
                 actionType: types.SET_NFT_DATA

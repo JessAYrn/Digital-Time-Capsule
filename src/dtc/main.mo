@@ -3,6 +3,7 @@ import Error "mo:base/Error";
 import Nat64 "mo:base/Nat64";
 import Nat8 "mo:base/Nat8";
 import Trie "mo:base/Trie";
+import HashMap "mo:base/HashMap";
 import Hash "mo:base/Hash";
 import Nat "mo:base/Nat";
 import Result "mo:base/Result";
@@ -84,11 +85,6 @@ shared (msg) actor class User() = this {
         assert (deposit == accepted);
         balance += accepted;
         { accepted = Nat64.fromNat(accepted) };
-    };
-
-    private func getAdminAccountId () : async Result.Result<Account.AccountIdentifier, JournalTypes.Error> {
-        let result = await MainMethods.getAdminAccountId(profiles);
-        return result;
     };
 
     public shared(msg) func refillCanisterCycles() : async Result.Result<((Nat,[Nat64])), JournalTypes.Error> {

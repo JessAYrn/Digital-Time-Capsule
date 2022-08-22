@@ -35,7 +35,6 @@ const HomePage = () => {
     let location = useLocation();
     //dispatch state from previous route to redux store if that state exists
     if(location.state){
-        console.log('location state: ',location.state);
         dispatch({
             actionType: types.SET_ENTIRE_REDUX_STATE,
             payload: location.state

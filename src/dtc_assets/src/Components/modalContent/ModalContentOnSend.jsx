@@ -37,7 +37,6 @@ const ModalContentOnSend = (props) => {
     }
 
     const onSendConfirm = async () => {
-        console.log(fromHexString(recipientAddress));
         setIsLoading(true);
         await actor.transferICP(
             parseInt(toE8s(amountToSend)), fromHexString(recipientAddress)

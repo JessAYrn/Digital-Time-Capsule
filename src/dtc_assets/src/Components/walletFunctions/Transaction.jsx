@@ -15,8 +15,6 @@ export const Transaction = (props) => {
     } = props;
 
     const unavailble = 'unavailble';
-
-    console.log('line 53: ',nanoSecondsToMiliSeconds(parseInt(timeStamp)));
     const date = timeStamp ? new Date(nanoSecondsToMiliSeconds(parseInt(timeStamp))).toString() : unavailble;
     const sourceOfTx = source ? shortenHexString(toHexString(source)) : unavailble;
     const recipientOfTx = recipient ? shortenHexString(toHexString(recipient)) : unavailble;

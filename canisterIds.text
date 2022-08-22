@@ -10,30 +10,3 @@
     "ic": "bs4fi-aaaaa-aaaap-qaabq-cai"
   }
 }
-
-//Test Canister Id's
-{
-  "dtc": {
-    "ic": "cxi6d-5iaaa-aaaap-qaaka-cai"
-  },
-  "dtc_assets": {
-    "ic": "cqjyx-qqaaa-aaaap-qaakq-cai"
-  }
-}
-
-//Test#2 Canister Id's
-{
-    "default": {
-      "ic": "qy4mt-3aaaa-aaaap-qadlq-cai"
-    },
-    "dtc": {
-      "ic": "rvsi5-uiaaa-aaaap-qadma-cai"
-    },
-    "dtc_assets": {
-      "ic": "rstoj-zqaaa-aaaap-qadmq-cai"
-    },
-    "journal": {
-      "ic": "u4odv-6iaaa-aaaap-qadqa-cai"
-    }
-}
- 
