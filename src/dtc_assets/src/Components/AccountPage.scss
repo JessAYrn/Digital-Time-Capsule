@@ -1,0 +1,25 @@
+.container_accountPage{
+    height: 100vh;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    background-size: 100%;
+    background-image: url("../../assets/dtc-logo-black.png");
+    .logoDivContainer{
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        .logoDiv{
+            border-radius: 10px;
+            box-shadow: 0 17px 20px rgb(0 0 0 / 38%);
+            background-color: rgb(233, 233, 233);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.98;
+        }
+    }
+}

@@ -10,3 +10,13 @@
     "ic": "bs4fi-aaaaa-aaaap-qaabq-cai"
   }
 }
+
+// test Canister Id's
+{
+  "dtc": {
+    "ic": "uqmlh-miaaa-aaaap-qap5a-cai"
+  },
+  "dtc_assets": {
+    "ic": "uxnnt-bqaaa-aaaap-qap5q-cai"
+  }
+}

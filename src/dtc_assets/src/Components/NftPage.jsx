@@ -40,7 +40,6 @@ const NftPage = () => {
 
     return(
         <div className='container'>
-            <div className={"background"}>
             <NavBar
                 walletLink={true}
                 journalLink={true}
@@ -51,7 +50,6 @@ const NftPage = () => {
                 context={UI_CONTEXTS.NFT}
             />
             { displayNftFiles() }
-            </div>
         </div>
     );
 

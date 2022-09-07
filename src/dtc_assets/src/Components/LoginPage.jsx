@@ -7,48 +7,8 @@ import { AppContext as NftPageContext } from "../NFTs";
 import { UI_CONTEXTS } from "../Contexts";
 // import { AppContext as PodcastContext } from "../PodcastPage"
 import "./LoginPage.scss";
-import "./Animation.scss";
-import { deviceType } from "../Utils";
-
-const getIntObserverFunc = (containerIndex, className) => {
-    return (entries) => {
-        entries.forEach(entry => {
-            const divs = document.querySelectorAll(`.${className}._${containerIndex}`);
-            const title = document.getElementById('title');
-            if(entry.isIntersecting){
-                divs.forEach(div => div.classList.add("animate"));
-                if(containerIndex === 0) {
-                    title.innerHTML = "Scroll for More Info"
-                    title.classList.add("animate");
-                } else if (containerIndex === 1){
-                    title.classList.remove("animate");
-                } else if (containerIndex === 2){
-                    title.innerHTML = "Features"
-                    title.classList.add("animate");
-                } else if(containerIndex === 5){
-                    if(deviceType() === "mobile"){
-                        title.innerHTML = "The Tech Behind the App"
-                        title.classList.add("animate");
-                    } else {
-                        title.classList.remove("animate");
-                    }
-                } else if(containerIndex === 6) {
-                    title.innerHTML = "The Tech Behind the App"
-                    title.classList.add("animate");
-                }
-            }  else if(!entry.isIntersecting){
-                divs.forEach(div => div.classList.remove("animate"));
-                if(containerIndex === 3 && deviceType() === "mobile"){
-                    title.classList.remove("animate");
-                } else if(containerIndex === 6) {
-                    title.classList.remove("animate");
-
-                }
-            }
-        });
-    }
-};
-
+import "../Components/animations/Animation.scss";
+import { getIntObserverFunc, visibilityFunctionLoginPage } from "./animations/IntersectionObserverFunctions";
 
 const LoginPage = (props) => {
 
@@ -89,12 +49,17 @@ const LoginPage = (props) => {
     };
     const containers = document.querySelectorAll(".contentContainer");
     containers.forEach( (container, index) => {
-        const observer = new IntersectionObserver(getIntObserverFunc(index, "animatedLeft"), {threshold: .6});
+        let props_ = {
+            containerIndex: index, 
+            className: "animatedLeft",
+            visibilityFunction: visibilityFunctionLoginPage
+        };
+        const observer = new IntersectionObserver(getIntObserverFunc(props_), {threshold: .6});
         observer.observe(container);
     });
 
     return(
-        <div className={"container"} >
+        <div className={"container_loginPage"} >
             <div className={'container_1'}>
                 <div className={'contentContainer animatedLeft _0 login'}>
                     <div className={'contentDiv__loginContent animatedLeft _0'}>
@@ -182,7 +147,7 @@ const LoginPage = (props) => {
                 </div>
             </div>
             <div className={"container_2"}>
-                <h4 id={'title'} className={"animatedRight"}> Scroll Down For More Info</h4>
+                <h4 id={'title'} className={"animatedRight scrollForMore animate"}> Scroll Down For More Info</h4>
             </div>
         </div>
     );

@@ -1,5 +1,5 @@
 import JournalPage from "./JournalPage";
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useMemo } from "react";
 import {initialState, types} from "../reducers/journalReducer";
 import "./Journal.scss";
 import { AppContext } from "../App";
@@ -10,10 +10,11 @@ import { milisecondsToNanoSeconds } from "../Utils";
 import { NavBar } from "./navigation/NavBar";
 import { MODALS_TYPES } from "../Constants";
 import { UI_CONTEXTS } from "../Contexts";
+import { getIntObserverFunc, visibilityFunctionDefault } from "./animations/IntersectionObserverFunctions";
 
 const Journal = (props) => {
 
-    const mql = window.matchMedia('(max-width: 480px)');
+    const mql = window.matchMedia('(max-width: 650px)');
     const {actor, authClient, setIsLoaded, journalState, dispatch} = useContext(AppContext);
 
     const handleSubmit = async () => {
@@ -64,13 +65,31 @@ const Journal = (props) => {
 
     const putCreateEntryButtonInTable = mql.matches && journalState.journal.length < 6;
 
+    useEffect(() => {
+        const containers = document.querySelectorAll(".contentContainer.animatedLeft");
+        containers.forEach( (container, index) => {
+            let props_ = {
+                className: "animatedLeft",
+                containerIndex: index,
+                visibilityFunction: visibilityFunctionDefault
+            };
+            const observer = new IntersectionObserver(getIntObserverFunc(props_), {threshold: .1});
+            observer.observe(container);
+        });
+    }, [journalState]);
+
+    let animatedLeftElementIndex = 0;
+
     const displayJournalTable = () => {
 
         return( 
             <>
-                <div className={'tableDivContainer'}>
-                    <div className={'tableDiv'}>
-                        <table className={"tableHeader"}>
+                <div 
+                    className={'tableDivContainer contentContainer animatedLeft' + 
+                    ` _${animatedLeftElementIndex++}`}
+                >
+                    <div className={'tableDiv '}>
+                        <table className={"tableHeader "}>
                             <tbody>
                                 <tr className={"tableRow "}>
                                     <th className={"tableCell "}>DATE</th>
@@ -81,7 +100,7 @@ const Journal = (props) => {
                                 </tr>
                             </tbody>
                         </table>
-                        <div className='scrollable'>
+                        <div className='scrollable '>
                             <table className={"table"}>
                                 <tbody>
                                     { journalState.journal.map((page, index) => {
@@ -142,17 +161,15 @@ const Journal = (props) => {
     return(
         journalState.modalStatus.show ?
         <div className={"container"}>
-            <div className={'background'}>
-                <Modal 
-                    context={UI_CONTEXTS.JOURNAL}
-                    index={getIndexOfVisiblePage()}
-                />
-            </div>
+            <Modal 
+                context={UI_CONTEXTS.JOURNAL}
+                index={getIndexOfVisiblePage()}
+            />
         </div> : 
         <React.Fragment>
             <>
                 { (getIndexOfVisiblePage() < 0) ? 
-                     <React.Fragment>
+                    <div className={"container"}>
                         <NavBar
                             walletLink={true}
                             journalLink={false}
@@ -164,86 +181,105 @@ const Journal = (props) => {
                             toggleDisplayNotifications={toggleDisplayNotifications}
                             context={UI_CONTEXTS.JOURNAL}
                         />
-                        {   mql.matches &&
-                            <div className={'submitAndLoginButtonsDiv'}>
-                                <button className={'addNewEntryButton'} onClick={addJournalPage}> Create New Entry </button>
-                                <button className={'loginButton'} onClick={async () => {
-                                    dispatch({
-                                        actionType: types.SET_ENTIRE_REDUX_STATE,
-                                        payload: initialState
-                                    });
-                                    await authClient.logout();
-                                    setIsLoaded(false);
-                                }} > Log Out </button>  
-                            </div> 
-                        }
-                        {mql.matches && <div className={'section2'}>
-                            <img src="dtc-logo-black.png" alt="TDTC logo" />
-                        </div>}
-                        <div className={'section1'}>
-                            <InputBox
-                                label={"This Journal Belongs To: "}
-                                rows={"1"}
-                                dispatch={dispatch}
-                                dispatchAction={types.CHANGE_NAME}
-                                value={journalState.bio.name}
-                            />
-                            <InputBox
-                                label={"Date of Birth: "}
-                                rows={"1"}
-                                dispatch={dispatch}
-                                dispatchAction={types.CHANGE_DOB}
-                                value={journalState.bio.dob}
-                            />
-                            <InputBox
-                                label={"Place of Birth: "}
-                                rows={"1"}
-                                dispatch={dispatch}
-                                dispatchAction={types.CHANGE_POB}
-                                value={journalState.bio.pob}
-                            />
-                            <InputBox
-                                divClassName={'dedications'}
-                                label={"Dedications: "}
-                                rows={"8"}
-                                dispatch={dispatch}
-                                dispatchAction={types.CHANGE_DEDICATIONS}
-                                value={journalState.bio.dedications}
-                            />
-                        </div>
-                        {!mql.matches && <div className={'section2'}>
-                            <img src="dtc-logo-black.png" alt="TDTC logo" />
-                        </div>}
-                        <div className={'prefaceDiv'}>
-                            <InputBox
-                                divClassName={'preface'}
-                                label={"Preface: "}
-                                rows={"24"}
-                                dispatch={dispatch}
-                                dispatchAction={types.CHANGE_PREFACE}
-                                value={journalState.bio.preface}
-                            />
-                        </div>
-                        {   mql.matches &&
-                            <div className={'submitAndLoginButtonsDiv'}>
-                                <button className={'submitButton'} type="submit" onClick={handleSubmit}> Submit </button> 
-                            </div> 
-                        }
-                        {displayJournalTable()}
-                        {   !mql.matches &&
-                            <div className={'submitAndLoginButtonsDiv'}>
-                                <button className={'submitButton'} type="submit" onClick={handleSubmit}> Submit </button>
-                                <button className={'loginButton'} onClick={async () => {
-                                    await authClient.logout();
-                                    dispatch({
-                                        actionType: types.SET_IS_AUTHENTICATED,
-                                        payload: false
-                                    });
-                                    setIsLoaded(false);
-                                }} > Log Out </button>  
-                            </div> 
-                        }
-                    </React.Fragment> : 
+                        <div className={"container__Journal"}>
+                            <div className={"section__1"}>
+                                {   mql.matches &&
+                                    <div className={'submitAndLoginButtonsDiv animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
+                                        <button className={'addNewEntryButton '} onClick={addJournalPage}> Create New Entry </button>
+                                        <button className={'loginButton '} onClick={async () => {
+                                            dispatch({
+                                                actionType: types.SET_ENTIRE_REDUX_STATE,
+                                                payload: initialState
+                                            });
+                                            await authClient.logout();
+                                            setIsLoaded(false);
+                                        }} > Log Out </button>  
+                                    </div> 
+                                }
+                                <div className={'biography'}>
+                                    {mql.matches && <div className={'coverPhotoDiv contentContainer animatedLeft '+` _${animatedLeftElementIndex++}`}>
+                                        <img className={""}src="dtc-logo-black.png" alt="TDTC logo" />
+                                    </div>}
+                                    <div className={"contentContainer animatedLeft"+` _${animatedLeftElementIndex++}`}>
+                                        <InputBox
+                                            label={"This Journal Belongs To: "}
+                                            rows={"1"}
+                                            dispatch={dispatch}
+                                            dispatchAction={types.CHANGE_NAME}
+                                            value={journalState.bio.name}
+                                        />
+                                    </div>
+                                    <div className={"contentContainer animatedLeft"+` _${animatedLeftElementIndex++}`}>
+                                        <InputBox
+                                            label={"Date of Birth: "}
+                                            rows={"1"}
+                                            dispatch={dispatch}
+                                            dispatchAction={types.CHANGE_DOB}
+                                            value={journalState.bio.dob}
+                                        />
+                                    </div>
+                                    <div className={"contentContainer animatedLeft"+` _${animatedLeftElementIndex++}`}>
+                                        <InputBox
+                                            label={"Place of Birth: "}
+                                            className={"animatedLeft"}
+                                            rows={"1"}
+                                            dispatch={dispatch}
+                                            dispatchAction={types.CHANGE_POB}
+                                            value={journalState.bio.pob}
+                                        />
+                                    </div>
+                                    <div className={"contentContainer animatedLeft"+` _${animatedLeftElementIndex++}`}>
+                                        <InputBox
+                                            divClassName={'dedications'}
+                                            label={"Dedications: "}
+                                            rows={"8"}
+                                            dispatch={dispatch}
+                                            dispatchAction={types.CHANGE_DEDICATIONS}
+                                            value={journalState.bio.dedications}
+                                        />
+                                    </div>
+                                    <div className={"contentContainer animatedLeft"+` _${animatedLeftElementIndex++}`}>
+                                        <InputBox
+                                            divClassName={'preface'}
+                                            label={"Preface: "}
+                                            rows={"24"}
+                                            dispatch={dispatch}
+                                            dispatchAction={types.CHANGE_PREFACE}
+                                            value={journalState.bio.preface}
+                                        />
+                                    </div>
+                                </div>
+                                <div className={'submitAndLoginButtonsDiv animatedLeft contentContainer'+` _${animatedLeftElementIndex++}`}>
+                                    <button className={'submitButton'} type="submit" onClick={handleSubmit}> Submit </button> 
+                                </div> 
+                            </div>
+                            <div className={"section__2"}>
+                                {!mql.matches && 
+                                <div 
+                                    className={'coverPhotoDiv contentContainer animatedLeft'+ 
+                                    ` _${animatedLeftElementIndex++}`}
+                                >
+                                    <img className={'coverPhotoDiv'} src="dtc-logo-black.png" alt="TDTC logo" />
+                                </div>}
+                                {displayJournalTable()}
+                                {   !mql.matches &&
+                                    <div 
+                                        className={'submitAndLoginButtonsDiv contentContainer animatedLeft'+ 
+                                        ` _${animatedLeftElementIndex++}`}
+                                    >
+                                        <button className={'loginButton'} onClick={async () => {
+                                            await authClient.logout();
+                                            dispatch({
+                                                actionType: types.SET_IS_AUTHENTICATED,
+                                                payload: false
+                                            });
+                                            setIsLoaded(false);
+                                        }} > Log Out </button>  
+                                    </div> 
+                                }
+                            </div>
+                        </div> 
+                    </div> : 
                     <JournalPage
                         index={getIndexOfVisiblePage()}
                     /> 
