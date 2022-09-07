@@ -1,164 +1,59 @@
 .linkDiv_Journal{
-    @media screen and (max-width: 480px) {
-        bottom:0;
-    };
-    @media screen and (min-width: 481px) {
-        top:0;
-    };
-    background-color: black;
+    background-color: #060b26;
     border: solid black;
-    height: 55px;
-    margin-left: -10px;
+    height: 45px;
     width: 100%;
+    padding-top: 10px;
     position:fixed;
+    top: 0;
+    z-index: 100;
+    .navbar{
+        padding-left: 10px;
+    }
+    .navBar_Journal.active{
+        transform: translateX(0px);
+    }
     .navBar_Journal{
+        margin-top: -10px;
+        transform: translateX(-280px);
+        transition: 750ms;
         width: 331px;
-        margin-left: auto;
-        margin-right: auto;
-        .linkContainer{
-            width: 100%;
-            height: 35px;
-            margin-top: 10px;
-            .walletLinkDiv{
-                float: left;
-                border-radius: 10px;
-                width: 55px;
-                margin-top: 2px;
-                width: 33px;
-                height: 33px;
-                .navLink_Journal{
-                    font-family: 'Julius Sans One', sans-serif;
-                    float: left;
-                    margin-top: 0px;
-                    width: 33px;
-                    height: 33px;
-                    border-radius: 10px;
-                    text-decoration: none;
-                    img{
-                        max-width: 37px;
-                        max-height: 37px;
-                        display: block;
-                        margin: auto;
-                        margin-left: -10px;
-                        margin-top: -5px;
-                    }
+        width: 270px;
+        background-color: #060b26;
+        height: 100vh;
+        .walletIcon_Journal{
+            width: 26px;
+            display: block;
+            margin: auto;
+            margin-left: -10px;
+            margin-top: -5px;
+        }
+        .unorderedList{
+            .listItem{
+                color: white;
+                display: flex;
+                .menu_icon{
+                    max-width: 37px;
+                    max-height: 37px;
+                    display: block;
+                    margin: auto;
+                    margin-left: -10px;
+                    margin-top: -5px;
+                    margin-right: 10px;
                 }
-            }
-            .timeCapsuleLinkDiv{
-                float: left;
-                border-radius: 10px;
-                width: 33px;
-                height: 33px;
-                .navLink_Journal{
-                    font-family: 'Julius Sans One', sans-serif;
-                    float: left;
-                    margin-top: 0px;
-                    width: 33px;
-                    height: 33px;
-                    border-radius: 10px;
-                    text-decoration: none;
-                    img{
-                        max-width: 45px;
-                        max-height: 45px;
-                        display: block;
-                        margin: auto;
-                        margin-left: -14.5px;
-                        margin-top: -11px;
-                    }
+                span{
+                    margin-left: 5px;
+                    font-family: 'Courier New', monospace;
                 }
-            }
-            .nftLinkDiv{
-                float: left;
-                border-radius: 10px;
-                width: 33px;
-                height: 33px;
-                .navLink_Journal{
-                    font-family: 'Julius Sans One', sans-serif;
-                    float: left;
-                    margin-top: 0px;
-                    width: 33px;
-                    height: 33px;
-                    border-radius: 10px;
-                    text-decoration: none;
-                    img{
-                        max-width: 32px;
-                        max-height: 32px;
-                        display: block;
-                        margin: auto;
-                        margin-left: -7.75px;
-                        margin-top: -2.5px;
-                    }
-                }
-            }
-            .dashboardIconDiv{
-                float: left;
-                width: 33px;
-                height: 33px;
-                border-radius: 10px;
-                .navLink_Journal{
-                    font-family: 'Julius Sans One', sans-serif;
-                    float: left;
-                    margin-top: 0px;
-                    width: 33px;
-                    height: 33px;
-                    border-radius: 10px;
-                    text-decoration: none;
-                    img{
-                        max-width: 31px;
-                        max-height: 31px;
-                        display: block;
-                        margin: auto;
-                        margin-left: -7px;
-                        margin-top: -2px;
-                    }
-                }
-            }
-            .notificationIconDiv{
-                float: left;
-                width: 33px;
-                height: 33px;
-                border-radius: 10px;
-                .navLink_Journal{
-                    font-family: 'Julius Sans One', sans-serif;
-                    float: left;
-                    margin-top: 0px;
-                    width: 33px;
-                    height: 33px;
-                    border-radius: 10px;
-                    text-decoration: none;
-                    img{
-                        max-width: 50px;
-                        max-height: 50px;
-                        display: block;
-                        margin: auto;
-                        margin-left: -16.5px;
-                        margin-top: -11px;
-                    }
-                }
-                
-            }
-            .accountIconLinkDiv{
-                width: 33px;
-                height: 33px;
-                float: left;
-                .navLink_Journal{
-                    margin-top: 0px;
-                    width: 33px;
-                    height: 33px;
-                    border-radius: 10px;
-                    font-family: 'Julius Sans One', sans-serif;
-                    color: black;
-                    text-decoration: none;
-                    img{
-                        max-width: 31px;
-                        max-height: 31px;
-                        display: block;
-                        margin: auto;
-                        margin-left: -7px;
-                        margin-top: -2px;
-                    }
+                img{
+                    max-width: 37px;
+                    max-height: 37px;
+                    display: block;
+                    margin: auto;
+                    margin-left: -10px;
+                    margin-top: -5px;
                 }
             }
         }
     }
-  }
+}

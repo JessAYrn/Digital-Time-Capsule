@@ -35,7 +35,6 @@ const HomePage = () => {
     let location = useLocation();
     //dispatch state from previous route to redux store if that state exists
     if(location.state){
-        console.log('location state: ',location.state);
         dispatch({
             actionType: types.SET_ENTIRE_REDUX_STATE,
             payload: location.state
@@ -111,26 +110,24 @@ const HomePage = () => {
                 isLoaded &&
                     journalState.isAuthenticated ? 
                     <div className="container">
-                        <div className="background center">
-                            <NavBar
-                                walletLink={true}
-                                journalLink={true}
-                                nftLink={true}
-                                accountLink={true}
-                                dashboardLink={false}
-                                notificationIcon={false}
-                                context={UI_CONTEXTS.HOME_PAGE}
-                            />
-                            <div class={'scrollable'}>
-                                <Analytics/>
-                                {/* <div className={'transparentDiv__homePage'}>
-                                    <div className={'carouselDiv'}>
-                                        <div className={'videoContainerDiv'}>
-                                            <YouTube videoId={'hiB8OCPxF40'} opts={opts} onReady={onready}/>
-                                        </div>
+                        <NavBar
+                            walletLink={true}
+                            journalLink={true}
+                            nftLink={true}
+                            accountLink={true}
+                            dashboardLink={false}
+                            notificationIcon={false}
+                            context={UI_CONTEXTS.HOME_PAGE}
+                        />
+                        <div class={'scrollable'}>
+                            <Analytics/>
+                            {/* <div className={'transparentDiv__homePage'}>
+                                <div className={'carouselDiv'}>
+                                    <div className={'videoContainerDiv'}>
+                                        <YouTube videoId={'hiB8OCPxF40'} opts={opts} onReady={onready}/>
                                     </div>
-                                </div> */}
-                            </div>
+                                </div>
+                            </div> */}
                         </div>
                     </div> : 
                     <LoginPage

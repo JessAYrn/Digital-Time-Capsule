@@ -37,7 +37,6 @@ const ModalContentOnSend = (props) => {
     }
 
     const onSendConfirm = async () => {
-        console.log(fromHexString(recipientAddress));
         setIsLoading(true);
         await actor.transferICP(
             parseInt(toE8s(amountToSend)), fromHexString(recipientAddress)
@@ -106,7 +105,7 @@ const ModalContentOnSend = (props) => {
                 </div>
                 <div className="ammountDiv">
                     <h5> Send Amount: </h5>
-                    <h6> {fromE8s(toE8s(amountToSend) - toE8s(fee))} ICP </h6>
+                    <h6> {fromE8s(toE8s(amountToSend) + toE8s(fee))} ICP </h6>
                 </div>
                 <div className='ModalContentOnSendButtons'>
                     <button className='button' onClick={onSendConfirm}> Send </button>

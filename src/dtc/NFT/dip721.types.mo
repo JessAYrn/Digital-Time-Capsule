@@ -4,14 +4,24 @@ import Nat16 "mo:base/Nat16";
 import Nat32 "mo:base/Nat32";
 import Nat64 "mo:base/Nat64";
 import Blob "mo:base/Blob";
+import Trie "mo:base/Trie";
 import Principal "mo:base/Principal";
 
 module {
     public type Dip721NonFungibleToken = {
-    logo: LogoResult;
-    name: Text;
-    symbol: Text;
-    maxLimit : Nat16;
+        logo: LogoResult;
+        name: Text;
+        symbol: Text;
+        maxLimit : Nat16;
+        collectionIndex : Nat;
+        creatorOfCollection: Principal;
+    };
+
+    public type Dip721NonFungibleTokenInput = {
+        logo: LogoResult;
+        name: Text;
+        symbol: Text;
+        maxLimit : Nat16;
     };
 
     public type ApiError = {
@@ -26,7 +36,7 @@ module {
     #Err : E;
     };
 
-    public type OwnerResult = Result<Principal, ApiError>;
+    public type OwnerResult = Result<[Principal], ApiError>;
     public type TxReceipt = Result<Nat, ApiError>;
 
     public type TransactionId = Nat;
@@ -46,10 +56,10 @@ module {
     };
 
     public type Nft = {
-    owner: Principal;
-    id: TokenId;
-    fileType: Text;
-    metadata: [MetadataKeyVal];
+        owners: [Principal];
+        id: TokenId;
+        fileType: Text;
+        nftData: Trie.Trie<Nat, Blob>;
     };
 
     public type ExtendedMetadataResult = Result<{
@@ -57,7 +67,7 @@ module {
     token_id: TokenId;
     }, ApiError>;
 
-    public type MetadataResult = Result<MetadataKeyVal, ApiError>;
+    public type MetadataResult = Result<Blob, ApiError>;
 
     public type MetadataDesc = [MetadataPart];
 
@@ -89,8 +99,9 @@ module {
 
     public type TokenMetaData = {
         id: TokenId;
-        metaDataArraySize: Nat;
+        nftDataTrieSize: Nat;
         fileType: Text;
+        numberOfCopiesOwned: Nat;
     };
 
     public type MintReceipt = Result<MintReceiptPart, ApiError>;

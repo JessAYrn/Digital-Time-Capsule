@@ -33,12 +33,7 @@ export const mapAndSendJournalPageRequestToApi = async (key, pageData, files, ac
     
     const entry = (journalEntry, {file1: blob1, file2: blob2});
     const entryKey = (key) ? {entryKey: key}: [];
-
-    console.log(entry);
-
-    await actor.updateJournal(entryKey, entry).then((result) => {
-        console.log(result);
-    });
+    await actor.updateJournal(entryKey, entry);
 
 };
 

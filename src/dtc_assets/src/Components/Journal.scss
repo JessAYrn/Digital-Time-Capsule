@@ -1,163 +1,210 @@
-.tableDivContainer{
-  @media screen and (max-width: 480px) {
-    width: 100%;
-    height: 600px;
-  };
-  width: 55%;
-  float: left;
-  .tableDiv{
-    width: 100%;
-    float: left;
-    border-radius: 10px;
-    margin-top: 60px;
-    box-shadow: 0 5px 16px rgb(0 0 0 / 20%);
-    .tableHeader{
-      font-family: 'Julius Sans One', sans-serif;
-      font-size: 1rem;
-      color: rgb(122, 122, 122);
-      border-collapse: collapse;
-      width: 100%;
-      .tableRow{
-        border-bottom: solid rgb(122, 122, 122) .5px;
+.container{
+  flex-direction: column;
+  .container__Journal{
+    @media screen and (max-width: 650px) {
+      flex-direction: column;
+    };
+    @media screen and (min-width: 480px) {
+      margin-top: 50px;
+    };
+    width: 103%;
+    height: auto;
+    display: flex;
+    align-items: center;
+    background-size: 80%;
+    background-color: rgb(233, 233, 233);
+    background-image: url("../../assets/dtc-logo-black.png");
+    background-position: center;
+    justify-content: center;
+    .section__1{
+      @media screen and (max-width: 650px) {
+        width: 95%;
+      };
+      flex-direction: column;
+      display: flex;
+      width: 45%;
+  
+      .biography{
         width: 100%;
-        padding-bottom: .5rem;
-        .tableCell{
-          width: 25%;
-          text-align: center;
-          padding: 0.5rem;
-          .openButton{
-            border-radius: 10px;
-          }
-        }
-      }
-    }
-    .scrollable{
-      height: 328px; /* or any value */
-      overflow-y: auto;
-      width: 100%;
-      .table{
-        font-family: 'Julius Sans One', sans-serif;
-        font-size: 1rem;
-        color: rgb(122, 122, 122);
-        border-collapse: collapse;
-        width: 100%;
-        .tableRow{
-          border-bottom: solid rgb(122, 122, 122) .5px;
+        @media screen and (min-width: 651px) {
+          margin-top: 35px;
+        };
+        float: left;
+        .coverPhotoDiv{
+          @media screen and (max-width: 650px) {
+            float: left;
+            height: 6rem;
+          };
+          @media screen and (min-width: 651px) {
+            margin-top: 35px;
+          };
           width: 100%;
-          padding-bottom: .5rem;
-          .tableCell{
-            width: 25%;
-            text-align: center;
-            padding: 0.5rem;
-          }
+          height: 22rem;
         }
-        .tableRowForButton{
-          border-bottom: 0;
-          width: 100%;
-          padding-bottom: .5rem;
-          .tableCell{
-            width: 100%;
-            padding: 1px;
-            height: 50px;
-            .addNewEntryButton{
-              width: 50%;
-              margin-left: 24%;
-              float: left;
+        .inputBox{
+          .input-element-div__dedications{
+            
+            .enabled{
+              border-width: 1px 1px 1px !important;
               border-radius: 10px;
+            }
+          
+            .disabled{
+                border-radius: 10px;
             }
           }
         }
       }
+    }
+    .section__2{
+      @media screen and (max-width: 650px) {
+        width: 95%;
+      };
+      flex-direction: column;
+      display: flex;
+      width: 50%;
   
+      .coverPhotoDiv{
+        @media screen and (max-width: 480px) {
+          float: left;
+          height: 6rem;
+        };
+        @media screen and (min-width: 481px) {
+          margin-top: 35px;
+        };
+        width: 100%;
+        height: 22rem;
+      }
     }
   
-  }
-
-  .addNewEntryButtonDiv{
-    width: 50%;
-    margin-left: 24%;
-    float: left;
-    .addNewEntryButton{
-      background-color: rgb(230, 230, 230);
-      border-radius: 25px;
-      border-color: rgb(230, 230, 230);
+    .tableDivContainer{
+      @media screen and (max-width: 480px) {
+        height: 600px;
+      };
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
       width: 100%;
-    }
-  }
-}
-
-.section1{
-  @media screen and (max-width: 480px) {
-    width: 100%;
-  };
-  @media screen and (min-width: 481px) {
-    margin-top: 35px;
-  };
-  width: 33%;
-  float: left;
-  height: 22rem;
-  .inputBox{
-    .input-element-div__dedications{
-      
-      .enabled{
-        border-width: 1px 1px 1px !important;
+      .tableDiv{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        width: 100%;
         border-radius: 10px;
+        margin-top: 60px;
+        box-shadow: 0 5px 16px rgb(0 0 0 / 20%);
+        background-color: white;
+        opacity: 0.978;
+        .tableHeader{
+          font-family: 'Courier New', monospace;
+          font-size: 1rem;
+          color: rgb(122, 122, 122);
+          border-collapse: collapse;
+          width: 100%;
+          .tableRow{
+            border-bottom: solid rgb(122, 122, 122) .5px;
+            width: 100%;
+            padding-bottom: .5rem;
+            .tableCell{
+              width: 25%;
+              text-align: center;
+              padding: 0.5rem;
+              .openButton{
+                border-radius: 10px;
+              }
+            }
+          }
+        }
+        .scrollable{
+          height: 328px; /* or any value */
+          overflow-y: auto;
+          width: 100%;
+          .table{
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            color: rgb(122, 122, 122);
+            border-collapse: collapse;
+            width: 100%;
+            .tableRow{
+              border-bottom: solid rgb(122, 122, 122) .5px;
+              width: 100%;
+              padding-bottom: .5rem;
+              .tableCell{
+                width: 25%;
+                text-align: center;
+                padding: 0.5rem;
+              }
+            }
+            .tableRowForButton{
+              border-bottom: 0;
+              width: 100%;
+              padding-bottom: .5rem;
+              .tableCell{
+                width: 100%;
+                padding: 1px;
+                height: 50px;
+                .addNewEntryButton{
+                  width: 50%;
+                  margin-left: 24%;
+                  float: left;
+                  border-radius: 10px;
+                }
+              }
+            }
+          }
+      
+        }
+      
       }
     
-      .disabled{
-          border-radius: 10px;
+      .addNewEntryButtonDiv{
+        width: 50%;
+        .addNewEntryButton{
+          background-color: rgb(230, 230, 230);
+          border-radius: 25px;
+          border-color: rgb(230, 230, 230);
+          width: 100%;
+        }
       }
     }
-  }
-}
-.section2{
-  @media screen and (max-width: 480px) {
-    float: left;
-    width: 100%;
-    height: 6rem;
-  };
-  @media screen and (min-width: 481px) {
-    margin-top: 35px;
-  };
-  width: 66%;
-  float: left;
-  height: 22rem;
-}
-
-.prefaceDiv{
-  @media screen and (max-width: 480px) {
-    width: 100%;
-  };
-  margin-top: 2rem;
-  margin-right: 5%;
-  width: 33%;
-  float: left;
-  .inputBox{
-    .input-element-div__preface{
-      
-      .enabled{
-        border-width: 1px 1px 1px !important;
-        border-radius: 10px;
+    .prefaceDiv{
+      @media screen and (max-width: 480px) {
+        width: 100%;
+      };
+      margin-top: 2rem;
+      margin-right: 5%;
+      width: 33%;
+      float: left;
+      .inputBox{
+        .input-element-div__preface{
+          
+          .enabled{
+            border-width: 1px 1px 1px !important;
+            border-radius: 10px;
+          }
+        
+          .disabled{
+              border-radius: 10px;
+          }
+          
+          
+        }
       }
+    }
     
-      .disabled{
-          border-radius: 10px;
+    .submitAndLoginButtonsDiv{
+      width: 100%;
+      float: left;
+      .submitButton{
+        float: left;
+        margin: 15px;
+      };
+      .loginButton{
+        float: right;
+        margin: 15px;
       }
-      
-      
     }
-  }
-}
-
-.submitAndLoginButtonsDiv{
-  width: 100%;
-  float: left;
-  .submitButton{
-    float: left;
-    margin: 15px;
-  };
-  .loginButton{
-    float: right;
-    margin: 15px;
+  
   }
 }

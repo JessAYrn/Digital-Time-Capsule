@@ -11,18 +11,17 @@ export const Transaction = (props) => {
         increase,
         recipient,
         timeStamp,
-        source
+        source,
+        class_
     } = props;
 
     const unavailble = 'unavailble';
-
-    console.log('line 53: ',nanoSecondsToMiliSeconds(parseInt(timeStamp)));
     const date = timeStamp ? new Date(nanoSecondsToMiliSeconds(parseInt(timeStamp))).toString() : unavailble;
     const sourceOfTx = source ? shortenHexString(toHexString(source)) : unavailble;
     const recipientOfTx = recipient ? shortenHexString(toHexString(recipient)) : unavailble;
 
     return(
-            <div className='transactionHistoryDiv' >
+            <div className={`transactionHistoryDiv ${class_}`} >
                 <div className="balanceDeltaDiv">
                     <h4 className="balanceDeltaText">
                         Change in balance: 

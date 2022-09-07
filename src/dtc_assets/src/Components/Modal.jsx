@@ -1,4 +1,4 @@
-import React, {useContext, useMemo} from 'react';
+import React, {useContext, useMemo, useEffect} from 'react';
 import { UI_CONTEXTS } from '../Contexts';
 import { AppContext as AccountContext } from '../Account';
 import { AppContext as WalletContext} from '../Wallet';
@@ -11,6 +11,7 @@ import ExitWithoutSubmit from './modalContent/ModalContentExitWithoutSubmitModal
 import Notifications from './modalContent/ModalContentNotifications';
 import ModalContentOnSend from './modalContent/ModalContentOnSend';
 import ModalContentSubmit from './modalContent/ModalContentOnSubmit';
+import { getIntObserverFunc, visibilityFunctionDefault } from './animations/IntersectionObserverFunctions';
 import "./Modal.scss";
 
 export const Modal = (props) => {
@@ -61,13 +62,28 @@ export const Modal = (props) => {
         journalState.modalStatus
     ]);
 
+    useEffect(() => {
+        const containers = document.querySelectorAll(".contentContainer.animatedLeft");
+        containers.forEach( (container, index) => {
+            let props_ = {
+                className: "animatedLeft",
+                containerIndex: index,
+                visibilityFunction: visibilityFunctionDefault
+            };
+            const observer = new IntersectionObserver(getIntObserverFunc(props_), {threshold: .1});
+            observer.observe(container);
+        });
+    }, [journalState]);
+
+    let animatedLeftElementIndex = 0;
+
 
     return(
         <> 
             { journalState.modalStatus.show ? 
-            <div className="modalDiv" >
-                <div className={'modalBackground'}>
-                    <div className='modalTransparentDiv'>
+            <div className={"container__modal"}>
+                <div className="modalDiv" >
+                    <div className={`modalTransparentDiv contentContainer _${animatedLeftElementIndex} animatedLeft`}>
                         <div className={'modalWrapper'}>
                             <ChildComponent
                                 hasError={hasError}
@@ -78,7 +94,8 @@ export const Modal = (props) => {
                         </div>
                     </div>
                 </div>
-            </div> :
+            </div>
+             :
                 null
             }
         </>

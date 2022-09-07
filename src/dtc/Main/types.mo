@@ -30,4 +30,6 @@ module{
 
     public type ProfilesTree = Trie.Trie<Principal, Profile>;
 
+    public type NftCollectionsTree = Trie.Trie<Nat, Nft>;
+
 }

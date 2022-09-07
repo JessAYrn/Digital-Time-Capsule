@@ -1,72 +1,185 @@
-.loginPageDivContainer{
-    padding-top: 0.5rem;
-    .loginPageDiv{
-        @media screen and (max-width: 825px) {
-            margin-left: 5%;    
-            max-width: 90%;  
-        };
-        box-shadow: 0 144px 227px rgb(0 0 0 / 20%);
-        background-color: rgb(233, 233, 233);
-        max-width: 50%;
-        height: 28rem;
-        margin-left:25%;
-        margin-top: 7rem;
-
-        img{
-            @media screen and (max-width: 480px) {    
-                max-width: 55vw;
-                max-height: 55vw; 
-            };
-            @media screen and (min-width: 481px) and (max-width: 825px) {    
-                max-width: 35vw;
-                max-height: 35vw; 
-            };
-            max-width: 20vw;
-        }
+.container_loginPage{
+    height: auto;
+    display: flex;
+    align-items: center;
+    background-image: url("../../assets/dtc-logo-black.png");
+    background-size: 80%;
+    background-position: center;
+    .container_1{
+        height: auto;
+        display: flex;
+        width: 90%;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+        .contentContainer{
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            .contentDiv{
+                border-radius: 10px;
+                box-shadow: 0 17px 20px rgb(0 0 0 / 38%);
+                background-color: rgb(233, 233, 233);
+                width: 75%;
+                display: flex;
+                justify-content: center;
+                &__sentences{
+                    @media screen and (max-width: 600px) {
+                        background-position: 70% 84%;
+                    }
+                    border-radius: 10px;
+                    box-shadow: 0 17px 20px rgb(0 0 0 / 38%);
+                    background-image: url("../../assets/chain.png");
+                    width: 75%;
+                    display: flex;
+                    justify-content: center;
+                    margin-top: 100px;
+                    font-size: 15px;
+                    background-size: 893px;
+                    background-position: 57% 43%;
+                    color: white;
+                    p{
+                        padding-left: 8px;
+                        width: 65%;
+                    }
+                }
+                &__features{
+                    display: flex;
+                    justify-content: center;
+                    width: 75%;
+                    border-radius: 10px;
+                    box-shadow: 0 17px 20px rgb(0 0 0 / 38%);
+                    background-color: rgb(233, 233, 233);
+                    margin-top: 100px;
+                    .list{
+                        display: flex;
+                        width: 100%;
+                        justify-content: center;
+                        align-items: center;
+                        .h4Tag{
+                            font-family: 'Courier New', monospace;
+                            width: 100%;
+                            padding-left: 10%;
+                        }
     
-        .open{
-            max-width: 27%;
-            max-height: 10%;
-            border-radius: 25px;
-        }
+                        .h6Tag{
+                            
+                            font-family: 'Courier New', monospace;
+                            width: 53%;
+                            padding-left: 10%;
+                        }
     
-        .loginButtonDiv__{
-            &open{
-                @media screen and (max-width: 480px) {    
-                    margin-left: 35%;
-                    max-width: 50%;
-                };
-                margin-left: 42.5%;
-                max-width: 27%;
-                max-height: 10%;
-                border-radius: 25px;
+                        .cameraImg{
+                            max-height: 150px;
+                        }
+    
+                        .bitcoinImg{
+                            max-height: 110px;
+                            padding-top: 20px;
+                            padding-bottom: 20px;
+                        }
+    
+                        .safeImg{
+                            max-height: 150px;
+                        }
+                    }
+                }
+    
+                &__loginContent{
+                    @media screen and (max-width: 825px) {
+                        margin-left: 5%;    
+                        max-width: 90%;  
+                    };
+                    border-radius: 10px;
+                    box-shadow: 0 17px 20px rgb(0 0 0 / 38%);
+                    background-color: rgb(233, 233, 233);
+                    width: 75%;
+                    height: 28rem;
+                    margin-top: 7rem;
+                    display: flex;
+                    justify-content: center;
+                    flex-direction: column;
+                    align-items: center;
+                    img{
+                        @media screen and (max-width: 480px) {    
+                            max-width: 55vw;
+                            max-height: 55vw; 
+                        };
+                        @media screen and (min-width: 481px) and (max-width: 825px) {    
+                            max-width: 35vw;
+                            max-height: 35vw; 
+                        };
+                        margin-top: -60px;
+                        margin-bottom: 0;
+                        max-width: 20vw;
+                    }
+                
+                    .open{
+                        max-width: 27%;
+                        max-height: 10%;
+                        border-radius: 25px;
+                    }
+                
+                    .loginButtonDiv__{
+                        &open{
+                            @media screen and (max-width: 480px) {    
+                                max-width: 50%;
+                            };
+                            max-width: 27%;
+                            max-height: 10%;
+                            border-radius: 25px;
+                        }
+                        &closed{
+                            @media screen and (max-width: 480px) {    
+                                max-width: 50%;
+                            };
+                            max-width: 27%;
+                            max-height: 10%;
+                            border-radius: 25px;
+                        }
+                    }
+            
+                    .icpLogoDiv{
+                        img{
+                            @media screen and (max-width: 480px) {    
+                                max-width: 14vw;
+                                max-height: 14vw; 
+                            };
+                            @media screen and (min-width: 481px) and (max-width: 825px) {    
+                                max-width: 10vw;
+                                max-height: 10vw; 
+                            };
+                            max-width: 5vw;
+                            max-height: 5vw;
+                            margin-top: 35px;
+                        }
+                    }
+                }
             }
-            &closed{
-                @media screen and (max-width: 480px) {    
-                    margin-left: 25%;
-                    max-width: 50%;
-                };
-                margin-left: 36.5%;
-                max-width: 27%;
-                max-height: 10%;
-                border-radius: 25px;
+            .contentDiv__features._1{
+                margin-top: 300px;
+            }
+            .contentDiv__sentences._5{
+                margin-top: 300px;
+            }
+            .contentDiv__sentences._7{
+                margin-bottom: 100px;
             }
         }
-
-        .icpLogoDiv{
-            img{
-                @media screen and (max-width: 480px) {    
-                    max-width: 14vw;
-                    max-height: 14vw; 
-                };
-                @media screen and (min-width: 481px) and (max-width: 825px) {    
-                    max-width: 10vw;
-                    max-height: 10vw; 
-                };
-                max-width: 5vw;
-                max-height: 5vw;
-                margin-top: 35px;
-            }
+    }
+    .container_2{
+        width: 10%;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+        height: 100%;
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        h4{
+            font-family: 'Courier New', monospace;
+            writing-mode: vertical-rl;
         }
     }
 }

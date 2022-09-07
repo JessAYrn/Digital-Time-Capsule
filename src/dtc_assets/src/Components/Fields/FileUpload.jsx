@@ -44,38 +44,56 @@ const FileUpload = (props) => {
     let dispatchActionToChangeFileBlob;
     let dispatchActionToChangeFileLoadStatus;
     let fileData;
+    let nftCollectionKey;
+    let fileName;
 
-
-    if(fileIndex === journalState.journal[index].file1.metaData.fileIndex){
+    if(context === UI_CONTEXTS.NFT){
+        fileData = journalState.nftData[index][1];
+        fileName = fileData.id;
+        nftCollectionKey = journalState.nftData[index][0].nftCollectionKey;
+        dispatchActionToChangeFileLoadStatus = types.CHANGE_NFT_FILE_LOAD_STATUS;
+    } else if(fileIndex === journalState.journal[index].file2.metaData.fileIndex){
+        fileData = journalState.journal[index].file2;
+        fileName = fileData.metaData.fileName
+        dispatchActionToChangeFileMetaData = types.CHANGE_FILE2_METADATA;
+        dispatchActionToChangeFileBlob = types.CHANGE_FILE2_BLOB;
+        dispatchActionToChangeFileLoadStatus = types.CHANGE_FILE2_LOAD_STATUS;
+    } else if(fileIndex === journalState.journal[index].file1.metaData.fileIndex){
         fileData = journalState.journal[index].file1;
+        fileName = fileData.metaData.fileName
         dispatchActionToChangeFileMetaData = types.CHANGE_FILE1_METADATA;
         dispatchActionToChangeFileBlob = types.CHANGE_FILE1_BLOB;
         dispatchActionToChangeFileLoadStatus = types.CHANGE_FILE1_LOAD_STATUS;
     }
-    if(fileIndex === journalState.journal[index].file2.metaData.fileIndex){
-        fileData = journalState.journal[index].file2;
-        dispatchActionToChangeFileMetaData = types.CHANGE_FILE2_METADATA;
-        dispatchActionToChangeFileBlob = types.CHANGE_FILE2_BLOB;
-        dispatchActionToChangeFileLoadStatus = types.CHANGE_FILE2_LOAD_STATUS;
-    }
 
-    const retrieveChunk = async (fileId,chunkIndex) => {
-
-        const chunk = await actor.readEntryFileChunk(fileId, chunkIndex);
+    const retrieveChunk = async (chunkIndex) => {
+        let chunk;
+        if(context === UI_CONTEXTS.JOURNAL){
+            chunk = await actor.readEntryFileChunk(fileName, chunkIndex);
+            chunk = chunk.ok;
+        } else if(context === UI_CONTEXTS.NFT){
+            chunk = await actor.getNftChunk(
+                nftCollectionKey,
+                fileData.id,
+                chunkIndex
+            );
+            chunk = chunk.Ok;
+        };
         return chunk
     }; 
 
     useEffect(async () => {
-        if(fileData.metaData.fileName === 'null'){
+        if(fileName === 'null'){
             return
         };
         if(fileData.blob){
+            let metaData_ = (fileData.metaData) ? fileData.metaData :  fileData;
             const fileAsFile = new File(
                 [fileData.blob],
-                fileData.metaData.fileName, 
+                fileName, 
                 {
-                    type: fileData.metaData.fileType, 
-                    lastModified: parseInt(fileData.metaData.lastModified)
+                    type: metaData_.fileType,
+                    lastModified: parseInt(metaData_.lastModified)
                 } 
             );
 
@@ -87,35 +105,38 @@ const FileUpload = (props) => {
                 payload: true,
                 index: index 
             });
-            let index_1 = 0;
+            let index_ = 0;
             let promises = [];
     
-            const fileChunkCounteObj = await actor.readEntryFileSize(fileData.metaData.fileName);
-            const fileChunkCount = parseInt(fileChunkCounteObj.ok);
+            let fileChunkCounteObj;
+            let fileChunkCount;
+            if( context === UI_CONTEXTS.JOURNAL){
+                fileChunkCounteObj = await actor.readEntryFileSize(fileName);
+                fileChunkCount = parseInt(fileChunkCounteObj.ok);
+            } else if(context === UI_CONTEXTS.NFT){
+                fileChunkCount = fileData.nftDataTrieSize;
+            }
             if( fileChunkCount > 0){
-                while(index_1 < fileChunkCount){
-                    promises.push(retrieveChunk(fileData.metaData.fileName, index_1));
-                    index_1 += 1;
+                while(index_ < fileChunkCount){
+                    promises.push(retrieveChunk(index_));
+                    index_ += 1;
                 };
-                const fileBytes = await Promise.all(promises);
-                let fileBytesArray =[];
-                fileBytes.map((blobObj) => {
-                    fileBytesArray.push(blobObj.ok);
-                });
-                fileBytesArray = fileBytesArray.flat(1);
-                const fileArrayBuffer = new Uint8Array(fileBytesArray).buffer;
+                let fileBytes = await Promise.all(promises);
+                fileBytes = fileBytes.flat(1);
+                const fileArrayBuffer = new Uint8Array(fileBytes).buffer;
+                let metaData_ = fileData.metaData ? fileData.metaData : fileData;
                 const fileBlob = new Blob(
                     [fileArrayBuffer], 
                     { 
-                        type: fileData.metaData.fileType 
+                        type: metaData_.fileType 
                     }
                 );
                 const fileAsFile = new File(
                     [fileBlob],
-                    fileData.metaData.fileName, 
+                    fileName, 
                     {
-                        type: fileData.metaData.fileType, 
-                        lastModified: parseInt(fileData.metaData.lastModified)
+                        type: metaData_.fileType, 
+                        lastModified: parseInt(metaData_.lastModified)
                     } 
                 );
                 setConstructedFile(fileAsFile);
@@ -126,7 +147,7 @@ const FileUpload = (props) => {
                 index: index 
             });
         }
-    },[fileData.metaData.fileName]);
+    },[fileName]);
 
     var uploadedFile;
     var obUrl;
@@ -185,7 +206,6 @@ const FileUpload = (props) => {
         };
 
         const results = await Promise.all(promises); 
-        console.log(results);
     };
 
     const getDuration = async (file) => {
@@ -284,7 +304,6 @@ const FileUpload = (props) => {
                                         id={elementId}
                                         alt="image preview" 
                                         className="imagePreview__image" 
-                                        autoPlay="false" 
                                     /> :
                                     (fileType.includes("quicktime") && (typeOfDevice !== DEVICE_TYPES.desktop)) ?
                                     <video 

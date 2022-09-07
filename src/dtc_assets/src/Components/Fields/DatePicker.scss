@@ -3,33 +3,31 @@
     .label{
 
         &__disabled{
-            font-family: 'Julius Sans One', sans-serif;
+            font-family: 'Courier New', monospace;
             font-size: .80rem;
             color: rgb(163, 163, 163);
         }
         &__enabled{
-            font-family: 'Julius Sans One', sans-serif;
+            font-family: 'Courier New', monospace;
             font-size: .95rem;
             color: rgb(0, 0, 0);
         }
     }
     .enabled{
-        font-family: 'Merriweather', serif;
+        font-family: 'Courier New', monospace;
         outline: 0;
         border-width: 0 0 1px;
         border-radius: 10px;
         border-color: rgb(0, 0, 0);
-        box-shadow: 0 5px 16px rgb(0 0 0 / 20%);
         width: 95%;
     }
     
     .disabled{
-        font-family: 'Merriweather', serif;
+        font-family: 'Courier New', monospace;
         outline: 0;
         border-width: 0 0 1px;
         border-radius: 10px;
         color: rgb(163, 163, 163);
-        box-shadow: 0 5px 16px rgb(0 0 0 / 20%);
         width: 95%;
     }
 }

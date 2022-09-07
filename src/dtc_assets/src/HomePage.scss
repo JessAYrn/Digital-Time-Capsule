@@ -1,54 +1,49 @@
 
 .container{
-    height: 48rem;
-
-    .background {
-        background-image: url("../assets/dtc-logo-black.png");
-        background-size: 160px;
-        height:100%;
-
-        .scrollable{
-            height: 100%; /* or any value */
-            overflow-y: auto;
-            width: 100%;
-            background-color: transparent;
-            .transparentDiv__homePage{
+    height: 100vh;
+    .scrollable{
+        height: 100%; /* or any value */
+        overflow-y: auto;
+        width: 100%;
+        background-color: transparent;
+        display: flex;
+        flex-direction: column;
+        .transparentDiv__homePage{
+            @media screen and (max-width: 480px) {
+                padding-left: 1.5%;    
+                width: 100%;        
+            };
+            width: 65%;
+            height: 75%;
+            padding-left: 17.5%;
+            padding-top: 4%;
+            padding-bottom: 4%;
+            .carouselDiv{
                 @media screen and (max-width: 480px) {
-                    padding-left: 1.5%;    
-                    width: 100%;        
+                    width: 408px;
+                    height: 100%;
                 };
-                width: 65%;
-                height: 75%;
-                padding-left: 17.5%;
-                padding-top: 4%;
-                padding-bottom: 4%;
-                .carouselDiv{
+                background-color: black;
+                border: solid black;
+                border-radius: 10px;
+                width: 100%;
+                height: 90%;
+                .videoContainerDiv{
                     @media screen and (max-width: 480px) {
-                        width: 408px;
-                        height: 100%;
+                        padding: 1.5%;    
+                        padding-top: 0
+
                     };
-                    background-color: black;
-                    border: solid black;
-                    border-radius: 10px;
-                    width: 100%;
-                    height: 90%;
-                    .videoContainerDiv{
-                        @media screen and (max-width: 480px) {
-                            padding: 1.5%;    
-                            padding-top: 0
+                    padding-top: .75%;
 
-                        };
-                        padding-top: .75%;
-
-                    }
                 }
             }
         }
-        .carouselContainer{
-            height: 15%;
-            width: 45%;
-            background-color: black;
-        }
+    }
+    .carouselContainer{
+        height: 15%;
+        width: 45%;
+        background-color: black;
     }
 }
 .linkDiv{

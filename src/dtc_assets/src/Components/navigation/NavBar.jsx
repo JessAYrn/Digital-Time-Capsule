@@ -1,5 +1,5 @@
-import React, { useCallback, useContext, useMemo } from 'react';
-import { useNavigate } from "react-router-dom";
+import React, { useCallback, useContext, useState } from 'react';
+import { useNavigate, Link } from "react-router-dom";
 import { NAV_LINKS } from '../../Constants';
 import { UI_CONTEXTS } from '../../Contexts';
 import { AppContext as AccountContext} from '../../Account';
@@ -7,6 +7,13 @@ import { AppContext as HomePageContext} from '../../HomePage';
 import { AppContext as NftContext} from '../../NFTs';
 import { AppContext as JournalContext} from '../../App';
 import { AppContext as WalletContext} from '../../Wallet';
+import * as FaIcons from 'react-icons/fa';
+import * as IoiosIcons from 'react-icons/io';
+import * as CgIcons from 'react-icons/cg';
+import * as AiIcons from 'react-icons/ai';
+import * as RiIcons from 'react-icons/ri';
+import * as ImIcons from 'react-icons/im';
+import { IconContext } from 'react-icons/lib';
 import "./NavBar.scss";
 
 export const NavBar = (props) => {
@@ -44,6 +51,8 @@ export const NavBar = (props) => {
         journalState,
         dispatch
     } = useContext(AppContext);
+
+    const [sideBar, setSideBar] = useState(false);
 
     let navigate = useNavigate();
 
@@ -97,61 +106,77 @@ export const NavBar = (props) => {
 
     const marginPxCount = (pixelCountOfDiv - (pixelCountOfIcon * numberOfButtons)) / (2 * numberOfButtons);
 
-    const notificationIconSrc = unreadNotifications ? 'notification-icon-alert.png' : 'notification-icon.png';
+    const showSideBar = () => {
+        setSideBar(!sideBar)
+    }
+
+    const NotificationIcon = unreadNotifications ?
+        <FaIcons.FaBell onClick={toggleDisplayNotifications}/> : 
+        <FaIcons.FaRegBell onClick={toggleDisplayNotifications}/>;
 
     return(
         <div className={'linkDiv_Journal'}>
-            <nav className={'navBar_Journal'}>
-                <div className="linkContainer">
-                    {
-                        walletLink &&
-                            <div className="walletLinkDiv" style={{marginLeft: marginPxCount + 'px', marginRight: marginPxCount+ 'px'}}>
-                                <button className={"navLink_Journal"} onClick={handleClickWallet}>
-                                    <img src={"wallet-icon.png"} alt="image preview" className="walletIcon_Journal"/> 
-                                </button>
-                            </div>
-                    }
-                    {
-                        journalLink &&
-                            <div className="timeCapsuleLinkDiv" style={{marginLeft: marginPxCount + 'px', marginRight: marginPxCount+ 'px'}}>
-                                <button className={"navLink_Journal"} onClick={handleClickJournal}>
-                                    <img src={"journal-icon.png"} alt="image preview" className="journalIcon_Journal"/> 
-                                </button>
-                            </div>
-                    }
-                    {
-                        nftLink &&
-                            <div className="nftLinkDiv" style={{marginLeft: marginPxCount + 'px', marginRight: marginPxCount+ 'px'}}>
-                                <button className={"navLink_Journal"} onClick={handleClickNFT}>
-                                    <img src={"nft-icon.png"} alt="image preview" className="nftIcon_Journal"/> 
-                                </button>
-                            </div>
-                    }
-                    {
-                        notificationIcon && 
-                            <div className={"notificationIconDiv"} style={{marginLeft: marginPxCount + 'px', marginRight: marginPxCount+ 'px'}}>
-                                <button className={"navLink_Journal"} onClick={toggleDisplayNotifications}>
-                                    <img src={notificationIconSrc}/>
-                                </button>
-                            </div>
-                    }
-                    {
-                        dashboardLink &&
-                            <div className="dashboardIconDiv" style={{marginLeft: marginPxCount + 'px', marginRight: marginPxCount+ 'px'}}>
-                                <button className={"navLink_Journal"} onClick={handleClickDashboard}>
-                                    <img src={"dashboard-icon.png"} alt="image preview" className="dashboardIcon_Journal"/> 
-                                </button>
-                            </div>
-                    }
-                    {
-                        accountLink &&
-                            <div className="accountIconLinkDiv" style={{marginLeft: marginPxCount + 'px', marginRight: marginPxCount+ 'px'}}>
-                                <button className={"navLink_Journal"} onClick={handleClickAccount}>
-                                    <img src={"account-icon.png"} alt="image preview" className="accountIcon_Journal"/> 
-                                </button>
-                            </div>
-                    }
-                </div>
+            <div className={'navbar'}> 
+                <Link to='#' className='menu-bars'>
+                    <IconContext.Provider value={{ color: 'white'}}>
+                        { sideBar ? 
+                            <ImIcons.ImCross onClick={showSideBar}/> : 
+                            <FaIcons.FaBars onClick={showSideBar}/>
+                        }
+                    </IconContext.Provider>
+                </Link>
+            </div>
+            <nav className={`navBar_Journal ${sideBar ? 'active' : ''}`}>
+                <ul className={'unorderedList'}>
+                    <li className={'listItem'} onClick={handleClickWallet}>
+                        <IconContext.Provider value={{ color: 'white'}}>
+                            <IoiosIcons.IoIosWallet/ > 
+                        </IconContext.Provider>
+                        <span>
+                            wallet
+                        </span>
+                    </li>
+                    <li className={'listItem'} onClick={handleClickJournal}>
+                        <IconContext.Provider value={{ color: 'white'}}>
+                            <IoiosIcons.IoIosJournal/> 
+                        </IconContext.Provider>
+                        <span>
+                            journal
+                        </span>
+                    </li>
+                    {/* <li className={'listItem'} onClick={handleClickNFT}>
+                        <IconContext.Provider value={{ color: 'white'}}>
+                            <CgIcons.CgInpicture/> 
+                        </IconContext.Provider>
+                        <span>
+                            nft
+                        </span>
+                    </li> */}
+                    <li className={'listItem'} onClick={toggleDisplayNotifications}>   
+                        <IconContext.Provider value={{ color: 'white'}}>
+                            {NotificationIcon}
+                        </IconContext.Provider>
+                        <span>
+                            notifications
+                        </span>
+                    </li>
+                    <li className={'listItem'} onClick={handleClickDashboard}>
+                        <IconContext.Provider value={{ color: 'white'}}>
+                            <AiIcons.AiFillDashboard/> 
+                        </IconContext.Provider>
+                        <span>
+                            dashboard
+                        </span>
+                    </li>
+                    <li className={'listItem'} onClick={handleClickAccount}>
+                        <IconContext.Provider value={{ color: 'white'}}>
+                            <RiIcons.RiAccountPinCircleFill/> 
+                        </IconContext.Provider>
+                        <span>
+                            account
+                        </span>
+                    </li>
+                </ul>
             </nav>
         </div>
     );
