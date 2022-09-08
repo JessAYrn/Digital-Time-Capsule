@@ -1,25 +1,32 @@
-.container_accountPage{
+.container__accountPage{
+    display: flex;
     height: 100vh;
+    background-size: 100%;
+    background-image: url("../../assets/dtc-logo-black.png");
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    display: flex;
-    background-size: 100%;
-    background-image: url("../../assets/dtc-logo-black.png");
-    .logoDivContainer{
-        width: 100%;
+    overflow-y: auto;
+    .logoDiv{
+        width: 90%;
+        border-radius: 10px;
+        box-shadow: 0 17px 20px rgb(0 0 0 / 38%);
+        background-color: rgb(233, 233, 233);
         display: flex;
-        justify-content: center;
+        flex-direction: column;
         align-items: center;
-        .logoDiv{
-            border-radius: 10px;
-            box-shadow: 0 17px 20px rgb(0 0 0 / 38%);
-            background-color: rgb(233, 233, 233);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            opacity: 0.98;
+        justify-content: center;
+        opacity: 0.98;
+        .updateButtonDiv{
+            padding-bottom: 30px;
         }
     }
+}
+
+.admin{
+    margin-top: 375px;
+}
+
+.admin_{
+    padding-top: 30px;
 }
