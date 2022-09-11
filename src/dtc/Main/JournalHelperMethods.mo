@@ -216,21 +216,16 @@ module{
                         };
                     };
                     case(? entryValue){
-                        let icpBalance = await journal.canisterBalance();
-                        if(icpBalance.e8s < oneICP){
-                            return #err(#WalletBalanceTooLow);
-                        } else {
-                            switch(entryKey){
-                                case null {
-                                    let status = await journal.createEntry(entryValue);
-                                    return status;
-                                };
-                                case (? entryKeyValue){
-                                    let entryStatus = await journal.updateJournalEntry(entryKeyValue.entryKey, entryValue);
-                                    return entryStatus;
-                                };
+                        switch(entryKey){
+                            case null {
+                                let status = await journal.createEntry(entryValue);
+                                return status;
                             };
-                        }
+                            case (? entryKeyValue){
+                                let entryStatus = await journal.updateJournalEntry(entryKeyValue.entryKey, entryValue);
+                                return entryStatus;
+                            };
+                        };
                     };
                 }
             };

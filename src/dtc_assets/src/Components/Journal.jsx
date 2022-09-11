@@ -73,7 +73,7 @@ const Journal = (props) => {
                 containerIndex: index,
                 visibilityFunction: visibilityFunctionDefault
             };
-            const observer = new IntersectionObserver(getIntObserverFunc(props_), {threshold: .1});
+            const observer = new IntersectionObserver(getIntObserverFunc(props_), {threshold: .05});
             observer.observe(container);
         });
     }, [journalState]);

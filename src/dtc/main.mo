@@ -72,6 +72,8 @@ shared (msg) actor class User() = this {
     private var daysInAMonth = 30;
 
     private let heartBeatInterval : Nat64 = 100;
+
+    private let heartBeatInterval_refill : Nat64 = 100000;
     
     private stable var heartBeatCount : Nat64 = 0;
 
@@ -436,6 +438,9 @@ shared (msg) actor class User() = this {
         if(heartBeatCount % heartBeatInterval == 0){
             await updateUsersTxHistory();
         };
+        if(heartBeatCount % heartBeatInterval_refill == 0){
+            let result = await refillCanisterCycles();
+        }
     };
 
     private  func key(x: Principal) : Trie.Key<Principal> {
