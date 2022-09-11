@@ -55,13 +55,14 @@ const ModalContentSubmit = (props) => {
                         Submit Successful
                     </h1>
                     <img className={'checkMarkImg'} src="check-mark.png" alt="Check Mark" />
-                </div> :
+                </div> 
+                :
                 <div className={"submitFailed"}> 
                     <h1>
                         Submit Failed:
                     </h1>
                     <h4>
-                        you must have atleast 1 ICP in your wallet in order to submit an entry
+                        An error occured while attempting to submit your journal entry
                     </h4>
                 </div>
             }

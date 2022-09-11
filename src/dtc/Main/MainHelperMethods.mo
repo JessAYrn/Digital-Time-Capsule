@@ -31,6 +31,7 @@ module{
                 Cycles.add(1_000_000_000_000);
                 let newUserJournal = await Journal.Journal(callerId);
                 let amountAccepted = await newUserJournal.wallet_receive();
+                let settingMainCanister = await newUserJournal.setMainCanisterPrincipalId();
                 let userAccountId = await newUserJournal.canisterAccount();
 
                 let userProfile: MainTypes.Profile = {
