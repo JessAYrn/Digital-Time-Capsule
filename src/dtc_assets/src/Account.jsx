@@ -6,57 +6,24 @@ import { mapApiObjectToFrontEndJournalEntriesObject } from './mappers/journalPag
 import { generateQrCode } from './Components/walletFunctions/GenerateQrCode';
 import { toHexString } from './Utils';
 import LoadScreen from './Components/LoadScreen';
-import LoginPage from './Components/LoginPage';
-import {AuthClient} from "@dfinity/auth-client";
-import { canisterId, createActor } from '../../declarations/dtc/index';
+import LoginPage from './Components/authentication/LoginPage';
 import { UI_CONTEXTS } from './Contexts';
+import { AuthenticateClient, CreateActor } from './Components/authentication/AuthenticationMethods';
 
 export const AppContext = createContext({
-    authClient: {}, 
-    setAuthClient: null,
-    loginAttempted: undefined,
-    setLoginAttempted: null,
     journalState:{},
-    dispatch: () => {},
-    actor: undefined,
-    setActor: null
+    dispatch: () => {}
 });
 
 const AccountPage = (props) => {
 
-    const [actor, setActor] = useState(undefined);
     const [journalState, dispatch] = useReducer(journalReducer, initialState);
-    const [authClient, setAuthClient] = useState(undefined);
-    const [isLoaded, setIsLoaded] = useState(true);
-    const [loginAttempted, setLoginAttempted] = useState(false);
 
     // login function used when Authenticating the client (aka user)
-    useEffect(() => {
-        AuthClient.create().then(async (client) => {
-            setAuthClient(client);
-            await client.isAuthenticated().then((result) => {
-                dispatch({
-                    actionType: types.SET_IS_AUTHENTICATED,
-                    payload: result
-                });
-            });
-            setIsLoaded(true);
-        });
-    }, [isLoaded])
+    useEffect(async () => await (AuthenticateClient(dispatch, types)), [journalState.isLoggingIn]);
 
     //Creating the canisterActor that enables us to be able to call the functions defined on the backend
-    useEffect(() => {
-        if(!authClient) return;
-
-        const identity = authClient.getIdentity();
-        const actor = createActor(canisterId, {
-            agentOptions: {
-                identity
-            }
-        });
-        setActor(actor);
-
-    }, [authClient]);
+    useEffect(async () => await CreateActor(journalState, dispatch, types), [journalState.authClient]);
 
     //clears useLocation().state upon page refresh so that when the user refreshes the page,
     //changes made to this route aren't overrided by the useLocation().state of the previous route.
@@ -76,7 +43,7 @@ const AccountPage = (props) => {
     }
 
     useEffect(async () => {
-        if(!journalState.isAuthenticated || !actor){
+        if(!journalState.isAuthenticated || !journalState.actor){
             return
         };
         if(journalState.reloadStatuses.journalData){
@@ -84,9 +51,9 @@ const AccountPage = (props) => {
                 actionType: types.SET_IS_LOADING,
                 payload: true
             });
-            const journal = await actor.readJournal();
+            const journal = await journalState.actor.readJournal();
             if("err" in journal){
-                actor.create().then((result) => {
+                journalState.actor.create().then((result) => {
                     dispatch({
                         actionType: types.SET_IS_LOADING,
                         payload: false
@@ -128,7 +95,7 @@ const AccountPage = (props) => {
             }
         }
         if(journalState.reloadStatuses.nftData){
-            const nftCollection = await actor.getUserNFTsInfo();
+            const nftCollection = await journalState.actor.getUserNFTsInfo();
             dispatch({
                 payload: nftCollection,
                 actionType: types.SET_NFT_DATA
@@ -141,7 +108,7 @@ const AccountPage = (props) => {
         }
         if(journalState.reloadStatuses.walletData){
             //Load wallet data in background
-            const walletDataFromApi = await actor.readWalletData();
+            const walletDataFromApi = await journalState.actor.readWalletData();
             const address = toHexString(new Uint8Array( [...walletDataFromApi.ok.address]))
             const walletData = { 
                 balance : parseInt(walletDataFromApi.ok.balance.e8s), 
@@ -164,33 +131,23 @@ const AccountPage = (props) => {
                 payload: false,
             });
         }
-    },[actor, authClient]);
+    },[journalState.actor, journalState.authClient]);
 
     return (
         <AppContext.Provider 
             value={{
-                authClient, 
-                setIsLoaded,
-                loginAttempted, 
-                setLoginAttempted, 
                 journalState,
-                dispatch,
-                actor
+                dispatch
             }}
         >
             {
-                isLoaded &&
-                    journalState.isAuthenticated ? 
-                    journalState.isLoading ?
-                        <LoadScreen/> :
-                            <SubcriptionPage/> : 
-                                <LoginPage
-                                    context={UI_CONTEXTS.ACCOUNT_PAGE}
-                                /> 
-            }
-            {
-                !isLoaded && 
-                    <h2> Load Screen </h2>
+                journalState.isAuthenticated ? 
+                journalState.isLoading ?
+                    <LoadScreen/> :
+                        <SubcriptionPage/> : 
+                            <LoginPage
+                                context={UI_CONTEXTS.ACCOUNT_PAGE}
+                            /> 
             }
         </AppContext.Provider>
     )

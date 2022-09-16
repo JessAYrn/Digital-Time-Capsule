@@ -7,7 +7,7 @@ import { getIntObserverFunc, visibilityFunctionDefault } from "./animations/Inte
 
 const LoadScreen = () => {
 
-    const { authClient, setIsLoaded, dispatch, journalState } = useContext(AppContext);
+    const { dispatch, journalState } = useContext(AppContext);
     const [showTop, setShowTop] = useState(true);
     const [showBottom, setShowBottom] = useState(false);
     let seconds = 0;
@@ -46,8 +46,11 @@ const LoadScreen = () => {
                             actionType: types.SET_ENTIRE_REDUX_STATE,
                             payload: initialState
                         });
-                        await authClient.logout();
-                        setIsLoaded(false);
+                        await journalState.authClient.logout();
+                        dispatch({
+                            actionType: types.SET_IS_LOGGING_IN,
+                            payload: false
+                        })
                     }}> Log Out </button>  
                 </div>
             </div> 

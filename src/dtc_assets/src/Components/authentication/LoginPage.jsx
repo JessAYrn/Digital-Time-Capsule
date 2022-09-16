@@ -1,14 +1,15 @@
 import React, {useContext} from "react";
-import { AppContext as JournalContext } from "../App";
-import { AppContext as AccountContext } from "../Account";
-import { AppContext as WalletContex } from "../Wallet";
-import { AppContext as HomePageContext } from "../HomePage";
-import { AppContext as NftPageContext } from "../NFTs";
-import { UI_CONTEXTS } from "../Contexts";
+import { AppContext as JournalContext } from "../../App";
+import { AppContext as AccountContext } from "../../Account";
+import { AppContext as WalletContex } from "../../Wallet";
+import { AppContext as HomePageContext } from "../../HomePage";
+import { AppContext as NftPageContext } from "../../NFTs";
+import { UI_CONTEXTS } from "../../Contexts";
 // import { AppContext as PodcastContext } from "../PodcastPage"
 import "./LoginPage.scss";
-import "../Components/animations/Animation.scss";
-import { getIntObserverFunc, visibilityFunctionLoginPage } from "./animations/IntersectionObserverFunctions";
+import "../../Components/animations/Animation.scss";
+import { getIntObserverFunc, visibilityFunctionLoginPage } from "../animations/IntersectionObserverFunctions";
+import { types } from "../../reducers/journalReducer";
 
 const LoginPage = (props) => {
 
@@ -30,22 +31,22 @@ const LoginPage = (props) => {
     } 
 
     const {    
-            authClient, 
-            setIsLoaded, 
-            loginAttempted, 
-            setLoginAttempted, 
+            journalState,
+            dispatch
         } = useContext(properContext);
 
     const handleClick = async () => {
-
-        setIsLoaded(false);
-
-        if(!loginAttempted){
-            await authClient.login({identityProvider : process.env.II_URL});
-            setLoginAttempted(!loginAttempted);
-        } else {
-            setLoginAttempted(!loginAttempted);
-        }
+        dispatch({
+            actionType: types.SET_IS_LOGGING_IN,
+            payload: false
+        });
+        if(!journalState.loginAttempted){
+            await journalState.authClient.login({identityProvider : process.env.II_URL});
+        };
+        dispatch({
+            actionType: types.SET_LOGIN_ATTEMPTED,
+            payload: !journalState.loginAttempted
+        });
     };
     const containers = document.querySelectorAll(".contentContainer");
     containers.forEach( (container, index) => {
@@ -64,7 +65,7 @@ const LoginPage = (props) => {
                 <div className={'contentContainer animatedLeft _0 login'}>
                     <div className={'contentDiv__loginContent animatedLeft _0'}>
                         <img className={'logoImg animatedLeft _0'}src="dtc-logo-black.png" alt="Logo"/>
-                        <button className={`loginButtonDiv__${(loginAttempted) ? "open" : 'closed'} animatedLeft _0`} onClick={handleClick}> {(loginAttempted) ? 'Open Journal' : 'Log In Using Internet Identity'} </button>
+                        <button className={`loginButtonDiv__${(journalState.loginAttempted) ? "open" : 'closed'} animatedLeft _0`} onClick={handleClick}> {(journalState.loginAttempted) ? 'Open Journal' : 'Log In Using Internet Identity'} </button>
                         <div className={'icpLogoDiv animatedLeft _0'}>
                             <img className={'logoImg'}src="logo.png" alt="Logo"/>
                         </div>

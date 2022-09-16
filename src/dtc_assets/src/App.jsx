@@ -3,62 +3,29 @@ import { createContext, useState, useEffect, useReducer} from 'react';
 import { generateQrCode } from './Components/walletFunctions/GenerateQrCode';
 import { useLocation } from 'react-router-dom';
 import Journal from './Components/Journal';
-import {AuthClient} from "@dfinity/auth-client";
-import LoginPage from './Components/LoginPage';
+import LoginPage from './Components/authentication/LoginPage';
 import { toHexString } from './Utils';
 import { mapApiObjectToFrontEndJournalEntriesObject } from './mappers/journalPageMappers';
 import LoadScreen from './Components/LoadScreen';
-import { canisterId, createActor } from '../../declarations/dtc/index';
 import { UI_CONTEXTS } from './Contexts';
 import journalReducer, {initialState, types} from './reducers/journalReducer';
 import { TEST_DATA_FOR_NOTIFICATIONS } from './testData/notificationsTestData';
+import { AuthenticateClient, CreateActor } from './Components/authentication/AuthenticationMethods';
 
 export const AppContext = createContext({
-    authClient: {}, 
-    setAuthClient: null,
-    loginAttempted: undefined,
-    setLoginAttempted: null,
     journalState:{},
-    dispatch: () => {},
-    actor: undefined,
-    setActor: null
+    dispatch: () => {}
 });
 
 const App = () => {
-    const [actor, setActor] = useState(undefined);
     const [journalState, dispatch] = useReducer(journalReducer, initialState);
-    const [authClient, setAuthClient] = useState(undefined);
-    const [isLoaded, setIsLoaded] = useState(true);
-    const [loginAttempted, setLoginAttempted] = useState(false);
     const [submissionsMade, setSubmissionsMade] = useState(0);
 
     // login function used when Authenticating the client (aka user)
-    useEffect(() => {
-        AuthClient.create().then(async (client) => {
-            setAuthClient(client);
-            await client.isAuthenticated().then((result) => {
-                dispatch({
-                    actionType: types.SET_IS_AUTHENTICATED,
-                    payload: result
-                });
-            });
-            setIsLoaded(true);
-        });
-    }, [isLoaded])
+    useEffect(async () => await AuthenticateClient(dispatch, types), [journalState.isLoggingIn]);
 
     //Creating the canisterActor that enables us to be able to call the functions defined on the backend
-    useEffect(() => {
-        if(!authClient) return;
-
-        const identity = authClient.getIdentity();
-        const actor = createActor(canisterId, {
-            agentOptions: {
-                identity
-            }
-        });
-        setActor(actor);
-
-    }, [authClient]);
+    useEffect(async () => await CreateActor(journalState, dispatch, types), [journalState.authClient]);
 
     // clears useLocation().state upon page refresh so that when the user refreshes the page,
     // changes made to this route aren't overrided by the useLocation().state of the previous route.
@@ -77,7 +44,7 @@ const App = () => {
     }
 
     useEffect(async () => {
-        if(!journalState.isAuthenticated || !actor){
+        if(!journalState.isAuthenticated || !journalState.actor){
             return
         };
         if(journalState.reloadStatuses.journalData){
@@ -85,9 +52,10 @@ const App = () => {
                 actionType: types.SET_IS_LOADING,
                 payload: true
             });
-            const journal = await actor.readJournal();
+            const journal = await journalState.actor.readJournal();
+            console.log(journal);
             if("err" in journal){
-                actor.create().then((result) => {
+                journalState.actor.create().then((result) => {
                     dispatch({
                         actionType: types.SET_IS_LOADING,
                         payload: false
@@ -129,7 +97,7 @@ const App = () => {
             }
         }
         if(journalState.reloadStatuses.nftData){
-            const nftCollection = await actor.getUserNFTsInfo();
+            const nftCollection = await journalState.actor.getUserNFTsInfo();
             dispatch({
                 payload: nftCollection,
                 actionType: types.SET_NFT_DATA
@@ -142,7 +110,7 @@ const App = () => {
         }
         if(journalState.reloadStatuses.walletData){
             //Load wallet data in background
-            const walletDataFromApi = await actor.readWalletData();
+            const walletDataFromApi = await journalState.actor.readWalletData();
             const address = toHexString(new Uint8Array( [...walletDataFromApi.ok.address]))
             const walletData = { 
                 balance : parseInt(walletDataFromApi.ok.balance.e8s), 
@@ -167,18 +135,11 @@ const App = () => {
         }
 
 
-    },[actor, authClient]);
+    },[journalState.actor, journalState.authClient]);
 
     return (
         <AppContext.Provider 
             value={{
-                authClient, 
-                setAuthClient, 
-                actor, 
-                setActor, 
-                setIsLoaded,
-                loginAttempted, 
-                setLoginAttempted, 
                 journalState,
                 dispatch,
                 submissionsMade,
@@ -187,7 +148,6 @@ const App = () => {
         >
 
             {
-                isLoaded &&
                 journalState.isAuthenticated ? 
                 journalState.isLoading ? 
                     <LoadScreen/> :
@@ -195,10 +155,6 @@ const App = () => {
                             <LoginPage
                                 context={UI_CONTEXTS.JOURNAL}
                             /> 
-            }
-            {
-                !isLoaded && 
-                    <h2> Load Screen </h2>
             }
 
         </AppContext.Provider>

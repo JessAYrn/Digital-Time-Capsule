@@ -1,4 +1,4 @@
-import React, { useContext, useState} from 'react';
+import React, { useContext } from 'react';
 import  InputBox  from './Fields/InputBox';
 import { types } from '../reducers/journalReducer'
 import AdminSection from './AdminSection';
@@ -12,15 +12,15 @@ import { UI_CONTEXTS } from '../Contexts';
 
 const SubcriptionPage = (props) => {
 
-    const { actor, journalState, dispatch } = useContext(AppContext);
-    const [isLoading, setIsLoading] = useState(false);
+    const { journalState, dispatch } = useContext(AppContext);
+
     const handleUpdate = async () => {
 
         const profileInput = {
             userName: (journalState.metaData.userName[0]) ? journalState.metaData.userName: [],
             email: (journalState.metaData.email[0]) ? journalState.metaData.email: []
         };
-        let result = await actor.updateProfile(profileInput);
+        let result = await journalState.actor.updateProfile(profileInput);
         // if("err" in result){
         //     showErrorMessage();
         // };

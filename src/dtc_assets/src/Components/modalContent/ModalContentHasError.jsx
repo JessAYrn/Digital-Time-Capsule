@@ -7,7 +7,7 @@ import "./ModalContentHasError.scss";
 import { types } from '../../reducers/journalReducer';
 const FileHasError = (props) => {
 
-    const { actor, journalState, dispatch } = useContext(AppContext);
+    const { journalState, dispatch } = useContext(AppContext);
 
 
     const onClickOk = () => {

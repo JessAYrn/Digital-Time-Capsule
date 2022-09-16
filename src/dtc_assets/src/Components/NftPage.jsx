@@ -7,11 +7,6 @@ import "./NftPage.scss";
 const NftPage = () => {
 
     const {
-        actor, 
-        authClient, 
-        setIsLoaded, 
-        setSubmissionsMade, 
-        submissionsMade,
         journalState,
         dispatch
     } = useContext(AppContext);

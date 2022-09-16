@@ -15,14 +15,14 @@ import { getIntObserverFunc, visibilityFunctionDefault } from "./animations/Inte
 const Journal = (props) => {
 
     const mql = window.matchMedia('(max-width: 650px)');
-    const {actor, authClient, setIsLoaded, journalState, dispatch} = useContext(AppContext);
+    const { journalState, dispatch} = useContext(AppContext);
 
     const handleSubmit = async () => {
         dispatch({
             actionType: types.SET_IS_LOADING,
             payload: true
         });
-        const result = await actor.updateBio({
+        const result = await journalState.actor.updateBio({
             dob: journalState.bio.dob,
             pob: journalState.bio.pob,
             name: journalState.bio.name,
@@ -191,8 +191,11 @@ const Journal = (props) => {
                                                 actionType: types.SET_ENTIRE_REDUX_STATE,
                                                 payload: initialState
                                             });
-                                            await authClient.logout();
-                                            setIsLoaded(false);
+                                            await journalState.authClient.logout();
+                                            dispatch({
+                                                actionType: types.SET_IS_LOGGING_IN,
+                                                payload: false
+                                            });
                                         }} > Log Out </button>  
                                     </div> 
                                 }
@@ -268,12 +271,15 @@ const Journal = (props) => {
                                         ` _${animatedLeftElementIndex++}`}
                                     >
                                         <button className={'loginButton'} onClick={async () => {
-                                            await authClient.logout();
+                                            await journalState.authClient.logout();
                                             dispatch({
                                                 actionType: types.SET_IS_AUTHENTICATED,
                                                 payload: false
                                             });
-                                            setIsLoaded(false);
+                                            dispatch({
+                                                actionType: types.SET_IS_LOGGING_IN,
+                                                payload: false
+                                            });
                                         }} > Log Out </button>  
                                     </div> 
                                 }

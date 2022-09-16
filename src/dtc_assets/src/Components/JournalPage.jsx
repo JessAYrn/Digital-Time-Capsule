@@ -19,7 +19,6 @@ const JournalPage = (props) => {
     } = props;
 
     const { 
-        actor,
         journalState,
         dispatch
     } = useContext(AppContext);
@@ -48,7 +47,7 @@ const JournalPage = (props) => {
 
         const entryKeyAsApiObject = (entryKey >= 0 && entryKey < journalSize - 1 ) ? [{entryKey: entryKey}] : [];
         
-        let result = await actor.updateJournalEntry(
+        let result = await journalState.actor.updateJournalEntry(
             entryKeyAsApiObject,
             entryAsApiObject
         );
@@ -57,6 +56,7 @@ const JournalPage = (props) => {
     }
 
     const handleSubmit = useCallback(async () => {
+        console.log(journalPageData);
         dispatch({
             actionType: types.SET_IS_LOADING,
             payload: true
@@ -65,7 +65,7 @@ const JournalPage = (props) => {
         let result2 = null;
         let result3 = null;
         if(journalPageData.file1.metaData.fileName !== 'null' && !journalPageData.file1.error){
-            await actor.submitFile(
+            await journalState.actor.submitFile(
                 journalPageData.file1.metaData.fileIndex,
                 journalPageData.file1.metaData.fileName
                 ).then(res => {
@@ -76,7 +76,7 @@ const JournalPage = (props) => {
             });
         };
         if(journalPageData.file2.metaData.fileName !== 'null' && !journalPageData.file2.error){
-            await actor.submitFile(
+            await journalState.actor.submitFile(
                 journalPageData.file2.metaData.fileIndex,
                 journalPageData.file2.metaData.fileName
                 ).then(res => {

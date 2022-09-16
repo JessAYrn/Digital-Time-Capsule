@@ -1,26 +1,25 @@
 import React, {useState, useEffect, useContext} from 'react';
 import { AppContext } from '../HomePage';
-import { types } from '../reducers/journalReducer';
 import "./Analytics.scss"
 
 
 const Analytics = () => {
 
     const [jounralCount, setJournalCount] = useState(null);
-    const {actor, authClient, journalState, dispatch, setIsLoaded} = useContext(AppContext);
+    const { journalState, dispatch } = useContext(AppContext);
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect( async () => {
-        if(!actor){
+        if(!journalState.actor){
             return;
         }
         setIsLoading(true);
-        await actor.getProfilesSize().then((profilesTrieSize) => {
+        await journalState.actor.getProfilesSize().then((profilesTrieSize) => {
             setJournalCount(parseInt(profilesTrieSize));
         });
         setIsLoading(false);
 
-    }, [authClient, actor]);
+    }, [journalState.authClient, journalState.actor]);
     return(
         <>
             <div className={'transparentDiv__homePage__journalsCount'}>

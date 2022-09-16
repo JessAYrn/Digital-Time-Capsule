@@ -1,4 +1,4 @@
-import React, {useState, useContext, useEffect} from "react";
+import React, {useState, useContext } from "react";
 import InputBox from "../Fields/InputBox";
 import { AppContext } from "../../Wallet.jsx";
 import { fromHexString } from "../../Utils.jsx";
@@ -19,7 +19,7 @@ const ModalContentOnSend = (props) => {
     const [isLoading, setIsLoading] = useState(false);
     const [showSummary, setShowSummary] = useState(false);
     const [showQrReader, setShowQrReader] = useState(false);
-    const {actor, journalState, dispatch} = useContext(AppContext);
+    const {journalState, dispatch} = useContext(AppContext);
 
 
     const onCancel = () => {
@@ -38,7 +38,7 @@ const ModalContentOnSend = (props) => {
 
     const onSendConfirm = async () => {
         setIsLoading(true);
-        await actor.transferICP(
+        await journalState.actor.transferICP(
             parseInt(toE8s(amountToSend)), fromHexString(recipientAddress)
             ).then((status) => {
                 setResponseFromApi(true);
