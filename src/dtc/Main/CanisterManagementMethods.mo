@@ -233,7 +233,7 @@ module{
                                 canister_id = journalCanisterId;
                             });
                             await ic.start_canister({canister_id = journalCanisterId});
-
+                            let result = await userJournal.setMainCanisterPrincipalId();
                         };
                     };
 

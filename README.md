@@ -161,3 +161,7 @@ dfx canister --network ic update-settings --controller <PRINCIPAL_OF_NEW_CONTROL
 
 sude dfx upgrade
 
+### Change Freezing threshold
+
+dfx canister --network ic  update-settings <canister_id> --freezing-threshold <NEW_THRESHOLD_VALUE>
+
