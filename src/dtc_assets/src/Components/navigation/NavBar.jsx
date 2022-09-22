@@ -9,11 +9,11 @@ import { AppContext as JournalContext} from '../../App';
 import { AppContext as WalletContext} from '../../Wallet';
 import * as FaIcons from 'react-icons/fa';
 import * as IoiosIcons from 'react-icons/io';
-import * as CgIcons from 'react-icons/cg';
 import * as AiIcons from 'react-icons/ai';
 import * as RiIcons from 'react-icons/ri';
 import * as ImIcons from 'react-icons/im';
 import { IconContext } from 'react-icons/lib';
+import { logout } from '../authentication/AuthenticationMethods';
 import "./NavBar.scss";
 
 export const NavBar = (props) => {
@@ -74,10 +74,12 @@ export const NavBar = (props) => {
         };
     });
 
-    //must remove function from state because useNavigate will send a null state if there is a function in the state
+    //must remove function from state because useNavigate will send a null state if there is a function in the state.
+    //the reason this happens is because objects retrieved from useLocation must be serializable and function are not.
     let journalStateWithoutFunction = {
         ...journalState,
-        handlePageSubmitFunction:''
+        handlePageSubmitFunction:'',
+        actor: undefined
     };
 
     const  handleClickDashboard = useCallback(() =>  {
@@ -99,12 +101,6 @@ export const NavBar = (props) => {
     const  handleClickAccount = useCallback(() =>  {
         navigate(NAV_LINKS.account, { replace: false, state: journalStateWithoutFunction });
     },[journalState.reloadStatuses]);
-    
-
-    const pixelCountOfIcon = 33;
-    const pixelCountOfDiv = 330;
-
-    const marginPxCount = (pixelCountOfDiv - (pixelCountOfIcon * numberOfButtons)) / (2 * numberOfButtons);
 
     const showSideBar = () => {
         setSideBar(!sideBar)
@@ -124,7 +120,7 @@ export const NavBar = (props) => {
                             <FaIcons.FaBars onClick={showSideBar}/>
                         }
                     </IconContext.Provider>
-                </Link>
+                </Link>                            
             </div>
             <nav className={`navBar_Journal ${sideBar ? 'active' : ''}`}>
                 <ul className={'unorderedList'}>
@@ -174,6 +170,16 @@ export const NavBar = (props) => {
                         </IconContext.Provider>
                         <span>
                             account
+                        </span>
+                    </li>
+                </ul>
+                <ul className={'unorderedList bottom'}>
+                    <li className={'listItem'} onClick={async () => await logout(journalState, dispatch)}>
+                        <IconContext.Provider value={{ color: 'white'}}>
+                            <RiIcons.RiLogoutBoxRFill/>
+                        </IconContext.Provider>    
+                        <span>
+                            logout
                         </span>
                     </li>
                 </ul>

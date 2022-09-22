@@ -1,15 +1,13 @@
 import React, { createContext, useReducer, useState, useEffect} from 'react';
 import LoginPage from './Components/authentication/LoginPage';
 import { useLocation } from 'react-router-dom';
-import { toHexString } from './Utils';
-import { generateQrCode } from './Components/walletFunctions/GenerateQrCode';
-import { mapApiObjectToFrontEndJournalEntriesObject } from './mappers/journalPageMappers';
 import LoadScreen from './Components/LoadScreen';
 import journalReducer, {initialState, types} from './reducers/journalReducer';
 import { UI_CONTEXTS } from './Contexts';
 import WalletPage from './Components/WalletPage';
 import { testTx } from './testData/Transactions';
 import { AuthenticateClient, CreateActor } from './Components/authentication/AuthenticationMethods';
+import { loadJournalData, loadWalletData, loadTxHistory } from './Components/loadingFunctions';
 
 export const AppContext = createContext({
     journalState:{},
@@ -40,47 +38,22 @@ const WalletApp = () => {
     window.onbeforeunload = window.history.replaceState(null, '');
 
     // login function used when Authenticating the client (aka user)
-    useEffect(async () => await AuthenticateClient(dispatch, types), [journalState.isLoggingIn]);
+    useEffect(async () => await AuthenticateClient(journalState, dispatch, types), [journalState.isLoggingIn]);
 
     //Creating the canisterActor that enables us to be able to call the functions defined on the backend
-    useEffect(async () => await CreateActor(journalState, dispatch, types), [journalState.authClient]);
+    useEffect(async () => await CreateActor(journalState, dispatch, types), [journalState.authClient, journalState.stoicIdentity]);
 
-    const loadTxHistory = async () => {
-        if(!journalState.actor){
-            return;
-        };
-        
-        dispatch({
-            actionType: types.SET_IS_TX_HISTORY_LOADING,
-            payload: true
-        });
+    const [seconds, setSeconds] = useState(0);
+    let delayTimeInSeconds = 3;
 
-        const tx = await journalState.actor.readTransaction();
-        const transactionHistory = tx.ok.sort(function(a,b){
-            const mapKeyOfA = parseInt(a[0]);
-            const mapKeyOfB = parseInt(b[0]);
-            if (mapKeyOfA > mapKeyOfB){
-                return -1
-            } else {
-                return 1
-            }
-        });
-        dispatch({
-            actionType: types.SET_TX_HISTORY_DATA,
-            payload: transactionHistory
-        });
-        dispatch({
-            actionType: types.SET_IS_TX_HISTORY_LOADING,
-            payload: false
-        });
-    };
+    setTimeout(() => {if(seconds <= delayTimeInSeconds) setSeconds(seconds + 1)}, 1000);
+
 
     //Loading Time Capsule Data
     useEffect(async () => {
         if(!journalState.actor){
             return;
         }
-
         if(journalState.reloadStatuses.walletData){
             dispatch({
                 actionType: types.SET_IS_LOADING,
@@ -95,67 +68,30 @@ const WalletApp = () => {
                     payload: false
                 });
             } else {
-                const address = toHexString(new Uint8Array( [...walletDataFromApi.ok.address]))
-                const walletData = { 
-                    balance : parseInt(walletDataFromApi.ok.balance.e8s), 
-                    address: address
-                };
-
-                const qrCodeImgUrl = await generateQrCode(address);
-                dispatch({
-                    actionType: types.SET_WALLET_QR_CODE_IMG_URL,
-                    payload: qrCodeImgUrl
-                });
-                dispatch({
-                    payload: walletData,
-                    actionType: types.SET_WALLET_DATA
-                });
-                dispatch({
-                    actionType: types.SET_WALLET_DATA_RELOAD_STATUS,
-                    payload: false,
-                });
-                dispatch({
-                    actionType: types.SET_IS_LOADING,
-                    payload: false
-                });
-                await loadTxHistory(journalState.walletData.address);
-
-                //Load Journal Data in the background
-                const journal = await journalState.actor.readJournal();
-                const journalEntriesObject = mapApiObjectToFrontEndJournalEntriesObject(journal);
-                let journalEntries = journalEntriesObject.allEntries;
-                let unreadEntries = journalEntriesObject.unreadEntries;
-
-                dispatch({
-                    payload: unreadEntries,
-                    actionType: types.SET_JOURNAL_UNREAD_ENTRIES
-                })
-
-                const journalBio = journal.ok.userJournalData[1];
-                const metaData = {email : journal.ok.email, userName: journal.ok.userName};
-                
-                dispatch({
-                    payload: metaData,
-                    actionType: types.SET_METADATA
-                })
-                dispatch({
-                    payload: journalBio,
-                    actionType: types.SET_BIO
-                })
-                dispatch({
-                    payload: journalEntries,
-                    actionType: types.SET_JOURNAL
-                });
-                dispatch({
-                    actionType: types.SET_JOURNAL_DATA_RELOAD_STATUS,
-                    payload: false,
-                });
-
+                await loadWalletData(walletDataFromApi, dispatch, types);
             }
-        } else {
-            await loadTxHistory(journalState.walletData.address);
-        }
-    },[journalState.actor, journalState.authClient]);
+        }; 
+        if(journalState.reloadStatuses.journalData){
+            //Load Journal Data in the background
+            const journal = await journalState.actor.readJournal();
+            loadJournalData(journal, dispatch, types);
+        };
+        
+        dispatch({
+            actionType: types.SET_IS_LOADING,
+            payload: false
+        });
+    },[journalState.isAuthenticated]);
+
+    useEffect(async () => {
+        if(seconds === delayTimeInSeconds){
+            try{
+                await loadTxHistory(journalState, dispatch, types);
+            } catch {
+                setSeconds(0);
+            }
+        };
+    }, [seconds])
 
     return(
         <AppContext.Provider 

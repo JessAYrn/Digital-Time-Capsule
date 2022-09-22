@@ -149,6 +149,10 @@ dfx identity --network ic get-principal
 
 dfx wallet --network ic send <destination> <amount>
 
+### command for viewing cycles balance 
+
+dfx wallet balance
+
 ### command for viewing the principals of the controllers of the canister
 
 dfx canister --network ic info $(dfx identity --network ic get-wallet)

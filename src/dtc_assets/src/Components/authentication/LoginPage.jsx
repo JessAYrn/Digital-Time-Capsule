@@ -5,6 +5,7 @@ import { AppContext as WalletContex } from "../../Wallet";
 import { AppContext as HomePageContext } from "../../HomePage";
 import { AppContext as NftPageContext } from "../../NFTs";
 import { UI_CONTEXTS } from "../../Contexts";
+import {StoicIdentity} from "ic-stoic-identity";
 // import { AppContext as PodcastContext } from "../PodcastPage"
 import "./LoginPage.scss";
 import "../../Components/animations/Animation.scss";
@@ -33,14 +34,39 @@ const LoginPage = (props) => {
     const {    
             journalState,
             dispatch
-        } = useContext(properContext);
+    } = useContext(properContext);
 
-    const handleClick = async () => {
+    const handleClick_Stoic = async () => {
         dispatch({
             actionType: types.SET_IS_LOGGING_IN,
-            payload: false
+            payload: true
+        });
+
+        if(!journalState.loginAttempted){
+            StoicIdentity.load().then(async identity => {
+                if (identity !== false) StoicIdentity.disconnect();
+                identity = await StoicIdentity.connect();
+                dispatch({
+                    actionType: types.SET_STOIC_IDENTITY,
+                    payload: identity
+                });
+            });
+        };
+        dispatch({
+            actionType: types.SET_LOGIN_ATTEMPTED,
+            payload: !journalState.loginAttempted
+        });
+    };
+
+    const handleClick_II = async () => {
+        dispatch({
+            actionType: types.SET_IS_LOGGING_IN,
+            payload: true
         });
         if(!journalState.loginAttempted){
+            StoicIdentity.load().then(async identity => {
+                if (identity !== false) StoicIdentity.disconnect(); 
+            });
             await journalState.authClient.login({identityProvider : process.env.II_URL});
         };
         dispatch({
@@ -65,7 +91,8 @@ const LoginPage = (props) => {
                 <div className={'contentContainer animatedLeft _0 login'}>
                     <div className={'contentDiv__loginContent animatedLeft _0'}>
                         <img className={'logoImg animatedLeft _0'}src="dtc-logo-black.png" alt="Logo"/>
-                        <button className={`loginButtonDiv__${(journalState.loginAttempted) ? "open" : 'closed'} animatedLeft _0`} onClick={handleClick}> {(journalState.loginAttempted) ? 'Open Journal' : 'Log In Using Internet Identity'} </button>
+                        <button className={`loginButtonDiv__${(journalState.loginAttempted) ? "open" : 'closed'} animatedLeft _0`} onClick={handleClick_II}> {(journalState.loginAttempted) ? 'Open Journal' : 'Log In Using Internet Identity'} </button>
+                        <button className={`loginButtonDiv__${(journalState.loginAttempted) ? "open" : 'closed'} animatedLeft _0`} onClick={handleClick_Stoic}> {(journalState.loginAttempted) ? 'Open Journal' : 'Log In Using Stoic Identity'} </button>
                         <div className={'icpLogoDiv animatedLeft _0'}>
                             <img className={'logoImg'}src="logo.png" alt="Logo"/>
                         </div>

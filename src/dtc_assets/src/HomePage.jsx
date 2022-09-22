@@ -34,10 +34,10 @@ const HomePage = () => {
     }
 
     // login function used when Authenticating the client (aka user)
-    useEffect(async () => await AuthenticateClient(dispatch, types), [journalState.isLoggingIn]);
+    useEffect(async () => await AuthenticateClient(journalState, dispatch, types), [journalState.isLoggingIn]);
 
     //Creating the canisterActor that enables us to be able to call the functions defined on the backend
-    useEffect(async () => await CreateActor(journalState, dispatch, types), [journalState.authClient]);
+    useEffect(async () => await CreateActor(journalState, dispatch, types), [journalState.authClient, journalState.stoicIdentity]);
 
     return (
         <AppContext.Provider 

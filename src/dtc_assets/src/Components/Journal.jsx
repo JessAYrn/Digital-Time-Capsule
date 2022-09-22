@@ -10,6 +10,7 @@ import { milisecondsToNanoSeconds } from "../Utils";
 import { NavBar } from "./navigation/NavBar";
 import { MODALS_TYPES } from "../Constants";
 import { UI_CONTEXTS } from "../Contexts";
+import {StoicIdentity} from "ic-stoic-identity";
 import { getIntObserverFunc, visibilityFunctionDefault } from "./animations/IntersectionObserverFunctions";
 
 const Journal = (props) => {
@@ -157,7 +158,6 @@ const Journal = (props) => {
             payload: {show: !journalState.modalStatus.show, which: MODALS_TYPES.notifications}
         });
     };
-
     return(
         journalState.modalStatus.show ?
         <div className={"container"}>
@@ -185,18 +185,7 @@ const Journal = (props) => {
                             <div className={"section__1"}>
                                 {   mql.matches &&
                                     <div className={'submitAndLoginButtonsDiv animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
-                                        <button className={'addNewEntryButton '} onClick={addJournalPage}> Create New Entry </button>
-                                        <button className={'loginButton '} onClick={async () => {
-                                            dispatch({
-                                                actionType: types.SET_ENTIRE_REDUX_STATE,
-                                                payload: initialState
-                                            });
-                                            await journalState.authClient.logout();
-                                            dispatch({
-                                                actionType: types.SET_IS_LOGGING_IN,
-                                                payload: false
-                                            });
-                                        }} > Log Out </button>  
+                                        <button className={'addNewEntryButton '} onClick={addJournalPage}> Create New Entry </button> 
                                     </div> 
                                 }
                                 <div className={'biography'}>
@@ -265,24 +254,6 @@ const Journal = (props) => {
                                     <img className={'coverPhotoDiv'} src="dtc-logo-black.png" alt="TDTC logo" />
                                 </div>}
                                 {displayJournalTable()}
-                                {   !mql.matches &&
-                                    <div 
-                                        className={'submitAndLoginButtonsDiv contentContainer animatedLeft'+ 
-                                        ` _${animatedLeftElementIndex++}`}
-                                    >
-                                        <button className={'loginButton'} onClick={async () => {
-                                            await journalState.authClient.logout();
-                                            dispatch({
-                                                actionType: types.SET_IS_AUTHENTICATED,
-                                                payload: false
-                                            });
-                                            dispatch({
-                                                actionType: types.SET_IS_LOGGING_IN,
-                                                payload: false
-                                            });
-                                        }} > Log Out </button>  
-                                    </div> 
-                                }
                             </div>
                         </div> 
                     </div> : 
