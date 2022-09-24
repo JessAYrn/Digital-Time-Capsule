@@ -58,7 +58,7 @@ export const loadWalletData = async (walletDataFromApi, dispatch, types ) => {
 
 export const loadTxHistory = async (journalState, dispatch, types, seconds) => {
     if(!journalState.actor){
-        return;
+        throw 'No actor defined'
     };
     dispatch({
         actionType: types.SET_IS_TX_HISTORY_LOADING,

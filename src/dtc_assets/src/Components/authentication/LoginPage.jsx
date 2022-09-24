@@ -1,4 +1,4 @@
-import React, {useContext} from "react";
+import React, {useContext, useState} from "react";
 import { AppContext as JournalContext } from "../../App";
 import { AppContext as AccountContext } from "../../Account";
 import { AppContext as WalletContex } from "../../Wallet";
@@ -10,6 +10,7 @@ import {StoicIdentity} from "ic-stoic-identity";
 import "./LoginPage.scss";
 import "../../Components/animations/Animation.scss";
 import { getIntObserverFunc, visibilityFunctionLoginPage } from "../animations/IntersectionObserverFunctions";
+import { TriggerAuththenticateClientFunction } from "./AuthenticationMethods";
 import { types } from "../../reducers/journalReducer";
 
 const LoginPage = (props) => {
@@ -35,15 +36,14 @@ const LoginPage = (props) => {
             journalState,
             dispatch
     } = useContext(properContext);
+    const [isUsingII, setIsUsingII] = useState(false);
+
+    setTimeout(() => TriggerAuththenticateClientFunction(journalState, dispatch, types, isUsingII), 1500);
 
     const handleClick_Stoic = async () => {
-        dispatch({
-            actionType: types.SET_IS_LOGGING_IN,
-            payload: true
-        });
-
-        if(!journalState.loginAttempted){
-            StoicIdentity.load().then(async identity => {
+        setIsUsingII(false);
+        if(!journalState.isAuthenticated){
+            await StoicIdentity.load().then(async identity => {
                 if (identity !== false) StoicIdentity.disconnect();
                 identity = await StoicIdentity.connect();
                 dispatch({
@@ -53,26 +53,19 @@ const LoginPage = (props) => {
             });
         };
         dispatch({
-            actionType: types.SET_LOGIN_ATTEMPTED,
-            payload: !journalState.loginAttempted
+            actionType: types.SET_LOGIN_ATTEMPTS,
+            payload: journalState.loginAttempts + 1
         });
     };
 
     const handleClick_II = async () => {
-        dispatch({
-            actionType: types.SET_IS_LOGGING_IN,
-            payload: true
-        });
-        if(!journalState.loginAttempted){
-            StoicIdentity.load().then(async identity => {
+        setIsUsingII(true);
+        if(!journalState.isAuthenticated){
+            await StoicIdentity.load().then(async identity => {
                 if (identity !== false) StoicIdentity.disconnect(); 
             });
             await journalState.authClient.login({identityProvider : process.env.II_URL});
         };
-        dispatch({
-            actionType: types.SET_LOGIN_ATTEMPTED,
-            payload: !journalState.loginAttempted
-        });
     };
     const containers = document.querySelectorAll(".contentContainer");
     containers.forEach( (container, index) => {
@@ -91,8 +84,18 @@ const LoginPage = (props) => {
                 <div className={'contentContainer animatedLeft _0 login'}>
                     <div className={'contentDiv__loginContent animatedLeft _0'}>
                         <img className={'logoImg animatedLeft _0'}src="dtc-logo-black.png" alt="Logo"/>
-                        <button className={`loginButtonDiv__${(journalState.loginAttempted) ? "open" : 'closed'} animatedLeft _0`} onClick={handleClick_II}> {(journalState.loginAttempted) ? 'Open Journal' : 'Log In Using Internet Identity'} </button>
-                        <button className={`loginButtonDiv__${(journalState.loginAttempted) ? "open" : 'closed'} animatedLeft _0`} onClick={handleClick_Stoic}> {(journalState.loginAttempted) ? 'Open Journal' : 'Log In Using Stoic Identity'} </button>
+                        <button 
+                            className={`loginButtonDiv__${(journalState.isAuthenticated) ? "open" : 'closed'} animatedLeft _0`} 
+                            onClick={handleClick_II}
+                        > 
+                            {(journalState.isAuthenticated) ? 'Open Journal' : 'Log In Using Internet Identity'} 
+                        </button>
+                        <button 
+                            className={`loginButtonDiv__${(journalState.isAuthenticated) ? "open" : 'closed'} animatedLeft _0`}
+                            onClick={handleClick_Stoic}
+                        > 
+                            {(journalState.isAuthenticated) ? 'Open Journal' : 'Log In Using Stoic Identity'} 
+                        </button>
                         <div className={'icpLogoDiv animatedLeft _0'}>
                             <img className={'logoImg'}src="logo.png" alt="Logo"/>
                         </div>

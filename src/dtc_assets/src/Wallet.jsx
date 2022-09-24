@@ -38,10 +38,20 @@ const WalletApp = () => {
     window.onbeforeunload = window.history.replaceState(null, '');
 
     // login function used when Authenticating the client (aka user)
-    useEffect(async () => await AuthenticateClient(journalState, dispatch, types), [journalState.isLoggingIn]);
+    useEffect(() => {
+        const authenticate = async () => {
+            await AuthenticateClient(journalState, dispatch, types)
+        };
+        authenticate();
+    }, [journalState.loginAttempts]);
 
     //Creating the canisterActor that enables us to be able to call the functions defined on the backend
-    useEffect(async () => await CreateActor(journalState, dispatch, types), [journalState.authClient, journalState.stoicIdentity]);
+    useEffect(() => {
+        const constructActor = async () => {
+            await CreateActor(journalState, dispatch, types)
+        };
+        constructActor();
+    }, [journalState.isAuthenticated]);
 
     const [seconds, setSeconds] = useState(0);
     let delayTimeInSeconds = 3;
@@ -81,7 +91,7 @@ const WalletApp = () => {
             actionType: types.SET_IS_LOADING,
             payload: false
         });
-    },[journalState.isAuthenticated]);
+    },[journalState.actor]);
 
     useEffect(async () => {
         if(seconds === delayTimeInSeconds){

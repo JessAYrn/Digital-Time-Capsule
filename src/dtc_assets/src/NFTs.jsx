@@ -20,10 +20,20 @@ const NFTapp = () => {
     const [journalState, dispatch] = useReducer(journalReducer, initialState);
 
     // login function used when Authenticating the client (aka user)
-    useEffect(async () => await AuthenticateClient(journalState, dispatch, types), [journalState.isLoggingIn]);
+    useEffect(() => {
+        const authenticate = async () => {
+            await AuthenticateClient(journalState, dispatch, types)
+        };
+        authenticate();
+    }, [journalState.loginAttempts]);
 
     //Creating the canisterActor that enables us to be able to call the functions defined on the backend
-    useEffect(async () => await CreateActor(journalState, dispatch, types), [journalState.authClient, journalState.stoicIdentity]);
+    useEffect(() => {
+        const constructActor = async () => {
+            await CreateActor(journalState, dispatch, types)
+        };
+        constructActor();
+    }, [journalState.isAuthenticated]);
 
     //clears useLocation().state upon page refresh so that when the user refreshes the page,
     //changes made to this route aren't overrided by the useLocation().state of the previous route.
@@ -76,7 +86,7 @@ const NFTapp = () => {
             actionType: types.SET_IS_LOADING,
             payload: false
         });
-    },[journalState.isAuthenticated]);
+    },[journalState.actor]);
 
 
 

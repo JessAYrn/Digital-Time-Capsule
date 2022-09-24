@@ -111,11 +111,12 @@ npm install
 // to deploy all canisters at once
 dfx deploy --network ic 
 
+// to deploy back-end canister only
+dfx deploy --network ic dtc
+
 // to deploy front-end canister only
 dfx deploy --network ic dtc_assets
 
-// to deploy back-end canister only
-dfx deploy --network ic dtc
 
 ## Command for minting ICP
 

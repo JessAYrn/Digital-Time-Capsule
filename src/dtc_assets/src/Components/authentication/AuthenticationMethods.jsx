@@ -28,19 +28,19 @@ export const AuthenticateClient = async (journalState, dispatch, actionTypes) =>
             actionType: actionTypes.SET_IS_AUTHENTICATED,
             payload: isAuthenticated
         });
-    }
-    dispatch({
-        actionType: actionTypes.SET_IS_LOGGING_IN,
-        payload: false
-    });
+    };
 };
 
 export const CreateActor = async (journalState, dispatch, actionTypes) => {
     if(!journalState.authClient && !journalState.stoicIdentity) return;
 
     let identity;
-    if(journalState.stoicIdentity) identity = journalState.stoicIdentity;
-    else identity = journalState.authClient.getIdentity();
+    if(journalState.stoicIdentity) {
+        identity = journalState.stoicIdentity;
+    }
+    else {
+        identity = journalState.authClient.getIdentity();
+    }
     const actor_ = createActor(canisterId, {
         agentOptions: {
             identity
@@ -64,4 +64,13 @@ export const logout = async (journalState, dispatch) => {
         actionType: types.SET_IS_LOGGING_IN,
         payload: true
     });
+}
+
+export const TriggerAuththenticateClientFunction = (journalState, dispatch, types, isUsingII) => {
+    if(isUsingII){
+        dispatch({
+            actionType: types.SET_LOGIN_ATTEMPTS,
+            payload: journalState.loginAttempts + 1
+        });
+    }
 }

@@ -5,7 +5,7 @@ export const types = {
     SET_ACTOR: "SET_ACTOR",
     SET_AUTH_CLIENT: "SET_AUTH_CLIENT",
     SET_STOIC_IDENTITY: "SET_STOIC_IDENTITY",
-    SET_LOGIN_ATTEMPTED: "SET_LOGIN_ATTEMPTED",
+    SET_LOGIN_ATTEMPTS: "SET_LOGIN_ATTEMPTS",
     SET_IS_LOGGING_IN: "SET_IS_LOGGING_IN",
     SET_JOURNAL: "SET_JOURNAL",
     SET_JOURNAL_UNREAD_ENTRIES:"SET_JOURNAL_UNREAD_ENTRIES",
@@ -60,7 +60,7 @@ export const types = {
 export const initialState = {
     actor: undefined,
     authClient: undefined,
-    loginAttempted: undefined,
+    loginAttempts: 0,
     stoicIdentity: undefined,
     isLoggingIn: false,
     metaData: {
@@ -175,8 +175,8 @@ const changeValue = (state = initialState, action) => {
         return {
             ...state
         }
-        case types.SET_LOGIN_ATTEMPTED:
-        state.loginAttempted = payload;
+        case types.SET_LOGIN_ATTEMPTS:
+        state.loginAttempts = payload;
         return {
             ...state
         }
