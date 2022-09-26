@@ -39,7 +39,7 @@ const HomePage = () => {
             await AuthenticateClient(journalState, dispatch, types)
         };
         authenticate();
-    }, [journalState.loginAttempts]);
+    }, [journalState.authenticateFunctionCallCount]);
 
     //Creating the canisterActor that enables us to be able to call the functions defined on the backend
     useEffect(() => {
@@ -47,7 +47,7 @@ const HomePage = () => {
             await CreateActor(journalState, dispatch, types)
         };
         constructActor();
-    }, [journalState.isAuthenticated]);
+    }, [journalState.createActorFunctionCallCount]);
 
     return (
         <AppContext.Provider 

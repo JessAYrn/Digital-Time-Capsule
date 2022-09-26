@@ -1,4 +1,4 @@
-import React, {useContext, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import { AppContext as JournalContext } from "../../App";
 import { AppContext as AccountContext } from "../../Account";
 import { AppContext as WalletContex } from "../../Wallet";
@@ -12,6 +12,7 @@ import "../../Components/animations/Animation.scss";
 import { getIntObserverFunc, visibilityFunctionLoginPage } from "../animations/IntersectionObserverFunctions";
 import { TriggerAuththenticateClientFunction } from "./AuthenticationMethods";
 import { types } from "../../reducers/journalReducer";
+import { delay } from "../../Utils";
 
 const LoginPage = (props) => {
 
@@ -37,8 +38,28 @@ const LoginPage = (props) => {
             dispatch
     } = useContext(properContext);
     const [isUsingII, setIsUsingII] = useState(false);
+    const [checks, setChecks] = useState(0);
 
-    setTimeout(() => TriggerAuththenticateClientFunction(journalState, dispatch, types, isUsingII), 1500);
+    useEffect(() => {
+        if(!checks) return;
+        const listenForIIAuthentication = async () => {
+            let client = journalState.authClient;
+            let authenticated_;
+            if(client) authenticated_ = await client.isAuthenticated();
+            if(authenticated_) TriggerAuththenticateClientFunction(journalState, dispatch, types);
+            else setChecks( checks + 1);
+        }
+        const listenForReduxStoreStoicIdToUpdate = async () => {
+            let stoicId = journalState.stoicIdentity;
+            if(stoicId) TriggerAuththenticateClientFunction(journalState, dispatch, types);
+            else{
+                await delay(1000);
+                setChecks( checks + 1);
+            };
+        }
+        if (isUsingII) listenForIIAuthentication();
+        else listenForReduxStoreStoicIdToUpdate();
+    }, [checks]);
 
     const handleClick_Stoic = async () => {
         setIsUsingII(false);
@@ -51,11 +72,8 @@ const LoginPage = (props) => {
                     payload: identity
                 });
             });
+            setChecks(checks + 1);
         };
-        dispatch({
-            actionType: types.SET_LOGIN_ATTEMPTS,
-            payload: journalState.loginAttempts + 1
-        });
     };
 
     const handleClick_II = async () => {
@@ -65,6 +83,7 @@ const LoginPage = (props) => {
                 if (identity !== false) StoicIdentity.disconnect(); 
             });
             await journalState.authClient.login({identityProvider : process.env.II_URL});
+            setChecks(checks + 1);
         };
     };
     const containers = document.querySelectorAll(".contentContainer");

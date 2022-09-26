@@ -1,5 +1,8 @@
 import React, {useState, useEffect, useContext} from 'react';
 import { AppContext } from '../HomePage';
+import { TriggerAuththenticateClientFunction } from './authentication/AuthenticationMethods';
+import { types } from '../reducers/journalReducer';
+import { handleErrorOnFirstLoad } from './loadingFunctions';
 import "./Analytics.scss"
 
 
@@ -14,9 +17,13 @@ const Analytics = () => {
             return;
         }
         setIsLoading(true);
-        await journalState.actor.getProfilesSize().then((profilesTrieSize) => {
-            setJournalCount(parseInt(profilesTrieSize));
-        });
+        let profilesTrieSize = await handleErrorOnFirstLoad(
+            journalState.actor.getProfilesSize, 
+            TriggerAuththenticateClientFunction, 
+            { journalState, dispatch, types }
+        );
+        if(!profilesTrieSize) return;
+        setJournalCount(parseInt(profilesTrieSize));
         setIsLoading(false);
 
     }, [journalState.authClient, journalState.actor]);

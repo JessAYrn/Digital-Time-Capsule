@@ -5,8 +5,8 @@ import { useLocation } from 'react-router-dom';
 import LoadScreen from './Components/LoadScreen';
 import LoginPage from './Components/authentication/LoginPage';
 import { UI_CONTEXTS } from './Contexts';
-import { AuthenticateClient, CreateActor } from './Components/authentication/AuthenticationMethods';
-import { loadJournalData, loadNftData, loadWalletData } from './Components/loadingFunctions';
+import { AuthenticateClient, CreateActor, TriggerAuththenticateClientFunction } from './Components/authentication/AuthenticationMethods';
+import { loadJournalData, loadNftData, loadWalletData, handleErrorOnFirstLoad } from './Components/loadingFunctions';
 
 export const AppContext = createContext({
     journalState:{},
@@ -23,7 +23,7 @@ const AccountPage = (props) => {
             await AuthenticateClient(journalState, dispatch, types)
         };
         authenticate();
-    }, [journalState.loginAttempts]);
+    }, [journalState.authenticateFunctionCallCount]);
 
     //Creating the canisterActor that enables us to be able to call the functions defined on the backend
     useEffect(() => {
@@ -31,7 +31,7 @@ const AccountPage = (props) => {
             await CreateActor(journalState, dispatch, types)
         };
         constructActor();
-    }, [journalState.isAuthenticated]);
+    }, [journalState.createActorFunctionCallCount]);
 
     //clears useLocation().state upon page refresh so that when the user refreshes the page,
     //changes made to this route aren't overrided by the useLocation().state of the previous route.
@@ -59,7 +59,12 @@ const AccountPage = (props) => {
                 actionType: types.SET_IS_LOADING,
                 payload: true
             });
-            const journal = await journalState.actor.readJournal();
+            let journal = await handleErrorOnFirstLoad(
+                journalState.actor.readJournal, 
+                TriggerAuththenticateClientFunction, 
+                { journalState, dispatch, types }
+            );
+            if(!journal) return;
             if("err" in journal){
                 journalState.actor.create().then((result) => {
                     dispatch({
@@ -69,6 +74,10 @@ const AccountPage = (props) => {
                 });
             } else {
                 loadJournalData(journal, dispatch, types);
+                dispatch({
+                    actionType: types.SET_IS_LOADING,
+                    payload: false
+                });
             }
         }
         if(journalState.reloadStatuses.nftData){
@@ -80,10 +89,6 @@ const AccountPage = (props) => {
             const walletDataFromApi = await journalState.actor.readWalletData();
             await loadWalletData(walletDataFromApi, dispatch, types);
         }
-        dispatch({
-            actionType: types.SET_IS_LOADING,
-            payload: false
-        });
     },[journalState.actor]);
 
     return (

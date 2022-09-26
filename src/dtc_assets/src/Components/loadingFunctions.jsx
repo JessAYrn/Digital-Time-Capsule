@@ -1,5 +1,5 @@
 import { mapApiObjectToFrontEndJournalEntriesObject } from "../mappers/journalPageMappers";
-import { toHexString } from "../Utils";
+import { delay, toHexString } from "../Utils";
 import { generateQrCode } from "./walletFunctions/GenerateQrCode";
 export const loadJournalData = (journal, dispatch, types) => {
     const journalEntriesObject = mapApiObjectToFrontEndJournalEntriesObject(journal);
@@ -95,4 +95,21 @@ export const loadNftData = (nftCollection, dispatch, types) => {
         payload: false,
         actionType: types.SET_NFT_DATA_RELOAD_STATUS
     });
+};
+
+export const handleErrorOnFirstLoad = async (fnForLoadingData, fnForRefiringAuthentication, props_ ) => {
+    const {
+        journalState, 
+        dispatch, 
+        types
+    } = props_;
+    try{
+        let journal = await fnForLoadingData();
+        return journal;
+    } catch (e){
+        console.error(e)
+        await delay(5000);
+        fnForRefiringAuthentication(journalState, dispatch, types);
+        return null
+    }
 }

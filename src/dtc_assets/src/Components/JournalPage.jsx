@@ -56,7 +56,6 @@ const JournalPage = (props) => {
     }
 
     const handleSubmit = useCallback(async () => {
-        console.log(journalPageData);
         dispatch({
             actionType: types.SET_IS_LOADING,
             payload: true

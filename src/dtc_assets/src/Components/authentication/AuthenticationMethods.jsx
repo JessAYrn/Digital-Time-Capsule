@@ -4,18 +4,19 @@ import {StoicIdentity} from "ic-stoic-identity";
 import { types, initialState } from "../../reducers/journalReducer";
 
 export const AuthenticateClient = async (journalState, dispatch, actionTypes) => { 
-    let stoicIsConnected;
-    await StoicIdentity.load().then(async identity => {
-        stoicIsConnected = !!identity;
-        dispatch({
-            actionType: types.SET_STOIC_IDENTITY,
-            payload: identity
-        });
-    }); 
-    if(stoicIsConnected){
+    let identity;
+    await StoicIdentity.load().then(identity_ => {
+        if (identity_ !== false) identity = identity_;
+    });
+    let isAuthenticated = !!identity
+    dispatch({
+        actionType: types.SET_STOIC_IDENTITY,
+        payload: identity
+    });
+    if(isAuthenticated){
         dispatch({
             actionType: actionTypes.SET_IS_AUTHENTICATED,
-            payload: true
+            payload: isAuthenticated
         });
     } else {
         const client = await AuthClient.create();
@@ -23,12 +24,13 @@ export const AuthenticateClient = async (journalState, dispatch, actionTypes) =>
             actionType: actionTypes.SET_AUTH_CLIENT,
             payload: client
         });
-        const isAuthenticated = await client.isAuthenticated();
+        isAuthenticated = await client.isAuthenticated();
         dispatch({
             actionType: actionTypes.SET_IS_AUTHENTICATED,
             payload: isAuthenticated
         });
     };
+    if(isAuthenticated) TriggerCreateActorFunction(journalState, dispatch, types);
 };
 
 export const CreateActor = async (journalState, dispatch, actionTypes) => {
@@ -66,11 +68,16 @@ export const logout = async (journalState, dispatch) => {
     });
 }
 
-export const TriggerAuththenticateClientFunction = (journalState, dispatch, types, isUsingII) => {
-    if(isUsingII){
-        dispatch({
-            actionType: types.SET_LOGIN_ATTEMPTS,
-            payload: journalState.loginAttempts + 1
-        });
-    }
+export const TriggerAuththenticateClientFunction = (journalState, dispatch, types) => {
+    dispatch({
+        actionType: types.SET_AUTHENTICATE_FUNCTION_CALL_COUNT,
+        payload: journalState.authenticateFunctionCallCount + 1
+    });
+};
+
+export const TriggerCreateActorFunction = (journalState, dispatch, types) => {
+    dispatch({
+        actionType: types.SET_CREATE_ACTOR_FUNCTION_CALL_COUNT,
+        payload: journalState.createActorFunctionCallCount + 1
+    });
 }

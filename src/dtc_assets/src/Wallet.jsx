@@ -6,8 +6,8 @@ import journalReducer, {initialState, types} from './reducers/journalReducer';
 import { UI_CONTEXTS } from './Contexts';
 import WalletPage from './Components/WalletPage';
 import { testTx } from './testData/Transactions';
-import { AuthenticateClient, CreateActor } from './Components/authentication/AuthenticationMethods';
-import { loadJournalData, loadWalletData, loadTxHistory } from './Components/loadingFunctions';
+import { AuthenticateClient, CreateActor, TriggerAuththenticateClientFunction } from './Components/authentication/AuthenticationMethods';
+import { loadJournalData, loadWalletData, loadTxHistory, handleErrorOnFirstLoad } from './Components/loadingFunctions';
 
 export const AppContext = createContext({
     journalState:{},
@@ -43,7 +43,7 @@ const WalletApp = () => {
             await AuthenticateClient(journalState, dispatch, types)
         };
         authenticate();
-    }, [journalState.loginAttempts]);
+    }, [journalState.authenticateFunctionCallCount]);
 
     //Creating the canisterActor that enables us to be able to call the functions defined on the backend
     useEffect(() => {
@@ -51,7 +51,7 @@ const WalletApp = () => {
             await CreateActor(journalState, dispatch, types)
         };
         constructActor();
-    }, [journalState.isAuthenticated]);
+    }, [journalState.createActorFunctionCallCount]);
 
     const [seconds, setSeconds] = useState(0);
     let delayTimeInSeconds = 3;
@@ -69,7 +69,12 @@ const WalletApp = () => {
                 actionType: types.SET_IS_LOADING,
                 payload: true
             });
-            const walletDataFromApi = await journalState.actor.readWalletData();
+            let walletDataFromApi = await handleErrorOnFirstLoad(
+                journalState.actor.readWalletData, 
+                TriggerAuththenticateClientFunction, 
+                { journalState, dispatch, types }
+            );
+            if(!walletDataFromApi) return;
             if("err" in walletDataFromApi){
                 journalState.actor.create().then((result) => {
                 });
@@ -79,6 +84,10 @@ const WalletApp = () => {
                 });
             } else {
                 await loadWalletData(walletDataFromApi, dispatch, types);
+                dispatch({
+                    actionType: types.SET_IS_LOADING,
+                    payload: false
+                });
             }
         }; 
         if(journalState.reloadStatuses.journalData){
@@ -87,10 +96,6 @@ const WalletApp = () => {
             loadJournalData(journal, dispatch, types);
         };
         
-        dispatch({
-            actionType: types.SET_IS_LOADING,
-            payload: false
-        });
     },[journalState.actor]);
 
     useEffect(async () => {

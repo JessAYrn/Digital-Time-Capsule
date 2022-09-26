@@ -5,8 +5,8 @@ import { useLocation } from 'react-router-dom';
 import LoadScreen from './Components/LoadScreen';
 import NftPage from './Components/NftPage';
 import { UI_CONTEXTS } from './Contexts';
-import { AuthenticateClient, CreateActor } from './Components/authentication/AuthenticationMethods';
-import { loadJournalData, loadNftData, loadWalletData } from './Components/loadingFunctions';
+import { AuthenticateClient, CreateActor, TriggerAuththenticateClientFunction } from './Components/authentication/AuthenticationMethods';
+import { loadJournalData, loadNftData, loadWalletData, handleErrorOnFirstLoad } from './Components/loadingFunctions';
 
 
 export const AppContext = createContext({
@@ -25,7 +25,7 @@ const NFTapp = () => {
             await AuthenticateClient(journalState, dispatch, types)
         };
         authenticate();
-    }, [journalState.loginAttempts]);
+    }, [journalState.authenticateFunctionCallCount]);
 
     //Creating the canisterActor that enables us to be able to call the functions defined on the backend
     useEffect(() => {
@@ -33,7 +33,7 @@ const NFTapp = () => {
             await CreateActor(journalState, dispatch, types)
         };
         constructActor();
-    }, [journalState.isAuthenticated]);
+    }, [journalState.createActorFunctionCallCount]);
 
     //clears useLocation().state upon page refresh so that when the user refreshes the page,
     //changes made to this route aren't overrided by the useLocation().state of the previous route.
@@ -60,7 +60,12 @@ const NFTapp = () => {
                 actionType: types.SET_IS_LOADING,
                 payload: true
             });
-            let nftCollection = await journalState.actor.getUserNFTsInfo();
+            let nftCollection = await handleErrorOnFirstLoad(
+                journalState.actor.getUserNFTsInfo, 
+                TriggerAuththenticateClientFunction, 
+                { journalState, dispatch, types }
+            );
+            if(!nftCollection) return;
             if("err" in nftCollection){
                 journalState.actor.create().then((result) => {
                     dispatch({
@@ -70,6 +75,10 @@ const NFTapp = () => {
                 });
             } else {
                 loadNftData(nftCollection, dispatch, types);
+                dispatch({
+                    actionType: types.SET_IS_LOADING,
+                    payload: false
+                });
             }
         }
         if(journalState.reloadStatuses.walletData){
@@ -81,11 +90,7 @@ const NFTapp = () => {
             //Load Journal Data in the background
             const journal = await journalState.actor.readJournal();
             loadJournalData(journal, dispatch, types);            
-        }
-        dispatch({
-            actionType: types.SET_IS_LOADING,
-            payload: false
-        });
+        };
     },[journalState.actor]);
 
 
