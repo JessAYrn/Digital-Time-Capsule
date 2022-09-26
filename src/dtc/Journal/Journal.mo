@@ -45,7 +45,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         preface = "";
     };
 
-    private var mainCanisterId_ : Text = "null"; 
+    private stable var mainCanisterId_ : Text = "null"; 
 
     private stable var journalEntryIndex : Nat = 0;
 
@@ -214,11 +214,6 @@ shared(msg) actor class Journal (principal : Principal) = this {
         if( Principal.toText(callerId) != mainCanisterId_ ) {
             return #err(#NotAuthorized);
         };
-
-        let icpBalance = await canisterBalance();
-        if(icpBalance.e8s < oneICP){
-            return #err(#WalletBalanceTooLow);
-        }; 
 
         if(Nat.equal(localFileIndex, localFileZeroIndex) == true){
             let (newLocalFile, oldValueForThisKey) = Trie.put(

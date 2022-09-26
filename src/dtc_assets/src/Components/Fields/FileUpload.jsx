@@ -38,7 +38,7 @@ const FileUpload = (props) => {
     if(context === UI_CONTEXTS.NFT){
         AppContext = NftContext
     }
-    const { actor, journalState, dispatch } = useContext(AppContext);
+    const { journalState, dispatch } = useContext(AppContext);
 
     let dispatchActionToChangeFileMetaData;
     let dispatchActionToChangeFileBlob;
@@ -69,10 +69,10 @@ const FileUpload = (props) => {
     const retrieveChunk = async (chunkIndex) => {
         let chunk;
         if(context === UI_CONTEXTS.JOURNAL){
-            chunk = await actor.readEntryFileChunk(fileName, chunkIndex);
+            chunk = await journalState.actor.readEntryFileChunk(fileName, chunkIndex);
             chunk = chunk.ok;
         } else if(context === UI_CONTEXTS.NFT){
-            chunk = await actor.getNftChunk(
+            chunk = await journalState.actor.getNftChunk(
                 nftCollectionKey,
                 fileData.id,
                 chunkIndex
@@ -111,7 +111,7 @@ const FileUpload = (props) => {
             let fileChunkCounteObj;
             let fileChunkCount;
             if( context === UI_CONTEXTS.JOURNAL){
-                fileChunkCounteObj = await actor.readEntryFileSize(fileName);
+                fileChunkCounteObj = await journalState.actor.readEntryFileSize(fileName);
                 fileChunkCount = parseInt(fileChunkCounteObj.ok);
             } else if(context === UI_CONTEXTS.NFT){
                 fileChunkCount = fileData.nftDataTrieSize;
@@ -176,7 +176,7 @@ const FileUpload = (props) => {
     const uploadChunk = async (chunkId, fileChunk) => {
         
         const fileChunkAsBlob = await fileToBlob(fileChunk)
-        return actor.uploadJournalEntryFile(
+        return journalState.actor.uploadJournalEntryFile(
             fileIndex, 
             chunkId, 
             fileChunkAsBlob
@@ -191,7 +191,7 @@ const FileUpload = (props) => {
         let chunk = 0;
 
         let promises = [];
-        const clearResult = await actor.clearLocalFile(fileData.metaData.fileIndex);
+        const clearResult = await journalState.actor.clearLocalFile(fileData.metaData.fileIndex);
         while(chunk < chunks){    
             
             const from = chunk * CHUNK_SIZE;

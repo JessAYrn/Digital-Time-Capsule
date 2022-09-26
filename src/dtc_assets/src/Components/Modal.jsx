@@ -40,7 +40,7 @@ export const Modal = (props) => {
         AppContext = AccountContext;
     }
     
-    const { actor, journalState, dispatch } = useContext(AppContext);
+    const { journalState, dispatch } = useContext(AppContext);
 
     const ChildComponent = useMemo(() => {
 

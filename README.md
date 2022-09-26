@@ -111,11 +111,12 @@ npm install
 // to deploy all canisters at once
 dfx deploy --network ic 
 
+// to deploy back-end canister only
+dfx deploy --network ic dtc
+
 // to deploy front-end canister only
 dfx deploy --network ic dtc_assets
 
-// to deploy back-end canister only
-dfx deploy --network ic dtc
 
 ## Command for minting ICP
 
@@ -149,6 +150,10 @@ dfx identity --network ic get-principal
 
 dfx wallet --network ic send <destination> <amount>
 
+### command for viewing cycles balance 
+
+dfx wallet balance
+
 ### command for viewing the principals of the controllers of the canister
 
 dfx canister --network ic info $(dfx identity --network ic get-wallet)
@@ -160,4 +165,8 @@ dfx canister --network ic update-settings --controller <PRINCIPAL_OF_NEW_CONTROL
 ### Upgrade dfx SDK
 
 sude dfx upgrade
+
+### Change Freezing threshold
+
+dfx canister --network ic  update-settings <canister_id> --freezing-threshold <NEW_THRESHOLD_VALUE>
 

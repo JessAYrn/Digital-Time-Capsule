@@ -28,6 +28,28 @@ module{
        nftCollection: NFT.Dip721NFT;
     };
 
+    public type UserPermissions = {
+        approved: Bool;
+    };
+
+    public type CanisterDataExport = {
+        frontEndPrincipal: Text;
+        backEndPrincipal: Text;
+        lastRecordedBackEndCyclesBalance: Nat;
+        backEndCyclesBurnRatePerDay: Nat;
+        nftOwner: Text;
+        approvedUsers: [(Text, UserPermissions)];
+    };
+
+    public type CanisterData = {
+        frontEndPrincipal: Text;
+        backEndPrincipal: Text;
+        lastRecordedBackEndCyclesBalance: Nat;
+        backEndCyclesBurnRatePerDay: Nat;
+        nftOwner: Text;
+        approvedUsers: Trie.Trie<Text, UserPermissions>;
+    };
+
     public type ProfilesTree = Trie.Trie<Principal, Profile>;
 
     public type NftCollectionsTree = Trie.Trie<Nat, Nft>;

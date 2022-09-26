@@ -17,7 +17,6 @@
         margin-top: -10px;
         transform: translateX(-280px);
         transition: 750ms;
-        width: 331px;
         width: 270px;
         background-color: #060b26;
         height: 100vh;
@@ -54,6 +53,10 @@
                     margin-top: -5px;
                 }
             }
+        }
+        .unorderedList.bottom{
+            position: absolute;
+            bottom: 60px;
         }
     }
 }

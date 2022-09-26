@@ -11,7 +11,7 @@ const AdminSection = (props) => {
     let inputRef = useRef();
 
 
-    const { actor } = useContext(AppContext);
+    const { journalState } = useContext(AppContext);
 
     const postEmail = async (emailAddress) => {
 
@@ -27,7 +27,7 @@ const AdminSection = (props) => {
 
     const handleSubmit = async () => {
 
-        const listOfCapsules = await actor.getEntriesToBeSent();
+        const listOfCapsules = await journalState.actor.getEntriesToBeSent();
         const emailAddressesArray = listOfCapsules.ok.map((profile) => {
             return profile[0];
         });
@@ -42,14 +42,14 @@ const AdminSection = (props) => {
 
     const handleSubmitRefill = async () => {
 
-        const result = await actor.refillCanisterCycles();
+        const result = await journalState.actor.refillCanisterCycles();
     };
 
     const upgradeJournalData = async (principal, wasmModule) => {
 
         console.log(`Upgrading: ${principal.toText()}`);
         const arg = IDL.encode([IDL.Principal], [principal]);
-        await actor.installCode(principal, [...arg], wasmModule);
+        await journalState.actor.installCode(principal, [...arg], wasmModule);
         console.log(`Done: ${principal.toText()}`);
 
     };
@@ -68,7 +68,7 @@ const AdminSection = (props) => {
             maxLimit : 250
         };
         
-        const result = await actor.createNFTCollection(init);
+        const result = await journalState.actor.createNFTCollection(init);
     };
 
     const mint = async () => {
@@ -89,18 +89,18 @@ const AdminSection = (props) => {
             const to = from + CHUNK_SIZE;
             const fileChunk = (to < fileSize -1) ? file.slice(from,to ) : file.slice(from);
             const fileChunkAsBlob = await fileToBlob(fileChunk);
-            promises.push(actor.uploadNftChunk(0, chunk, fileChunkAsBlob));
+            promises.push(journalState.actor.uploadNftChunk(0, chunk, fileChunkAsBlob));
 
             chunk += 1;
         };
         const results = await Promise.all(promises);  
-        const receipt = await actor.mintNft(0, fileType, 1);
+        const receipt = await journalState.actor.mintNft(0, fileType, 1);
     };
 
     const handleUpgrade = async () => {
         let promises =[];
         const wasmModule = await fileToBlob(inputRef.current.files[0]);
-        const principalsList = await actor.getPrincipalsList();
+        const principalsList = await journalState.actor.getPrincipalsList();
         principalsList.forEach((principal) => promises.push(upgradeJournalData(principal, wasmModule)));
         await Promise.all(promises);
     };

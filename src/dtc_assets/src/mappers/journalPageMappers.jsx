@@ -1,6 +1,5 @@
 import { milisecondsToNanoSeconds } from "../Utils";
 import { file1FileIndex, file2FileIndex } from "../Constants";
-import { types } from "../reducers/journalReducer";
 import { TEST_DATA_FOR_NOTIFICATIONS } from "../testData/notificationsTestData";
 
 

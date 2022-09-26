@@ -22,7 +22,6 @@ import Ledger "/Ledger/Ledger";
 import LedgerCandid "/Ledger/LedgerCandid";
 import Journal "Journal/Journal";
 import Account "/Ledger/Account";
-import IC "/IC/ic.types";
 import NFT "/NFT/Dip-721-NFT-Container";
 import DIP721Types "/NFT/dip721.types";
 import JournalTypes "/Journal/journal.types";
@@ -31,6 +30,7 @@ import JournalHelperMethods "/Main/JournalHelperMethods";
 import NftHelperMethods "/Main/NftHelperMethods";
 import MainTypes "/Main/types";
 import TxHelperMethods "/Main/TransactionHelperMethods";
+import CanisterManagementMethods "/Main/CanisterManagementMethods";
 
 shared (msg) actor class User() = this {
 
@@ -49,9 +49,16 @@ shared (msg) actor class User() = this {
 
     private stable var nftCollectionsIndex : Nat = 0;
 
-    private stable var startIndexForBlockChainQuery : Nat64 = 3_512_868;
+    private stable var canisterData : MainTypes.CanisterData = {
+        frontEndPrincipal = "Null";
+        backEndPrincipal = "Null";
+        lastRecordedBackEndCyclesBalance = 0;
+        backEndCyclesBurnRatePerDay = 0;
+        nftOwner = "Null";
+        approvedUsers = Trie.empty();
+    };
 
-    private let ic : IC.Self = actor "aaaaa-aa";
+    private stable var startIndexForBlockChainQuery : Nat64 = 3_512_868;
 
     private var Gas: Nat64 = 10000;
     
@@ -339,96 +346,49 @@ shared (msg) actor class User() = this {
 
     public shared(msg) func getPrincipalsList() : async [Principal] {
         let callerId = msg.caller;
+        let result = await CanisterManagementMethods.getPrincipalsList(callerId, profiles);
+        return result;
+    };
 
-        let profile = Trie.find(
-            profiles,
-            key(callerId),
-            Principal.equal
-        );
+    public shared(msg) func addApprovedUser(principal : Text) : async() {
+        let callerId = msg.caller;  
+        let updatedCanisterData = await CanisterManagementMethods.addApprovedUser(callerId, principal, canisterData);
+        canisterData := updatedCanisterData;
+    };
 
-        switch(profile){
-            case null{
-                throw Error.reject("Unauthorized access. Caller is not an admin.");
-            };
-            case ( ? existingProfile){
+    public shared(msg) func removeApprovedUser(principal: Text) : async() {
+        let callerId = msg.caller;
+        let updatedCanisterData = await CanisterManagementMethods.removeApprovedUser(callerId, principal, canisterData);
+        canisterData := updatedCanisterData;
+    };
 
-                if (Option.get(existingProfile.userName, "null") == "admin") {
+    public shared(msg) func setPrincipalIds( backEndPrincipal : Text, frontEndPrincipal : Text ) : async () {
+        let callerId = msg.caller;
+        let updatedCanisterData = await CanisterManagementMethods.setPrincipalIds(callerId, backEndPrincipal, frontEndPrincipal, canisterData);
+        canisterData := updatedCanisterData;
+    };
 
-                    var index = 0;
-                    let numberOfProfiles = Trie.size(profiles);
-                    let profilesIter = Trie.iter(profiles);
-                    let profilesArray = Iter.toArray(profilesIter);
-                    let ArrayBuffer = Buffer.Buffer<(Principal)>(1);
+    public shared(msg) func getCanisterData() : async MainTypes.CanisterDataExport {
+        let callerId = msg.caller;
+        let canisterDataPackagedForExport = await CanisterManagementMethods.getCanisterData(callerId, canisterData);
+        return canisterDataPackagedForExport;
+    };
 
-                    while(index < numberOfProfiles){
-                        let userProfile = profilesArray[index];
-                        let userPrincipal = userProfile.0;
-                        ArrayBuffer.add(userPrincipal);
-                        index += 1;
-                    };
+    private func setCyclesBurnRate() : async (){
+        let currentCylcesBalance = Cycles.balance();
+        let updatedCanisterData = await CanisterManagementMethods.setCyclesBurnRate(currentCylcesBalance, canisterData);
+        canisterData := updatedCanisterData;
+    };
 
-                    return ArrayBuffer.toArray();
-
-                } else {
-                    throw Error.reject("Unauthorized access. Caller is not an admin.");
-
-                }
-
-            };
-        };
-
+    private func setLastRecordedBackEndCyclesBalance() : async (){
+        let currentCylcesBalance = Cycles.balance();
+        let updatedCanisterData = await CanisterManagementMethods.setLastRecordedBackEndCyclesBalance(currentCylcesBalance, canisterData);
+        canisterData := updatedCanisterData;
     };
 
     public shared(msg) func installCode( userPrincipal: Principal, args: Blob, wasmModule: Blob): async() {
         let callerId = msg.caller;
-
-        let profile = Trie.find(
-            profiles,
-            key(callerId),
-            Principal.equal
-        );
-
-        switch(profile){
-            case null{
-                throw Error.reject("Unauthorized access. Caller is not an admin.");
-            };
-            case ( ? existingProfile){
-
-                if (Option.get(existingProfile.userName, "null") == "admin") {
-
-                    let theUserProfile = Trie.find(
-                        profiles,
-                        key(userPrincipal),
-                        Principal.equal
-                    );
-
-                    switch(theUserProfile){
-                        case null{
-                            throw Error.reject("No profile for this principal.");
-                        };
-                        case ( ? existingProfile){
-                            let userJournal = existingProfile.journal;
-                            let journalCanisterId = Principal.fromActor(userJournal);
-                            await ic.stop_canister({canister_id = journalCanisterId});
-                            await ic.install_code({
-                                arg = args;
-                                wasm_module = wasmModule;
-                                mode = #upgrade;
-                                canister_id = journalCanisterId;
-                            });
-                            await ic.start_canister({canister_id = journalCanisterId});
-
-                        };
-                    };
-
-                } else {
-                    throw Error.reject("Unauthorized access. Caller is not an admin.");
-
-                }
-
-            };
-
-        };
+        let result = await CanisterManagementMethods.installCode(callerId, userPrincipal, args, wasmModule, profiles);
     };
 
     system func heartbeat() : async () {
@@ -449,5 +409,9 @@ shared (msg) actor class User() = this {
 
     private func natKey(x: Nat) : Trie.Key<Nat> {
         return {key = x; hash = Hash.hash(x)}
+    };
+
+    private func textKey(x: Text) : Trie.Key<Text> {
+        return {key = x; hash = Text.hash(x)}
     };
 }

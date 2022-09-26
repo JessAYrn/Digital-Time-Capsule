@@ -1,14 +1,18 @@
-import React, {useContext} from "react";
-import { AppContext as JournalContext } from "../App";
-import { AppContext as AccountContext } from "../Account";
-import { AppContext as WalletContex } from "../Wallet";
-import { AppContext as HomePageContext } from "../HomePage";
-import { AppContext as NftPageContext } from "../NFTs";
-import { UI_CONTEXTS } from "../Contexts";
+import React, {useContext, useEffect, useState} from "react";
+import { AppContext as JournalContext } from "../../App";
+import { AppContext as AccountContext } from "../../Account";
+import { AppContext as WalletContex } from "../../Wallet";
+import { AppContext as HomePageContext } from "../../HomePage";
+import { AppContext as NftPageContext } from "../../NFTs";
+import { UI_CONTEXTS } from "../../Contexts";
+import {StoicIdentity} from "ic-stoic-identity";
 // import { AppContext as PodcastContext } from "../PodcastPage"
 import "./LoginPage.scss";
-import "../Components/animations/Animation.scss";
-import { getIntObserverFunc, visibilityFunctionLoginPage } from "./animations/IntersectionObserverFunctions";
+import "../../Components/animations/Animation.scss";
+import { getIntObserverFunc, visibilityFunctionLoginPage } from "../animations/IntersectionObserverFunctions";
+import { TriggerAuththenticateClientFunction } from "./AuthenticationMethods";
+import { types } from "../../reducers/journalReducer";
+import { delay } from "../../Utils";
 
 const LoginPage = (props) => {
 
@@ -30,22 +34,57 @@ const LoginPage = (props) => {
     } 
 
     const {    
-            authClient, 
-            setIsLoaded, 
-            loginAttempted, 
-            setLoginAttempted, 
-        } = useContext(properContext);
+            journalState,
+            dispatch
+    } = useContext(properContext);
+    const [isUsingII, setIsUsingII] = useState(false);
+    const [checks, setChecks] = useState(0);
 
-    const handleClick = async () => {
-
-        setIsLoaded(false);
-
-        if(!loginAttempted){
-            await authClient.login({identityProvider : process.env.II_URL});
-            setLoginAttempted(!loginAttempted);
-        } else {
-            setLoginAttempted(!loginAttempted);
+    useEffect(() => {
+        if(!checks) return;
+        const listenForIIAuthentication = async () => {
+            let client = journalState.authClient;
+            let authenticated_;
+            if(client) authenticated_ = await client.isAuthenticated();
+            if(authenticated_) TriggerAuththenticateClientFunction(journalState, dispatch, types);
+            else setChecks( checks + 1);
         }
+        const listenForReduxStoreStoicIdToUpdate = async () => {
+            let stoicId = journalState.stoicIdentity;
+            if(stoicId) TriggerAuththenticateClientFunction(journalState, dispatch, types);
+            else{
+                await delay(1000);
+                setChecks( checks + 1);
+            };
+        }
+        if (isUsingII) listenForIIAuthentication();
+        else listenForReduxStoreStoicIdToUpdate();
+    }, [checks]);
+
+    const handleClick_Stoic = async () => {
+        setIsUsingII(false);
+        if(!journalState.isAuthenticated){
+            await StoicIdentity.load().then(async identity => {
+                if (identity !== false) StoicIdentity.disconnect();
+                identity = await StoicIdentity.connect();
+                dispatch({
+                    actionType: types.SET_STOIC_IDENTITY,
+                    payload: identity
+                });
+            });
+            setChecks(checks + 1);
+        };
+    };
+
+    const handleClick_II = async () => {
+        setIsUsingII(true);
+        if(!journalState.isAuthenticated){
+            await StoicIdentity.load().then(async identity => {
+                if (identity !== false) StoicIdentity.disconnect(); 
+            });
+            await journalState.authClient.login({identityProvider : process.env.II_URL});
+            setChecks(checks + 1);
+        };
     };
     const containers = document.querySelectorAll(".contentContainer");
     containers.forEach( (container, index) => {
@@ -64,7 +103,18 @@ const LoginPage = (props) => {
                 <div className={'contentContainer animatedLeft _0 login'}>
                     <div className={'contentDiv__loginContent animatedLeft _0'}>
                         <img className={'logoImg animatedLeft _0'}src="dtc-logo-black.png" alt="Logo"/>
-                        <button className={`loginButtonDiv__${(loginAttempted) ? "open" : 'closed'} animatedLeft _0`} onClick={handleClick}> {(loginAttempted) ? 'Open Journal' : 'Log In Using Internet Identity'} </button>
+                        <button 
+                            className={`loginButtonDiv__${(journalState.isAuthenticated) ? "open" : 'closed'} animatedLeft _0`} 
+                            onClick={handleClick_II}
+                        > 
+                            {(journalState.isAuthenticated) ? 'Open Journal' : 'Log In Using Internet Identity'} 
+                        </button>
+                        <button 
+                            className={`loginButtonDiv__${(journalState.isAuthenticated) ? "open" : 'closed'} animatedLeft _0`}
+                            onClick={handleClick_Stoic}
+                        > 
+                            {(journalState.isAuthenticated) ? 'Open Journal' : 'Log In Using Stoic Identity'} 
+                        </button>
                         <div className={'icpLogoDiv animatedLeft _0'}>
                             <img className={'logoImg'}src="logo.png" alt="Logo"/>
                         </div>

@@ -2,6 +2,12 @@ import { dayInNanoSeconds, MODALS_TYPES } from "../Constants"
 
 export const types = {
     SET_ENTIRE_REDUX_STATE: "SET_ENTIRE_REDUX_STATE",
+    SET_ACTOR: "SET_ACTOR",
+    SET_AUTH_CLIENT: "SET_AUTH_CLIENT",
+    SET_STOIC_IDENTITY: "SET_STOIC_IDENTITY",
+    SET_AUTHENTICATE_FUNCTION_CALL_COUNT: "SET_AUTHENTICATE_FUNCTION_CALL_COUNT",
+    SET_CREATE_ACTOR_FUNCTION_CALL_COUNT: "SET_CREATE_ACTOR_FUNCTION_CALL_COUNT",
+    SET_IS_LOGGING_IN: "SET_IS_LOGGING_IN",
     SET_JOURNAL: "SET_JOURNAL",
     SET_JOURNAL_UNREAD_ENTRIES:"SET_JOURNAL_UNREAD_ENTRIES",
     SET_BIO: "SET_BIO",
@@ -53,6 +59,12 @@ export const types = {
 }
 
 export const initialState = {
+    actor: undefined,
+    authClient: undefined,
+    authenticateFunctionCallCount: 0,
+    createActorFunctionCallCount: 0,
+    stoicIdentity: undefined,
+    isLoggingIn: false,
     metaData: {
         email: [],
         userName: []
@@ -150,6 +162,36 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
+        case types.SET_ACTOR:
+            state.actor = payload;
+            return {
+                ...state
+            }
+        case types.SET_AUTH_CLIENT:
+        state.authClient = payload;
+        return {
+            ...state
+        }
+        case types.SET_STOIC_IDENTITY:
+        state.stoicIdentity = payload;
+        return {
+            ...state
+        }
+        case types.SET_AUTHENTICATE_FUNCTION_CALL_COUNT:
+        state.authenticateFunctionCallCount = payload;
+        return {
+            ...state
+        }
+        case types.SET_CREATE_ACTOR_FUNCTION_CALL_COUNT:
+        state.createActorFunctionCallCount = payload;
+        return {
+            ...state
+        }
+        case types.SET_IS_LOGGING_IN:
+        state.isLoggingIn = payload;
+        return {
+            ...state
+        }
         case types.SET_MODAL_STATUS:
             state.modalStatus = payload;
             return {

@@ -5,7 +5,6 @@ import { Modal } from './Modal';
 import './WalletPage.scss';
 import { shortenHexString } from '../Utils';
 import { e8sInOneICP, MODALS_TYPES } from '../Constants';
-import ModalContentOnSend from './modalContent/ModalContentOnSend';
 import {  RenderQrCode } from './walletFunctions/GenerateQrCode';
 import { copyWalletAddressHelper } from './walletFunctions/CopyWalletAddress';
 import { Transaction } from './walletFunctions/Transaction';
