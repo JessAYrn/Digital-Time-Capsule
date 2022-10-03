@@ -18,7 +18,7 @@ import Int "mo:base/Int";
 import Account "../Ledger/Account";
 import Bool "mo:base/Bool";
 import Option "mo:base/Option";
-import JournalTypes "/journal.types";
+import JournalTypes "journal.types";
 
 shared(msg) actor class Journal (principal : Principal) = this {
     let callerId = msg.caller;

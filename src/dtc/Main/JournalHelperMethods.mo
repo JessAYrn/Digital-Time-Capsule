@@ -1,5 +1,5 @@
 import Trie "mo:base/Trie";
-import Types "/types";
+import Types "types";
 import Iter "mo:base/Iter";
 import Buffer "mo:base/Buffer";
 import Result "mo:base/Result";
@@ -7,7 +7,7 @@ import Account "../Ledger/Account";
 import JournalTypes "../Journal/journal.types";
 import Principal "mo:base/Principal";
 import Cycles "mo:base/ExperimentalCycles";
-import MainTypes "/types";
+import MainTypes "types";
 import Journal "../Journal/Journal";
 import Ledger "../Ledger/Ledger";
 import Blob "mo:base/Blob";

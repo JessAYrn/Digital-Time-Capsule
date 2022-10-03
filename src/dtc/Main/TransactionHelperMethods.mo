@@ -1,4 +1,4 @@
-import MainTypes "/types";
+import MainTypes "types";
 import Account "../Ledger/Account";
 import Result "mo:base/Result";
 import Trie "mo:base/Trie";

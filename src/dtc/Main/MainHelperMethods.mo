@@ -1,21 +1,22 @@
 import Trie "mo:base/Trie";
-import Types "/types";
+import Types "types";
 import Iter "mo:base/Iter";
 import Buffer "mo:base/Buffer";
+import Text "mo:base/Text";
 import Result "mo:base/Result";
 import Account "../Ledger/Account";
 import JournalTypes "../Journal/journal.types";
 import Principal "mo:base/Principal";
 import Cycles "mo:base/ExperimentalCycles";
-import MainTypes "/types";
+import MainTypes "types";
 import Journal "../Journal/Journal";
 
 module{
 
-    public func create (callerId: Principal, profilesTree: MainTypes.ProfilesTree) : 
+    public func create (callerId: Principal, canisterData: MainTypes.CanisterData, profilesTree: MainTypes.ProfilesTree, isLocal: Bool) : 
     async Result.Result<(MainTypes.ProfilesTree, MainTypes.AmountAccepted), JournalTypes.Error> {
 
-        if(Principal.toText(callerId) == "2vxsx-fae"){
+        if(not isLocal and Principal.toText(callerId) == "2vxsx-fae"){
            return #err(#NotAuthorized);
         };
 
@@ -28,29 +29,41 @@ module{
         // If there is an original value, do not update
         switch(existing) {
             case null {
-                Cycles.add(1_000_000_000_000);
-                let newUserJournal = await Journal.Journal(callerId);
-                let amountAccepted = await newUserJournal.wallet_receive();
-                let settingMainCanister = await newUserJournal.setMainCanisterPrincipalId();
-                let userAccountId = await newUserJournal.canisterAccount();
-
-                let userProfile: MainTypes.Profile = {
-                    journal = newUserJournal;
-                    email = null;
-                    userName = null;
-                    id = callerId;
-                    accountId = ?userAccountId;
-
-                };
-
-                let (newProfiles, oldValueForThisKey) = Trie.put(
-                    profilesTree, 
-                    key(callerId),
-                    Principal.equal,
-                    userProfile
+                let approvedPrincipal = Trie.find(
+                    canisterData.approvedUsers,
+                    textKey(Principal.toText(callerId)),
+                    Text.equal
                 );
+                switch(approvedPrincipal){
+                    case null{
+                        return #err(#NotAuthorized)
+                    };
+                    case(? approved){
+                        Cycles.add(1_000_000_000_000);
+                        let newUserJournal = await Journal.Journal(callerId);
+                        let amountAccepted = await newUserJournal.wallet_receive();
+                        let settingMainCanister = await newUserJournal.setMainCanisterPrincipalId();
+                        let userAccountId = await newUserJournal.canisterAccount();
 
-                return #ok((newProfiles, amountAccepted));
+                        let userProfile: MainTypes.Profile = {
+                            journal = newUserJournal;
+                            email = null;
+                            userName = null;
+                            id = callerId;
+                            accountId = ?userAccountId;
+
+                        };
+
+                        let (newProfiles, oldValueForThisKey) = Trie.put(
+                            profilesTree, 
+                            key(callerId),
+                            Principal.equal,
+                            userProfile
+                        );
+
+                        return #ok((newProfiles, amountAccepted));
+                    };
+                };
             };
             case ( ? v) {
                 return #err(#AlreadyExists);
@@ -61,10 +74,6 @@ module{
 
     public func updateProfile(callerId: Principal, profilesTree: MainTypes.ProfilesTree, profile: MainTypes.ProfileInput) : 
     async Result.Result<MainTypes.ProfilesTree, JournalTypes.Error> {
-
-        if(Principal.toText(callerId) == "2vxsx-fae"){
-           return #err(#NotAuthorized);
-        };
 
         let result = Trie.find(
             profilesTree,       //Target Trie
@@ -107,10 +116,6 @@ module{
 
     public func delete(callerId: Principal, profilesTree: MainTypes.ProfilesTree) : 
     async Result.Result<MainTypes.ProfilesTree, JournalTypes.Error> {
-
-        if(Principal.toText(callerId) == "2vxsx-fae"){
-           return #err(#NotAuthorized)
-        };
 
         let result = Trie.find(
             profilesTree,       //Target Trie
@@ -221,5 +226,9 @@ module{
 
     private  func key(x: Principal) : Trie.Key<Principal> {
         return {key = x; hash = Principal.hash(x)};
+    };
+
+    private func textKey(x: Text) : Trie.Key<Text> {
+        return {key = x; hash = Text.hash(x)}
     };
 }

@@ -10,7 +10,6 @@ import { milisecondsToNanoSeconds } from "../Utils";
 import { NavBar } from "./navigation/NavBar";
 import { MODALS_TYPES } from "../Constants";
 import { UI_CONTEXTS } from "../Contexts";
-import {StoicIdentity} from "ic-stoic-identity";
 import { getIntObserverFunc, visibilityFunctionDefault } from "./animations/IntersectionObserverFunctions";
 
 const Journal = (props) => {
@@ -190,7 +189,7 @@ const Journal = (props) => {
                                 }
                                 <div className={'biography'}>
                                     {mql.matches && <div className={'coverPhotoDiv contentContainer animatedLeft '+` _${animatedLeftElementIndex++}`}>
-                                        <img className={""}src="dtc-logo-black.png" alt="TDTC logo" />
+                                        <img className={""}src="../../assets/dtc-logo-black.png" alt="TDTC logo" />
                                     </div>}
                                     <div className={"contentContainer animatedLeft"+` _${animatedLeftElementIndex++}`}>
                                         <InputBox
@@ -251,7 +250,7 @@ const Journal = (props) => {
                                     className={'coverPhotoDiv contentContainer animatedLeft'+ 
                                     ` _${animatedLeftElementIndex++}`}
                                 >
-                                    <img className={'coverPhotoDiv'} src="dtc-logo-black.png" alt="TDTC logo" />
+                                    <img className={'coverPhotoDiv'} src="../../assets/dtc-logo-black.png" alt="TDTC logo" />
                                 </div>}
                                 {displayJournalTable()}
                             </div>

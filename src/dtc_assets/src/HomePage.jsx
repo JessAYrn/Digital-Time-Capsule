@@ -7,6 +7,9 @@ import Analytics from './Components/Analytics';
 import "./HomePage.scss";
 import { NavBar } from './Components/navigation/NavBar';
 import { AuthenticateClient, CreateActor } from './Components/authentication/AuthenticationMethods';
+import { TriggerAuththenticateClientFunction } from './Components/authentication/AuthenticationMethods';
+import { handleErrorOnFirstLoad } from './Components/loadingFunctions';
+import { mapBackendCanisterDataToFrontEndObj } from './mappers/dashboardMapperFunctions';
 
 export const AppContext = createContext({
     journalState: null,
@@ -49,6 +52,38 @@ const HomePage = () => {
         constructActor();
     }, [journalState.createActorFunctionCallCount]);
 
+    useEffect( async () => {
+        if(!journalState.actor){
+            return;
+        }
+        dispatch({
+            actionType: types.SET_IS_LOADING,
+            payload: true
+        })
+        let profilesTrieSize = await handleErrorOnFirstLoad(
+            journalState.actor.getProfilesSize, 
+            TriggerAuththenticateClientFunction, 
+            { journalState, dispatch, types }
+        );
+        if(!profilesTrieSize && parseInt(profilesTrieSize) !== 0) return;
+        let canisterData = await journalState.actor.getCanisterData();
+        canisterData = mapBackendCanisterDataToFrontEndObj(canisterData);
+        dispatch({
+            actionType: types.SET_CANISTER_DATA,
+            payload: canisterData
+        });
+
+        dispatch({
+            actionType: types.SET_JOURNAL_COUNT,
+            payload: parseInt(profilesTrieSize)
+        })
+        dispatch({
+            actionType: types.SET_IS_LOADING,
+            payload: false
+        })
+
+    }, [journalState.actor]);
+
     return (
         <AppContext.Provider 
             value={{
@@ -71,13 +106,6 @@ const HomePage = () => {
                     />
                     <div class={'scrollable'}>
                         <Analytics/>
-                        {/* <div className={'transparentDiv__homePage'}>
-                            <div className={'carouselDiv'}>
-                                <div className={'videoContainerDiv'}>
-                                    <YouTube videoId={'hiB8OCPxF40'} opts={opts} onReady={onready}/>
-                                </div>
-                            </div>
-                        </div> */}
                     </div>
                 </div> : 
                 <LoginPage

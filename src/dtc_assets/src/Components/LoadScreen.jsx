@@ -36,10 +36,10 @@ const LoadScreen = () => {
         <div className="container">
             <div className="loadContentContainer">
                 <div className={`loadContentDiv contentContainer ${showTop ? 'animatedLeft' : ''}`}>
-                    <img src="Loading.gif" alt="Loading Screen" />
+                    <img src="../../assets/Loading.gif" alt="Loading Screen" />
                 </div>
                 <div className={`loadContentDiv contentContainer ${showBottom ? 'animatedLeft' : ''}`}>
-                    <img src="Loading.gif" alt="Loading Screen" />
+                    <img src="../../assets/Loading.gif" alt="Loading Screen" />
                 </div>
                 <div className={`loginButtonDiv contentContainer ${(seconds > 9) ? 'animatedLeft' : ''}`}>
                     <button className={'loginButton'} onClick={async () => {

@@ -17,6 +17,9 @@
         align-items: center;
         justify-content: center;
         opacity: 0.98;
+        .logoImg{
+            max-width: 300px;
+        }
         .updateButtonDiv{
             padding-bottom: 30px;
         }

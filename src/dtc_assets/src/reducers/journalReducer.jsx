@@ -7,9 +7,11 @@ export const types = {
     SET_STOIC_IDENTITY: "SET_STOIC_IDENTITY",
     SET_AUTHENTICATE_FUNCTION_CALL_COUNT: "SET_AUTHENTICATE_FUNCTION_CALL_COUNT",
     SET_CREATE_ACTOR_FUNCTION_CALL_COUNT: "SET_CREATE_ACTOR_FUNCTION_CALL_COUNT",
+    SET_CANISTER_DATA: "SET_CANISTER_DATA",
     SET_IS_LOGGING_IN: "SET_IS_LOGGING_IN",
     SET_JOURNAL: "SET_JOURNAL",
     SET_JOURNAL_UNREAD_ENTRIES:"SET_JOURNAL_UNREAD_ENTRIES",
+    SET_JOURNAL_COUNT: "SET_JOURNAL_COUNT",
     SET_BIO: "SET_BIO",
     SET_METADATA: "SET_METADATA",
     SET_WALLET_DATA: "SET_WALLET_DATA",
@@ -64,6 +66,16 @@ export const initialState = {
     authenticateFunctionCallCount: 0,
     createActorFunctionCallCount: 0,
     stoicIdentity: undefined,
+    journalCount: 0,
+    canisterData: {
+        approvedUsers: [],
+        backEndCyclesBurnRatePerDay: 1,
+        backEndPrincipal: "Null",
+        frontEndPrincipal: "Null",
+        lastRecordedBackEndCyclesBalance: 1,
+        nftOwner: "Null",
+        nftId: "Null"
+    },
     isLoggingIn: false,
     metaData: {
         email: [],
@@ -174,6 +186,16 @@ const changeValue = (state = initialState, action) => {
         }
         case types.SET_STOIC_IDENTITY:
         state.stoicIdentity = payload;
+        return {
+            ...state
+        }
+        case types.SET_JOURNAL_COUNT:
+        state.journalCount = payload;
+        return {
+            ...state
+        }
+        case types.SET_CANISTER_DATA:
+        state.canisterData = payload;
         return {
             ...state
         }

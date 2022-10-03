@@ -75,7 +75,7 @@ const ModalContentOnSend = (props) => {
                         <h2 className={"onSendResponsMessage"}>
                             Payment Successfully Sent
                         </h2>
-                        <img className={'checkMarkImg'} src="check-mark.png" alt="Check Mark" />
+                        <img className={'checkMarkImg'} src="../../../assets/check-mark.png" alt="Check Mark" />
                     </>
                         :
                         <h2>
@@ -149,7 +149,7 @@ const ModalContentOnSend = (props) => {
         <React.Fragment>
             { isLoading ?
                 <>
-                    <img className={'loadGif'} src="Loading.gif" alt="Load Gif" />
+                    <img className={'loadGif'} src="../../../assets/Loading.gif" alt="Load Gif" />
                 </> :
                 <>
                     { responseFromApi ? 

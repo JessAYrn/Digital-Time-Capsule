@@ -1,6 +1,7 @@
 import Debug "mo:base/Debug";
 import Error "mo:base/Error";
 import Nat64 "mo:base/Nat64";
+import Nat32 "mo:base/Nat32";
 import Nat8 "mo:base/Nat8";
 import Trie "mo:base/Trie";
 import HashMap "mo:base/HashMap";
@@ -18,19 +19,20 @@ import Int "mo:base/Int";
 import Text "mo:base/Text";
 import Bool "mo:base/Bool";
 import Option "mo:base/Option";
-import Ledger "/Ledger/Ledger";
-import LedgerCandid "/Ledger/LedgerCandid";
+import Ledger "Ledger/Ledger";
+import LedgerCandid "Ledger/LedgerCandid";
 import Journal "Journal/Journal";
-import Account "/Ledger/Account";
-import NFT "/NFT/Dip-721-NFT-Container";
-import DIP721Types "/NFT/dip721.types";
-import JournalTypes "/Journal/journal.types";
-import MainMethods "/Main/MainHelperMethods";
-import JournalHelperMethods "/Main/JournalHelperMethods";
-import NftHelperMethods "/Main/NftHelperMethods";
-import MainTypes "/Main/types";
-import TxHelperMethods "/Main/TransactionHelperMethods";
-import CanisterManagementMethods "/Main/CanisterManagementMethods";
+import Account "Ledger/Account";
+import NFT "NFT/Dip-721-NFT-Container";
+import DIP721Types "NFT/dip721.types";
+import JournalTypes "Journal/journal.types";
+import MainMethods "Main/MainHelperMethods";
+import JournalHelperMethods "Main/JournalHelperMethods";
+import NftHelperMethods "Main/NftHelperMethods";
+import MainTypes "Main/types";
+import TxHelperMethods "Main/TransactionHelperMethods";
+import CanisterManagementMethods "Main/CanisterManagementMethods";
+import NftCollection "NftCollection/NftCollection";
 
 shared (msg) actor class User() = this {
 
@@ -42,6 +44,8 @@ shared (msg) actor class User() = this {
     //profiles is the name of the variable
     //Trie.Trie is the data type. a Trie is a key/value map where Nat is the key and Profile is the data type
     // and it has been initialized as empty. hence the Trie.empty()
+
+    private var isLocal : Bool = false;
 
     private stable var profiles : Trie.Trie<Principal, MainTypes.Profile> = Trie.empty();
 
@@ -55,6 +59,8 @@ shared (msg) actor class User() = this {
         lastRecordedBackEndCyclesBalance = 0;
         backEndCyclesBurnRatePerDay = 0;
         nftOwner = "Null";
+        nftId = -1;
+        lastRecordedTime = 0;
         approvedUsers = Trie.empty();
     };
 
@@ -67,6 +73,8 @@ shared (msg) actor class User() = this {
     private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
 
     private let ledgerC : LedgerCandid.Interface = actor(LedgerCandid.CANISTER_ID);
+
+    private let nftCollection : NftCollection.Interface = actor(NftCollection.CANISTER_ID);
 
     private var balance = Cycles.balance();
 
@@ -112,7 +120,7 @@ shared (msg) actor class User() = this {
     //Result.Result returns a varient type that has attributes from success case(the first input) and from your error case (your second input). both inputs must be varient types. () is a unit type.
     public shared(msg) func create () : async Result.Result<MainTypes.AmountAccepted, JournalTypes.Error> {
         let callerId = msg.caller;
-        let result = await MainMethods.create(callerId, profiles);
+        let result = await MainMethods.create(callerId, canisterData, profiles, isLocal);
         switch(result){
             case(#ok(r)){
                 let newProfilesTree = r.0;
@@ -351,38 +359,45 @@ shared (msg) actor class User() = this {
     };
 
     public shared(msg) func addApprovedUser(principal : Text) : async() {
-        let callerId = msg.caller;  
-        let updatedCanisterData = await CanisterManagementMethods.addApprovedUser(callerId, principal, canisterData);
+        let callerId = msg.caller;
+        let principalAsBlob = Principal.fromText(principal);
+        let updatedCanisterData = await CanisterManagementMethods.addApprovedUser(callerId, principalAsBlob, canisterData);
         canisterData := updatedCanisterData;
     };
 
     public shared(msg) func removeApprovedUser(principal: Text) : async() {
         let callerId = msg.caller;
-        let updatedCanisterData = await CanisterManagementMethods.removeApprovedUser(callerId, principal, canisterData);
+        let principalAsBlob = Principal.fromText(principal);
+        let updatedCanisterData = await CanisterManagementMethods.removeApprovedUser(callerId, principalAsBlob, canisterData);
         canisterData := updatedCanisterData;
     };
 
-    public shared(msg) func setPrincipalIds( backEndPrincipal : Text, frontEndPrincipal : Text ) : async () {
-        let callerId = msg.caller;
-        let updatedCanisterData = await CanisterManagementMethods.setPrincipalIds(callerId, backEndPrincipal, frontEndPrincipal, canisterData);
-        canisterData := updatedCanisterData;
+    public shared(msg) func setPrincipalIds(frontEndPrincipal : Text, nftId: Int ) : async Result.Result<(), JournalTypes.Error> {
+        let backEndPrincipalAsPrincipal = Principal.fromActor(this);
+        let backEndPrincipal = Principal.toText(backEndPrincipalAsPrincipal);
+        let updatedCanisterData = await CanisterManagementMethods.setPrincipalIds( backEndPrincipal, frontEndPrincipal, nftId, canisterData);
+        if(canisterData.frontEndPrincipal == "Null" or canisterData.nftId == -1){
+            canisterData := updatedCanisterData;
+        };
+        #ok(());
     };
 
     public shared(msg) func getCanisterData() : async MainTypes.CanisterDataExport {
         let callerId = msg.caller;
-        let canisterDataPackagedForExport = await CanisterManagementMethods.getCanisterData(callerId, canisterData);
+        let canisterDataPackagedForExport = await CanisterManagementMethods.getCanisterData(callerId, canisterData, profiles);
         return canisterDataPackagedForExport;
     };
 
-    private func setCyclesBurnRate() : async (){
+    private func setCyclesBurnRate() : (){
         let currentCylcesBalance = Cycles.balance();
-        let updatedCanisterData = await CanisterManagementMethods.setCyclesBurnRate(currentCylcesBalance, canisterData);
+        let updatedCanisterData = CanisterManagementMethods.setCyclesBurnRate(currentCylcesBalance, canisterData);
         canisterData := updatedCanisterData;
     };
 
-    private func setLastRecordedBackEndCyclesBalance() : async (){
+    private func setLastRecordedBackEndCyclesBalance() : (){
         let currentCylcesBalance = Cycles.balance();
-        let updatedCanisterData = await CanisterManagementMethods.setLastRecordedBackEndCyclesBalance(currentCylcesBalance, canisterData);
+        let currentTime = Time.now();
+        let updatedCanisterData = CanisterManagementMethods.setLastRecordedBackEndCyclesBalance(currentCylcesBalance, currentTime, canisterData);
         canisterData := updatedCanisterData;
     };
 
@@ -390,10 +405,63 @@ shared (msg) actor class User() = this {
         let callerId = msg.caller;
         let result = await CanisterManagementMethods.installCode(callerId, userPrincipal, args, wasmModule, profiles);
     };
+    
+    private func verifyOwnership( principal: Principal ): async Bool {
+        let accountId = Account.accountIdentifier(principal, Account.defaultSubaccount());
+        let accountIdAsText = Text.decodeUtf8(accountId);
+        switch(accountIdAsText){
+            case null{
+                return false;
+            };
+            case(? aidAsText){
+                let tokens_ext_result = await nftCollection.tokens_ext(aidAsText);
+                switch(tokens_ext_result){
+                    case(#ok(tokensOwned)){
+                        var index = 0;
+                        let tokensOwnedIter = Iter.fromArray(tokensOwned);
+                        let numberOfTokensOwned = Iter.size(tokensOwnedIter);
+                        while(index < numberOfTokensOwned){
+                            let tokenData = tokensOwned[index];
+                            let tokenId = tokenData.0;
+                            let tokenIdAsNat = Nat32.toNat(tokenId);
+                            if(tokenIdAsNat == canisterData.nftId){
+                                return true;
+                            };
+                            index += 1;
+                        };
+                        return false;
+                    };
+                    case(#err(e)){
+                        return false;
+                    };
+                };
+            };
+        };
+    };
+
+    public shared(msg) func registerOwner() : async  Result.Result<(), JournalTypes.Error>{
+        let callerId = msg.caller;
+        var shouldAdd = false;
+        if(isLocal == true){
+            shouldAdd := true;
+        } else {
+            shouldAdd := await verifyOwnership(callerId);
+        };
+        if(shouldAdd == true){
+            let canisterData_withOwner = CanisterManagementMethods.updateOwner(callerId, canisterData);
+            let updatedCanisterData = await CanisterManagementMethods.addApprovedUser(callerId, callerId, canisterData_withOwner);
+            canisterData := updatedCanisterData;
+        };
+        #ok(());
+    };
 
     system func heartbeat() : async () {
 
         heartBeatCount += 1;
+        if(Time.now() - canisterData.lastRecordedTime > nanosecondsInADay){
+            setCyclesBurnRate();
+            setLastRecordedBackEndCyclesBalance();
+        };
 
         if(heartBeatCount % heartBeatInterval == 0){
             await updateUsersTxHistory();

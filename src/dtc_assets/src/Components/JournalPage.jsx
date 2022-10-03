@@ -145,8 +145,8 @@ const JournalPage = (props) => {
             <LoadScreen/> : 
                 <div className={"journalPageContainer"}>
                     <div className={"logoDiv"}>
-                        <img className={'backButtonImg'} src="back-icon.png" alt="Back Button" onClick={(e) => handleClosePage(e)}/>
-                        <img className={'logoImg'}src="dtc-logo-black.png" alt="Logo" />
+                        <img className={'backButtonImg'} src="../../assets/back-icon.png" alt="Back Button" onClick={(e) => handleClosePage(e)}/>
+                        <img className={'logoImg'}src="../../assets/dtc-logo-black.png" alt="Logo" />
                     </div>
                     <Slider
                         min={0}

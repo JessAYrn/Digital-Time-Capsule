@@ -1,5 +1,5 @@
 import Trie "mo:base/Trie";
-import Types "/types";
+import Types "types";
 import Iter "mo:base/Iter";
 import Buffer "mo:base/Buffer";
 import Result "mo:base/Result";
@@ -7,7 +7,7 @@ import Account "../Ledger/Account";
 import JournalTypes "../Journal/journal.types";
 import Principal "mo:base/Principal";
 import Cycles "mo:base/ExperimentalCycles";
-import MainTypes "/types";
+import MainTypes "types";
 import Journal "../Journal/Journal";
 import Ledger "../Ledger/Ledger";
 import Blob "mo:base/Blob";
@@ -62,7 +62,23 @@ module{
         };
     };
 
-    public func addApprovedUser(callerId : Principal, principal: Text, canisterData : MainTypes.CanisterData) : async MainTypes.CanisterData {
+    public func updateOwner(ownerPrincipal: Principal, canisterData: MainTypes.CanisterData) : MainTypes.CanisterData {
+        let callerIdAsText = Principal.toText(ownerPrincipal);
+        let newCanisterData = {
+            frontEndPrincipal = canisterData.frontEndPrincipal;
+            backEndPrincipal = canisterData.backEndPrincipal;
+            lastRecordedBackEndCyclesBalance = canisterData.lastRecordedBackEndCyclesBalance;
+            backEndCyclesBurnRatePerDay = canisterData.backEndCyclesBurnRatePerDay;
+            nftOwner = callerIdAsText;
+            nftId = canisterData.nftId;
+            lastRecordedTime = canisterData.lastRecordedTime;
+            approvedUsers = canisterData.approvedUsers;
+        };
+        return newCanisterData;
+
+    };
+
+    public func addApprovedUser(callerId : Principal, principal: Principal, canisterData : MainTypes.CanisterData) : async MainTypes.CanisterData {
         let callerIdAsText = Principal.toText(callerId);
         if(callerIdAsText != canisterData.nftOwner){
             throw Error.reject("Unauthorized access.");
@@ -72,9 +88,10 @@ module{
         let permissions : MainTypes.UserPermissions = {
             approved = true;
         };
+        let principalAsText = Principal.toText(principal);
         let (newApprovedUsersTrie, oldValueForThisKey) = Trie.put(
             approvedUsersTrie,
-            textKey(principal),
+            textKey(principalAsText),
             Text.equal,
             permissions
         );
@@ -85,13 +102,15 @@ module{
             lastRecordedBackEndCyclesBalance = canisterData.lastRecordedBackEndCyclesBalance;
             backEndCyclesBurnRatePerDay = canisterData.backEndCyclesBurnRatePerDay;
             nftOwner = canisterData.nftOwner;
+            nftId = canisterData.nftId;
+            lastRecordedTime = canisterData.lastRecordedTime;
             approvedUsers = newApprovedUsersTrie;
         };
 
         return updatedCanisterData;
     };
 
-    public func removeApprovedUser(callerId: Principal, principal: Text, canisterData : MainTypes.CanisterData) : async MainTypes.CanisterData {
+    public func removeApprovedUser(callerId: Principal, principal: Principal, canisterData : MainTypes.CanisterData) : async MainTypes.CanisterData {
         let callerIdAsText = Principal.toText(callerId);
         if(callerIdAsText != canisterData.nftOwner){
             throw Error.reject("Unauthorized access.");
@@ -99,9 +118,10 @@ module{
 
         let approvedUsersTrie = canisterData.approvedUsers;
 
+        let principalAsText = Principal.toText(principal);
         let (newApprovedUsersTrie, oldValueForThisKey) = Trie.remove(
             approvedUsersTrie,
-            textKey(principal),
+            textKey(principalAsText),
             Text.equal
         );
 
@@ -111,20 +131,16 @@ module{
             lastRecordedBackEndCyclesBalance = canisterData.lastRecordedBackEndCyclesBalance;
             backEndCyclesBurnRatePerDay = canisterData.backEndCyclesBurnRatePerDay;
             nftOwner = canisterData.nftOwner;
+            nftId = canisterData.nftId;
+            lastRecordedTime = canisterData.lastRecordedTime;
             approvedUsers = newApprovedUsersTrie;
         };
 
         return updatedCanisterData;
     };
 
-    public func setPrincipalIds( callerId: Principal, backEndPrincipal : Text, frontEndPrincipal : Text,  canisterData : MainTypes.CanisterData) 
+    public func setPrincipalIds( backEndPrincipal : Text, frontEndPrincipal : Text, nftId : Int,   canisterData : MainTypes.CanisterData) 
     : async MainTypes.CanisterData {
-
-        let callerIdAsText = Principal.toText(callerId);
-
-        if(callerIdAsText != canisterData.nftOwner){
-            throw Error.reject("Unauthorized access");
-        };
 
         let updatedCanisterData = {
             frontEndPrincipal = frontEndPrincipal;
@@ -132,36 +148,47 @@ module{
             lastRecordedBackEndCyclesBalance = canisterData.lastRecordedBackEndCyclesBalance;
             backEndCyclesBurnRatePerDay = canisterData.backEndCyclesBurnRatePerDay;
             nftOwner = canisterData.nftOwner;
+            nftId = nftId;
+            lastRecordedTime = canisterData.lastRecordedTime;
             approvedUsers = canisterData.approvedUsers;
         };
 
         return updatedCanisterData;
     };
 
-    public func getCanisterData(callerId: Principal, canisterData: MainTypes.CanisterData) : async MainTypes.CanisterDataExport {
-        let callerIdAsText = Principal.toText(callerId);
+    public func getCanisterData(callerId: Principal, canisterData: MainTypes.CanisterData, profiles : MainTypes.ProfilesTree) 
+    : async MainTypes.CanisterDataExport {
+        let profile = Trie.find(
+            profiles,
+            key(callerId),
+            Principal.equal
+        );
+        switch(profile){
+            case null{
+                throw Error.reject("Unauthorized.");
+            };
+            case ( ? existingProfile){
+                let approvedUsersList = canisterData.approvedUsers;
+                let approvedUsersListAsIter = Trie.iter(approvedUsersList);
+                let approvedUsersListAsArray = Iter.toArray(approvedUsersListAsIter);
 
-        if(callerIdAsText != canisterData.nftOwner){
-            throw Error.reject("Unauthorized access");
-        };
+                let canisterDataPackagedForExport = {
+                    frontEndPrincipal = canisterData.frontEndPrincipal;
+                    backEndPrincipal = canisterData.backEndPrincipal;
+                    lastRecordedBackEndCyclesBalance = canisterData.lastRecordedBackEndCyclesBalance;
+                    backEndCyclesBurnRatePerDay = canisterData.backEndCyclesBurnRatePerDay;
+                    nftOwner = canisterData.nftOwner;
+                    nftId = canisterData.nftId;
+                    lastRecordedTime = canisterData.lastRecordedTime;
+                    approvedUsers = approvedUsersListAsArray;
+                };
 
-        let approvedUsersList = canisterData.approvedUsers;
-        let approvedUsersListAsIter = Trie.iter(approvedUsersList);
-        let approvedUsersListAsArray = Iter.toArray(approvedUsersListAsIter);
-
-        let canisterDataPackagedForExport = {
-            frontEndPrincipal = canisterData.frontEndPrincipal;
-            backEndPrincipal = canisterData.backEndPrincipal;
-            lastRecordedBackEndCyclesBalance = canisterData.lastRecordedBackEndCyclesBalance;
-            backEndCyclesBurnRatePerDay = canisterData.backEndCyclesBurnRatePerDay;
-            nftOwner = canisterData.nftOwner;
-            approvedUsers = approvedUsersListAsArray;
-        };
-
-        return canisterDataPackagedForExport;
+                return canisterDataPackagedForExport;
+            }
+        }
     };
 
-    public func setCyclesBurnRate(currentCylcesBalance: Nat, canisterData : MainTypes.CanisterData) : async MainTypes.CanisterData{
+    public func setCyclesBurnRate(currentCylcesBalance: Nat, canisterData : MainTypes.CanisterData) : MainTypes.CanisterData{
         let cyclesBurned = currentCylcesBalance - canisterData.lastRecordedBackEndCyclesBalance;
 
         let updatedCanisterData = {
@@ -170,13 +197,15 @@ module{
             lastRecordedBackEndCyclesBalance = canisterData.lastRecordedBackEndCyclesBalance;
             backEndCyclesBurnRatePerDay = cyclesBurned;
             nftOwner = canisterData.nftOwner;
+            nftId = canisterData.nftId;
+            lastRecordedTime = canisterData.lastRecordedTime;
             approvedUsers = canisterData.approvedUsers;
         };
         return updatedCanisterData;
     };
 
-    public func setLastRecordedBackEndCyclesBalance(currentCylcesBalance: Nat, canisterData : MainTypes.CanisterData) : 
-    async MainTypes.CanisterData{
+    public func setLastRecordedBackEndCyclesBalance(currentCylcesBalance: Nat, currentTime: Int, canisterData : MainTypes.CanisterData) : 
+    MainTypes.CanisterData{
 
         let updatedCanisterData = {
             frontEndPrincipal = canisterData.frontEndPrincipal;
@@ -184,6 +213,8 @@ module{
             lastRecordedBackEndCyclesBalance = currentCylcesBalance;
             backEndCyclesBurnRatePerDay = canisterData.backEndCyclesBurnRatePerDay;
             nftOwner = canisterData.nftOwner;
+            nftId = canisterData.nftId;
+            lastRecordedTime = currentTime;
             approvedUsers = canisterData.approvedUsers;
         };
 

@@ -28,7 +28,7 @@ const FileUpload = (props) => {
     let inputRef = useRef();
 
     const [constructedFile, setConstructedFile] = useState(null);
-    const [fileSrc, setFileSrc]  = useState("dtc-logo-black.png");
+    const [fileSrc, setFileSrc]  = useState("../../../assets/dtc-logo-black.png");
     const [fileType, setFileType] = useState("image/png");
 
     let AppContext;
@@ -294,7 +294,7 @@ const FileUpload = (props) => {
                 {
                     fileData.isLoading ? 
                         <>
-                            <img src="Loading.gif" alt="Loading Screen" />
+                            <img src="../../../assets/Loading.gif" alt="Loading Screen" />
                         </> :
                         <>
                             { 

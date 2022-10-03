@@ -72,6 +72,8 @@ change the "candid": "ledger.private.did" line of the dfx.json file back so that
 
 Take the ledger canister-id and set it as the value of the CANISTER_ID variable in the Digital-Time-Capsule/src/dtc/ledger.mo file. 
 
+set the isLocal var in the main.mo file to true;
+
 run the following commands in the Digital-Time-Capsule terminal: 
 
 npm i
@@ -92,6 +94,8 @@ then:
 npm start
 
 ## Deploying to the Mainnet
+
+set the isLocal var in the main.mo file to false;
 
 first, be sure that you delete the following from the dfx.json file
 

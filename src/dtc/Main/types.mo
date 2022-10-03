@@ -38,6 +38,8 @@ module{
         lastRecordedBackEndCyclesBalance: Nat;
         backEndCyclesBurnRatePerDay: Nat;
         nftOwner: Text;
+        nftId: Int;
+        lastRecordedTime: Int;
         approvedUsers: [(Text, UserPermissions)];
     };
 
@@ -47,6 +49,8 @@ module{
         lastRecordedBackEndCyclesBalance: Nat;
         backEndCyclesBurnRatePerDay: Nat;
         nftOwner: Text;
+        nftId: Int;
+        lastRecordedTime: Int;
         approvedUsers: Trie.Trie<Text, UserPermissions>;
     };
 

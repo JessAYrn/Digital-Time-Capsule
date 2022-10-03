@@ -1,117 +1,83 @@
-.transparentDiv__homePage__roadMap{
-    @media screen and (max-width: 410px) {
-        padding-left: 1.5%;    
-        width: 100%;   
-        height: 925px;     
-        margin-top: 60px;
-    };
-    @media screen and (min-width: 411px) and (max-width: 480px) {
-        padding-left: 1.5%;    
-        width: 100%;   
-        height: 850px;     
-        margin-top: 60px;
-    };
-    @media screen and (min-width: 481px) and (max-width: 550px) {
-        padding-left: 1.5%;    
-        width: 100%;   
-        height: 800px;     
-        margin-top: 60px;
-    };
-    @media screen and (min-width: 551px) and (max-width: 620px) {
-        padding-left: 1.5%;    
-        width: 100%;   
-        height: 750px;     
-        margin-top: 60px;
-    };
-    @media screen and (min-width: 621px) and (max-width: 690px) {
-        padding-left: 1.5%;    
-        width: 100%;   
-        height: 700px;     
-        margin-top: 60px;
-    };
-    @media screen and (min-width: 691px) and (max-width: 760px) {
-        padding-left: 1.5%;    
-        width: 100%;   
-        height: 650px;     
-        margin-top: 60px;
-    };
-    @media screen and (min-width: 761px) and (max-width: 830px) {
-        padding-left: 1.5%;    
-        width: 100%;   
-        height: 600px;     
-        margin-top: 60px;
-    };
-    @media screen and (min-width: 831px) and (max-width: 910px) {
-        padding-left: 1.5%;    
-        width: 100%;   
-        height: 550px;     
-        margin-top: 60px;
-    };
-    @media screen and (min-width: 911px) and (max-width: 1090px) {
-        padding-left: 1.5%;    
-        width: 100%;   
-        height: 500px;     
-        margin-top: 60px;
-    };
-
-    width: 65%;
-    height: 70%;
-    padding-left: 17.5%;
-    padding-top: 4%;
-    .roadMapContentDiv{
-        background-color: white;
-        box-shadow: 0 72px 114px rgb(0 0 0 / 20%);
-        border-radius: 10px;
-        height: 100%;
-        .missionStatementContentContainer{
-            background-color: transparent;
-            padding-top: 3%;
-            .roadMapDiv{
-                margin-left: 5%;
-                width: 90%;
+.container_homePage{
+    display: flex; 
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+    align-items: center;
+    background-size: 80%;
+    background-color: rgb(233, 233, 233);
+    background-image: url("../../assets/dtc-logo-black.png");
+    background-position: center;
+    justify-content: center;
+    .transparentDiv__homePage__roadMap{
+        @media screen and (max-width: 650px) {
+            width: 95%;
+            margin-top: 90px;
+        };
+        width: 65%;
+        height: 70%;
+        padding-top: 4%;
+        .roadMapContentDiv{
+            box-shadow: 0 5px 16px rgb(0 0 0 / 20%);
+            opacity: 0.978;
+            background-color: white;
+            border-radius: 10px;
+            height: 100%;
+            .missionStatementContentContainer{
+                background-color: transparent;
+                padding-top: 3%;
+                .roadMapDiv{
+                    margin-left: 5%;
+                    width: 90%;
+                }
             }
         }
     }
-}
-
-.transparentDiv__homePage__journalsCount{
-    @media screen and (max-width: 480px) {
-        margin-bottom: 60px;
-
-    };
-    @media screen and (max-width: 1090px) {
-        width: 100%;
-        padding-left: 1.5%;    
-    };
-    width: 65%;
-    height: 175px;
-    padding-left: 17.5%;
-    padding-top: 4%;
-    padding-bottom: 4%;
-    margin-top: 60px;
-    .AnalyticsDiv{
-        background-color: white;
-        box-shadow: 0 72px 114px rgb(0 0 0 / 20%);
-        border-radius: 10px;
-        width: 100%;
-        height: 211px;
-        .AnalyticsContentContainer{
-            background-color: transparent;
-            padding-top: 3%;
-            .jountalsCountDiv{
-                width: 90%;
-                margin-left: 5%;
-                .infoH3{
-                    text-align: center;
-                }
-                .infoH1{
-                    text-align: center;
-                }
-                img{
-                    max-width: 90px;
-                    max-height: 90px;
-                    display: block;
-                    margin: auto;
+    
+    .transparentDiv__homePage__journalsCount{
+        @media screen and (max-width: 650px) {
+            width: 95%;
+            margin-top: 90px;
+        };
+        width: 65%;
+        height: auto;
+        padding-top: 4%;
+        padding-bottom: 4%;
+        margin-top: 60px;
+        .AnalyticsDiv{
+            box-shadow: 0 5px 16px rgb(0 0 0 / 20%);
+            opacity: 0.978;
+            background-color: white;
+            border-radius: 10px;
+            width: 100%;
+            height: auto;
+            display: flex;
+            flex-direction: column;
+            .AnalyticsContentContainer{
+                background-color: transparent;
+                display: flex;
+                flex-direction: column;
+                .canisterDataDiv{
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    .section{
+                        width: 50%;
+                        .lebelH3{
+                            font-family: 'Courier New', monospace;
+                            text-align: center;
+                        }
+                        .h3DataField{
+                            font-family: 'Courier New', monospace;
+                            text-align: center;
+                            margin: 0 39px 0 39px;
+                        }
+                        img{
+                            max-width: 90px;
+                            max-height: 90px;
+                            display: block;
+                        }
+                    }
                 }
             }
         }

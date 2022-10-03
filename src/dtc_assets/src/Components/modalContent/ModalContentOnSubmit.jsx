@@ -54,7 +54,7 @@ const ModalContentSubmit = (props) => {
                     <h1>
                         Submit Successful
                     </h1>
-                    <img className={'checkMarkImg'} src="check-mark.png" alt="Check Mark" />
+                    <img className={'checkMarkImg'} src="../../../assets/check-mark.png" alt="Check Mark" />
                 </div> 
                 :
                 <div className={"submitFailed"}> 
