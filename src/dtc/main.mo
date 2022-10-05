@@ -110,8 +110,22 @@ shared (msg) actor class User() = this {
         return result;
     };
 
-    public func getProfilesSize () : async Nat {
-        return Trie.size(profiles);
+    public shared(msg) func getProfilesSize () : async Result.Result<Nat, JournalTypes.Error>  {
+        let callerId = msg.caller;
+        let profile = Trie.find(
+            profiles,
+            key(callerId),
+            Principal.equal
+        );
+
+        switch(profile){
+            case null{
+                return #err(#NotAuthorized);
+            };
+            case(?existingProfile){
+                return #ok(Trie.size(profiles))
+            };
+        };
     };
 
     //Profile Methods

@@ -27,7 +27,9 @@ export const MODALS_TYPES = {
     fileHasError: 'fileHasError',
     notifications: 'notifications',
     onSend:'onSend',
-    onSubmit: 'onSubmit'
+    onSubmit: 'onSubmit',
+    notAuthorizedByOwner: "notAuthorizedByOwner",
+    onRegisterNewOwner: "onRegisterNewOwner"
 }
 
 export const MAX_NUMBER_OF_BYTES = 21000000;

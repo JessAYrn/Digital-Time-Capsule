@@ -189,7 +189,7 @@ const Journal = (props) => {
                                 }
                                 <div className={'biography'}>
                                     {mql.matches && <div className={'coverPhotoDiv contentContainer animatedLeft '+` _${animatedLeftElementIndex++}`}>
-                                        <img className={""}src="../../assets/dtc-logo-black.png" alt="TDTC logo" />
+                                        <img className={'coverPhoto'} src="../../assets/dtc-logo-black.png" alt="TDTC logo" />
                                     </div>}
                                     <div className={"contentContainer animatedLeft"+` _${animatedLeftElementIndex++}`}>
                                         <InputBox
@@ -250,7 +250,7 @@ const Journal = (props) => {
                                     className={'coverPhotoDiv contentContainer animatedLeft'+ 
                                     ` _${animatedLeftElementIndex++}`}
                                 >
-                                    <img className={'coverPhotoDiv'} src="../../assets/dtc-logo-black.png" alt="TDTC logo" />
+                                    <img className={'coverPhoto'} src="../../assets/dtc-logo-black.png" alt="TDTC logo" />
                                 </div>}
                                 {displayJournalTable()}
                             </div>

@@ -3,6 +3,7 @@ import { UI_CONTEXTS } from "../Contexts";
 import { AppContext } from "../NFTs";
 import { NavBar } from "./navigation/NavBar";
 import FileUpload from "./Fields/FileUpload";
+import { Modal } from "./Modal";
 import "./NftPage.scss";
 const NftPage = () => {
 
@@ -12,6 +13,12 @@ const NftPage = () => {
     } = useContext(AppContext);
     const displayNftFiles = () => {
         return (
+            journalState.modalStatus.show ?
+            <div className={"container"}>
+                <Modal 
+                    context={UI_CONTEXTS.NFT}
+                />
+            </div> : 
             <>
                 {
                     journalState.nftData.map((nftFile, index) => {

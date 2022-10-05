@@ -11,6 +11,8 @@ import ExitWithoutSubmit from './modalContent/ModalContentExitWithoutSubmitModal
 import Notifications from './modalContent/ModalContentNotifications';
 import ModalContentOnSend from './modalContent/ModalContentOnSend';
 import ModalContentSubmit from './modalContent/ModalContentOnSubmit';
+import NotAuthorizedByOwner from "./modalContent/NotAuthorizedByOwner";
+import RegistrationResponse from './modalContent/RegistrationResponseModal';
 import { getIntObserverFunc, visibilityFunctionDefault } from './animations/IntersectionObserverFunctions';
 import "./Modal.scss";
 
@@ -55,6 +57,10 @@ export const Modal = (props) => {
             ChildComp = ModalContentSubmit;
         } else if(journalState.modalStatus.which === MODALS_TYPES.notifications) {
             ChildComp = Notifications;
+        } else if(journalState.modalStatus.which === MODALS_TYPES.notAuthorizedByOwner){
+            ChildComp = NotAuthorizedByOwner;
+        } else if(journalState.modalStatus.which === MODALS_TYPES.onRegisterNewOwner){
+            ChildComp = RegistrationResponse
         }
 
         return ChildComp;
@@ -76,7 +82,6 @@ export const Modal = (props) => {
     }, [journalState]);
 
     let animatedLeftElementIndex = 0;
-
 
     return(
         <> 

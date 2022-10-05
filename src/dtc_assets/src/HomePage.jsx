@@ -5,11 +5,8 @@ import LoginPage from './Components/authentication/LoginPage';
 import { UI_CONTEXTS } from './Contexts';
 import Analytics from './Components/Analytics';
 import "./HomePage.scss";
-import { NavBar } from './Components/navigation/NavBar';
-import { AuthenticateClient, CreateActor } from './Components/authentication/AuthenticationMethods';
-import { TriggerAuththenticateClientFunction } from './Components/authentication/AuthenticationMethods';
-import { handleErrorOnFirstLoad } from './Components/loadingFunctions';
-import { mapBackendCanisterDataToFrontEndObj } from './mappers/dashboardMapperFunctions';
+import { AuthenticateClient, CreateActor, TriggerAuththenticateClientFunction, CreateUserJournal } from './Components/authentication/AuthenticationMethods';
+import { handleErrorOnFirstLoad, loadCanisterData } from './Components/loadingFunctions';
 
 export const AppContext = createContext({
     journalState: null,
@@ -60,23 +57,22 @@ const HomePage = () => {
             actionType: types.SET_IS_LOADING,
             payload: true
         })
-        let profilesTrieSize = await handleErrorOnFirstLoad(
+        let profilesTrieSizeObj = await handleErrorOnFirstLoad(
             journalState.actor.getProfilesSize, 
             TriggerAuththenticateClientFunction, 
             { journalState, dispatch, types }
         );
-        if(!profilesTrieSize && parseInt(profilesTrieSize) !== 0) return;
+        if(!profilesTrieSizeObj) return;
+        if("err" in profilesTrieSizeObj) profilesTrieSizeObj = await CreateUserJournal(journalState, dispatch, 'getProfilesSize');
+        if("err" in profilesTrieSizeObj) {
+            dispatch({
+                actionType: types.SET_IS_LOADING,
+                payload: false
+            });
+            return;
+        }
         let canisterData = await journalState.actor.getCanisterData();
-        canisterData = mapBackendCanisterDataToFrontEndObj(canisterData);
-        dispatch({
-            actionType: types.SET_CANISTER_DATA,
-            payload: canisterData
-        });
-
-        dispatch({
-            actionType: types.SET_JOURNAL_COUNT,
-            payload: parseInt(profilesTrieSize)
-        })
+        loadCanisterData(profilesTrieSizeObj, canisterData, dispatch, types);
         dispatch({
             actionType: types.SET_IS_LOADING,
             payload: false
@@ -94,23 +90,10 @@ const HomePage = () => {
 
             {           
                 journalState.isAuthenticated ? 
-                <div className="container">
-                    <NavBar
-                        walletLink={true}
-                        journalLink={true}
-                        nftLink={true}
-                        accountLink={true}
-                        dashboardLink={false}
-                        notificationIcon={false}
+                    <Analytics/> : 
+                    <LoginPage
                         context={UI_CONTEXTS.HOME_PAGE}
-                    />
-                    <div class={'scrollable'}>
-                        <Analytics/>
-                    </div>
-                </div> : 
-                <LoginPage
-                    context={UI_CONTEXTS.HOME_PAGE}
-                /> 
+                    /> 
             }
         </AppContext.Provider>
     );

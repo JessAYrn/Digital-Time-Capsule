@@ -5,7 +5,7 @@ import { useLocation } from 'react-router-dom';
 import LoadScreen from './Components/LoadScreen';
 import LoginPage from './Components/authentication/LoginPage';
 import { UI_CONTEXTS } from './Contexts';
-import { AuthenticateClient, CreateActor, TriggerAuththenticateClientFunction } from './Components/authentication/AuthenticationMethods';
+import { AuthenticateClient, CreateActor, TriggerAuththenticateClientFunction, CreateUserJournal } from './Components/authentication/AuthenticationMethods';
 import { loadJournalData, loadNftData, loadWalletData, handleErrorOnFirstLoad } from './Components/loadingFunctions';
 
 export const AppContext = createContext({
@@ -65,20 +65,19 @@ const AccountPage = (props) => {
                 { journalState, dispatch, types }
             );
             if(!journal) return;
-            if("err" in journal){
-                journalState.actor.create().then((result) => {
-                    dispatch({
-                        actionType: types.SET_IS_LOADING,
-                        payload: false
-                    });
-                });
-            } else {
-                loadJournalData(journal, dispatch, types);
+            if("err" in journal) journal = await CreateUserJournal(journalState, dispatch, 'readJournal');
+            if("err" in journal) {
                 dispatch({
                     actionType: types.SET_IS_LOADING,
                     payload: false
                 });
+                return;
             }
+            loadJournalData(journal, dispatch, types);
+            dispatch({
+                actionType: types.SET_IS_LOADING,
+                payload: false
+            });
         }
         if(journalState.reloadStatuses.nftData){
             const nftCollection = await journalState.actor.getUserNFTsInfo();

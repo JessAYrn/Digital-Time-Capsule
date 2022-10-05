@@ -100,22 +100,22 @@ const LoginPage = (props) => {
     return(
         <div className={"container_loginPage"} >
             <div className={'container_1'}>
-                <div className={'contentContainer animatedLeft _0 login'}>
-                    <div className={'contentDiv__loginContent animatedLeft _0'}>
-                        <img className={'logoImg animatedLeft _0'}src="../../../assets/dtc-logo-black.png" alt="Logo"/>
+                <div className={'contentContainer _0 login'}>
+                    <div className={'contentDiv__loginContent _0'}>
+                        <img className={'logoImg _0'}src="../../../assets/dtc-logo-black.png" alt="Logo"/>
                         <button 
-                            className={`loginButtonDiv__${(journalState.isAuthenticated) ? "open" : 'closed'} animatedLeft _0`} 
+                            className={`loginButtonDiv _0`} 
                             onClick={handleClick_II}
                         > 
-                            {(journalState.isAuthenticated) ? 'Open Journal' : 'Log In Using Internet Identity'} 
+                            Log In Using Internet Identity
                         </button>
                         <button 
-                            className={`loginButtonDiv__${(journalState.isAuthenticated) ? "open" : 'closed'} animatedLeft _0`}
+                            className={`loginButtonDiv _0`}
                             onClick={handleClick_Stoic}
                         > 
-                            {(journalState.isAuthenticated) ? 'Open Journal' : 'Log In Using Stoic Identity'} 
+                            Log In Using Stoic Identity
                         </button>
-                        <div className={'icpLogoDiv animatedLeft _0'}>
+                        <div className={'icpLogoDiv _0'}>
                             <img className={'logoImg'}src="../../../assets/logo.png" alt="Logo"/>
                         </div>
                     </div>
@@ -197,7 +197,7 @@ const LoginPage = (props) => {
                 </div>
             </div>
             <div className={"container_2"}>
-                <h4 id={'title'} className={"animatedRight scrollForMore animate"}> Scroll Down For More Info</h4>
+                <h4 id={'title'} className={"scrollForMore"}> Scroll Down For More Info</h4>
             </div>
         </div>
     );

@@ -5,7 +5,7 @@ import { useLocation } from 'react-router-dom';
 import LoadScreen from './Components/LoadScreen';
 import NftPage from './Components/NftPage';
 import { UI_CONTEXTS } from './Contexts';
-import { AuthenticateClient, CreateActor, TriggerAuththenticateClientFunction } from './Components/authentication/AuthenticationMethods';
+import { AuthenticateClient, CreateActor, TriggerAuththenticateClientFunction, CreateUserJournal } from './Components/authentication/AuthenticationMethods';
 import { loadJournalData, loadNftData, loadWalletData, handleErrorOnFirstLoad } from './Components/loadingFunctions';
 
 
@@ -52,35 +52,32 @@ const NFTapp = () => {
     };
 
     useEffect(async () => {
-        if(!journalState.isAuthenticated || !journalState.actor){
-            return
-        };
+        if(!journalState.isAuthenticated || !journalState.actor) return;
+        dispatch({
+            actionType: types.SET_IS_LOADING,
+            payload: true
+        });
         if(journalState.reloadStatuses.nftData){
-            dispatch({
-                actionType: types.SET_IS_LOADING,
-                payload: true
-            });
             let nftCollection = await handleErrorOnFirstLoad(
                 journalState.actor.getUserNFTsInfo, 
                 TriggerAuththenticateClientFunction, 
                 { journalState, dispatch, types }
             );
             if(!nftCollection) return;
-            if("err" in nftCollection){
-                journalState.actor.create().then((result) => {
-                    dispatch({
-                        actionType: types.SET_IS_LOADING,
-                        payload: false
-                    });
-                });
-            } else {
-                loadNftData(nftCollection, dispatch, types);
+            if("err" in nftCollection) nftCollection = await CreateUserJournal(journalState, dispatch, 'getUserNFTsInfo');
+            if("err" in nftCollection) {
                 dispatch({
                     actionType: types.SET_IS_LOADING,
                     payload: false
                 });
+                return;
             }
-        }
+            loadNftData(nftCollection, dispatch, types);
+            dispatch({
+                actionType: types.SET_IS_LOADING,
+                payload: false
+            });
+        };
         if(journalState.reloadStatuses.walletData){
             //Load wallet data in background
             const walletDataFromApi = await journalState.actor.readWalletData();
