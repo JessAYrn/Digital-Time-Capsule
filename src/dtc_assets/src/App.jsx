@@ -101,12 +101,12 @@ const App = () => {
 
             {
                 journalState.isAuthenticated ? 
-                journalState.isLoading ? 
-                    <LoadScreen/> :
+                    journalState.isLoading ? 
+                        <LoadScreen/> :
                         <Journal/> : 
-                            <LoginPage
-                                context={UI_CONTEXTS.JOURNAL}
-                            /> 
+                    <LoginPage
+                        context={UI_CONTEXTS.JOURNAL}
+                    /> 
             }
 
         </AppContext.Provider>

@@ -34,6 +34,9 @@
         }
     }
     .registryButtonDiv{
+        @media screen and (max-width: 650px) {
+            width: 95%;
+        };
         width: 65%;
         .registryButton{
             width: 100%;
@@ -44,6 +47,7 @@
             font-family: 'Courier New', monospace;
         }
     }
+
     .transparentDiv__homePage__dataFields.approvedPrincipals{
         .canisterDataDiv{
             flex-direction: column;
@@ -51,6 +55,22 @@
                 width: 100%;
             }
         }
+    }
+
+    .switchDiv{
+        @media screen and (max-width: 650px) {
+            width: 95%;
+        };
+        box-shadow: 0 5px 16px rgb(0 0 0 / 20%);
+        opacity: 0.978;
+        width: 65%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: white;
+        border-radius: 10px;
+        margin: 40px 0 40px 0;
+
     }
     
     .transparentDiv__homePage__dataFields{
@@ -80,31 +100,46 @@
                     display: flex;
                     justify-content: center;
                     align-items: center;
-                    .array.section{
-                        width: 100%;
-                        .h3DataField{
-                            margin-bottom: 10px;
-                        }
-                    }
-                    .section{
-                        width: 50%;
-                        .lebelH3{
-                            font-family: 'Courier New', monospace;
-                            text-align: center;
-                        }
-                        .h3DataField{
-                            font-family: 'Courier New', monospace;
-                            text-align: center;
-                            margin: 0 39px 0 39px;
-                        }
-                        img{
-                            max-width: 90px;
-                            max-height: 90px;
-                            display: block;
-                        }
-                    }
                 }
             }
         }
+    }
+}
+
+.dataFieldRow{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 25px;
+}
+
+.array.section{
+    width: 100%;
+    flex-direction: column;
+}
+.section{
+    width: 45%;
+    display: flex;
+    align-items: center;
+    justify-content: center;    
+    .lebelH3{
+        font-family: 'Courier New', monospace;
+    }
+    .h3DataField{
+        @media screen and (max-width: 650px) {
+            width: 80%;
+        };
+        font-family: 'Courier New', monospace;
+        margin: 0 39px 0 39px;
+        width: 90%;
+        text-align: center;
+        margin-left: 0;
+        margin-right: 0;
+    }
+    img{
+        max-width: 90px;
+        max-height: 90px;
+        display: block;
     }
 }

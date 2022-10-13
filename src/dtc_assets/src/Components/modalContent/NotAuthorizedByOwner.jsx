@@ -7,6 +7,8 @@ import { AppContext as JournalContext } from '../../App';
 import { AppContext as  HomePageContext} from '../../HomePage';
 import { AppContext as  AccountContext} from '../../Account';
 import { UI_CONTEXTS } from '../../Contexts';
+import { types } from '../../reducers/journalReducer';
+import { MODALS_TYPES } from '../../Constants';
 const NotAuthorizedByOwner = (props) => {
     const {
         context
@@ -33,6 +35,30 @@ const NotAuthorizedByOwner = (props) => {
         await logout(journalState, dispatch);
     }; 
 
+    const handleSubmitRequest = async () => {
+        dispatch({
+            actionType: types.SET_IS_LOADING,
+            payload: true
+        });
+        let result = await journalState.actor.requestApproval();
+        console.log(result);
+        if("ok" in result){
+            dispatch({
+                actionType: types.SET_MODAL_STATUS,
+                payload: { show: true, which: MODALS_TYPES.requestApprovalRepsonse, success: true}
+            });
+        } else {
+            dispatch({
+                actionType: types.SET_MODAL_STATUS,
+                payload: { show: true, which: MODALS_TYPES.requestApprovalRepsonse, success: false}
+            });
+        }
+        dispatch({
+            actionType: types.SET_IS_LOADING,
+            payload: false
+        });
+    };
+
     return (
         <div className="contentDiv__notAuthorized">
             <ul>
@@ -54,6 +80,7 @@ const NotAuthorizedByOwner = (props) => {
                 </li>
             </ul>
             <button onClick={handleClick} className="button"> OK </button>
+            <button onClick={handleSubmitRequest} className="button"> Request Approval </button>
         </div>
     )
 };

@@ -43,12 +43,12 @@ const RegistrationResponse = (props) => {
             { journalState.modalStatus.success ? 
                 <>
                     <h3 className='success'>
-                        Owner Successfully Updated
+                        Action successfully executed.
                     </h3>
                 </> :
                 <>
                     <h3 className='fail'>
-                        Failed to update. Only the owner of the corresponding NFT may register as the owner of this application.
+                        Failed to update. Only the owner of the corresponding NFT may perform this action.
                     </h3>
                 </>
             }

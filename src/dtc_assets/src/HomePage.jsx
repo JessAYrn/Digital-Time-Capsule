@@ -72,7 +72,17 @@ const HomePage = () => {
             return;
         }
         let canisterData = await journalState.actor.getCanisterData();
-        loadCanisterData(profilesTrieSizeObj, canisterData, dispatch, types);
+        canisterData = loadCanisterData(profilesTrieSizeObj, canisterData, dispatch, types);
+        let requestsForApproval;
+        if(canisterData.isOwner){
+            requestsForApproval = await journalState.actor.getRequestingPrincipals();
+            requestsForApproval = requestsForApproval.ok;
+            let updatedCanisterData = {...canisterData, requestsForApproval};
+            dispatch({
+                actionType: types.SET_CANISTER_DATA,
+                payload: updatedCanisterData
+            });
+        }
         dispatch({
             actionType: types.SET_IS_LOADING,
             payload: false

@@ -78,6 +78,7 @@ module {
         #UserNameTaken;
         #WalletBalanceTooLow;
         #ZeroAddress;
+        #NotAcceptingRequests;
     };
     
 }

@@ -39,8 +39,11 @@ module{
         backEndCyclesBurnRatePerDay: Nat;
         nftOwner: Text;
         nftId: Int;
+        acceptingRequests: Bool;
         lastRecordedTime: Int;
         approvedUsers: [(Text, UserPermissions)];
+        isOwner: Bool;
+        supportMode: Bool;
     };
 
     public type CanisterData = {
@@ -50,9 +53,12 @@ module{
         backEndCyclesBurnRatePerDay: Nat;
         nftOwner: Text;
         nftId: Int;
+        acceptingRequests: Bool;
         lastRecordedTime: Int;
         approvedUsers: Trie.Trie<Text, UserPermissions>;
     };
+
+    public type ApprovedUsersExport = [(Text, UserPermissions)];
 
     public type ProfilesTree = Trie.Trie<Principal, Profile>;
 

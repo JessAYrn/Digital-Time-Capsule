@@ -33,6 +33,8 @@ import MainTypes "Main/types";
 import TxHelperMethods "Main/TransactionHelperMethods";
 import CanisterManagementMethods "Main/CanisterManagementMethods";
 import NftCollection "NftCollection/NftCollection";
+import Support "SupportCanisterIds/SupportCanisterIds";
+import IC "IC/ic.types";
 
 shared (msg) actor class User() = this {
 
@@ -47,11 +49,17 @@ shared (msg) actor class User() = this {
 
     private var isLocal : Bool = false;
 
+    private let ic : IC.Self = actor "aaaaa-aa";
+
     private stable var profiles : Trie.Trie<Principal, MainTypes.Profile> = Trie.empty();
 
     private stable var nftCollections : Trie.Trie<Nat, MainTypes.Nft> = Trie.empty();
 
     private stable var nftCollectionsIndex : Nat = 0;
+
+    private stable var supportMode : Bool = false;
+
+    private stable var defaultControllers : [Principal] = [];
 
     private stable var canisterData : MainTypes.CanisterData = {
         frontEndPrincipal = "Null";
@@ -60,9 +68,12 @@ shared (msg) actor class User() = this {
         backEndCyclesBurnRatePerDay = 0;
         nftOwner = "Null";
         nftId = -1;
+        acceptingRequests = true;
         lastRecordedTime = 0;
         approvedUsers = Trie.empty();
     };
+
+    private stable var requestsForApproval: [Text] = [];
 
     private stable var startIndexForBlockChainQuery : Nat64 = 3_512_868;
 
@@ -372,33 +383,126 @@ shared (msg) actor class User() = this {
         return result;
     };
 
-    public shared(msg) func addApprovedUser(principal : Text) : async() {
+    public shared(msg) func addApprovedUser(principal : Text) : async Result.Result<(MainTypes.ApprovedUsersExport), JournalTypes.Error> {
         let callerId = msg.caller;
         let principalAsBlob = Principal.fromText(principal);
         let updatedCanisterData = await CanisterManagementMethods.addApprovedUser(callerId, principalAsBlob, canisterData);
-        canisterData := updatedCanisterData;
+        switch(updatedCanisterData){
+            case(#ok(data)){
+                canisterData := data;
+                let approvedUsers = Trie.iter(canisterData.approvedUsers);
+                let approvedUsersExport = Iter.toArray(approvedUsers);
+                return #ok(approvedUsersExport)
+            };
+            case(#err(e)){
+                return #err(e);
+            };
+        };
     };
 
-    public shared(msg) func removeApprovedUser(principal: Text) : async() {
+    public shared(msg) func removeApprovedUser(principal: Text) : async Result.Result<(MainTypes.ApprovedUsersExport), JournalTypes.Error> {
         let callerId = msg.caller;
         let principalAsBlob = Principal.fromText(principal);
         let updatedCanisterData = await CanisterManagementMethods.removeApprovedUser(callerId, principalAsBlob, canisterData);
-        canisterData := updatedCanisterData;
+        switch(updatedCanisterData){
+            case(#ok(data)){
+                canisterData := data;
+                let approvedUsers = Trie.iter(canisterData.approvedUsers);
+                let approvedUsersExport = Iter.toArray(approvedUsers);
+                return #ok(approvedUsersExport);
+            }; 
+            case(#err(e)){
+                return #err(e)
+            };
+        };
     };
 
-    public shared(msg) func setPrincipalIds(frontEndPrincipal : Text, nftId: Int ) : async Result.Result<(), JournalTypes.Error> {
+    public shared(msg) func configureApp(frontEndPrincipal : Text, nftId: Int ) : async Result.Result<(), JournalTypes.Error> {
         let backEndPrincipalAsPrincipal = Principal.fromActor(this);
         let backEndPrincipal = Principal.toText(backEndPrincipalAsPrincipal);
-        let updatedCanisterData = await CanisterManagementMethods.setPrincipalIds( backEndPrincipal, frontEndPrincipal, nftId, canisterData);
+        //let upgradeCanisterPrincipal = Principal.fromActor(upgradeCanisterActor);
+        // pass that into the configureApp function
+        let result = await CanisterManagementMethods.configureApp( backEndPrincipal, frontEndPrincipal, nftId, canisterData);
+        let updatedCanisterData = result.0;
+        let defaultControllers_ = result.1;
         if(canisterData.frontEndPrincipal == "Null" or canisterData.nftId == -1){
             canisterData := updatedCanisterData;
+            defaultControllers := defaultControllers_;
+            #ok(());
+        } else {
+            return #err(#NotAuthorized);
         };
-        #ok(());
+        
+    };
+
+    public shared(msg) func toggleAcceptRequest() : async  Result.Result<(MainTypes.CanisterData), JournalTypes.Error>{
+        let callerId = msg.caller;
+        let result = CanisterManagementMethods.toggleAcceptRequest(callerId, canisterData);
+        switch(result){
+            case(#err(e)){
+                return #err(e);
+            };
+            case(#ok(updatedCanisterData)){
+                canisterData := updatedCanisterData;
+                return #ok(updatedCanisterData);
+            }
+        };
+    };
+
+    public shared(msg) func getRequestingPrincipals() : async Result.Result<([Text]), JournalTypes.Error>{
+        let callerId = msg.caller;
+        let callerIdAsText = Principal.toText(callerId);
+        if(callerIdAsText != canisterData.nftOwner){
+            return #err(#NotAuthorized);
+        } else {
+            return #ok(requestsForApproval)
+        };
+    };
+
+    public shared(msg) func requestApproval() : async Result.Result<([Text]), JournalTypes.Error>{
+        let callerId = msg.caller;
+        if(canisterData.acceptingRequests == false){
+            return #err(#NotAcceptingRequests);
+        };
+        let callerIdAsText = Principal.toText(callerId);
+        let ArrayBuffer = Buffer.Buffer<Text>(1);
+        var inListAlready = false;
+        let requestsForApprovalIter = Iter.fromArray(requestsForApproval);
+        Iter.iterate<Text>(requestsForApprovalIter, func (x : Text, index: Nat){
+            if(x == callerIdAsText){
+                inListAlready := true
+            };
+            ArrayBuffer.add(x);
+        });
+
+        if(inListAlready == false){
+            ArrayBuffer.add(callerIdAsText);
+        };
+        requestsForApproval := ArrayBuffer.toArray();
+        return #ok(requestsForApproval);
+    };
+
+    public shared(msg) func removePrincipalFromRequestsArray(principalOfRequester: Text) : 
+    async Result.Result<([Text]), JournalTypes.Error>{
+        let callerId = msg.caller;
+        let callerIdAsText = Principal.toText(callerId);
+        if( callerIdAsText != canisterData.nftOwner ){
+            return #err(#NotAuthorized);
+        };
+        let ArrayBuffer = Buffer.Buffer<Text>(1);
+        let requestsForApprovalIter = Iter.fromArray(requestsForApproval);
+        Iter.iterate<Text>(requestsForApprovalIter, func (x: Text, index: Nat){
+            if(x != principalOfRequester){
+                ArrayBuffer.add(x);
+            }
+        });
+        requestsForApproval := ArrayBuffer.toArray();
+        return #ok(requestsForApproval);
     };
 
     public shared(msg) func getCanisterData() : async MainTypes.CanisterDataExport {
         let callerId = msg.caller;
-        let canisterDataPackagedForExport = await CanisterManagementMethods.getCanisterData(callerId, canisterData, profiles);
+        let canisterDataPackagedForExport = await CanisterManagementMethods.getCanisterData(callerId, canisterData, supportMode, profiles);
         return canisterDataPackagedForExport;
     };
 
@@ -453,6 +557,84 @@ shared (msg) actor class User() = this {
         };
     };
 
+    private func setToDefualtControllerSettings(canisterPrincipal: Principal) : 
+    async () {
+        let canisterStatus = await ic.canister_status({canister_id = canisterPrincipal });
+        let settings = canisterStatus.settings;
+        let updatedSettings : IC.canister_settings = {
+            controllers = ?defaultControllers;
+            freezing_threshold = ?settings.freezing_threshold;
+            memory_allocation = ?settings.memory_allocation;
+            compute_allocation = ?settings.compute_allocation;
+        };
+        let result = await ic.update_settings({
+            canister_id = canisterPrincipal;
+            settings = updatedSettings;
+        });
+    };
+
+    private func addController(principal: Text, canisterPrincipal: Principal) : 
+    async () {
+        
+        let canisterStatus = await ic.canister_status({canister_id = canisterPrincipal });
+        let settings = canisterStatus.settings;
+        let controllersOption = settings.controllers;
+        var controllers = Option.get(controllersOption, defaultControllers);
+        let principalAsBlob = Principal.fromText(principal);
+        let ArrayBuffer = Buffer.Buffer<(Principal)>(1);
+        let controllersIter = Iter.fromArray(controllers);
+        ArrayBuffer.add(principalAsBlob);
+        Iter.iterate<Principal>(controllersIter, func (x: Principal, index: Nat){
+            ArrayBuffer.add(x);
+        });
+        controllers := ArrayBuffer.toArray();
+        let updatedSettings : IC.canister_settings = {
+            controllers = ?controllers;
+            freezing_threshold = ?settings.freezing_threshold;
+            memory_allocation = ?settings.memory_allocation;
+            compute_allocation = ?settings.compute_allocation;
+        };
+        let result = await ic.update_settings({
+            canister_id = canisterPrincipal;
+            settings = updatedSettings;
+        });
+    };
+
+    public func getCanisterCongtrollers(canisterPrincipal: Principal) : async ([Text]) {
+        let canisterStatus = await ic.canister_status({ canister_id = canisterPrincipal });
+        let settings = canisterStatus.settings;
+        let controllersOption = settings.controllers;
+        var controllers = Option.get(controllersOption, [canisterPrincipal]);
+        let ArrayBuffer = Buffer.Buffer<(Text)>(1);
+        let controllersIter = Iter.fromArray(controllers);
+        Iter.iterate<Principal>(controllersIter, func (x: Principal, index: Nat){
+            let text = Principal.toText(x);
+            ArrayBuffer.add(text);
+        });
+        let controllersAsTextArray = ArrayBuffer.toArray();
+        return controllersAsTextArray;
+    };
+
+    public shared(msg) func toggleSupportMode() : async Result.Result<(),JournalTypes.Error>{
+        let callerId = msg.caller;
+        let callerIdAsText = Principal.toText(callerId);
+        if(callerIdAsText != canisterData.nftOwner){
+            return #err(#NotAuthorized)
+        } else {
+            supportMode := not supportMode;
+            if(supportMode == true){
+                let result1 = await addController(Support.TechSupportPrincipal1, Principal.fromActor(this));
+                let result2 = await addController(Support.TechSupportPrincipal2, Principal.fromActor(this));
+                // will have to call addController again on Upgrader canister and front end canister
+                return #ok()
+            } else {
+                let result = await setToDefualtControllerSettings(Principal.fromActor(this));
+                // will have to call setDefualtControllerSettings again on Upgrader canister and front end canister
+                return #ok()
+            };
+        };
+    };
+
     public shared(msg) func registerOwner() : async  Result.Result<(), JournalTypes.Error>{
         let callerId = msg.caller;
         var shouldAdd = false;
@@ -464,9 +646,18 @@ shared (msg) actor class User() = this {
         if(shouldAdd == true){
             let canisterData_withOwner = CanisterManagementMethods.updateOwner(callerId, canisterData);
             let updatedCanisterData = await CanisterManagementMethods.addApprovedUser(callerId, callerId, canisterData_withOwner);
-            canisterData := updatedCanisterData;
+            switch(updatedCanisterData){
+                case(#ok(data)){
+                    canisterData := data;
+                    #ok(());
+                };
+                case(#err(e)){
+                    return #err(e)
+                };
+            };
+        } else {
+            return #err(#NotAuthorized);
         };
-        #ok(());
     };
 
     system func heartbeat() : async () {

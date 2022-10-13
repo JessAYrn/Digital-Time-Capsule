@@ -109,6 +109,7 @@ export const loadCanisterData = (profilesTrieSizeObj, canisterData, dispatch, ty
         actionType: types.SET_JOURNAL_COUNT,
         payload: parseInt(profilesTrieSizeObj)
     });
+    return canisterData;
 }
 
 export const handleErrorOnFirstLoad = async (fnForLoadingData, fnForRefiringAuthentication, props_ ) => {

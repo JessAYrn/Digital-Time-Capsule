@@ -13,6 +13,7 @@ import ModalContentOnSend from './modalContent/ModalContentOnSend';
 import ModalContentSubmit from './modalContent/ModalContentOnSubmit';
 import NotAuthorizedByOwner from "./modalContent/NotAuthorizedByOwner";
 import RegistrationResponse from './modalContent/RegistrationResponseModal';
+import RequestApprovalResponseModal from './modalContent/RequestApprovaModal';
 import { getIntObserverFunc, visibilityFunctionDefault } from './animations/IntersectionObserverFunctions';
 import "./Modal.scss";
 
@@ -61,6 +62,8 @@ export const Modal = (props) => {
             ChildComp = NotAuthorizedByOwner;
         } else if(journalState.modalStatus.which === MODALS_TYPES.onRegisterNewOwner){
             ChildComp = RegistrationResponse
+        } else if(journalState.modalStatus.which === MODALS_TYPES.requestApprovalRepsonse){
+            ChildComp = RequestApprovalResponseModal;
         }
 
         return ChildComp;

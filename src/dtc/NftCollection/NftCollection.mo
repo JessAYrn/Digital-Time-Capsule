@@ -6,7 +6,7 @@ import Principal "mo:base/Principal";
 
 module {
 
-    public let CANISTER_ID : Text = "n54f2-aiaaa-aaaap-qaseq-cai";
+    public let CANISTER_ID : Text = "7enuz-ziaaa-aaaam-qa6ma-cai";
 
     public type Time = Time.Time;
 
