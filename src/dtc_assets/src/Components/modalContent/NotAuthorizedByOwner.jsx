@@ -41,7 +41,6 @@ const NotAuthorizedByOwner = (props) => {
             payload: true
         });
         let result = await journalState.actor.requestApproval();
-        console.log(result);
         if("ok" in result){
             dispatch({
                 actionType: types.SET_MODAL_STATUS,

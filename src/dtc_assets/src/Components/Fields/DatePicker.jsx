@@ -13,7 +13,8 @@ const DatePicker = (props) => {
         setChangesWereMade,
         dispatch,
         index,
-        value
+        value,
+        min
         // dispatchAction //the action that is to take place in order to dispatch the field change to the redux store
     } = props;
 
@@ -52,6 +53,7 @@ const DatePicker = (props) => {
                 onFocus={onFocus}
                 onBlur={onBlur}
                 onChange={onChnage}
+                min={min}
             />
             </div>
         </div>

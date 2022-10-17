@@ -26,7 +26,6 @@ const DataFieldArray = (props) => {
         dispatch
     } = props;
     let array = journalState[dataField][dataSubField] || journalState[dataField];
-    console.log(journalState, dataSubField);
 
     const handleAddPrincipal = async (principal) => {
         dispatch({

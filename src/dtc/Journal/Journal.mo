@@ -94,7 +94,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
     };
 
     public shared(msg) func createEntry( journalEntry : JournalTypes.JournalEntryInput) : 
-    async Result.Result<Trie.Trie<Nat, JournalTypes.JournalEntry>, JournalTypes.Error> {
+    async Result.Result<([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio), JournalTypes.Error> {
         let callerId = msg.caller;
         if( Principal.toText(callerId) != mainCanisterId_ ) {
             return #err(#NotAuthorized);
@@ -105,8 +105,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
             text = journalEntry.text;
             location = journalEntry.location;
             date = journalEntry.date;
-            lockTime = journalEntry.lockTime;
-            unlockTime = Time.now() + nanosecondsInADay * daysInAMonth * journalEntry.lockTime;
+            unlockTime = journalEntry.unlockTime;
             sent = false;
             read = false;
             draft = journalEntry.draft;
@@ -127,8 +126,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
         journalV2 := newJournal;
 
         journalEntryIndex += 1;
-
-        #ok(journalV2);
+        let journalAsArray = Iter.toArray(Trie.iter(journalV2));
+        #ok(((journalAsArray), biography));
     };
 
     public shared(msg) func clearLocalFile(localFileIndex: Nat): async Result.Result<(), JournalTypes.Error> {
@@ -269,7 +268,6 @@ shared(msg) actor class Journal (principal : Principal) = this {
                         text = x.1.text;
                         location = x.1.location;
                         date = x.1.date;
-                        lockTime = x.1.lockTime;
                         unlockTime = x.1.unlockTime;
                         sent = true;
                         read = x.1.read;
@@ -322,7 +320,6 @@ shared(msg) actor class Journal (principal : Principal) = this {
                     text = entryValue.text;
                     location = entryValue.location;
                     date = entryValue.date;
-                    lockTime = entryValue.lockTime;
                     unlockTime = entryValue.unlockTime;
                     sent = true;
                     read = true;
@@ -414,7 +411,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
         #ok(());
     };
 
-    public shared(msg) func updateJournalEntry(key: Nat, journalEntry: JournalTypes.JournalEntryInput) : async Result.Result<Trie.Trie<Nat,JournalTypes.JournalEntry>,JournalTypes.Error> {
+    public shared(msg) func updateJournalEntry(key: Nat, journalEntry: JournalTypes.JournalEntryInput) : 
+    async Result.Result<([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio),JournalTypes.Error> {
         let callerId = msg.caller;
         if( Principal.toText(callerId) != mainCanisterId_) {
            return #err(#NotAuthorized);
@@ -436,8 +434,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
                     text = journalEntry.text;
                     location = journalEntry.location;
                     date = journalEntry.date;
-                    lockTime = journalEntry.lockTime;
-                    unlockTime = Time.now() + nanosecondsInADay * daysInAMonth * journalEntry.lockTime;
+                    unlockTime = journalEntry.unlockTime;
                     sent = false;
                     read = false;
                     draft = journalEntry.draft;
@@ -456,9 +453,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
                 );
 
                 journalV2:= newJournal;
-
-                #ok(newJournal);
-
+                let journalAsArray = Iter.toArray(Trie.iter(journalV2));
+                #ok((journalAsArray, biography));
             }
         }
 
@@ -498,7 +494,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
     };
 
     public shared(msg) func deleteJournalEntry(key: Nat) : 
-    async Result.Result<Trie.Trie<Nat,JournalTypes.JournalEntry>,JournalTypes.Error> {
+    async Result.Result<([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio),JournalTypes.Error> {
         let callerId = msg.caller;
         if( Principal.toText(callerId) != mainCanisterId_) {
            return #err(#NotAuthorized);
@@ -522,7 +518,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
                 );
 
                 journalV2 := updatedJournal.0;
-                #ok(updatedJournal.0);
+                let journalAsArray = Iter.toArray(Trie.iter(journalV2));
+                #ok((journalAsArray), biography);
 
             };
         };

@@ -28,8 +28,9 @@ export const types = {
     CHANGE_DRAFT: "CHANGE_DRAFT",
     CHANGE_DATE: "CHANGE_DATE",
     CHANGE_LOCATION: "CHANGE_LOCATION",
+    CHANGE_CAPSULED: "CHANGE_CAPSULED",
     CHANGE_ENTRY: "CHANGE_ENTRY",
-    CHANGE_LOCK_TIME: "CHANGE_LOCK_TIME",
+    CHANGE_UNLOCK_TIME: "CHANGE_UNLOCK_TIME",
     ADD_JOURNAL_PAGE: "ADD_JOURNAL_PAGE",
     ADD_NFT_FILE: "ADD_NFT_FILE",
     CHANGE_DOB: "CHANGE_DOB",
@@ -133,14 +134,14 @@ const freshPage = {
     title: '',
     location: '',
     entry: '',
-    lockTime: '3',
-    unlockTime: `${Date.now()}`,
+    unlockTime: null,
     emailOne: '',
     emailTwo: '',
     emailThree: '', 
     draft: true,
     isDisabled: false,
     isOpen: true,
+    capsuled: false,
     file1:{
         metaData: {
             fileName: 'null',
@@ -437,6 +438,15 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
+        case types.CHANGE_CAPSULED:
+            updatedJournalPage = {
+                ... state.journal[index],
+                capsuled: payload
+            }
+            state.journal[index] = updatedJournalPage;
+            return {
+                ...state
+            }
         case types.CHANGE_FILE1_METADATA:
             updatedJournalPage = {
                 ... state.journal[index],
@@ -551,10 +561,10 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
-        case types.CHANGE_LOCK_TIME:
+        case types.CHANGE_UNLOCK_TIME:
             updatedJournalPage = {
                 ... state.journal[index],
-                lockTime: payload
+                unlockTime: payload
             }
             state.journal[index] = updatedJournalPage;
             return {

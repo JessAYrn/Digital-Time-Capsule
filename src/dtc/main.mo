@@ -35,6 +35,7 @@ import CanisterManagementMethods "Main/CanisterManagementMethods";
 import NftCollection "NftCollection/NftCollection";
 import Support "SupportCanisterIds/SupportCanisterIds";
 import IC "IC/ic.types";
+import Hex "Ledger/Hex";
 
 shared (msg) actor class User() = this {
 
@@ -232,7 +233,8 @@ shared (msg) actor class User() = this {
         return result;
     };
 
-    public shared(msg) func updateJournalEntry(entryKey : ?JournalTypes.EntryKey, entry : ?JournalTypes.JournalEntryInput) : async Result.Result<Trie.Trie<Nat,JournalTypes.JournalEntry>, JournalTypes.Error> {
+    public shared(msg) func updateJournalEntry(entryKey : ?JournalTypes.EntryKey, entry : ?JournalTypes.JournalEntryInput) : 
+    async Result.Result<([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio), JournalTypes.Error> {
         let callerId = msg.caller;
         let result = await JournalHelperMethods.updateJournalEntry(callerId, profiles, entryKey, entry);
         return result;
@@ -525,36 +527,32 @@ shared (msg) actor class User() = this {
     };
     
     private func verifyOwnership( principal: Principal ): async Bool {
-        let accountId = Account.accountIdentifier(principal, Account.defaultSubaccount());
-        let accountIdAsText = Text.decodeUtf8(accountId);
-        switch(accountIdAsText){
-            case null{
+        let accountIdBlob = Account.accountIdentifier(principal, Account.defaultSubaccount());
+        let accountIdArray = Blob.toArray(accountIdBlob);
+        let accountIdText = Hex.encode(accountIdArray);
+        let tokens_ext_result = await nftCollection.tokens_ext(accountIdText);
+        switch(tokens_ext_result){
+            case(#ok(tokensOwned)){
+                var index = 0;
+                let tokensOwnedIter = Iter.fromArray(tokensOwned);
+                let numberOfTokensOwned = Iter.size(tokensOwnedIter);
+                while(index < numberOfTokensOwned){
+                    let tokenData = tokensOwned[index];
+                    let tokenIndex = tokenData.0;
+                    var tokenIndexAsNat = Nat32.toNat(tokenIndex);
+                    tokenIndexAsNat := tokenIndexAsNat + 1;
+                    if(tokenIndexAsNat == canisterData.nftId){
+                        return true;
+                    };
+                    index += 1;
+                };
                 return false;
             };
-            case(? aidAsText){
-                let tokens_ext_result = await nftCollection.tokens_ext(aidAsText);
-                switch(tokens_ext_result){
-                    case(#ok(tokensOwned)){
-                        var index = 0;
-                        let tokensOwnedIter = Iter.fromArray(tokensOwned);
-                        let numberOfTokensOwned = Iter.size(tokensOwnedIter);
-                        while(index < numberOfTokensOwned){
-                            let tokenData = tokensOwned[index];
-                            let tokenId = tokenData.0;
-                            let tokenIdAsNat = Nat32.toNat(tokenId);
-                            if(tokenIdAsNat == canisterData.nftId){
-                                return true;
-                            };
-                            index += 1;
-                        };
-                        return false;
-                    };
-                    case(#err(e)){
-                        return false;
-                    };
-                };
+            case(#err(e)){
+                return false;
             };
         };
+            
     };
 
     private func setToDefualtControllerSettings(canisterPrincipal: Principal) : 

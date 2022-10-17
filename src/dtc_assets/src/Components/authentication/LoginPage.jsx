@@ -102,7 +102,7 @@ const LoginPage = (props) => {
             <div className={'container_1'}>
                 <div className={'contentContainer _0 login'}>
                     <div className={'contentDiv__loginContent _0'}>
-                        <img className={'logoImg _0'}src="../../../assets/dtc-logo-black.png" alt="Logo"/>
+                        <img className={'logoImg _0'}src="dtc-logo-black.png" alt="Logo"/>
                         <button 
                             className={`loginButtonDiv _0`} 
                             onClick={handleClick_II}
@@ -116,7 +116,7 @@ const LoginPage = (props) => {
                             Log In Using Stoic Identity
                         </button>
                         <div className={'icpLogoDiv _0'}>
-                            <img className={'logoImg'}src="../../../assets/logo.png" alt="Logo"/>
+                            <img className={'logoImg'}src="logo.png" alt="Logo"/>
                         </div>
                     </div>
                 </div>
@@ -126,14 +126,14 @@ const LoginPage = (props) => {
                             <h6 className={" animatedLeft _1 h6Tag"}>
                                 Store Your Memories
                             </h6>
-                            <img className={"cameraImg animatedLeft _1"}src="../../../assets/camera.png" alt="camera"/>
+                            <img className={"cameraImg animatedLeft _1"}src="camera.png" alt="camera"/>
                         </div>
                     </div>
                 </div>
                 <div className={"contentContainer animatedLeft _2"}>
                     <div className={"contentDiv__features animatedLeft _2"}>
                         <div className={"list animatedLeft _2"}>
-                        <img className={"bitcoinImg animatedLeft _2"}src="../../../assets/bitcoin.png" alt="bitcoin"/>
+                        <img className={"bitcoinImg animatedLeft _2"}src="bitcoin.png" alt="bitcoin"/>
                             <h6 className={" animatedLeft _2 h6Tag"}>
                                 Store Your Crypto
                             </h6>
@@ -146,7 +146,7 @@ const LoginPage = (props) => {
                             <h6 className={" animatedLeft _3 h6Tag"}>
                                 Store Your Passwords
                             </h6>
-                            <img className={"safeImg animatedLeft _3"}src="../../../assets/safe-image.png" alt="safe"/>
+                            <img className={"safeImg animatedLeft _3"}src="safe-image.png" alt="safe"/>
                         </div>
                     </div>
                 </div>

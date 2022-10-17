@@ -6,11 +6,11 @@ import { AppContext } from "../App";
 import InputBox from "./Fields/InputBox";
 import { dayInNanoSeconds, monthInDays } from "../Constants";
 import { Modal } from "./Modal";
-import { milisecondsToNanoSeconds } from "../Utils";
 import { NavBar } from "./navigation/NavBar";
 import { MODALS_TYPES } from "../Constants";
 import { UI_CONTEXTS } from "../Contexts";
 import { getIntObserverFunc, visibilityFunctionDefault } from "./animations/IntersectionObserverFunctions";
+import { getDateInMilliseconds } from "../Utils";
 
 const Journal = (props) => {
 
@@ -94,7 +94,7 @@ const Journal = (props) => {
                                 <tr className={"tableRow "}>
                                     <th className={"tableCell "}>DATE</th>
                                     <th className={"tableCell "}>LOCATION</th>
-                                    <th className={"tableCell "}>TIME LAPSED</th>
+                                    <th className={"tableCell "}>AVAILABLE</th>
                                     <th className={"tableCell "}></th>
 
                                 </tr>
@@ -104,19 +104,15 @@ const Journal = (props) => {
                             <table className={"table"}>
                                 <tbody>
                                     { journalState.journal.map((page, index) => {
-                                        const unlockTimeAsInt = page.unlockTime;
-                                        const currentTimeAsInt = milisecondsToNanoSeconds(Date.now());
+                                        const unlockTimeAsInt = getDateInMilliseconds(page.unlockTime);
+                                        const currentTimeAsInt = Date.now();
                                         const unlocked = (currentTimeAsInt >= unlockTimeAsInt);
-                                        const remainingWaitTime = unlockTimeAsInt - currentTimeAsInt;
-                                        const remainingWaitTimeInMonths = remainingWaitTime / (dayInNanoSeconds * monthInDays);
-                                        const timeLapsed = page.lockTime - remainingWaitTimeInMonths;
-                                        const timeLapsedRound = Math.round(timeLapsed * 100) / 100;
                                         const openButton = (unlocked) ? 'Open' : 'Locked';
                                         return(
                                             <tr className={"tableRow "+index} key={index}>
                                                 <td className={"tableCell "+index}>{page.date}</td>
                                                 <td className={"tableCell "+index}>{page.location}</td>
-                                                <td className={"tableCell "+index}> {timeLapsedRound} / {page.lockTime} mo.</td>
+                                                <td className={"tableCell "+index}>{page.unlockTime}  </td>
                                                 <td className={"tableCell "+index}> <button className={'openButton'} onClick={(e) => openPage(e, index, unlocked)}> {openButton} </button> </td>
                                             </tr>  
                                         );
@@ -189,7 +185,7 @@ const Journal = (props) => {
                                 }
                                 <div className={'biography'}>
                                     {mql.matches && <div className={'coverPhotoDiv contentContainer animatedLeft '+` _${animatedLeftElementIndex++}`}>
-                                        <img className={'coverPhoto'} src="../../assets/dtc-logo-black.png" alt="TDTC logo" />
+                                        <img className={'coverPhoto'} src="dtc-logo-black.png" alt="TDTC logo" />
                                     </div>}
                                     <div className={"contentContainer animatedLeft"+` _${animatedLeftElementIndex++}`}>
                                         <InputBox
@@ -250,7 +246,7 @@ const Journal = (props) => {
                                     className={'coverPhotoDiv contentContainer animatedLeft'+ 
                                     ` _${animatedLeftElementIndex++}`}
                                 >
-                                    <img className={'coverPhoto'} src="../../assets/dtc-logo-black.png" alt="TDTC logo" />
+                                    <img className={'coverPhoto'} src="dtc-logo-black.png" alt="TDTC logo" />
                                 </div>}
                                 {displayJournalTable()}
                             </div>

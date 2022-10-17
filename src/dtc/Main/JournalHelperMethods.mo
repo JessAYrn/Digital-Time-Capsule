@@ -186,7 +186,7 @@ module{
         entryKey : ?JournalTypes.EntryKey, 
         entry : ?JournalTypes.JournalEntryInput
     ) : 
-    async Result.Result<Trie.Trie<Nat,JournalTypes.JournalEntry>, JournalTypes.Error> {
+    async Result.Result<([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio), JournalTypes.Error> {
         if(Principal.toText(callerId) == "2vxsx-fae"){
            return #err(#NotAuthorized);
         };

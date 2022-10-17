@@ -11,8 +11,8 @@ export const loadJournalData = (journal, dispatch, types) => {
         payload: unreadEntries,
         actionType: types.SET_JOURNAL_UNREAD_ENTRIES
     })
-
-    const journalBio = journal.ok.userJournalData[1];
+    let userJournalData = journal.ok.userJournalData || journal.ok
+    const journalBio = userJournalData[1];
     const metaData = {email : journal.ok.email, userName: journal.ok.userName};
     
     dispatch({

@@ -1,5 +1,9 @@
 .sliderDiv{
     width: 90%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     .sliderLabelDiv{
         color: rgb(122, 122, 122);
         &__enabled{
@@ -16,10 +20,8 @@
         }
     }
     .sliderInputDiv{
-        padding-left: 5%;
-        width:100%;
         .slider{
-            width: 100%;
+            position: inherit;
         }
     }
 }
