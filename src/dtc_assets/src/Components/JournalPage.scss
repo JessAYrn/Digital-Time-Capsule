@@ -68,6 +68,17 @@
     .logoDiv{
         width: 100%;
         float: left;
+        display: flex;
+        .switchDiv{
+            .switchH5{
+                font-family: 'Courier New', monospace;
+            }
+            width: 85%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
         .backButtonImg{
             margin-top: 3rem;
             float: left;
@@ -76,6 +87,10 @@
         }
     
         .logoImg{
+            @media screen and (max-width: 650px) {    
+                max-width: 8rem;
+                max-height: 8rem;
+            };
             float: right;
             max-width: 10rem;
             max-height: 10rem;

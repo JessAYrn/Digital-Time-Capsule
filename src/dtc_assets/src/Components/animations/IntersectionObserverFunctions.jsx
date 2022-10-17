@@ -15,8 +15,6 @@ export const visibilityFunctionLoginPage = (props) => {
         if(containerIndex === 0) {
             title.innerHTML = "Scroll for More Info"
             title.classList.add("animate");
-        } else if (containerIndex === 1){
-            title.classList.remove("animate");
         } else if (containerIndex === 2){
             title.innerHTML = "Features"
             title.classList.add("animate");
@@ -24,20 +22,10 @@ export const visibilityFunctionLoginPage = (props) => {
             if(deviceType() === "mobile"){
                 title.innerHTML = "The Tech Behind the App"
                 title.classList.add("animate");
-            } else {
-                title.classList.remove("animate");
             }
         } else if(containerIndex === 6) {
             title.innerHTML = "The Tech Behind the App"
             title.classList.add("animate");
-        }
-    }  else if(!entry.isIntersecting){
-        divs.forEach(div => div.classList.remove("animate"));
-        if(containerIndex === 3 && deviceType() === "mobile"){
-            title.classList.remove("animate");
-        } else if(containerIndex === 6) {
-            title.classList.remove("animate");
-
         }
     }
 }
@@ -52,9 +40,7 @@ export const visibilityFunctionDefault = (props) => {
 
     if(entry.isIntersecting){
         divs.forEach(div => div.classList.add("animate"));
-    }  else {
-        divs.forEach(div => div.classList.remove("animate"));
-    }
+    } 
 }
 
 

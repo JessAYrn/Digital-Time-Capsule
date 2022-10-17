@@ -74,3 +74,36 @@ export const getFileArrayBuffer = (inputFile) => {
 export const delay = (ms) => {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+export const getDateInMilliseconds = (date) => {
+  let dateArray = date.split('-');
+  let year = dateArray[0].slice(2);
+  let month = dateArray[1];
+  let day = dateArray[2];
+  if(month === '01' || month === '1') month = 'January'
+  else if(month === '02' || month === '2') month = 'February'
+  else if(month === '03' || month === '3') month = 'March'
+  else if(month === '04' || month === '4') month = 'April'
+  else if(month === '05' || month === '5') month = 'May'
+  else if(month === '06' || month === '6') month = 'June'
+  else if(month === '07' || month === '7') month = 'July'
+  else if(month === '08' || month === '8') month = 'August'
+  else if(month === '09' || month === '9') month = 'September'
+  else if(month === '10') month = 'October'
+  else if(month === '11') month = 'November'
+  else if(month === '12') month = 'December'
+
+  let date_ = new Date();
+  let hour = date_.getUTCHours();
+  let minute = date_.getUTCMinutes();
+  let seconds = date_.getUTCSeconds();
+  if(hour < 10) hour = '0'+hour;
+  if(minute < 10) minute = '0'+minute;
+  if(seconds < 10) seconds = '0'+seconds;
+  let time = hour+":"+minute+':'+seconds;
+
+  date = month + ' ' + day + ', ' + year + ' ' + time + ' UTC+00:00';
+  let unlockDate = new Date(date);
+  let unlockTime = parseInt(unlockDate.getTime());
+  return unlockTime;
+}

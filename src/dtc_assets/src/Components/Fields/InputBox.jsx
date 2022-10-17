@@ -17,6 +17,7 @@ const InputBox = (props) => {
         index,
         setChangesWereMade,
         value,
+        onBlur_,
         setParentState
         // dispatchAction //the action that is to take place in order to dispatch the field change to the redux store
     } = props;
@@ -34,6 +35,7 @@ const InputBox = (props) => {
             setParentState(inputRef.current.value);
         }
         setDisabledOrEnabled("disabled");
+        if(onBlur_) onBlur_();
     };
     const onFocus = () => {
         setDisabledOrEnabled("enabled");

@@ -5,8 +5,8 @@ import LoginPage from './Components/authentication/LoginPage';
 import { UI_CONTEXTS } from './Contexts';
 import Analytics from './Components/Analytics';
 import "./HomePage.scss";
-import { NavBar } from './Components/navigation/NavBar';
-import { AuthenticateClient, CreateActor } from './Components/authentication/AuthenticationMethods';
+import { AuthenticateClient, CreateActor, TriggerAuththenticateClientFunction, CreateUserJournal } from './Components/authentication/AuthenticationMethods';
+import { handleErrorOnFirstLoad, loadCanisterData } from './Components/loadingFunctions';
 
 export const AppContext = createContext({
     journalState: null,
@@ -49,6 +49,47 @@ const HomePage = () => {
         constructActor();
     }, [journalState.createActorFunctionCallCount]);
 
+    useEffect( async () => {
+        if(!journalState.actor){
+            return;
+        }
+        dispatch({
+            actionType: types.SET_IS_LOADING,
+            payload: true
+        })
+        let profilesTrieSizeObj = await handleErrorOnFirstLoad(
+            journalState.actor.getProfilesSize, 
+            TriggerAuththenticateClientFunction, 
+            { journalState, dispatch, types }
+        );
+        if(!profilesTrieSizeObj) return;
+        if("err" in profilesTrieSizeObj) profilesTrieSizeObj = await CreateUserJournal(journalState, dispatch, 'getProfilesSize');
+        if("err" in profilesTrieSizeObj) {
+            dispatch({
+                actionType: types.SET_IS_LOADING,
+                payload: false
+            });
+            return;
+        }
+        let canisterData = await journalState.actor.getCanisterData();
+        canisterData = loadCanisterData(profilesTrieSizeObj, canisterData, dispatch, types);
+        let requestsForApproval;
+        if(canisterData.isOwner){
+            requestsForApproval = await journalState.actor.getRequestingPrincipals();
+            requestsForApproval = requestsForApproval.ok;
+            let updatedCanisterData = {...canisterData, requestsForApproval};
+            dispatch({
+                actionType: types.SET_CANISTER_DATA,
+                payload: updatedCanisterData
+            });
+        }
+        dispatch({
+            actionType: types.SET_IS_LOADING,
+            payload: false
+        })
+
+    }, [journalState.actor]);
+
     return (
         <AppContext.Provider 
             value={{
@@ -59,30 +100,10 @@ const HomePage = () => {
 
             {           
                 journalState.isAuthenticated ? 
-                <div className="container">
-                    <NavBar
-                        walletLink={true}
-                        journalLink={true}
-                        nftLink={true}
-                        accountLink={true}
-                        dashboardLink={false}
-                        notificationIcon={false}
+                    <Analytics/> : 
+                    <LoginPage
                         context={UI_CONTEXTS.HOME_PAGE}
-                    />
-                    <div class={'scrollable'}>
-                        <Analytics/>
-                        {/* <div className={'transparentDiv__homePage'}>
-                            <div className={'carouselDiv'}>
-                                <div className={'videoContainerDiv'}>
-                                    <YouTube videoId={'hiB8OCPxF40'} opts={opts} onReady={onready}/>
-                                </div>
-                            </div>
-                        </div> */}
-                    </div>
-                </div> : 
-                <LoginPage
-                    context={UI_CONTEXTS.HOME_PAGE}
-                /> 
+                    /> 
             }
         </AppContext.Provider>
     );

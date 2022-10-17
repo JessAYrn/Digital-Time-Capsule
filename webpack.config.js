@@ -86,14 +86,6 @@ module.exports = {
       template: path.join(__dirname, asset_entry),
       cache: false
     }),
-    new CopyPlugin({
-      patterns: [
-        {
-          from: path.join(__dirname, "src", "dtc_assets", "assets"),
-          to: path.join(__dirname, "dist", "dtc_assets"),
-        },
-      ],
-    }),
     new webpack.EnvironmentPlugin({
       NODE_ENV: 'development',
       DTC_CANISTER_ID: canisters["dtc"],

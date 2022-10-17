@@ -1,6 +1,7 @@
 import { mapApiObjectToFrontEndJournalEntriesObject } from "../mappers/journalPageMappers";
 import { delay, toHexString } from "../Utils";
 import { generateQrCode } from "./walletFunctions/GenerateQrCode";
+import { mapBackendCanisterDataToFrontEndObj } from "../mappers/dashboardMapperFunctions";
 export const loadJournalData = (journal, dispatch, types) => {
     const journalEntriesObject = mapApiObjectToFrontEndJournalEntriesObject(journal);
     let journalEntries = journalEntriesObject.allEntries;
@@ -10,8 +11,8 @@ export const loadJournalData = (journal, dispatch, types) => {
         payload: unreadEntries,
         actionType: types.SET_JOURNAL_UNREAD_ENTRIES
     })
-
-    const journalBio = journal.ok.userJournalData[1];
+    let userJournalData = journal.ok.userJournalData || journal.ok
+    const journalBio = userJournalData[1];
     const metaData = {email : journal.ok.email, userName: journal.ok.userName};
     
     dispatch({
@@ -96,6 +97,20 @@ export const loadNftData = (nftCollection, dispatch, types) => {
         actionType: types.SET_NFT_DATA_RELOAD_STATUS
     });
 };
+
+export const loadCanisterData = (profilesTrieSizeObj, canisterData, dispatch, types) => {
+    profilesTrieSizeObj = profilesTrieSizeObj.ok;
+    canisterData = mapBackendCanisterDataToFrontEndObj(canisterData);
+    dispatch({
+        actionType: types.SET_CANISTER_DATA,
+        payload: canisterData
+    });
+    dispatch({
+        actionType: types.SET_JOURNAL_COUNT,
+        payload: parseInt(profilesTrieSizeObj)
+    });
+    return canisterData;
+}
 
 export const handleErrorOnFirstLoad = async (fnForLoadingData, fnForRefiringAuthentication, props_ ) => {
     const {

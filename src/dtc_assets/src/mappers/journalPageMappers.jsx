@@ -1,5 +1,6 @@
 import { milisecondsToNanoSeconds } from "../Utils";
 import { file1FileIndex, file2FileIndex } from "../Constants";
+import { nanoSecondsToMiliSeconds } from "../Utils";
 import { TEST_DATA_FOR_NOTIFICATIONS } from "../testData/notificationsTestData";
 
 
@@ -37,8 +38,8 @@ export const mapAndSendJournalPageRequestToApi = async (key, pageData, files, ac
 };
 
 export const mapApiObjectToFrontEndJournalEntriesObject = (journalDataFromApi) => {
-
-    let journalEntriesForFrontend = journalDataFromApi.ok.userJournalData[0].map((arrayWithKeyAndPage) => {
+    let journalEntriesForFrontend_ = journalDataFromApi.ok.userJournalData || journalDataFromApi.ok
+    let journalEntriesForFrontend = journalEntriesForFrontend_[0].map((arrayWithKeyAndPage) => {
         const backEndObj = arrayWithKeyAndPage[1];
         const entryKey  = arrayWithKeyAndPage[0];
         const file1Data = {
@@ -55,15 +56,27 @@ export const mapApiObjectToFrontEndJournalEntriesObject = (journalDataFromApi) =
                 fileIndex: file2FileIndex
             },
             isLoading: false
-        }
+        };
+        let unlockTimeInNanoseconds = parseInt(backEndObj.unlockTime);
+        let unlockTimeInMilliseconds = nanoSecondsToMiliSeconds(unlockTimeInNanoseconds);
+        let unlockDate = new Date(unlockTimeInMilliseconds);
+        let year = unlockDate.getFullYear();
+        let month = unlockDate.getMonth() + 1;
+        if(month < 10) month = `0${month}`;
+        let day = unlockDate.getDate();
+        if(day < 10) day = `0${day}`;
+        unlockDate = year + '-' + month + '-' + day;  
 
-
+        let submitDateArray = backEndObj.date.split('-');
+        let submitMonth = submitDateArray[1];
+        let capsuled = false;
+        if(parseInt(submitMonth) !== parseInt(month)) capsuled = true;
         return {
             date: backEndObj.date,
             title: backEndObj.entryTitle,
             location: backEndObj.location,
-            lockTime: parseInt(backEndObj.lockTime),
-            unlockTime: parseInt(backEndObj.unlockTime),
+            capsuled: capsuled,
+            unlockTime: unlockDate,
             entry: backEndObj.text,
             emailOne: backEndObj.emailOne,
             emailTwo: backEndObj.emailTwo,

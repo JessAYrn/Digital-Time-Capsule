@@ -6,7 +6,7 @@ import journalReducer, {initialState, types} from './reducers/journalReducer';
 import { UI_CONTEXTS } from './Contexts';
 import WalletPage from './Components/WalletPage';
 import { testTx } from './testData/Transactions';
-import { AuthenticateClient, CreateActor, TriggerAuththenticateClientFunction } from './Components/authentication/AuthenticationMethods';
+import { AuthenticateClient, CreateActor, CreateUserJournal, TriggerAuththenticateClientFunction } from './Components/authentication/AuthenticationMethods';
 import { loadJournalData, loadWalletData, loadTxHistory, handleErrorOnFirstLoad } from './Components/loadingFunctions';
 
 export const AppContext = createContext({
@@ -75,20 +75,19 @@ const WalletApp = () => {
                 { journalState, dispatch, types }
             );
             if(!walletDataFromApi) return;
-            if("err" in walletDataFromApi){
-                journalState.actor.create().then((result) => {
-                });
+            if("err" in walletDataFromApi) walletDataFromApi = await CreateUserJournal(journalState, dispatch, 'readWalletData');
+            if("err" in walletDataFromApi) {
                 dispatch({
                     actionType: types.SET_IS_LOADING,
                     payload: false
                 });
-            } else {
-                await loadWalletData(walletDataFromApi, dispatch, types);
-                dispatch({
-                    actionType: types.SET_IS_LOADING,
-                    payload: false
-                });
-            }
+                return;
+            };
+            await loadWalletData(walletDataFromApi, dispatch, types);
+            dispatch({
+                actionType: types.SET_IS_LOADING,
+                payload: false
+            });
         }; 
         if(journalState.reloadStatuses.journalData){
             //Load Journal Data in the background

@@ -7,7 +7,7 @@ import LoadScreen from './Components/LoadScreen';
 import { UI_CONTEXTS } from './Contexts';
 import journalReducer, {initialState, types} from './reducers/journalReducer';
 import { TEST_DATA_FOR_NOTIFICATIONS } from './testData/notificationsTestData';
-import { AuthenticateClient, CreateActor, TriggerAuththenticateClientFunction } from './Components/authentication/AuthenticationMethods';
+import { AuthenticateClient, CreateActor, CreateUserJournal, TriggerAuththenticateClientFunction } from './Components/authentication/AuthenticationMethods';
 import { handleErrorOnFirstLoad, loadJournalData, loadNftData, loadWalletData } from './Components/loadingFunctions';
 
 export const AppContext = createContext({
@@ -64,20 +64,19 @@ const App = () => {
                 { journalState, dispatch, types }
             );
             if(!journal) return;
-            if("err" in journal){
-                journalState.actor.create().then((result) => {
-                    dispatch({
-                        actionType: types.SET_IS_LOADING,
-                        payload: false
-                    });
-                });
-            } else {
-                loadJournalData(journal, dispatch, types);
+            if("err" in journal) journal = await CreateUserJournal(journalState, dispatch, 'readJournal');
+            if("err" in journal) {
                 dispatch({
                     actionType: types.SET_IS_LOADING,
                     payload: false
                 });
+                return;
             }
+            loadJournalData(journal, dispatch, types);
+            dispatch({
+                actionType: types.SET_IS_LOADING,
+                payload: false
+            });
         }
         if(journalState.reloadStatuses.nftData){
             const nftCollection = await journalState.actor.getUserNFTsInfo();
@@ -102,12 +101,12 @@ const App = () => {
 
             {
                 journalState.isAuthenticated ? 
-                journalState.isLoading ? 
-                    <LoadScreen/> :
+                    journalState.isLoading ? 
+                        <LoadScreen/> :
                         <Journal/> : 
-                            <LoginPage
-                                context={UI_CONTEXTS.JOURNAL}
-                            /> 
+                    <LoginPage
+                        context={UI_CONTEXTS.JOURNAL}
+                    /> 
             }
 
         </AppContext.Provider>

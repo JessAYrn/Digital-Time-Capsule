@@ -18,7 +18,6 @@ module {
         text: Text;
         location: Text;
         date: Text;
-        lockTime: Int;
         unlockTime: Int;
         sent: Bool;
         emailOne: Text;
@@ -43,7 +42,7 @@ module {
         text: Text;
         location: Text;
         date: Text;
-        lockTime: Int;
+        unlockTime: Int;
         emailOne: Text;
         emailTwo: Text;
         emailThree: Text;
@@ -78,6 +77,7 @@ module {
         #UserNameTaken;
         #WalletBalanceTooLow;
         #ZeroAddress;
+        #NotAcceptingRequests;
     };
     
 }

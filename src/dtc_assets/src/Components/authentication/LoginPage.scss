@@ -90,6 +90,7 @@
                         margin-left: 5%;    
                         max-width: 90%;  
                     };
+                    opacity: 0.98;
                     border-radius: 10px;
                     box-shadow: 0 17px 20px rgb(0 0 0 / 38%);
                     background-color: rgb(233, 233, 233);
@@ -114,29 +115,13 @@
                         max-width: 20vw;
                     }
                 
-                    .open{
-                        max-width: 27%;
-                        max-height: 10%;
-                        border-radius: 25px;
-                    }
-                
-                    .loginButtonDiv__{
-                        &open{
-                            @media screen and (max-width: 480px) {    
-                                max-width: 50%;
-                            };
-                            max-width: 27%;
-                            max-height: 10%;
-                            border-radius: 25px;
-                        }
-                        &closed{
-                            @media screen and (max-width: 480px) {    
-                                max-width: 50%;
-                            };
-                            max-width: 27%;
-                            max-height: 10%;
-                            border-radius: 25px;
-                        }
+                    .loginButtonDiv{
+                        font-family: 'Courier New', monospace;
+                        max-width: 100%;
+                        width: 270px;
+                        height: 35px;
+                        border-radius: 10px;
+                        margin-bottom: 20px;
                     }
             
                     .icpLogoDiv{

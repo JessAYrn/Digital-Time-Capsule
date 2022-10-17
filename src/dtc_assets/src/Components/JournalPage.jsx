@@ -9,6 +9,9 @@ import DatePicker from "./Fields/DatePicker";
 import LoadScreen from "./LoadScreen";
 import { UI_CONTEXTS } from "../Contexts";
 import { MODALS_TYPES } from "../Constants";
+import { getDateInMilliseconds, milisecondsToNanoSeconds } from "../Utils";
+import { loadJournalData } from "./loadingFunctions";
+import Switch from "./Fields/Switch";
 
 const JournalPage = (props) => {
 
@@ -25,18 +28,41 @@ const JournalPage = (props) => {
 
     let journalSize = journalState.journal.length;
 
+    let todaysDate = new Date();
+    let year = todaysDate.getFullYear();
+    let month = todaysDate.getMonth();
+    let minimumMonth = (month + 2) % 12;
+    if(minimumMonth < 10) minimumMonth = '0' + minimumMonth;
+    let minimumYear = (minimumMonth === '01') ? year + 1 : year;
+    let day = todaysDate.getDate();
+    if(day < 10) day = '0' + day;
+    let minimumDate = minimumYear + '-' + minimumMonth + '-' + day;
+
     const journalPageData = useMemo(() => {
         return journalState.journal[index];
     }, [journalState.journal[index]])
 
+    const toggleSwitch = () => {
+        dispatch({
+            actionType: types.CHANGE_CAPSULED,
+            payload: !journalPageData.capsuled,
+            index: index
+        });
+    };
+
     const mapAndSendEntryToApi = async (entryKey, journalEntry, isDraft) => {
+        let unlockTimeInNanoseconds;
+        if(journalEntry.unlockTime) {
+            let unlockTimeInMilliseconds = getDateInMilliseconds(journalEntry.unlockTime);
+            unlockTimeInNanoseconds = milisecondsToNanoSeconds(unlockTimeInMilliseconds);
+        } else unlockTimeInNanoseconds = milisecondsToNanoSeconds(parseInt(Date.now()));
 
         const entryAsApiObject = [{
             entryTitle: journalEntry.title,
             text: journalEntry.entry,
             location: journalEntry.location,
             date: journalEntry.date,
-            lockTime: parseInt(journalEntry.lockTime),
+            unlockTime: unlockTimeInNanoseconds,
             emailOne: journalEntry.emailOne,
             emailTwo: journalEntry.emailTwo,
             emailThree: journalEntry.emailThree,
@@ -51,6 +77,9 @@ const JournalPage = (props) => {
             entryKeyAsApiObject,
             entryAsApiObject
         );
+        if('ok' in result){
+            loadJournalData(result, dispatch, types);
+        }
         return result;
 
     }
@@ -146,21 +175,21 @@ const JournalPage = (props) => {
                 <div className={"journalPageContainer"}>
                     <div className={"logoDiv"}>
                         <img className={'backButtonImg'} src="back-icon.png" alt="Back Button" onClick={(e) => handleClosePage(e)}/>
+                        <div className="switchDiv">
+                            <h5 className='switchH5'>
+                                Time Capsule:
+                            </h5>
+                            <Switch
+                                disabled={!journalPageData.draft}
+                                active={journalPageData.capsuled}
+                                onClick={toggleSwitch}
+                            />
+                        </div>
                         <img className={'logoImg'}src="dtc-logo-black.png" alt="Logo" />
                     </div>
-                    <Slider
-                        min={0}
-                        max={120}
-                        setChangesWereMade={setPageChangesMade}
-                        disabled={!journalPageData.draft}
-                        dispatch={dispatch}
-                        dispatchAction={types.CHANGE_LOCK_TIME}
-                        index={index}
-                        value={(journalPageData) ? journalPageData.lockTime : '3'}
-                    />
                     <div className={"journalText"} >
                         <DatePicker
-                            label={"Date: "}
+                            label={"Date of Entry: "}
                             rows={"1"}
                             disabled={!journalPageData.draft}
                             setChangesWereMade={setPageChangesMade}
@@ -169,6 +198,18 @@ const JournalPage = (props) => {
                             index={index}
                             value={(journalPageData) ? journalPageData.date : ''}
                         />
+                        {journalPageData.capsuled && 
+                        <DatePicker
+                            label={"Date to Unlock Entry: "}
+                            rows={"1"}
+                            disabled={!journalPageData.draft}
+                            setChangesWereMade={setPageChangesMade}
+                            dispatch={dispatch}
+                            dispatchAction={types.CHANGE_UNLOCK_TIME}
+                            index={index}
+                            value={(journalPageData) ? journalPageData.unlockTime : ''}
+                            min={minimumDate}
+                        />}
                         <InputBox
                             label={"Location: "}
                             rows={"1"}

@@ -7,6 +7,7 @@ import "./SubscriptionPage.scss";
 import { AppContext } from '../Account';
 import { NavBar } from './navigation/NavBar';
 import { UI_CONTEXTS } from '../Contexts';
+import { Modal } from './Modal';
 
 
 
@@ -30,6 +31,12 @@ const SubcriptionPage = (props) => {
     const isAdmin = journalState.metaData.userName[0] === 'admin';
 
 return(
+    journalState.modalStatus.show ?
+    <div className={"container__accountPage"}>
+        <Modal 
+            context={UI_CONTEXTS.ACCOUNT_PAGE}
+        />
+    </div> : 
     <div className='container__accountPage'>
         <NavBar
             walletLink={true}

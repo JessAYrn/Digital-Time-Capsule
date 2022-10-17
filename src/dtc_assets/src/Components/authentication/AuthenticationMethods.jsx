@@ -2,6 +2,7 @@ import { AuthClient } from "@dfinity/auth-client";
 import { createActor, canisterId } from "../../../../declarations/dtc/index";
 import {StoicIdentity} from "ic-stoic-identity";
 import { types, initialState } from "../../reducers/journalReducer";
+import { MODALS_TYPES } from "../../Constants";
 
 export const AuthenticateClient = async (journalState, dispatch, actionTypes) => { 
     let identity;
@@ -80,4 +81,21 @@ export const TriggerCreateActorFunction = (journalState, dispatch, types) => {
         actionType: types.SET_CREATE_ACTOR_FUNCTION_CALL_COUNT,
         payload: journalState.createActorFunctionCallCount + 1
     });
+}
+
+export const CreateUserJournal = async (journalState, dispatch, nameOfLoadFunction) => {
+    let registrationResult = await journalState.actor.registerOwner();
+    let result = await journalState.actor.create()
+    if("err" in result){
+        let payload = { show: true, which: MODALS_TYPES.notAuthorizedByOwner };
+        dispatch({
+            actionType: types.SET_MODAL_STATUS, 
+            payload: payload
+        });
+    } else {
+        const loadFunction = journalState.actor[nameOfLoadFunction];
+        result = await loadFunction();
+    }
+    return result;
+    
 }

@@ -7,9 +7,11 @@ export const types = {
     SET_STOIC_IDENTITY: "SET_STOIC_IDENTITY",
     SET_AUTHENTICATE_FUNCTION_CALL_COUNT: "SET_AUTHENTICATE_FUNCTION_CALL_COUNT",
     SET_CREATE_ACTOR_FUNCTION_CALL_COUNT: "SET_CREATE_ACTOR_FUNCTION_CALL_COUNT",
+    SET_CANISTER_DATA: "SET_CANISTER_DATA",
     SET_IS_LOGGING_IN: "SET_IS_LOGGING_IN",
     SET_JOURNAL: "SET_JOURNAL",
     SET_JOURNAL_UNREAD_ENTRIES:"SET_JOURNAL_UNREAD_ENTRIES",
+    SET_JOURNAL_COUNT: "SET_JOURNAL_COUNT",
     SET_BIO: "SET_BIO",
     SET_METADATA: "SET_METADATA",
     SET_WALLET_DATA: "SET_WALLET_DATA",
@@ -26,8 +28,9 @@ export const types = {
     CHANGE_DRAFT: "CHANGE_DRAFT",
     CHANGE_DATE: "CHANGE_DATE",
     CHANGE_LOCATION: "CHANGE_LOCATION",
+    CHANGE_CAPSULED: "CHANGE_CAPSULED",
     CHANGE_ENTRY: "CHANGE_ENTRY",
-    CHANGE_LOCK_TIME: "CHANGE_LOCK_TIME",
+    CHANGE_UNLOCK_TIME: "CHANGE_UNLOCK_TIME",
     ADD_JOURNAL_PAGE: "ADD_JOURNAL_PAGE",
     ADD_NFT_FILE: "ADD_NFT_FILE",
     CHANGE_DOB: "CHANGE_DOB",
@@ -64,6 +67,20 @@ export const initialState = {
     authenticateFunctionCallCount: 0,
     createActorFunctionCallCount: 0,
     stoicIdentity: undefined,
+    journalCount: 0,
+    canisterData: {
+        approvedUsers: [],
+        backEndCyclesBurnRatePerDay: 1,
+        backEndPrincipal: "Null",
+        frontEndPrincipal: "Null",
+        lastRecordedBackEndCyclesBalance: 1,
+        nftOwner: "Null",
+        isOwner: false,
+        nftId: "Null",
+        supportMode: false,
+        acceptingRequests: false,
+        requestsForApproval: []
+    },
     isLoggingIn: false,
     metaData: {
         email: [],
@@ -117,14 +134,14 @@ const freshPage = {
     title: '',
     location: '',
     entry: '',
-    lockTime: '3',
-    unlockTime: `${Date.now()}`,
+    unlockTime: null,
     emailOne: '',
     emailTwo: '',
     emailThree: '', 
     draft: true,
     isDisabled: false,
     isOpen: true,
+    capsuled: false,
     file1:{
         metaData: {
             fileName: 'null',
@@ -174,6 +191,16 @@ const changeValue = (state = initialState, action) => {
         }
         case types.SET_STOIC_IDENTITY:
         state.stoicIdentity = payload;
+        return {
+            ...state
+        }
+        case types.SET_JOURNAL_COUNT:
+        state.journalCount = payload;
+        return {
+            ...state
+        }
+        case types.SET_CANISTER_DATA:
+        state.canisterData = payload;
         return {
             ...state
         }
@@ -411,6 +438,15 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
+        case types.CHANGE_CAPSULED:
+            updatedJournalPage = {
+                ... state.journal[index],
+                capsuled: payload
+            }
+            state.journal[index] = updatedJournalPage;
+            return {
+                ...state
+            }
         case types.CHANGE_FILE1_METADATA:
             updatedJournalPage = {
                 ... state.journal[index],
@@ -525,10 +561,10 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
-        case types.CHANGE_LOCK_TIME:
+        case types.CHANGE_UNLOCK_TIME:
             updatedJournalPage = {
                 ... state.journal[index],
-                lockTime: payload
+                unlockTime: payload
             }
             state.journal[index] = updatedJournalPage;
             return {
