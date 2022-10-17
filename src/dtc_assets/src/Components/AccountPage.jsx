@@ -48,7 +48,7 @@ return(
             context={UI_CONTEXTS.ACCOUNT_PAGE}
         />
         <div className={`logoDiv ${isAdmin ? 'admin' : ''}`}>
-            <img className={'logoImg'}src="../../assets/dtc-logo-black.png" alt="Logo"/>
+            <img className={'logoImg'}src="dtc-logo-black.png" alt="Logo"/>
             <div className={`subscriptionSection ${isAdmin ? 'admin_' : ''}`}>
                 <InputBox
                     divClassName={"email"}

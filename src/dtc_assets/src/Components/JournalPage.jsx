@@ -176,9 +176,9 @@ const JournalPage = (props) => {
                     <div className={"logoDiv"}>
                         <img className={'backButtonImg'} src="back-icon.png" alt="Back Button" onClick={(e) => handleClosePage(e)}/>
                         <div className="switchDiv">
-                            <h3 className='switchH3'>
+                            <h5 className='switchH5'>
                                 Time Capsule:
-                            </h3>
+                            </h5>
                             <Switch
                                 disabled={!journalPageData.draft}
                                 active={journalPageData.capsuled}

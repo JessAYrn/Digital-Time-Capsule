@@ -95,7 +95,7 @@ const WalletPage = (props) => {
                             { journalState.walletData.txHistory.isLoading ? 
                             <div className={`loadGifContainer contentContainer _${contentContainerIndex} animatedLeft`}>
                                 <div className='loadGifDiv'>
-                                    <img src="../../assets/Loading.gif" alt="Loading Screen" />
+                                    <img src="Loading.gif" alt="Loading Screen" />
                                 </div>
                             </div>
                                 :
