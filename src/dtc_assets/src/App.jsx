@@ -101,9 +101,7 @@ const App = () => {
 
             {
                 journalState.isAuthenticated ? 
-                    journalState.isLoading ? 
-                        <LoadScreen/> :
-                        <Journal/> : 
+                    <Journal/> : 
                     <LoginPage
                         context={UI_CONTEXTS.JOURNAL}
                     /> 

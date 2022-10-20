@@ -9,15 +9,16 @@ import { getIntObserverFunc, visibilityFunctionDefault } from "./animations/Inte
 const LoadScreen = () => {
 
     const { dispatch, journalState } = useContext(AppContext);
-    const [showTop, setShowTop] = useState(true);
-    const [showBottom, setShowBottom] = useState(false);
-    let seconds = 0;
-    const toggleAnimations = () => {
-        setShowBottom(!showBottom);
-        setShowTop(!showTop);
-        seconds++;
+    const [direction, setDirection] = useState('');
+    const [seconds, setSeconds] = useState(0);
+    const rotateAnimations = () => {
+        setSeconds( seconds + 1);
+        if(seconds % 4 === 0) setDirection('');
+        else if(seconds % 4 === 1) setDirection('right');
+        else if(seconds % 4 === 2) setDirection('down');
+        else if(seconds % 4 === 3) setDirection('left');
     }
-    setTimeout(toggleAnimations, 1000);
+    setTimeout(rotateAnimations, 1000);
 
     useEffect(() => {
         const containers = document.querySelectorAll(".contentContainer.animatedLeft");
@@ -33,33 +34,12 @@ const LoadScreen = () => {
     }, [journalState])
 
     return(
-        <div className="container">
+        <div className="container_loadScreen">
             <div className="loadContentContainer">
-                <div className={`loadContentDiv contentContainer ${showTop ? 'animatedLeft' : ''}`}>
-                    <img src="Loading.gif" alt="Loading Screen" />
-                </div>
-                <div className={`loadContentDiv contentContainer ${showBottom ? 'animatedLeft' : ''}`}>
-                    <img src="Loading.gif" alt="Loading Screen" />
-                </div>
-                <div className={`loginButtonDiv contentContainer ${(seconds > 9) ? 'animatedLeft' : ''}`}>
-                    <button className={'loginButton'} onClick={async () => {
-                        dispatch({
-                            actionType: types.SET_ENTIRE_REDUX_STATE,
-                            payload: initialState
-                        });
-                        StoicIdentity.load().then(async identity => {
-                            if (identity !== false) StoicIdentity.disconnect();
-                            dispatch({
-                                actionType: types.SET_STOIC_IDENTITY,
-                                payload: undefined
-                            });
-                        });
-                        await journalState.authClient.logout();
-                        dispatch({
-                            actionType: types.SET_IS_LOGGING_IN,
-                            payload: true
-                        })
-                    }}> Log Out </button>  
+                <div className={`loadContentDiv contentContainer`}>
+                    <div className={`imageDiv rotate ${direction}`}>
+                        <img src="dtc-logo-black.png" alt="Loading Screen" />
+                    </div>
                 </div>
             </div> 
         </div>

@@ -6,12 +6,13 @@
     padding-top: 10px;
     position:fixed;
     top: 0;
+    left: 0px;
     z-index: 100;
     .navbar{
         padding-left: 10px;
     }
     .navBar_Journal.active{
-        transform: translateX(0px);
+        transform: translateX(-3px);
     }
     .navBar_Journal{
         margin-top: -10px;

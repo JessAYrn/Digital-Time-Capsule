@@ -5,6 +5,7 @@ import "./Journal.scss";
 import { AppContext } from "../App";
 import InputBox from "./Fields/InputBox";
 import { dayInNanoSeconds, monthInDays } from "../Constants";
+import LoadScreen from "./LoadScreen";
 import { Modal } from "./Modal";
 import { NavBar } from "./navigation/NavBar";
 import { MODALS_TYPES } from "../Constants";
@@ -176,6 +177,8 @@ const Journal = (props) => {
                             toggleDisplayNotifications={toggleDisplayNotifications}
                             context={UI_CONTEXTS.JOURNAL}
                         />
+                        {journalState.isLoading ? 
+                        <LoadScreen/> : 
                         <div className={"container__Journal"}>
                             <div className={"section__1"}>
                                 {   mql.matches &&
@@ -250,7 +253,7 @@ const Journal = (props) => {
                                 </div>}
                                 {displayJournalTable()}
                             </div>
-                        </div> 
+                        </div> }
                     </div> : 
                     <JournalPage
                         index={getIndexOfVisiblePage()}

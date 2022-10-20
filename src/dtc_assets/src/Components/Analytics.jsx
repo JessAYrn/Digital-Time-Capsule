@@ -232,8 +232,6 @@ const Analytics = () => {
     let animatedLeftElementIndex = 0;
 
     return(
-        journalState.isLoading ? 
-            <LoadScreen/> :
             journalState.modalStatus.show ?
                 <div className={"container"}>
                     <Modal 
@@ -250,183 +248,185 @@ const Analytics = () => {
                         notificationIcon={false}
                         context={UI_CONTEXTS.HOME_PAGE}
                     />
-                    <div class={'scrollable'}>
-                        <div className='container_homePage'>
-                            <div className={'transparentDiv__homePage__dataFields  animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
-                                <div className={'AnalyticsDiv'}>
-                                    <div className={'AnalyticsContentContainer'}>
-                                        <DataField
-                                            label={'Journals Created:'}
-                                            journalState={journalState}
-                                            dispatch={dispatch}
-                                            dataField={'journalCount'}
-                                        />
-                                        <DataField
-                                            label={'Front End Canister Principal:'}
-                                            journalState={journalState}
-                                            dispatch={dispatch}
-                                            dataField={'canisterData'}
-                                            dataSubField={CANISTER_DATA_FIELDS.frontEndPrincipal}
-                                        />
-                                        <DataField
-                                            label={'Back End Canister Principal:'}
-                                            journalState={journalState}
-                                            dispatch={dispatch}
-                                            dataField={'canisterData'}
-                                            dataSubField={CANISTER_DATA_FIELDS.backEndPrincipal}
-                                        />
-                                        <DataField
-                                            label={'Cycles Burned Per Day:'}
-                                            journalState={journalState}
-                                            dispatch={dispatch}
-                                            dataField={'canisterData'}
-                                            dataSubField={CANISTER_DATA_FIELDS.backEndCyclesBurnRatePerDay}
-                                        />
-                                        <DataField
-                                            label={'Cycles Balance:'}
-                                            journalState={journalState}
-                                            dispatch={dispatch}
-                                            dataField={'canisterData'}
-                                            dataSubField={CANISTER_DATA_FIELDS.lastRecordedBackEndCyclesBalance}
-                                        />
-                                        <DataField
-                                            label={'Canister Owner:'}
-                                            journalState={journalState}
-                                            dispatch={dispatch}
-                                            dataField={'canisterData'}
-                                            dataSubField={CANISTER_DATA_FIELDS.nftOwner}
-                                        />
-                                        <DataField
-                                            label={'NFT ID:'}
-                                            journalState={journalState}
-                                            dispatch={dispatch}
-                                            dataField={'canisterData'}
-                                            dataSubField={CANISTER_DATA_FIELDS.nftId}
-                                        />
+                    {journalState.isLoading ? 
+                        <LoadScreen/> :
+                        <div class={'scrollable'}>
+                            <div className='container_homePage'>
+                                <div className={'transparentDiv__homePage__dataFields  animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
+                                    <div className={'AnalyticsDiv'}>
+                                        <div className={'AnalyticsContentContainer'}>
+                                            <DataField
+                                                label={'Journals Created:'}
+                                                journalState={journalState}
+                                                dispatch={dispatch}
+                                                dataField={'journalCount'}
+                                            />
+                                            <DataField
+                                                label={'Front End Canister Principal:'}
+                                                journalState={journalState}
+                                                dispatch={dispatch}
+                                                dataField={'canisterData'}
+                                                dataSubField={CANISTER_DATA_FIELDS.frontEndPrincipal}
+                                            />
+                                            <DataField
+                                                label={'Back End Canister Principal:'}
+                                                journalState={journalState}
+                                                dispatch={dispatch}
+                                                dataField={'canisterData'}
+                                                dataSubField={CANISTER_DATA_FIELDS.backEndPrincipal}
+                                            />
+                                            <DataField
+                                                label={'Cycles Burned Per Day:'}
+                                                journalState={journalState}
+                                                dispatch={dispatch}
+                                                dataField={'canisterData'}
+                                                dataSubField={CANISTER_DATA_FIELDS.backEndCyclesBurnRatePerDay}
+                                            />
+                                            <DataField
+                                                label={'Cycles Balance:'}
+                                                journalState={journalState}
+                                                dispatch={dispatch}
+                                                dataField={'canisterData'}
+                                                dataSubField={CANISTER_DATA_FIELDS.lastRecordedBackEndCyclesBalance}
+                                            />
+                                            <DataField
+                                                label={'Canister Owner:'}
+                                                journalState={journalState}
+                                                dispatch={dispatch}
+                                                dataField={'canisterData'}
+                                                dataSubField={CANISTER_DATA_FIELDS.nftOwner}
+                                            />
+                                            <DataField
+                                                label={'NFT ID:'}
+                                                journalState={journalState}
+                                                dispatch={dispatch}
+                                                dataField={'canisterData'}
+                                                dataSubField={CANISTER_DATA_FIELDS.nftId}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            {   journalState.canisterData.isOwner &&
+                                {   journalState.canisterData.isOwner &&
+                                    <div className={'transparentDiv__homePage__dataFields approvedPrincipals  animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
+                                        <div className={'AnalyticsDiv'}>
+                                            <div className={'AnalyticsContentContainer'}>
+                                                <DataFieldArray
+                                                    label={'Principals Requesting Approval:'}
+                                                    dispatch={dispatch}
+                                                    journalState={journalState}
+                                                    dataField={'canisterData'}
+                                                    dataSubField={CANISTER_DATA_FIELDS.requestsForApproval}
+                                                    tuples={false}
+                                                    isOwner={journalState.canisterData.isOwner}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div> 
+                                }
                                 <div className={'transparentDiv__homePage__dataFields approvedPrincipals  animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
                                     <div className={'AnalyticsDiv'}>
                                         <div className={'AnalyticsContentContainer'}>
                                             <DataFieldArray
-                                                label={'Principals Requesting Approval:'}
+                                                label={'Approved Principals:'}
                                                 dispatch={dispatch}
+                                                tuples={true}
                                                 journalState={journalState}
                                                 dataField={'canisterData'}
-                                                dataSubField={CANISTER_DATA_FIELDS.requestsForApproval}
-                                                tuples={false}
+                                                dataSubField={CANISTER_DATA_FIELDS.approvedUsers}
                                                 isOwner={journalState.canisterData.isOwner}
                                             />
                                         </div>
                                     </div>
-                                </div> 
-                            }
-                            <div className={'transparentDiv__homePage__dataFields approvedPrincipals  animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
-                                <div className={'AnalyticsDiv'}>
-                                    <div className={'AnalyticsContentContainer'}>
-                                        <DataFieldArray
-                                            label={'Approved Principals:'}
-                                            dispatch={dispatch}
-                                            tuples={true}
-                                            journalState={journalState}
-                                            dataField={'canisterData'}
-                                            dataSubField={CANISTER_DATA_FIELDS.approvedUsers}
-                                            isOwner={journalState.canisterData.isOwner}
+                                </div>
+                                {journalState.canisterData.isOwner && 
+                                <div className={'switchDiv animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
+                                    <div className='section'>
+                                        <h3 className={'lebelH3'}> 
+                                            Activate Support Mode:  
+                                        </h3>
+                                    </div>
+                                    <div className='section'>
+                                        <Switch
+                                            active={journalState.canisterData.supportMode}
+                                            onClick={toggleSupportMode}
                                         />
                                     </div>
+                                </div>}
+                                {journalState.canisterData.isOwner && 
+                                <div className={'switchDiv animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
+                                    <div className='section'>
+                                        <h3 className={'lebelH3'}> 
+                                            Receive Requests:  
+                                        </h3>
+                                    </div>
+                                    <div className='section'>
+                                        <Switch
+                                            active={journalState.canisterData.acceptingRequests}
+                                            onClick={toggleAcceptRequest}
+                                        />
+                                    </div>
+                                </div>}
+                                <div className={'registryButtonDiv animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
+                                    <button className={'registryButton'} onClick={handleRegistration}> Register As New Owner </button>
                                 </div>
-                            </div>
-                            {journalState.canisterData.isOwner && 
-                            <div className={'switchDiv animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
-                                <div className='section'>
-                                    <h3 className={'lebelH3'}> 
-                                        Activate Support Mode:  
-                                    </h3>
-                                </div>
-                                <div className='section'>
-                                    <Switch
-                                        active={journalState.canisterData.supportMode}
-                                        onClick={toggleSupportMode}
-                                    />
-                                </div>
-                            </div>}
-                            {journalState.canisterData.isOwner && 
-                            <div className={'switchDiv animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
-                                <div className='section'>
-                                    <h3 className={'lebelH3'}> 
-                                        Receive Requests:  
-                                    </h3>
-                                </div>
-                                <div className='section'>
-                                    <Switch
-                                        active={journalState.canisterData.acceptingRequests}
-                                        onClick={toggleAcceptRequest}
-                                    />
-                                </div>
-                            </div>}
-                            <div className={'registryButtonDiv animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
-                                <button className={'registryButton'} onClick={handleRegistration}> Register As New Owner </button>
-                            </div>
-                            <div className={'transparentDiv__homePage__roadMap animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
-                                <div className={'roadMapContentDiv'}>
-                                    <div className={'missionStatementContentContainer'}>
-                                        <div className={'roadMapDiv'}>
-                                            <h3> Road Map: </h3>
-                                            <ul>
-                                                <li>
-                                                    Transaction history displayed in wallet section
+                                <div className={'transparentDiv__homePage__roadMap animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
+                                    <div className={'roadMapContentDiv'}>
+                                        <div className={'missionStatementContentContainer'}>
+                                            <div className={'roadMapDiv'}>
+                                                <h3> Road Map: </h3>
+                                                <ul>
+                                                    <li>
+                                                        Transaction history displayed in wallet section
 
-                                                </li>
-                                                <li>
-                                                    Transaction summaries when sending ICP from wallets
+                                                    </li>
+                                                    <li>
+                                                        Transaction summaries when sending ICP from wallets
 
-                                                </li>
-                                                <li>
-                                                    Journal entry streak counter
+                                                    </li>
+                                                    <li>
+                                                        Journal entry streak counter
 
-                                                </li>
-                                                <li>
-                                                    Bitcoin Integration and wallet compatability
+                                                    </li>
+                                                    <li>
+                                                        Bitcoin Integration and wallet compatability
 
-                                                </li>
-                                                <li>
-                                                    Ethereum Integration and wallet compatability
+                                                    </li>
+                                                    <li>
+                                                        Ethereum Integration and wallet compatability
 
-                                                </li>
-                                                <li>
-                                                    Digital Time Capsule Token
+                                                    </li>
+                                                    <li>
+                                                        Digital Time Capsule Token
 
-                                                </li>
-                                                <li>
-                                                    Digital Time Capsule Token price analytics and graphing viewable from wallet section
+                                                    </li>
+                                                    <li>
+                                                        Digital Time Capsule Token price analytics and graphing viewable from wallet section
 
-                                                </li>
-                                                <li>
-                                                    Reduce load time
-                                                    
-                                                </li>
-                                                <li>
-                                                    Digital Time Capsule Governance System
+                                                    </li>
+                                                    <li>
+                                                        Reduce load time
+                                                        
+                                                    </li>
+                                                    <li>
+                                                        Digital Time Capsule Governance System
 
-                                                </li>
-                                                <li>
-                                                    Video Compatability for journal entries
+                                                    </li>
+                                                    <li>
+                                                        Video Compatability for journal entries
 
-                                                </li>
-                                                <li>
-                                                    Group/Community Time Capsules
+                                                    </li>
+                                                    <li>
+                                                        Group/Community Time Capsules
 
-                                                </li>
-                                            </ul>
-                                            
+                                                    </li>
+                                                </ul>
+                                                
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
+                        </div>}
                 </div>
 
         

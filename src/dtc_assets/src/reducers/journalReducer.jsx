@@ -121,7 +121,7 @@ export const initialState = {
         journalData: true
     }, 
     isAuthenticated: false,
-    isLoading: false,
+    isLoading: true,
     modalStatus: {
         show: false, 
         which: MODALS_TYPES.onSubmit

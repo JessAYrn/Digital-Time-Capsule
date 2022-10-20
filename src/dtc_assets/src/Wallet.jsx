@@ -116,12 +116,10 @@ const WalletApp = () => {
             >
                 {
                     journalState.isAuthenticated ?
-                    journalState.isLoading ?
-                        <LoadScreen/> : 
-                            <WalletPage/> : 
-                                <LoginPage
-                                    context={UI_CONTEXTS.WALLET}
-                                /> 
+                        <WalletPage/> : 
+                        <LoginPage
+                            context={UI_CONTEXTS.WALLET}
+                        /> 
                 }
             </AppContext.Provider>
     );

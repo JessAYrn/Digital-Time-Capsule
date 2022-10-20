@@ -99,12 +99,10 @@ const AccountPage = (props) => {
         >
             {
                 journalState.isAuthenticated ? 
-                journalState.isLoading ?
-                    <LoadScreen/> :
-                        <SubcriptionPage/> : 
-                            <LoginPage
-                                context={UI_CONTEXTS.ACCOUNT_PAGE}
-                            /> 
+                    <SubcriptionPage/> : 
+                    <LoginPage
+                        context={UI_CONTEXTS.ACCOUNT_PAGE}
+                    /> 
             }
         </AppContext.Provider>
     )

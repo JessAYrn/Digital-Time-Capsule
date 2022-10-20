@@ -32,11 +32,14 @@ const JournalPage = (props) => {
     let year = todaysDate.getFullYear();
     let month = todaysDate.getMonth();
     let minimumMonth = (month + 2) % 12;
+    let thisMonth = (month + 1) % 12;
     if(minimumMonth < 10) minimumMonth = '0' + minimumMonth;
+    if(thisMonth < 10) thisMonth = '0' + thisMonth;
     let minimumYear = (minimumMonth === '01') ? year + 1 : year;
     let day = todaysDate.getDate();
     if(day < 10) day = '0' + day;
     let minimumDate = minimumYear + '-' + minimumMonth + '-' + day;
+    let thisDate = year + '-' + thisMonth + '-' + day;
 
     const journalPageData = useMemo(() => {
         return journalState.journal[index];
@@ -189,6 +192,7 @@ const JournalPage = (props) => {
                     </div>
                     <div className={"journalText"} >
                         <DatePicker
+                            id={'entryDate'}
                             label={"Date of Entry: "}
                             rows={"1"}
                             disabled={!journalPageData.draft}
@@ -197,9 +201,11 @@ const JournalPage = (props) => {
                             dispatchAction={types.CHANGE_DATE}
                             index={index}
                             value={(journalPageData) ? journalPageData.date : ''}
+                            max={thisDate}
                         />
                         {journalPageData.capsuled && 
                         <DatePicker
+                            id={'lockDate'}
                             label={"Date to Unlock Entry: "}
                             rows={"1"}
                             disabled={!journalPageData.draft}

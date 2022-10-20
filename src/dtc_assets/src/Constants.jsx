@@ -30,7 +30,8 @@ export const MODALS_TYPES = {
     onSubmit: 'onSubmit',
     notAuthorizedByOwner: "notAuthorizedByOwner",
     onRegisterNewOwner: "onRegisterNewOwner",
-    requestApprovalRepsonse: "requestApprovalRepsonse"
+    requestApprovalRepsonse: "requestApprovalRepsonse",
+    dateSelectedOutOfRange: 'dateSelectedOutOfRange'
 }
 
 export const MAX_NUMBER_OF_BYTES = 21000000;
