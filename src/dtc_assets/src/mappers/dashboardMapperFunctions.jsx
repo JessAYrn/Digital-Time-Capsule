@@ -1,6 +1,6 @@
 export const mapBackendCanisterDataToFrontEndObj = (props) => {
     const {
-        approvedUsers,
+        users,
         backEndCyclesBurnRatePerDay,
         backEndPrincipal,
         frontEndPrincipal,
@@ -9,11 +9,12 @@ export const mapBackendCanisterDataToFrontEndObj = (props) => {
         nftId,
         isOwner,
         supportMode,
-        acceptingRequests
+        acceptingRequests,
+        journalCount
     } = props;
 
     return {
-        approvedUsers: approvedUsers,
+        users: users,
         backEndCyclesBurnRatePerDay: parseInt(backEndCyclesBurnRatePerDay),
         backEndPrincipal: backEndPrincipal,
         frontEndPrincipal: frontEndPrincipal,
@@ -22,6 +23,7 @@ export const mapBackendCanisterDataToFrontEndObj = (props) => {
         isOwner: isOwner,
         nftId: parseInt(nftId),
         supportMode: supportMode,
-        acceptingRequests: acceptingRequests
+        acceptingRequests: acceptingRequests,
+        journalCount: parseInt(journalCount)
     }
 }; 

@@ -7,7 +7,7 @@ import { UI_CONTEXTS } from './Contexts';
 import WalletPage from './Components/WalletPage';
 import { testTx } from './testData/Transactions';
 import { AuthenticateClient, CreateActor, CreateUserJournal, TriggerAuththenticateClientFunction } from './Components/authentication/AuthenticationMethods';
-import { loadJournalData, loadWalletData, loadTxHistory, handleErrorOnFirstLoad } from './Components/loadingFunctions';
+import { loadJournalData, loadWalletData, loadCanisterData, loadTxHistory, handleErrorOnFirstLoad } from './Components/loadingFunctions';
 
 export const AppContext = createContext({
     journalState:{},
@@ -89,6 +89,11 @@ const WalletApp = () => {
                 payload: false
             });
         }; 
+        if(journalState.reloadStatuses.canisterData){
+            //Load canister data in background
+            const canisterData = await journalState.actor.getCanisterData();
+            loadCanisterData(canisterData, dispatch, types);
+        }
         if(journalState.reloadStatuses.journalData){
             //Load Journal Data in the background
             const journal = await journalState.actor.readJournal();

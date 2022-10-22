@@ -50,6 +50,7 @@ export const CANISTER_DATA_FIELDS = {
     nftOwner: "nftOwner",
     nftId: "nftId",
     requestsForApproval: "requestsForApproval",
-    approvedUsers: "approvedUsers"
+    users: "users",
+    journalCount: "journalCount"
 }
 

@@ -12,6 +12,7 @@ import Switch from './Fields/Switch';
 import { CANISTER_DATA_FIELDS } from '../Constants';
 import * as RiIcons from 'react-icons/ri';
 import * as FaIcons from 'react-icons/fa';
+import * as AiIcons from 'react-icons/ai';
 import { IconContext } from 'react-icons/lib';
 
 
@@ -21,11 +22,12 @@ const DataFieldArray = (props) => {
         dataField,
         dataSubField,
         label,
-        tuples,
+        isListOfRequests,
         isOwner,
         dispatch
     } = props;
-    let array = journalState[dataField][dataSubField] || journalState[dataField];
+    
+    let array = journalState[dataField][dataSubField] || [];
 
     const handleAddPrincipal = async (principal) => {
         dispatch({
@@ -41,7 +43,7 @@ const DataFieldArray = (props) => {
             result_1 = result_1.ok;
             dispatch({
                 actionType: types.SET_CANISTER_DATA,
-                payload: {...journalState.canisterData, requestsForApproval: result_0, approvedUsers: result_1}
+                payload: {...journalState.canisterData, requestsForApproval: result_0, users: result_1}
             });
         }
         dispatch({
@@ -65,7 +67,7 @@ const DataFieldArray = (props) => {
         if("ok" in result){
             success = true;
             result = result.ok;
-            let payload = requestingApproval ? { ...journalState.canisterData, requestsForApproval: result } : { ...journalState.canisterData, approvedUsers: result }
+            let payload = requestingApproval ? { ...journalState.canisterData, requestsForApproval: result } : { ...journalState.canisterData, users: result }
             dispatch({
                 actionType: types.SET_CANISTER_DATA,
                 payload: payload
@@ -93,21 +95,40 @@ const DataFieldArray = (props) => {
             <div className={'section array'}>
                 <>
                     {
-                        array.map((principal, index) => {
-                            principal = tuples ? principal[0] : principal
+                        array.map((obj, index) => {
+                            let principal = !isListOfRequests ? obj[0] : obj;
+                            let permissions = !isListOfRequests ? obj[1] : null;
                             return (
                                 <div className={'dataFieldRow'}>
-                                    {isOwner && dataSubField === CANISTER_DATA_FIELDS.requestsForApproval && 
-                                    <IconContext.Provider value={{ size: '25px'}}>
-                                        <FaIcons.FaCheckSquare onClick={() => handleAddPrincipal(principal)}/>
-                                    </IconContext.Provider>}
-                                    <h3 className={'h3DataField'}>
-                                        {principal}
-                                    </h3>
-                                    {isOwner && 
-                                    <IconContext.Provider value={{ size: '25px'}}>
-                                        <RiIcons.RiDeleteBin2Line onClick={() => handleRemovePrincipal(principal, requestingApproval)}/>
-                                    </IconContext.Provider>}
+                                    <div className={'rowSection1'}>  
+                                        {isOwner && (isListOfRequests || permissions.approved === false) &&
+                                        <IconContext.Provider value={{ size: '25px'}}>
+                                            <FaIcons.FaCheckSquare onClick={() => handleAddPrincipal(principal)}/>
+                                        </IconContext.Provider>}
+                                        <h3 className={'h3DataField'}>
+                                            {principal}
+                                        </h3>
+                                        {isOwner && (isListOfRequests || permissions.approved === true) &&
+                                        <IconContext.Provider value={{ size: '25px'}}>
+                                            <RiIcons.RiDeleteBin2Line onClick={() => handleRemovePrincipal(principal, requestingApproval)}/>
+                                        </IconContext.Provider>}
+                                    </div>
+                                    {!isListOfRequests && permissions.approved &&
+                                    <div className={'rowSection2'}>
+                                        <IconContext.Provider value={{ size: '15px'}}>
+                                            <AiIcons.AiTwotoneLike/>
+                                        </IconContext.Provider>
+                                        <h6>approved to post content</h6>
+                                    </div>
+                                    }
+                                    {!isListOfRequests && !permissions.approved &&
+                                    <div className={'rowSection2'}>
+                                        <IconContext.Provider value={{ size: '15px'}}>
+                                            <AiIcons.AiTwotoneDislike/>
+                                        </IconContext.Provider>
+                                        <h6>not approved to post content</h6>
+                                    </div>
+                                    }
                                 </div>
                             )
                         })
@@ -259,7 +280,8 @@ const Analytics = () => {
                                                 label={'Journals Created:'}
                                                 journalState={journalState}
                                                 dispatch={dispatch}
-                                                dataField={'journalCount'}
+                                                dataSubField={CANISTER_DATA_FIELDS.journalCount}
+                                                dataField={'canisterData'}
                                             />
                                             <DataField
                                                 label={'Front End Canister Principal:'}
@@ -316,7 +338,7 @@ const Analytics = () => {
                                                     journalState={journalState}
                                                     dataField={'canisterData'}
                                                     dataSubField={CANISTER_DATA_FIELDS.requestsForApproval}
-                                                    tuples={false}
+                                                    isListOfRequests={true}
                                                     isOwner={journalState.canisterData.isOwner}
                                                 />
                                             </div>
@@ -327,12 +349,12 @@ const Analytics = () => {
                                     <div className={'AnalyticsDiv'}>
                                         <div className={'AnalyticsContentContainer'}>
                                             <DataFieldArray
-                                                label={'Approved Principals:'}
+                                                label={'User Principals:'}
                                                 dispatch={dispatch}
-                                                tuples={true}
+                                                isListOfRequests={false}
                                                 journalState={journalState}
                                                 dataField={'canisterData'}
-                                                dataSubField={CANISTER_DATA_FIELDS.approvedUsers}
+                                                dataSubField={CANISTER_DATA_FIELDS.users}
                                                 isOwner={journalState.canisterData.isOwner}
                                             />
                                         </div>

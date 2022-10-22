@@ -84,7 +84,11 @@ export const TriggerCreateActorFunction = (journalState, dispatch, types) => {
 }
 
 export const CreateUserJournal = async (journalState, dispatch, nameOfLoadFunction) => {
-    let registrationResult = await journalState.actor.registerOwner();
+    try{
+        let registrationResult = await journalState.actor.registerOwner();
+    } catch(e) {
+        console.log('could not be verified');
+    }
     let result = await journalState.actor.create()
     if("err" in result){
         let payload = { show: true, which: MODALS_TYPES.notAuthorizedByOwner };

@@ -6,7 +6,7 @@ import { UI_CONTEXTS } from './Contexts';
 import Analytics from './Components/Analytics';
 import "./HomePage.scss";
 import { AuthenticateClient, CreateActor, TriggerAuththenticateClientFunction, CreateUserJournal } from './Components/authentication/AuthenticationMethods';
-import { handleErrorOnFirstLoad, loadCanisterData } from './Components/loadingFunctions';
+import { handleErrorOnFirstLoad, loadCanisterData, loadJournalData, loadWalletData } from './Components/loadingFunctions';
 
 export const AppContext = createContext({
     journalState: null,
@@ -17,12 +17,8 @@ const HomePage = () => {
 
     const [journalState, dispatch] = useReducer(journalReducer, initialState);
 
-    //clears useLocation().state upon page refresh so that when the user refreshes the page,
-    //changes made to this route aren't overrided by the useLocation().state of the previous route.
-    window.onbeforeunload = window.history.replaceState(null, '');
-
     //gets state from previous route
-    let location = useLocation();
+    const location = useLocation();
     //dispatch state from previous route to redux store if that state exists
     if(location.state){
         dispatch({
@@ -49,44 +45,64 @@ const HomePage = () => {
         constructActor();
     }, [journalState.createActorFunctionCallCount]);
 
+    //clears useLocation().state upon page refresh so that when the user refreshes the page,
+    //changes made to this route aren't overrided by the useLocation().state of the previous route.
+    window.onbeforeunload = window.history.replaceState(null, '');
+
     useEffect( async () => {
         if(!journalState.actor){
             return;
         }
-        dispatch({
-            actionType: types.SET_IS_LOADING,
-            payload: true
-        })
-        let profilesTrieSizeObj = await handleErrorOnFirstLoad(
-            journalState.actor.getProfilesSize, 
-            TriggerAuththenticateClientFunction, 
-            { journalState, dispatch, types }
-        );
-        if(!profilesTrieSizeObj) return;
-        if("err" in profilesTrieSizeObj) profilesTrieSizeObj = await CreateUserJournal(journalState, dispatch, 'getProfilesSize');
-        if("err" in profilesTrieSizeObj) {
+        if(journalState.reloadStatuses.canisterData){
+            dispatch({
+                actionType: types.SET_IS_LOADING,
+                payload: true
+            })
+            let canisterData = await handleErrorOnFirstLoad(
+                journalState.actor.getCanisterData, 
+                TriggerAuththenticateClientFunction, 
+                { journalState, dispatch, types }
+            );
+            if(!canisterData) return;
+            if("err" in canisterData) canisterData = await CreateUserJournal(journalState, dispatch, 'getCanisterData');
+            if("err" in canisterData) {
+                dispatch({
+                    actionType: types.SET_IS_LOADING,
+                    payload: false
+                });
+                return;
+            }
+            canisterData = loadCanisterData(canisterData, dispatch, types);
+            let requestsForApproval;
+            if(canisterData.isOwner){
+                requestsForApproval = await journalState.actor.getRequestingPrincipals();
+                requestsForApproval = requestsForApproval.ok;
+                let updatedCanisterData = {...canisterData, requestsForApproval};
+                dispatch({
+                    actionType: types.SET_CANISTER_DATA,
+                    payload: updatedCanisterData
+                });
+            }
+            dispatch({
+                actionType: types.SET_CANISTER_DATA_RELOAD_STATUS,
+                payload: false,
+            });
             dispatch({
                 actionType: types.SET_IS_LOADING,
                 payload: false
             });
-            return;
-        }
-        let canisterData = await journalState.actor.getCanisterData();
-        canisterData = loadCanisterData(profilesTrieSizeObj, canisterData, dispatch, types);
-        let requestsForApproval;
-        if(canisterData.isOwner){
-            requestsForApproval = await journalState.actor.getRequestingPrincipals();
-            requestsForApproval = requestsForApproval.ok;
-            let updatedCanisterData = {...canisterData, requestsForApproval};
-            dispatch({
-                actionType: types.SET_CANISTER_DATA,
-                payload: updatedCanisterData
-            });
-        }
-        dispatch({
-            actionType: types.SET_IS_LOADING,
-            payload: false
-        })
+        };
+        if(journalState.reloadStatuses.journalData){
+            //Load Journal Data in the background
+            const journal = await journalState.actor.readJournal();
+            loadJournalData(journal, dispatch, types);
+        };
+        if(journalState.reloadStatuses.walletData){
+            //Load wallet data in background
+            const walletDataFromApi = await journalState.actor.readWalletData();
+            await loadWalletData(walletDataFromApi, dispatch, types);
+        };
+
 
     }, [journalState.actor]);
 

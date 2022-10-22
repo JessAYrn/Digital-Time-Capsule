@@ -11,7 +11,6 @@ export const types = {
     SET_IS_LOGGING_IN: "SET_IS_LOGGING_IN",
     SET_JOURNAL: "SET_JOURNAL",
     SET_JOURNAL_UNREAD_ENTRIES:"SET_JOURNAL_UNREAD_ENTRIES",
-    SET_JOURNAL_COUNT: "SET_JOURNAL_COUNT",
     SET_BIO: "SET_BIO",
     SET_METADATA: "SET_METADATA",
     SET_WALLET_DATA: "SET_WALLET_DATA",
@@ -21,6 +20,7 @@ export const types = {
     SET_NFT_DATA_RELOAD_STATUS: "SET_NFT_DATA_RELOAD_STATUS",
     SET_WALLET_DATA_RELOAD_STATUS: "SET_WALLET_DATA_RELOAD_STATUS",
     SET_JOURNAL_DATA_RELOAD_STATUS: "SET_JOURNAL_DATA_RELOAD_STATUS",
+    SET_CANISTER_DATA_RELOAD_STATUS: "SET_CANISTER_DATA_RELOAD_STATUS",
     SET_IS_AUTHENTICATED: "SET_IS_AUTHENTICATED",
     SET_IS_LOADING:"SET_IS_LOADING",
     SET_TX_HISTORY_DATA:"SET_TX_HISTORY_DATA",
@@ -69,7 +69,8 @@ export const initialState = {
     stoicIdentity: undefined,
     journalCount: 0,
     canisterData: {
-        approvedUsers: [],
+        users: [],
+        journalCount: 0,
         backEndCyclesBurnRatePerDay: 1,
         backEndPrincipal: "Null",
         frontEndPrincipal: "Null",
@@ -118,7 +119,8 @@ export const initialState = {
     reloadStatuses: {
         nftData: true,
         walletData: true,
-        journalData: true
+        journalData: true,
+        canisterData: true
     }, 
     isAuthenticated: false,
     isLoading: true,
@@ -191,11 +193,6 @@ const changeValue = (state = initialState, action) => {
         }
         case types.SET_STOIC_IDENTITY:
         state.stoicIdentity = payload;
-        return {
-            ...state
-        }
-        case types.SET_JOURNAL_COUNT:
-        state.journalCount = payload;
         return {
             ...state
         }
@@ -333,6 +330,14 @@ const changeValue = (state = initialState, action) => {
         state.reloadStatuses = {
             ...state.reloadStatuses,
             nftData: payload
+        };
+        return {
+            ...state
+        }
+        case types.SET_CANISTER_DATA_RELOAD_STATUS:
+        state.reloadStatuses = {
+            ...state.reloadStatuses,
+            canisterData: payload
         };
         return {
             ...state

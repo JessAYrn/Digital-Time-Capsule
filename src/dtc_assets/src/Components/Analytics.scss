@@ -107,11 +107,22 @@
 }
 
 .dataFieldRow{
+    width: 100%;
+    border-bottom: solid rgb(122, 122, 122) .5px;
+    margin-top: 10px;
+}
+
+.rowSection1{
     display: flex;
     justify-content: center;
     align-items: center;
     width: 100%;
-    margin-bottom: 25px;
+}
+
+.rowSection2{
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .array.section{

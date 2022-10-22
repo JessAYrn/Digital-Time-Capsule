@@ -17,15 +17,19 @@ const SubcriptionPage = (props) => {
     const { journalState, dispatch } = useContext(AppContext);
 
     const handleUpdate = async () => {
-
+        dispatch({
+            actionType: types.SET_IS_LOADING,
+            payload: true
+        });
         const profileInput = {
             userName: (journalState.metaData.userName[0]) ? journalState.metaData.userName: [],
             email: (journalState.metaData.email[0]) ? journalState.metaData.email: []
         };
         let result = await journalState.actor.updateProfile(profileInput);
-        // if("err" in result){
-        //     showErrorMessage();
-        // };
+        dispatch({
+            actionType: types.SET_IS_LOADING,
+            payload: false
+        });
 
     };
 

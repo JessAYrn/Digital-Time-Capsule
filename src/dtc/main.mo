@@ -71,7 +71,7 @@ shared (msg) actor class User() = this {
         nftId = -1;
         acceptingRequests = true;
         lastRecordedTime = 0;
-        approvedUsers = Trie.empty();
+        users = Trie.empty();
     };
 
     private stable var requestsForApproval: [Text] = [];
@@ -120,24 +120,6 @@ shared (msg) actor class User() = this {
         let callerId = msg.caller;
         let result = await MainMethods.refillCanisterCycles(callerId, profiles);
         return result;
-    };
-
-    public shared(msg) func getProfilesSize () : async Result.Result<Nat, JournalTypes.Error>  {
-        let callerId = msg.caller;
-        let profile = Trie.find(
-            profiles,
-            key(callerId),
-            Principal.equal
-        );
-
-        switch(profile){
-            case null{
-                return #err(#NotAuthorized);
-            };
-            case(?existingProfile){
-                return #ok(Trie.size(profiles))
-            };
-        };
     };
 
     //Profile Methods
@@ -385,16 +367,16 @@ shared (msg) actor class User() = this {
         return result;
     };
 
-    public shared(msg) func addApprovedUser(principal : Text) : async Result.Result<(MainTypes.ApprovedUsersExport), JournalTypes.Error> {
+    public shared(msg) func addApprovedUser(principal : Text) : async Result.Result<(MainTypes.UsersExport), JournalTypes.Error> {
         let callerId = msg.caller;
         let principalAsBlob = Principal.fromText(principal);
         let updatedCanisterData = await CanisterManagementMethods.addApprovedUser(callerId, principalAsBlob, canisterData);
         switch(updatedCanisterData){
             case(#ok(data)){
                 canisterData := data;
-                let approvedUsers = Trie.iter(canisterData.approvedUsers);
-                let approvedUsersExport = Iter.toArray(approvedUsers);
-                return #ok(approvedUsersExport)
+                let users = Trie.iter(canisterData.users);
+                let usersExport = Iter.toArray(users);
+                return #ok(usersExport)
             };
             case(#err(e)){
                 return #err(e);
@@ -402,16 +384,16 @@ shared (msg) actor class User() = this {
         };
     };
 
-    public shared(msg) func removeApprovedUser(principal: Text) : async Result.Result<(MainTypes.ApprovedUsersExport), JournalTypes.Error> {
+    public shared(msg) func removeApprovedUser(principal: Text) : async Result.Result<(MainTypes.UsersExport), JournalTypes.Error> {
         let callerId = msg.caller;
         let principalAsBlob = Principal.fromText(principal);
         let updatedCanisterData = await CanisterManagementMethods.removeApprovedUser(callerId, principalAsBlob, canisterData);
         switch(updatedCanisterData){
             case(#ok(data)){
                 canisterData := data;
-                let approvedUsers = Trie.iter(canisterData.approvedUsers);
-                let approvedUsersExport = Iter.toArray(approvedUsers);
-                return #ok(approvedUsersExport);
+                let users = Trie.iter(canisterData.users);
+                let usersExport = Iter.toArray(users);
+                return #ok(usersExport);
             }; 
             case(#err(e)){
                 return #err(e)
@@ -502,7 +484,7 @@ shared (msg) actor class User() = this {
         return #ok(requestsForApproval);
     };
 
-    public shared(msg) func getCanisterData() : async MainTypes.CanisterDataExport {
+    public shared(msg) func getCanisterData() : async Result.Result<(MainTypes.CanisterDataExport), JournalTypes.Error> {
         let callerId = msg.caller;
         let canisterDataPackagedForExport = await CanisterManagementMethods.getCanisterData(callerId, canisterData, supportMode, profiles);
         return canisterDataPackagedForExport;

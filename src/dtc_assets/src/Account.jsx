@@ -2,11 +2,10 @@ import React, {useReducer, createContext, useState, useEffect} from 'react';
 import journalReducer, { types, initialState } from './reducers/journalReducer';
 import SubcriptionPage from './Components/AccountPage';
 import { useLocation } from 'react-router-dom';
-import LoadScreen from './Components/LoadScreen';
 import LoginPage from './Components/authentication/LoginPage';
 import { UI_CONTEXTS } from './Contexts';
 import { AuthenticateClient, CreateActor, TriggerAuththenticateClientFunction, CreateUserJournal } from './Components/authentication/AuthenticationMethods';
-import { loadJournalData, loadNftData, loadWalletData, handleErrorOnFirstLoad } from './Components/loadingFunctions';
+import { loadJournalData, loadCanisterData, loadWalletData, handleErrorOnFirstLoad } from './Components/loadingFunctions';
 
 export const AppContext = createContext({
     journalState:{},
@@ -79,9 +78,10 @@ const AccountPage = (props) => {
                 payload: false
             });
         }
-        if(journalState.reloadStatuses.nftData){
-            const nftCollection = await journalState.actor.getUserNFTsInfo();
-            loadNftData(nftCollection, dispatch, types);
+        if(journalState.reloadStatuses.canisterData){
+            //Load canister data in background
+            const canisterData = await journalState.actor.getCanisterData();
+            loadCanisterData(canisterData, dispatch, types);
         }
         if(journalState.reloadStatuses.walletData){
             //Load wallet data in background
