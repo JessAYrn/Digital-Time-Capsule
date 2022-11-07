@@ -13,6 +13,7 @@ import Ledger "../Ledger/Ledger";
 import Blob "mo:base/Blob";
 import Text "mo:base/Text";
 import Hash "mo:base/Hash";
+import Nat "mo:base/Nat";
 import Option "mo:base/Option";
 import Error "mo:base/Error";
 import IC "../IC/ic.types";
@@ -248,20 +249,26 @@ module{
     };
 
     public func setCyclesBurnRate(currentCylcesBalance: Nat, canisterData : MainTypes.CanisterData) : MainTypes.CanisterData{
-        let cyclesBurned : Nat = currentCylcesBalance - canisterData.lastRecordedBackEndCyclesBalance;
 
-        let updatedCanisterData = {
-            frontEndPrincipal = canisterData.frontEndPrincipal;
-            backEndPrincipal = canisterData.backEndPrincipal;
-            lastRecordedBackEndCyclesBalance = canisterData.lastRecordedBackEndCyclesBalance;
-            backEndCyclesBurnRatePerDay = cyclesBurned;
-            nftOwner = canisterData.nftOwner;
-            nftId = canisterData.nftId;
-            acceptingRequests = canisterData.acceptingRequests;
-            lastRecordedTime = canisterData.lastRecordedTime;
-            users = canisterData.users;
+        let cylesDecreased : Bool = Nat.less(currentCylcesBalance, canisterData.lastRecordedBackEndCyclesBalance);
+        if(cylesDecreased == true){
+            let cyclesBurned : Nat = canisterData.lastRecordedBackEndCyclesBalance - currentCylcesBalance;
+
+            let updatedCanisterData = {
+                frontEndPrincipal = canisterData.frontEndPrincipal;
+                backEndPrincipal = canisterData.backEndPrincipal;
+                lastRecordedBackEndCyclesBalance = canisterData.lastRecordedBackEndCyclesBalance;
+                backEndCyclesBurnRatePerDay = cyclesBurned;
+                nftOwner = canisterData.nftOwner;
+                nftId = canisterData.nftId;
+                acceptingRequests = canisterData.acceptingRequests;
+                lastRecordedTime = canisterData.lastRecordedTime;
+                users = canisterData.users;
+            };
+            return updatedCanisterData;
+        } else {
+            return canisterData
         };
-        return updatedCanisterData;
     };
 
     public func setLastRecordedBackEndCyclesBalance(currentCylcesBalance: Nat, currentTime: Int, canisterData : MainTypes.CanisterData) : 

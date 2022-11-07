@@ -100,7 +100,7 @@ shared (msg) actor class User() = this {
 
     private let heartBeatInterval : Nat64 = 100;
 
-    private let heartBeatInterval_refill : Nat64 = 100000;
+    private let heartBeatInterval_refill : Nat64 = 25000;
     
     private stable var heartBeatCount : Nat64 = 0;
 
@@ -491,7 +491,7 @@ shared (msg) actor class User() = this {
     };
 
     private func setCyclesBurnRate() : (){
-        let currentCylcesBalance = Cycles.balance();
+        let currentCylcesBalance : Nat = Cycles.balance();
         let updatedCanisterData = CanisterManagementMethods.setCyclesBurnRate(currentCylcesBalance, canisterData);
         canisterData := updatedCanisterData;
     };
