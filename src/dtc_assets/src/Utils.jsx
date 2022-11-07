@@ -107,3 +107,32 @@ export const getDateInMilliseconds = (date) => {
   let unlockTime = parseInt(unlockDate.getTime());
   return unlockTime;
 }
+
+export const getDateAsString = (dateInMilliseconds = null) => {
+  let date = dateInMilliseconds ? new Date(dateInMilliseconds) : new Date();
+  let year = date.getFullYear();
+  let month = date.getMonth() + 1;
+  if(month < 10) month = `0${month}`;
+  let day = date.getDate();
+  if(day < 10) day = `0${day}`;
+  date = year + '-' + month + '-' + day; 
+  return date;
+}
+
+export const dateAisLaterThanOrSameAsDateB = (a, b) => {
+  if(a === b) return true;
+  let dateAAsArray = a.split('-');
+  let yearA = parseInt(dateAAsArray[0]);
+  let monthA = parseInt(dateAAsArray[1]);
+  let dayA = parseInt(dateAAsArray[2]);
+
+  let dateBAsArray = b.split('-');
+  let yearB = parseInt(dateBAsArray[0]);
+  let monthB = parseInt(dateBAsArray[1]);
+  let dayB = parseInt(dateBAsArray[2]);
+
+  if(yearA < yearB) return false;
+  else if(yearA === yearB && monthA < monthB) return false;
+  else if(yearA === yearB && monthA === monthB && dayA < dayB) return false;
+  else return true;
+}

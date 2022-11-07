@@ -601,17 +601,17 @@ shared (msg) actor class User() = this {
         if(callerIdAsText != canisterData.nftOwner){
             return #err(#NotAuthorized)
         } else {
-            supportMode := not supportMode;
-            if(supportMode == true){
+            if(supportMode == false){
                 let result1 = await addController(Support.TechSupportPrincipal1, Principal.fromActor(this));
                 let result2 = await addController(Support.TechSupportPrincipal2, Principal.fromActor(this));
                 // will have to call addController again on Upgrader canister and front end canister
-                return #ok()
             } else {
                 let result = await setToDefualtControllerSettings(Principal.fromActor(this));
                 // will have to call setDefualtControllerSettings again on Upgrader canister and front end canister
-                return #ok()
             };
+            supportMode := not supportMode;
+            return #ok()
+
         };
     };
 

@@ -11,7 +11,7 @@ import { NavBar } from "./navigation/NavBar";
 import { MODALS_TYPES } from "../Constants";
 import { UI_CONTEXTS } from "../Contexts";
 import { getIntObserverFunc, visibilityFunctionDefault } from "./animations/IntersectionObserverFunctions";
-import { getDateInMilliseconds } from "../Utils";
+import { dateAisLaterThanOrSameAsDateB, getDateAsString, getDateInMilliseconds } from "../Utils";
 
 const Journal = (props) => {
 
@@ -105,9 +105,8 @@ const Journal = (props) => {
                             <table className={"table"}>
                                 <tbody>
                                     { journalState.journal.map((page, index) => {
-                                        const unlockTimeAsInt = getDateInMilliseconds(page.unlockTime);
-                                        const currentTimeAsInt = Date.now();
-                                        const unlocked = (currentTimeAsInt >= unlockTimeAsInt);
+                                        let today = getDateAsString();
+                                        const unlocked = dateAisLaterThanOrSameAsDateB(today, page.unlockTime);
                                         const openButton = (unlocked) ? 'Open' : 'Locked';
                                         return(
                                             <tr className={"tableRow "+index} key={index}>
@@ -148,12 +147,6 @@ const Journal = (props) => {
         return journalState.journal.findIndex(page => page.isOpen === true);
     }
 
-    const toggleDisplayNotifications = () => {
-        dispatch({
-            actionType: types.SET_MODAL_STATUS,
-            payload: {show: !journalState.modalStatus.show, which: MODALS_TYPES.notifications}
-        });
-    };
     return(
         journalState.modalStatus.show ?
         <div className={"container"}>
@@ -174,7 +167,6 @@ const Journal = (props) => {
                             dashboardLink={true}
                             notificationIcon={true}
                             unreadNotifications={journalState.unreadEntries.length}
-                            toggleDisplayNotifications={toggleDisplayNotifications}
                             context={UI_CONTEXTS.JOURNAL}
                         />
                         {journalState.isLoading ? 

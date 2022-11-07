@@ -31,10 +31,6 @@ const NotAuthorizedByOwner = (props) => {
     }
     const {journalState, dispatch} = useContext(AppContext);
 
-    const handleClick = async () => {
-        await logout(journalState, dispatch);
-    }; 
-
     const handleSubmitRequest = async () => {
         dispatch({
             actionType: types.SET_IS_LOADING,
@@ -62,23 +58,22 @@ const NotAuthorizedByOwner = (props) => {
         <div className="contentDiv__notAuthorized">
             <ul>
                 <li>
-                    <h3>
+                    <h6>
                         Your Principal Has Not Been Granted Access to This Application. 
-                    </h3>
+                    </h6>
                 </li>
                 <li>
-                    <h3>
+                    <h6>
                         Only the owner of this application may grant access to principals. 
-                    </h3>
+                    </h6>
                 </li>
                 <li>
-                    <h3>
+                    <h6>
                         If you are the owner of this application, attempting to log in for the first time, you must click the "Register As Owner"
                         button found on the login page. You must register with the Stoic Identity that owns the NFT that corresponds to this application.
-                    </h3>
+                    </h6>
                 </li>
             </ul>
-            <button onClick={handleClick} className="button"> OK </button>
             <button onClick={handleSubmitRequest} className="button"> Request Approval </button>
         </div>
     )

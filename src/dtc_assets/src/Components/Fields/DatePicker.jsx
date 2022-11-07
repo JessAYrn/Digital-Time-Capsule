@@ -1,6 +1,7 @@
 import React, {useState, useRef} from 'react';
 import { MODALS_TYPES } from '../../Constants';
 import { types } from '../../reducers/journalReducer';
+import { dateAisLaterThanOrSameAsDateB } from '../../Utils';
 import "./DatePicker.scss";
 
 
@@ -28,24 +29,6 @@ const DatePicker = (props) => {
     const onFocus = () => {
         setDisabledOrEnabled("enabled");
     };
-
-    const dateAisLaterThanOrSameAsDateB = (a, b) => {
-        if(a === b) return true;
-        let dateAAsArray = a.split('-');
-        let yearA = parseInt(dateAAsArray[0]);
-        let monthA = parseInt(dateAAsArray[1]);
-        let dayA = parseInt(dateAAsArray[2]);
-
-        let dateBAsArray = b.split('-');
-        let yearB = parseInt(dateBAsArray[0]);
-        let monthB = parseInt(dateBAsArray[1]);
-        let dayB = parseInt(dateBAsArray[2]);
-
-        if(yearA < yearB) return false;
-        else if(yearA === yearB && monthA < monthB) return false;
-        else if(yearA === yearB && monthA === monthB && dayA < dayB) return false;
-        else return true;
-    }
 
     const onChnage = () => {
         if(setChangesWereMade){

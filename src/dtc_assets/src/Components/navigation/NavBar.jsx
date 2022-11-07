@@ -14,6 +14,8 @@ import * as RiIcons from 'react-icons/ri';
 import * as ImIcons from 'react-icons/im';
 import { IconContext } from 'react-icons/lib';
 import { logout } from '../authentication/AuthenticationMethods';
+import { types } from '../../reducers/journalReducer';
+import { MODALS_TYPES } from '../../Constants';
 import "./NavBar.scss";
 
 export const NavBar = (props) => {
@@ -25,7 +27,6 @@ export const NavBar = (props) => {
         dashboardLink,
         notificationIcon,
         unreadNotifications,
-        toggleDisplayNotifications,
         context
 
     } = props;
@@ -51,6 +52,13 @@ export const NavBar = (props) => {
         journalState,
         dispatch
     } = useContext(AppContext);
+
+    const toggleDisplayNotifications = () => {
+        dispatch({
+            actionType: types.SET_MODAL_STATUS,
+            payload: {show: !journalState.modalStatus.show, which: MODALS_TYPES.notifications}
+        });
+    };
 
     const [sideBar, setSideBar] = useState(false);
 

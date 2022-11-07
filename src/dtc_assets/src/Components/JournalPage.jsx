@@ -1,14 +1,14 @@
 import React, {useState, useContext, useMemo, useCallback, useEffect} from "react";
 import FileUpload from "./Fields/FileUpload";
 import InputBox from "./Fields/InputBox";
-import Slider from "./Fields/Slider";
 import {types} from "../reducers/journalReducer";
 import  {AppContext} from "../App";
 import "./JournalPage.scss";
 import DatePicker from "./Fields/DatePicker";
 import LoadScreen from "./LoadScreen";
 import { UI_CONTEXTS } from "../Contexts";
-import { MODALS_TYPES } from "../Constants";
+import { MODALS_TYPES, monthInMilliSeconds} from "../Constants";
+import { getDateAsString } from "../Utils";
 import { getDateInMilliseconds, milisecondsToNanoSeconds } from "../Utils";
 import { loadJournalData } from "./loadingFunctions";
 import Switch from "./Fields/Switch";
@@ -29,21 +29,21 @@ const JournalPage = (props) => {
     let journalSize = journalState.journal.length;
 
     let todaysDate = new Date();
-    let year = todaysDate.getFullYear();
-    let month = todaysDate.getMonth();
-    let minimumMonth = (month + 2) % 12;
-    let thisMonth = (month + 1) % 12;
-    if(minimumMonth < 10) minimumMonth = '0' + minimumMonth;
-    if(thisMonth < 10) thisMonth = '0' + thisMonth;
-    let minimumYear = (minimumMonth === '01') ? year + 1 : year;
-    let day = todaysDate.getDate();
-    if(day < 10) day = '0' + day;
-    let minimumDate = minimumYear + '-' + minimumMonth + '-' + day;
-    let thisDate = year + '-' + thisMonth + '-' + day;
+    let todaysDateInMilliseconds = todaysDate.getTime();
+    let oneMonthLater = todaysDateInMilliseconds + monthInMilliSeconds;
+    let minimumDate = getDateAsString(oneMonthLater);
+    let thisDate = getDateAsString();
 
     const journalPageData = useMemo(() => {
         return journalState.journal[index];
-    }, [journalState.journal[index]])
+    }, [journalState.journal[index]]);
+
+    try{
+        //marks this page as read so that it no longer shows in the notifications section
+        let result_ = journalState.actor.readEntry({entryKey: journalPageData.entryKey});
+    } catch(e){
+        
+    }
 
     const toggleSwitch = () => {
         dispatch({
