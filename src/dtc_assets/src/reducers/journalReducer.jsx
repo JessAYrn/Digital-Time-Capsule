@@ -75,6 +75,7 @@ export const initialState = {
         backEndPrincipal: "Null",
         frontEndPrincipal: "Null",
         lastRecordedBackEndCyclesBalance: 1,
+        currentCyclesBalance: 1,
         nftOwner: "Null",
         isOwner: false,
         nftId: "Null",

@@ -37,13 +37,9 @@ const JournalPage = (props) => {
     const journalPageData = useMemo(() => {
         return journalState.journal[index];
     }, [journalState.journal[index]]);
-
-    try{
-        //marks this page as read so that it no longer shows in the notifications section
-        let result_ = journalState.actor.readEntry({entryKey: journalPageData.entryKey});
-    } catch(e){
-        
-    }
+    
+    //marks this page as read so that it no longer shows in the notifications section
+    if(journalPageData.entryKey) journalState.actor.readEntry({entryKey: journalPageData.entryKey});
 
     const toggleSwitch = () => {
         dispatch({
@@ -158,17 +154,25 @@ const JournalPage = (props) => {
     },[handleSubmit])
 
     const handleClosePage = (e) => {
-        if(pageChangesMade){
-            dispatch({
-                actionType: types.SET_MODAL_STATUS,
-                payload: {show: true, which: MODALS_TYPES.exitWithoutSubmit}
-            });
-        } else {
+        // new pages don't have entryKey's until they've been submitted to the backend. 
+        let isNewPage = !journalPageData.entryKey && journalPageData.entryKey !== 0;
+        if(!isNewPage) {
             dispatch({
                 actionType: types.CHANGE_PAGE_IS_OPEN,
                 payload: false,
                 index: index
             })
+        } else {
+            if(pageChangesMade){
+                dispatch({
+                    actionType: types.SET_MODAL_STATUS,
+                    payload: {show: true, which: MODALS_TYPES.exitWithoutSubmit}
+                });
+            } else {
+                dispatch({
+                    actionType: types.REMOVE_UNSUBMITTED_PAGE
+                });
+            }
         }
     }
 

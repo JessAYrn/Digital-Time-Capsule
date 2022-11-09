@@ -213,7 +213,7 @@ module{
         return (updatedCanisterData,updatedDefaultControllers_0);
     };
 
-    public func getCanisterData(callerId: Principal, canisterData: MainTypes.CanisterData, supportMode: Bool, profiles : MainTypes.ProfilesTree) 
+    public func getCanisterData(callerId: Principal, canisterData: MainTypes.CanisterData, cyclesBalance: Nat, supportMode: Bool, profiles : MainTypes.ProfilesTree) 
     : async Result.Result<(MainTypes.CanisterDataExport), JournalTypes.Error> {
         let profile = Trie.find(
             profiles,
@@ -234,6 +234,7 @@ module{
                     frontEndPrincipal = canisterData.frontEndPrincipal;
                     backEndPrincipal = canisterData.backEndPrincipal;
                     lastRecordedBackEndCyclesBalance = canisterData.lastRecordedBackEndCyclesBalance;
+                    currentCyclesBalance = cyclesBalance;
                     backEndCyclesBurnRatePerDay = canisterData.backEndCyclesBurnRatePerDay;
                     nftOwner = canisterData.nftOwner;
                     acceptingRequests = canisterData.acceptingRequests;

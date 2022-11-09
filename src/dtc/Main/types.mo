@@ -47,6 +47,7 @@ module{
         lastRecordedTime: Int;
         users: [(Text, UserPermissions)];
         isOwner: Bool;
+        currentCyclesBalance: Nat;
         supportMode: Bool;
     };
 

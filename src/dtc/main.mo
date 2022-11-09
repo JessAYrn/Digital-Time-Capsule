@@ -486,7 +486,8 @@ shared (msg) actor class User() = this {
 
     public shared(msg) func getCanisterData() : async Result.Result<(MainTypes.CanisterDataExport), JournalTypes.Error> {
         let callerId = msg.caller;
-        let canisterDataPackagedForExport = await CanisterManagementMethods.getCanisterData(callerId, canisterData, supportMode, profiles);
+        let cyclesBalance = Cycles.balance();
+        let canisterDataPackagedForExport = await CanisterManagementMethods.getCanisterData(callerId, canisterData, cyclesBalance, supportMode, profiles);
         return canisterDataPackagedForExport;
     };
 

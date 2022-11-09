@@ -309,7 +309,7 @@ const Analytics = () => {
                                                 journalState={journalState}
                                                 dispatch={dispatch}
                                                 dataField={'canisterData'}
-                                                dataSubField={CANISTER_DATA_FIELDS.lastRecordedBackEndCyclesBalance}
+                                                dataSubField={CANISTER_DATA_FIELDS.currentCyclesBalance}
                                             />
                                             <DataField
                                                 label={'Canister Owner:'}
