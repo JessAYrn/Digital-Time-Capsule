@@ -29,16 +29,19 @@ module{
         // If there is an original value, do not update
         switch(existing) {
             case null {
-                let approvedPrincipal = Trie.find(
-                    canisterData.approvedUsers,
+                let userPermissions = Trie.find(
+                    canisterData.users,
                     textKey(Principal.toText(callerId)),
                     Text.equal
                 );
-                switch(approvedPrincipal){
+                switch(userPermissions){
                     case null{
                         return #err(#NotAuthorized)
                     };
-                    case(? approved){
+                    case(? permissions){
+                        if(permissions.approved == false){
+                            return #err(#NotAuthorized);
+                        };
                         Cycles.add(1_000_000_000_000);
                         let newUserJournal = await Journal.Journal(callerId);
                         let amountAccepted = await newUserJournal.wallet_receive();

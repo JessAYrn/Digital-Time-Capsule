@@ -1,11 +1,32 @@
 import React, { useContext} from 'react';
 import "./ModalContentNotifications.scss";
 import { dayInNanoSeconds, monthInDays } from "../../Constants";
-import { AppContext } from '../../App';
+import { UI_CONTEXTS } from "../../Contexts";
+import { AppContext as JournalContext} from '../../App';
+import { AppContext as WalletContext } from "../../Wallet";
+import { AppContext as JournalContext } from "../../App";
+import { AppContext as  AccountContext} from "../../Account";
+import { AppContext as  HomePageContext} from "../../HomePage";
 import { MODALS_TYPES } from '../../Constants';
 import { types } from '../../reducers/journalReducer';
 
 const Notifications = (props) => {
+    const {
+        context
+    } = props;
+    let AppContext;
+    if(context === UI_CONTEXTS.JOURNAL){
+        AppContext = JournalContext;
+    }
+    if(context === UI_CONTEXTS.HOME_PAGE){
+        AppContext = HomePageContext;
+    }
+    if(context === UI_CONTEXTS.WALLET){
+        AppContext = WalletContext
+    }
+    if(context === UI_CONTEXTS.ACCOUNT_PAGE){
+        AppContext = AccountContext;
+    }
 
     const { journalState, dispatch } = useContext(AppContext);
 
@@ -24,25 +45,17 @@ const Notifications = (props) => {
                     <tr className={"tableRow "}>
                         <th className={"tableCell "}>DATE</th>
                         <th className={"tableCell "}>LOCATION</th>
-                        <th className={"tableCell "}>TIME LAPSED</th>
+                        <th className={"tableCell "}>AVAILABLE</th>
                     </tr>
                 </table>
                 <div class='scrollable'>
                     <table className={"table"}>
                         { journalState.unreadEntries.map((page, index) => {
-                            const unlockTimeAsInt = page.unlockTime;
-                            const currentTimeAsInt = Date.now() *1000000;
-                            const open = (currentTimeAsInt >= unlockTimeAsInt);
-                            const remainingWaitTime = unlockTimeAsInt - currentTimeAsInt;
-                            const remainingWaitTimeInMonths = remainingWaitTime / (dayInNanoSeconds * monthInDays);
-                            const timeLapsed = page.lockTime - remainingWaitTimeInMonths;
-                            const timeLapsedRound = Math.round(timeLapsed * 100) / 100;
-                            const openButton = (open) ? 'Open' : 'Locked';
                             return(
                                 <tr className={"tableRow "+index}>
                                     <td className={"tableCell "+index}>{page.date}</td>
                                     <td className={"tableCell "+index}>{page.location}</td>
-                                    <td className={"tableCell "+index}> {timeLapsedRound} / {page.lockTime} mo.</td>
+                                    <td className={"tableCell "+index}>{page.unlockTime}</td>
                                 </tr>  
                             );
                         }) }

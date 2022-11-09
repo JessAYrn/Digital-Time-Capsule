@@ -15,6 +15,7 @@ import NotAuthorizedByOwner from "./modalContent/NotAuthorizedByOwner";
 import RegistrationResponse from './modalContent/RegistrationResponseModal';
 import RequestApprovalResponseModal from './modalContent/RequestApprovaModal';
 import { getIntObserverFunc, visibilityFunctionDefault } from './animations/IntersectionObserverFunctions';
+import DateOutOfRange from './modalContent/DateOutOfRange';
 import "./Modal.scss";
 
 export const Modal = (props) => {
@@ -64,6 +65,8 @@ export const Modal = (props) => {
             ChildComp = RegistrationResponse
         } else if(journalState.modalStatus.which === MODALS_TYPES.requestApprovalRepsonse){
             ChildComp = RequestApprovalResponseModal;
+        } else if(journalState.modalStatus.which === MODALS_TYPES.dateSelectedOutOfRange){
+            ChildComp = DateOutOfRange;
         }
 
         return ChildComp;

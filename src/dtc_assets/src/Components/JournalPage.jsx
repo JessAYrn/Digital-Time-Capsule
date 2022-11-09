@@ -1,14 +1,14 @@
 import React, {useState, useContext, useMemo, useCallback, useEffect} from "react";
 import FileUpload from "./Fields/FileUpload";
 import InputBox from "./Fields/InputBox";
-import Slider from "./Fields/Slider";
 import {types} from "../reducers/journalReducer";
 import  {AppContext} from "../App";
 import "./JournalPage.scss";
 import DatePicker from "./Fields/DatePicker";
 import LoadScreen from "./LoadScreen";
 import { UI_CONTEXTS } from "../Contexts";
-import { MODALS_TYPES } from "../Constants";
+import { MODALS_TYPES, monthInMilliSeconds} from "../Constants";
+import { getDateAsString } from "../Utils";
 import { getDateInMilliseconds, milisecondsToNanoSeconds } from "../Utils";
 import { loadJournalData } from "./loadingFunctions";
 import Switch from "./Fields/Switch";
@@ -29,18 +29,17 @@ const JournalPage = (props) => {
     let journalSize = journalState.journal.length;
 
     let todaysDate = new Date();
-    let year = todaysDate.getFullYear();
-    let month = todaysDate.getMonth();
-    let minimumMonth = (month + 2) % 12;
-    if(minimumMonth < 10) minimumMonth = '0' + minimumMonth;
-    let minimumYear = (minimumMonth === '01') ? year + 1 : year;
-    let day = todaysDate.getDate();
-    if(day < 10) day = '0' + day;
-    let minimumDate = minimumYear + '-' + minimumMonth + '-' + day;
+    let todaysDateInMilliseconds = todaysDate.getTime();
+    let oneMonthLater = todaysDateInMilliseconds + monthInMilliSeconds;
+    let minimumDate = getDateAsString(oneMonthLater);
+    let thisDate = getDateAsString();
 
     const journalPageData = useMemo(() => {
         return journalState.journal[index];
-    }, [journalState.journal[index]])
+    }, [journalState.journal[index]]);
+    
+    //marks this page as read so that it no longer shows in the notifications section
+    if(journalPageData.entryKey) journalState.actor.readEntry({entryKey: journalPageData.entryKey});
 
     const toggleSwitch = () => {
         dispatch({
@@ -155,17 +154,25 @@ const JournalPage = (props) => {
     },[handleSubmit])
 
     const handleClosePage = (e) => {
-        if(pageChangesMade){
-            dispatch({
-                actionType: types.SET_MODAL_STATUS,
-                payload: {show: true, which: MODALS_TYPES.exitWithoutSubmit}
-            });
-        } else {
+        // new pages don't have entryKey's until they've been submitted to the backend. 
+        let isNewPage = !journalPageData.entryKey && journalPageData.entryKey !== 0;
+        if(!isNewPage) {
             dispatch({
                 actionType: types.CHANGE_PAGE_IS_OPEN,
                 payload: false,
                 index: index
             })
+        } else {
+            if(pageChangesMade){
+                dispatch({
+                    actionType: types.SET_MODAL_STATUS,
+                    payload: {show: true, which: MODALS_TYPES.exitWithoutSubmit}
+                });
+            } else {
+                dispatch({
+                    actionType: types.REMOVE_UNSUBMITTED_PAGE
+                });
+            }
         }
     }
 
@@ -189,6 +196,7 @@ const JournalPage = (props) => {
                     </div>
                     <div className={"journalText"} >
                         <DatePicker
+                            id={'entryDate'}
                             label={"Date of Entry: "}
                             rows={"1"}
                             disabled={!journalPageData.draft}
@@ -197,9 +205,11 @@ const JournalPage = (props) => {
                             dispatchAction={types.CHANGE_DATE}
                             index={index}
                             value={(journalPageData) ? journalPageData.date : ''}
+                            max={thisDate}
                         />
                         {journalPageData.capsuled && 
                         <DatePicker
+                            id={'lockDate'}
                             label={"Date to Unlock Entry: "}
                             rows={"1"}
                             disabled={!journalPageData.draft}

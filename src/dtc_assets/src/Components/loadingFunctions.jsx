@@ -98,16 +98,16 @@ export const loadNftData = (nftCollection, dispatch, types) => {
     });
 };
 
-export const loadCanisterData = (profilesTrieSizeObj, canisterData, dispatch, types) => {
-    profilesTrieSizeObj = profilesTrieSizeObj.ok;
+export const loadCanisterData = (canisterData, dispatch, types) => {
+    canisterData = canisterData.ok;
     canisterData = mapBackendCanisterDataToFrontEndObj(canisterData);
     dispatch({
         actionType: types.SET_CANISTER_DATA,
         payload: canisterData
     });
     dispatch({
-        actionType: types.SET_JOURNAL_COUNT,
-        payload: parseInt(profilesTrieSizeObj)
+        actionType: types.SET_CANISTER_DATA_RELOAD_STATUS,
+        payload: false,
     });
     return canisterData;
 }

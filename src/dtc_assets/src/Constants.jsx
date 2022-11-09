@@ -1,5 +1,9 @@
 export const dayInNanoSeconds = 86400000000000;
 
+export const dayInMilliSeconds = 86400000;
+
+export const monthInMilliSeconds = dayInMilliSeconds * 30;
+
 export const monthInDays = 30;
 
 export const e8sInOneICP = 100000000;
@@ -30,7 +34,8 @@ export const MODALS_TYPES = {
     onSubmit: 'onSubmit',
     notAuthorizedByOwner: "notAuthorizedByOwner",
     onRegisterNewOwner: "onRegisterNewOwner",
-    requestApprovalRepsonse: "requestApprovalRepsonse"
+    requestApprovalRepsonse: "requestApprovalRepsonse",
+    dateSelectedOutOfRange: 'dateSelectedOutOfRange'
 }
 
 export const MAX_NUMBER_OF_BYTES = 21000000;
@@ -47,8 +52,10 @@ export const CANISTER_DATA_FIELDS = {
     backEndCyclesBurnRatePerDay: "backEndCyclesBurnRatePerDay",
     lastRecordedBackEndCyclesBalance: "lastRecordedBackEndCyclesBalance",
     nftOwner: "nftOwner",
+    currentCyclesBalance: "currentCyclesBalance",
     nftId: "nftId",
     requestsForApproval: "requestsForApproval",
-    approvedUsers: "approvedUsers"
+    users: "users",
+    journalCount: "journalCount"
 }
 

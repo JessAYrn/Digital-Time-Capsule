@@ -1,4 +1,7 @@
 import React, {useState, useRef} from 'react';
+import { MODALS_TYPES } from '../../Constants';
+import { types } from '../../reducers/journalReducer';
+import { dateAisLaterThanOrSameAsDateB } from '../../Utils';
 import "./DatePicker.scss";
 
 
@@ -7,6 +10,7 @@ const DatePicker = (props) => {
     const [disabledOrEnabled,setDisabledOrEnabled] = useState("disabled");
     const {
         label,
+        id,
         disabled,
         divClassName,
         dispatchAction,
@@ -14,7 +18,8 @@ const DatePicker = (props) => {
         dispatch,
         index,
         value,
-        min
+        min,
+        max
         // dispatchAction //the action that is to take place in order to dispatch the field change to the redux store
     } = props;
 
@@ -29,11 +34,37 @@ const DatePicker = (props) => {
         if(setChangesWereMade){
             setChangesWereMade(true);
         }
+        let dateSelected = inputRef.current.value;
+        if(min){
+            let selectedDateIsAfterMin = dateAisLaterThanOrSameAsDateB(dateSelected, min);
+            if(!selectedDateIsAfterMin){
+                let dateElement = document.getElementById(id);
+                dateElement.value = min;
+                dateSelected = min;
+                dispatch({
+                    payload: { show: true, which: MODALS_TYPES.dateSelectedOutOfRange, beyondMax: false},
+                    actionType: types.SET_MODAL_STATUS
+                });
+            }
+
+        } else if(max){
+            let selectedDateIsBeforeMax = dateAisLaterThanOrSameAsDateB(max, dateSelected);
+            if(!selectedDateIsBeforeMax){
+                let dateElement = document.getElementById(id);
+                dateElement.value = max;
+                dateSelected = max;
+                dispatch({
+                    payload: { show: true, which: MODALS_TYPES.dateSelectedOutOfRange, beyondMax: true},
+                    actionType: types.SET_MODAL_STATUS
+                });
+            }
+        }
         dispatch({
-            payload: inputRef.current.value,
+            payload: dateSelected,
             actionType: dispatchAction,
             index: index
         });
+
     }
 
     return(
@@ -43,6 +74,7 @@ const DatePicker = (props) => {
             </div>
             <div className={`input-element-div__${(divClassName) ? divClassName : " "}`}>
             <input
+                id={id}
                 className={disabledOrEnabled}
                 value={value}
                 data-date-format="yyyy-mm-dd"
@@ -54,6 +86,7 @@ const DatePicker = (props) => {
                 onBlur={onBlur}
                 onChange={onChnage}
                 min={min}
+                max={max}
             />
             </div>
         </div>

@@ -30,9 +30,13 @@ module{
 
     public type UserPermissions = {
         approved: Bool;
+        treasuryMember: Bool;
+        treasuryContribution: Nat64;
+        monthsSpentAsTreasuryMember: Nat;
     };
 
     public type CanisterDataExport = {
+        journalCount: Nat;
         frontEndPrincipal: Text;
         backEndPrincipal: Text;
         lastRecordedBackEndCyclesBalance: Nat;
@@ -41,8 +45,9 @@ module{
         nftId: Int;
         acceptingRequests: Bool;
         lastRecordedTime: Int;
-        approvedUsers: [(Text, UserPermissions)];
+        users: [(Text, UserPermissions)];
         isOwner: Bool;
+        currentCyclesBalance: Nat;
         supportMode: Bool;
     };
 
@@ -55,10 +60,10 @@ module{
         nftId: Int;
         acceptingRequests: Bool;
         lastRecordedTime: Int;
-        approvedUsers: Trie.Trie<Text, UserPermissions>;
+        users: Trie.Trie<Text, UserPermissions>;
     };
 
-    public type ApprovedUsersExport = [(Text, UserPermissions)];
+    public type UsersExport = [(Text, UserPermissions)];
 
     public type ProfilesTree = Trie.Trie<Principal, Profile>;
 

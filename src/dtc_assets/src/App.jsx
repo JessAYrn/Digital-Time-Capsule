@@ -3,12 +3,11 @@ import { createContext, useState, useEffect, useReducer} from 'react';
 import { useLocation } from 'react-router-dom';
 import Journal from './Components/Journal';
 import LoginPage from './Components/authentication/LoginPage';
-import LoadScreen from './Components/LoadScreen';
 import { UI_CONTEXTS } from './Contexts';
 import journalReducer, {initialState, types} from './reducers/journalReducer';
 import { TEST_DATA_FOR_NOTIFICATIONS } from './testData/notificationsTestData';
 import { AuthenticateClient, CreateActor, CreateUserJournal, TriggerAuththenticateClientFunction } from './Components/authentication/AuthenticationMethods';
-import { handleErrorOnFirstLoad, loadJournalData, loadNftData, loadWalletData } from './Components/loadingFunctions';
+import { handleErrorOnFirstLoad, loadCanisterData, loadJournalData, loadWalletData } from './Components/loadingFunctions';
 
 export const AppContext = createContext({
     journalState:{},
@@ -71,16 +70,17 @@ const App = () => {
                     payload: false
                 });
                 return;
-            }
+            };
             loadJournalData(journal, dispatch, types);
             dispatch({
                 actionType: types.SET_IS_LOADING,
                 payload: false
             });
         }
-        if(journalState.reloadStatuses.nftData){
-            const nftCollection = await journalState.actor.getUserNFTsInfo();
-            loadNftData(nftCollection, dispatch, types);
+        if(journalState.reloadStatuses.canisterData){
+            //Load canister data in background
+            const canisterData = await journalState.actor.getCanisterData();
+            loadCanisterData(canisterData, dispatch, types);
         }
         if(journalState.reloadStatuses.walletData){
             //Load wallet data in background
@@ -98,17 +98,13 @@ const App = () => {
                 setSubmissionsMade
             }}
         >
-
             {
                 journalState.isAuthenticated ? 
-                    journalState.isLoading ? 
-                        <LoadScreen/> :
-                        <Journal/> : 
+                    <Journal/> : 
                     <LoginPage
                         context={UI_CONTEXTS.JOURNAL}
                     /> 
             }
-
         </AppContext.Provider>
     )
 }

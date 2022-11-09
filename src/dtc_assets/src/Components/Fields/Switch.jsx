@@ -7,9 +7,9 @@ const Switch = (props) => {
         disabled
     } = props
     return (
-        <label class="switch">
+        <label className="switch">
             <input type="checkbox" disabled={disabled} onClick={onClick} checked={active}/>
-            <span class="slider round"></span>
+            <span className="slider round"></span>
         </label>
     );
 };

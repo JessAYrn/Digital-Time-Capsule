@@ -1,6 +1,6 @@
 import { milisecondsToNanoSeconds } from "../Utils";
 import { file1FileIndex, file2FileIndex } from "../Constants";
-import { nanoSecondsToMiliSeconds } from "../Utils";
+import { nanoSecondsToMiliSeconds, getDateAsString, dateAisLaterThanOrSameAsDateB } from "../Utils";
 import { TEST_DATA_FOR_NOTIFICATIONS } from "../testData/notificationsTestData";
 
 
@@ -59,18 +59,10 @@ export const mapApiObjectToFrontEndJournalEntriesObject = (journalDataFromApi) =
         };
         let unlockTimeInNanoseconds = parseInt(backEndObj.unlockTime);
         let unlockTimeInMilliseconds = nanoSecondsToMiliSeconds(unlockTimeInNanoseconds);
-        let unlockDate = new Date(unlockTimeInMilliseconds);
-        let year = unlockDate.getFullYear();
-        let month = unlockDate.getMonth() + 1;
-        if(month < 10) month = `0${month}`;
-        let day = unlockDate.getDate();
-        if(day < 10) day = `0${day}`;
-        unlockDate = year + '-' + month + '-' + day;  
-
-        let submitDateArray = backEndObj.date.split('-');
-        let submitMonth = submitDateArray[1];
+        let unlockDate = getDateAsString(unlockTimeInMilliseconds)        
+        let submitDate = backEndObj.date;
         let capsuled = false;
-        if(parseInt(submitMonth) !== parseInt(month)) capsuled = true;
+        if(dateAisLaterThanOrSameAsDateB(unlockDate, submitDate) && submitDate !== unlockDate) capsuled = true;
         return {
             date: backEndObj.date,
             title: backEndObj.entryTitle,
@@ -125,11 +117,11 @@ export const mapApiObjectToFrontEndJournalEntriesObject = (journalDataFromApi) =
 
 
     //filtering all of the unread journal entries
-    let unreadJournalEntriesForFronten = journalEntriesForFrontend.filter(entry => !entry.read && 
-        (milisecondsToNanoSeconds(Date.now())> parseInt(entry.unlockTime)) &&
-        parseInt(entry.lockTime) > 0
-    )
-
+    let unreadJournalEntriesForFronten = journalEntriesForFrontend.filter(entry => {
+        let today = getDateAsString();
+        let notify = !entry.read && entry.capsuled && dateAisLaterThanOrSameAsDateB(today, entry.unlockTime);
+        return notify;
+    });
     return { allEntries: journalEntriesForFrontend, unreadEntries: unreadJournalEntriesForFronten } ;
 
 
