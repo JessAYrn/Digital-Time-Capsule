@@ -42,7 +42,11 @@ export const CreateActor = async (journalState, dispatch, actionTypes) => {
         identity = journalState.stoicIdentity;
     }
     else {
-        identity = journalState.authClient.getIdentity();
+        try{
+            identity = journalState.authClient.getIdentity();
+        } catch(e){
+            TriggerAuththenticateClientFunction(journalState, dispatch, actionTypes);
+        }
     }
     const actor_ = createActor(canisterId, {
         agentOptions: {

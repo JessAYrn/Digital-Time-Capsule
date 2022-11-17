@@ -1,4 +1,5 @@
 import Account "../Ledger/Account";
+import Trie "mo:base/Trie";
 
 module {
     public type EntryKey = {
@@ -13,6 +14,17 @@ module {
         preface: Text;
     };
 
+    public type Files = Trie.Trie2D<Text,Nat,Blob>;
+
+    public type File = Trie.Trie<Nat,Blob>;
+
+
+    public type FileMetaData = {
+        fileName: Text;
+        lastModified: Int;
+        fileType: Text;
+    };
+
     public type JournalEntry = {
         entryTitle: Text;
         text: Text;
@@ -25,16 +37,7 @@ module {
         emailThree: Text;
         read: Bool;
         draft: Bool;
-        file1MetaData: {
-            fileName: Text;
-            lastModified: Int;
-            fileType: Text;
-        };
-        file2MetaData: {
-            fileName: Text;
-            lastModified: Int;
-            fileType: Text;
-        };
+        filesMetaData : [FileMetaData];
     }; 
 
     public type JournalEntryInput = {
@@ -47,16 +50,7 @@ module {
         emailTwo: Text;
         emailThree: Text;
         draft: Bool;
-        file1MetaData: {
-            fileName: Text;
-            lastModified: Int;
-            fileType: Text;
-        };
-        file2MetaData: {
-            fileName: Text;
-            lastModified: Int;
-            fileType: Text;
-        };
+        filesMetaData : [FileMetaData];
     };
 
     public type Transaction = {

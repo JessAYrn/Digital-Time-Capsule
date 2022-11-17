@@ -2,11 +2,11 @@ import { mapApiObjectToFrontEndJournalEntriesObject } from "../mappers/journalPa
 import { delay, toHexString } from "../Utils";
 import { generateQrCode } from "./walletFunctions/GenerateQrCode";
 import { mapBackendCanisterDataToFrontEndObj } from "../mappers/dashboardMapperFunctions";
+
 export const loadJournalData = (journal, dispatch, types) => {
     const journalEntriesObject = mapApiObjectToFrontEndJournalEntriesObject(journal);
     let journalEntries = journalEntriesObject.allEntries;
     let unreadEntries = journalEntriesObject.unreadEntries;
-
     dispatch({
         payload: unreadEntries,
         actionType: types.SET_JOURNAL_UNREAD_ENTRIES

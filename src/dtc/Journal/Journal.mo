@@ -25,18 +25,12 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     private stable var journalV2 : Trie.Trie<Nat, JournalTypes.JournalEntry> = Trie.empty();
 
-    private stable var files : Trie.Trie2D<Text,Nat,Blob> = Trie.empty();
+    private stable var files : JournalTypes.Files = Trie.empty();
 
     private stable var txHistory : Trie.Trie<Nat, JournalTypes.Transaction> = Trie.empty();
 
-    private stable var localFile0 : Trie.Trie<Nat, Blob> = Trie.empty();
+    private stable var unsubmittedFiles : JournalTypes.Files = Trie.empty();
     
-    private stable var localFile1 : Trie.Trie<Nat, Blob> = Trie.empty();
-
-    private var localFileZeroIndex : Nat = 0;
-
-    private var localFileOneIndex : Nat = 1;
-
     private stable var biography : JournalTypes.Bio = {
         name = "";
         dob = "";
@@ -112,8 +106,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
             emailOne = journalEntry.emailOne;
             emailTwo = journalEntry.emailTwo;
             emailThree = journalEntry.emailThree;
-            file1MetaData = journalEntry.file1MetaData;
-            file2MetaData = journalEntry.file2MetaData;
+            filesMetaData  = journalEntry.filesMetaData;
         };
         
         let (newJournal, oldValueForThisKey) = Trie.put(
@@ -130,115 +123,41 @@ shared(msg) actor class Journal (principal : Principal) = this {
         #ok(((journalAsArray), biography));
     };
 
-    public shared(msg) func clearLocalFile(localFileIndex: Nat): async Result.Result<(), JournalTypes.Error> {
+    public shared(msg) func clearUnsubmittedFiles(): async Result.Result<(), JournalTypes.Error> {
         let callerId = msg.caller;
         if( Principal.toText(callerId) != mainCanisterId_ ) {
             return #err(#NotAuthorized);
         };
-
-        if(Nat.equal(localFileIndex, localFileOneIndex) == true) {
-            localFile1 := Trie.empty();
-            return #ok(());
-        };
-        if(Nat.equal(localFileIndex, localFileZeroIndex) == true) {
-            localFile0 := Trie.empty();
-            return #ok(());
-        };
-
-        return #err(#NotFound);
-
+        unsubmittedFiles := Trie.empty();
+        return #ok(());
     };
 
-    public shared(msg) func submitFile(localFileIndex: Nat, fileId : Text) : async Result.Result<(), JournalTypes.Error> {
+    public shared(msg) func submitFiles() : async Result.Result<(), JournalTypes.Error> {
         if( Principal.toText(callerId) != mainCanisterId_ ) {
             return #err(#NotAuthorized);
         };
+        let updatedFiles = Trie.merge(files, unsubmittedFiles, Text.equal);
+        files := updatedFiles;
+        let KeysBuffer = Buffer.Buffer<(Text, Text)>(1);
+        unsubmittedFiles := Trie.empty();
+        return #ok(());
+    };
 
-        let existingFile = Trie.find(
-            files,
+    public shared(msg) func uploadFileChunk(fileId: Text, chunkId : Nat, blobChunk : Blob) : async Result.Result<(Text), JournalTypes.Error> {
+        let callerId = msg.caller;
+        if( Principal.toText(callerId) != mainCanisterId_ ) {
+            return #err(#NotAuthorized);
+        };
+        let updatedUnsubmittedFiles = Trie.put2D(
+            unsubmittedFiles,
             textKey(fileId),
-            Text.equal
+            Text.equal,
+            natKey(chunkId),
+            Nat.equal,
+            blobChunk
         );
-
-        switch(existingFile){
-            case null{
-                if(Nat.equal(localFileIndex, localFileOneIndex) == true) {
-                    let localFileIter = Trie.iter(localFile1);
-                    Iter.iterate<(Nat, Blob)>(localFileIter, func(x : (Nat, Blob), _index) {
-
-                        let updatedFiles = Trie.put2D(
-                            files,
-                            textKey(fileId),
-                            Text.equal,
-                            natKey(x.0),
-                            Nat.equal,
-                            x.1
-                        );
-                        files := updatedFiles;
-                    });
-
-                    localFile1 := Trie.empty();
-                    return #ok(());
-                    
-                };
-                if(Nat.equal(localFileIndex, localFileZeroIndex) == true){
-                    let localFileIter = Trie.iter(localFile0);
-                    Iter.iterate<(Nat, Blob)>(localFileIter, func(x : (Nat, Blob), _index) {
-
-                        let updatedFiles = Trie.put2D(
-                            files,
-                            textKey(fileId),
-                            Text.equal,
-                            natKey(x.0),
-                            Nat.equal,
-                            x.1
-                        );
-                        files := updatedFiles;
-                    });
-
-                    localFile0 := Trie.empty();
-                        return #ok(());
-                };
-                #err(#NotFound);
-            };
-            case (? fileExists){
-                #err(#AlreadyExists);
-            };
-        };
-
-    };
-
-    public shared(msg) func uploadFileChunk(localFileIndex: Nat, chunkId : Nat, blobChunk : Blob) : async Result.Result<(), JournalTypes.Error> {
-        let callerId = msg.caller;
-        if( Principal.toText(callerId) != mainCanisterId_ ) {
-            return #err(#NotAuthorized);
-        };
-
-        if(Nat.equal(localFileIndex, localFileZeroIndex) == true){
-            let (newLocalFile, oldValueForThisKey) = Trie.put(
-                localFile0,
-                natKey(chunkId),
-                Nat.equal,
-                blobChunk
-            );
-
-            localFile0 := newLocalFile;
-            return #ok(()); 
-        };
-
-        if(Nat.equal(localFileIndex, localFileOneIndex) == true){
-            let (newLocalFile, oldValueForThisKey) = Trie.put(
-                localFile1,
-                natKey(chunkId),
-                Nat.equal,
-                blobChunk
-            );
-
-            localFile1 := newLocalFile;
-            return #ok(()); 
-        };
-
-        #err(#NotFound);
+        unsubmittedFiles := updatedUnsubmittedFiles;
+        return #ok(fileId); 
     };
 
     public shared(msg) func readJournal() : async ([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio) {
@@ -275,8 +194,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
                         emailOne = x.1.emailOne;
                         emailTwo = x.1.emailTwo;
                         emailThree = x.1.emailThree;
-                        file1MetaData = x.1.file1MetaData;
-                        file2MetaData = x.1.file2MetaData;
+                        filesMetaData  = x.1.filesMetaData;
+
                     };
 
                     let (newJournal, oldValueForThisKey) = Trie.put(
@@ -327,8 +246,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
                     emailOne = entryValue.emailOne;
                     emailTwo = entryValue.emailTwo;
                     emailThree = entryValue.emailThree;
-                    file1MetaData = entryValue.file1MetaData;
-                    file2MetaData = entryValue.file2MetaData;
+                    filesMetaData  = entryValue.filesMetaData;
+
                 };
 
                 let (newJournal, oldValueForThisKey) = Trie.put(
@@ -441,8 +360,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
                     emailOne = journalEntry.emailOne;
                     emailTwo = journalEntry.emailTwo;
                     emailThree = journalEntry.emailThree;
-                    file1MetaData = journalEntry.file1MetaData;
-                    file2MetaData = journalEntry.file2MetaData;
+                    filesMetaData  = journalEntry.filesMetaData;
+
                 };
 
                 let (newJournal, oldValueForThisKey) = Trie.put(
