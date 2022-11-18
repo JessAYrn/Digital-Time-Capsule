@@ -59,6 +59,8 @@ const Journal = (props) => {
     };
 
     const addJournalPage = () => {
+        //Ensures that there are no unsubmitted entries left over from a previous post
+        journalState.actor.clearUnsubmittedFiles();
         dispatch({
             actionType: types.ADD_JOURNAL_PAGE
         });

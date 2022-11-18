@@ -1,15 +1,15 @@
 import React, {useRef, useState, useEffect, useContext, useMemo} from 'react';
 import "./FileUpload.scss";
-import { types } from '../../reducers/journalReducer';
-import { useEffect } from '../../../../../dist/dtc_assets';
-import { deviceType, getFileArrayBuffer } from '../../Utils';
-import { DEVICE_TYPES, MAX_DURATION_OF_VIDEO_IN_SECONDS } from '../../Constants';
-import { MODALS_TYPES } from '../../Constants';
-import { CHUNK_SIZE } from '../../Constants';
-import { fileToBlob } from '../../Utils';
-import { AppContext as JournalContext} from '../../App';
-import { AppContext as NftContext } from '../../NFTs';
-import { UI_CONTEXTS } from '../../Contexts';
+import { types } from '../../../reducers/journalReducer';
+import { useEffect } from '../../../../../../dist/dtc_assets';
+import { deviceType, getFileArrayBuffer } from '../../../Utils';
+import { DEVICE_TYPES, MAX_DURATION_OF_VIDEO_IN_SECONDS } from '../../../Constants';
+import { MODALS_TYPES } from '../../../Constants';
+import { CHUNK_SIZE } from '../../../Constants';
+import { fileToBlob } from '../../../Utils';
+import { retrieveChunk, getFileURL, uploadChunk, getDuration } from './FileManagementTools';
+import { AppContext as JournalContext} from '../../../App';
+import { UI_CONTEXTS } from '../../../Contexts';
 
 const forbiddenFileTypes = [
     'application/pdf'
@@ -35,154 +35,81 @@ const FileUpload = (props) => {
     if(context === UI_CONTEXTS.JOURNAL){
         AppContext = JournalContext;
     }
-    if(context === UI_CONTEXTS.NFT){
-        AppContext = NftContext
-    }
     const { journalState, dispatch } = useContext(AppContext);
 
-    let dispatchActionToChangeFileMetaData;
-    let dispatchActionToChangeFileBlob;
-    let dispatchActionToChangeFileLoadStatus;
-    let fileData;
-    let nftCollectionKey;
-    let fileName;
+    let dispatchActionToChangeFileMetaData = types.CHANGE_FILE_METADATA;
+    let dispatchActionToChangeFileLoadStatus = types.CHANGE_FILE_LOAD_STATUS;
+    let fileData = journalState.journal[index].filesMetaData[fileIndex];
+    let fileName = fileData.fileName;
 
-    if(context === UI_CONTEXTS.NFT){
-        fileData = journalState.nftData[index][1];
-        fileName = fileData.id;
-        nftCollectionKey = journalState.nftData[index][0].nftCollectionKey;
-        dispatchActionToChangeFileLoadStatus = types.CHANGE_NFT_FILE_LOAD_STATUS;
-    } else if(fileIndex === journalState.journal[index].file2.metaData.fileIndex){
-        fileData = journalState.journal[index].file2;
-        fileName = fileData.metaData.fileName
-        dispatchActionToChangeFileMetaData = types.CHANGE_FILE2_METADATA;
-        dispatchActionToChangeFileBlob = types.CHANGE_FILE2_BLOB;
-        dispatchActionToChangeFileLoadStatus = types.CHANGE_FILE2_LOAD_STATUS;
-    } else if(fileIndex === journalState.journal[index].file1.metaData.fileIndex){
-        fileData = journalState.journal[index].file1;
-        fileName = fileData.metaData.fileName
-        dispatchActionToChangeFileMetaData = types.CHANGE_FILE1_METADATA;
-        dispatchActionToChangeFileBlob = types.CHANGE_FILE1_BLOB;
-        dispatchActionToChangeFileLoadStatus = types.CHANGE_FILE1_LOAD_STATUS;
-    }
-
-    const retrieveChunk = async (chunkIndex) => {
-        let chunk;
-        if(context === UI_CONTEXTS.JOURNAL){
-            chunk = await journalState.actor.readEntryFileChunk(fileName, chunkIndex);
-            chunk = chunk.ok;
-        } else if(context === UI_CONTEXTS.NFT){
-            chunk = await journalState.actor.getNftChunk(
-                nftCollectionKey,
-                fileData.id,
-                chunkIndex
-            );
-            chunk = chunk.Ok;
-        };
-        return chunk
-    }; 
+    useEffect(() => {
+        fileData = journalState.journal[index].filesMetaData[fileIndex];
+    }, [journalState.journal[index].filesMetaData[fileIndex]]);
+    useEffect(() => {
+        fileName = fileData.fileName;
+    }, [[journalState.journal[index].filesMetaData[fileIndex]]]);    
 
     useEffect(async () => {
-        if(fileName === 'null'){
-            return
-        };
-        if(fileData.blob){
-            let metaData_ = (fileData.metaData) ? fileData.metaData :  fileData;
+        if(fileName === 'null') return;
+        dispatch({ 
+            actionType: dispatchActionToChangeFileLoadStatus,
+            payload: true,
+            index: index,
+            fileIndex: fileIndex 
+        });
+        let index_ = 0;
+        let promises = [];
+        let fileChunkCounteObj;
+        let fileChunkCount;
+        if( context === UI_CONTEXTS.JOURNAL){
+            fileChunkCounteObj = await journalState.actor.readEntryFileSize(fileName);
+            fileChunkCount = parseInt(fileChunkCounteObj.ok);
+        } 
+        if( fileChunkCount > 0){
+            while(index_ < fileChunkCount){
+                promises.push(retrieveChunk(journalState, context, fileName, index_));
+                index_ += 1;
+            };
+            let fileBytes = await Promise.all(promises);
+            fileBytes = fileBytes.flat(1);
+            const fileArrayBuffer = new Uint8Array(fileBytes).buffer;
+            let metaData_ = fileData.metaData ? fileData.metaData : fileData;
+            const fileBlob = new Blob(
+                [fileArrayBuffer], 
+                { 
+                    type: metaData_.fileType 
+                }
+            );
             const fileAsFile = new File(
-                [fileData.blob],
+                [fileBlob],
                 fileName, 
                 {
-                    type: metaData_.fileType,
+                    type: metaData_.fileType, 
                     lastModified: parseInt(metaData_.lastModified)
                 } 
             );
-
             setConstructedFile(fileAsFile);
-            
-        } else {
-            dispatch({ 
-                actionType: dispatchActionToChangeFileLoadStatus,
-                payload: true,
-                index: index 
-            });
-            let index_ = 0;
-            let promises = [];
-    
-            let fileChunkCounteObj;
-            let fileChunkCount;
-            if( context === UI_CONTEXTS.JOURNAL){
-                fileChunkCounteObj = await journalState.actor.readEntryFileSize(fileName);
-                fileChunkCount = parseInt(fileChunkCounteObj.ok);
-            } else if(context === UI_CONTEXTS.NFT){
-                fileChunkCount = fileData.nftDataTrieSize;
-            }
-            if( fileChunkCount > 0){
-                while(index_ < fileChunkCount){
-                    promises.push(retrieveChunk(index_));
-                    index_ += 1;
-                };
-                let fileBytes = await Promise.all(promises);
-                fileBytes = fileBytes.flat(1);
-                const fileArrayBuffer = new Uint8Array(fileBytes).buffer;
-                let metaData_ = fileData.metaData ? fileData.metaData : fileData;
-                const fileBlob = new Blob(
-                    [fileArrayBuffer], 
-                    { 
-                        type: metaData_.fileType 
-                    }
-                );
-                const fileAsFile = new File(
-                    [fileBlob],
-                    fileName, 
-                    {
-                        type: metaData_.fileType, 
-                        lastModified: parseInt(metaData_.lastModified)
-                    } 
-                );
-                setConstructedFile(fileAsFile);
-            }
-            dispatch({ 
-                actionType: dispatchActionToChangeFileLoadStatus,
-                payload: false,
-                index: index 
-            });
         }
+        dispatch({ 
+            actionType: dispatchActionToChangeFileLoadStatus,
+            payload: false,
+            index: index,
+            fileIndex: fileIndex 
+        });
     },[fileName]);
 
     var uploadedFile;
-    var obUrl;
+    var fileURL;
     
     const typeOfDevice = deviceType();
 
-    const processAndDisplayFile = async (file) => {
-        setFileType(file.type);
-        let fileAsBuffer = await getFileArrayBuffer(file);
-        let fileBlob = new Blob([new Uint8Array(fileAsBuffer)], { type: file.type });
-        dispatch({
-            actionType: dispatchActionToChangeFileBlob,
-            payload: fileBlob,
-            index: index
-        });
-        let url = window.URL.createObjectURL(fileBlob);
-        setFileSrc(url);
-    };
-
     useEffect( async () => {
         if(constructedFile){
-            processAndDisplayFile(constructedFile);
-        }
+            setFileType(constructedFile.type);
+            fileURL = await getFileURL(constructedFile);
+            setFileSrc(fileURL)
+        };
     },[constructedFile]);
-
-    const uploadChunk = async (chunkId, fileChunk) => {
-        
-        const fileChunkAsBlob = await fileToBlob(fileChunk)
-        return journalState.actor.uploadJournalEntryFile(
-            fileIndex, 
-            chunkId, 
-            fileChunkAsBlob
-        );
-
-    };
 
     const mapAndSendFileToApi = async (file) => {
         const fileSize = file.size;
@@ -191,7 +118,6 @@ const FileUpload = (props) => {
         let chunk = 0;
 
         let promises = [];
-        const clearResult = await journalState.actor.clearLocalFile(fileData.metaData.fileIndex);
         while(chunk < chunks){    
             
             const from = chunk * CHUNK_SIZE;
@@ -200,40 +126,24 @@ const FileUpload = (props) => {
             const fileChunk = (to < fileSize -1) ? file.slice(from,to ) : file.slice(from);
 
             let chunkId = parseInt(chunk);
-            promises.push(uploadChunk(chunkId, fileChunk));
+            let fileId = journalState.journal[index].filesMetaData[fileIndex].fileName;
+            promises.push(uploadChunk(journalState, fileId, chunkId, fileChunk));
 
             chunk += 1;
         };
-
         const results = await Promise.all(promises); 
     };
-
-    const getDuration = async (file) => {
-        obUrl = URL.createObjectURL(file);
-       
-        return new Promise((resolve) => {
-          const audio = document.createElement("audio");
-          audio.muted = true;
-          const source = document.createElement("source");
-          source.src = obUrl; //--> blob URL
-          audio.preload= "metadata";
-          audio.appendChild(source);
-          audio.onloadedmetadata = function(){
-             resolve(audio.duration)
-          };
-        });
-    }
 
     const updateFileMetadataInStore = (file) => {
         dispatch({
             payload: {
                 fileName: `${file.name}-${Date.now()}`,
                 lastModified: file.lastModified,
-                fileType: file.type,
-                fileIndex: fileIndex
+                fileType: file.type
             },
             actionType: dispatchActionToChangeFileMetaData,
-            index: index
+            index: index,
+            fileIndex: fileIndex
         })
         if(!!setChangesWereMade){
             setChangesWereMade(true);
@@ -246,7 +156,8 @@ const FileUpload = (props) => {
         dispatch({ 
             actionType: dispatchActionToChangeFileLoadStatus,
             payload: true,
-            index: index 
+            index: index,
+            fileIndex: fileIndex 
         });
 
         //check file extension for audio/video type
@@ -265,16 +176,20 @@ const FileUpload = (props) => {
                             duration: duration
                         }
                 });
-                URL.revokeObjectURL(obUrl);
+                URL.revokeObjectURL(fileURL);
             } else {
-                await processAndDisplayFile(uploadedFile);
+                setFileType(uploadedFile.type);
+                fileURL = await getFileURL(uploadedFile);
+                setFileSrc(fileURL)
                 updateFileMetadataInStore(uploadedFile);
                 setConstructedFile(uploadedFile);
                 await mapAndSendFileToApi(uploadedFile);
             }
         } else {
             //triggers useEffect which displays the video
-            await processAndDisplayFile(uploadedFile);
+            setFileType(uploadedFile.type);
+            fileURL = await getFileURL(uploadedFile);
+            setFileSrc(fileURL)
             updateFileMetadataInStore(uploadedFile);
             setConstructedFile(uploadedFile);
             await mapAndSendFileToApi(uploadedFile);
@@ -283,7 +198,8 @@ const FileUpload = (props) => {
         dispatch({ 
             actionType: dispatchActionToChangeFileLoadStatus,
             payload: false,
-            index: index 
+            index: index,
+            fileIndex: fileIndex 
         });
         
     };

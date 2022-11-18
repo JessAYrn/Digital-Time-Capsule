@@ -222,21 +222,21 @@ shared (msg) actor class User() = this {
         return result;
     };
 
-    public shared(msg) func submitFile(localFileIndex: Nat, fileId : Text) : async Result.Result<(), JournalTypes.Error> {
+    public shared(msg) func submitFiles() : async Result.Result<(), JournalTypes.Error> {
         let callerId = msg.caller;
-        let result = await JournalHelperMethods.submitFile(callerId, profiles, localFileIndex, fileId);
+        let result = await JournalHelperMethods.submitFiles(callerId, profiles);
         return result;
     };
 
-    public shared(msg) func clearLocalFile(localFileIndex: Nat): async Result.Result<(), JournalTypes.Error>{
+    public shared(msg) func clearUnsubmittedFiles(): async Result.Result<(), JournalTypes.Error>{
         let callerId = msg.caller;
-        let result = await JournalHelperMethods.clearLocalFile(callerId, profiles, localFileIndex);
+        let result = await JournalHelperMethods.clearUnsubmittedFiles(callerId, profiles);
         return result;
     };
 
-    public shared(msg) func uploadJournalEntryFile(localFileIndex: Nat, chunkId: Nat, blobChunk: Blob): async Result.Result<(), JournalTypes.Error>{
+    public shared(msg) func uploadJournalEntryFile(fileId: Text, chunkId: Nat, blobChunk: Blob): async Result.Result<(Text), JournalTypes.Error>{
         let callerId = msg.caller;
-        let result = await JournalHelperMethods.uploadJournalEntryFile(callerId, profiles, localFileIndex, chunkId, blobChunk);
+        let result = await JournalHelperMethods.uploadJournalEntryFile(callerId, profiles, fileId, chunkId, blobChunk);
         return result;
     };
 
@@ -363,7 +363,7 @@ shared (msg) actor class User() = this {
 
     public shared(msg) func getPrincipalsList() : async [Principal] {
         let callerId = msg.caller;
-        let result = await CanisterManagementMethods.getPrincipalsList(callerId, profiles);
+        let result = await CanisterManagementMethods.getPrincipalsList(callerId, profiles, canisterData);
         return result;
     };
 
@@ -506,7 +506,7 @@ shared (msg) actor class User() = this {
 
     public shared(msg) func installCode( userPrincipal: Principal, args: Blob, wasmModule: Blob): async() {
         let callerId = msg.caller;
-        let result = await CanisterManagementMethods.installCode(callerId, userPrincipal, args, wasmModule, profiles);
+        let result = await CanisterManagementMethods.installCode(callerId, userPrincipal, args, wasmModule, profiles, canisterData);
     };
     
     private func verifyOwnership( principal: Principal ): async Bool {

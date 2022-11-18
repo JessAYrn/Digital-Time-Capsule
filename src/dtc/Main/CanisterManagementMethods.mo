@@ -23,44 +23,36 @@ module{
 
     private let ic : IC.Self = actor "aaaaa-aa";
 
-    public func getPrincipalsList(callerId : Principal, profiles : MainTypes.ProfilesTree) : async [Principal] {
+    public func getPrincipalsList(
+        callerId : Principal, 
+        profiles : MainTypes.ProfilesTree, 
+        canisterData: MainTypes.CanisterData
+        ) : async [Principal] {
 
-        let profile = Trie.find(
-            profiles,
-            key(callerId),
-            Principal.equal
-        );
+        let callerIdAsText = Principal.toText(callerId);
+            
+        if (callerIdAsText == canisterData.nftOwner) {
 
-        switch(profile){
-            case null{
-                throw Error.reject("Unauthorized access. Caller is not an admin.");
+            var index = 0;
+            let numberOfProfiles = Trie.size(profiles);
+            let profilesIter = Trie.iter(profiles);
+            let profilesArray = Iter.toArray(profilesIter);
+            let ArrayBuffer = Buffer.Buffer<(Principal)>(1);
+
+            while(index < numberOfProfiles){
+                let userProfile = profilesArray[index];
+                let userPrincipal = userProfile.0;
+                ArrayBuffer.add(userPrincipal);
+                index += 1;
             };
-            case ( ? existingProfile){
 
-                if (Option.get(existingProfile.userName, "null") == "admin") {
+            return ArrayBuffer.toArray();
 
-                    var index = 0;
-                    let numberOfProfiles = Trie.size(profiles);
-                    let profilesIter = Trie.iter(profiles);
-                    let profilesArray = Iter.toArray(profilesIter);
-                    let ArrayBuffer = Buffer.Buffer<(Principal)>(1);
+        } else {
+            throw Error.reject("Unauthorized access. Caller is not the owner.");
 
-                    while(index < numberOfProfiles){
-                        let userProfile = profilesArray[index];
-                        let userPrincipal = userProfile.0;
-                        ArrayBuffer.add(userPrincipal);
-                        index += 1;
-                    };
-
-                    return ArrayBuffer.toArray();
-
-                } else {
-                    throw Error.reject("Unauthorized access. Caller is not an admin.");
-
-                }
-
-            };
-        };
+        }
+        
     };
 
     public func updateOwner(ownerPrincipal: Principal, canisterData: MainTypes.CanisterData) : MainTypes.CanisterData {
@@ -317,56 +309,43 @@ module{
         userPrincipal: Principal, 
         args: Blob, 
         wasmModule: Blob, 
-        profiles : MainTypes.ProfilesTree
+        profiles : MainTypes.ProfilesTree,
+        canisterData : MainTypes.CanisterData
         ): async() {
 
-        let profile = Trie.find(
-            profiles,
-            key(callerId),
-            Principal.equal
-        );
+        let callerIdAsText = Principal.toText(callerId);
 
-        switch(profile){
-            case null{
-                throw Error.reject("Unauthorized access. Caller is not an admin.");
-            };
-            case ( ? existingProfile){
+            
+        if (callerIdAsText == canisterData.nftOwner) {
 
-                if (Option.get(existingProfile.userName, "null") == "admin") {
+            let theUserProfile = Trie.find(
+                profiles,
+                key(userPrincipal),
+                Principal.equal
+            );
 
-                    let theUserProfile = Trie.find(
-                        profiles,
-                        key(userPrincipal),
-                        Principal.equal
-                    );
-
-                    switch(theUserProfile){
-                        case null{
-                            throw Error.reject("No profile for this principal.");
-                        };
-                        case ( ? existingProfile){
-                            let userJournal = existingProfile.journal;
-                            let journalCanisterId = Principal.fromActor(userJournal);
-                            await ic.stop_canister({canister_id = journalCanisterId});
-                            await ic.install_code({
-                                arg = args;
-                                wasm_module = wasmModule;
-                                mode = #upgrade;
-                                canister_id = journalCanisterId;
-                            });
-                            await ic.start_canister({canister_id = journalCanisterId});
-                            let result = await userJournal.setMainCanisterPrincipalId();
-                        };
-                    };
-
-                } else {
-                    throw Error.reject("Unauthorized access. Caller is not an admin.");
-
-                }
-
+            switch(theUserProfile){
+                case null{
+                    throw Error.reject("No profile for this principal.");
+                };
+                case ( ? existingProfile){
+                    let userJournal = existingProfile.journal;
+                    let journalCanisterId = Principal.fromActor(userJournal);
+                    await ic.stop_canister({canister_id = journalCanisterId});
+                    await ic.install_code({
+                        arg = args;
+                        wasm_module = wasmModule;
+                        mode = #upgrade;
+                        canister_id = journalCanisterId;
+                    });
+                    await ic.start_canister({canister_id = journalCanisterId});
+                    let result = await userJournal.setMainCanisterPrincipalId();
+                };
             };
 
-        };
+        } else {
+            throw Error.reject("Unauthorized access. Caller is not the owner.");
+        }
     };
 
 

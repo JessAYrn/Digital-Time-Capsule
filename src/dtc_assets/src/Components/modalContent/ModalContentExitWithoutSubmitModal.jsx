@@ -1,4 +1,4 @@
-import React, { useContext} from 'react';
+import React, { useContext, useMemo } from 'react';
 import { MODALS_TYPES } from '../../Constants';
 import { AppContext } from '../../App';
 import "./ModalContentExitWithoutSubmitModal.scss";
@@ -17,6 +17,14 @@ const ExitWithoutSubmit = (props) => {
 
     const indexOfNewPage = journalState.journal.length - 1;
     const newPage = journalState.journal[indexOfNewPage];
+
+    let filesAreLoading = useMemo(() => {
+        let filesLoading = false;
+        journalState.journal[indexOfNewPage].filesMetaData.forEach(file => {
+            if(file.isLoading) filesLoading = file.isLoading;
+        });
+        return filesLoading;
+    }, [journalState.journal[indexOfNewPage].filesMetaData]);
 
 
     const onClickSubmit = () => {
@@ -51,7 +59,7 @@ const ExitWithoutSubmit = (props) => {
                 <button 
                     className='button' 
                     onClick={onClickSubmit}
-                    disabled={newPage.file1.isLoading || newPage.file2.isLoading}
+                    disabled={filesAreLoading}
                 > Yes, I almost forgot 
                 </button> 
             </div>   
@@ -59,7 +67,7 @@ const ExitWithoutSubmit = (props) => {
                 <button 
                     className='button' 
                     onClick={onClickExit}
-                    disabled={newPage.file1.isLoading || newPage.file2.isLoading}
+                    disabled={filesAreLoading}
                 > No, Don't worry about it  </button> 
             </div>  
         </div>

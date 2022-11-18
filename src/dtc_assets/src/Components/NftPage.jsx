@@ -2,7 +2,7 @@ import React, {useEffect, useState, useContext } from "react";
 import { UI_CONTEXTS } from "../Contexts";
 import { AppContext } from "../NFTs";
 import { NavBar } from "./navigation/NavBar";
-import FileUpload from "./Fields/FileUpload";
+import FileUpload from "./Fields/fileManger/FileUpload";
 import { Modal } from "./Modal";
 import "./NftPage.scss";
 const NftPage = () => {

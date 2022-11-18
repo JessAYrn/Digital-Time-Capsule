@@ -13,7 +13,6 @@ import { types } from '../../reducers/journalReducer';
 const ModalContentSubmit = (props) => {
 
     const {
-        closePage,
         context
     } = props;
 
@@ -38,9 +37,6 @@ const ModalContentSubmit = (props) => {
 
 
     const onClick = () => {
-        if(closePage){
-            closePage();
-        }
         dispatch({
             actionType: types.SET_MODAL_STATUS,
             payload: {show: false, which: MODALS_TYPES.onSubmit}
@@ -69,8 +65,6 @@ const ModalContentSubmit = (props) => {
             <div className={'buttonDiv'}>
                 <button className='button' onClick={onClick}> OK </button> 
             </div>       
-                    
-
         </div>
     )
 

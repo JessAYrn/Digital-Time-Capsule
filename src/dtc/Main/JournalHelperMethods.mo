@@ -232,7 +232,7 @@ module{
         };
     };
 
-    public func submitFile(callerId: Principal, profilesTree: MainTypes.ProfilesTree, localFileIndex: Nat, fileId : Text) : 
+    public func submitFiles(callerId: Principal, profilesTree: MainTypes.ProfilesTree) : 
     async Result.Result<(), JournalTypes.Error> {
 
         if(Principal.toText(callerId) == "2vxsx-fae"){
@@ -251,13 +251,13 @@ module{
             };
             case (? v){
                 let journal = v.journal;
-                let result = journal.submitFile(localFileIndex, fileId);
-                #ok(());
+                let result = await journal.submitFiles();
+                return result;
             };
         };
     };
 
-    public func clearLocalFile(callerId: Principal, profilesTree: MainTypes.ProfilesTree, localFileIndex: Nat): 
+    public func clearUnsubmittedFiles(callerId: Principal, profilesTree: MainTypes.ProfilesTree): 
     async Result.Result<(), JournalTypes.Error>{
 
         if(Principal.toText(callerId) == "2vxsx-fae"){
@@ -276,14 +276,14 @@ module{
             };
             case (? v){
                 let journal = v.journal;
-                let result = journal.clearLocalFile(localFileIndex: Nat);
+                let result = journal.clearUnsubmittedFiles();
                 #ok(());
             };
         };
     };
 
-    public func uploadJournalEntryFile(callerId: Principal, profilesTree: MainTypes.ProfilesTree,localFileIndex: Nat, chunkId: Nat, blobChunk: Blob): 
-    async Result.Result<(), JournalTypes.Error>{
+    public func uploadJournalEntryFile(callerId: Principal, profilesTree: MainTypes.ProfilesTree,fileId: Text, chunkId: Nat, blobChunk: Blob): 
+    async Result.Result<(Text), JournalTypes.Error>{
 
         if(Principal.toText(callerId) == "2vxsx-fae"){
            return #err(#NotAuthorized);
@@ -301,7 +301,7 @@ module{
             };
             case (? v){
                 let journal = v.journal;
-                let status = await journal.uploadFileChunk(localFileIndex: Nat, chunkId, blobChunk);
+                let status = await journal.uploadFileChunk(fileId: Text, chunkId, blobChunk);
                 return status;
             };
         };

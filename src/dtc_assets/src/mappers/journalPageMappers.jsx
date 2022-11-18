@@ -42,21 +42,13 @@ export const mapApiObjectToFrontEndJournalEntriesObject = (journalDataFromApi) =
     let journalEntriesForFrontend = journalEntriesForFrontend_[0].map((arrayWithKeyAndPage) => {
         const backEndObj = arrayWithKeyAndPage[1];
         const entryKey  = arrayWithKeyAndPage[0];
-        const file1Data = {
-            metaData: {
-                ...backEndObj.file1MetaData,
-                fileIndex: file1FileIndex
-            },
-            isLoading: false
-        }
+        const filesMetaData = backEndObj.filesMetaData.map(fileData => {
+            return {
+                ...fileData,
+                lastModified : parseInt(fileData.lastModified)
+            };
+        });
 
-        const file2Data = {
-            metaData: {
-                ...backEndObj.file2MetaData,
-                fileIndex: file2FileIndex
-            },
-            isLoading: false
-        };
         let unlockTimeInNanoseconds = parseInt(backEndObj.unlockTime);
         let unlockTimeInMilliseconds = nanoSecondsToMiliSeconds(unlockTimeInNanoseconds);
         let unlockDate = getDateAsString(unlockTimeInMilliseconds)        
@@ -76,8 +68,7 @@ export const mapApiObjectToFrontEndJournalEntriesObject = (journalDataFromApi) =
             sent : backEndObj.sent,
             read : backEndObj.read,
             draft: backEndObj.draft,
-            file1: file1Data,
-            file2: file2Data,
+            filesMetaData: filesMetaData,
             isOpen: false,
             entryKey: parseInt(entryKey)
         };
