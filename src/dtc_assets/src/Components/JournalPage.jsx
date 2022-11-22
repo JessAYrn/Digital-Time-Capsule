@@ -10,7 +10,10 @@ import { UI_CONTEXTS } from "../Contexts";
 import { MODALS_TYPES, monthInMilliSeconds} from "../Constants";
 import { getDateAsString } from "../Utils";
 import { getDateInMilliseconds, milisecondsToNanoSeconds } from "../Utils";
-import { loadJournalData } from "./loadingFunctions";
+import { loadJournalDataResponseAfterSubmit } from "./loadingFunctions";
+import * as RiIcons from 'react-icons/ri';
+import * as BiIcons from 'react-icons/bi';
+import { IconContext } from 'react-icons/lib';
 import Switch from "./Fields/Switch";
 
 const JournalPage = (props) => {
@@ -76,7 +79,7 @@ const JournalPage = (props) => {
             entryAsApiObject
         );
         if('ok' in result){
-            loadJournalData(result, dispatch, types);
+            loadJournalDataResponseAfterSubmit(result, dispatch, types);
         }
         return result;
 
@@ -150,7 +153,24 @@ const JournalPage = (props) => {
                 });
             }
         }
-    }
+    };
+
+    const handleDeleteFile = async () => {
+        dispatch({
+            index: index,
+            actionType: types.REMOVE_JOURNAL_ENTRY_FILE
+        });
+        let fileCount = journalPageData.filesMetaData.length;
+        let fileName = journalPageData.filesMetaData[fileCount-1].fileName;
+        let result = await journalState.actor.deleteUnsubmittedFile(fileName);
+    };
+
+    const handleAddFile = async () => {
+        dispatch({
+            index: index,
+            actionType: types.ADD_JOURNAL_ENTRY_FILE
+        });
+    };
 
     let filesAreLoading = useMemo(() => {
         let filesLoading = false;
@@ -165,7 +185,11 @@ const JournalPage = (props) => {
             <LoadScreen/> : 
                 <div className={"journalPageContainer"}>
                     <div className={"logoDiv"}>
-                        <img className={'backButtonImg'} src="back-icon.png" alt="Back Button" onClick={(e) => handleClosePage(e)}/>
+                        <div className={'backButtonDiv'}>
+                            <IconContext.Provider value={{ size: '25px'}}>
+                                <RiIcons.RiArrowGoBackLine onClick={handleClosePage}/>
+                            </IconContext.Provider>
+                        </div>
                         <div className="switchDiv">
                             <h5 className='switchH5'>
                                 Time Capsule:
@@ -217,7 +241,7 @@ const JournalPage = (props) => {
                         <InputBox
                             divClassName={"entry"}
                             label={"Entry: "}
-                            rows={"59"}
+                            rows={"30"}
                             disabled={!journalPageData.draft}
                             setChangesWereMade={setPageChangesMade}
                             dispatch={dispatch}
@@ -229,6 +253,14 @@ const JournalPage = (props) => {
                     {journalPageData.filesMetaData.map((metaData, fileIndex) => {
                         return(
                             <div className='fileContainer'>
+                                {
+                                    (journalPageData.filesMetaData.length-1 === fileIndex) && journalPageData.draft &&
+                                    <div className={'removeFileDiv'}>
+                                        <IconContext.Provider value={{ size: '25px', color: 'red'}}>
+                                            <RiIcons.RiDeleteBin2Line onClick={handleDeleteFile}/>
+                                        </IconContext.Provider>
+                                    </div>
+                                }
                                 <FileUpload
                                     label={`file_${metaData.fileIndex}`}
                                     elementId={`file_${metaData.fileIndex}`}
@@ -242,17 +274,20 @@ const JournalPage = (props) => {
                             </div>
                         )
                     })}
-                    <div className={"submitButtonDiv"}>
-                        <button 
-                            className={'button'} 
-                            type="submit" 
-                            onClick={handleSubmit} 
-                            disabled={!journalPageData.draft || filesAreLoading}
-                        > 
-                            Submit 
-                        </button>
-                    </div>
-                    
+                    {
+                        journalPageData.draft &&
+                        <div className={'addFileDiv'}>
+                            <IconContext.Provider value={{ size: '25px'}}>
+                                <BiIcons.BiImageAdd onClick={handleAddFile}/>
+                            </IconContext.Provider>
+                        </div>
+                    }
+                    {
+                        journalPageData.draft && !filesAreLoading && pageChangesMade &&
+                        <div className={"submitButtonDiv"} onClick={handleSubmit}>
+                                Submit 
+                        </div>
+                    }
                 </div>
     )
 };

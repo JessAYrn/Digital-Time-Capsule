@@ -34,8 +34,7 @@ const ModalContentSubmit = (props) => {
     }
 
     const { journalState, dispatch } = useContext(AppContext);
-
-
+    
     const onClick = () => {
         dispatch({
             actionType: types.SET_MODAL_STATUS,

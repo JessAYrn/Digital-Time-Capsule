@@ -80,6 +80,36 @@
         
       }
     }
+    .submitButtonDiv{
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      background-color: white;
+      position: fixed;
+      bottom: 30px;
+      left: 30px;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 10px;
+      border-color: rgb(0, 0, 0);
+      box-shadow: 0 5px 16px rgb(0 0 0 / 50%);
+    }
+    .addPageDiv{
+      background-color: white;
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 10px;
+      border-color: rgb(0, 0, 0);
+      box-shadow: 0 5px 16px rgb(0 0 0 / 50%);
+    }
   
     .tableDivContainer{
       @media screen and (max-width: 480px) {

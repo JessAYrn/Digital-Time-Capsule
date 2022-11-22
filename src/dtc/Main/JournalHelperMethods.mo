@@ -232,12 +232,28 @@ module{
         };
     };
 
-    public func submitFiles(callerId: Principal, profilesTree: MainTypes.ProfilesTree) : 
+    public func deleteUnsubmittedFile(callerId: Principal, profilesTree: MainTypes.ProfilesTree, fileId: Text) :
     async Result.Result<(), JournalTypes.Error> {
 
-        if(Principal.toText(callerId) == "2vxsx-fae"){
-           return #err(#NotAuthorized);
+        let result = Trie.find(
+            profilesTree,
+            key(callerId),
+            Principal.equal
+        );
+        switch(result){
+            case null{
+                return #err(#NotFound);
+            };
+            case(? v){
+                let journal = v.journal;
+                let result_ = await journal.deleteUnsubmittedFile(fileId);
+                return result_;
+            };
         };
+    };
+
+    public func submitFiles(callerId: Principal, profilesTree: MainTypes.ProfilesTree) : 
+    async Result.Result<(), JournalTypes.Error> {
 
         let result = Trie.find(
             profilesTree,

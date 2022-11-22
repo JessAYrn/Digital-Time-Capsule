@@ -8,6 +8,8 @@ import { e8sInOneICP, MODALS_TYPES } from '../Constants';
 import {  RenderQrCode } from './walletFunctions/GenerateQrCode';
 import { copyWalletAddressHelper } from './walletFunctions/CopyWalletAddress';
 import { Transaction } from './walletFunctions/Transaction';
+import * as GrIcons from 'react-icons/gr';
+import { IconContext } from 'react-icons/lib';
 import { testTx } from '../testData/Transactions';
 import LoadScreen from './LoadScreen';
 import { types } from '../reducers/journalReducer';
@@ -63,63 +65,63 @@ const WalletPage = (props) => {
                     {journalState.isLoading ?
                         <LoadScreen/> :
                         <div className={"container__wallet"}>
-                                <div className={'transparentDiv__wallet'}>
-                                    <div className={`infoDiv contentContainer _${contentContainerIndex++} animatedLeft`} >
-                                        { mql.matches &&
-                                            <RenderQrCode
-                                                imgUrl={journalState.walletData.qrCodeImgUrl}
-                                            />  
-                                        }
-                                        <div className={'textsDiv'}>
-                                            <div className="balanceDiv">
-                                                Wallet Balance: {journalState.walletData.balance /  e8sInOneICP} ICP
+                            <div className={'transparentDiv__wallet'}>
+                                <div className={`infoDiv contentContainer _${contentContainerIndex++} animatedLeft`} >
+                                    { mql.matches &&
+                                        <RenderQrCode
+                                            imgUrl={journalState.walletData.qrCodeImgUrl}
+                                        />  
+                                    }
+                                    <div className={'textsDiv'}>
+                                        <div className="balanceDiv">
+                                            Wallet Balance: {journalState.walletData.balance /  e8sInOneICP} ICP
+                                        </div>
+                                        <div className={'walletInfoDiv'}>
+                                            <div className='walletAddressDiv'>
+                                                <p className='firstPTag'>
+                                                    Wallet Address:  
+                                                </p>
+                                                <p className='secondPTag'>
+                                                    {shortenHexString(journalState.walletData.address)} 
+                                                </p> 
                                             </div>
-                                            <div className={'walletInfoDiv'}>
-                                                <div className='walletAddressDiv'>
-                                                    <p className='firstPTag'>
-                                                        Wallet Address:  
-                                                    </p>
-                                                    <p className='secondPTag'>
-                                                        {shortenHexString(journalState.walletData.address)} 
-                                                    </p> 
-                                                </div>
-                                                <div className={"copyWalletAddressButton"}>
-                                                    <button className='button' onClick={copyWalletAddress}> Copy Wallet Address </button>
-                                                </div>
-                                                <div className="buttonsDiv" >
-                                                    <button className='button' onClick={openModal}> Send </button>
-                                                </div>
+                                            <div className={"copyWalletAddressButton"}>
+                                                <button className='button' onClick={copyWalletAddress}> Copy Wallet Address </button>
                                             </div>
                                         </div>
-                                        { !mql.matches &&
-                                            <RenderQrCode
-                                                imgUrl={journalState.walletData.qrCodeImgUrl}
-                                            />  
-                                        }
                                     </div>
-                                    { journalState.walletData.txHistory.isLoading ? 
-                                    <div className={`loadGifContainer contentContainer _${contentContainerIndex} animatedLeft`}>
-                                        <div className='loadGifDiv'>
-                                            <img src="Loading.gif" alt="Loading Screen" />
-                                        </div>
-                                    </div>
-                                        :
-                                        journalState.walletData.txHistory.data.map((tx) => {
-                                            return(
-                                                    <Transaction
-                                                        class_={`contentContainer _${contentContainerIndex++} animatedLeft`}
-                                                        balanceDelta={tx[1].balanceDelta}
-                                                        increase={tx[1].increase}
-                                                        recipient={tx[1].recipient[0]}
-                                                        timeStamp={tx[1].timeStamp[0]}
-                                                        source={tx[1].source[0]}
-                                                    />
-                                            );
-                                        })
-                                    }              
+                                    { !mql.matches &&
+                                        <RenderQrCode
+                                            imgUrl={journalState.walletData.qrCodeImgUrl}
+                                        />  
+                                    }
                                 </div>
-                                
-                            
+                                { journalState.walletData.txHistory.isLoading ? 
+                                <div className={`loadGifContainer contentContainer _${contentContainerIndex} animatedLeft`}>
+                                    <div className='loadGifDiv'>
+                                        <img src="Loading.gif" alt="Loading Screen" />
+                                    </div>
+                                </div>
+                                    :
+                                    journalState.walletData.txHistory.data.map((tx) => {
+                                        return(
+                                                <Transaction
+                                                    class_={`contentContainer _${contentContainerIndex++} animatedLeft`}
+                                                    balanceDelta={tx[1].balanceDelta}
+                                                    increase={tx[1].increase}
+                                                    recipient={tx[1].recipient[0]}
+                                                    timeStamp={tx[1].timeStamp[0]}
+                                                    source={tx[1].source[0]}
+                                                />
+                                        );
+                                    })
+                                }              
+                            </div>
+                            <div className={'sendButtonDiv'}>
+                                <IconContext.Provider value={{ size: '25px'}}>
+                                    <GrIcons.GrSend onClick={openModal}/>
+                                </IconContext.Provider>
+                            </div>
                         </div>}
                 </>
             }

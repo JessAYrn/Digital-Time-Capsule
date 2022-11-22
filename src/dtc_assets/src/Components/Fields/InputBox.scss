@@ -1,36 +1,50 @@
 .inputBox{
     width: 100%;
     opacity: 0.98;
-    .label{
-
-        &__disabled{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    .label-element-div{
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        .label.disabled{
+            width: 93%;
             font-family: 'Courier New', monospace;
             font-size: .80rem;
             color: rgb(163, 163, 163);
         }
-        &__enabled{
+        .label.enabled{
+            width: 93%;
             font-family: 'Courier New', monospace;
             font-size: .95rem;
             color: rgb(0, 0, 0);
         }
     }
-    .enabled{
-        font-family: 'Courier New', monospace;
-        outline: 0;
-        border-width: 0 0 1px;
-        border-radius: 10px;
-        border-color: rgb(0, 0, 0);
-        box-shadow: 0 5px 16px rgb(0 0 0 / 50%);
+    .input-element-div{
         width: 100%;
-    }
-    
-    .disabled{
-        font-family: 'Courier New', monospace;
-        outline: 0;
-        border-width: 0 0 1px;
-        border-radius: 10px;
-        color: rgb(163, 163, 163);
-        box-shadow: 0 5px 16px rgb(0 0 0 / 50%);
-        width: 95%;
+        display: flex;
+        justify-content: center;
+        .enabled{
+            font-family: 'Courier New', monospace;
+            outline: 0;
+            border-width: 0 0 1px;
+            border-radius: 10px;
+            border-color: rgb(0, 0, 0);
+            box-shadow: 0 5px 16px rgb(0 0 0 / 50%);
+            width: 100%;
+        }
+        
+        .disabled{
+            font-family: 'Courier New', monospace;
+            outline: 0;
+            border-width: 0 0 1px;
+            border-radius: 10px;
+            color: rgb(163, 163, 163);
+            box-shadow: 0 5px 16px rgb(0 0 0 / 50%);
+            width: 95%;
+        }
     }
 }

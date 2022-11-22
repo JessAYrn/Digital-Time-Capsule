@@ -1,24 +1,57 @@
 .journalPageContainer{
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    .addFileDiv{
+        background-color: white;
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 10px;
+        border-color: rgb(0, 0, 0);
+        box-shadow: 0 5px 16px rgb(0 0 0 / 50%);
+    }
+    .removeFileDiv{
+        width: 50px;
+        height: 50px;
+        position: relative;
+        top: 90px;
+        left: 25px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 10px;
+        border-color: rgb(0, 0, 0);
+        box-shadow: 0 5px 16px rgb(0 0 0 / 50%);
+    }
     .submitButtonDiv{
-        width: 100%;
-        float: left;
-        .button{
-            width: 80%;
-            margin-left: 10%;
-            border-radius: 10px;
-            margin-top: 20px;
-        }
+        font-family: 'Courier New', monospace;
+        font-size: 13px;
+        background-color: white;
+        position: fixed;
+        bottom: 30px;
+        left: 30px;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 10px;
+        border-color: rgb(0, 0, 0);
+        box-shadow: 0 5px 16px rgb(0 0 0 / 50%);
     }
     .journalText{
         @media screen and (max-width: 1260px) {    
             width: 90%;
-            float: left;
-            margin-left: 5%
         };
-        margin-left: 20px;
-        margin-right: 20px;
-        width: 40%;
-        float: left;
+        width: 66%;
     }
     .fileContainer{
         float: left;
@@ -67,25 +100,29 @@
 
     .logoDiv{
         width: 100%;
-        float: left;
         display: flex;
+        justify-content: center;
+        align-items: center;
+        .backButtonDiv{
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
+            border-color: rgb(0, 0, 0);
+            box-shadow: 0 5px 16px rgb(0 0 0 / 50%);
+        }
         .switchDiv{
             .switchH5{
                 font-family: 'Courier New', monospace;
             }
-            width: 85%;
+            width: 48%;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-direction: column;
         }
-        .backButtonImg{
-            margin-top: 3rem;
-            float: left;
-            max-width: 3rem;
-            max-height: 3rem;
-        }
-    
         .logoImg{
             @media screen and (max-width: 650px) {    
                 max-width: 8rem;

@@ -1,6 +1,6 @@
 import React, {useReducer, createContext, useState, useEffect} from 'react';
 import journalReducer, { types, initialState } from './reducers/journalReducer';
-import SubcriptionPage from './Components/AccountPage';
+import AccountSection from './Components/AccountPage';
 import { useLocation } from 'react-router-dom';
 import LoginPage from './Components/authentication/LoginPage';
 import { UI_CONTEXTS } from './Contexts';
@@ -99,7 +99,7 @@ const AccountPage = (props) => {
         >
             {
                 journalState.isAuthenticated ? 
-                    <SubcriptionPage/> : 
+                    <AccountSection/> : 
                     <LoginPage
                         context={UI_CONTEXTS.ACCOUNT_PAGE}
                     /> 

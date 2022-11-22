@@ -1,10 +1,13 @@
 .imageDivContainer{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     float: left;
     width: 330px;
     border-radius: 10px;
     height: 500px;
     margin: auto;
-    padding-top: 27px;
     margin-left: 11.5px;
     margin-right: 11.5px;
     .imageDiv{
@@ -37,8 +40,9 @@
         }
     }
     .imageInputButton{
-        padding-left: 108px;
         width: 92px;
+        position: relative;
+        bottom: 50%;
         margin-bottom: 1rem;
     }
 }
