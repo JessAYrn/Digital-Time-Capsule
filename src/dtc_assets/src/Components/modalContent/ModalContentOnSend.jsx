@@ -7,6 +7,7 @@ import { toE8s, fromE8s } from "../../Utils.jsx";
 import { QrReaderContent } from "../walletFunctions/ScanQrCode";
 import { MODALS_TYPES } from "../../Constants";
 import { types } from "../../reducers/journalReducer";
+import ButtonField from "../Fields/Button";
 
 const ModalContentOnSend = (props) => {
 
@@ -83,10 +84,12 @@ const ModalContentOnSend = (props) => {
                         </h2>
                     }
                 </div>
-
-                <div className={'buttonDiv'}>
-                    <button className='button' onClick={onClick}> OK </button> 
-                </div> 
+                <ButtonField
+                    text={'Ok'}
+                    className={'buttonDiv'}
+                    onClick={onClick}
+                    withBox={true}
+                />
             </div> 
         );
     }
@@ -95,7 +98,7 @@ const ModalContentOnSend = (props) => {
 
         return(
             <div className={'summaryContentDiv'}>
-                <div className="recipientAdressDiv">
+                <div className="recipientAddressDiv">
                     <h5> Recipient Address: </h5>
                     <h6> {recipientAddress.slice(0,9)} ... {recipientAddress.slice(-10)}  </h6>
                 </div>
@@ -108,8 +111,18 @@ const ModalContentOnSend = (props) => {
                     <h6> {fromE8s(toE8s(amountToSend) + toE8s(fee))} ICP </h6>
                 </div>
                 <div className='ModalContentOnSendButtons'>
-                    <button className='button' onClick={onSendConfirm}> Send </button>
-                    <button className='button' onClick={onCancel}> Cancel </button> 
+                    <ButtonField
+                        text={'Send'}
+                        className={'button'}
+                        onClick={onSendConfirm}
+                        withBox={true}
+                    />
+                    <ButtonField
+                        text={'Cancel'}
+                        className={'button'}
+                        onClick={onCancel}
+                        withBox={true}
+                    />
                 </div> 
             </div>
         )
@@ -118,10 +131,13 @@ const ModalContentOnSend = (props) => {
     const InputTransaction = () => {
         return (
             <div className="sendContentDiv">
-                <div className='ModalContentOnSendQRButton'>
-                    <button className='button' onClick={() => setShowQrReader(!showQrReader)}> Scan QR Code </button>
-                </div> 
-                <div className="recipientAdressDiv">
+                <ButtonField
+                    text={'Scan QR Code'}
+                    className={'ModalContentOnSendQRButton'}
+                    onClick={() => setShowQrReader(!showQrReader)}
+                    withBox={true}
+                />
+                <div className="recipientAddressDiv">
                     <InputBox
                         label={"Recipient Address: "}
                         rows={"1"}
@@ -138,8 +154,18 @@ const ModalContentOnSend = (props) => {
                     />
                 </div>
                 <div className='ModalContentOnSendButtons'>
-                    <button className='button' onClick={showTxSummary}> Summary </button>
-                    <button className='button' onClick={onCancel}> Cancel </button> 
+                    <ButtonField
+                        text={'Summary'}
+                        className={'button'}
+                        onClick={showTxSummary}
+                        withBox={true}
+                    />
+                    <ButtonField
+                        text={'Cancel'}
+                        className={'button'}
+                        onClick={onCancel}
+                        withBox={true}
+                    />
                 </div> 
             </div>
         )

@@ -1,23 +1,5 @@
 Digital-Time-Capsule
 
-in order to get the test Internet_Identity canister to work, you must do the following steps:
-
-## Running Internet-Identity canister Locally
-
-To run the internet_identity canisters, proceed as follows after cloning the internet_identity repository
-
-After checking out dfinity/internet-identity, run this in `./demos/using-dev-build`:
-
-```
-dfx start --background --clean
-npm ci
-dfx deploy --no-wallet --argument '(null)'
-```
-
-In a different terminal, run the following command to install the Internet Identity canister:
-
-II_FETCH_ROOT_KEY=1 dfx deploy --no-wallet --argument '(null)'
-
 ## Running the Digital-Time-Capsule repo locally
 
 in the Digital-Time-Capsule project 
@@ -37,6 +19,18 @@ add the follow property to the "canisters" object in the dfx.json file:
       "type": "custom",
       "wasm": "ledger.wasm",
       "candid": "ledger.public.did"
+  },
+  "internet_identity": {
+      "type": "custom",
+      "candid": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity.did",
+      "wasm": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity_dev.wasm",
+      "shrink": false,
+      "remote": {
+        "candid": "internet_identity.did",
+        "id": {
+          "ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+        }
+      }
     },
 ```
 
@@ -45,7 +39,7 @@ change the "candid": "ledger.public.did" line of the dfx.json file so that it re
 start local replica by running the following line:
 
 ```
-dfx start --background
+dfx start --background --clean
 ```
 
 Create a new identity that will work as a minting account by running the following lines:
@@ -63,6 +57,19 @@ dfx identity use default
 export LEDGER_ACC=$(dfx ledger account-id)
 ```
 
+### deploy the internet identity canister locally
+
+Deploy the internet identity app to your network by running the following line:
+```
+dfx deploy internet_identity
+```
+
+take the canister id for the internet identity canister and set it as the value of the LOCAL_II_CANISTER_ID variable located on line 8 
+of the webpack.config.js file.
+
+
+### deploy the ledger canister locally
+
 Deploy the ledger canister to your network by running the following line:
 ```
 dfx deploy ledger --argument '(record {minting_account = "'${MINT_ACC}'"; initial_values = vec { record { "'${LEDGER_ACC}'"; record { e8s=100_000_000_000 } }; }; send_whitelist = vec {}})'
@@ -71,6 +78,8 @@ dfx deploy ledger --argument '(record {minting_account = "'${MINT_ACC}'"; initia
 change the "candid": "ledger.private.did" line of the dfx.json file back so that it reads "candid": "ledger.public.did" again.
 
 Take the ledger canister-id and set it as the value of the CANISTER_ID variable in the Digital-Time-Capsule/src/dtc/ledger.mo file. 
+
+### deploy the backend and frontend canisters locally
 
 set the isLocal var in the main.mo file to true;
 
@@ -104,10 +113,24 @@ first, be sure that you delete the following from the dfx.json file
       "type": "custom",
       "wasm": "ledger.wasm",
       "candid": "ledger.public.did"
+  },
+  "internet_identity": {
+      "type": "custom",
+      "candid": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity.did",
+      "wasm": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity_dev.wasm",
+      "shrink": false,
+      "remote": {
+        "candid": "internet_identity.did",
+        "id": {
+          "ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+        }
+      }
     },
 ```
 
 Change the CANISTER_ID variable in the Digital-Time-Capsule/src/dtc/ledger.mo file to "ryjl3-tyaaa-aaaaa-aaaba-cai" (This is the canister-id of the ledger canister on the mainnet);
+
+Change the LOCAL_II_CANISTER_ID variable in the webpack.config.js file back to what it was.
 
 run the following commands
 

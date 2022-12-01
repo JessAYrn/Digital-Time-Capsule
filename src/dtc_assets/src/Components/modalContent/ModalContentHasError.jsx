@@ -5,6 +5,7 @@ import { MODALS_TYPES } from '../../Constants';
 import { round2Decimals } from '../../Utils';
 import "./ModalContentHasError.scss";
 import { types } from '../../reducers/journalReducer';
+import ButtonField from '../Fields/Button';
 const FileHasError = (props) => {
 
     const { journalState, dispatch } = useContext(AppContext);
@@ -41,9 +42,12 @@ const FileHasError = (props) => {
                     </h6>
                 </li> 
             </ul> 
-            <div className={'buttonDiv__ok'}>
-                <button className='button' onClick={onClickOk}> OK </button> 
-            </div> 
+            <ButtonField
+                text={'OK'}
+                className={'buttonDiv__ok'}
+                onClick={onClickOk}
+                withBox={true}
+            />
         </div>
 
     )

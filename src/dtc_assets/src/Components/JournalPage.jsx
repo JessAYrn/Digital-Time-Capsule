@@ -13,6 +13,7 @@ import { getDateInMilliseconds, milisecondsToNanoSeconds } from "../Utils";
 import { loadJournalDataResponseAfterSubmit } from "./loadingFunctions";
 import * as RiIcons from 'react-icons/ri';
 import * as BiIcons from 'react-icons/bi';
+import ButtonField from "./Fields/Button";
 import { IconContext } from 'react-icons/lib';
 import Switch from "./Fields/Switch";
 
@@ -185,11 +186,13 @@ const JournalPage = (props) => {
             <LoadScreen/> : 
                 <div className={"journalPageContainer"}>
                     <div className={"logoDiv"}>
-                        <div className={'backButtonDiv'}>
-                            <IconContext.Provider value={{ size: '25px'}}>
-                                <RiIcons.RiArrowGoBackLine onClick={handleClosePage}/>
-                            </IconContext.Provider>
-                        </div>
+                        <ButtonField
+                            Icon={RiIcons.RiArrowGoBackLine}
+                            iconSize={25}
+                            className={'backButtonDiv'}
+                            onClick={handleClosePage}
+                            withBox={true}
+                        />
                         <div className="switchDiv">
                             <h5 className='switchH5'>
                                 Time Capsule:
@@ -255,11 +258,14 @@ const JournalPage = (props) => {
                             <div className='fileContainer'>
                                 {
                                     (journalPageData.filesMetaData.length-1 === fileIndex) && journalPageData.draft &&
-                                    <div className={'removeFileDiv'}>
-                                        <IconContext.Provider value={{ size: '25px', color: 'red'}}>
-                                            <RiIcons.RiDeleteBin2Line onClick={handleDeleteFile}/>
-                                        </IconContext.Provider>
-                                    </div>
+                                    <ButtonField
+                                        Icon={RiIcons.RiDeleteBin2Line}
+                                        iconSize={25}
+                                        iconColor={'red'}
+                                        className={'removeFileDiv'}
+                                        onClick={handleDeleteFile}
+                                        withBox={true}
+                                    />
                                 }
                                 <FileUpload
                                     label={`file_${metaData.fileIndex}`}
@@ -276,17 +282,22 @@ const JournalPage = (props) => {
                     })}
                     {
                         journalPageData.draft &&
-                        <div className={'addFileDiv'}>
-                            <IconContext.Provider value={{ size: '25px'}}>
-                                <BiIcons.BiImageAdd onClick={handleAddFile}/>
-                            </IconContext.Provider>
-                        </div>
+                        <ButtonField
+                            Icon={BiIcons.BiImageAdd}
+                            iconSize={25}
+                            className={'addFileDiv'}
+                            onClick={handleAddFile}
+                            withBox={true}
+                        />
                     }
                     {
                         journalPageData.draft && !filesAreLoading && pageChangesMade &&
-                        <div className={"submitButtonDiv"} onClick={handleSubmit}>
-                                Submit 
-                        </div>
+                        <ButtonField
+                            text={'Submit'}
+                            className={'submitButtonDiv'}
+                            onClick={handleSubmit}
+                            withBox={true}
+                        />
                     }
                 </div>
     )

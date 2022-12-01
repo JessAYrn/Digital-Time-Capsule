@@ -22,7 +22,7 @@ export const fromE8s = (number) => {
 }
 
 export const shortenHexString = (hexString) => {
-  const shortString = `${hexString.slice(0,9)} ... ${hexString.slice(-10)}`
+  const shortString = `${hexString.slice(0,4)} ... ${hexString.slice(-4)}`
   return shortString
 }
 

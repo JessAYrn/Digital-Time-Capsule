@@ -7,6 +7,7 @@ import { AppContext as  AccountContext} from "../../Account";
 import { AppContext as  HomePageContext} from "../../HomePage";
 import { types } from "../../reducers/journalReducer";
 import { MODALS_TYPES } from "../../Constants";
+import ButtonField from "../Fields/Button";
 import "./DateOutOfRange.scss"
 
 const DateOutOfRange = (props) => {
@@ -41,13 +42,18 @@ const DateOutOfRange = (props) => {
     return(
         <div className="contentDiv__dateOutOfRange">
 
-                <h3 className='h3Texts'>
-                    { journalState.modalStatus.beyondMax ? 
-                        'You may only select dates as late as the current date.' :
-                        'The unlock date must be at least one month in the future.'
-                    }
-                </h3>
-            <button className={'button'} onClick={onClick}> OK </button>
+            <h3 className='h3Texts'>
+                { journalState.modalStatus.beyondMax ? 
+                    'You may only select dates as late as the current date.' :
+                    'The unlock date must be at least one month in the future.'
+                }
+            </h3>
+            <ButtonField
+                text={'OK'}
+                className={'button'}
+                onClick={onClick}
+                withBox={true}
+            />
         </div>
     )
 };

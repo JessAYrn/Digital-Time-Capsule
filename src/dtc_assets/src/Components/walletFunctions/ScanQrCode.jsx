@@ -1,5 +1,6 @@
 import React from 'react';
 import { QrReader } from 'react-qr-reader';
+import ButtonField from '../Fields/Button';
 
 export const QrReaderContent = (props) => {
 
@@ -27,9 +28,12 @@ export const QrReaderContent = (props) => {
                     style={{ height: '50%' }}
             />
             </div>
-            <div className="qrCancelButtonDiv" >
-                <button className='button' onClick={() => setShowQrReader(!showQrReader)}> Cancel </button>
-            </div>
+            <ButtonField
+                text={'Cancel'}
+                className={'qrCancelButtonDiv'}
+                onClick={() => setShowQrReader(!showQrReader)}
+                withBox={true}
+            />
         </>
     )
 }

@@ -6,6 +6,7 @@ import { AppContext as WalletContext} from '../../Wallet';
 import { AppContext as HomePageContext} from '../../HomePage';
 import { AppContext as NftContext} from '../../NFTs';
 import { AppContext as JournalContext} from '../../App';
+import ButtonField from '../Fields/Button';
 
 import "./ModalContentOnSubmit.scss";
 import { types } from '../../reducers/journalReducer';
@@ -61,9 +62,12 @@ const ModalContentSubmit = (props) => {
                     </h4>
                 </div>
             }
-            <div className={'buttonDiv'}>
-                <button className='button' onClick={onClick}> OK </button> 
-            </div>       
+            <ButtonField
+                text={'OK'}
+                className={'buttonDiv'}
+                onClick={onClick}
+                withBox={true}
+            />      
         </div>
     )
 

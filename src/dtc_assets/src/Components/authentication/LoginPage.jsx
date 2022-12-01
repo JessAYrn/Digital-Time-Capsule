@@ -13,6 +13,7 @@ import { getIntObserverFunc, visibilityFunctionLoginPage } from "../animations/I
 import { TriggerAuththenticateClientFunction } from "./AuthenticationMethods";
 import { types } from "../../reducers/journalReducer";
 import { delay } from "../../Utils";
+import ButtonField from "../Fields/Button";
 
 const LoginPage = (props) => {
 
@@ -103,18 +104,18 @@ const LoginPage = (props) => {
                 <div className={'contentContainer _0 login'}>
                     <div className={'contentDiv__loginContent _0'}>
                         <img className={'logoImg _0'}src="dtc-logo-black.png" alt="Logo"/>
-                        <button 
-                            className={`loginButtonDiv _0`} 
+                        <ButtonField
+                            text={'Log In Using Internet Identity'}
+                            className={`loginButtonDiv _0`}
                             onClick={handleClick_II}
-                        > 
-                            Log In Using Internet Identity
-                        </button>
-                        <button 
+                            withBox={true}
+                        />
+                        <ButtonField
+                            text={'Log In Using Stoic Identity'}
                             className={`loginButtonDiv _0`}
                             onClick={handleClick_Stoic}
-                        > 
-                            Log In Using Stoic Identity
-                        </button>
+                            withBox={true}
+                        />
                         <div className={'icpLogoDiv _0'}>
                             <img className={'logoImg'}src="logo.png" alt="Logo"/>
                         </div>

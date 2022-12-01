@@ -5,7 +5,7 @@ import "./Journal.scss";
 import { AppContext } from "../App";
 import InputBox from "./Fields/InputBox";
 import * as AiIcons from 'react-icons/ai';
-import { IconContext } from 'react-icons/lib';
+import ButtonField from "./Fields/Button";
 import LoadScreen from "./LoadScreen";
 import { Modal } from "./Modal";
 import { NavBar } from "./navigation/NavBar";
@@ -230,15 +230,20 @@ const Journal = (props) => {
                             </div>
                             {
                                 pageChangesMade &&
-                                <div className={"submitButtonDiv"} onClick={handleSubmit}>
-                                        Submit 
-                                </div>
+                                <ButtonField
+                                    text={'Submit'}
+                                    className={'submitButtonDiv'}
+                                    onClick={handleSubmit}
+                                    withBox={true}
+                                />
                             }
-                            <div className={'addPageDiv'}>
-                                <IconContext.Provider value={{ size: '25px'}}>
-                                    <AiIcons.AiFillFileAdd onClick={addJournalPage}/>
-                                </IconContext.Provider>
-                            </div>
+                            <ButtonField
+                                Icon={AiIcons.AiFillFileAdd}
+                                iconSize={25}
+                                className={'addPageDiv'}
+                                onClick={addJournalPage}
+                                withBox={true}
+                            />
                         </div> }
                     </div> : 
                     <JournalPage

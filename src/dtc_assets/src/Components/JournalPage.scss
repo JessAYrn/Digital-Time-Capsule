@@ -11,12 +11,6 @@
         right: 30px;
         width: 50px;
         height: 50px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        border-radius: 10px;
-        border-color: rgb(0, 0, 0);
-        box-shadow: 0 5px 16px rgb(0 0 0 / 50%);
     }
     .removeFileDiv{
         width: 50px;
@@ -24,12 +18,6 @@
         position: relative;
         top: 90px;
         left: 25px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        border-radius: 10px;
-        border-color: rgb(0, 0, 0);
-        box-shadow: 0 5px 16px rgb(0 0 0 / 50%);
     }
     .submitButtonDiv{
         font-family: 'Courier New', monospace;
@@ -40,12 +28,7 @@
         left: 30px;
         width: 50px;
         height: 50px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        border-radius: 10px;
-        border-color: rgb(0, 0, 0);
-        box-shadow: 0 5px 16px rgb(0 0 0 / 50%);
+        
     }
     .journalText{
         @media screen and (max-width: 1260px) {    
@@ -106,13 +89,7 @@
         .backButtonDiv{
             width: 50px;
             height: 50px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 10px;
-            border-color: rgb(0, 0, 0);
-            box-shadow: 0 5px 16px rgb(0 0 0 / 50%);
-        }
+        };
         .switchDiv{
             .switchH5{
                 font-family: 'Courier New', monospace;

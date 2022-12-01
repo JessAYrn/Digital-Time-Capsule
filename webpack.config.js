@@ -5,6 +5,7 @@ const TerserPlugin = require("terser-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
 
 let localCanisters, prodCanisters, canisters;
+let LOCAL_II_CANISTER_ID = 'rrkah-fqaaa-aaaaa-aaaaq-cai';
 
 function initCanisterIds() {
   try {
@@ -90,7 +91,7 @@ module.exports = {
       NODE_ENV: 'development',
       DTC_CANISTER_ID: canisters["dtc"],
       II_URL : isDevelopment ?
-      "http://localhost:8000?canisterId=rwlgt-iiaaa-aaaaa-aaaaa-cai#authorize" :
+      `http://localhost:8000?canisterId=${LOCAL_II_CANISTER_ID}#authorize` :
       "https://identity.ic0.app/#authorize",
     }),
     new webpack.ProvidePlugin({

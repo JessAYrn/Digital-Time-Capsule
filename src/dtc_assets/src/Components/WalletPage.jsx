@@ -9,12 +9,14 @@ import {  RenderQrCode } from './walletFunctions/GenerateQrCode';
 import { copyWalletAddressHelper } from './walletFunctions/CopyWalletAddress';
 import { Transaction } from './walletFunctions/Transaction';
 import * as GrIcons from 'react-icons/gr';
+import * as FaIcons from 'react-icons/fa';
 import { IconContext } from 'react-icons/lib';
 import { testTx } from '../testData/Transactions';
 import LoadScreen from './LoadScreen';
 import { types } from '../reducers/journalReducer';
 import { UI_CONTEXTS } from '../Contexts';
 import { visibilityFunctionDefault, getIntObserverFunc } from './animations/IntersectionObserverFunctions';
+import ButtonField from './Fields/Button';
 
 const WalletPage = (props) => {
 
@@ -84,9 +86,12 @@ const WalletPage = (props) => {
                                                 <p className='secondPTag'>
                                                     {shortenHexString(journalState.walletData.address)} 
                                                 </p> 
-                                            </div>
-                                            <div className={"copyWalletAddressButton"}>
-                                                <button className='button' onClick={copyWalletAddress}> Copy Wallet Address </button>
+                                                <ButtonField
+                                                    Icon={FaIcons.FaCopy}
+                                                    iconSize={17.5}
+                                                    onClick={copyWalletAddress}
+                                                    withBox={false}
+                                                />
                                             </div>
                                         </div>
                                     </div>
@@ -117,11 +122,13 @@ const WalletPage = (props) => {
                                     })
                                 }              
                             </div>
-                            <div className={'sendButtonDiv'}>
-                                <IconContext.Provider value={{ size: '25px'}}>
-                                    <GrIcons.GrSend onClick={openModal}/>
-                                </IconContext.Provider>
-                            </div>
+                            <ButtonField
+                                Icon={GrIcons.GrSend}
+                                className={'sendTxDiv'}
+                                iconSize={25}
+                                onClick={openModal}
+                                withBox={true}
+                            />
                         </div>}
                 </>
             }
