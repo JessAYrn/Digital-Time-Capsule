@@ -1,4 +1,5 @@
 import { dayInNanoSeconds, MODALS_TYPES } from "../Constants"
+import { getDateAsString } from "../Utils";
 
 export const types = {
     SET_ENTIRE_REDUX_STATE: "SET_ENTIRE_REDUX_STATE",
@@ -137,11 +138,11 @@ const defaultFileMetaData = {
 };
 
 const freshPage = {
-    date: '',
+    date: getDateAsString(Date.now()),
     title: '',
     location: '',
     entry: '',
-    unlockTime: null,
+    unlockTime: getDateAsString(Date.now()),
     emailOne: '',
     emailTwo: '',
     emailThree: '', 

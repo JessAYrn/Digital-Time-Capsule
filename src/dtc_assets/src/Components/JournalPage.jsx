@@ -8,7 +8,7 @@ import DatePicker from "./Fields/DatePicker";
 import LoadScreen from "./LoadScreen";
 import { UI_CONTEXTS } from "../Contexts";
 import { MODALS_TYPES, monthInMilliSeconds} from "../Constants";
-import { getDateAsString } from "../Utils";
+import { dateAisLaterThanOrSameAsDateB, getDateAsString } from "../Utils";
 import { getDateInMilliseconds, milisecondsToNanoSeconds } from "../Utils";
 import { loadJournalDataResponseAfterSubmit } from "./loadingFunctions";
 import * as RiIcons from 'react-icons/ri';
@@ -47,11 +47,27 @@ const JournalPage = (props) => {
     if(journalPageData.entryKey) journalState.actor.readEntry({entryKey: journalPageData.entryKey});
 
     const toggleSwitch = () => {
-        dispatch({
-            actionType: types.CHANGE_CAPSULED,
-            payload: !journalPageData.capsuled,
-            index: index
-        });
+        if(journalPageData.draft){
+            let isCapsuled = !journalPageData.capsuled
+            dispatch({
+                actionType: types.CHANGE_CAPSULED,
+                payload: isCapsuled,
+                index: index
+            });
+            if(isCapsuled) {
+                dispatch({
+                    actionType: types.CHANGE_UNLOCK_TIME,
+                    payload: minimumDate,
+                    index: index
+                });
+            } else{
+                dispatch({
+                    actionType: types.CHANGE_UNLOCK_TIME,
+                    payload: thisDate,
+                    index: index
+                });
+            };
+        };
     };
 
     const mapAndSendEntryToApi = async (entryKey, journalEntry, isDraft) => {
@@ -197,22 +213,22 @@ const JournalPage = (props) => {
                             />
                         </div>
                         <div className={'buttonContainer right'}>
-                            {journalPageData.capsuled &&
-                            <ButtonField
-                                Icon={ImIcons.ImLock}
-                                iconSize={25}
-                                className={'lockButton'}
-                                onClick={toggleSwitch}
-                                withBox={true}
-                            />}
-                            {!journalPageData.capsuled &&
-                            <ButtonField
-                                Icon={ImIcons.ImUnlocked}
-                                iconSize={25}
-                                className={'lockButton'}
-                                onClick={toggleSwitch}
-                                withBox={true}
-                            />}
+                            {dateAisLaterThanOrSameAsDateB(thisDate, journalPageData.unlockTime) ?
+                                <ButtonField
+                                    Icon={ImIcons.ImUnlocked}
+                                    iconSize={25}
+                                    className={'lockButton'}
+                                    onClick={toggleSwitch}
+                                    withBox={true}
+                                /> :
+                                <ButtonField
+                                    Icon={ImIcons.ImLock}
+                                    iconSize={25}
+                                    className={'lockButton'}
+                                    onClick={toggleSwitch}
+                                    withBox={true}
+                                />
+                            }
                         </div>
                     </div>
                     <div className={"journalText"} >
@@ -225,10 +241,10 @@ const JournalPage = (props) => {
                             dispatch={dispatch}
                             dispatchAction={types.CHANGE_DATE}
                             index={index}
-                            value={(journalPageData) ? journalPageData.date : ''}
+                            value={journalPageData.date}
                             max={thisDate}
                         />
-                        {journalPageData.capsuled && 
+                        {(!journalPageData.draft || journalPageData.capsuled) && 
                         <DatePicker
                             id={'lockDate'}
                             label={"Date to Unlock Entry: "}
@@ -238,7 +254,7 @@ const JournalPage = (props) => {
                             dispatch={dispatch}
                             dispatchAction={types.CHANGE_UNLOCK_TIME}
                             index={index}
-                            value={(journalPageData) ? journalPageData.unlockTime : ''}
+                            value={journalPageData.unlockTime}
                             min={minimumDate}
                         />}
                         <InputBox

@@ -76,7 +76,7 @@ const DatePicker = (props) => {
             <input
                 id={id}
                 className={disabledOrEnabled}
-                value={value}
+                value={value || max || min}
                 data-date-format="yyyy-mm-dd"
                 type="date" 
                 alt={label} 
