@@ -106,37 +106,11 @@ npm start
 
 set the isLocal var in the main.mo file to false;
 
-first, be sure that you delete the following from the dfx.json file
-
-```
-"ledger": {
-      "type": "custom",
-      "wasm": "ledger.wasm",
-      "candid": "ledger.public.did"
-  },
-  "internet_identity": {
-      "type": "custom",
-      "candid": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity.did",
-      "wasm": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity_dev.wasm",
-      "shrink": false,
-      "remote": {
-        "candid": "internet_identity.did",
-        "id": {
-          "ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
-        }
-      }
-    },
-```
-
 Change the CANISTER_ID variable in the Digital-Time-Capsule/src/dtc/ledger.mo file to "ryjl3-tyaaa-aaaaa-aaaba-cai" (This is the canister-id of the ledger canister on the mainnet);
-
-Change the LOCAL_II_CANISTER_ID variable in the webpack.config.js file back to what it was.
 
 run the following commands
 
 npm install
-// to deploy all canisters at once
-dfx deploy --network ic 
 
 // to deploy back-end canister only
 dfx deploy --network ic dtc

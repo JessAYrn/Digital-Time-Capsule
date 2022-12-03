@@ -11,10 +11,6 @@
     height: auto;
     display: flex;
     align-items: center;
-    background-size: 80%;
-    background-color: rgb(233, 233, 233);
-    background-image: url("../../assets/dtc-logo-black.png");
-    background-position: center;
     justify-content: center;
     .section__1{
       @media screen and (max-width: 650px) {
@@ -121,7 +117,6 @@
         .tableHeader{
           font-family: 'Courier New', monospace;
           font-size: 1rem;
-          color: rgb(122, 122, 122);
           border-collapse: collapse;
           width: 100%;
           .tableRow{
@@ -145,7 +140,6 @@
           .table{
             font-family: 'Courier New', monospace;
             font-size: 1rem;
-            color: rgb(122, 122, 122);
             border-collapse: collapse;
             width: 100%;
             .tableRow{

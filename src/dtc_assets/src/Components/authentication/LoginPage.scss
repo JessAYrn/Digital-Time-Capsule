@@ -2,9 +2,6 @@
     height: auto;
     display: flex;
     align-items: center;
-    background-image: url("../../../assets/dtc-logo-black.png");
-    background-size: 80%;
-    background-position: center;
     .container_1{
         height: auto;
         display: flex;
@@ -95,7 +92,7 @@
                     box-shadow: 0 17px 20px rgb(0 0 0 / 38%);
                     background-color: rgb(233, 233, 233);
                     width: 75%;
-                    height: 28rem;
+                    height: 35rem;
                     margin-top: 7rem;
                     display: flex;
                     justify-content: center;
@@ -120,7 +117,7 @@
                         font-family: 'Courier New', monospace;
                         max-width: 90%;
                         width: 270px;
-                        height: 35px;
+                        height: auto;
                         border-radius: 10px;
                         margin-bottom: 20px;
                     }

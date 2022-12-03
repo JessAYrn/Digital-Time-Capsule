@@ -1,29 +1,37 @@
 .inputBox__datePicker{
-    width: 100%;
+    width: 90%;
+    @media screen and (max-width: 480px) {
+        margin-left: -6px;
+    }
+    @media screen and (max-width: 550px) {
+        margin-left: 4px;
+    }
+    margin-left: 20px;
     display: flex;
     flex-direction: column;
-    align-items: center;
     justify-content: center;
     margin-bottom: 15px;
     .label-element-div{
-        width: 100%;
+        width: 235px;
         display: flex;
         justify-content: center;
+        border-radius: 10px;
+        background-color: grey;
         .label.disabled{
             width: 93%;
             font-family: 'Courier New', monospace;
             font-size: .80rem;
-            color: rgb(163, 163, 163);
+            color: white
         }
         .label.enabled{
             width: 93%;
             font-family: 'Courier New', monospace;
             font-size: .95rem;
-            color: rgb(0, 0, 0);
+            color: white
         }
     }
     .input-element-div{
-        width: 100%;
+        width: 120px;
         display: flex;
         justify-content: center;
         .enabled{
@@ -32,6 +40,7 @@
             border-width: 0 0 1px;
             border-radius: 10px;
             border-color: rgb(0, 0, 0);
+            background-color: white;
             box-shadow: 0 5px 16px rgb(0 0 0 / 50%);
             width: 95%;
         }
@@ -41,7 +50,7 @@
             outline: 0;
             border-width: 0 0 1px;
             border-radius: 10px;
-            color: rgb(163, 163, 163);
+            background-color: white;
             box-shadow: 0 5px 16px rgb(0 0 0 / 50%);
             width: 95%;
         }

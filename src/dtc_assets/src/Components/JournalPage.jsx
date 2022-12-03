@@ -13,6 +13,7 @@ import { getDateInMilliseconds, milisecondsToNanoSeconds } from "../Utils";
 import { loadJournalDataResponseAfterSubmit } from "./loadingFunctions";
 import * as RiIcons from 'react-icons/ri';
 import * as BiIcons from 'react-icons/bi';
+import * as ImIcons from 'react-icons/im';
 import ButtonField from "./Fields/Button";
 import { IconContext } from 'react-icons/lib';
 import Switch from "./Fields/Switch";
@@ -186,24 +187,33 @@ const JournalPage = (props) => {
             <LoadScreen/> : 
                 <div className={"journalPageContainer"}>
                     <div className={"logoDiv"}>
-                        <ButtonField
-                            Icon={RiIcons.RiArrowGoBackLine}
-                            iconSize={25}
-                            className={'backButtonDiv'}
-                            onClick={handleClosePage}
-                            withBox={true}
-                        />
-                        <div className="switchDiv">
-                            <h5 className='switchH5'>
-                                Time Capsule:
-                            </h5>
-                            <Switch
-                                disabled={!journalPageData.draft}
-                                active={journalPageData.capsuled}
-                                onClick={toggleSwitch}
+                        <div className={'buttonContainer left'}>
+                            <ButtonField
+                                Icon={RiIcons.RiArrowGoBackLine}
+                                iconSize={25}
+                                className={'backButtonDiv'}
+                                onClick={handleClosePage}
+                                withBox={true}
                             />
                         </div>
-                        <img className={'logoImg'}src="dtc-logo-black.png" alt="Logo" />
+                        <div className={'buttonContainer right'}>
+                            {journalPageData.capsuled &&
+                            <ButtonField
+                                Icon={ImIcons.ImLock}
+                                iconSize={25}
+                                className={'lockButton'}
+                                onClick={toggleSwitch}
+                                withBox={true}
+                            />}
+                            {!journalPageData.capsuled &&
+                            <ButtonField
+                                Icon={ImIcons.ImUnlocked}
+                                iconSize={25}
+                                className={'lockButton'}
+                                onClick={toggleSwitch}
+                                withBox={true}
+                            />}
+                        </div>
                     </div>
                     <div className={"journalText"} >
                         <DatePicker

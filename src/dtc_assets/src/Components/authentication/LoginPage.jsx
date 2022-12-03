@@ -98,71 +98,73 @@ const LoginPage = (props) => {
         observer.observe(container);
     });
 
+    let animatedLeftElementIndex = 0;
+
     return(
-        <div className={"container_loginPage"} >
+        <div className={"container_loginPage"}>
             <div className={'container_1'}>
-                <div className={'contentContainer _0 login'}>
-                    <div className={'contentDiv__loginContent _0'}>
-                        <img className={'logoImg _0'}src="dtc-logo-black.png" alt="Logo"/>
+                <div className={`contentContainer _${animatedLeftElementIndex} login`}>
+                    <div className={`contentDiv__loginContent _${animatedLeftElementIndex++}`}>
+                        <img className={`logoImg`}src="dtc-logo-black.png" alt="Logo"/>
                         <ButtonField
                             text={'Log In Using Internet Identity'}
-                            className={`loginButtonDiv _0`}
+                            className={`loginButtonDiv`}
                             onClick={handleClick_II}
                             withBox={true}
                         />
                         <ButtonField
                             text={'Log In Using Stoic Identity'}
-                            className={`loginButtonDiv _0`}
+                            className={`loginButtonDiv`}
                             onClick={handleClick_Stoic}
                             withBox={true}
                         />
-                        <div className={'icpLogoDiv _0'}>
+                        <div className={`icpLogoDiv`}>
                             <img className={'logoImg'}src="logo.png" alt="Logo"/>
                         </div>
                     </div>
                 </div>
-                <div className={"contentContainer animatedLeft _1"}>
-                    <div className={"contentDiv__features animatedLeft _1"}>
-                        <div className={"list animatedLeft _1"}>
-                            <h6 className={" animatedLeft _1 h6Tag"}>
+                <div className={`contentContainer _${animatedLeftElementIndex}`}>
+                    <div className={`contentDiv__features _${animatedLeftElementIndex++}`}>
+                        <div className={`list`}>
+                            <h6 className={`h6Tag`}>
                                 Store Your Memories
                             </h6>
-                            <img className={"cameraImg animatedLeft _1"}src="camera.png" alt="camera"/>
+                            <img className={`cameraImg`}src="camera.png" alt="camera"/>
                         </div>
                     </div>
                 </div>
-                <div className={"contentContainer animatedLeft _2"}>
-                    <div className={"contentDiv__features animatedLeft _2"}>
-                        <div className={"list animatedLeft _2"}>
-                        <img className={"bitcoinImg animatedLeft _2"}src="bitcoin.png" alt="bitcoin"/>
-                            <h6 className={" animatedLeft _2 h6Tag"}>
+                <div className={`contentContainer animatedLeft _${animatedLeftElementIndex}`}>
+                    <div className={`contentDiv__features animatedLeft _${animatedLeftElementIndex++}`}>
+                        <div className={`list`}>
+                        <img className={`bitcoinImg`}src="bitcoin.png" alt="bitcoin"/>
+                            <h6 className={`h6Tag`}>
                                 Store Your Crypto
                             </h6>
                         </div>
                     </div>
                 </div>
-                <div className={"contentContainer animatedLeft _3"}>
-                    <div className={"contentDiv__features animatedLeft _3"}>
-                        <div className={"list animatedLeft _3"}>
-                            <h6 className={" animatedLeft _3 h6Tag"}>
+                <div className={`contentContainer animatedLeft _${animatedLeftElementIndex}`}>
+                    <div className={`contentDiv__features animatedLeft _${animatedLeftElementIndex++}`}>
+                        <div className={`list`}>
+                            <h6 className={`h6Tag`}>
                                 Store Your Passwords
                             </h6>
-                            <img className={"safeImg animatedLeft _3"}src="safe-image.png" alt="safe"/>
+                            <img className={`safeImg`}src="safe-image.png" alt="safe"/>
                         </div>
                     </div>
                 </div>
-                <div className={"contentContainer animatedLeft _4"}>
-                    <div className={"contentDiv__features animatedLeft _4"}>
-                        <div className={"list animatedLeft _4"}>
-                            <h4 className={"animatedLeft _4 h4Tag"}>
+                <div className={`contentContainer animatedLeft _${animatedLeftElementIndex}`}>
+                    <div className={`contentDiv__features animatedLeft _${animatedLeftElementIndex++}`}>
+                        <div className={`list`}>
+                            <h4 className={`h4Tag`}>
                                 All In One Place
                             </h4>
                         </div>
                     </div>
                 </div>
-                <div className={"contentContainer animatedLeft _5"}>
-                    <div className={"contentDiv__sentences animatedLeft _5"}>
-                    <div className={"sentences animatedLeft _5"}>
+                <div className={`contentContainer animatedLeft _${animatedLeftElementIndex}`}>
+                    <div className={`contentDiv__sentences animatedLeft _${animatedLeftElementIndex++}`}>
+                        <div className={`sentences`}>
                             <p>
                                 The invention of blockchain technology enables us be to able to store our sensitive data in a decentralized,
                                 secure manner. The Digital Time Capsule is an application built and hosted entirely on the Internet Computer blockchain.
@@ -170,9 +172,9 @@ const LoginPage = (props) => {
                         </div>
                     </div>
                 </div>
-                <div className={"contentContainer animatedLeft _6"}>
-                    <div className={"contentDiv__sentences animatedLeft _6"}>
-                    <div className={"sentences animatedLeft _6"}>
+                <div className={`contentContainer animatedLeft _${animatedLeftElementIndex}`}>
+                    <div className={`contentDiv__sentences animatedLeft _${animatedLeftElementIndex++}`}>
+                        <div className={`sentences`}>
                             <p>
                                 The Digital Time Capsule leverages the security of the blockchain to allow users to store digital assets of sentimental 
                                 and monetary value all in one safe location- free of worry. Access to your data is granted using 
@@ -181,9 +183,9 @@ const LoginPage = (props) => {
                         </div>
                     </div>
                 </div>
-                <div className={"contentContainer animatedLeft _7"}>
-                    <div className={"contentDiv__sentences animatedLeft _7"}>
-                    <div className={"sentences animatedLeft _7"}>
+                <div className={`contentContainer animatedLeft _${animatedLeftElementIndex}`}>
+                    <div className={`contentDiv__sentences animatedLeft _${animatedLeftElementIndex++}`}>
+                        <div className={`sentences`}>
                             <p>
                                 This access feature is more secure than a username and password: 
                                 it eliminates the possibility of bad actors being able to remotely 

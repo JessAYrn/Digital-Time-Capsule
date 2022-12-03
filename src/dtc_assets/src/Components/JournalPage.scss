@@ -31,10 +31,10 @@
         
     }
     .journalText{
-        @media screen and (max-width: 1260px) {    
-            width: 90%;
-        };
-        width: 66%;
+        max-width: 90%;
+        width: 1000px;
+        display: flex;
+        flex-direction: column;
     }
     .fileContainer{
         float: left;
@@ -82,32 +82,50 @@
     }
 
     .logoDiv{
-        width: 100%;
-        display: flex;
+        width: 1100px;
+        max-width: 90%;
         justify-content: center;
         align-items: center;
-        .backButtonDiv{
-            width: 50px;
-            height: 50px;
+        margin-bottom: 24px;
+        .buttonContainer.left{
+            @media screen and (max-width: 1110px) {    
+                margin-left: 22px;
+            };
+            float: left;
+            margin-left: 7%;
         };
-        .switchDiv{
-            .switchH5{
-                font-family: 'Courier New', monospace;
-            }
-            width: 48%;
+        .buttonContainer.right{
+            @media screen and (max-width: 1110px) {    
+                margin-right: 22px;
+            };
+            float: right;
+            margin-right: 7%;
+        };
+        .buttonContainer{
+            float: left;
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-direction: column;
-        }
-        .logoImg{
-            @media screen and (max-width: 650px) {    
-                max-width: 8rem;
-                max-height: 8rem;
+            .backButtonDiv{
+                width: 50px;
+                height: 50px;
+                background-color: white;
+                
             };
-            float: right;
-            max-width: 10rem;
-            max-height: 10rem;
+            .lockButton{
+                width: 50px;
+                height: 50px;
+                background-color: white;
+            }
+            .switchDiv{
+                .switchH5{
+                    font-family: 'Courier New', monospace;
+                }
+                max-width: 60%;
+                align-items: center;
+                display: flex;
+                margin-left: 27%;
+            }
         }
     }
 

@@ -10,17 +10,19 @@
         width: 100%;
         display: flex;
         justify-content: center;
+        border-radius: 10px;
+        background-color: grey;
         .label.disabled{
             width: 93%;
             font-family: 'Courier New', monospace;
             font-size: .80rem;
-            color: rgb(163, 163, 163);
+            color: white
         }
         .label.enabled{
             width: 93%;
             font-family: 'Courier New', monospace;
             font-size: .95rem;
-            color: rgb(0, 0, 0);
+            color: white
         }
     }
     .input-element-div{
@@ -33,6 +35,8 @@
             border-width: 0 0 1px;
             border-radius: 10px;
             border-color: rgb(0, 0, 0);
+            background-color: white;
+            opacity: 1;
             box-shadow: 0 5px 16px rgb(0 0 0 / 50%);
             width: 100%;
         }
@@ -40,9 +44,10 @@
         .disabled{
             font-family: 'Courier New', monospace;
             outline: 0;
+            opacity: 1;
             border-width: 0 0 1px;
             border-radius: 10px;
-            color: rgb(163, 163, 163);
+            background-color: white;
             box-shadow: 0 5px 16px rgb(0 0 0 / 50%);
             width: 95%;
         }

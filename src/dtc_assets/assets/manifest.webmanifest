@@ -3,15 +3,15 @@
   "name": "The Digital Time Capsule",
   "icons": [
     {
-      "src": "https://fkkq7-siaaa-aaaap-qaaya-cai.raw.ic0.app/dtc-logo-white.png",
+      "src": "./dtc-logo-white.png",
       "type": "image/png",
       "sizes": "512x512"
     }
   ],
   "start_url": "/#/app",
-  "background_color": "#3367D6",
+  "background_color": "#060b26",
   "display": "browser",
   "scope": "/",
-  "theme_color": "#3367D6",
+  "theme_color": "#060b26",
   "description": "Document you legacy"
 }

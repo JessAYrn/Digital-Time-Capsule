@@ -53,18 +53,18 @@ const ExitWithoutSubmit = (props) => {
 
     return(
         <div className={'exitWithoutSubmitCotentDiv'}>  
-            <h1>
+            <h3>
                 Would you like to submit this journal entry?
-            </h1>
+            </h3>
             <ButtonField
-                text={'Yes, I almost forgot'}
+                text={'Yes'}
                 className={'buttonDiv'}
                 onClick={onClickSubmit}
                 disabled={filesAreLoading}
                 withBox={true}
             />
             <ButtonField
-                text={"No, Don't worry about it"}
+                text={"No"}
                 className={'buttonDiv'}
                 onClick={onClickExit}
                 disabled={filesAreLoading}
