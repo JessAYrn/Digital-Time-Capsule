@@ -25,7 +25,6 @@ export const types = {
     SET_IS_AUTHENTICATED: "SET_IS_AUTHENTICATED",
     SET_IS_LOADING:"SET_IS_LOADING",
     SET_TX_HISTORY_DATA:"SET_TX_HISTORY_DATA",
-    SET_IS_TX_HISTORY_LOADING: "SET_IS_TX_HISTORY_LOADING",
     CHANGE_DRAFT: "CHANGE_DRAFT",
     CHANGE_DATE: "CHANGE_DATE",
     CHANGE_LOCATION: "CHANGE_LOCATION",
@@ -265,17 +264,6 @@ const changeValue = (state = initialState, action) => {
         state.walletData = {
             ...state.walletData,
             qrCodeImgUrl: payload
-        };
-        return {
-            ...state
-        }
-        case types.SET_IS_TX_HISTORY_LOADING:
-        state.walletData = {
-            ...state.walletData,
-            txHistory: {
-                ...state.walletData.txHistory,
-                isLoading: payload
-            }
         };
         return {
             ...state

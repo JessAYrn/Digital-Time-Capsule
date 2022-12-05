@@ -1,13 +1,12 @@
 import React, { createContext, useReducer, useState, useEffect} from 'react';
 import LoginPage from './Components/authentication/LoginPage';
 import { useLocation } from 'react-router-dom';
-import LoadScreen from './Components/LoadScreen';
 import journalReducer, {initialState, types} from './reducers/journalReducer';
 import { UI_CONTEXTS } from './Contexts';
 import WalletPage from './Components/WalletPage';
 import { testTx } from './testData/Transactions';
 import { AuthenticateClient, CreateActor, CreateUserJournal, TriggerAuththenticateClientFunction } from './Components/authentication/AuthenticationMethods';
-import { loadJournalData, loadWalletData, loadCanisterData, loadTxHistory, handleErrorOnFirstLoad } from './Components/loadingFunctions';
+import { loadJournalData, loadWalletData, loadCanisterData, handleErrorOnFirstLoad } from './Components/loadingFunctions';
 
 export const AppContext = createContext({
     journalState:{},
@@ -53,12 +52,6 @@ const WalletApp = () => {
         constructActor();
     }, [journalState.createActorFunctionCallCount]);
 
-    const [seconds, setSeconds] = useState(0);
-    let delayTimeInSeconds = 3;
-
-    setTimeout(() => {if(seconds <= delayTimeInSeconds) setSeconds(seconds + 1)}, 1000);
-
-
     //Loading Time Capsule Data
     useEffect(async () => {
         if(!journalState.actor){
@@ -101,16 +94,6 @@ const WalletApp = () => {
         };
         
     },[journalState.actor]);
-
-    useEffect(async () => {
-        if(seconds === delayTimeInSeconds){
-            try{
-                await loadTxHistory(journalState, dispatch, types);
-            } catch {
-                setSeconds(0);
-            }
-        };
-    }, [seconds])
 
     return(
         <AppContext.Provider 

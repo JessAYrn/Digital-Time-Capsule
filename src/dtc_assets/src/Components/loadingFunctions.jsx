@@ -82,14 +82,10 @@ export const loadWalletData = async (walletDataFromApi, dispatch, types ) => {
     });
 };
 
-export const loadTxHistory = async (journalState, dispatch, types, seconds) => {
+export const loadTxHistory = async (journalState, dispatch, types) => {
     if(!journalState.actor){
         throw 'No actor defined'
     };
-    dispatch({
-        actionType: types.SET_IS_TX_HISTORY_LOADING,
-        payload: true
-    });
 
     const tx = await journalState.actor.readTransaction();
     const transactionHistory = tx.ok.sort(function(a,b){
@@ -105,10 +101,7 @@ export const loadTxHistory = async (journalState, dispatch, types, seconds) => {
         actionType: types.SET_TX_HISTORY_DATA,
         payload: transactionHistory
     });
-    dispatch({
-        actionType: types.SET_IS_TX_HISTORY_LOADING,
-        payload: false
-    });
+    return {transactionHistory, tx};
 };
 
 export const loadNftData = (nftCollection, dispatch, types) => {

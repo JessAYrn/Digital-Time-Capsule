@@ -8,8 +8,7 @@ import DatePicker from "./Fields/DatePicker";
 import LoadScreen from "./LoadScreen";
 import { UI_CONTEXTS } from "../Contexts";
 import { MODALS_TYPES, monthInMilliSeconds} from "../Constants";
-import { dateAisLaterThanOrSameAsDateB, getDateAsString } from "../Utils";
-import { getDateInMilliseconds, milisecondsToNanoSeconds } from "../Utils";
+import { dateAisLaterThanOrSameAsDateB, getDateAsString, getDateInMilliseconds, milisecondsToNanoSeconds, scrollToBottom, scrollToTop } from "../Utils";
 import { loadJournalDataResponseAfterSubmit } from "./loadingFunctions";
 import * as RiIcons from 'react-icons/ri';
 import * as BiIcons from 'react-icons/bi';
@@ -20,7 +19,8 @@ import Switch from "./Fields/Switch";
 
 const JournalPage = (props) => {
 
-    const [pageChangesMade, setPageChangesMade] = useState(false);    
+    const [pageChangesMade, setPageChangesMade] = useState(false);  
+    const [firstTimeOpeningPage, setFirstTimeOpeningPage] = useState(true);
     
     const {
         index
@@ -42,6 +42,14 @@ const JournalPage = (props) => {
     const journalPageData = useMemo(() => {
         return journalState.journal[index];
     }, [journalState.journal[index]]);
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [journalPageData.filesMetaData.length]);
+
+    useEffect(() => {
+        scrollToTop();
+    },[firstTimeOpeningPage]);
     
     //marks this page as read so that it no longer shows in the notifications section
     if(journalPageData.entryKey) journalState.actor.readEntry({entryKey: journalPageData.entryKey});

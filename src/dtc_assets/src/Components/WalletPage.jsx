@@ -1,4 +1,4 @@
-import React, {useCallback, useContext, useEffect, useMemo} from 'react';
+import React, {useCallback, useContext, useEffect, useState} from 'react';
 import { AppContext } from '../Wallet';
 import { NavBar } from './navigation/NavBar';
 import { Modal } from './Modal';
@@ -8,8 +8,10 @@ import { e8sInOneICP, MODALS_TYPES } from '../Constants';
 import {  RenderQrCode } from './walletFunctions/GenerateQrCode';
 import { copyWalletAddressHelper } from './walletFunctions/CopyWalletAddress';
 import { Transaction } from './walletFunctions/Transaction';
+import { loadTxHistory } from './loadingFunctions';
 import * as GrIcons from 'react-icons/gr';
 import * as FaIcons from 'react-icons/fa';
+import * as AiIcons from 'react-icons/ai'
 import { IconContext } from 'react-icons/lib';
 import { testTx } from '../testData/Transactions';
 import LoadScreen from './LoadScreen';
@@ -22,12 +24,21 @@ const WalletPage = (props) => {
 
     const mql = window.matchMedia('(max-width: 939px)');
     const { journalState, dispatch } = useContext(AppContext);
+    const [loadingTx, setIsLoadingTx] = useState(false);
+    const [showReloadButton, setShowReloadButton] = useState(false);
 
     const openModal = () => {
         dispatch({
             actionType: types.SET_MODAL_STATUS,
             payload: {show: true, which: MODALS_TYPES.onSend}
         });
+    };
+
+    const loadTxs = async () => {
+        setIsLoadingTx(true);
+        setShowReloadButton(true);
+        let result = await loadTxHistory(journalState, dispatch, types);
+        setIsLoadingTx(false);
     };
 
     const copyWalletAddress = useCallback(() => copyWalletAddressHelper(journalState.walletData.address), [journalState]);
@@ -101,27 +112,41 @@ const WalletPage = (props) => {
                                         />  
                                     }
                                 </div>
-                                { journalState.walletData.txHistory.isLoading ? 
-                                <div className={`loadGifContainer contentContainer _${contentContainerIndex} animatedLeft`}>
-                                    <div className='loadGifDiv'>
-                                        <img src="Loading.gif" alt="Loading Screen" />
-                                    </div>
-                                </div>
-                                    :
-                                    journalState.walletData.txHistory.data.map((tx) => {
-                                        return(
-                                                <Transaction
-                                                    class_={`contentContainer _${contentContainerIndex++} animatedLeft`}
-                                                    balanceDelta={tx[1].balanceDelta}
-                                                    increase={tx[1].increase}
-                                                    recipient={tx[1].recipient[0]}
-                                                    timeStamp={tx[1].timeStamp[0]}
-                                                    source={tx[1].source[0]}
-                                                />
-                                        );
-                                    })
+                                { loadingTx ? 
+                                    <div className={`loadGifContainer contentContainer _${contentContainerIndex} animatedLeft`}>
+                                        <div className='loadGifDiv'>
+                                            <img src="Loading.gif" alt="Loading Screen" />
+                                        </div>
+                                    </div> :
+                                    !journalState.walletData.txHistory.data.length ? 
+                                        !showReloadButton && 
+                                        <ButtonField
+                                            text={'Load Transaction History'}
+                                            className={'loadTxHistory'}
+                                            onClick={loadTxs}
+                                            withBox={true}
+                                        /> :
+                                        journalState.walletData.txHistory.data.map((tx) => {
+                                            return(
+                                                    <Transaction
+                                                        class_={`contentContainer _${contentContainerIndex++} animatedLeft`}
+                                                        balanceDelta={tx[1].balanceDelta}
+                                                        increase={tx[1].increase}
+                                                        recipient={tx[1].recipient[0]}
+                                                        timeStamp={tx[1].timeStamp[0]}
+                                                        source={tx[1].source[0]}
+                                                    />
+                                            );
+                                        })
                                 }              
                             </div>
+                            {showReloadButton && <ButtonField
+                                Icon={AiIcons.AiOutlineReload}
+                                className={'reloadTxData'}
+                                iconSize={25}
+                                onClick={loadTxs}
+                                withBox={true}
+                            />}
                             <ButtonField
                                 Icon={GrIcons.GrSend}
                                 className={'sendTxDiv'}
