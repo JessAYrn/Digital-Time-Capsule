@@ -4,10 +4,6 @@
     width: 100%;
     height: auto;
     align-items: center;
-    background-size: 80%;
-    background-color: rgb(233, 233, 233);
-    background-image: url("../../assets/dtc-logo-black.png");
-    background-position: center;
     justify-content: center;
     .transparentDiv__homePage__roadMap{
         @media screen and (max-width: 650px) {
@@ -34,6 +30,7 @@
         }
     }
     .registryButtonDiv{
+        background-color: white;
         @media screen and (max-width: 650px) {
             width: 95%;
         };
@@ -42,7 +39,6 @@
             width: 100%;
             height: 50px;
             border-radius: 10px;
-            background-color: white;
             font-size: 25px;
             font-family: 'Courier New', monospace;
         }

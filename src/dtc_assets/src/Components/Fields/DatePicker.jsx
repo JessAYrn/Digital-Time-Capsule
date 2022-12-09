@@ -68,15 +68,15 @@ const DatePicker = (props) => {
     }
 
     return(
-        <div className={'inputBox'}>
+        <div className={'inputBox__datePicker'}>
             <div className={'label-element-div '}>
-                <label className={"label__"+disabledOrEnabled} htmlFor='Label'> {label}  &nbsp; </label>
+                <label className={"label "+disabledOrEnabled} htmlFor='Label'> {label}  &nbsp; </label>
             </div>
-            <div className={`input-element-div__${(divClassName) ? divClassName : " "}`}>
+            <div className={`input-element-div ${(divClassName) ? divClassName : " "}`}>
             <input
                 id={id}
                 className={disabledOrEnabled}
-                value={value}
+                value={value || max || min}
                 data-date-format="yyyy-mm-dd"
                 type="date" 
                 alt={label} 

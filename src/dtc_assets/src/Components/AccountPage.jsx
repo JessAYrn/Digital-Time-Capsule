@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import  InputBox  from './Fields/InputBox';
 import { types } from '../reducers/journalReducer'
 import AdminSection from './AdminSection';
@@ -12,11 +12,13 @@ import { Modal } from './Modal';
 
 
 
-const SubcriptionPage = (props) => {
+const AccountSection = (props) => {
 
     const { journalState, dispatch } = useContext(AppContext);
+    const [pageChangesMade, setPageChangesMade] = useState(false);    
 
     const handleUpdate = async () => {
+        setPageChangesMade(false);
         dispatch({
             actionType: types.SET_IS_LOADING,
             payload: true
@@ -32,7 +34,6 @@ const SubcriptionPage = (props) => {
         });
 
     };
-
     const isAdmin = journalState.metaData.userName[0] === 'admin';
 
 return(
@@ -59,6 +60,7 @@ return(
                 <div className={`subscriptionSection ${isAdmin ? 'admin_' : ''}`}>
                     <InputBox
                         divClassName={"email"}
+                        setChangesWereMade={setPageChangesMade}
                         label={"Email: "}
                         rows={"1"}
                         dispatch={dispatch}
@@ -67,21 +69,25 @@ return(
                     />
                     <InputBox
                         divClassName={"userName"}
+                        setChangesWereMade={setPageChangesMade}
                         label={"Username: "}
                         rows={"1"}
                         dispatch={dispatch}
                         dispatchAction={types.CHANGE_USERNAME}
                         value={journalState.metaData.userName}
                     />
-                    <div className={'updateButtonDiv'}>
-                        <button className={'updateButton'} type="submit" onClick={handleUpdate}> Update Username & Email </button>
-                    </div>
                     {isAdmin && <AdminSection/>}
                 </div> 
             </div>}
+            {
+                pageChangesMade &&
+                <div className={"submitButtonDiv"} onClick={handleUpdate}>
+                        Submit 
+                </div>
+            }
     </div>
 )
 
 };
 
-export default SubcriptionPage;
+export default AccountSection;

@@ -9,6 +9,7 @@ import { AppContext as  AccountContext} from "../../Account";
 import { AppContext as  HomePageContext} from "../../HomePage";
 import { MODALS_TYPES } from '../../Constants';
 import { types } from '../../reducers/journalReducer';
+import ButtonField from '../Fields/Button';
 
 const Notifications = (props) => {
     const {
@@ -62,9 +63,12 @@ const Notifications = (props) => {
                     </table>
                 </div>
             </div>
-            <div className={'addNewEntryButtonDiv'}>
-                <button className={'addNewEntryButton'} onClick={onClick}> Close </button>
-            </div>
+            <ButtonField
+                text={'Close'}
+                className={'addNewEntryButtonDiv'}
+                onClick={onClick}
+                withBox={true}
+            />
         </div>
     )
 

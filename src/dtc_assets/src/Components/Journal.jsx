@@ -1,10 +1,11 @@
 import JournalPage from "./JournalPage";
-import React, { useContext, useEffect, useMemo } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {initialState, types} from "../reducers/journalReducer";
 import "./Journal.scss";
 import { AppContext } from "../App";
 import InputBox from "./Fields/InputBox";
-import { dayInNanoSeconds, monthInDays } from "../Constants";
+import * as AiIcons from 'react-icons/ai';
+import ButtonField from "./Fields/Button";
 import LoadScreen from "./LoadScreen";
 import { Modal } from "./Modal";
 import { NavBar } from "./navigation/NavBar";
@@ -17,8 +18,10 @@ const Journal = (props) => {
 
     const mql = window.matchMedia('(max-width: 650px)');
     const { journalState, dispatch} = useContext(AppContext);
+    const [pageChangesMade, setPageChangesMade] = useState(false);    
 
     const handleSubmit = async () => {
+        setPageChangesMade(false);
         dispatch({
             actionType: types.SET_IS_LOADING,
             payload: true
@@ -65,8 +68,6 @@ const Journal = (props) => {
             actionType: types.ADD_JOURNAL_PAGE
         });
     }
-
-    const putCreateEntryButtonInTable = mql.matches && journalState.journal.length < 6;
 
     useEffect(() => {
         const containers = document.querySelectorAll(".contentContainer.animatedLeft");
@@ -121,25 +122,8 @@ const Journal = (props) => {
                                     }) }
                                 </tbody>
                             </table>
-                                {
-                                    (putCreateEntryButtonInTable) ?
-                                    <table className={"table"}>
-                                        <tr className={"tableRowForButton"}>
-                                            <td className={"tableCell"}> 
-                                                <button className={'addNewEntryButton'} onClick={addJournalPage}> Create New Entry </button>
-                                            </td>
-                                        </tr>
-                                    </table> : null
-
-                                }
                         </div>
                     </div>
-                    {   
-                        !putCreateEntryButtonInTable ? 
-                            <div className={'addNewEntryButtonDiv'}>
-                                <button className={'addNewEntryButton'} onClick={addJournalPage}> Create New Entry </button>
-                            </div> : null
-                    }
                 </div>
             </>
         );
@@ -175,11 +159,6 @@ const Journal = (props) => {
                         <LoadScreen/> : 
                         <div className={"container__Journal"}>
                             <div className={"section__1"}>
-                                {   mql.matches &&
-                                    <div className={'submitAndLoginButtonsDiv animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
-                                        <button className={'addNewEntryButton '} onClick={addJournalPage}> Create New Entry </button> 
-                                    </div> 
-                                }
                                 <div className={'biography'}>
                                     {mql.matches && <div className={'coverPhotoDiv contentContainer animatedLeft '+` _${animatedLeftElementIndex++}`}>
                                         <img className={'coverPhoto'} src="dtc-logo-black.png" alt="TDTC logo" />
@@ -187,6 +166,7 @@ const Journal = (props) => {
                                     <div className={"contentContainer animatedLeft"+` _${animatedLeftElementIndex++}`}>
                                         <InputBox
                                             label={"This Journal Belongs To: "}
+                                            setChangesWereMade={setPageChangesMade}
                                             rows={"1"}
                                             dispatch={dispatch}
                                             dispatchAction={types.CHANGE_NAME}
@@ -196,6 +176,7 @@ const Journal = (props) => {
                                     <div className={"contentContainer animatedLeft"+` _${animatedLeftElementIndex++}`}>
                                         <InputBox
                                             label={"Date of Birth: "}
+                                            setChangesWereMade={setPageChangesMade}
                                             rows={"1"}
                                             dispatch={dispatch}
                                             dispatchAction={types.CHANGE_DOB}
@@ -205,6 +186,7 @@ const Journal = (props) => {
                                     <div className={"contentContainer animatedLeft"+` _${animatedLeftElementIndex++}`}>
                                         <InputBox
                                             label={"Place of Birth: "}
+                                            setChangesWereMade={setPageChangesMade}
                                             className={"animatedLeft"}
                                             rows={"1"}
                                             dispatch={dispatch}
@@ -215,6 +197,7 @@ const Journal = (props) => {
                                     <div className={"contentContainer animatedLeft"+` _${animatedLeftElementIndex++}`}>
                                         <InputBox
                                             divClassName={'dedications'}
+                                            setChangesWereMade={setPageChangesMade}
                                             label={"Dedications: "}
                                             rows={"8"}
                                             dispatch={dispatch}
@@ -225,6 +208,7 @@ const Journal = (props) => {
                                     <div className={"contentContainer animatedLeft"+` _${animatedLeftElementIndex++}`}>
                                         <InputBox
                                             divClassName={'preface'}
+                                            setChangesWereMade={setPageChangesMade}
                                             label={"Preface: "}
                                             rows={"24"}
                                             dispatch={dispatch}
@@ -233,9 +217,6 @@ const Journal = (props) => {
                                         />
                                     </div>
                                 </div>
-                                <div className={'submitAndLoginButtonsDiv animatedLeft contentContainer'+` _${animatedLeftElementIndex++}`}>
-                                    <button className={'submitButton'} type="submit" onClick={handleSubmit}> Submit </button> 
-                                </div> 
                             </div>
                             <div className={"section__2"}>
                                 {!mql.matches && 
@@ -247,6 +228,22 @@ const Journal = (props) => {
                                 </div>}
                                 {displayJournalTable()}
                             </div>
+                            {
+                                pageChangesMade &&
+                                <ButtonField
+                                    text={'Submit'}
+                                    className={'submitButtonDiv'}
+                                    onClick={handleSubmit}
+                                    withBox={true}
+                                />
+                            }
+                            <ButtonField
+                                Icon={AiIcons.AiFillFileAdd}
+                                iconSize={25}
+                                className={'addPageDiv'}
+                                onClick={addJournalPage}
+                                withBox={true}
+                            />
                         </div> }
                     </div> : 
                     <JournalPage

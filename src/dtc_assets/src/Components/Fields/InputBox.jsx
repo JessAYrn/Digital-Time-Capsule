@@ -52,9 +52,9 @@ const InputBox = (props) => {
     return(
         <div className={'inputBox'}>
             <div className={'label-element-div '}>
-                <label className={"label__"+disabledOrEnabled} htmlFor='Label'> {label}  &nbsp; </label>
+                <label className={"label "+disabledOrEnabled} htmlFor='Label'> {label}  &nbsp; </label>
             </div>
-            <div className={`input-element-div__${(divClassName) ? divClassName : " "}`}>
+            <div className={`input-element-div ${(divClassName) ? divClassName : " "}`}>
             <textarea
                 rows={rows}
                 cols={columns}

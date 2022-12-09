@@ -13,6 +13,7 @@ import { CANISTER_DATA_FIELDS } from '../Constants';
 import * as RiIcons from 'react-icons/ri';
 import * as FaIcons from 'react-icons/fa';
 import * as AiIcons from 'react-icons/ai';
+import ButtonField from './Fields/Button';
 import { IconContext } from 'react-icons/lib';
 
 
@@ -388,9 +389,12 @@ const Analytics = () => {
                                         />
                                     </div>
                                 </div>}
-                                <div className={'registryButtonDiv animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
-                                    <button className={'registryButton'} onClick={handleRegistration}> Register As New Owner </button>
-                                </div>
+                                <ButtonField
+                                    text={' Register As New Owner '}
+                                    className={'registryButtonDiv animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}
+                                    onClick={handleRegistration}
+                                    withBox={true}
+                                />
                                 <div className={'transparentDiv__homePage__roadMap animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
                                     <div className={'roadMapContentDiv'}>
                                         <div className={'missionStatementContentContainer'}>

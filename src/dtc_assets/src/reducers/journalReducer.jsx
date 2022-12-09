@@ -1,4 +1,5 @@
 import { dayInNanoSeconds, MODALS_TYPES } from "../Constants"
+import { getDateAsString } from "../Utils";
 
 export const types = {
     SET_ENTIRE_REDUX_STATE: "SET_ENTIRE_REDUX_STATE",
@@ -24,7 +25,6 @@ export const types = {
     SET_IS_AUTHENTICATED: "SET_IS_AUTHENTICATED",
     SET_IS_LOADING:"SET_IS_LOADING",
     SET_TX_HISTORY_DATA:"SET_TX_HISTORY_DATA",
-    SET_IS_TX_HISTORY_LOADING: "SET_IS_TX_HISTORY_LOADING",
     CHANGE_DRAFT: "CHANGE_DRAFT",
     CHANGE_DATE: "CHANGE_DATE",
     CHANGE_LOCATION: "CHANGE_LOCATION",
@@ -33,6 +33,7 @@ export const types = {
     CHANGE_UNLOCK_TIME: "CHANGE_UNLOCK_TIME",
     ADD_JOURNAL_PAGE: "ADD_JOURNAL_PAGE",
     ADD_NFT_FILE: "ADD_NFT_FILE",
+    ADD_JOURNAL_ENTRY_FILE: "ADD_JOURNAL_ENTRY_FILE",
     CHANGE_DOB: "CHANGE_DOB",
     CHANGE_POB: "CHANGE_POB",
     CHANGE_PREFACE: "CHANGE_PREFACE",
@@ -52,6 +53,7 @@ export const types = {
     CHANGE_NFT_FILE_LOAD_STATUS: "CHANGE_NFT_FILE_LOAD_STATUS",
     REMOVE_UNSUBMITTED_PAGE: "REMOVE_UNSUBMITTED_PAGE",
     REMOVE_NFT_FILE:"REMOVE_NFT_FILE",
+    REMOVE_JOURNAL_ENTRY_FILE: "REMOVE_JOURNAL_ENTRY_FILE",
     SET_HANDLE_PAGE_SUBMIT_FUNCTION: "SET_HANDLE_PAGE_SUBMIT_FUNCTION"
 
 }
@@ -125,31 +127,21 @@ export const initialState = {
         which: MODALS_TYPES.onSubmit
     },
     handlePageSubmitFunction: () => {}
-}
-
-const defaultFileMetaDataArray = [
-    {
-        fileName: "null",
-        lastModified: 0,
-        fileType: "null",
-        isLoading: false,
-        error: false
-    },
-    {
-        fileName: "null",
-        lastModified: 0,
-        fileType: "null",
-        isLoading: false,
-        error: false
-    },
-];
+};
+const defaultFileMetaData = {
+    fileName: "null",
+    lastModified: 0,
+    fileType: "null",
+    isLoading: false,
+    error: false
+};
 
 const freshPage = {
-    date: '',
+    date: getDateAsString(Date.now()),
     title: '',
     location: '',
     entry: '',
-    unlockTime: null,
+    unlockTime: getDateAsString(Date.now()),
     emailOne: '',
     emailTwo: '',
     emailThree: '', 
@@ -157,7 +149,7 @@ const freshPage = {
     isDisabled: false,
     isOpen: true,
     capsuled: false,
-    filesMetaData: [...defaultFileMetaDataArray]
+    filesMetaData: []
 }
 
 const changeValue = (state = initialState, action) => {
@@ -272,17 +264,6 @@ const changeValue = (state = initialState, action) => {
         state.walletData = {
             ...state.walletData,
             qrCodeImgUrl: payload
-        };
-        return {
-            ...state
-        }
-        case types.SET_IS_TX_HISTORY_LOADING:
-        state.walletData = {
-            ...state.walletData,
-            txHistory: {
-                ...state.walletData.txHistory,
-                isLoading: payload
-            }
         };
         return {
             ...state
@@ -445,6 +426,20 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
+        case types.ADD_JOURNAL_ENTRY_FILE:
+            updatedFilesMetaDataArry = [...state.journal[index].filesMetaData];
+            updatedFilesMetaDataArry.push(defaultFileMetaData);
+            state.journal[index].filesMetaData = updatedFilesMetaDataArry;
+            return {
+                ...state
+            }
+        case types.REMOVE_JOURNAL_ENTRY_FILE:
+            updatedFilesMetaDataArry = [...state.journal[index].filesMetaData];
+            updatedFilesMetaDataArry.pop();
+            state.journal[index].filesMetaData = updatedFilesMetaDataArry;
+            return {
+                ...state
+            }
         case types.CHANGE_FILE_METADATA:
             updatedFileMetaData = {
                 ...state.journal[index].filesMetaData[fileIndex],
@@ -510,7 +505,7 @@ const changeValue = (state = initialState, action) => {
         case types.ADD_JOURNAL_PAGE:
             state.journal.push({
                 ...freshPage,
-                filesMetaData : [...defaultFileMetaDataArray]
+                filesMetaData : []
             });
             return {
                 ...state

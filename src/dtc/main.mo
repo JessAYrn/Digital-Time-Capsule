@@ -222,6 +222,12 @@ shared (msg) actor class User() = this {
         return result;
     };
 
+    public shared(msg) func deleteUnsubmittedFile(fileId: Text) : async Result.Result<(), JournalTypes.Error> {
+        let callerId = msg.caller;
+        let result = await JournalHelperMethods.deleteUnsubmittedFile(callerId, profiles, fileId);
+        return result;
+    };
+
     public shared(msg) func submitFiles() : async Result.Result<(), JournalTypes.Error> {
         let callerId = msg.caller;
         let result = await JournalHelperMethods.submitFiles(callerId, profiles);

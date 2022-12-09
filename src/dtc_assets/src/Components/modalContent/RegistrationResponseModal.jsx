@@ -8,6 +8,7 @@ import { AppContext as  HomePageContext} from "../../HomePage";
 import './RegistrationResponseModal.scss';
 import { types } from "../../reducers/journalReducer";
 import { MODALS_TYPES } from "../../Constants";
+import ButtonField from "../Fields/Button";
 
 const RegistrationResponse = (props) => {
     const {
@@ -52,7 +53,12 @@ const RegistrationResponse = (props) => {
                     </h3>
                 </>
             }
-            <button className={'button'} onClick={onClick}> OK </button>
+            <ButtonField
+                text={'OK'}
+                className={'button'}
+                onClick={onClick}
+                withBox={true}
+            />
         </div>
     )
 };

@@ -9,6 +9,9 @@ import { AppContext as  AccountContext} from '../../Account';
 import { UI_CONTEXTS } from '../../Contexts';
 import { types } from '../../reducers/journalReducer';
 import { MODALS_TYPES } from '../../Constants';
+import ButtonField from '../Fields/Button';
+import LoadScreen from '../LoadScreen';
+
 const NotAuthorizedByOwner = (props) => {
     const {
         context
@@ -55,6 +58,8 @@ const NotAuthorizedByOwner = (props) => {
     };
 
     return (
+        journalState.isLoading ? 
+        <LoadScreen/> :
         <div className="contentDiv__notAuthorized">
             <ul>
                 <li>
@@ -69,12 +74,17 @@ const NotAuthorizedByOwner = (props) => {
                 </li>
                 <li>
                     <h6>
-                        If you are the owner of this application, attempting to log in for the first time, you must click the "Register As Owner"
-                        button found on the login page. You must register with the Stoic Identity that owns the NFT that corresponds to this application.
+                        If you are the owner of this application, attempting to log in for the first time, you must log in using the wallet that
+                        owns the Utility NFT that corresponds to this server.
                     </h6>
                 </li>
             </ul>
-            <button onClick={handleSubmitRequest} className="button"> Request Approval </button>
+            <ButtonField
+                text={'Request Approval'}
+                className={'button'}
+                onClick={handleSubmitRequest}
+                withBox={true}
+            />
         </div>
     )
 };

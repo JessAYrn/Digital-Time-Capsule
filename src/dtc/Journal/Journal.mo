@@ -132,13 +132,41 @@ shared(msg) actor class Journal (principal : Principal) = this {
         return #ok(());
     };
 
+    public shared(msg) func deleteUnsubmittedFile(fileId: Text): async Result.Result<(), JournalTypes.Error> {
+        let callerId = msg.caller;
+        if( Principal.toText(callerId) != mainCanisterId_ ) {
+            return #err(#NotAuthorized);
+        };
+        let trieIter = Trie.iter(unsubmittedFiles);
+        let trieSize = Trie.size(unsubmittedFiles);
+        var trieArray = Iter.toArray(trieIter);
+        var newTrie : JournalTypes.Files = Trie.empty();
+        var index = 0;
+        while(index < trieSize){
+            let fileWithName = trieArray[index];
+            let fileName = fileWithName.0;
+            let file = fileWithName.1;
+            if(fileName != fileId){
+                let (updatedNewTrie, oldValueForThisKey) = Trie.put(
+                    newTrie,
+                    textKey(fileName),
+                    Text.equal,
+                    file
+                );
+                newTrie := updatedNewTrie;
+            };
+            index += 1;
+        };
+        unsubmittedFiles := newTrie;
+        return #ok(());
+    };
+
     public shared(msg) func submitFiles() : async Result.Result<(), JournalTypes.Error> {
         if( Principal.toText(callerId) != mainCanisterId_ ) {
             return #err(#NotAuthorized);
         };
         let updatedFiles = Trie.merge(files, unsubmittedFiles, Text.equal);
         files := updatedFiles;
-        let KeysBuffer = Buffer.Buffer<(Text, Text)>(1);
         unsubmittedFiles := Trie.empty();
         return #ok(());
     };

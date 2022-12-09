@@ -33,6 +33,31 @@ export const loadJournalData = (journal, dispatch, types) => {
     });
 };
 
+export const loadJournalDataResponseAfterSubmit = (journal, dispatch, types) => {
+    const journalEntriesObject = mapApiObjectToFrontEndJournalEntriesObject(journal);
+    let journalEntries = journalEntriesObject.allEntries;
+    let unreadEntries = journalEntriesObject.unreadEntries;
+    dispatch({
+        payload: unreadEntries,
+        actionType: types.SET_JOURNAL_UNREAD_ENTRIES
+    })
+    let userJournalData = journal.ok
+    const journalBio = userJournalData[1];
+    
+    dispatch({
+        payload: journalBio,
+        actionType: types.SET_BIO
+    })
+    dispatch({
+        payload: journalEntries,
+        actionType: types.SET_JOURNAL
+    });
+    dispatch({
+        actionType: types.SET_JOURNAL_DATA_RELOAD_STATUS,
+        payload: false,
+    });
+};
+
 
 
 export const loadWalletData = async (walletDataFromApi, dispatch, types ) => {
@@ -57,14 +82,10 @@ export const loadWalletData = async (walletDataFromApi, dispatch, types ) => {
     });
 };
 
-export const loadTxHistory = async (journalState, dispatch, types, seconds) => {
+export const loadTxHistory = async (journalState, dispatch, types) => {
     if(!journalState.actor){
         throw 'No actor defined'
     };
-    dispatch({
-        actionType: types.SET_IS_TX_HISTORY_LOADING,
-        payload: true
-    });
 
     const tx = await journalState.actor.readTransaction();
     const transactionHistory = tx.ok.sort(function(a,b){
@@ -80,10 +101,7 @@ export const loadTxHistory = async (journalState, dispatch, types, seconds) => {
         actionType: types.SET_TX_HISTORY_DATA,
         payload: transactionHistory
     });
-    dispatch({
-        actionType: types.SET_IS_TX_HISTORY_LOADING,
-        payload: false
-    });
+    return {transactionHistory, tx};
 };
 
 export const loadNftData = (nftCollection, dispatch, types) => {

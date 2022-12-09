@@ -8,14 +8,19 @@ import DatePicker from "./Fields/DatePicker";
 import LoadScreen from "./LoadScreen";
 import { UI_CONTEXTS } from "../Contexts";
 import { MODALS_TYPES, monthInMilliSeconds} from "../Constants";
-import { getDateAsString } from "../Utils";
-import { getDateInMilliseconds, milisecondsToNanoSeconds } from "../Utils";
-import { loadJournalData } from "./loadingFunctions";
+import { dateAisLaterThanOrSameAsDateB, getDateAsString, getDateInMilliseconds, milisecondsToNanoSeconds, scrollToBottom, scrollToTop } from "../Utils";
+import { loadJournalDataResponseAfterSubmit } from "./loadingFunctions";
+import * as RiIcons from 'react-icons/ri';
+import * as BiIcons from 'react-icons/bi';
+import * as ImIcons from 'react-icons/im';
+import ButtonField from "./Fields/Button";
+import { IconContext } from 'react-icons/lib';
 import Switch from "./Fields/Switch";
 
 const JournalPage = (props) => {
 
-    const [pageChangesMade, setPageChangesMade] = useState(false);    
+    const [pageChangesMade, setPageChangesMade] = useState(false);  
+    const [firstTimeOpeningPage, setFirstTimeOpeningPage] = useState(true);
     
     const {
         index
@@ -37,16 +42,40 @@ const JournalPage = (props) => {
     const journalPageData = useMemo(() => {
         return journalState.journal[index];
     }, [journalState.journal[index]]);
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [journalPageData.filesMetaData.length]);
+
+    useEffect(() => {
+        scrollToTop();
+    },[firstTimeOpeningPage]);
     
     //marks this page as read so that it no longer shows in the notifications section
     if(journalPageData.entryKey) journalState.actor.readEntry({entryKey: journalPageData.entryKey});
 
     const toggleSwitch = () => {
-        dispatch({
-            actionType: types.CHANGE_CAPSULED,
-            payload: !journalPageData.capsuled,
-            index: index
-        });
+        if(journalPageData.draft){
+            let isCapsuled = !journalPageData.capsuled
+            dispatch({
+                actionType: types.CHANGE_CAPSULED,
+                payload: isCapsuled,
+                index: index
+            });
+            if(isCapsuled) {
+                dispatch({
+                    actionType: types.CHANGE_UNLOCK_TIME,
+                    payload: minimumDate,
+                    index: index
+                });
+            } else{
+                dispatch({
+                    actionType: types.CHANGE_UNLOCK_TIME,
+                    payload: thisDate,
+                    index: index
+                });
+            };
+        };
     };
 
     const mapAndSendEntryToApi = async (entryKey, journalEntry, isDraft) => {
@@ -76,7 +105,7 @@ const JournalPage = (props) => {
             entryAsApiObject
         );
         if('ok' in result){
-            loadJournalData(result, dispatch, types);
+            loadJournalDataResponseAfterSubmit(result, dispatch, types);
         }
         return result;
 
@@ -150,7 +179,24 @@ const JournalPage = (props) => {
                 });
             }
         }
-    }
+    };
+
+    const handleDeleteFile = async () => {
+        dispatch({
+            index: index,
+            actionType: types.REMOVE_JOURNAL_ENTRY_FILE
+        });
+        let fileCount = journalPageData.filesMetaData.length;
+        let fileName = journalPageData.filesMetaData[fileCount-1].fileName;
+        let result = await journalState.actor.deleteUnsubmittedFile(fileName);
+    };
+
+    const handleAddFile = async () => {
+        dispatch({
+            index: index,
+            actionType: types.ADD_JOURNAL_ENTRY_FILE
+        });
+    };
 
     let filesAreLoading = useMemo(() => {
         let filesLoading = false;
@@ -165,18 +211,33 @@ const JournalPage = (props) => {
             <LoadScreen/> : 
                 <div className={"journalPageContainer"}>
                     <div className={"logoDiv"}>
-                        <img className={'backButtonImg'} src="back-icon.png" alt="Back Button" onClick={(e) => handleClosePage(e)}/>
-                        <div className="switchDiv">
-                            <h5 className='switchH5'>
-                                Time Capsule:
-                            </h5>
-                            <Switch
-                                disabled={!journalPageData.draft}
-                                active={journalPageData.capsuled}
-                                onClick={toggleSwitch}
+                        <div className={'buttonContainer left'}>
+                            <ButtonField
+                                Icon={RiIcons.RiArrowGoBackLine}
+                                iconSize={25}
+                                className={'backButtonDiv'}
+                                onClick={handleClosePage}
+                                withBox={true}
                             />
                         </div>
-                        <img className={'logoImg'}src="dtc-logo-black.png" alt="Logo" />
+                        <div className={'buttonContainer right'}>
+                            {dateAisLaterThanOrSameAsDateB(thisDate, journalPageData.unlockTime) ?
+                                <ButtonField
+                                    Icon={ImIcons.ImUnlocked}
+                                    iconSize={25}
+                                    className={'lockButton'}
+                                    onClick={toggleSwitch}
+                                    withBox={true}
+                                /> :
+                                <ButtonField
+                                    Icon={ImIcons.ImLock}
+                                    iconSize={25}
+                                    className={'lockButton'}
+                                    onClick={toggleSwitch}
+                                    withBox={true}
+                                />
+                            }
+                        </div>
                     </div>
                     <div className={"journalText"} >
                         <DatePicker
@@ -188,10 +249,10 @@ const JournalPage = (props) => {
                             dispatch={dispatch}
                             dispatchAction={types.CHANGE_DATE}
                             index={index}
-                            value={(journalPageData) ? journalPageData.date : ''}
+                            value={journalPageData.date}
                             max={thisDate}
                         />
-                        {journalPageData.capsuled && 
+                        {(!journalPageData.draft || journalPageData.capsuled) && 
                         <DatePicker
                             id={'lockDate'}
                             label={"Date to Unlock Entry: "}
@@ -201,7 +262,7 @@ const JournalPage = (props) => {
                             dispatch={dispatch}
                             dispatchAction={types.CHANGE_UNLOCK_TIME}
                             index={index}
-                            value={(journalPageData) ? journalPageData.unlockTime : ''}
+                            value={journalPageData.unlockTime}
                             min={minimumDate}
                         />}
                         <InputBox
@@ -217,7 +278,7 @@ const JournalPage = (props) => {
                         <InputBox
                             divClassName={"entry"}
                             label={"Entry: "}
-                            rows={"59"}
+                            rows={"30"}
                             disabled={!journalPageData.draft}
                             setChangesWereMade={setPageChangesMade}
                             dispatch={dispatch}
@@ -229,6 +290,17 @@ const JournalPage = (props) => {
                     {journalPageData.filesMetaData.map((metaData, fileIndex) => {
                         return(
                             <div className='fileContainer'>
+                                {
+                                    (journalPageData.filesMetaData.length-1 === fileIndex) && journalPageData.draft &&
+                                    <ButtonField
+                                        Icon={RiIcons.RiDeleteBin2Line}
+                                        iconSize={25}
+                                        iconColor={'red'}
+                                        className={'removeFileDiv'}
+                                        onClick={handleDeleteFile}
+                                        withBox={true}
+                                    />
+                                }
                                 <FileUpload
                                     label={`file_${metaData.fileIndex}`}
                                     elementId={`file_${metaData.fileIndex}`}
@@ -242,17 +314,25 @@ const JournalPage = (props) => {
                             </div>
                         )
                     })}
-                    <div className={"submitButtonDiv"}>
-                        <button 
-                            className={'button'} 
-                            type="submit" 
-                            onClick={handleSubmit} 
-                            disabled={!journalPageData.draft || filesAreLoading}
-                        > 
-                            Submit 
-                        </button>
-                    </div>
-                    
+                    {
+                        journalPageData.draft &&
+                        <ButtonField
+                            Icon={BiIcons.BiImageAdd}
+                            iconSize={25}
+                            className={'addFileDiv'}
+                            onClick={handleAddFile}
+                            withBox={true}
+                        />
+                    }
+                    {
+                        journalPageData.draft && !filesAreLoading && pageChangesMade &&
+                        <ButtonField
+                            text={'Submit'}
+                            className={'submitButtonDiv'}
+                            onClick={handleSubmit}
+                            withBox={true}
+                        />
+                    }
                 </div>
     )
 };

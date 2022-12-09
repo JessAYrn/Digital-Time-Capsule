@@ -41,13 +41,13 @@ const FileUpload = (props) => {
     let dispatchActionToChangeFileLoadStatus = types.CHANGE_FILE_LOAD_STATUS;
     let fileData = journalState.journal[index].filesMetaData[fileIndex];
     let fileName = fileData.fileName;
+    let fileNameIsNull = fileName === "null";
 
     useEffect(() => {
         fileData = journalState.journal[index].filesMetaData[fileIndex];
-    }, [journalState.journal[index].filesMetaData[fileIndex]]);
-    useEffect(() => {
         fileName = fileData.fileName;
-    }, [[journalState.journal[index].filesMetaData[fileIndex]]]);    
+        fileNameIsNull = fileName === "null";
+    }, [journalState.journal[index].filesMetaData[fileIndex]]);
 
     useEffect(async () => {
         if(fileName === 'null') return;
@@ -263,7 +263,7 @@ const FileUpload = (props) => {
                         </> 
                 }          
             </div>
-            { !disabled &&
+            { !disabled && fileNameIsNull &&
                 <input 
                     disabled={disabled}
                     id={`uploadedImaged__${elementId}`} 

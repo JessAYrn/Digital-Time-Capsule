@@ -1,8 +1,6 @@
 .container__accountPage{
     display: flex;
     height: 100vh;
-    background-size: 100%;
-    background-image: url("../../assets/dtc-logo-black.png");
     flex-direction: column;
     justify-content: center;
     align-items: center;
@@ -24,6 +22,22 @@
             padding-bottom: 30px;
         }
     }
+    .submitButtonDiv{
+        font-family: 'Courier New', monospace;
+        font-size: 13px;
+        background-color: white;
+        position: fixed;
+        bottom: 30px;
+        left: 30px;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 10px;
+        border-color: rgb(0, 0, 0);
+        box-shadow: 0 5px 16px rgb(0 0 0 / 50%);
+      }
 }
 
 .admin{

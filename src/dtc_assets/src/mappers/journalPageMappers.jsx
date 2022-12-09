@@ -51,7 +51,7 @@ export const mapApiObjectToFrontEndJournalEntriesObject = (journalDataFromApi) =
 
         let unlockTimeInNanoseconds = parseInt(backEndObj.unlockTime);
         let unlockTimeInMilliseconds = nanoSecondsToMiliSeconds(unlockTimeInNanoseconds);
-        let unlockDate = getDateAsString(unlockTimeInMilliseconds)        
+        let unlockDate = getDateAsString(unlockTimeInMilliseconds);        
         let submitDate = backEndObj.date;
         let capsuled = false;
         if(dateAisLaterThanOrSameAsDateB(unlockDate, submitDate) && submitDate !== unlockDate) capsuled = true;

@@ -3,6 +3,7 @@ import { MODALS_TYPES } from '../../Constants';
 import { AppContext } from '../../App';
 import "./ModalContentExitWithoutSubmitModal.scss";
 import { types } from '../../reducers/journalReducer';
+import ButtonField from '../Fields/Button';
 
 const ExitWithoutSubmit = (props) => {
 
@@ -52,24 +53,23 @@ const ExitWithoutSubmit = (props) => {
 
     return(
         <div className={'exitWithoutSubmitCotentDiv'}>  
-            <h1>
+            <h3>
                 Would you like to submit this journal entry?
-            </h1>
-            <div className={'buttonDiv'}>
-                <button 
-                    className='button' 
-                    onClick={onClickSubmit}
-                    disabled={filesAreLoading}
-                > Yes, I almost forgot 
-                </button> 
-            </div>   
-            <div className={'buttonDiv'}>
-                <button 
-                    className='button' 
-                    onClick={onClickExit}
-                    disabled={filesAreLoading}
-                > No, Don't worry about it  </button> 
-            </div>  
+            </h3>
+            <ButtonField
+                text={'Yes'}
+                className={'buttonDiv'}
+                onClick={onClickSubmit}
+                disabled={filesAreLoading}
+                withBox={true}
+            />
+            <ButtonField
+                text={"No"}
+                className={'buttonDiv'}
+                onClick={onClickExit}
+                disabled={filesAreLoading}
+                withBox={true}
+            /> 
         </div>
 
     )
