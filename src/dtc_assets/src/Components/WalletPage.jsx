@@ -140,13 +140,14 @@ const WalletPage = (props) => {
                                         })
                                 }              
                             </div>
-                            {showReloadButton && <ButtonField
-                                Icon={AiIcons.AiOutlineReload}
-                                className={'reloadTxData'}
-                                iconSize={25}
-                                onClick={loadTxs}
-                                withBox={true}
-                            />}
+                            {(showReloadButton || journalState.walletData.txHistory.data.length > 0) && 
+                                <ButtonField
+                                    Icon={AiIcons.AiOutlineReload}
+                                    className={'reloadTxData'}
+                                    iconSize={25}
+                                    onClick={loadTxs}
+                                    withBox={true}
+                                />}
                             <ButtonField
                                 Icon={GrIcons.GrSend}
                                 className={'sendTxDiv'}
