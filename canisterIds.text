@@ -11,12 +11,12 @@
   }
 }
 
-// test Canister Id's
+//Test Canister Id's
 {
   "dtc": {
-    "ic": "uqmlh-miaaa-aaaap-qap5a-cai"
+    "ic": "cxi6d-5iaaa-aaaap-qaaka-cai"
   },
   "dtc_assets": {
-    "ic": "uxnnt-bqaaa-aaaap-qap5q-cai"
+    "ic": "cqjyx-qqaaa-aaaap-qaakq-cai"
   }
 }
