@@ -155,8 +155,33 @@ module{
 
     };
 
+    public func updatePhotos(callerId: Principal, profilesTree: MainTypes.ProfilesTree, photos: [JournalTypes.FileMetaData]) : 
+    async Result.Result<(JournalTypes.Bio), JournalTypes.Error> {
+        
+        if(Principal.toText(callerId) == "2vxsx-fae"){
+           return #err(#NotAuthorized);
+        };
+
+        let result = Trie.find(
+            profilesTree,
+            key(callerId),
+            Principal.equal
+        );
+
+        switch(result){
+            case null{
+                #err(#NotAuthorized);
+            };
+            case (? existingJournal){
+                let journal = existingJournal.journal;
+                let status = await journal.updatePhotos(photos);
+                return status;
+            };
+        };
+    };
+
     public func updateBio(callerId: Principal, profilesTree: MainTypes.ProfilesTree, bio: JournalTypes.Bio) : 
-    async Result.Result<(), JournalTypes.Error> {
+    async Result.Result<(JournalTypes.Bio), JournalTypes.Error> {
         
         if(Principal.toText(callerId) == "2vxsx-fae"){
            return #err(#NotAuthorized);
@@ -228,6 +253,26 @@ module{
                         };
                     };
                 }
+            };
+        };
+    };
+
+    public func deleteSubmittedFile(callerId: Principal, profilesTree: MainTypes.ProfilesTree, fileId: Text) :
+    async Result.Result<(), JournalTypes.Error> {
+
+        let result = Trie.find(
+            profilesTree,
+            key(callerId),
+            Principal.equal
+        );
+        switch(result){
+            case null{
+                return #err(#NotFound);
+            };
+            case(? v){
+                let journal = v.journal;
+                let result_ = await journal.deleteSubmittedFile(fileId);
+                return result_;
             };
         };
     };

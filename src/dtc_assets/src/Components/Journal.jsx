@@ -13,6 +13,7 @@ import { MODALS_TYPES } from "../Constants";
 import { UI_CONTEXTS } from "../Contexts";
 import { getIntObserverFunc, visibilityFunctionDefault } from "./animations/IntersectionObserverFunctions";
 import { dateAisLaterThanOrSameAsDateB, getDateAsString, getDateInMilliseconds } from "../Utils";
+import FileCarousel from "./Fields/fileManger/FileCarousel";
 
 const Journal = (props) => {
 
@@ -31,7 +32,8 @@ const Journal = (props) => {
             pob: journalState.bio.pob,
             name: journalState.bio.name,
             dedications: journalState.bio.dedications,
-            preface: journalState.bio.preface
+            preface: journalState.bio.preface,
+            photos: journalState.bio.photos
         });
         dispatch({
             actionType: types.SET_IS_LOADING,
@@ -161,7 +163,15 @@ const Journal = (props) => {
                             <div className={"section__1"}>
                                 <div className={'biography'}>
                                     {mql.matches && <div className={'coverPhotoDiv contentContainer animatedLeft '+` _${animatedLeftElementIndex++}`}>
-                                        <img className={'coverPhoto'} src="dtc-logo-black.png" alt="TDTC logo" />
+                                        <FileCarousel
+                                            filesMetaDataArray={journalState.bio.photos}
+                                            dispatch={dispatch}
+                                            journalState={journalState}
+                                            setChangesWereMade={setPageChangesMade}
+                                            dispatchActionToAddFile={types.ADD_COVER_PHOTO}
+                                            dispatchActionToDeleteFile={types.REMOVE_COVER_PHOTO}
+                                            clearUnsubmittedFiles={journalState.actor.clearUnsubmittedFiles}
+                                        />
                                     </div>}
                                     <div className={"contentContainer animatedLeft"+` _${animatedLeftElementIndex++}`}>
                                         <InputBox
@@ -224,7 +234,14 @@ const Journal = (props) => {
                                     className={'coverPhotoDiv contentContainer animatedLeft'+ 
                                     ` _${animatedLeftElementIndex++}`}
                                 >
-                                    <img className={'coverPhoto'} src="dtc-logo-black.png" alt="TDTC logo" />
+                                    <FileCarousel
+                                        filesMetaDataArray={journalState.bio.photos}
+                                        journalState={journalState}
+                                        setChangesWereMade={setPageChangesMade}
+                                        dispatch={dispatch}
+                                        dispatchActionToAddFile={types.ADD_COVER_PHOTO}
+                                        dispatchActionToDeleteFile={types.REMOVE_COVER_PHOTO}
+                                    />
                                 </div>}
                                 {displayJournalTable()}
                             </div>

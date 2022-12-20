@@ -37,6 +37,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         pob = "";
         dedications = "";
         preface = "";
+        photos = [];
     };
 
     private stable var mainCanisterId_ : Text = "null"; 
@@ -129,6 +130,35 @@ shared(msg) actor class Journal (principal : Principal) = this {
             return #err(#NotAuthorized);
         };
         unsubmittedFiles := Trie.empty();
+        return #ok(());
+    };
+
+    public shared(msg) func deleteSubmittedFile(fileId: Text): async Result.Result<(), JournalTypes.Error>{
+        let callerId = msg.caller;
+        if( Principal.toText(callerId) != mainCanisterId_ ) {
+            return #err(#NotAuthorized);
+        };
+        let trieIter = Trie.iter(files);
+        let trieSize = Trie.size(files);
+        var trieArray = Iter.toArray(trieIter);
+        var newTrie : JournalTypes.Files = Trie.empty();
+        var index = 0;
+        while(index < trieSize){
+            let fileWithName = trieArray[index];
+            let fileName = fileWithName.0;
+            let file = fileWithName.1;
+            if(fileName != fileId){
+                let (updatedNewTrie, oldValueForThisKey) = Trie.put(
+                    newTrie,
+                    textKey(fileName),
+                    Text.equal,
+                    file
+                );
+                newTrie := updatedNewTrie;
+            };
+            index += 1;
+        };
+        files := newTrie;
         return #ok(());
     };
 
@@ -349,13 +379,30 @@ shared(msg) actor class Journal (principal : Principal) = this {
         };
     };
 
-    public shared(msg) func updateBio(bio: JournalTypes.Bio) : async Result.Result<(), JournalTypes.Error>{
+    public shared(msg) func updateBio(bio: JournalTypes.Bio) : async Result.Result<(JournalTypes.Bio), JournalTypes.Error>{
         let callerId = msg.caller;
         if( Principal.toText(callerId) != mainCanisterId_) {
            return #err(#NotAuthorized);
         };
         biography := bio;
-        #ok(());
+        #ok(biography);
+    };
+
+    public shared(msg) func updatePhotos(photos: [JournalTypes.FileMetaData]) : async Result.Result<(JournalTypes.Bio), JournalTypes.Error>{
+        let callerId = msg.caller;
+        if( Principal.toText(callerId) != mainCanisterId_) {
+           return #err(#NotAuthorized);
+        };
+        let updatedBiography : JournalTypes.Bio = {
+            name = biography.name;
+            dob = biography.dob;
+            pob = biography.pob;
+            dedications = biography.dedications;
+            preface = biography.preface;
+            photos = photos;
+        };
+        biography := updatedBiography;
+        #ok(biography);
     };
 
     public shared(msg) func updateJournalEntry(key: Nat, journalEntry: JournalTypes.JournalEntryInput) : 
