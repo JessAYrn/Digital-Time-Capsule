@@ -11,6 +11,7 @@ import ButtonField from "../Button";
 import { NULL_STRING_ALL_LOWERCASE } from "../../../Constants";
 import { types } from "../../../reducers/journalReducer";
 
+
 const FileCarousel = (props) => {
 
     const {
