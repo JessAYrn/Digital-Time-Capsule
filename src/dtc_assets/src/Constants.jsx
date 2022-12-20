@@ -59,3 +59,12 @@ export const CANISTER_DATA_FIELDS = {
     journalCount: "journalCount"
 }
 
+export const PAGES = {
+    JOURNAL_COVER: "JOURNAL_COVER",
+    JOURNAL_PAGE: "JOURNAL_PAGE",
+}
+
+export const NULL_STRING_ALL_LOWERCASE = "null";
+export const NULL_STRING_CAPITALIZED = "Null";
+export const NULL_STRING_ALL_CAPS = "NULL";
+

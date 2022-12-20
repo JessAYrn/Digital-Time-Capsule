@@ -209,9 +209,15 @@ shared (msg) actor class User() = this {
         return result;
     };
 
-    public shared(msg) func updateBio(bio: JournalTypes.Bio) : async Result.Result<(), JournalTypes.Error> {
+    public shared(msg) func updateBio(bio: JournalTypes.Bio) : async Result.Result<(JournalTypes.Bio), JournalTypes.Error> {
         let callerId = msg.caller;
         let result = await JournalHelperMethods.updateBio(callerId, profiles, bio);
+        return result;
+    };
+
+    public shared(msg) func updatePhotos(photos: [JournalTypes.FileMetaData]) : async Result.Result<(JournalTypes.Bio), JournalTypes.Error> {
+        let callerId = msg.caller;
+        let result = await JournalHelperMethods.updatePhotos(callerId, profiles, photos);
         return result;
     };
 
@@ -225,6 +231,12 @@ shared (msg) actor class User() = this {
     public shared(msg) func deleteUnsubmittedFile(fileId: Text) : async Result.Result<(), JournalTypes.Error> {
         let callerId = msg.caller;
         let result = await JournalHelperMethods.deleteUnsubmittedFile(callerId, profiles, fileId);
+        return result;
+    };
+
+    public shared(msg) func deleteSubmittedFile(fileId: Text) : async Result.Result<(), JournalTypes.Error> {
+        let callerId = msg.caller;
+        let result = await JournalHelperMethods.deleteSubmittedFile(callerId, profiles, fileId);
         return result;
     };
 

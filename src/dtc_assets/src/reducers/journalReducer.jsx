@@ -1,4 +1,4 @@
-import { dayInNanoSeconds, MODALS_TYPES } from "../Constants"
+import { MODALS_TYPES, NULL_STRING_ALL_LOWERCASE, NULL_STRING_CAPITALIZED } from "../Constants"
 import { getDateAsString } from "../Utils";
 
 export const types = {
@@ -39,6 +39,8 @@ export const types = {
     CHANGE_PREFACE: "CHANGE_PREFACE",
     CHANGE_DEDICATIONS: "CHANGE_DEDICATIONS",
     CHANGE_NAME: "CHANGE_NAME",
+    ADD_COVER_PHOTO: "ADD_COVER_PHOTO",
+    REMOVE_COVER_PHOTO: "REMOVE_COVER_PHOTO",
     CHANGE_ENTRY_TITLE: "CHANGE_ENTRY_TITLE",
     CHANGE_EMAIL: "CHANGE_EMAIL",
     CHANGE_USERNAME: "CHANGE_USERNAME",
@@ -47,8 +49,10 @@ export const types = {
     CHANGE_RECIPIENT_EMAIL_THREE: "CHANGE_RECIPIENT_EMAIL_THREE",
     CHANGE_PAGE_IS_DISABLED_STATUS: "CHANGE_PAGE_IS_DISABLED_STATUS",
     CHANGE_FILE_METADATA: "CHANGE_FILE_METADATA",
+    CHANGE_FILE_METADATA_JOURNAL_COVER_PAGE: "CHANGE_FILE_METADATA_JOURNAL_COVER_PAGE",
     CHANGE_FILE_ERROR_STATUS: "CHANGE_FILE_ERROR_STATUS",
     CHANGE_FILE_LOAD_STATUS: "CHANGE_FILE_LOAD_STATUS",
+    CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE: "CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE",
     CHANGE_PAGE_IS_OPEN: "CHANGE_PAGE_IS_OPEN",
     CHANGE_NFT_FILE_LOAD_STATUS: "CHANGE_NFT_FILE_LOAD_STATUS",
     REMOVE_UNSUBMITTED_PAGE: "REMOVE_UNSUBMITTED_PAGE",
@@ -69,13 +73,13 @@ export const initialState = {
         users: [],
         journalCount: 0,
         backEndCyclesBurnRatePerDay: 1,
-        backEndPrincipal: "Null",
-        frontEndPrincipal: "Null",
+        backEndPrincipal: NULL_STRING_CAPITALIZED,
+        frontEndPrincipal: NULL_STRING_CAPITALIZED,
         lastRecordedBackEndCyclesBalance: 1,
         currentCyclesBalance: 1,
-        nftOwner: "Null",
+        nftOwner: NULL_STRING_CAPITALIZED,
         isOwner: false,
-        nftId: "Null",
+        nftId: NULL_STRING_CAPITALIZED,
         supportMode: false,
         acceptingRequests: false,
         requestsForApproval: []
@@ -110,7 +114,8 @@ export const initialState = {
         pob: '',
         dedications: '',
         preface:'',
-        email: ''
+        email: '',
+        photos: []
     },
     journal: [],
     unreadEntries:[],
@@ -129,11 +134,12 @@ export const initialState = {
     handlePageSubmitFunction: () => {}
 };
 const defaultFileMetaData = {
-    fileName: "null",
+    fileName: NULL_STRING_ALL_LOWERCASE,
     lastModified: 0,
-    fileType: "null",
+    fileType: NULL_STRING_ALL_LOWERCASE,
     isLoading: false,
-    error: false
+    error: false,
+    fileIsUnsubmitted: true
 };
 
 const freshPage = {
@@ -159,6 +165,7 @@ const changeValue = (state = initialState, action) => {
     let updatedJournalPage;
     let updatedNftFile;
     let updatedFilesMetaDataArry;
+    let updatedPhotos;
 
     switch (actionType){
         case types.SET_ENTIRE_REDUX_STATE:
@@ -243,6 +250,7 @@ const changeValue = (state = initialState, action) => {
         }
         case types.SET_BIO:
             state.bio = payload;
+            state.bio.photos = (state.bio.photos.length) ? state.bio.photos : [defaultFileMetaData];
             return {
                 ...state
             }
@@ -453,6 +461,19 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
+        case types.CHANGE_FILE_METADATA_JOURNAL_COVER_PAGE:
+            updatedFileMetaData = {
+                ...state.bio.photos[fileIndex],
+                fileName: payload.fileName,
+                lastModified: payload.lastModified,
+                fileType: payload.fileType
+            };
+            updatedFilesMetaDataArry = [...state.bio.photos];
+            updatedFilesMetaDataArry[fileIndex] = updatedFileMetaData;
+            state.bio.photos = updatedFilesMetaDataArry;
+            return {
+                ...state
+            }
         case types.CHANGE_FILE_ERROR_STATUS:
             updatedFileMetaData = {
                 ...state.journal[index].filesMetaData[fileIndex],
@@ -472,6 +493,17 @@ const changeValue = (state = initialState, action) => {
             updatedFilesMetaDataArry = [...state.journal[index].filesMetaData];
             updatedFilesMetaDataArry[fileIndex] = updatedFileMetaData;
             state.journal[index].filesMetaData = updatedFilesMetaDataArry;
+            return {
+                ...state
+            }
+        case types.CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE:
+            updatedFileMetaData = {
+                ...state.bio.photos[fileIndex],
+                isLoading: payload,
+            };
+            updatedFilesMetaDataArry = [...state.bio.photos];
+            updatedFilesMetaDataArry[fileIndex] = updatedFileMetaData;
+            state.bio.photos = updatedFilesMetaDataArry;
             return {
                 ...state
             }
@@ -519,6 +551,22 @@ const changeValue = (state = initialState, action) => {
             state.bio = {
                 ...state.bio,
                 name: payload
+            }
+            return {
+                ...state
+            }
+        case types.ADD_COVER_PHOTO:
+            state.bio.photos.push(defaultFileMetaData);
+            state.bio.photos = [...state.bio.photos];
+            return {
+                ...state
+            }
+        case types.REMOVE_COVER_PHOTO:
+            updatedPhotos = state.bio.photos.filter((metaData, i) =>  i !== fileIndex);
+            if(!updatedPhotos.length) updatedPhotos.push(defaultFileMetaData);
+            state.bio = {
+                ...state.bio,
+                photos: [...updatedPhotos]
             }
             return {
                 ...state

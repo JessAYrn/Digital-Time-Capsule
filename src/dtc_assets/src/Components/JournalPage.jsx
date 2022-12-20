@@ -7,7 +7,7 @@ import "./JournalPage.scss";
 import DatePicker from "./Fields/DatePicker";
 import LoadScreen from "./LoadScreen";
 import { UI_CONTEXTS } from "../Contexts";
-import { MODALS_TYPES, monthInMilliSeconds} from "../Constants";
+import { MODALS_TYPES, monthInMilliSeconds, PAGES} from "../Constants";
 import { dateAisLaterThanOrSameAsDateB, getDateAsString, getDateInMilliseconds, milisecondsToNanoSeconds, scrollToBottom, scrollToTop } from "../Utils";
 import { loadJournalDataResponseAfterSubmit } from "./loadingFunctions";
 import * as RiIcons from 'react-icons/ri';
@@ -44,7 +44,7 @@ const JournalPage = (props) => {
     }, [journalState.journal[index]]);
 
     useEffect(() => {
-        scrollToBottom();
+        scrollToBottom(1050);
     }, [journalPageData.filesMetaData.length]);
 
     useEffect(() => {
@@ -307,6 +307,7 @@ const JournalPage = (props) => {
                                     disabled={!journalPageData.draft}
                                     fileIndex={fileIndex}
                                     key={fileIndex}
+                                    page={PAGES.JOURNAL_PAGE}
                                     context={UI_CONTEXTS.JOURNAL}
                                     setChangesWereMade={setPageChangesMade}
                                     index={index}
