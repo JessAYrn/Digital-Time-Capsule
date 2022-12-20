@@ -145,9 +145,9 @@ export const scrollToTop = () => {
   });
 }
 
-export const scrollToBottom = (distanceFromBottom = 0) => {
+export const scrollToBottom = () => {
   window.scrollTo({
-    top: document.body.scrollHeight - distanceFromBottom,
+    top: document.body.scrollHeight,
     left: 0,
     behavior: 'smooth'
   });

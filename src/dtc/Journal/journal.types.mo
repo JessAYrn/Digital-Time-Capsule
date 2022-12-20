@@ -12,7 +12,6 @@ module {
         pob: Text;
         dedications: Text;
         preface: Text;
-        photos: [FileMetaData];
     };
 
     public type Files = Trie.Trie2D<Text,Nat,Blob>;

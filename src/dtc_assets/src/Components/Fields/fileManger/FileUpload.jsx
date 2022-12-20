@@ -2,10 +2,12 @@ import React, {useRef, useState, useEffect, useContext, useMemo} from 'react';
 import "./FileUpload.scss";
 import { types } from '../../../reducers/journalReducer';
 import { useEffect } from '../../../../../../dist/dtc_assets';
-import { deviceType } from '../../../Utils';
-import { DEVICE_TYPES, MAX_DURATION_OF_VIDEO_IN_SECONDS, NULL_STRING_ALL_LOWERCASE, PAGES } from '../../../Constants';
+import { deviceType, getFileArrayBuffer } from '../../../Utils';
+import { DEVICE_TYPES, MAX_DURATION_OF_VIDEO_IN_SECONDS } from '../../../Constants';
 import { MODALS_TYPES } from '../../../Constants';
-import { getFileFromApi, getFileURL, mapAndSendFileToApi, getDuration, updateFileMetadataInStore } from './FileManagementTools';
+import { CHUNK_SIZE } from '../../../Constants';
+import { fileToBlob } from '../../../Utils';
+import { retrieveChunk, getFileURL, uploadChunk, getDuration } from './FileManagementTools';
 import { AppContext as JournalContext} from '../../../App';
 import { UI_CONTEXTS } from '../../../Contexts';
 
@@ -18,24 +20,16 @@ const FileUpload = (props) => {
         label,
         index,
         elementId,
-        forceDisplayDefaultFileSrc,
         setChangesWereMade,
         fileIndex,
         context,
-        disabled,
-        page,
+        disabled
     } = props;
     let inputRef = useRef();
 
     const [constructedFile, setConstructedFile] = useState(null);
-    const [fileSrc, setFileSrc]  = useState("../../../assets/dtc-logo-black.png");
+    const [fileSrc, setFileSrc]  = useState("dtc-logo-black.png");
     const [fileType, setFileType] = useState("image/png");
-    const defaultFileSrc = "../../../assets/dtc-logo-black.png";
-
-    var uploadedFile;
-    var fileURL;
-    
-    const typeOfDevice = deviceType();
 
     let AppContext;
     if(context === UI_CONTEXTS.JOURNAL){
@@ -43,56 +37,72 @@ const FileUpload = (props) => {
     }
     const { journalState, dispatch } = useContext(AppContext);
 
-    let dispatchActionToChangeFileMetaData;
-    let dispatchActionToChangeFileLoadStatus;
-    let fileData;
-    let filesMetaDataArray;
-    let videoHeight;
-    let classNameMod = '';
-
-    //selects the appropriate fileMetaDataArray, and dispatchActions for updating that array in the redux store
-    if(page === PAGES.JOURNAL_COVER){
-        dispatchActionToChangeFileMetaData = types.CHANGE_FILE_METADATA_JOURNAL_COVER_PAGE;
-        dispatchActionToChangeFileLoadStatus = types.CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE;
-        classNameMod = 'coverPhoto';
-        filesMetaDataArray = journalState.bio.photos;
-        videoHeight = '330';
-    } else if(page === PAGES.JOURNAL_PAGE) {
-        dispatchActionToChangeFileMetaData= types.CHANGE_FILE_METADATA;
-        dispatchActionToChangeFileLoadStatus= types.CHANGE_FILE_LOAD_STATUS;
-        filesMetaDataArray = journalState.journal[index].filesMetaData;
-        videoHeight = '443';
-    }
-    fileData = filesMetaDataArray[fileIndex];
+    let dispatchActionToChangeFileMetaData = types.CHANGE_FILE_METADATA;
+    let dispatchActionToChangeFileLoadStatus = types.CHANGE_FILE_LOAD_STATUS;
+    let fileData = journalState.journal[index].filesMetaData[fileIndex];
     let fileName = fileData.fileName;
-    let fileNameIsNull = fileName === NULL_STRING_ALL_LOWERCASE;
+    let fileNameIsNull = fileName === "null";
 
-    //Upon uploading a file, this function updates the file metadata from its default settings 
-    //to that of the file that was uploaded. 
     useEffect(() => {
-        filesMetaDataArray[fileIndex];
+        fileData = journalState.journal[index].filesMetaData[fileIndex];
         fileName = fileData.fileName;
-        fileNameIsNull = fileName === NULL_STRING_ALL_LOWERCASE;
-    }, [filesMetaDataArray[fileIndex]]);
+        fileNameIsNull = fileName === "null";
+    }, [journalState.journal[index].filesMetaData[fileIndex]]);
 
-    //Retrieves file chunks from API and used them, along with the file metadata, to construct
-    //a the file and set the constructedFile variable to the newly constructed file. 
-    //it only does this if the fileName property of the fileMetaData object is not equal
-    //to NULL_STRING_ALL_LOWERCASE. Otherwise, this function does nothing.
-    useEffect(() => {
-        const getFiles = async () => getFileFromApi(
-            journalState,
-            dispatch, 
-            dispatchActionToChangeFileLoadStatus, 
-            fileData,
-            index, 
-            fileIndex,
-            setConstructedFile
-        );
-        getFiles();
-    }, []);
+    useEffect(async () => {
+        if(fileName === 'null') return;
+        dispatch({ 
+            actionType: dispatchActionToChangeFileLoadStatus,
+            payload: true,
+            index: index,
+            fileIndex: fileIndex 
+        });
+        let index_ = 0;
+        let promises = [];
+        let fileChunkCounteObj;
+        let fileChunkCount;
+        if( context === UI_CONTEXTS.JOURNAL){
+            fileChunkCounteObj = await journalState.actor.readEntryFileSize(fileName);
+            fileChunkCount = parseInt(fileChunkCounteObj.ok);
+        } 
+        if( fileChunkCount > 0){
+            while(index_ < fileChunkCount){
+                promises.push(retrieveChunk(journalState, context, fileName, index_));
+                index_ += 1;
+            };
+            let fileBytes = await Promise.all(promises);
+            fileBytes = fileBytes.flat(1);
+            const fileArrayBuffer = new Uint8Array(fileBytes).buffer;
+            let metaData_ = fileData.metaData ? fileData.metaData : fileData;
+            const fileBlob = new Blob(
+                [fileArrayBuffer], 
+                { 
+                    type: metaData_.fileType 
+                }
+            );
+            const fileAsFile = new File(
+                [fileBlob],
+                fileName, 
+                {
+                    type: metaData_.fileType, 
+                    lastModified: parseInt(metaData_.lastModified)
+                } 
+            );
+            setConstructedFile(fileAsFile);
+        }
+        dispatch({ 
+            actionType: dispatchActionToChangeFileLoadStatus,
+            payload: false,
+            index: index,
+            fileIndex: fileIndex 
+        });
+    },[fileName]);
 
-    //updates the fileSrc whenever the constructedFile variable is updated with the proper file
+    var uploadedFile;
+    var fileURL;
+    
+    const typeOfDevice = deviceType();
+
     useEffect( async () => {
         if(constructedFile){
             setFileType(constructedFile.type);
@@ -101,8 +111,55 @@ const FileUpload = (props) => {
         };
     },[constructedFile]);
 
-    //returns the fileId of a newly uploaded file, but only of the file fits the format requirements.
-    const uploadFileToFrontend = async (uploadedFile) => {
+    const mapAndSendFileToApi = async (file) => {
+        const fileSize = file.size;
+
+        const chunks = Math.ceil(fileSize/CHUNK_SIZE);
+        let chunk = 0;
+
+        let promises = [];
+        while(chunk < chunks){    
+            
+            const from = chunk * CHUNK_SIZE;
+            const to = from + CHUNK_SIZE;
+
+            const fileChunk = (to < fileSize -1) ? file.slice(from,to ) : file.slice(from);
+
+            let chunkId = parseInt(chunk);
+            let fileId = journalState.journal[index].filesMetaData[fileIndex].fileName;
+            promises.push(uploadChunk(journalState, fileId, chunkId, fileChunk));
+
+            chunk += 1;
+        };
+        const results = await Promise.all(promises); 
+    };
+
+    const updateFileMetadataInStore = (file) => {
+        dispatch({
+            payload: {
+                fileName: `${file.name}-${Date.now()}`,
+                lastModified: file.lastModified,
+                fileType: file.type
+            },
+            actionType: dispatchActionToChangeFileMetaData,
+            index: index,
+            fileIndex: fileIndex
+        })
+        if(!!setChangesWereMade){
+            setChangesWereMade(true);
+        } 
+    };
+
+    const handleUpload = async () => {
+        uploadedFile = inputRef.current.files[0] || constructedFile;
+        
+        dispatch({ 
+            actionType: dispatchActionToChangeFileLoadStatus,
+            payload: true,
+            index: index,
+            fileIndex: fileIndex 
+        });
+
         //check file extension for audio/video type
         //this if statement will ultimately end up triggering the 
         //canPlayThrough() function.
@@ -120,50 +177,23 @@ const FileUpload = (props) => {
                         }
                 });
                 URL.revokeObjectURL(fileURL);
-                return null;
             } else {
                 setFileType(uploadedFile.type);
                 fileURL = await getFileURL(uploadedFile);
-                setFileSrc(fileURL);
-                let fileId = updateFileMetadataInStore(
-                    dispatch, 
-                    dispatchActionToChangeFileMetaData, 
-                    index, 
-                    fileIndex, 
-                    setChangesWereMade, 
-                    uploadedFile
-                );
+                setFileSrc(fileURL)
+                updateFileMetadataInStore(uploadedFile);
                 setConstructedFile(uploadedFile);
-                return fileId;
+                await mapAndSendFileToApi(uploadedFile);
             }
         } else {
             //triggers useEffect which displays the video
             setFileType(uploadedFile.type);
             fileURL = await getFileURL(uploadedFile);
             setFileSrc(fileURL)
-            let fileId = updateFileMetadataInStore(
-                dispatch, 
-                dispatchActionToChangeFileMetaData, 
-                index, 
-                fileIndex, 
-                setChangesWereMade, 
-                uploadedFile
-            );
+            updateFileMetadataInStore(uploadedFile);
             setConstructedFile(uploadedFile);
-            return fileId;
+            await mapAndSendFileToApi(uploadedFile);
         }
-    };
-
-    const handleUpload = async () => {
-        uploadedFile = inputRef.current.files[0] || constructedFile;
-        dispatch({ 
-            actionType: dispatchActionToChangeFileLoadStatus,
-            payload: true,
-            index: index,
-            fileIndex: fileIndex 
-        });
-        let fileId = await uploadFileToFrontend(uploadedFile);
-        if(fileId) await mapAndSendFileToApi(journalState, fileId, uploadedFile);
 
         dispatch({ 
             actionType: dispatchActionToChangeFileLoadStatus,
@@ -171,14 +201,12 @@ const FileUpload = (props) => {
             index: index,
             fileIndex: fileIndex 
         });
+        
     };
 
-    const fileSrcToDisplay = forceDisplayDefaultFileSrc ? defaultFileSrc : fileSrc;
-
     return(
-        <div className={`imageDivContainer ${classNameMod}`}>
-            {!disabled && fileNameIsNull && <h5 className={'chooseFileH5'}>Tap to choose file.</h5>}
-            <div className={`imageDiv ${classNameMod}`}>  
+        <div className={'imageDivContainer'}>
+            <div className={'imageDiv'}>  
                 {
                     fileData.isLoading ? 
                         <>
@@ -188,7 +216,7 @@ const FileUpload = (props) => {
                             { 
                                 (fileType.includes("image")) ? 
                                     <img 
-                                        src={fileSrcToDisplay} 
+                                        src={fileSrc} 
                                         id={elementId}
                                         alt="image preview" 
                                         className="imagePreview__image" 
@@ -196,7 +224,7 @@ const FileUpload = (props) => {
                                     (fileType.includes("quicktime") && (typeOfDevice !== DEVICE_TYPES.desktop)) ?
                                     <video 
                                         width="330" 
-                                        height={videoHeight} 
+                                        height="443" 
                                         className="imagePreview__video" 
                                         preload
                                         id={elementId}
@@ -205,11 +233,11 @@ const FileUpload = (props) => {
                                         muted
                                         poster={'video-thumbnail.png'}
                                         playsInline
-                                        src={fileSrcToDisplay}
+                                        src={fileSrc}
                                     ></video> :
                                     <video 
                                         width="330" 
-                                        height={videoHeight} 
+                                        height="443" 
                                         style={{borderRadius: 10 + 'px'}}
                                         className="imagePreview__video" 
                                         preload="metadata"
@@ -218,16 +246,16 @@ const FileUpload = (props) => {
                                         muted
                                         playsInline
                                     >
-                                        <source src={fileSrcToDisplay} type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'/>
-                                        <source src={fileSrcToDisplay} type='video/ogg; codecs="theora, vorbis"'/>
-                                        <source src={fileSrcToDisplay} type='video/webm; codecs="vp8, vorbis"'/>
-                                        <source src={fileSrcToDisplay} type='video/mpeg'/>
+                                        <source src={fileSrc} type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'/>
+                                        <source src={fileSrc} type='video/ogg; codecs="theora, vorbis"'/>
+                                        <source src={fileSrc} type='video/webm; codecs="vp8, vorbis"'/>
+                                        <source src={fileSrc} type='video/mpeg'/>
                                         Your browser does not support the video tag.
                                     </video>  
                             
                             }
                             {
-                                !fileSrcToDisplay && 
+                                !fileSrc && 
                                 <span className="imagePreview__default-display">
                                     Image Preview
                                 </span>   

@@ -1,26 +1,23 @@
 .imageDivContainer{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     float: left;
     width: 330px;
     border-radius: 10px;
-    height: 443px;
+    height: 500px;
     margin: auto;
-    max-height: 100%;
-    .chooseFileH5{
-        position: relative;
-        top: 66px;
-        margin-top: -38px;
-        width: 100%;
-        text-align: center;
-    }
+    margin-left: 11.5px;
+    margin-right: 11.5px;
     .imageDiv{
         @media screen and (max-width: 900px){
             width: 100%;
         };
-        align-items: center;
-        justify-content: center;
-        display: flex;
         width: 100%;
-        height: 100%;
+        height: 443px;
+        float: left;
+        display: flex;
         margin: 0.25%;
         border: solid;
         border-radius: 15px;
@@ -43,20 +40,9 @@
         }
     }
     .imageInputButton{
-        width: 100%;
-        opacity: 0;
+        width: 92px;
         position: relative;
-        bottom: 100%;
-        height: 100%;
+        bottom: 50%;
+        margin-bottom: 1rem;
     }
 }
-
-.imageDivContainer.coverPhoto{
-    height: 330px;
-    .imageDiv{
-        align-items: center;
-        justify-content: center;
-        display: flex;
-        height: 330px;
-    };
-};
