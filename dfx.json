@@ -4,6 +4,10 @@
       "main": "src/dtc/main.mo",
       "type": "motoko"
     },
+    "journal": {
+      "main": "src/dtc/Journal/Journal.mo",
+      "type": "motoko"
+    },
     "ledger": {
       "type": "custom",
       "wasm": "ledger.wasm",
