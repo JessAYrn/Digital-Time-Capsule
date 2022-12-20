@@ -10,7 +10,7 @@ import * as MdIcons from 'react-icons/md';
 import ButtonField from "../Button";
 import { NULL_STRING_ALL_LOWERCASE } from "../../../Constants";
 import { types } from "../../../reducers/journalReducer";
-//testing
+
 const FileCarousel = (props) => {
 
     const {
