@@ -5,7 +5,7 @@
     justify-content: center;
     align-items: center;
     .photoCarouselDiv{
-        height: 330px;
+        height: 357px;
         width: 350px;
         overflow-x: auto;
         overflow-y: hidden;
@@ -18,8 +18,9 @@
             margin-right: 10px;
             .removeFileDiv{
                 position: relative;
-                left: -317px;
-                top: 15px;
+                top: 55px;
+                margin-top: -29px;
+                left: 10px;
             }
             .addFileDiv{
                 position: relative;
@@ -30,13 +31,13 @@
     }
     .addFileDiv{
         position: relative;
-        top: -6px;
+        bottom: 21px;
         left: -140px;
         margin-top: -29px;
     }
     .editFileCarousel{
         position: relative;
-        top: -35px;
+        top: -50px;
         left: 140px;
     }
 }

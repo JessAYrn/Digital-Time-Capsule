@@ -44,7 +44,7 @@ const JournalPage = (props) => {
     }, [journalState.journal[index]]);
 
     useEffect(() => {
-        scrollToBottom(1050);
+        scrollToBottom();
     }, [journalPageData.filesMetaData.length]);
 
     useEffect(() => {

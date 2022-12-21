@@ -177,7 +177,6 @@ const FileUpload = (props) => {
 
     return(
         <div className={`imageDivContainer ${classNameMod}`}>
-            {!disabled && fileNameIsNull && <h5 className={'chooseFileH5'}>Tap to choose file.</h5>}
             <div className={`imageDiv ${classNameMod}`}>  
                 {
                     fileData.isLoading ? 
