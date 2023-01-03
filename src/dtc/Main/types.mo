@@ -47,7 +47,8 @@ module{
         lastRecordedTime: Int;
         users: [(Text, UserPermissions)];
         isOwner: Bool;
-        currentCyclesBalance: Nat;
+        currentCyclesBalance_backend: Nat;
+        currentCyclesBalance_frontend: Nat;
         supportMode: Bool;
     };
 
@@ -61,6 +62,11 @@ module{
         acceptingRequests: Bool;
         lastRecordedTime: Int;
         users: Trie.Trie<Text, UserPermissions>;
+    };
+
+    public type CanisterCyclesBalances = {
+        backendCyclesBalance : Nat;
+        frontendCyclesBalance: Nat
     };
 
     public type UsersExport = [(Text, UserPermissions)];

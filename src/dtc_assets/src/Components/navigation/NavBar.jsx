@@ -20,12 +20,6 @@ import "./NavBar.scss";
 
 export const NavBar = (props) => {
     const {
-        walletLink,
-        journalLink,
-        nftLink,
-        accountLink,
-        dashboardLink,
-        notificationIcon,
         unreadNotifications,
         context
 
@@ -64,24 +58,6 @@ export const NavBar = (props) => {
 
     let navigate = useNavigate();
 
-
-    let numberOfButtons = 0;
-
-    const iconArray = [
-        walletLink,
-        journalLink,
-        nftLink,
-        accountLink,
-        dashboardLink,
-        notificationIcon
-    ];
-
-    iconArray.forEach((icon) => {
-        if(icon){
-            numberOfButtons += 1;
-        };
-    });
-
     //must remove function from state because useNavigate will send a null state if there is a function in the state.
     //the reason this happens is because objects retrieved from useLocation must be serializable and function are not.
     let journalStateWithoutFunction = {
@@ -93,10 +69,6 @@ export const NavBar = (props) => {
     const  handleClickDashboard = useCallback(() =>  {
         navigate(NAV_LINKS.dashboard, { replace: false, state: journalStateWithoutFunction});
     }, [journalState.reloadStatuses]);
-
-    const  handleClickNFT = useCallback(() =>  {
-        navigate(NAV_LINKS.nft, { replace: false, state: journalStateWithoutFunction});
-    },[journalState.reloadStatuses]);
 
     const  handleClickWallet = useCallback(() =>  {
         navigate(NAV_LINKS.wallet, { replace: false, state: journalStateWithoutFunction});
@@ -134,7 +106,7 @@ export const NavBar = (props) => {
                 <ul className={'unorderedList'}>
                     <li className={'listItem'} onClick={handleClickWallet}>
                         <IconContext.Provider value={{ color: 'white'}}>
-                            <IoiosIcons.IoIosWallet/ > 
+                            <IoiosIcons.IoIosWallet/> 
                         </IconContext.Provider>
                         <span>
                             wallet
@@ -148,14 +120,6 @@ export const NavBar = (props) => {
                             journal
                         </span>
                     </li>
-                    {/* <li className={'listItem'} onClick={handleClickNFT}>
-                        <IconContext.Provider value={{ color: 'white'}}>
-                            <CgIcons.CgInpicture/> 
-                        </IconContext.Provider>
-                        <span>
-                            nft
-                        </span>
-                    </li> */}
                     <li className={'listItem'} onClick={toggleDisplayNotifications}>   
                         <IconContext.Provider value={{ color: 'white'}}>
                             {NotificationIcon}

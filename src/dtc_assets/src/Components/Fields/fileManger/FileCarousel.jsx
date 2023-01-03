@@ -111,6 +111,7 @@ const FileCarousel = (props) => {
     },[filesMetaDataArray]);
 
     let lastFileIsPopulated = filesMetaDataArray[filesMetaDataArray.length-1].fileName !== NULL_STRING_ALL_LOWERCASE;
+    let maxNumberOfFilesReached = filesMetaDataArray.length >= 4;
 
     return (
         <div className={'photoCarouselContainer'}>
@@ -144,7 +145,7 @@ const FileCarousel = (props) => {
                     )
                 })}
             </div>
-            {editMode && lastFileIsPopulated && <ButtonField
+            {editMode && lastFileIsPopulated && !maxNumberOfFilesReached && <ButtonField
                 Icon={BiIcons.BiImageAdd}
                 iconSize={25}
                 className={'addFileDiv'}

@@ -502,10 +502,16 @@ shared (msg) actor class User() = this {
         return #ok(requestsForApproval);
     };
 
+    public shared(msg) func getCanisterCyclesBalances() : async MainTypes.CanisterCyclesBalances{
+        let cyclesBalance_backend = Cycles.balance();
+        let balances = await CanisterManagementMethods.getCanisterCyclesBalances(cyclesBalance_backend, canisterData);
+        return balances;
+    };
+
     public shared(msg) func getCanisterData() : async Result.Result<(MainTypes.CanisterDataExport), JournalTypes.Error> {
         let callerId = msg.caller;
-        let cyclesBalance = Cycles.balance();
-        let canisterDataPackagedForExport = await CanisterManagementMethods.getCanisterData(callerId, canisterData, cyclesBalance, supportMode, profiles);
+        let cyclesBalance_backend = Cycles.balance();
+        let canisterDataPackagedForExport = await CanisterManagementMethods.getCanisterData(callerId, canisterData, cyclesBalance_backend, supportMode, profiles);
         return canisterDataPackagedForExport;
     };
 

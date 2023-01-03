@@ -205,8 +205,19 @@ module{
         return (updatedCanisterData,updatedDefaultControllers_0);
     };
 
-    public func getCanisterData(callerId: Principal, canisterData: MainTypes.CanisterData, cyclesBalance: Nat, supportMode: Bool, profiles : MainTypes.ProfilesTree) 
-    : async Result.Result<(MainTypes.CanisterDataExport), JournalTypes.Error> {
+    public func getCanisterCyclesBalances(backendCyclesBalance: Nat, canisterData: MainTypes.CanisterData) 
+    : async  MainTypes.CanisterCyclesBalances {
+
+        let frontendCyclesBalance = await getCyclesBalance(Principal.fromText(canisterData.frontEndPrincipal));
+        return {frontendCyclesBalance = frontendCyclesBalance; backendCyclesBalance = backendCyclesBalance}
+    };
+
+    public func getCanisterData(callerId: Principal, 
+        canisterData: MainTypes.CanisterData, 
+        cyclesBalance_backend: Nat, 
+        supportMode: Bool, 
+        profiles : MainTypes.ProfilesTree
+    ) : async Result.Result<(MainTypes.CanisterDataExport), JournalTypes.Error> {
         let profile = Trie.find(
             profiles,
             key(callerId),
@@ -217,6 +228,9 @@ module{
                 return #err(#NotAuthorized);
             };
             case ( ? existingProfile){
+                let frontendPrincipal = Principal.fromText(canisterData.frontEndPrincipal);
+                let cyclesBalance_frontend = await getCyclesBalance(frontendPrincipal);
+
                 let usersList = canisterData.users;
                 let usersListAsIter = Trie.iter(usersList);
                 let usersListAsArray = Iter.toArray(usersListAsIter);
@@ -226,7 +240,8 @@ module{
                     frontEndPrincipal = canisterData.frontEndPrincipal;
                     backEndPrincipal = canisterData.backEndPrincipal;
                     lastRecordedBackEndCyclesBalance = canisterData.lastRecordedBackEndCyclesBalance;
-                    currentCyclesBalance = cyclesBalance;
+                    currentCyclesBalance_frontend = cyclesBalance_frontend;
+                    currentCyclesBalance_backend = cyclesBalance_backend;
                     backEndCyclesBurnRatePerDay = canisterData.backEndCyclesBurnRatePerDay;
                     nftOwner = canisterData.nftOwner;
                     acceptingRequests = canisterData.acceptingRequests;
@@ -346,6 +361,12 @@ module{
         } else {
             throw Error.reject("Unauthorized access. Caller is not the owner.");
         }
+    };
+
+    private func getCyclesBalance(principal: Principal) : async Nat {
+        let canisterStatus = await ic.canister_status({ canister_id = principal });
+        let cyclesBalance = canisterStatus.cycles;
+        return cyclesBalance;
     };
 
 

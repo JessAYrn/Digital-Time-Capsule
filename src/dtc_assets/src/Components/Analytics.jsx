@@ -5,6 +5,7 @@ import { NavBar } from './navigation/NavBar';
 import { UI_CONTEXTS } from '../Contexts';
 import { Modal } from './Modal';
 import "./Analytics.scss"
+import DataField from './Fields/DataField';
 import LoadScreen from './LoadScreen';
 import { types } from '../reducers/journalReducer';
 import { MODALS_TYPES } from '../Constants';
@@ -140,33 +141,6 @@ const DataFieldArray = (props) => {
     )
 };
 
-const DataField = (props) => {
-    const {
-        journalState,
-        dataField,
-        dataSubField,
-        label
-    } = props;
-    let text;
-    if(journalState[dataField][dataSubField] || journalState[dataField][dataSubField] === 0) text = journalState[dataField][dataSubField]
-    else text = journalState[dataField];
-
-    return(
-        <div className={'canisterDataDiv'}>
-            <div className={'section'}>
-                <h3 className={'lebelH3'}>
-                    {label} 
-                </h3>
-            </div>
-            <div className={'section'}>
-                <h3 className={'h3DataField'}>
-                    {text}
-                </h3>
-            </div>
-        </div>
-    )
-};
-
 const Analytics = () => {
     const { journalState, dispatch } = useContext(AppContext);
 
@@ -279,52 +253,43 @@ const Analytics = () => {
                                         <div className={'AnalyticsContentContainer'}>
                                             <DataField
                                                 label={'Journals Created:'}
-                                                journalState={journalState}
+                                                text={journalState.canisterData[CANISTER_DATA_FIELDS.journalCount]}
                                                 dispatch={dispatch}
-                                                dataSubField={CANISTER_DATA_FIELDS.journalCount}
-                                                dataField={'canisterData'}
                                             />
                                             <DataField
                                                 label={'Front End Canister Principal:'}
-                                                journalState={journalState}
+                                                text={journalState.canisterData[CANISTER_DATA_FIELDS.frontEndPrincipal]}
                                                 dispatch={dispatch}
-                                                dataField={'canisterData'}
-                                                dataSubField={CANISTER_DATA_FIELDS.frontEndPrincipal}
                                             />
                                             <DataField
                                                 label={'Back End Canister Principal:'}
-                                                journalState={journalState}
+                                                text={journalState.canisterData[CANISTER_DATA_FIELDS.backEndPrincipal]}
                                                 dispatch={dispatch}
-                                                dataField={'canisterData'}
-                                                dataSubField={CANISTER_DATA_FIELDS.backEndPrincipal}
                                             />
                                             <DataField
                                                 label={'Cycles Burned Per Day:'}
-                                                journalState={journalState}
                                                 dispatch={dispatch}
-                                                dataField={'canisterData'}
-                                                dataSubField={CANISTER_DATA_FIELDS.backEndCyclesBurnRatePerDay}
+                                                text={journalState.canisterData[CANISTER_DATA_FIELDS.backEndCyclesBurnRatePerDay]}
                                             />
                                             <DataField
-                                                label={'Cycles Balance:'}
-                                                journalState={journalState}
+                                                label={'Frontend Cycles Balance:'}
+                                                text={journalState.canisterData[CANISTER_DATA_FIELDS.currentCyclesBalance_frontend]}
                                                 dispatch={dispatch}
-                                                dataField={'canisterData'}
-                                                dataSubField={CANISTER_DATA_FIELDS.currentCyclesBalance}
+                                            />
+                                            <DataField
+                                                label={'Backend Cycles Balance:'}
+                                                text={journalState.canisterData[CANISTER_DATA_FIELDS.currentCyclesBalance_backend]}
+                                                dispatch={dispatch}
                                             />
                                             <DataField
                                                 label={'Canister Owner:'}
-                                                journalState={journalState}
+                                                text={journalState.canisterData[CANISTER_DATA_FIELDS.nftOwner]}
                                                 dispatch={dispatch}
-                                                dataField={'canisterData'}
-                                                dataSubField={CANISTER_DATA_FIELDS.nftOwner}
                                             />
                                             <DataField
                                                 label={'NFT ID:'}
-                                                journalState={journalState}
+                                                text={journalState.canisterData[CANISTER_DATA_FIELDS.nftId]}
                                                 dispatch={dispatch}
-                                                dataField={'canisterData'}
-                                                dataSubField={CANISTER_DATA_FIELDS.nftId}
                                             />
                                         </div>
                                     </div>
