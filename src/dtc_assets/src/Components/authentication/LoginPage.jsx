@@ -208,10 +208,14 @@ const LoginPage = (props) => {
                         />
                         <DataField
                             label={'Front-end Canister Balance: '}
+                            className={'loginPage'}
+                            isCycles={true}
                             text={isLoading ? 'Loading...' : frontendCanisterBalance}
                         />
                         <DataField
                             label={'Back-end Canister Balance: '}
+                            className={'loginPage'}
+                            isCycles={true}
                             text={isLoading ? 'Loading...' : backendCanisterBalance}
                         />
                     </div>

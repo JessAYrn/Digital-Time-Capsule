@@ -16,6 +16,8 @@ import * as FaIcons from 'react-icons/fa';
 import * as AiIcons from 'react-icons/ai';
 import ButtonField from './Fields/Button';
 import { IconContext } from 'react-icons/lib';
+import { shortenHexString } from '../Utils';
+import { copyWalletAddressHelper } from './walletFunctions/CopyWalletAddress';
 
 
 const DataFieldArray = (props) => {
@@ -85,14 +87,16 @@ const DataFieldArray = (props) => {
         });
     } 
 
+    const copyPrincipal = (principal) => copyWalletAddressHelper(principal);
+
     let requestingApproval = dataSubField === CANISTER_DATA_FIELDS.requestsForApproval;
 
     return(
         <div className={'canisterDataDiv'}>
             <div className={'section'}>
-                <h3 className={'lebelH3'}>
+                <h5 className={'lebelH5'}>
                     {label} 
-                </h3>
+                </h5>
             </div>
             <div className={'section array'}>
                 <>
@@ -107,9 +111,15 @@ const DataFieldArray = (props) => {
                                         <IconContext.Provider value={{ size: '25px'}}>
                                             <FaIcons.FaCheckSquare onClick={() => handleAddPrincipal(principal)}/>
                                         </IconContext.Provider>}
-                                        <h3 className={'h3DataField'}>
-                                            {principal}
-                                        </h3>
+                                        <h5 className={'h5DataField'}>
+                                            {shortenHexString(principal)}
+                                            {<ButtonField
+                                                Icon={FaIcons.FaCopy}
+                                                iconSize={17.5}
+                                                onClick={() => copyPrincipal(principal)}
+                                                withBox={false}
+                                            />}
+                                        </h5>
                                         {isOwner && (isListOfRequests || permissions.approved === true) &&
                                         <IconContext.Provider value={{ size: '25px'}}>
                                             <RiIcons.RiDeleteBin2Line onClick={() => handleRemovePrincipal(principal, requestingApproval)}/>
@@ -257,34 +267,40 @@ const Analytics = () => {
                                                 dispatch={dispatch}
                                             />
                                             <DataField
-                                                label={'Front End Canister Principal:'}
+                                                label={'Frontend Canister Principal:'}
                                                 text={journalState.canisterData[CANISTER_DATA_FIELDS.frontEndPrincipal]}
                                                 dispatch={dispatch}
+                                                isPrincipal={true}
                                             />
                                             <DataField
-                                                label={'Back End Canister Principal:'}
+                                                label={'Backend Canister Principal:'}
                                                 text={journalState.canisterData[CANISTER_DATA_FIELDS.backEndPrincipal]}
                                                 dispatch={dispatch}
+                                                isPrincipal={true}
                                             />
                                             <DataField
                                                 label={'Cycles Burned Per Day:'}
                                                 dispatch={dispatch}
                                                 text={journalState.canisterData[CANISTER_DATA_FIELDS.backEndCyclesBurnRatePerDay]}
+                                                isCycles={true}
                                             />
                                             <DataField
                                                 label={'Frontend Cycles Balance:'}
                                                 text={journalState.canisterData[CANISTER_DATA_FIELDS.currentCyclesBalance_frontend]}
                                                 dispatch={dispatch}
+                                                isCycles={true}
                                             />
                                             <DataField
                                                 label={'Backend Cycles Balance:'}
                                                 text={journalState.canisterData[CANISTER_DATA_FIELDS.currentCyclesBalance_backend]}
                                                 dispatch={dispatch}
+                                                isCycles={true}
                                             />
                                             <DataField
                                                 label={'Canister Owner:'}
                                                 text={journalState.canisterData[CANISTER_DATA_FIELDS.nftOwner]}
                                                 dispatch={dispatch}
+                                                isPrincipal={true}
                                             />
                                             <DataField
                                                 label={'NFT ID:'}
@@ -329,9 +345,9 @@ const Analytics = () => {
                                 {journalState.canisterData.isOwner && 
                                 <div className={'switchDiv animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
                                     <div className='section'>
-                                        <h3 className={'lebelH3'}> 
+                                        <h5 className={'lebelH5'}> 
                                             Activate Support Mode:  
-                                        </h3>
+                                        </h5>
                                     </div>
                                     <div className='section'>
                                         <Switch
@@ -343,9 +359,9 @@ const Analytics = () => {
                                 {journalState.canisterData.isOwner && 
                                 <div className={'switchDiv animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
                                     <div className='section'>
-                                        <h3 className={'lebelH3'}> 
+                                        <h5 className={'lebelH5'}> 
                                             Receive Requests:  
-                                        </h3>
+                                        </h5>
                                     </div>
                                     <div className='section'>
                                         <Switch
@@ -360,62 +376,6 @@ const Analytics = () => {
                                     onClick={handleRegistration}
                                     withBox={true}
                                 />
-                                <div className={'transparentDiv__homePage__roadMap animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
-                                    <div className={'roadMapContentDiv'}>
-                                        <div className={'missionStatementContentContainer'}>
-                                            <div className={'roadMapDiv'}>
-                                                <h3> Road Map: </h3>
-                                                <ul>
-                                                    <li>
-                                                        Transaction history displayed in wallet section
-
-                                                    </li>
-                                                    <li>
-                                                        Transaction summaries when sending ICP from wallets
-
-                                                    </li>
-                                                    <li>
-                                                        Journal entry streak counter
-
-                                                    </li>
-                                                    <li>
-                                                        Bitcoin Integration and wallet compatability
-
-                                                    </li>
-                                                    <li>
-                                                        Ethereum Integration and wallet compatability
-
-                                                    </li>
-                                                    <li>
-                                                        Digital Time Capsule Token
-
-                                                    </li>
-                                                    <li>
-                                                        Digital Time Capsule Token price analytics and graphing viewable from wallet section
-
-                                                    </li>
-                                                    <li>
-                                                        Reduce load time
-                                                        
-                                                    </li>
-                                                    <li>
-                                                        Digital Time Capsule Governance System
-
-                                                    </li>
-                                                    <li>
-                                                        Video Compatability for journal entries
-
-                                                    </li>
-                                                    <li>
-                                                        Group/Community Time Capsules
-
-                                                    </li>
-                                                </ul>
-                                                
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>}
                 </div>

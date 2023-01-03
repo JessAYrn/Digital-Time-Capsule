@@ -22,7 +22,7 @@ export const fromE8s = (number) => {
 }
 
 export const shortenHexString = (hexString) => {
-  const shortString = `${hexString.slice(0,4)} ... ${hexString.slice(-4)}`
+  const shortString = `${hexString.slice(0,4)}...${hexString.slice(-4)}`
   return shortString
 }
 
@@ -57,6 +57,10 @@ export const deviceType = () => {
 
 export const round2Decimals = (num) => {
   return Math.round(num * 100) / 100
+};
+
+export const inTrillions = (num) => {
+  return num / 1000000000000;
 }
 
 export const getFileArrayBuffer = (inputFile) => {
