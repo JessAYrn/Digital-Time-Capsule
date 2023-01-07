@@ -597,52 +597,14 @@ shared(msg) actor class Journal (principal : Principal) = this {
         if( Principal.toText(callerId) != mainCanisterId_) {
             throw Error.reject("Unauthorized access.");
         };
-
-        let trieSize : Nat = Iter.size(Trie.iter(txHistory));
-        let lastIndex : Nat = trieSize - 1;
-        let result = Trie.nth(txHistory, lastIndex);
-
-        switch(result){
-            case null{
-
-            };
-            case(? existingTx){
-                let timeOfTx = existingTx.1.timeStamp;
-                switch(timeOfTx){
-                    case null{
-                        let (newTxHistoryTrie, oldValueForThisKey) = Trie.put(
-                            txHistory,
-                            natKey(txTrieIndex),
-                            Nat.equal,
-                            tx
-                        );
-
-                        txHistory := newTxHistoryTrie;
-                        txTrieIndex += 1; 
-                    };
-                    case(? existingTimeOfTx){
-                        switch(tx.timeStamp){
-                            case null{
-
-                            };
-                            case(? existingTimeStampOnArgument){
-                                if(Nat64.notEqual(existingTimeOfTx, existingTimeStampOnArgument) == true){
-                                    let (newTxHistoryTrie, oldValueForThisKey) = Trie.put(
-                                        txHistory,
-                                        natKey(txTrieIndex),
-                                        Nat.equal,
-                                        tx
-                                    );
-
-                                    txHistory := newTxHistoryTrie;
-                                    txTrieIndex += 1; 
-                                };
-                            };
-                        };
-                    };
-                };
-            };
-        };
+        let (newTxHistoryTrie, oldValueForThisKey) = Trie.put(
+            txHistory,
+            natKey(txTrieIndex),
+            Nat.equal,
+            tx
+        );
+        txHistory := newTxHistoryTrie;
+        txTrieIndex += 1; 
     };
 
     private func userAccountId() : Account.AccountIdentifier {
