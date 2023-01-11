@@ -12,7 +12,7 @@ delete the /dist file,
 delete the /.dfx file,
 delete the /src/declarations file
 
-add the follow property to the "canisters" object in the dfx.json file:
+add the follow properties to the "canisters" object in the dfx.json file:
 
 ```
 "ledger": {
@@ -33,8 +33,6 @@ add the follow property to the "canisters" object in the dfx.json file:
       }
     },
 ```
-
-change the "candid": "ledger.public.did" line of the dfx.json file so that it reads "candid": "ledger.private.did"
 
 start local replica by running the following line:
 
@@ -69,6 +67,8 @@ of the webpack.config.js file.
 
 
 ### deploy the ledger canister locally
+
+change the "candid": "ledger.public.did" line of the dfx.json file so that it reads "candid": "ledger.private.did"
 
 Deploy the ledger canister to your network by running the following line:
 ```
