@@ -29,6 +29,10 @@ const FileCarousel = (props) => {
         let updatedEditMode = !editMode
         setEditMode(updatedEditMode);
         if(!updatedEditMode){
+            dispatch({
+                actionType: types.SET_IS_LOADING,
+                payload: true
+            });
             let photos = journalState.bio.photos.filter((metaData, i) =>  metaData.fileName !== NULL_STRING_ALL_LOWERCASE);
             photos = photos.map(metaData => {
                 return {
@@ -44,6 +48,10 @@ const FileCarousel = (props) => {
                 payload: result
             });
             result = await journalState.actor.submitFiles();
+            dispatch({
+                actionType: types.SET_IS_LOADING,
+                payload: false
+            });
         } else {
             let result = await journalState.actor.clearUnsubmittedFiles();
         }
@@ -103,6 +111,7 @@ const FileCarousel = (props) => {
     },[filesMetaDataArray]);
 
     let lastFileIsPopulated = filesMetaDataArray[filesMetaDataArray.length-1].fileName !== NULL_STRING_ALL_LOWERCASE;
+    let maxNumberOfFilesReached = filesMetaDataArray.length >= 4;
 
     return (
         <div className={'photoCarouselContainer'}>
@@ -113,6 +122,14 @@ const FileCarousel = (props) => {
                     (editMode &&  hasUnsubmittedFiles && fileIndex === filesMetaDataArray.length-1);
                     return(
                         <div className = {'fileContainer'}>
+                            {displayRemoveButton && <ButtonField
+                                Icon={RiIcons.RiDeleteBin2Line}
+                                iconSize={25}
+                                iconColor={'red'}
+                                className={'removeFileDiv'}
+                                onClick={() => deleteFile(fileIndex, fileMetaData)}
+                                withBox={false}
+                            />}
                             <FileUpload
                                 label={`file_${fileIndex}`}
                                 elementId={`file_${fileIndex}`}
@@ -124,19 +141,11 @@ const FileCarousel = (props) => {
                                 page={PAGES.JOURNAL_COVER}
                                 setChangesWereMade={setChangesWereMade}
                             />
-                            {displayRemoveButton && <ButtonField
-                                Icon={RiIcons.RiDeleteBin2Line}
-                                iconSize={25}
-                                iconColor={'red'}
-                                className={'removeFileDiv'}
-                                onClick={() => deleteFile(fileIndex, fileMetaData)}
-                                withBox={false}
-                            />}
                         </div>
                     )
                 })}
             </div>
-            {editMode && lastFileIsPopulated && <ButtonField
+            {editMode && lastFileIsPopulated && !maxNumberOfFilesReached && <ButtonField
                 Icon={BiIcons.BiImageAdd}
                 iconSize={25}
                 className={'addFileDiv'}

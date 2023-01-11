@@ -207,8 +207,10 @@
 }
 
 .summaryContentDiv{
-    h6{
-        margin-left: 10px;
+    h4{
+        margin-bottom: 5px;
+        margin-top: 5px;
+        text-align: center;
     }
     width: 90%;
     display: flex;
@@ -234,6 +236,7 @@
     }
 
     .ModalContentOnSendButtons{
+        margin-top: 25px;
         width: 100%;
         text-align: center;
         display: flex;

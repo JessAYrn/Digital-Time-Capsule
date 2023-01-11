@@ -14,6 +14,6 @@ export const copyWalletAddressHelper = (address) => {
 
     document.body.removeChild(addressTextArea);
 
-    alert("Wallet Address Copied To Clip Board");
+    alert("Item Copied To Clip Board");
     
 };

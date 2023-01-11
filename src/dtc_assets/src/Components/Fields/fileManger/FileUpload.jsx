@@ -28,9 +28,9 @@ const FileUpload = (props) => {
     let inputRef = useRef();
 
     const [constructedFile, setConstructedFile] = useState(null);
-    const [fileSrc, setFileSrc]  = useState("../../../assets/dtc-logo-black.png");
+    const [fileSrc, setFileSrc]  = useState("dtc-logo-black.png");
     const [fileType, setFileType] = useState("image/png");
-    const defaultFileSrc = "../../../assets/dtc-logo-black.png";
+    const defaultFileSrc = "dtc-logo-black.png";
 
     var uploadedFile;
     var fileURL;
@@ -177,7 +177,6 @@ const FileUpload = (props) => {
 
     return(
         <div className={`imageDivContainer ${classNameMod}`}>
-            {!disabled && fileNameIsNull && <h5 className={'chooseFileH5'}>Tap to choose file.</h5>}
             <div className={`imageDiv ${classNameMod}`}>  
                 {
                     fileData.isLoading ? 

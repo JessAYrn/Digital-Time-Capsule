@@ -51,7 +51,7 @@ const Journal = (props) => {
                 payload: {show:true, which: MODALS_TYPES.onSubmit, success: false}
             });
         }
-    }
+    };
 
     const openPage = async (e, index, unlocked) => {
         if(unlocked){
@@ -162,17 +162,6 @@ const Journal = (props) => {
                         <div className={"container__Journal"}>
                             <div className={"section__1"}>
                                 <div className={'biography'}>
-                                    {mql.matches && <div className={'coverPhotoDiv contentContainer animatedLeft '+` _${animatedLeftElementIndex++}`}>
-                                        <FileCarousel
-                                            filesMetaDataArray={journalState.bio.photos}
-                                            dispatch={dispatch}
-                                            journalState={journalState}
-                                            setChangesWereMade={setPageChangesMade}
-                                            dispatchActionToAddFile={types.ADD_COVER_PHOTO}
-                                            dispatchActionToDeleteFile={types.REMOVE_COVER_PHOTO}
-                                            clearUnsubmittedFiles={journalState.actor.clearUnsubmittedFiles}
-                                        />
-                                    </div>}
                                     <div className={"contentContainer animatedLeft"+` _${animatedLeftElementIndex++}`}>
                                         <InputBox
                                             label={"This Journal Belongs To: "}
@@ -220,7 +209,7 @@ const Journal = (props) => {
                                             divClassName={'preface'}
                                             setChangesWereMade={setPageChangesMade}
                                             label={"Preface: "}
-                                            rows={"24"}
+                                            rows={"29"}
                                             dispatch={dispatch}
                                             dispatchAction={types.CHANGE_PREFACE}
                                             value={journalState.bio.preface}
@@ -228,8 +217,7 @@ const Journal = (props) => {
                                     </div>
                                 </div>
                             </div>
-                            <div className={"section__2"}>
-                                {!mql.matches && 
+                            <div className={"section__2"}> 
                                 <div 
                                     className={'coverPhotoDiv contentContainer animatedLeft'+ 
                                     ` _${animatedLeftElementIndex++}`}
@@ -242,7 +230,7 @@ const Journal = (props) => {
                                         dispatchActionToAddFile={types.ADD_COVER_PHOTO}
                                         dispatchActionToDeleteFile={types.REMOVE_COVER_PHOTO}
                                     />
-                                </div>}
+                                </div>
                                 {displayJournalTable()}
                             </div>
                             {

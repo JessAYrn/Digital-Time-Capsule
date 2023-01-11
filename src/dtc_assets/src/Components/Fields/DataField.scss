@@ -1,0 +1,33 @@
+.canisterDataDiv{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    .section{
+        width: 45%;
+        display: flex;
+        align-items: center;
+        justify-content: center;    
+        .lebelH5{
+            font-family: 'Courier New', monospace;
+        }
+        .h5DataField{
+            @media screen and (max-width: 650px) {
+                width: 80%;
+            };
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Courier New', monospace;
+            margin: 0 39px 0 39px;
+            width: 90%;
+            text-align: center;
+            margin-left: 0;
+            margin-right: 0;
+        }
+        img{
+            max-width: 90px;
+            max-height: 90px;
+            display: block;
+        }
+    }
+}

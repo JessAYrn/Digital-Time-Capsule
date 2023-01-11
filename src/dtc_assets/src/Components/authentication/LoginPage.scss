@@ -89,10 +89,8 @@
                     };
                     opacity: 0.98;
                     border-radius: 10px;
-                    box-shadow: 0 17px 20px rgb(0 0 0 / 38%);
-                    background-color: rgb(233, 233, 233);
                     width: 75%;
-                    height: 35rem;
+                    height: 675px;
                     margin-top: 7rem;
                     display: flex;
                     justify-content: center;
@@ -122,19 +120,14 @@
                         margin-bottom: 20px;
                     }
             
-                    .icpLogoDiv{
+                    .logoDiv{
+                        position: relative;
+                        bottom: -187px;
+                        margin-top: -154px;
+                        z-index: -10;
                         img{
-                            @media screen and (max-width: 480px) {    
-                                max-width: 14vw;
-                                max-height: 14vw; 
-                            };
-                            @media screen and (min-width: 481px) and (max-width: 825px) {    
-                                max-width: 10vw;
-                                max-height: 10vw; 
-                            };
-                            max-width: 5vw;
-                            max-height: 5vw;
-                            margin-top: 35px;
+                            width: 190px;
+                            height: 190px;
                         }
                     }
                 }
@@ -161,8 +154,34 @@
         bottom: 0;
         right: 0;
         h4{
+            color: white;
             font-family: 'Courier New', monospace;
             writing-mode: vertical-rl;
         }
     }
+}
+.row{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    margin-bottom: 12px;
+}
+
+.buttonFieldDiv.loginPage{
+    width: 75px;
+    height: 75px;
+    margin: 10px;
+    margin-left: 35px;
+    margin-right: 35px;
+}
+
+.active{
+    background-color: white;
+}
+
+.canisterDataDiv.loginPage{
+    color: white;
+    width: 270px;
+    max-width: 90%;
 }
