@@ -100,15 +100,15 @@ const ModalContentOnSend = (props) => {
             <div className={'summaryContentDiv'}>
                 <div className="recipientAddressDiv">
                     <h4> Recipient Address: </h4>
-                    <h3> {recipientAddress.slice(0,4)} ... {recipientAddress.slice(-4)}  </h3>
+                    <h4> {recipientAddress.slice(0,4)} ... {recipientAddress.slice(-4)}  </h4>
                 </div>
                 <div className="ammountDiv">
                     <h4> Transaction Fee: </h4>
-                    <h3> {fee} ICP </h3>
+                    <h4> {fee} ICP </h4>
                 </div>
                 <div className="ammountDiv">
                     <h4> Send Amount: </h4>
-                    <h3> {fromE8s(toE8s(amountToSend) + toE8s(fee))} ICP </h3>
+                    <h4> {fromE8s(toE8s(amountToSend) + toE8s(fee))} ICP </h4>
                 </div>
                 <div className='ModalContentOnSendButtons'>
                     <ButtonField
