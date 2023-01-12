@@ -129,7 +129,7 @@ const WalletPage = (props) => {
                                         journalState.walletData.txHistory.data.map((tx) => {
                                             return(
                                                     <Transaction
-                                                        class_={`contentContainer _${contentContainerIndex++} animatedLeft`}
+                                                        class_={`contentContainer _${contentContainerIndex++}`}
                                                         balanceDelta={tx[1].balanceDelta}
                                                         increase={tx[1].increase}
                                                         recipient={tx[1].recipient[0]}
