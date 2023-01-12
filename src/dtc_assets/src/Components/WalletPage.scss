@@ -42,28 +42,19 @@
             width: 100%;
             height: 500px;
             margin-top: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             .balanceDeltaDiv{
-                width: 100%;
-                float:left;
+                display: flex;
+                justify-content: center;
+                align-items: center;
                 .balanceDeltaText{
-                    @media screen and (max-width: 522px){
-                        margin-bottom: -3px; 
-                        width: 100%;
-                    }
-                    padding-left: 50px;
-                    width: 221px;
-                    float: left;
-                }
-                .balanceDeltaValue{
-                    @media screen and (max-width: 522px){
-                        margin-bottom: -3px; 
-                        width: 100%;
-                    }
-                    text-align: left;
-                    width: 200px;
-                    float: left;
-                    margin-left: 44px;
-                    margin-top: 30px;
+                    margin-right: 5px;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
                 }
                 .increase{
                     color: green;
@@ -73,29 +64,19 @@
                 }
             }
             .dateDiv{
-                width: 100%;
-                float:left;
+                display: flex;
+                justify-content: center;
+                align-items: center;
                 .dateText{
-                    @media screen and (max-width: 522px){
-                        margin-bottom: -3px; 
-                        width: 100%;
-                    }
-                    padding-left: 50px;
-                    width: 200px;
-                    float: left;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    margin-right: 5px;
                 }
                 .dateValue{
-                    @media screen and (max-width: 522px){
-                        margin-bottom: -3px; 
-                    }
-                    @media screen and (max-width: 684px){
-                        width: 221px;
-                    }
-                    text-align: center;
-                    width: 375px;
-                    float: left;
-                    margin-left: 35px;
-                    margin-top: 30px;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
                 }
                 .increase{
                     color: green;
