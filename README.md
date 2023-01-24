@@ -37,7 +37,7 @@ add the follow properties to the "canisters" object in the dfx.json file:
 start local replica by running the following line:
 
 ```
-dfx start --background --clean
+dfx start --clean
 ```
 
 Create a new identity that will work as a minting account by running the following lines:

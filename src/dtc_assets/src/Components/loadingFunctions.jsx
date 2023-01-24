@@ -137,8 +137,8 @@ export const handleErrorOnFirstLoad = async (fnForLoadingData, fnForRefiringAuth
         types
     } = props_;
     try{
-        let journal = await fnForLoadingData();
-        return journal;
+        let data = await fnForLoadingData();
+        return data;
     } catch (e){
         console.error(e)
         await delay(5000);

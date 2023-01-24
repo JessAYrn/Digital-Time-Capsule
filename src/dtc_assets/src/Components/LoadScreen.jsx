@@ -1,7 +1,6 @@
 import React, {useContext, useState, useEffect} from "react";
 import { initialState, types } from "../reducers/journalReducer";
 import { AppContext } from "../App";
-import {StoicIdentity} from "ic-stoic-identity";
 import "./LoadScreen.scss";
 import { getIntObserverFunc, visibilityFunctionDefault } from "./animations/IntersectionObserverFunctions";
 

@@ -69,3 +69,9 @@ export const NULL_STRING_ALL_LOWERCASE = "null";
 export const NULL_STRING_CAPITALIZED = "Null";
 export const NULL_STRING_ALL_CAPS = "NULL";
 
+export const PROVIDER_STATUS = {
+    connected: 'connected',
+    initializing: 'initializing',
+    idle: 'idle'
+}
+

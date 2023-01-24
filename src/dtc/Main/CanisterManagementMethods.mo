@@ -13,6 +13,7 @@ import Ledger "../Ledger/Ledger";
 import Blob "mo:base/Blob";
 import Text "mo:base/Text";
 import Hash "mo:base/Hash";
+import Array "mo:base/Array";
 import Nat "mo:base/Nat";
 import Option "mo:base/Option";
 import Error "mo:base/Error";
@@ -66,111 +67,87 @@ module{
             acceptingRequests = canisterData.acceptingRequests;
             nftId = canisterData.nftId;
             lastRecordedTime = canisterData.lastRecordedTime;
-            users = canisterData.users;
         };
         return newCanisterData;
 
     };
 
-    public func addApprovedUser(callerId : Principal, principal: Principal, canisterData : MainTypes.CanisterData) : 
-    async Result.Result<(MainTypes.CanisterData), JournalTypes.Error> {
-        let callerIdAsText = Principal.toText(callerId);
-        if(callerIdAsText != canisterData.nftOwner){
-            return #err(#NotAuthorized);
-        };
+    public func grantAccess( principal: Principal, requestsForAccess: MainTypes.RequestsForAccess) : 
+    async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error> {
+
         let principalAsText = Principal.toText(principal);
-        let usersTrie = canisterData.users;
-        let user = Trie.find(
-            usersTrie,
-            textKey(principalAsText),
-            Text.equal,
-        );
-        var permissions : MainTypes.UserPermissions = {
-            approved = true;
-            treasuryMember = false;
-            treasuryContribution = 0;
-            monthsSpentAsTreasuryMember = 0;
-        };
-        switch(user){
-            case null{};
-            case(?existingUser){
-                permissions := {
-                    approved = true;
-                    treasuryMember = existingUser.treasuryMember;
-                    treasuryContribution = existingUser.treasuryContribution;
-                    monthsSpentAsTreasuryMember = existingUser.monthsSpentAsTreasuryMember;
-                }
+        let requestsForAccessSize = Iter.size(Iter.fromArray(requestsForAccess));
+        let ArrayBuffer = Buffer.Buffer<(Text, MainTypes.Approved)>(1);
+        var index = 0;
+        var requestPresent = false;
+        while(index < requestsForAccessSize){
+            let (thisPrincipalAsText, approved) = requestsForAccess[index];
+            if(thisPrincipalAsText == principalAsText){
+                ArrayBuffer.add((thisPrincipalAsText, true));
+                requestPresent := true;
+            } else {
+                ArrayBuffer.add((thisPrincipalAsText, approved));
             };
+            index += 1;
         };
-        let (newUsersTrie, oldValueForThisKey) = Trie.put(
-            usersTrie,
-            textKey(principalAsText),
-            Text.equal,
-            permissions
-        );
-
-        let updatedCanisterData = {
-            frontEndPrincipal = canisterData.frontEndPrincipal;
-            backEndPrincipal = canisterData.backEndPrincipal;
-            lastRecordedBackEndCyclesBalance = canisterData.lastRecordedBackEndCyclesBalance;
-            backEndCyclesBurnRatePerDay = canisterData.backEndCyclesBurnRatePerDay;
-            nftOwner = canisterData.nftOwner;
-            acceptingRequests = canisterData.acceptingRequests;
-            nftId = canisterData.nftId;
-            lastRecordedTime = canisterData.lastRecordedTime;
-            users = newUsersTrie;
+        if(requestPresent == false){
+            ArrayBuffer.add((principalAsText, true));
         };
-
-        return #ok(updatedCanisterData);
+        return #ok(ArrayBuffer.toArray());
     };
 
-    public func removeApprovedUser(callerId: Principal, principal: Principal, canisterData : MainTypes.CanisterData) : 
-    async Result.Result<(MainTypes.CanisterData), JournalTypes.Error> {
-        let callerIdAsText = Principal.toText(callerId);
-        if(callerIdAsText != canisterData.nftOwner){
-            return #err(#NotAuthorized);
-        };
-        let principalAsText = Principal.toText(principal);
-        let usersTrie = canisterData.users;
-        let user = Trie.find(
-            usersTrie,
-            textKey(principalAsText),
-            Text.equal
+    public func updateApprovalStatus( principal: Principal, profiles: MainTypes.ProfilesTree, newApprovalStatuse: Bool) : 
+    async Result.Result<(MainTypes.ProfilesTree), JournalTypes.Error>{
+
+        let userProfile = Trie.find(
+            profiles,
+            key(principal),
+            Principal.equal
         );
-        switch(user){
-            case null {
+        switch(userProfile){
+            case null{
                 return #err(#NotFound);
             };
-            case(?existingUser){
-                let permissions : MainTypes.UserPermissions = {
-                    approved = false;
-                    treasuryMember = existingUser.treasuryMember;
-                    treasuryContribution = existingUser.treasuryContribution;
-                    monthsSpentAsTreasuryMember = existingUser.monthsSpentAsTreasuryMember;
+            case(?profile){
+                let updatedProfile : MainTypes.Profile = {
+                    journal = profile.journal;
+                    email = profile.email;
+                    userName = profile.userName;
+                    id = profile.id;
+                    accountId = profile.accountId;
+                    approved = ?newApprovalStatuse;
+                    treasuryMember = profile.treasuryMember;
+                    treasuryContribution = profile.treasuryContribution;
+                    monthsSpentAsTreasuryMember = profile.monthsSpentAsTreasuryMember;
                 };
-
-                let (newUsersTrie, oldValueForThisKey) = Trie.put(
-                    usersTrie,
-                    textKey(principalAsText),
-                    Text.equal,
-                    permissions
+                let (newTrie, oldValue) = Trie.put(
+                    profiles,
+                    key(principal),
+                    Principal.equal,
+                    updatedProfile
                 );
-
-                let updatedCanisterData = {
-                    frontEndPrincipal = canisterData.frontEndPrincipal;
-                    backEndPrincipal = canisterData.backEndPrincipal;
-                    lastRecordedBackEndCyclesBalance = canisterData.lastRecordedBackEndCyclesBalance;
-                    backEndCyclesBurnRatePerDay = canisterData.backEndCyclesBurnRatePerDay;
-                    nftOwner = canisterData.nftOwner;
-                    acceptingRequests = canisterData.acceptingRequests;
-                    nftId = canisterData.nftId;
-                    lastRecordedTime = canisterData.lastRecordedTime;
-                    users = newUsersTrie;
-                };
-
-                return #ok(updatedCanisterData);
+                return #ok(newTrie);
             };
         };
+    };
+
+    public func removeFromRequestsList(
+        principal: Principal, 
+        requestsForAccess: MainTypes.RequestsForAccess
+    ) : async MainTypes.RequestsForAccess {
+
+        let principalAsText = Principal.toText(principal);
+        let requestsForAccessSize = Iter.size(Iter.fromArray(requestsForAccess));
+        let ArrayBuffer = Buffer.Buffer<(Text, MainTypes.Approved)>(1);
+        var index = 0;
+        while(index < requestsForAccessSize){
+            let (thisPrincipalAsText, approved) = requestsForAccess[index];
+            if(thisPrincipalAsText != principalAsText){
+                ArrayBuffer.add((principalAsText, approved));
+            };
+            index += 1;
+        };
+        return ArrayBuffer.toArray();
     };
 
     private func addDefualtController(defaultControllers : [Principal], principal: Principal) : [Principal]{
@@ -199,7 +176,6 @@ module{
             acceptingRequests = canisterData.acceptingRequests;
             nftId = nftId;
             lastRecordedTime = canisterData.lastRecordedTime;
-            users = canisterData.users;
         };
 
         return (updatedCanisterData,updatedDefaultControllers_0);
@@ -218,22 +194,22 @@ module{
         supportMode: Bool, 
         profiles : MainTypes.ProfilesTree
     ) : async Result.Result<(MainTypes.CanisterDataExport), JournalTypes.Error> {
+
         let profile = Trie.find(
             profiles,
             key(callerId),
             Principal.equal
         );
+
         switch(profile){
             case null{
                 return #err(#NotAuthorized);
             };
             case ( ? existingProfile){
+
+                let profilesApprovalStatus = getProfilesMetaData(profiles);
                 let frontendPrincipal = Principal.fromText(canisterData.frontEndPrincipal);
                 let cyclesBalance_frontend = await getCyclesBalance(frontendPrincipal);
-
-                let usersList = canisterData.users;
-                let usersListAsIter = Trie.iter(usersList);
-                let usersListAsArray = Iter.toArray(usersListAsIter);
                 let isOwner = Principal.toText(callerId) == canisterData.nftOwner;
                 let canisterDataPackagedForExport = {
                     journalCount = Trie.size(profiles);
@@ -247,7 +223,7 @@ module{
                     acceptingRequests = canisterData.acceptingRequests;
                     nftId = canisterData.nftId;
                     lastRecordedTime = canisterData.lastRecordedTime;
-                    users = usersListAsArray;
+                    profilesMetaData = profilesApprovalStatus;
                     isOwner = isOwner;
                     supportMode = supportMode
                 };
@@ -271,7 +247,6 @@ module{
                 nftId = canisterData.nftId;
                 acceptingRequests = canisterData.acceptingRequests;
                 lastRecordedTime = canisterData.lastRecordedTime;
-                users = canisterData.users;
             };
             return updatedCanisterData;
         } else {
@@ -291,7 +266,6 @@ module{
             nftId = canisterData.nftId;
             lastRecordedTime = currentTime;
             acceptingRequests = canisterData.acceptingRequests;
-            users = canisterData.users;
         };
 
         return updatedCanisterData;
@@ -312,7 +286,6 @@ module{
                 nftId = canisterData.nftId;
                 lastRecordedTime = canisterData.lastRecordedTime;
                 acceptingRequests = not canisterData.acceptingRequests;
-                users = canisterData.users;
             };
 
             return #ok(updatedCanisterData);
@@ -369,7 +342,18 @@ module{
         return cyclesBalance;
     };
 
-
+    public func getProfilesMetaData(profiles: MainTypes.ProfilesTree) : MainTypes.ProfilesApprovalStatuses {
+        let profilesApprovalStatus = Trie.toArray<Principal, MainTypes.Profile, (Text, MainTypes.Approved)>(
+            profiles,
+            func (x: (Principal, MainTypes.Profile)) : (Text, MainTypes.Approved) {
+                let (principal, profile) = x;
+                let principalAsText = Principal.toText(principal);
+                let isApproved = Option.get(profile.approved, false);
+                return (principalAsText, isApproved);
+            }
+        );
+        return profilesApprovalStatus;
+    };
 
     private  func key(x: Principal) : Trie.Key<Principal> {
         return {key = x; hash = Principal.hash(x)};

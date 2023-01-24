@@ -1,63 +1,6 @@
-import { AuthClient } from "@dfinity/auth-client";
-import { createActor, canisterId } from "../../../../declarations/dtc/index";
 import {StoicIdentity} from "ic-stoic-identity";
 import { types, initialState } from "../../reducers/journalReducer";
 import { MODALS_TYPES } from "../../Constants";
-
-export const AuthenticateClient = async (journalState, dispatch, actionTypes) => { 
-    let identity;
-    await StoicIdentity.load().then(identity_ => {
-        if (identity_ !== false) identity = identity_;
-    });
-    let isAuthenticated = !!identity
-    dispatch({
-        actionType: types.SET_STOIC_IDENTITY,
-        payload: identity
-    });
-    if(isAuthenticated){
-        dispatch({
-            actionType: actionTypes.SET_IS_AUTHENTICATED,
-            payload: isAuthenticated
-        });
-    } else {
-        const client = await AuthClient.create();
-        dispatch({
-            actionType: actionTypes.SET_AUTH_CLIENT,
-            payload: client
-        });
-        isAuthenticated = await client.isAuthenticated();
-        dispatch({
-            actionType: actionTypes.SET_IS_AUTHENTICATED,
-            payload: isAuthenticated
-        });
-    };
-    if(isAuthenticated) TriggerCreateActorFunction(journalState, dispatch, types);
-};
-
-export const CreateActor = async (journalState, dispatch, actionTypes) => {
-    if(!journalState.authClient && !journalState.stoicIdentity) return;
-
-    let identity;
-    if(journalState.stoicIdentity) {
-        identity = journalState.stoicIdentity;
-    }
-    else {
-        try{
-            identity = journalState.authClient.getIdentity();
-        } catch(e){
-            TriggerAuththenticateClientFunction(journalState, dispatch, actionTypes);
-        }
-    }
-    const actor_ = createActor(canisterId, {
-        agentOptions: {
-            identity
-        }
-    })
-    dispatch({
-        actionType: actionTypes.SET_ACTOR,
-        payload: actor_
-    });
-}
 
 export const logout = async (journalState, dispatch) => {
     let identity = await StoicIdentity.load();

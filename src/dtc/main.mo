@@ -71,10 +71,9 @@ shared (msg) actor class User() = this {
         nftId = -1;
         acceptingRequests = true;
         lastRecordedTime = 0;
-        users = Trie.empty();
     };
 
-    private stable var requestsForApproval: [Text] = [];
+    private stable var requestsForAccess: MainTypes.RequestsForAccess = [];
 
     private stable var startIndexForBlockChainQuery : Nat64 = 3_512_868;
 
@@ -116,10 +115,13 @@ shared (msg) actor class User() = this {
         { accepted = Nat64.fromNat(accepted) };
     };
 
-    public shared(msg) func refillCanisterCycles() : async Result.Result<((Nat,[Nat64])), JournalTypes.Error> {
+    private func refillCanisterCycles() : async () {
+        let result = await MainMethods.refillCanisterCycles(profiles);
+    };
+
+    public shared(msg) func whoAmI () : async Text{
         let callerId = msg.caller;
-        let result = await MainMethods.refillCanisterCycles(callerId, profiles);
-        return result;
+        return Principal.toText(callerId);
     };
 
     //Profile Methods
@@ -128,11 +130,12 @@ shared (msg) actor class User() = this {
     //Result.Result returns a varient type that has attributes from success case(the first input) and from your error case (your second input). both inputs must be varient types. () is a unit type.
     public shared(msg) func create () : async Result.Result<MainTypes.AmountAccepted, JournalTypes.Error> {
         let callerId = msg.caller;
-        let result = await MainMethods.create(callerId, canisterData, profiles, isLocal);
+        let result = await MainMethods.create(callerId, requestsForAccess, profiles, isLocal);
+        let updatedRequestsList = await CanisterManagementMethods.removeFromRequestsList(callerId, requestsForAccess);
         switch(result){
             case(#ok(r)){
-                let newProfilesTree = r.0;
-                let amountAccepted = r.1;
+                let (newProfilesTree, amountAccepted)  = r;
+                requestsForAccess := updatedRequestsList;
                 profiles := newProfilesTree;
                 return #ok(amountAccepted);
             };
@@ -385,16 +388,18 @@ shared (msg) actor class User() = this {
         return result;
     };
 
-    public shared(msg) func addApprovedUser(principal : Text) : async Result.Result<(MainTypes.UsersExport), JournalTypes.Error> {
+    public shared(msg) func grantAccess(principal : Text) : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error> {
         let callerId = msg.caller;
+        let callerIdAsText = Principal.toText(callerId);
+        if(callerIdAsText != canisterData.nftOwner){
+            return #err(#NotAuthorized);
+        };
         let principalAsBlob = Principal.fromText(principal);
-        let updatedCanisterData = await CanisterManagementMethods.addApprovedUser(callerId, principalAsBlob, canisterData);
+        let updatedCanisterData = await CanisterManagementMethods.grantAccess(principalAsBlob, requestsForAccess);
         switch(updatedCanisterData){
             case(#ok(data)){
-                canisterData := data;
-                let users = Trie.iter(canisterData.users);
-                let usersExport = Iter.toArray(users);
-                return #ok(usersExport)
+                requestsForAccess := data;
+                return #ok(data)
             };
             case(#err(e)){
                 return #err(e);
@@ -402,21 +407,36 @@ shared (msg) actor class User() = this {
         };
     };
 
-    public shared(msg) func removeApprovedUser(principal: Text) : async Result.Result<(MainTypes.UsersExport), JournalTypes.Error> {
+    public shared(msg) func updateApprovalStatus(principal: Text, newApprovalStatus: Bool) : 
+    async Result.Result<(MainTypes.ProfilesApprovalStatuses), JournalTypes.Error>{
         let callerId = msg.caller;
-        let principalAsBlob = Principal.fromText(principal);
-        let updatedCanisterData = await CanisterManagementMethods.removeApprovedUser(callerId, principalAsBlob, canisterData);
-        switch(updatedCanisterData){
-            case(#ok(data)){
-                canisterData := data;
-                let users = Trie.iter(canisterData.users);
-                let usersExport = Iter.toArray(users);
-                return #ok(usersExport);
-            }; 
-            case(#err(e)){
-                return #err(e)
-            };
+        let callerIdAsText = Principal.toText(callerId);
+        if(callerIdAsText != canisterData.nftOwner){
+            return #err(#NotAuthorized);
         };
+        let result = await CanisterManagementMethods.updateApprovalStatus(Principal.fromText(principal), profiles, newApprovalStatus);
+        switch(result){
+            case(#ok(newTrie)){
+                profiles := newTrie;
+                let profilesApprovalStatuses = CanisterManagementMethods.getProfilesMetaData(newTrie);
+                return #ok(profilesApprovalStatuses);
+            };
+            case(#err(e)){
+                return #err(e);
+            }
+        };
+    };
+
+    public shared(msg) func removeFromRequestsList(principal: Text) : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error> {
+        let callerId = msg.caller;
+        let callerIdAsText = Principal.toText(callerId);
+        if(callerIdAsText != canisterData.nftOwner){
+            return #err(#NotAuthorized);
+        };
+        let principalAsBlob = Principal.fromText(principal);
+        let updatedRequestsList = await CanisterManagementMethods.removeFromRequestsList(principalAsBlob, requestsForAccess);
+        requestsForAccess := updatedRequestsList;
+        return #ok(updatedRequestsList);
     };
 
     public shared(msg) func configureApp(frontEndPrincipal : Text, nftId: Int ) : async Result.Result<(), JournalTypes.Error> {
@@ -451,55 +471,38 @@ shared (msg) actor class User() = this {
         };
     };
 
-    public shared(msg) func getRequestingPrincipals() : async Result.Result<([Text]), JournalTypes.Error>{
+    public shared(msg) func getRequestingPrincipals() : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error>{
         let callerId = msg.caller;
         let callerIdAsText = Principal.toText(callerId);
         if(callerIdAsText != canisterData.nftOwner){
             return #err(#NotAuthorized);
         } else {
-            return #ok(requestsForApproval)
+            return #ok(requestsForAccess)
         };
     };
 
-    public shared(msg) func requestApproval() : async Result.Result<([Text]), JournalTypes.Error>{
+    public shared(msg) func requestApproval() : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error>{
         let callerId = msg.caller;
         if(canisterData.acceptingRequests == false){
             return #err(#NotAcceptingRequests);
         };
         let callerIdAsText = Principal.toText(callerId);
-        let ArrayBuffer = Buffer.Buffer<Text>(1);
+        let ArrayBuffer = Buffer.Buffer<(Text, MainTypes.Approved)>(1);
         var inListAlready = false;
-        let requestsForApprovalIter = Iter.fromArray(requestsForApproval);
-        Iter.iterate<Text>(requestsForApprovalIter, func (x : Text, index: Nat){
-            if(x == callerIdAsText){
+        let requestsForAccessIter = Iter.fromArray(requestsForAccess);
+        Iter.iterate<(Text, MainTypes.Approved)>(requestsForAccessIter, func (x : (Text, MainTypes.Approved), index: Nat){
+            let (principalAsText, approved) = x;
+            if(principalAsText == callerIdAsText){
                 inListAlready := true
             };
-            ArrayBuffer.add(x);
+            ArrayBuffer.add((principalAsText, approved));
         });
 
         if(inListAlready == false){
-            ArrayBuffer.add(callerIdAsText);
+            ArrayBuffer.add((callerIdAsText, false));
         };
-        requestsForApproval := ArrayBuffer.toArray();
-        return #ok(requestsForApproval);
-    };
-
-    public shared(msg) func removePrincipalFromRequestsArray(principalOfRequester: Text) : 
-    async Result.Result<([Text]), JournalTypes.Error>{
-        let callerId = msg.caller;
-        let callerIdAsText = Principal.toText(callerId);
-        if( callerIdAsText != canisterData.nftOwner ){
-            return #err(#NotAuthorized);
-        };
-        let ArrayBuffer = Buffer.Buffer<Text>(1);
-        let requestsForApprovalIter = Iter.fromArray(requestsForApproval);
-        Iter.iterate<Text>(requestsForApprovalIter, func (x: Text, index: Nat){
-            if(x != principalOfRequester){
-                ArrayBuffer.add(x);
-            }
-        });
-        requestsForApproval := ArrayBuffer.toArray();
-        return #ok(requestsForApproval);
+        requestsForAccess := ArrayBuffer.toArray();
+        return #ok(requestsForAccess);
     };
 
     public shared(msg) func getCanisterCyclesBalances() : async MainTypes.CanisterCyclesBalances{
@@ -650,10 +653,14 @@ shared (msg) actor class User() = this {
         };
         if(shouldAdd == true){
             let canisterData_withOwner = CanisterManagementMethods.updateOwner(callerId, canisterData);
-            let updatedCanisterData = await CanisterManagementMethods.addApprovedUser(callerId, callerId, canisterData_withOwner);
-            switch(updatedCanisterData){
-                case(#ok(data)){
-                    canisterData := data;
+            canisterData := canisterData_withOwner;
+            let updatedRequestsForAccess = await CanisterManagementMethods.grantAccess(
+                callerId,  
+                requestsForAccess
+            );
+            switch(updatedRequestsForAccess){
+                case(#ok(requests)){
+                    requestsForAccess := requests;
                     #ok(());
                 };
                 case(#err(e)){

@@ -1,4 +1,7 @@
+import * as canisterIds from "../../../canister_ids.json";
+import * as dtcFiles from "../../declarations/dtc"
 import { e8sInOneICP } from "./Constants";
+
 
 export const toHexString = (byteArray)  =>{
     return Array.from(byteArray, function(byte) {
@@ -156,3 +159,11 @@ export const scrollToBottom = (distanceFromBottom = 0) => {
     behavior: 'smooth'
   });
 }
+
+export const backendActor = async (activeProvider) => {
+  const dtc_canisterId = canisterIds.dtc.ic;
+  const dtc_idlFactory = dtcFiles.idlFactory;
+  let { value: actor } = await activeProvider?.createActor(dtc_canisterId, dtc_idlFactory);
+  return actor;
+};
+

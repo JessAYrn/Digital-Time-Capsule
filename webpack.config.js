@@ -77,6 +77,10 @@ module.exports = {
    rules: [
      { test: /\.(ts|tsx|jsx)$/, loader: "ts-loader" },
      {
+      test: /\.css$/i,
+      use: ["style-loader", "css-loader"],
+     },
+     {
       test: /\.scss$/,
       use: ['style-loader', 'css-loader', 'sass-loader']
     }

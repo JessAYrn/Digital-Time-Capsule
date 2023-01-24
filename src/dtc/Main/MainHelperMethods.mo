@@ -2,6 +2,7 @@ import Trie "mo:base/Trie";
 import Types "types";
 import Iter "mo:base/Iter";
 import Buffer "mo:base/Buffer";
+import Option "mo:base/Option";
 import Text "mo:base/Text";
 import Result "mo:base/Result";
 import Account "../Ledger/Account";
@@ -9,15 +10,36 @@ import JournalTypes "../Journal/journal.types";
 import Principal "mo:base/Principal";
 import Cycles "mo:base/ExperimentalCycles";
 import MainTypes "types";
+import Array "mo:base/Array";
 import Journal "../Journal/Journal";
 
 module{
 
-    public func create (callerId: Principal, canisterData: MainTypes.CanisterData, profilesTree: MainTypes.ProfilesTree, isLocal: Bool) : 
-    async Result.Result<(MainTypes.ProfilesTree, MainTypes.AmountAccepted), JournalTypes.Error> {
+    public func create (
+        callerId: Principal, 
+        requestsForAccess: MainTypes.RequestsForAccess, 
+        profilesTree: MainTypes.ProfilesTree, 
+        isLocal: Bool
+    ) : async Result.Result<(MainTypes.ProfilesTree, MainTypes.AmountAccepted), JournalTypes.Error> {
 
         if(not isLocal and Principal.toText(callerId) == "2vxsx-fae"){
            return #err(#NotAuthorized);
+        };
+
+        let callerIdAsText = Principal.toText(callerId);
+        let isApprovedOption = Array.find(
+            requestsForAccess, func (x: (Text, MainTypes.Approved)) : Bool {
+                let (principalAsText, approved) = x;
+                if(principalAsText == callerIdAsText and approved == true){
+                    return true;
+                } else {
+                    false
+                };
+            }
+        );
+
+        if(Option.isNull(isApprovedOption) == true){
+            return #err(#NotAuthorized);
         };
 
         let existing = Trie.find(
@@ -29,50 +51,35 @@ module{
         // If there is an original value, do not update
         switch(existing) {
             case null {
-                let userPermissions = Trie.find(
-                    canisterData.users,
-                    textKey(Principal.toText(callerId)),
-                    Text.equal
-                );
-                switch(userPermissions){
-                    case null{
-                        return #err(#NotAuthorized)
-                    };
-                    case(? permissions){
-                        if(permissions.approved == false){
-                            return #err(#NotAuthorized);
-                        };
-                        Cycles.add(1_000_000_000_000);
-                        let newUserJournal = await Journal.Journal(callerId);
-                        let amountAccepted = await newUserJournal.wallet_receive();
-                        let settingMainCanister = await newUserJournal.setMainCanisterPrincipalId();
-                        let userAccountId = await newUserJournal.canisterAccount();
-
-                        let userProfile: MainTypes.Profile = {
-                            journal = newUserJournal;
-                            email = null;
-                            userName = null;
-                            id = callerId;
-                            accountId = ?userAccountId;
-
-                        };
-
-                        let (newProfiles, oldValueForThisKey) = Trie.put(
-                            profilesTree, 
-                            key(callerId),
-                            Principal.equal,
-                            userProfile
-                        );
-
-                        return #ok((newProfiles, amountAccepted));
-                    };
+                Cycles.add(1_000_000_000_000);
+                let newUserJournal = await Journal.Journal(callerId);
+                let amountAccepted = await newUserJournal.wallet_receive();
+                let settingMainCanister = await newUserJournal.setMainCanisterPrincipalId();
+                let userAccountId = await newUserJournal.canisterAccount();
+                let userProfile: MainTypes.Profile = {
+                    journal = newUserJournal;
+                    email = null;
+                    userName = null;
+                    id = callerId;
+                    accountId = ?userAccountId;
+                    approved = ?true;
+                    treasuryMember = ?false;
+                    treasuryContribution = ?0;
+                    monthsSpentAsTreasuryMember = ?0;
                 };
+                let (newProfiles, oldValueForThisKey) = Trie.put(
+                    profilesTree, 
+                    key(callerId),
+                    Principal.equal,
+                    userProfile
+                );
+                
+                return #ok((newProfiles, amountAccepted));
             };
             case ( ? v) {
                 return #err(#AlreadyExists);
             }
         };
-
     };
 
     public func updateProfile(callerId: Principal, profilesTree: MainTypes.ProfilesTree, profile: MainTypes.ProfileInput) : 
@@ -99,6 +106,10 @@ module{
                         userName = profile.userName;
                         id = callerId;
                         accountId = v.accountId;
+                        approved = ?true;
+                        treasuryMember = ?false;
+                        treasuryContribution = ?0;
+                        monthsSpentAsTreasuryMember = ?0;
 
                     };
 
@@ -182,48 +193,19 @@ module{
         };
     };
 
-    public func refillCanisterCycles(callerId : Principal, profilesTree : MainTypes.ProfilesTree ) : 
-    async Result.Result<((Nat,[Nat64])), JournalTypes.Error> {
-        let result = Trie.find(
-            profilesTree,
-            key(callerId),
-            Principal.equal
-        );
-
-        switch(result){
-            case null{
-                #err(#NotAuthorized);
+    public func refillCanisterCycles(profilesTree : MainTypes.ProfilesTree) : async () {
+        let numberOfProfiles = Trie.size(profilesTree);
+        let profilesIter = Trie.iter(profilesTree);
+        let profilesArray = Iter.toArray(profilesIter);
+        var index = 0;
+        while(index < numberOfProfiles){
+            let (principal, profile) = profilesArray[index];
+            let approved = Option.get(profile.approved, false);
+            if(approved){
+                Cycles.add(100_000_000_000);
+                let amountAccepted = ignore profile.journal.wallet_receive();
             };
-            case(? profile){
-                switch(profile.userName){
-                    case null{
-                        #err(#NotAuthorized);
-                    };
-                    case (? existingUserName){
-                        if(existingUserName == "admin"){
-                            var index = 0;
-                            let numberOfProfiles = Trie.size(profilesTree);
-                            let profilesIter = Trie.iter(profilesTree);
-                            let profilesArray = Iter.toArray(profilesIter);
-                            let AmountAcceptedArrayBuffer = Buffer.Buffer<Nat64>(1);
-
-                            while(index < numberOfProfiles){
-                                let userProfile = profilesArray[index];
-                                Cycles.add(100_000_000_000);
-                                let amountAccepted = await userProfile.1.journal.wallet_receive();
-                                AmountAcceptedArrayBuffer.add(amountAccepted.accepted);
-
-                                index += 1;
-                            };
-
-                            #ok(Cycles.balance(), AmountAcceptedArrayBuffer.toArray());
-
-                        } else {
-                            #err(#NotAuthorized);
-                        }
-                    };
-                };
-            };
+            index += 1;
         };
     };
 

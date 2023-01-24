@@ -40,11 +40,6 @@ const AdminSection = (props) => {
         const results = await Promise.all(promises);        
     };
 
-    const handleSubmitRefill = async () => {
-
-        const result = await journalState.actor.refillCanisterCycles();
-    };
-
     const upgradeJournalData = async (principal, wasmModule) => {
 
         console.log(`Upgrading: ${principal.toText()}`);
@@ -109,9 +104,6 @@ const AdminSection = (props) => {
         <React.Fragment>
             <div className={'sendEmailsButtonDiv'}>
                 <button className={'sendEmailsButton'} type="submit" onClick={handleSubmit}> Send Emails </button>
-            </div>
-            <div className={'sendEmailsButtonDiv'}>
-                <button className={'refillAllCanisterCycles'} type="submit" onClick={handleSubmitRefill}> Refill All Canister Cycles </button>
             </div>
             <div className={'sendEmailsButtonDiv'}>
                 <input 

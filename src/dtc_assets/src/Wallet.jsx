@@ -36,22 +36,6 @@ const WalletApp = () => {
     //changes made to this route aren't overrided by the useLocation().state of the previous route.
     window.onbeforeunload = window.history.replaceState(null, '');
 
-    // login function used when Authenticating the client (aka user)
-    useEffect(() => {
-        const authenticate = async () => {
-            await AuthenticateClient(journalState, dispatch, types)
-        };
-        authenticate();
-    }, [journalState.authenticateFunctionCallCount]);
-
-    //Creating the canisterActor that enables us to be able to call the functions defined on the backend
-    useEffect(() => {
-        const constructActor = async () => {
-            await CreateActor(journalState, dispatch, types)
-        };
-        constructActor();
-    }, [journalState.createActorFunctionCallCount]);
-
     //Loading Time Capsule Data
     useEffect(async () => {
         if(!journalState.actor){
@@ -62,11 +46,7 @@ const WalletApp = () => {
                 actionType: types.SET_IS_LOADING,
                 payload: true
             });
-            let walletDataFromApi = await handleErrorOnFirstLoad(
-                journalState.actor.readWalletData, 
-                TriggerAuththenticateClientFunction, 
-                { journalState, dispatch, types }
-            );
+            let walletDataFromApi = await journalState.actor.readWalletData()
             if(!walletDataFromApi) return;
             if("err" in walletDataFromApi) walletDataFromApi = await CreateUserJournal(journalState, dispatch, 'readWalletData');
             if("err" in walletDataFromApi) {
