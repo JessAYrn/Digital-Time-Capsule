@@ -1,20 +1,5 @@
-import {StoicIdentity} from "ic-stoic-identity";
-import { types, initialState } from "../../reducers/journalReducer";
+import { types } from "../../reducers/journalReducer";
 import { MODALS_TYPES } from "../../Constants";
-
-export const logout = async (journalState, dispatch) => {
-    let identity = await StoicIdentity.load();
-    if(identity !== false) StoicIdentity.disconnect();
-    else await journalState.authClient.logout();
-    dispatch({
-        actionType: types.SET_ENTIRE_REDUX_STATE,
-        payload: initialState
-    });
-    dispatch({
-        actionType: types.SET_IS_LOGGING_IN,
-        payload: true
-    });
-}
 
 export const TriggerAuththenticateClientFunction = (journalState, dispatch, types) => {
     dispatch({

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect} from 'react';
+import React, { useContext, useEffect, useState} from 'react';
 import { getIntObserverFunc, visibilityFunctionDefault } from './animations/IntersectionObserverFunctions';
 import { AppContext } from '../HomePage';
 import { NavBar } from './navigation/NavBar';
@@ -20,6 +20,7 @@ import { IconContext } from 'react-icons/lib';
 
 const Analytics = () => {
     const { journalState, dispatch } = useContext(AppContext);
+    const [showUserPrincipals, setShowUserPrincipals] = useState(false);
 
     const handleDenyAccess = async (principal) => {
         dispatch({
@@ -262,41 +263,53 @@ const Analytics = () => {
                                     <div className={'AnalyticsDiv'}>
                                         <div className={'AnalyticsContentContainer'}>
                                         <h4 className='requestingAccessH4'>  User Principals </h4>
-                                                {journalState.canisterData.profilesMetaData.map(([principal, approvalStatus]) => {
-                                                    const onClick1 = (approvalStatus) ? 
-                                                    () => handleUpdateApprovalStatus(principal, !approvalStatus) : 
-                                                    () => {};
+                                        {   
+                                            !showUserPrincipals &&
+                                            <ButtonField
+                                                Icon={AiIcons.AiOutlineArrowDown}
+                                                iconSize={25}
+                                                onClick={() => {setShowUserPrincipals(!showUserPrincipals)}}
+                                                withBox={true}
+                                            />
+                                        }
+                                        {
+                                            showUserPrincipals &&
+                                            journalState.canisterData.profilesMetaData.map(([principal, approvalStatus]) => {
+                                                const onClick1 = (approvalStatus) ? 
+                                                () => handleUpdateApprovalStatus(principal, !approvalStatus) : 
+                                                () => {};
 
-                                                    const onClick0 = (approvalStatus) ? 
-                                                    () => {} : 
-                                                    () => handleUpdateApprovalStatus(principal, !approvalStatus);
-                                                    return (
-                                                        <div className={'dataFieldRow'}>
-                                                            <DataField
-                                                                text={principal}
-                                                                isPrincipal={true}
-                                                                buttonIcon_1={RiIcons.RiDeleteBin2Line}
-                                                                buttonIcon_0={FaIcons.FaCheckSquare}
-                                                                onClick_1={onClick1}
-                                                                onClick_0={onClick0}
-                                                            />
-                                                            {approvalStatus &&
-                                                            <div className={'approvalStatusDiv'}>
-                                                                <IconContext.Provider value={{ size: '15px', margin: '5px'}}>
-                                                                    <AiIcons.AiTwotoneLike/>
-                                                                </IconContext.Provider>
-                                                                <h6> Subsidized </h6>
-                                                            </div>}
-                                                            {!approvalStatus &&
-                                                            <div className={'approvalStatusDiv'}>
-                                                                <IconContext.Provider value={{ size: '15px', margin: '5px'}}>
-                                                                    <AiIcons.AiTwotoneDislike/>
-                                                                </IconContext.Provider>
-                                                                <h6> Unsubsidized </h6>
-                                                            </div>}
-                                                        </div>
-                                                    )
-                                                })} 
+                                                const onClick0 = (approvalStatus) ? 
+                                                () => {} : 
+                                                () => handleUpdateApprovalStatus(principal, !approvalStatus);
+                                                return (
+                                                    <div className={'dataFieldRow'}>
+                                                        <DataField
+                                                            text={principal}
+                                                            isPrincipal={true}
+                                                            buttonIcon_1={RiIcons.RiDeleteBin2Line}
+                                                            buttonIcon_0={FaIcons.FaCheckSquare}
+                                                            onClick_1={onClick1}
+                                                            onClick_0={onClick0}
+                                                        />
+                                                        {approvalStatus &&
+                                                        <div className={'approvalStatusDiv'}>
+                                                            <IconContext.Provider value={{ size: '15px', margin: '5px'}}>
+                                                                <AiIcons.AiTwotoneLike/>
+                                                            </IconContext.Provider>
+                                                            <h6> Subsidized </h6>
+                                                        </div>}
+                                                        {!approvalStatus &&
+                                                        <div className={'approvalStatusDiv'}>
+                                                            <IconContext.Provider value={{ size: '15px', margin: '5px'}}>
+                                                                <AiIcons.AiTwotoneDislike/>
+                                                            </IconContext.Provider>
+                                                            <h6> Unsubsidized </h6>
+                                                        </div>}
+                                                    </div>
+                                                )
+                                            })
+                                        }
                                         </div>
                                     </div>
                                 </div>
@@ -334,6 +347,13 @@ const Analytics = () => {
                                     onClick={handleRegistration}
                                     withBox={true}
                                 />
+                                { showUserPrincipals && <ButtonField
+                                    Icon={AiIcons.AiOutlineArrowUp}
+                                    iconSize={25}
+                                    className={'collapseArrayButton'}
+                                    onClick={() => {setShowUserPrincipals(!showUserPrincipals)}}
+                                    withBox={true}
+                                />}
                             </div>
                         </div>}
                 </div>

@@ -9,12 +9,12 @@ import { UI_CONTEXTS } from "../../Contexts";
 import * as IoiosIcons from 'react-icons/io';
 import * as AiIcons from 'react-icons/ai';
 import * as RiIcons from 'react-icons/ri';
-import { NAV_LINKS, PROVIDER_STATUS } from "../../Constants";
+import { NAV_LINKS } from "../../Constants";
 // import { AppContext as PodcastContext } from "../PodcastPage"
 import "./LoginPage.scss";
 import "../../Components/animations/Animation.scss";
 import { getIntObserverFunc, visibilityFunctionLoginPage } from "../animations/IntersectionObserverFunctions";
-import { ConnectButton, ConnectDialog, useConnect, useCanister, useClient } from "@connect2ic/react";
+import { ConnectButton, ConnectDialog, useConnect, useCanister } from "@connect2ic/react";
 import "@connect2ic/core/style.css"
 import ButtonField from "../Fields/Button";
 import DataField from "../Fields/DataField";

@@ -13,9 +13,10 @@ import * as AiIcons from 'react-icons/ai';
 import * as RiIcons from 'react-icons/ri';
 import * as ImIcons from 'react-icons/im';
 import { IconContext } from 'react-icons/lib';
-import { logout } from '../authentication/AuthenticationMethods';
 import { types } from '../../reducers/journalReducer';
 import { MODALS_TYPES } from '../../Constants';
+import { ConnectButton, ConnectDialog, useConnect } from "@connect2ic/react";
+import { initialState } from '../../reducers/journalReducer';
 import "./NavBar.scss";
 
 export const NavBar = (props) => {
@@ -86,6 +87,16 @@ export const NavBar = (props) => {
         setSideBar(!sideBar)
     }
 
+    useConnect({
+        onConnect: () => {},
+        onDisconnect: () => {
+            dispatch({
+                actionType: types.SET_ENTIRE_REDUX_STATE,
+                payload: initialState
+            });
+        }
+    });
+
     const NotificationIcon = unreadNotifications ?
         <FaIcons.FaBell onClick={toggleDisplayNotifications}/> : 
         <FaIcons.FaRegBell onClick={toggleDisplayNotifications}/>;
@@ -146,14 +157,8 @@ export const NavBar = (props) => {
                     </li>
                 </ul>
                 <ul className={'unorderedList bottom'}>
-                    <li className={'listItem'} onClick={async () => await logout(journalState, dispatch)}>
-                        <IconContext.Provider value={{ color: 'white'}}>
-                            <RiIcons.RiLogoutBoxRFill/>
-                        </IconContext.Provider>    
-                        <span>
-                            logout
-                        </span>
-                    </li>
+                <ConnectButton/>
+                <ConnectDialog />
                 </ul>
             </nav>
         </div>

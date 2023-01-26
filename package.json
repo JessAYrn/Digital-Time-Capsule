@@ -54,8 +54,8 @@
     "last 2 edge version"
   ],
   "dependencies": {
-    "@connect2ic/core": "^0.2.0-beta.5",
-    "@connect2ic/react": "^0.2.0-beta.5",
+    "@connect2ic/core": "^0.2.0-beta.21",
+    "@connect2ic/react": "^0.2.0-beta.21",
     "@stripe/react-stripe-js": "^1.7.0",
     "@stripe/stripe-js": "^1.22.0",
     "@types/react": "^17.0.34",

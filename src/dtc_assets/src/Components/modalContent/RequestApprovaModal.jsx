@@ -6,9 +6,7 @@ import { AppContext as  HomePageContext} from '../../HomePage';
 import { AppContext as  AccountContext} from '../../Account';
 import { UI_CONTEXTS } from '../../Contexts';
 import { initialState, types } from "../../reducers/journalReducer";
-import { logout } from "../authentication/AuthenticationMethods";
 import "./RequestApprovaModal.scss";
-import ButtonField from "../Fields/Button";
 import { ConnectButton, ConnectDialog, useConnect } from "@connect2ic/react";
 import LoadScreen from "../LoadScreen";
 

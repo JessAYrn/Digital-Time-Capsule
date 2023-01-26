@@ -19,7 +19,7 @@ const Router = (props) => {
     const client = createClient({
         globalProviderConfig: {
             host: 'https://mainnet.ic0.app',
-            whitelist: [],
+            whitelist: [dtc_canisterId],
             appName: ''
         },
         canisters: {

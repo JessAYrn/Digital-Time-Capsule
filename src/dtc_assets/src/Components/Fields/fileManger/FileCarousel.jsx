@@ -20,7 +20,11 @@ const FileCarousel = (props) => {
         dispatchActionToAddFile,
         journalState,
         dispatchActionToDeleteFile,
-        setChangesWereMade
+        setChangesWereMade,
+        classNameMod,
+        dispatchActionToChangeFileMetaData,
+        dispatchActionToChangeFileLoadStatus,
+        videoHeight
     } = props;
 
     const [editMode, setEditMode] = useState(false);
@@ -138,8 +142,12 @@ const FileCarousel = (props) => {
                                 key={fileIndex}
                                 forceDisplayDefaultFileSrc={forceDisplayDefaultFileSrc}
                                 context={UI_CONTEXTS.JOURNAL}
-                                page={PAGES.JOURNAL_COVER}
                                 setChangesWereMade={setChangesWereMade}
+                                classNameMod={classNameMod}
+                                dispatchActionToChangeFileMetaData={dispatchActionToChangeFileMetaData}
+                                dispatchActionToChangeFileLoadStatus={dispatchActionToChangeFileLoadStatus}
+                                filesMetaDataArray={filesMetaDataArray}
+                                videoHeight={videoHeight}
                             />
                         </div>
                     )

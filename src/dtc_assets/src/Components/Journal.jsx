@@ -223,12 +223,16 @@ const Journal = (props) => {
                                     ` _${animatedLeftElementIndex++}`}
                                 >
                                     <FileCarousel
+                                        videoHeight = {'330'}
                                         filesMetaDataArray={journalState.bio.photos}
                                         journalState={journalState}
                                         setChangesWereMade={setPageChangesMade}
                                         dispatch={dispatch}
                                         dispatchActionToAddFile={types.ADD_COVER_PHOTO}
                                         dispatchActionToDeleteFile={types.REMOVE_COVER_PHOTO}
+                                        classNameMod={'coverPhoto'}
+                                        dispatchActionToChangeFileMetaData={types.CHANGE_FILE_METADATA_JOURNAL_COVER_PAGE}
+                                        dispatchActionToChangeFileLoadStatus={types.CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE}
                                     />
                                 </div>
                                 {displayJournalTable()}

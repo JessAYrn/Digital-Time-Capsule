@@ -1,5 +1,4 @@
 import React, {useContext}from 'react';
-import { logout } from '../authentication/AuthenticationMethods';
 import './NotAuthorizedByOwner.scss'
 import { AppContext as NftContext} from '../../NFTs';
 import { AppContext as  WalletContext} from '../../Wallet';

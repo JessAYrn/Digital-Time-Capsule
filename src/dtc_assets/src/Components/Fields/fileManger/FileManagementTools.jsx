@@ -12,7 +12,8 @@ export const retrieveChunk = async (journalState, fileName, chunkIndex) => {
 export const getFileURL = async (file) => {
     let fileAsBuffer = await getFileArrayBuffer(file);
     let fileBlob = new Blob([new Uint8Array(fileAsBuffer)], { type: file.type });
-    let url = window.URL.createObjectURL(fileBlob);
+    let url = window.URL.createObjectURL(file);
+    console.log(url);
     return url;
 };
 
