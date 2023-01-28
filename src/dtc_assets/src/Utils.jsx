@@ -167,3 +167,17 @@ export const backendActor = async (activeProvider) => {
   return actor;
 };
 
+export const flattenUint8array = (array) => {
+  let length = 0;
+  array.forEach(uint8array => {
+    length += uint8array.length;
+  });
+  let uint8stream = new Uint8Array(length);
+  let nextUnpopulatedIndex = 0;
+  array.forEach(uint8array => {
+    uint8stream.set(uint8array, nextUnpopulatedIndex);
+    nextUnpopulatedIndex += uint8array.length;
+  })
+  return uint8stream;
+};
+

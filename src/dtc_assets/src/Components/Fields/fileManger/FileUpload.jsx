@@ -81,7 +81,7 @@ const FileUpload = (props) => {
         if(constructedFile){
             setFileType(constructedFile.type);
             fileURL = await getFileURL(constructedFile);
-            setFileSrc(fileURL)
+            setFileSrc(fileURL);
         };
     },[constructedFile]);
 
@@ -108,7 +108,6 @@ const FileUpload = (props) => {
             } else {
                 setFileType(uploadedFile.type);
                 fileURL = await getFileURL(uploadedFile);
-                setFileSrc(fileURL);
                 let fileId = updateFileMetadataInStore(
                     dispatch, 
                     dispatchActionToChangeFileMetaData, 
@@ -124,7 +123,6 @@ const FileUpload = (props) => {
             //triggers useEffect which displays the video
             setFileType(uploadedFile.type);
             fileURL = await getFileURL(uploadedFile);
-            setFileSrc(fileURL)
             let fileId = updateFileMetadataInStore(
                 dispatch, 
                 dispatchActionToChangeFileMetaData, 
