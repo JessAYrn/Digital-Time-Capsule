@@ -18,7 +18,11 @@ module{
     private let oneICP : Nat64 = 100_000_000;
 
     public func readJournal (callerId: Principal, profilesTree: MainTypes.ProfilesTree) : async Result.Result<({
-    userJournalData : ([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio); email: ?Text; userName: ?Text;}), 
+        userJournalData : ([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio); 
+        email: ?Text; 
+        userName: ?Text;
+        principal: Text;
+    }), 
     JournalTypes.Error> {
 
         if(Principal.toText(callerId) == "2vxsx-fae"){
@@ -40,9 +44,10 @@ module{
                 let userJournalData = await journal.readJournal();
                 
                 return #ok({
-                    userJournalData = userJournalData;
+                    userJournalData = (userJournalData.0, userJournalData.1);
                     email = v.email;
                     userName = v.userName;
+                    principal = userJournalData.2;
                 });
                 
             };

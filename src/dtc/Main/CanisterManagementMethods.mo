@@ -292,10 +292,8 @@ module{
         };
     };
 
-    public func installCode( 
-        callerId : Principal, 
-        userPrincipal: Principal, 
-        args: Blob, 
+    public func installCode_journalCanisters( 
+        callerId : Principal,  
         wasmModule: Blob, 
         profiles : MainTypes.ProfilesTree,
         canisterData : MainTypes.CanisterData
@@ -303,37 +301,33 @@ module{
 
         let callerIdAsText = Principal.toText(callerId);
 
-            
         if (callerIdAsText == canisterData.nftOwner) {
-
-            let theUserProfile = Trie.find(
-                profiles,
-                key(userPrincipal),
-                Principal.equal
-            );
-
-            switch(theUserProfile){
-                case null{
-                    throw Error.reject("No profile for this principal.");
-                };
-                case ( ? existingProfile){
-                    let userJournal = existingProfile.journal;
-                    let journalCanisterId = Principal.fromActor(userJournal);
-                    await ic.stop_canister({canister_id = journalCanisterId});
-                    await ic.install_code({
-                        arg = args;
-                        wasm_module = wasmModule;
-                        mode = #upgrade;
-                        canister_id = journalCanisterId;
-                    });
-                    await ic.start_canister({canister_id = journalCanisterId});
-                    let result = await userJournal.setMainCanisterPrincipalId();
-                };
+            let profilesIter = Trie.iter(profiles);
+            let profilesSize = Trie.size(profiles);
+            let profilesArray = Iter.toArray(profilesIter);
+            var index = 0;
+            while(index < profilesSize){
+                let (principal, profile ) = profilesArray[index];
+                let userJournal = profile.journal;
+                let journalCanisterId = Principal.fromActor(userJournal);
+                let arg = principal;
+                ignore installCode_(arg, wasmModule, journalCanisterId);
+                index += 1;
             };
-
         } else {
             throw Error.reject("Unauthorized access. Caller is not the owner.");
         }
+    };
+
+    private func installCode_ (arg: Principal, wasmModule: Blob, canister_id: Principal) : async () {
+        await ic.stop_canister({canister_id = canister_id});
+        await ic.install_code({
+            arg = to_candid(arg);
+            wasm_module = wasmModule;
+            mode = #upgrade;
+            canister_id = canister_id;
+        });
+        await ic.start_canister({canister_id = canister_id});
     };
 
     private func getCyclesBalance(principal: Principal) : async Nat {

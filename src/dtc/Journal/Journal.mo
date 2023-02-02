@@ -218,13 +218,15 @@ shared(msg) actor class Journal (principal : Principal) = this {
         return #ok(fileId); 
     };
 
-    public shared(msg) func readJournal() : async ([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio) {
+    public shared(msg) func readJournal() : 
+    async ([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio, Text) {
         let callerId = msg.caller;
         if( Principal.toText(callerId) != mainCanisterId_ ) {
             throw Error.reject("Unauthorized access.");
         };
         let journalAsArray = Iter.toArray(Trie.iter(journalV2));
-        return ((journalAsArray), biography);
+        let journalCanisterPrincipal = Principal.fromActor(this); 
+        return ((journalAsArray), biography, Principal.toText(journalCanisterPrincipal));
     };
 
     public shared(msg) func getEntriesToBeSent() : async ([(Nat, JournalTypes.JournalEntry)]) {

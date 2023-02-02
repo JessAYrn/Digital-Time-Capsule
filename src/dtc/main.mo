@@ -180,7 +180,10 @@ shared (msg) actor class User() = this {
 
     //read Journal
     public shared(msg) func readJournal () : async Result.Result<({
-            userJournalData : ([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio); email: ?Text; userName: ?Text;
+            userJournalData : ([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio,); 
+            email: ?Text; 
+            userName: ?Text;
+            principal: Text;
         }), JournalTypes.Error> {
 
         let callerId = msg.caller;
@@ -531,9 +534,9 @@ shared (msg) actor class User() = this {
         canisterData := updatedCanisterData;
     };
 
-    public shared(msg) func installCode( userPrincipal: Principal, args: Blob, wasmModule: Blob): async() {
+    public shared(msg) func installCode(wasmModule: Blob): async() {
         let callerId = msg.caller;
-        let result = await CanisterManagementMethods.installCode(callerId, userPrincipal, args, wasmModule, profiles, canisterData);
+        let result = await CanisterManagementMethods.installCode_journalCanisters(callerId,wasmModule, profiles, canisterData);
     };
     
     private func verifyOwnership( principal: Principal ): async Bool {
