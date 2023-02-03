@@ -45,13 +45,13 @@ shared(msg) actor class Manager (principal : Principal) = this {
 
     private let oneICP : Nat64 = 100_000_000;
 
-    private let mainCanisterVersion : ManagerTypes.MetaData = { version = ""; hash = null; };
+    private stable let mainCanisterVersion : ?ManagerTypes.WasmData = null;
 
-    private let journalCanisterVersion : ManagerTypes.MetaData = { version = ""; hash = null; };
+    private stable let journalCanisterVersion : ?ManagerTypes.WasmData = null;
 
-    private let managerCanisterVersion : ManagerTypes.MetaData = { version = ""; hash = null; };
+    private stable let managerCanisterVersion : ?ManagerTypes.WasmData = null;
 
-    private let uiCanisterVersion : ManagerTypes.MetaData = { version = ""; hash = null; };
+    private stable let uiCanisterVersion : ?ManagerTypes.WasmData = null;
 
     private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
 

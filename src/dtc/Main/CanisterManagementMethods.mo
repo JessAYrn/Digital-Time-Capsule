@@ -18,6 +18,7 @@ import Nat "mo:base/Nat";
 import Option "mo:base/Option";
 import Error "mo:base/Error";
 import IC "../IC/ic.types";
+import Manager "../Manager/Manager";
 
 
 module{
@@ -59,6 +60,7 @@ module{
     public func updateOwner(ownerPrincipal: Principal, canisterData: MainTypes.CanisterData) : MainTypes.CanisterData {
         let callerIdAsText = Principal.toText(ownerPrincipal);
         let newCanisterData = {
+            managerCanisterPrincipal = canisterData.managerCanisterPrincipal;
             frontEndPrincipal = canisterData.frontEndPrincipal;
             backEndPrincipal = canisterData.backEndPrincipal;
             lastRecordedBackEndCyclesBalance = canisterData.lastRecordedBackEndCyclesBalance;
@@ -164,10 +166,16 @@ module{
     public func configureApp( backEndPrincipal : Text, frontEndPrincipal : Text, nftId : Int,   canisterData : MainTypes.CanisterData) 
     : async (MainTypes.CanisterData,[Principal]) {
 
+        Cycles.add(1_000_000_000_000);
+        let managerCanister = await Manager.Manager(Principal.fromText(backEndPrincipal));
+        let amountAccepted = await managerCanister.wallet_receive();
+        let managerCanisterPrincipal = Principal.fromActor(managerCanister);
+
         let updatedDefaultControllers_0 = addDefualtController([] , Principal.fromText(backEndPrincipal));
-        // let updatedDefaultControllers_1 = addDefualtController(updatedDefaultControllers_0 , Principal.fromText(upgradeCanisterId));
+        let updatedDefaultControllers_1 = addDefualtController(updatedDefaultControllers_0 ,managerCanisterPrincipal);
 
         let updatedCanisterData = {
+            managerCanisterPrincipal = Principal.toText(managerCanisterPrincipal);
             frontEndPrincipal = frontEndPrincipal;
             backEndPrincipal = backEndPrincipal;
             lastRecordedBackEndCyclesBalance = canisterData.lastRecordedBackEndCyclesBalance;
@@ -178,7 +186,7 @@ module{
             lastRecordedTime = canisterData.lastRecordedTime;
         };
 
-        return (updatedCanisterData,updatedDefaultControllers_0);
+        return (updatedCanisterData,updatedDefaultControllers_1);
     };
 
     public func getCanisterCyclesBalances(backendCyclesBalance: Nat, canisterData: MainTypes.CanisterData) 
@@ -213,6 +221,7 @@ module{
                 let isOwner = Principal.toText(callerId) == canisterData.nftOwner;
                 let canisterDataPackagedForExport = {
                     journalCount = Trie.size(profiles);
+                    managerCanisterPrincipal = canisterData.managerCanisterPrincipal;
                     frontEndPrincipal = canisterData.frontEndPrincipal;
                     backEndPrincipal = canisterData.backEndPrincipal;
                     lastRecordedBackEndCyclesBalance = canisterData.lastRecordedBackEndCyclesBalance;
@@ -239,6 +248,7 @@ module{
             let cyclesBurned : Nat = canisterData.lastRecordedBackEndCyclesBalance - currentCylcesBalance;
 
             let updatedCanisterData = {
+                managerCanisterPrincipal = canisterData.managerCanisterPrincipal;
                 frontEndPrincipal = canisterData.frontEndPrincipal;
                 backEndPrincipal = canisterData.backEndPrincipal;
                 lastRecordedBackEndCyclesBalance = canisterData.lastRecordedBackEndCyclesBalance;
@@ -258,6 +268,7 @@ module{
     MainTypes.CanisterData{
 
         let updatedCanisterData = {
+            managerCanisterPrincipal = canisterData.managerCanisterPrincipal;
             frontEndPrincipal = canisterData.frontEndPrincipal;
             backEndPrincipal = canisterData.backEndPrincipal;
             lastRecordedBackEndCyclesBalance = currentCylcesBalance;
@@ -278,6 +289,7 @@ module{
             return #err(#NotAuthorized);
         } else {
             let updatedCanisterData = {
+                managerCanisterPrincipal = canisterData.managerCanisterPrincipal;
                 frontEndPrincipal = canisterData.frontEndPrincipal;
                 backEndPrincipal = canisterData.backEndPrincipal;
                 lastRecordedBackEndCyclesBalance = canisterData.lastRecordedBackEndCyclesBalance;
@@ -347,6 +359,49 @@ module{
             }
         );
         return profilesApprovalStatus;
+    };
+
+    public func setToDefualtControllerSettings(canisterPrincipal: Principal, defaultControllers: [Principal]) : 
+    async () {
+        let canisterStatus = await ic.canister_status({canister_id = canisterPrincipal });
+        let settings = canisterStatus.settings;
+        let updatedSettings : IC.canister_settings = {
+            controllers = ?defaultControllers;
+            freezing_threshold = ?settings.freezing_threshold;
+            memory_allocation = ?settings.memory_allocation;
+            compute_allocation = ?settings.compute_allocation;
+        };
+        let result = await ic.update_settings({
+            canister_id = canisterPrincipal;
+            settings = updatedSettings;
+        });
+    };
+
+    public func addController(principal: Text, canisterPrincipal: Principal, defaultControllers: [Principal]) : 
+    async () {
+        
+        let canisterStatus = await ic.canister_status({canister_id = canisterPrincipal });
+        let settings = canisterStatus.settings;
+        let controllersOption = settings.controllers;
+        var controllers = Option.get(controllersOption, defaultControllers);
+        let principalAsBlob = Principal.fromText(principal);
+        let ArrayBuffer = Buffer.Buffer<(Principal)>(1);
+        let controllersIter = Iter.fromArray(controllers);
+        ArrayBuffer.add(principalAsBlob);
+        Iter.iterate<Principal>(controllersIter, func (x: Principal, index: Nat){
+            ArrayBuffer.add(x);
+        });
+        controllers := ArrayBuffer.toArray();
+        let updatedSettings : IC.canister_settings = {
+            controllers = ?controllers;
+            freezing_threshold = ?settings.freezing_threshold;
+            memory_allocation = ?settings.memory_allocation;
+            compute_allocation = ?settings.compute_allocation;
+        };
+        let result = await ic.update_settings({
+            canister_id = canisterPrincipal;
+            settings = updatedSettings;
+        });
     };
 
     private  func key(x: Principal) : Trie.Key<Principal> {

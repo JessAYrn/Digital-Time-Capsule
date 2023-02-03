@@ -36,6 +36,9 @@ import NftCollection "NftCollection/NftCollection";
 import Support "SupportCanisterIds/SupportCanisterIds";
 import IC "IC/ic.types";
 import Hex "Ledger/Hex";
+import ManagerCanister "Manager/Manager";
+import ManagerTypes "Manager/manager.types";
+import Manager "Manager/Manager";
 
 shared (msg) actor class User() = this {
 
@@ -63,6 +66,7 @@ shared (msg) actor class User() = this {
     private stable var defaultControllers : [Principal] = [];
 
     private stable var canisterData : MainTypes.CanisterData = {
+        managerCanisterPrincipal = "Null";
         frontEndPrincipal = "Null";
         backEndPrincipal = "Null";
         lastRecordedBackEndCyclesBalance = 0;
@@ -130,7 +134,7 @@ shared (msg) actor class User() = this {
     //Result.Result returns a varient type that has attributes from success case(the first input) and from your error case (your second input). both inputs must be varient types. () is a unit type.
     public shared(msg) func create () : async Result.Result<MainTypes.AmountAccepted, JournalTypes.Error> {
         let callerId = msg.caller;
-        let result = await MainMethods.create(callerId, requestsForAccess, profiles, isLocal);
+        let result = await MainMethods.create(callerId, requestsForAccess, profiles, isLocal, defaultControllers, canisterData);
         let updatedRequestsList = await CanisterManagementMethods.removeFromRequestsList(callerId, requestsForAccess);
         switch(result){
             case(#ok(r)){
@@ -443,14 +447,12 @@ shared (msg) actor class User() = this {
     };
 
     public shared(msg) func configureApp(frontEndPrincipal : Text, nftId: Int ) : async Result.Result<(), JournalTypes.Error> {
-        let backEndPrincipalAsPrincipal = Principal.fromActor(this);
-        let backEndPrincipal = Principal.toText(backEndPrincipalAsPrincipal);
-        //let upgradeCanisterPrincipal = Principal.fromActor(upgradeCanisterActor);
-        // pass that into the configureApp function
-        let result = await CanisterManagementMethods.configureApp( backEndPrincipal, frontEndPrincipal, nftId, canisterData);
-        let updatedCanisterData = result.0;
-        let defaultControllers_ = result.1;
-        if(canisterData.frontEndPrincipal == "Null" or canisterData.nftId == -1){
+        if(canisterData.frontEndPrincipal == "Null" or canisterData.nftId == -1 or canisterData.managerCanisterPrincipal == "Null"){
+            let backEndPrincipalAsPrincipal = Principal.fromActor(this);
+            let backEndPrincipal = Principal.toText(backEndPrincipalAsPrincipal);
+            let result = await CanisterManagementMethods.configureApp( backEndPrincipal, frontEndPrincipal, nftId, canisterData);
+            let updatedCanisterData = result.0;
+            let defaultControllers_ = result.1;
             canisterData := updatedCanisterData;
             defaultControllers := defaultControllers_;
             #ok(());
@@ -568,54 +570,11 @@ shared (msg) actor class User() = this {
             
     };
 
-    private func setToDefualtControllerSettings(canisterPrincipal: Principal) : 
-    async () {
-        let canisterStatus = await ic.canister_status({canister_id = canisterPrincipal });
-        let settings = canisterStatus.settings;
-        let updatedSettings : IC.canister_settings = {
-            controllers = ?defaultControllers;
-            freezing_threshold = ?settings.freezing_threshold;
-            memory_allocation = ?settings.memory_allocation;
-            compute_allocation = ?settings.compute_allocation;
-        };
-        let result = await ic.update_settings({
-            canister_id = canisterPrincipal;
-            settings = updatedSettings;
-        });
-    };
-
-    private func addController(principal: Text, canisterPrincipal: Principal) : 
-    async () {
-        
-        let canisterStatus = await ic.canister_status({canister_id = canisterPrincipal });
-        let settings = canisterStatus.settings;
-        let controllersOption = settings.controllers;
-        var controllers = Option.get(controllersOption, defaultControllers);
-        let principalAsBlob = Principal.fromText(principal);
-        let ArrayBuffer = Buffer.Buffer<(Principal)>(1);
-        let controllersIter = Iter.fromArray(controllers);
-        ArrayBuffer.add(principalAsBlob);
-        Iter.iterate<Principal>(controllersIter, func (x: Principal, index: Nat){
-            ArrayBuffer.add(x);
-        });
-        controllers := ArrayBuffer.toArray();
-        let updatedSettings : IC.canister_settings = {
-            controllers = ?controllers;
-            freezing_threshold = ?settings.freezing_threshold;
-            memory_allocation = ?settings.memory_allocation;
-            compute_allocation = ?settings.compute_allocation;
-        };
-        let result = await ic.update_settings({
-            canister_id = canisterPrincipal;
-            settings = updatedSettings;
-        });
-    };
-
     public func getCanisterCongtrollers(canisterPrincipal: Principal) : async ([Text]) {
         let canisterStatus = await ic.canister_status({ canister_id = canisterPrincipal });
         let settings = canisterStatus.settings;
         let controllersOption = settings.controllers;
-        var controllers = Option.get(controllersOption, [canisterPrincipal]);
+        var controllers = Option.get(controllersOption, defaultControllers);
         let ArrayBuffer = Buffer.Buffer<(Text)>(1);
         let controllersIter = Iter.fromArray(controllers);
         Iter.iterate<Principal>(controllersIter, func (x: Principal, index: Nat){
@@ -633,12 +592,49 @@ shared (msg) actor class User() = this {
             return #err(#NotAuthorized)
         } else {
             if(supportMode == false){
-                let result1 = await addController(Support.TechSupportPrincipal1, Principal.fromActor(this));
-                let result2 = await addController(Support.TechSupportPrincipal2, Principal.fromActor(this));
-                // will have to call addController again on Upgrader canister and front end canister
+                let result1 = await CanisterManagementMethods.addController(
+                    Support.TechSupportPrincipal1, 
+                    Principal.fromActor(this), 
+                    defaultControllers
+                );
+                let result2 = await CanisterManagementMethods.addController(
+                    Support.TechSupportPrincipal2, 
+                    Principal.fromActor(this), 
+                    defaultControllers
+                );
+                let result3 = await CanisterManagementMethods.addController(
+                    Support.TechSupportPrincipal1, 
+                    Principal.fromText(canisterData.managerCanisterPrincipal),
+                    defaultControllers
+                );
+                let result4 = await CanisterManagementMethods.addController(
+                    Support.TechSupportPrincipal2, 
+                    Principal.fromText(canisterData.managerCanisterPrincipal),
+                    defaultControllers
+                );
+                let result5 = await CanisterManagementMethods.addController(
+                    Support.TechSupportPrincipal1, 
+                    Principal.fromText(canisterData.frontEndPrincipal),
+                    defaultControllers
+                );
+                let result6 = await CanisterManagementMethods.addController(
+                    Support.TechSupportPrincipal2, 
+                    Principal.fromText(canisterData.frontEndPrincipal),
+                    defaultControllers
+                );
             } else {
-                let result = await setToDefualtControllerSettings(Principal.fromActor(this));
-                // will have to call setDefualtControllerSettings again on Upgrader canister and front end canister
+                let result1 = await CanisterManagementMethods.setToDefualtControllerSettings(
+                    Principal.fromActor(this), 
+                    defaultControllers
+                );
+                let result2 = await CanisterManagementMethods.setToDefualtControllerSettings(
+                    Principal.fromText(canisterData.managerCanisterPrincipal), 
+                    defaultControllers
+                );
+                let result3 = await CanisterManagementMethods.setToDefualtControllerSettings(
+                    Principal.fromText(canisterData.frontEndPrincipal), 
+                    defaultControllers
+                );
             };
             supportMode := not supportMode;
             return #ok()

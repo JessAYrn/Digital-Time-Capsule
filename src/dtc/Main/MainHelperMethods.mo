@@ -12,6 +12,7 @@ import Cycles "mo:base/ExperimentalCycles";
 import MainTypes "types";
 import Array "mo:base/Array";
 import Journal "../Journal/Journal";
+import CanisterManagementMethods "CanisterManagementMethods";
 
 module{
 
@@ -19,7 +20,9 @@ module{
         callerId: Principal, 
         requestsForAccess: MainTypes.RequestsForAccess, 
         profilesTree: MainTypes.ProfilesTree, 
-        isLocal: Bool
+        isLocal: Bool,
+        defaultControllers: [Principal],
+        canisterData: MainTypes.CanisterData
     ) : async Result.Result<(MainTypes.ProfilesTree, MainTypes.AmountAccepted), JournalTypes.Error> {
 
         if(not isLocal and Principal.toText(callerId) == "2vxsx-fae"){
@@ -54,6 +57,11 @@ module{
                 Cycles.add(1_000_000_000_000);
                 let newUserJournal = await Journal.Journal(callerId);
                 let amountAccepted = await newUserJournal.wallet_receive();
+                ignore CanisterManagementMethods.addController(
+                    canisterData.managerCanisterPrincipal,
+                    Principal.fromActor(newUserJournal),
+                    defaultControllers
+                );
                 let settingMainCanister = await newUserJournal.setMainCanisterPrincipalId();
                 let userAccountId = await newUserJournal.canisterAccount();
                 let userProfile: MainTypes.Profile = {

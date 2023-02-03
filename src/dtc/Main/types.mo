@@ -43,6 +43,7 @@ module{
 
     public type CanisterDataExport = {
         journalCount: Nat;
+        managerCanisterPrincipal: Text;
         frontEndPrincipal: Text;
         backEndPrincipal: Text;
         lastRecordedBackEndCyclesBalance: Nat;
@@ -59,6 +60,7 @@ module{
     };
 
     public type CanisterData = {
+        managerCanisterPrincipal: Text;
         frontEndPrincipal: Text;
         backEndPrincipal: Text;
         lastRecordedBackEndCyclesBalance: Nat;

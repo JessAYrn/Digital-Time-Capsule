@@ -175,3 +175,6 @@ dfx canister --network ic  update-settings <canister_id> --freezing-threshold <N
 
 dfx canister update-settings dtc --add-controller <ADD_CONTROLLER>
 
+### gzip wasm module before upgrading canister (note: after gzipping, you'll have to change the file name from dtc.wasm.gz back to dtc.wasm)
+gzip -f -1 ./.dfx/ic/canisters/dtc/dtc.wasm  
+

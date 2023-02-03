@@ -1,6 +1,8 @@
 module {
-    public type MetaData = {
+    public type WasmData = {
         version : Text;
-        hash : ?Blob
+        hash : Blob;
+        dev : Principal;
+        wasmModule: Blob
     };
 };
