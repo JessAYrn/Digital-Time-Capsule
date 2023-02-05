@@ -15,14 +15,10 @@ module{
 
     private let Gas: Nat64 = 10000;
 
-    public func transferICP(callerId: Principal, profilesTree: MainTypes.ProfilesTree ,amount: Nat64, canisterAccountId: Account.AccountIdentifier) : 
+    public func transferICP(callerId: Principal, profilesMap: MainTypes.ProfilesMap ,amount: Nat64, canisterAccountId: Account.AccountIdentifier) : 
     async Result.Result<(), JournalTypes.Error> {
 
-        let userProfile = Trie.find(
-            profilesTree,
-            key(callerId),
-            Principal.equal 
-        );
+        let userProfile = profilesMap.get(callerId);
         switch(userProfile) {
             case null{
                 #err(#NotFound)
@@ -39,14 +35,10 @@ module{
         };
     };
 
-    public func readTransaction(callerId: Principal, profilesTree: MainTypes.ProfilesTree) : 
+    public func readTransaction(callerId: Principal, profilesMap: MainTypes.ProfilesMap) : 
     async Result.Result<[(Nat, JournalTypes.Transaction)], JournalTypes.Error> {
 
-        let callerProfile = Trie.find(
-            profilesTree,
-            key(callerId), 
-            Principal.equal 
-        );
+        let callerProfile = profilesMap.get(callerId);
 
         switch(callerProfile){
             case null{
@@ -60,7 +52,7 @@ module{
         };
     };
 
-    public func updateUsersTxHistory(queryResponse: Ledger.QueryBlocksResponse, profilesTree: MainTypes.ProfilesTree) : 
+    public func updateUsersTxHistory(queryResponse: Ledger.QueryBlocksResponse, profilesMap: MainTypes.ProfilesMap) : 
     async () {
         let blocksArray = queryResponse.blocks;
         let blocksArraySize = Iter.size(Iter.fromArray(blocksArray));
@@ -79,8 +71,8 @@ module{
                             let amount = r.amount.e8s;
                             let fee = r.fee.e8s;
                             let timeOfCreation = transaction.created_at_time.timestamp_nanos;
-                            let profilesSize = Trie.size(profilesTree);
-                            let profilesIter = Trie.iter(profilesTree);
+                            let profilesSize = profilesMap.size();
+                            let profilesIter = profilesMap.entries();
                             let profilesArray = Iter.toArray(profilesIter);
                             var index_1 = 0;
                             while(index_1 < profilesSize){

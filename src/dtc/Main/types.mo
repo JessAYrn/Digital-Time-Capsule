@@ -3,6 +3,7 @@ import Account "../Ledger/Account";
 import NFT "../NFT/Dip-721-NFT-Container";
 import Trie "mo:base/Trie";
 import Principal "mo:base/Principal";
+import HashMap "mo:base/HashMap";
 
 
 module{
@@ -81,6 +82,10 @@ module{
     };
 
     public type ProfilesTree = Trie.Trie<Principal, Profile>;
+
+    public type ProfilesMap = HashMap.HashMap<Principal, Profile>;
+
+    public type ProfilesArray = [(Principal, Profile)];
 
     public type NftCollectionsTree = Trie.Trie<Nat, Nft>;
 

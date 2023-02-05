@@ -27,7 +27,7 @@ module{
 
     public func getPrincipalsList(
         callerId : Principal, 
-        profiles : MainTypes.ProfilesTree, 
+        profilesMap : MainTypes.ProfilesMap, 
         canisterData: MainTypes.CanisterData
         ) : async [Principal] {
 
@@ -36,8 +36,8 @@ module{
         if (callerIdAsText == canisterData.nftOwner) {
 
             var index = 0;
-            let numberOfProfiles = Trie.size(profiles);
-            let profilesIter = Trie.iter(profiles);
+            let numberOfProfiles = profilesMap.size();
+            let profilesIter = profilesMap.entries();
             let profilesArray = Iter.toArray(profilesIter);
             let ArrayBuffer = Buffer.Buffer<(Principal)>(1);
 
@@ -98,14 +98,10 @@ module{
         return #ok(ArrayBuffer.toArray());
     };
 
-    public func updateApprovalStatus( principal: Principal, profiles: MainTypes.ProfilesTree, newApprovalStatuse: Bool) : 
-    async Result.Result<(MainTypes.ProfilesTree), JournalTypes.Error>{
+    public func updateApprovalStatus( principal: Principal, profilesMap: MainTypes.ProfilesMap, newApprovalStatuse: Bool) : 
+    async Result.Result<(), JournalTypes.Error>{
 
-        let userProfile = Trie.find(
-            profiles,
-            key(principal),
-            Principal.equal
-        );
+        let userProfile = profilesMap.get(principal);
         switch(userProfile){
             case null{
                 return #err(#NotFound);
@@ -122,13 +118,8 @@ module{
                     treasuryContribution = profile.treasuryContribution;
                     monthsSpentAsTreasuryMember = profile.monthsSpentAsTreasuryMember;
                 };
-                let (newTrie, oldValue) = Trie.put(
-                    profiles,
-                    key(principal),
-                    Principal.equal,
-                    updatedProfile
-                );
-                return #ok(newTrie);
+                profilesMap.put(principal, updatedProfile);
+                return #ok();
             };
         };
     };
@@ -200,14 +191,10 @@ module{
         canisterData: MainTypes.CanisterData, 
         cyclesBalance_backend: Nat, 
         supportMode: Bool, 
-        profiles : MainTypes.ProfilesTree
+        profilesMap : MainTypes.ProfilesMap
     ) : async Result.Result<(MainTypes.CanisterDataExport), JournalTypes.Error> {
 
-        let profile = Trie.find(
-            profiles,
-            key(callerId),
-            Principal.equal
-        );
+        let profile = profilesMap.get(callerId);
 
         switch(profile){
             case null{
@@ -215,12 +202,12 @@ module{
             };
             case ( ? existingProfile){
 
-                let profilesApprovalStatus = getProfilesMetaData(profiles);
+                let profilesApprovalStatus = getProfilesMetaData(profilesMap);
                 let frontendPrincipal = Principal.fromText(canisterData.frontEndPrincipal);
                 let cyclesBalance_frontend = await getCyclesBalance(frontendPrincipal);
                 let isOwner = Principal.toText(callerId) == canisterData.nftOwner;
                 let canisterDataPackagedForExport = {
-                    journalCount = Trie.size(profiles);
+                    journalCount = profilesMap.size();
                     managerCanisterPrincipal = canisterData.managerCanisterPrincipal;
                     frontEndPrincipal = canisterData.frontEndPrincipal;
                     backEndPrincipal = canisterData.backEndPrincipal;
@@ -307,15 +294,15 @@ module{
     public func installCode_journalCanisters( 
         callerId : Principal,  
         wasmModule: Blob, 
-        profiles : MainTypes.ProfilesTree,
+        profilesMap : MainTypes.ProfilesMap,
         canisterData : MainTypes.CanisterData
         ): async() {
 
         let callerIdAsText = Principal.toText(callerId);
 
         if (callerIdAsText == canisterData.nftOwner) {
-            let profilesIter = Trie.iter(profiles);
-            let profilesSize = Trie.size(profiles);
+            let profilesIter = profilesMap.entries();
+            let profilesSize = profilesMap.size();
             let profilesArray = Iter.toArray(profilesIter);
             var index = 0;
             while(index < profilesSize){
@@ -348,9 +335,11 @@ module{
         return cyclesBalance;
     };
 
-    public func getProfilesMetaData(profiles: MainTypes.ProfilesTree) : MainTypes.ProfilesApprovalStatuses {
-        let profilesApprovalStatus = Trie.toArray<Principal, MainTypes.Profile, (Text, MainTypes.Approved)>(
-            profiles,
+    public func getProfilesMetaData(profilesMap: MainTypes.ProfilesMap) : MainTypes.ProfilesApprovalStatuses {
+        let profilesMapEntries = profilesMap.entries();
+        let profilesMapEntriesArray = Iter.toArray(profilesMapEntries);
+        let profilesApprovalStatus = Array.map<(Principal, MainTypes.Profile), (Text, MainTypes.Approved)>(
+            profilesMapEntriesArray, 
             func (x: (Principal, MainTypes.Profile)) : (Text, MainTypes.Approved) {
                 let (principal, profile) = x;
                 let principalAsText = Principal.toText(principal);

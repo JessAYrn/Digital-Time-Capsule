@@ -23,16 +23,12 @@ module{
     public func createNFTCollection( 
         callerId: Principal, 
         mainCanisterPrincipal: Principal, 
-        profilesTree: MainTypes.ProfilesTree, 
+        profilesMap: MainTypes.ProfilesMap, 
         initInput: DIP721Types.Dip721NonFungibleTokenInput,
         nftCollectionIndex: Nat
     ) : async Result.Result<(MainTypes.Nft, MainTypes.AmountAccepted), JournalTypes.Error> {
 
-        let result = Trie.find(
-            profilesTree,
-            key(callerId),
-            Principal.equal
-        );
+        let result = profilesMap.get(callerId);
 
         switch(result){
             case null{
@@ -64,18 +60,14 @@ module{
 
     public func mintNft( 
         callerId: Principal, 
-        profilesTree: MainTypes.ProfilesTree, 
+        profilesMap: MainTypes.ProfilesMap, 
         nftCollections: MainTypes.NftCollectionsTree,
         nftCollectionIndex: Nat, 
         file_type: Text, 
         numberOfCopies: Nat
     ) : async DIP721Types.MintReceipt {
 
-        let userAccount = Trie.find(
-            profilesTree,
-            key(callerId),
-            Principal.equal
-        );
+        let userAccount = profilesMap.get(callerId);
 
         switch(userAccount){
             case null{
@@ -104,17 +96,13 @@ module{
 
     public func uploadNftChunk(
     callerId: Principal, 
-    profilesTree: MainTypes.ProfilesTree,
+    profilesMap: MainTypes.ProfilesMap,
     nftCollections: MainTypes.NftCollectionsTree,
     nftCollectionIndex : Nat, 
     chunkId: Nat, 
     blobChunk: Blob) : async Result.Result<(), DIP721Types.ApiError>{
 
-        let userAccount = Trie.find(
-            profilesTree,
-            key(callerId),
-            Principal.equal
-        );
+        let userAccount = profilesMap.get(callerId);
 
         switch(userAccount){
             case null{
@@ -144,27 +132,19 @@ module{
 
     public func safeTransferNFT( 
     callerId: Principal, 
-    profilesTree: MainTypes.ProfilesTree, 
+    profilesMap: MainTypes.ProfilesMap, 
     nftCollections:MainTypes.NftCollectionsTree, 
     nftCollectionIndex: Nat, 
     to: Principal, 
     token_id: DIP721Types.TokenId) : async DIP721Types.TxReceipt{
 
-        let userProfile = Trie.find(
-            profilesTree,
-            key(callerId),
-            Principal.equal,
-        );
+        let userProfile = profilesMap.get(callerId);
         switch(userProfile){
             case null{
                 return #Err(#ZeroAddress);
             };
             case(? existingProfile){
-                let recipient = Trie.find(
-                    profilesTree,
-                    key(to),
-                    Principal.equal,
-                );
+                let recipient = profilesMap.get(to);
                 switch(recipient){
                     case null{
                         return #Err(#ZeroAddress);
@@ -194,15 +174,11 @@ module{
 
     public func getUserNFTsInfo(
     callerId: Principal,
-    profilesTree: MainTypes.ProfilesTree, 
+    profilesMap: MainTypes.ProfilesMap, 
     nftCollections: MainTypes.NftCollectionsTree) : 
     async Result.Result<[({nftCollectionKey: Nat}, DIP721Types.TokenMetaData)], JournalTypes.Error> {
 
-        let userProfile = Trie.find(
-            profilesTree,
-            key(callerId),
-            Principal.equal
-        );
+        let userProfile = profilesMap.get(callerId);
 
         switch(userProfile){
             case null{

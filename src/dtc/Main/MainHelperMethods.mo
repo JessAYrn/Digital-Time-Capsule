@@ -13,17 +13,18 @@ import MainTypes "types";
 import Array "mo:base/Array";
 import Journal "../Journal/Journal";
 import CanisterManagementMethods "CanisterManagementMethods";
+import HashMap "mo:base/HashMap";
 
 module{
 
     public func create (
         callerId: Principal, 
         requestsForAccess: MainTypes.RequestsForAccess, 
-        profilesTree: MainTypes.ProfilesTree, 
+        profilesMap: MainTypes.ProfilesMap, 
         isLocal: Bool,
         defaultControllers: [Principal],
         canisterData: MainTypes.CanisterData
-    ) : async Result.Result<(MainTypes.ProfilesTree, MainTypes.AmountAccepted), JournalTypes.Error> {
+    ) : async Result.Result<MainTypes.AmountAccepted, JournalTypes.Error> {
 
         if(not isLocal and Principal.toText(callerId) == "2vxsx-fae"){
            return #err(#NotAuthorized);
@@ -45,11 +46,7 @@ module{
             return #err(#NotAuthorized);
         };
 
-        let existing = Trie.find(
-            profilesTree,       //Target Trie
-            key(callerId), //Key
-            Principal.equal
-        );
+        let existing = profilesMap.get(callerId);
 
         // If there is an original value, do not update
         switch(existing) {
@@ -75,14 +72,9 @@ module{
                     treasuryContribution = ?0;
                     monthsSpentAsTreasuryMember = ?0;
                 };
-                let (newProfiles, oldValueForThisKey) = Trie.put(
-                    profilesTree, 
-                    key(callerId),
-                    Principal.equal,
-                    userProfile
-                );
+                profilesMap.put(callerId, userProfile);
                 
-                return #ok((newProfiles, amountAccepted));
+                return #ok(amountAccepted);
             };
             case ( ? v) {
                 return #err(#AlreadyExists);
@@ -90,14 +82,10 @@ module{
         };
     };
 
-    public func updateProfile(callerId: Principal, profilesTree: MainTypes.ProfilesTree, profile: MainTypes.ProfileInput) : 
-    async Result.Result<MainTypes.ProfilesTree, JournalTypes.Error> {
+    public func updateProfile(callerId: Principal, profilesMap: MainTypes.ProfilesMap, profile: MainTypes.ProfileInput) : 
+    async Result.Result<(), JournalTypes.Error> {
 
-        let result = Trie.find(
-            profilesTree,       //Target Trie
-            key(callerId), //Key
-            Principal.equal      //Equality Checker
-        );
+        let result = profilesMap.get(callerId);
 
         switch (result){
             //Preventing updates to profiles that haven't been created yet
@@ -106,7 +94,7 @@ module{
             };
             case(? v) {
 
-                let userNameAvailable = isUserNameAvailable(profile.userName, callerId, profilesTree);
+                let userNameAvailable = isUserNameAvailable(profile.userName, callerId, profilesMap);
                 if(userNameAvailable == true){
                     let userProfile : MainTypes.Profile = {
                         journal = v.journal;
@@ -121,13 +109,8 @@ module{
 
                     };
 
-                    let newTree = Trie.replace(
-                        profilesTree,       //Target trie
-                        key(callerId), //Key
-                        Principal.equal,      //Equality Checker
-                        ?userProfile        //The profile that you mean to use to overWrite the existing profile
-                    ).0;                // The result is a tuple where the 0th entry is the resulting profiles trie
-                    #ok(newTree);
+                    let newProfile = profilesMap.replace(callerId, userProfile);            
+                    #ok(());
                 } else {
                     #err(#UserNameTaken);
                 }
@@ -136,14 +119,10 @@ module{
     };
 
 
-    public func delete(callerId: Principal, profilesTree: MainTypes.ProfilesTree) : 
-    async Result.Result<MainTypes.ProfilesTree, JournalTypes.Error> {
+    public func delete(callerId: Principal, profilesMap: MainTypes.ProfilesMap) : 
+    async Result.Result<(), JournalTypes.Error> {
 
-        let result = Trie.find(
-            profilesTree,       //Target Trie
-            key(callerId), //Key
-            Principal.equal       //Equality Checker
-        );
+        let result = profilesMap.get(callerId);
 
         switch (result){
             //Preventing updates to profiles that haven't been created yet
@@ -152,26 +131,21 @@ module{
             };
             case(? v) {
 
-                let newTree = Trie.replace(
-                    profilesTree,
-                    key(callerId),
-                    Principal.equal,
-                    null
-                ).0;    
-                #ok(newTree);
+                let newProfile = profilesMap.delete(callerId);
+                #ok(());
             };
         };
     };
 
-    public func isUserNameAvailable(userName: ?Text, callerId: Principal, profilesTree: MainTypes.ProfilesTree) : Bool {
+    public func isUserNameAvailable(userName: ?Text, callerId: Principal, profilesMap: MainTypes.ProfilesMap) : Bool {
         switch(userName){
             case null{
                 true
             };
             case (? userNameValue){
                 var index = 0;
-                let numberOfProfiles = Trie.size(profilesTree);
-                let profilesIter = Trie.iter(profilesTree);
+                let numberOfProfiles = profilesMap.size();
+                let profilesIter = profilesMap.entries();
                 let profilesArray = Iter.toArray(profilesIter);
                 let ArrayBuffer = Buffer.Buffer<(Principal,Types.Profile)>(1);
 
@@ -201,9 +175,9 @@ module{
         };
     };
 
-    public func refillCanisterCycles(profilesTree : MainTypes.ProfilesTree) : async () {
-        let numberOfProfiles = Trie.size(profilesTree);
-        let profilesIter = Trie.iter(profilesTree);
+    public func refillCanisterCycles(profilesMap : MainTypes.ProfilesMap) : async () {
+        let numberOfProfiles = profilesMap.size();
+        let profilesIter = profilesMap.entries();
         let profilesArray = Iter.toArray(profilesIter);
         var index = 0;
         while(index < numberOfProfiles){
