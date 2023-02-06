@@ -12,7 +12,7 @@ import Cycles "mo:base/ExperimentalCycles";
 import MainTypes "types";
 import Array "mo:base/Array";
 import Journal "../Journal/Journal";
-import CanisterManagementMethods "CanisterManagementMethods";
+import CanisterManagementMethods "../Manager/CanisterManagementMethods";
 import HashMap "mo:base/HashMap";
 
 module{

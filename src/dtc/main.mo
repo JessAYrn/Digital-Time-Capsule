@@ -31,7 +31,7 @@ import JournalHelperMethods "Main/JournalHelperMethods";
 import NftHelperMethods "Main/NftHelperMethods";
 import MainTypes "Main/types";
 import TxHelperMethods "Main/TransactionHelperMethods";
-import CanisterManagementMethods "Main/CanisterManagementMethods";
+import CanisterManagementMethods "Manager/CanisterManagementMethods";
 import NftCollection "NftCollection/NftCollection";
 import Support "SupportCanisterIds/SupportCanisterIds";
 import IC "IC/ic.types";
