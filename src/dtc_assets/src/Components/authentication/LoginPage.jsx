@@ -1,10 +1,10 @@
 import React, {useContext, useEffect, useState, useCallback} from "react";
 import { useNavigate } from "react-router-dom";
-import { AppContext as JournalContext } from "../../App";
-import { AppContext as AccountContext } from "../../Account";
-import { AppContext as WalletContex } from "../../Wallet";
-import { AppContext as HomePageContext } from "../../HomePage";
-import { AppContext as NftPageContext } from "../../NFTs";
+import { AppContext as JournalContext } from "../../Routes/App";
+import { AppContext as AccountContext } from "../../Routes/Account";
+import { AppContext as WalletContex } from "../../Routes/Wallet";
+import { AppContext as HomePageContext } from "../../Routes/HomePage";
+import { AppContext as NftPageContext } from "../../Routes/NFTs";
 import { UI_CONTEXTS } from "../../Contexts";
 import * as IoiosIcons from 'react-icons/io';
 import * as AiIcons from 'react-icons/ai';
@@ -131,6 +131,7 @@ const LoginPage = (props) => {
                             <ButtonField
                                 Icon={IoiosIcons.IoIosWallet}
                                 iconSize={25}
+                                iconColor={'#917153'}
                                 className={`walletIconDiv loginPage ${(context === UI_CONTEXTS.WALLET) ? 'active' : ''}`}
                                 onClick={handleClickWallet}
                                 withBox={true}
@@ -138,6 +139,7 @@ const LoginPage = (props) => {
                             <ButtonField
                                 Icon={IoiosIcons.IoIosJournal}
                                 iconSize={25}
+                                iconColor={'#917153'}
                                 className={`journalIconDiv loginPage ${(context === UI_CONTEXTS.JOURNAL) ? 'active' : ''}`}
                                 onClick={handleClickJournal}
                                 withBox={true}
@@ -147,6 +149,7 @@ const LoginPage = (props) => {
                             <ButtonField
                                 Icon={AiIcons.AiFillDashboard}
                                 iconSize={25}
+                                iconColor={'#917153'}
                                 className={`dashboardIconDiv loginPage ${(context === UI_CONTEXTS.HOME_PAGE) ? 'active' : ''}`}
                                 onClick={handleClickDashboard}
                                 withBox={true}
@@ -154,6 +157,7 @@ const LoginPage = (props) => {
                             <ButtonField
                                 Icon={RiIcons.RiAccountPinCircleFill}
                                 iconSize={25}
+                                iconColor={'#917153'}
                                 className={`accountIconDiv loginPage ${(context === UI_CONTEXTS.ACCOUNT_PAGE) ? 'active' : ''}`}
                                 onClick={handleClickAccount}
                                 withBox={true}

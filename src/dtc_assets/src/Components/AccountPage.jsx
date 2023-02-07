@@ -4,7 +4,7 @@ import { types } from '../reducers/journalReducer'
 import AdminSection from './AdminSection';
 import "./AccountPage.scss";
 import "./SubscriptionPage.scss";
-import { AppContext } from '../Account';
+import { AppContext } from '../Routes/Account';
 import { NavBar } from './navigation/NavBar';
 import { UI_CONTEXTS } from '../Contexts';
 import LoadScreen from './LoadScreen';

@@ -2,7 +2,7 @@ import JournalPage from "./JournalPage";
 import React, { useContext, useEffect, useState } from "react";
 import {initialState, types} from "../reducers/journalReducer";
 import "./Journal.scss";
-import { AppContext } from "../App";
+import { AppContext } from "../Routes/App";
 import InputBox from "./Fields/InputBox";
 import * as AiIcons from 'react-icons/ai';
 import ButtonField from "./Fields/Button";

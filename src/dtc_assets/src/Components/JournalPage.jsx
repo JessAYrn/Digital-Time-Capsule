@@ -2,7 +2,7 @@ import React, {useState, useContext, useMemo, useCallback, useEffect} from "reac
 import FileUpload from "./Fields/fileManger/FileUpload";
 import InputBox from "./Fields/InputBox";
 import {types} from "../reducers/journalReducer";
-import  {AppContext} from "../App";
+import  {AppContext} from "../Routes/App";
 import "./JournalPage.scss";
 import DatePicker from "./Fields/DatePicker";
 import LoadScreen from "./LoadScreen";

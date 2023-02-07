@@ -30,7 +30,9 @@
         }
     }
     .registryButtonDiv{
-        background-color: white;
+        color: white;
+        border: solid;
+        border-width: thin;
         @media screen and (max-width: 650px) {
             width: 95%;
         };
@@ -54,8 +56,10 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        background-color: white;
         border-radius: 10px;
+        border: solid;
+        border-width: thin;
+        color: white;
         margin: 40px 0 40px 0;
 
     }
@@ -73,7 +77,10 @@
         .AnalyticsDiv{
             box-shadow: 0 5px 16px rgb(0 0 0 / 20%);
             opacity: 0.978;
-            background-color: white;
+            background-color: #202A44;
+            color: white;
+            border: solid;
+            border-width: thin;
             border-radius: 10px;
             width: 100%;
             height: auto;
@@ -103,6 +110,10 @@
                         justify-content: center;
                     }
                 }
+            }
+            .array{
+                justify-content: center;
+                align-items: center;
             }
         }
     }

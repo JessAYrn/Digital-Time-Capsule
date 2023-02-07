@@ -1,12 +1,12 @@
 import React, { createContext, useReducer, useState, useEffect} from 'react';
-import LoginPage from './Components/authentication/LoginPage';
+import LoginPage from '../Components/authentication/LoginPage';
 import { useLocation } from 'react-router-dom';
-import journalReducer, {initialState, types} from './reducers/journalReducer';
-import { UI_CONTEXTS } from './Contexts';
-import WalletPage from './Components/WalletPage';
-import { testTx } from './testData/Transactions';
-import { AuthenticateClient, CreateActor, CreateUserJournal, TriggerAuththenticateClientFunction } from './Components/authentication/AuthenticationMethods';
-import { loadJournalData, loadWalletData, loadCanisterData, handleErrorOnFirstLoad } from './Components/loadingFunctions';
+import journalReducer, {initialState, types} from '../reducers/journalReducer';
+import { UI_CONTEXTS } from '../Contexts';
+import WalletPage from '../Components/WalletPage';
+import { testTx } from '../testData/Transactions';
+import { AuthenticateClient, CreateActor, CreateUserJournal, TriggerAuththenticateClientFunction } from '../Components/authentication/AuthenticationMethods';
+import { loadJournalData, loadWalletData, loadCanisterData, handleErrorOnFirstLoad } from '../Components/loadingFunctions';
 
 export const AppContext = createContext({
     journalState:{},

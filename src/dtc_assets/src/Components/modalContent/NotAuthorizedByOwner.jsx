@@ -1,10 +1,10 @@
 import React, {useContext}from 'react';
 import './NotAuthorizedByOwner.scss'
-import { AppContext as NftContext} from '../../NFTs';
-import { AppContext as  WalletContext} from '../../Wallet';
-import { AppContext as JournalContext } from '../../App';
-import { AppContext as  HomePageContext} from '../../HomePage';
-import { AppContext as  AccountContext} from '../../Account';
+import { AppContext as NftContext} from '../../Routes/NFTs';
+import { AppContext as  WalletContext} from '../../Routes/Wallet';
+import { AppContext as JournalContext } from '../../Routes/App';
+import { AppContext as  HomePageContext} from '../../Routes/HomePage';
+import { AppContext as  AccountContext} from '../../Routes/Account';
 import { UI_CONTEXTS } from '../../Contexts';
 import { types } from '../../reducers/journalReducer';
 import { MODALS_TYPES } from '../../Constants';

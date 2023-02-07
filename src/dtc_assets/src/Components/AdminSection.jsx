@@ -1,6 +1,6 @@
 import React, {useContext, useRef} from "react";
 import axios from "axios";
-import { AppContext } from "../Account";
+import { AppContext } from "../Routes/Account";
 import "./AdminSection.scss";
 import { IDL } from "@dfinity/candid";
 import { fileToBlob } from "../Utils";

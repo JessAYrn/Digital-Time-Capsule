@@ -1,12 +1,12 @@
 import React, { createContext, useState, useReducer, useEffect} from 'react';
-import LoginPage from './Components/authentication/LoginPage';
-import journalReducer, { types, initialState } from './reducers/journalReducer';
+import LoginPage from '../Components/authentication/LoginPage';
+import journalReducer, { types, initialState } from '../reducers/journalReducer';
 import { useLocation } from 'react-router-dom';
-import LoadScreen from './Components/LoadScreen';
-import NftPage from './Components/NftPage';
-import { UI_CONTEXTS } from './Contexts';
-import { AuthenticateClient, CreateActor, TriggerAuththenticateClientFunction, CreateUserJournal } from './Components/authentication/AuthenticationMethods';
-import { loadJournalData, loadNftData, loadWalletData, handleErrorOnFirstLoad } from './Components/loadingFunctions';
+import LoadScreen from '../Components/LoadScreen';
+import NftPage from '../Components/NftPage';
+import { UI_CONTEXTS } from '../Contexts';
+import { AuthenticateClient, CreateActor, TriggerAuththenticateClientFunction, CreateUserJournal } from '../Components/authentication/AuthenticationMethods';
+import { loadJournalData, loadNftData, loadWalletData, handleErrorOnFirstLoad } from '../Components/loadingFunctions';
 
 
 export const AppContext = createContext({

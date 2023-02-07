@@ -6,7 +6,7 @@ import { deviceType } from '../../../Utils';
 import { DEVICE_TYPES, MAX_DURATION_OF_VIDEO_IN_SECONDS, NULL_STRING_ALL_LOWERCASE, PAGES } from '../../../Constants';
 import { MODALS_TYPES } from '../../../Constants';
 import { getFileFromApi, getFileURL, mapAndSendFileToApi, getDuration, updateFileMetadataInStore } from './FileManagementTools';
-import { AppContext as JournalContext} from '../../../App';
+import { AppContext as JournalContext} from '../../../Routes/App';
 import { UI_CONTEXTS } from '../../../Contexts';
 
 const forbiddenFileTypes = [

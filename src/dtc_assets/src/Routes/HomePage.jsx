@@ -1,12 +1,12 @@
 import React, { createContext, useReducer, useEffect} from 'react';
 import { useLocation } from 'react-router-dom';
-import journalReducer, {initialState, types} from "./reducers/journalReducer";
-import LoginPage from './Components/authentication/LoginPage';
-import { UI_CONTEXTS } from './Contexts';
-import Analytics from './Components/Analytics';
+import journalReducer, {initialState, types} from "../reducers/journalReducer";
+import LoginPage from '../Components/authentication/LoginPage';
+import { UI_CONTEXTS } from '../Contexts';
+import Analytics from '../Components/Analytics';
 import "./HomePage.scss";
-import { CreateUserJournal } from './Components/authentication/AuthenticationMethods';
-import { loadCanisterData, loadJournalData, loadWalletData } from './Components/loadingFunctions';
+import { CreateUserJournal } from '../Components/authentication/AuthenticationMethods';
+import { loadCanisterData, loadJournalData, loadWalletData } from '../Components/loadingFunctions';
 
 export const AppContext = createContext({
     journalState: null,

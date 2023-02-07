@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState} from 'react';
 import { getIntObserverFunc, visibilityFunctionDefault } from './animations/IntersectionObserverFunctions';
-import { AppContext } from '../HomePage';
+import { AppContext } from '../Routes/HomePage';
 import { NavBar } from './navigation/NavBar';
 import { UI_CONTEXTS } from '../Contexts';
 import { Modal } from './Modal';
@@ -225,7 +225,7 @@ const Analytics = () => {
                                 {   journalState.canisterData.isOwner &&
                                     <div className={'transparentDiv__homePage__dataFields animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
                                         <div className={'AnalyticsDiv'}>
-                                            <div className={'AnalyticsContentContainer'}>
+                                            <div className={'AnalyticsContentContainer array'}>
                                                 <h4 className='requestingAccessH4'>  Principals Requesting Access </h4>
                                                 {journalState.canisterData.requestsForApproval.map(([principal, approvalStatus]) => {
                                                     return (
@@ -261,11 +261,12 @@ const Analytics = () => {
                                 }
                                 <div className={'transparentDiv__homePage__dataFields  animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
                                     <div className={'AnalyticsDiv'}>
-                                        <div className={'AnalyticsContentContainer'}>
+                                        <div className={'AnalyticsContentContainer array'}>
                                         <h4 className='requestingAccessH4'>  User Principals </h4>
                                         {   
                                             !showUserPrincipals &&
                                             <ButtonField
+                                                className={'active'}
                                                 Icon={AiIcons.AiOutlineArrowDown}
                                                 iconSize={25}
                                                 onClick={() => {setShowUserPrincipals(!showUserPrincipals)}}
@@ -343,14 +344,14 @@ const Analytics = () => {
                                 </div>}
                                 <ButtonField
                                     text={' Register As New Owner '}
-                                    className={'registryButtonDiv animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}
+                                    className={'registryButtonDiv active animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}
                                     onClick={handleRegistration}
                                     withBox={true}
                                 />
                                 { showUserPrincipals && <ButtonField
                                     Icon={AiIcons.AiOutlineArrowUp}
                                     iconSize={25}
-                                    className={'collapseArrayButton'}
+                                    className={'collapseArrayButton active'}
                                     onClick={() => {setShowUserPrincipals(!showUserPrincipals)}}
                                     withBox={true}
                                 />}

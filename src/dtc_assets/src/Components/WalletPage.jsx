@@ -1,5 +1,5 @@
 import React, {useCallback, useContext, useEffect, useState} from 'react';
-import { AppContext } from '../Wallet';
+import { AppContext } from '../Routes/Wallet';
 import { NavBar } from './navigation/NavBar';
 import { Modal } from './Modal';
 import './WalletPage.scss';

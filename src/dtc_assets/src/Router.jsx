@@ -1,10 +1,10 @@
 import React from 'react';
 import { Route, Routes, HashRouter } from 'react-router-dom';
-import HomePage from './HomePage';
-import App from './App';
-import AccountPage from "./Account"
-import WalletApp from './Wallet';
-import NFTapp from './NFTs';
+import HomePage from './Routes/HomePage';
+import App from './Routes/App';
+import AccountPage from "./Routes/Account"
+import WalletApp from './Routes/Wallet';
+import NFTapp from './Routes/NFTs';
 import { defaultProviders } from "@connect2ic/core/providers"
 import { createClient } from "@connect2ic/core"
 import { Connect2ICProvider } from "@connect2ic/react"

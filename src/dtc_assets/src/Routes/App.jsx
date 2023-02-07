@@ -1,28 +1,26 @@
-import React, {useReducer, createContext, useState, useEffect} from 'react';
-import journalReducer, { types, initialState } from './reducers/journalReducer';
-import AccountSection from './Components/AccountPage';
+import * as React from 'react';
+import { createContext, useState, useEffect, useReducer} from 'react';
 import { useLocation } from 'react-router-dom';
-import LoginPage from './Components/authentication/LoginPage';
-import { UI_CONTEXTS } from './Contexts';
-import { PopulateStore, CreateActor, TriggerAuththenticateClientFunction, CreateUserJournal } from './Components/authentication/AuthenticationMethods';
-import { loadJournalData, loadCanisterData, loadWalletData, handleErrorOnFirstLoad } from './Components/loadingFunctions';
+import Journal from '../Components/Journal';
+import LoginPage from '../Components/authentication/LoginPage';
+import { UI_CONTEXTS } from '../Contexts';
+import journalReducer, {initialState, types} from '../reducers/journalReducer';
+import { TEST_DATA_FOR_NOTIFICATIONS } from '../testData/notificationsTestData';
+import { CreateUserJournal } from '../Components/authentication/AuthenticationMethods';
+import { loadCanisterData, loadJournalData, loadWalletData } from '../Components/loadingFunctions';
 
 export const AppContext = createContext({
     journalState:{},
     dispatch: () => {}
 });
 
-const AccountPage = () => {
-
+const App = () => {
     const [journalState, dispatch] = useReducer(journalReducer, initialState);
+    const [submissionsMade, setSubmissionsMade] = useState(0);
 
-    //clears useLocation().state upon page refresh so that when the user refreshes the page,
-    //changes made to this route aren't overrided by the useLocation().state of the previous route.
-    window.onbeforeunload = window.history.replaceState(null, '');
-
-    //gets state from previous route
+    // gets state from previous route
     const location = useLocation();
-    //dispatch state from previous route to redux store if that state exists
+    // dispatch state from previous route to redux store if that state exists
     if(location.state){
         dispatch({
             actionType: types.SET_ENTIRE_REDUX_STATE,
@@ -30,10 +28,15 @@ const AccountPage = () => {
         });
         //wipe previous location state to prevent infinite loop
         location.state = null;
-    }
+    };
+
+   
+    // clears useLocation().state upon page refresh so that when the user refreshes the page,
+    // changes made to this route aren't overrided by the useLocation().state of the previous route.
+    window.onbeforeunload = window.history.replaceState(null, '');
 
     useEffect(async () => {
-        if(!journalState.actor) return;
+        if( !journalState.actor) return;
         if(journalState.reloadStatuses.journalData){
             dispatch({
                 actionType: types.SET_IS_LOADING,
@@ -48,7 +51,7 @@ const AccountPage = () => {
                     payload: false
                 });
                 return;
-            }
+            };
             loadJournalData(journal, dispatch, types);
             dispatch({
                 actionType: types.SET_IS_LOADING,
@@ -64,26 +67,27 @@ const AccountPage = () => {
             //Load wallet data in background
             const walletDataFromApi = await journalState.actor.readWalletData();
             await loadWalletData(walletDataFromApi, dispatch, types);
-        }
+        };
     },[journalState.actor]);
 
     return (
         <AppContext.Provider 
             value={{
                 journalState,
-                dispatch
+                dispatch,
+                submissionsMade,
+                setSubmissionsMade
             }}
         >
             {
                 journalState.isAuthenticated ? 
-                    <AccountSection/> : 
+                    <Journal/> : 
                     <LoginPage
-                        context={UI_CONTEXTS.ACCOUNT_PAGE}
+                        context={UI_CONTEXTS.JOURNAL}
                     /> 
             }
         </AppContext.Provider>
     )
+}
 
-};
-
-export default AccountPage;
+export default App;
