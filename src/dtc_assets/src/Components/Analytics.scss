@@ -30,7 +30,9 @@
         }
     }
     .registryButtonDiv{
-        background-color: white;
+        color: white;
+        border: solid;
+        border-width: thin;
         @media screen and (max-width: 650px) {
             width: 95%;
         };
@@ -44,15 +46,6 @@
         }
     }
 
-    .transparentDiv__homePage__dataFields.approvedPrincipals{
-        .canisterDataDiv{
-            flex-direction: column;
-            .section{
-                width: 100%;
-            }
-        }
-    }
-
     .switchDiv{
         @media screen and (max-width: 650px) {
             width: 95%;
@@ -63,8 +56,10 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        background-color: white;
         border-radius: 10px;
+        border: solid;
+        border-width: thin;
+        color: white;
         margin: 40px 0 40px 0;
 
     }
@@ -82,7 +77,10 @@
         .AnalyticsDiv{
             box-shadow: 0 5px 16px rgb(0 0 0 / 20%);
             opacity: 0.978;
-            background-color: white;
+            background-color: #202A44;
+            color: white;
+            border: solid;
+            border-width: thin;
             border-radius: 10px;
             width: 100%;
             height: auto;
@@ -92,8 +90,40 @@
                 background-color: transparent;
                 display: flex;
                 flex-direction: column;
+                .requestingAccessH4{
+                    font-family: 'Courier New', monospace;
+                    text-align: center
+                };
+                .dataFieldRow{
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    flex-direction: column;
+                    border-bottom: solid rgb(122, 122, 122) .5px;
+                    .canisterDataDiv{
+                        width: 100%;
+                    }
+                    .approvalStatusDiv{
+                        width: 100%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+                }
+            }
+            .array{
+                justify-content: center;
+                align-items: center;
             }
         }
+    }
+    .collapseArrayButton{
+        background-color: white;
+        position: fixed;
+        bottom: 30px;
+        left: 30px;
+        width: 50px;
+        height: 50px;
     }
 }
 

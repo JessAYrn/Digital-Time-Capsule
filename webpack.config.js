@@ -77,6 +77,10 @@ module.exports = {
    rules: [
      { test: /\.(ts|tsx|jsx)$/, loader: "ts-loader" },
      {
+      test: /\.css$/i,
+      use: ["style-loader", "css-loader"],
+     },
+     {
       test: /\.scss$/,
       use: ['style-loader', 'css-loader', 'sass-loader']
     }
@@ -101,15 +105,15 @@ module.exports = {
   ],
   // proxy /api to port 8000 during development
   devServer: {
-    proxy: {
-      "/api": {
-        target: "http://localhost:8000",
-        changeOrigin: true,
-        pathRewrite: {
-          "^/api": "/api",
-        },
-      },
-    },
+    // proxy: {
+    //   "/api": {
+    //     target: "http://localhost:8000",
+    //     changeOrigin: true,
+    //     pathRewrite: {
+    //       "^/api": "/api",
+    //     },
+    //   },
+    // },
     hot: true,
     static: {
       directory: path.join(__dirname, "./src/dtc_assets"),

@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useContext } from "react";
 import { UI_CONTEXTS } from "../Contexts";
-import { AppContext } from "../NFTs";
+import { AppContext } from "../Routes/NFTs";
 import { NavBar } from "./navigation/NavBar";
 import FileUpload from "./Fields/fileManger/FileUpload";
 import { Modal } from "./Modal";

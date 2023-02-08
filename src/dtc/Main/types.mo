@@ -3,6 +3,7 @@ import Account "../Ledger/Account";
 import NFT "../NFT/Dip-721-NFT-Container";
 import Trie "mo:base/Trie";
 import Principal "mo:base/Principal";
+import HashMap "mo:base/HashMap";
 
 
 module{
@@ -13,6 +14,10 @@ module{
         userName: ?Text;
         id: Principal;
         accountId: ?Account.AccountIdentifier;
+        approved: ?Bool;
+        treasuryMember: ?Bool;
+        treasuryContribution: ?Nat64;
+        monthsSpentAsTreasuryMember: ?Nat;
     };
 
     public type ProfileInput = {
@@ -35,8 +40,11 @@ module{
         monthsSpentAsTreasuryMember: Nat;
     };
 
+    public type ProfilesApprovalStatuses = [(Text, Approved)];
+
     public type CanisterDataExport = {
         journalCount: Nat;
+        managerCanisterPrincipal: Text;
         frontEndPrincipal: Text;
         backEndPrincipal: Text;
         lastRecordedBackEndCyclesBalance: Nat;
@@ -45,7 +53,7 @@ module{
         nftId: Int;
         acceptingRequests: Bool;
         lastRecordedTime: Int;
-        users: [(Text, UserPermissions)];
+        profilesMetaData: ProfilesApprovalStatuses;
         isOwner: Bool;
         currentCyclesBalance_backend: Nat;
         currentCyclesBalance_frontend: Nat;
@@ -53,6 +61,7 @@ module{
     };
 
     public type CanisterData = {
+        managerCanisterPrincipal: Text;
         frontEndPrincipal: Text;
         backEndPrincipal: Text;
         lastRecordedBackEndCyclesBalance: Nat;
@@ -61,17 +70,22 @@ module{
         nftId: Int;
         acceptingRequests: Bool;
         lastRecordedTime: Int;
-        users: Trie.Trie<Text, UserPermissions>;
     };
+
+    public type Approved = Bool;
+
+    public type RequestsForAccess = [(Text, Approved)];
 
     public type CanisterCyclesBalances = {
         backendCyclesBalance : Nat;
         frontendCyclesBalance: Nat
     };
 
-    public type UsersExport = [(Text, UserPermissions)];
-
     public type ProfilesTree = Trie.Trie<Principal, Profile>;
+
+    public type ProfilesMap = HashMap.HashMap<Principal, Profile>;
+
+    public type ProfilesArray = [(Principal, Profile)];
 
     public type NftCollectionsTree = Trie.Trie<Nat, Nft>;
 

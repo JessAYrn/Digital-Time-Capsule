@@ -19,17 +19,46 @@ import Account "../Ledger/Account";
 import Bool "mo:base/Bool";
 import Option "mo:base/Option";
 import JournalTypes "journal.types";
+import HashMap "mo:base/HashMap";
 
 shared(msg) actor class Journal (principal : Principal) = this {
     let callerId = msg.caller;
 
-    private stable var journalV2 : Trie.Trie<Nat, JournalTypes.JournalEntry> = Trie.empty();
+    private stable var journalArray : [(Nat, JournalTypes.JournalEntry)] = [];
 
-    private stable var files : JournalTypes.Files = Trie.empty();
+    private var journalMap : JournalTypes.JournalMap = HashMap.fromIter<Nat, JournalTypes.JournalEntry>(
+        Iter.fromArray(journalArray), 
+        Iter.size(Iter.fromArray(journalArray)), 
+        Nat.equal,
+        Hash.hash
+    );
 
-    private stable var txHistory : Trie.Trie<Nat, JournalTypes.Transaction> = Trie.empty();
+    private stable var filesArray : [(Text, JournalTypes.File)] = [];
 
-    private stable var unsubmittedFiles : JournalTypes.Files = Trie.empty();
+    private var filesMap : JournalTypes.FileMap = HashMap.fromIter<Text, JournalTypes.File>(
+        Iter.fromArray(filesArray), 
+        Iter.size(Iter.fromArray(filesArray)), 
+        Text.equal,
+        Text.hash
+    );
+
+    private stable var txHistoryArray : [(Nat, JournalTypes.Transaction)] = [];
+
+    private var txHistoryMap : JournalTypes.TxHistoryMap = HashMap.fromIter<Nat, JournalTypes.Transaction>(
+        Iter.fromArray(txHistoryArray), 
+        Iter.size(Iter.fromArray(txHistoryArray)), 
+        Nat.equal,
+        Hash.hash
+    );
+
+    private stable var unsubmittedFilesArray : [(Text, JournalTypes.File)] = [];
+
+    private var unsubmittedFiles : JournalTypes.FileMap = HashMap.fromIter<Text, JournalTypes.File>(
+        Iter.fromArray(unsubmittedFilesArray),
+        Iter.size(Iter.fromArray(unsubmittedFilesArray)),
+        Text.equal,
+        Text.hash
+    );
     
     private stable var biography : JournalTypes.Bio = {
         name = "";
@@ -110,17 +139,11 @@ shared(msg) actor class Journal (principal : Principal) = this {
             filesMetaData  = journalEntry.filesMetaData;
         };
         
-        let (newJournal, oldValueForThisKey) = Trie.put(
-            journalV2,
-            natKey(journalEntryIndex),
-            Nat.equal,
-            completeEntry
-        );
-
-        journalV2 := newJournal;
+        journalMap.put(journalEntryIndex, completeEntry);
 
         journalEntryIndex += 1;
-        let journalAsArray = Iter.toArray(Trie.iter(journalV2));
+
+        let journalAsArray = Iter.toArray(journalMap.entries());
         #ok(((journalAsArray), biography));
     };
 
@@ -129,7 +152,14 @@ shared(msg) actor class Journal (principal : Principal) = this {
         if( Principal.toText(callerId) != mainCanisterId_ ) {
             return #err(#NotAuthorized);
         };
-        unsubmittedFiles := Trie.empty();
+        let emptyArray : [(Text, JournalTypes.File)] = [];
+        unsubmittedFiles := HashMap.fromIter<Text, JournalTypes.File>(
+            Iter.fromArray(emptyArray),
+            Iter.size(Iter.fromArray(emptyArray)),
+            Text.equal,
+            Text.hash
+        );
+    
         return #ok(());
     };
 
@@ -138,27 +168,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         if( Principal.toText(callerId) != mainCanisterId_ ) {
             return #err(#NotAuthorized);
         };
-        let trieIter = Trie.iter(files);
-        let trieSize = Trie.size(files);
-        var trieArray = Iter.toArray(trieIter);
-        var newTrie : JournalTypes.Files = Trie.empty();
-        var index = 0;
-        while(index < trieSize){
-            let fileWithName = trieArray[index];
-            let fileName = fileWithName.0;
-            let file = fileWithName.1;
-            if(fileName != fileId){
-                let (updatedNewTrie, oldValueForThisKey) = Trie.put(
-                    newTrie,
-                    textKey(fileName),
-                    Text.equal,
-                    file
-                );
-                newTrie := updatedNewTrie;
-            };
-            index += 1;
-        };
-        files := newTrie;
+        filesMap.delete(fileId);
         return #ok(());
     };
 
@@ -167,27 +177,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         if( Principal.toText(callerId) != mainCanisterId_ ) {
             return #err(#NotAuthorized);
         };
-        let trieIter = Trie.iter(unsubmittedFiles);
-        let trieSize = Trie.size(unsubmittedFiles);
-        var trieArray = Iter.toArray(trieIter);
-        var newTrie : JournalTypes.Files = Trie.empty();
-        var index = 0;
-        while(index < trieSize){
-            let fileWithName = trieArray[index];
-            let fileName = fileWithName.0;
-            let file = fileWithName.1;
-            if(fileName != fileId){
-                let (updatedNewTrie, oldValueForThisKey) = Trie.put(
-                    newTrie,
-                    textKey(fileName),
-                    Text.equal,
-                    file
-                );
-                newTrie := updatedNewTrie;
-            };
-            index += 1;
-        };
-        unsubmittedFiles := newTrie;
+        unsubmittedFiles.delete(fileId);
         return #ok(());
     };
 
@@ -195,9 +185,22 @@ shared(msg) actor class Journal (principal : Principal) = this {
         if( Principal.toText(callerId) != mainCanisterId_ ) {
             return #err(#NotAuthorized);
         };
-        let updatedFiles = Trie.merge(files, unsubmittedFiles, Text.equal);
-        files := updatedFiles;
-        unsubmittedFiles := Trie.empty();
+        let filesArray_ = Iter.toArray(filesMap.entries());
+        let unsubmittedFilesArray_ = Iter.toArray(unsubmittedFiles.entries());
+        let updatedFiles = Array.append(filesArray_, unsubmittedFilesArray_);
+        let emptyArray : [(Text, JournalTypes.File)] = [];
+        filesMap := HashMap.fromIter<Text, JournalTypes.File>(
+            Iter.fromArray(updatedFiles),
+            Iter.size(Iter.fromArray(updatedFiles)),
+            Text.equal,
+            Text.hash
+        );
+        unsubmittedFiles := HashMap.fromIter<Text, JournalTypes.File>(
+            Iter.fromArray(emptyArray),
+            Iter.size(Iter.fromArray(emptyArray)),
+            Text.equal,
+            Text.hash
+        );
         return #ok(());
     };
 
@@ -206,25 +209,27 @@ shared(msg) actor class Journal (principal : Principal) = this {
         if( Principal.toText(callerId) != mainCanisterId_ ) {
             return #err(#NotAuthorized);
         };
-        let updatedUnsubmittedFiles = Trie.put2D(
-            unsubmittedFiles,
-            textKey(fileId),
-            Text.equal,
+        let fileOption = unsubmittedFiles.get(fileId);
+        let fileTrie = Option.get(fileOption, Trie.empty());
+        let (newTrie, oldValue) = Trie.put(
+            fileTrie,
             natKey(chunkId),
             Nat.equal,
             blobChunk
         );
-        unsubmittedFiles := updatedUnsubmittedFiles;
+        unsubmittedFiles.put(fileId, newTrie);
         return #ok(fileId); 
     };
 
-    public shared(msg) func readJournal() : async ([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio) {
+    public shared(msg) func readJournal() : 
+    async ([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio, Text) {
         let callerId = msg.caller;
         if( Principal.toText(callerId) != mainCanisterId_ ) {
             throw Error.reject("Unauthorized access.");
         };
-        let journalAsArray = Iter.toArray(Trie.iter(journalV2));
-        return ((journalAsArray), biography);
+        let journalAsArray = Iter.toArray(journalMap.entries());
+        let journalCanisterPrincipal = Principal.fromActor(this); 
+        return ((journalAsArray), biography, Principal.toText(journalCanisterPrincipal));
     };
 
     public shared(msg) func getEntriesToBeSent() : async ([(Nat, JournalTypes.JournalEntry)]) {
@@ -233,7 +238,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
             throw Error.reject("Unauthorized access.");
         };
 
-        let journalIter = Trie.iter(journalV2);
+        let journalIter = journalMap.entries();
         let entriesToBeSentBuffer = Buffer.Buffer<(Nat, JournalTypes.JournalEntry)>(1);
 
         Iter.iterate<(Nat, JournalTypes.JournalEntry)>(journalIter, func(x : (Nat, JournalTypes.JournalEntry), _index) {
@@ -256,14 +261,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
                     };
 
-                    let (newJournal, oldValueForThisKey) = Trie.put(
-                        journalV2,
-                        natKey(x.0),
-                        Nat.equal,
-                        updatedJournalEntry
-                    );
-
-                    journalV2 := newJournal;
+                    journalMap.put(x.0,updatedJournalEntry);
                 };
             };
         });
@@ -273,25 +271,16 @@ shared(msg) actor class Journal (principal : Principal) = this {
     };
 
     public shared(msg) func readJournalEntry(key : Nat): async Result.Result<JournalTypes.JournalEntry, JournalTypes.Error> {
-
         let callerId = msg.caller;
         if( Principal.toText(callerId) != mainCanisterId_) {
             return #err(#NotAuthorized);
         };
-
-        let entry = Trie.find(
-            journalV2,
-            natKey(key),
-            Nat.equal
-        );
-
-
+        let entry = journalMap.get(key);
         switch(entry){
             case null{
                 #err(#NotFound);
             };
             case(? entryValue){
-                
                 let updatedEntryValue : JournalTypes.JournalEntry = {
                     entryTitle = entryValue.entryTitle;
                     text = entryValue.text;
@@ -305,18 +294,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
                     emailTwo = entryValue.emailTwo;
                     emailThree = entryValue.emailThree;
                     filesMetaData  = entryValue.filesMetaData;
-
                 };
-
-                let (newJournal, oldValueForThisKey) = Trie.put(
-                    journalV2,
-                    natKey(key),
-                    Nat.equal,
-                    updatedEntryValue
-                );
-
-                journalV2 := newJournal;
-
+                journalMap.put(key,updatedEntryValue);
                 #ok(updatedEntryValue);
             };
         }
@@ -328,11 +307,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
            return #err(#NotAuthorized);
         };
 
-        let file = Trie.find(
-            files,
-            textKey(fileId),
-            Text.equal,
-        );
+        let file = filesMap.get(fileId);
 
         switch(file){
             case null{
@@ -361,13 +336,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         if( Principal.toText(callerId) != mainCanisterId_) {
            return #err(#NotAuthorized);
         };
-
-        let file = Trie.find(
-            files,
-            textKey(fileId),
-            Text.equal,
-        );
-
+        let file = filesMap.get(fileId);
         switch(file){
             case null{
                 #err(#NotFound);
@@ -411,11 +380,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         if( Principal.toText(callerId) != mainCanisterId_) {
            return #err(#NotAuthorized);
         };
-        let entry = Trie.find(
-            journalV2,
-            natKey(key),
-            Nat.equal
-        );
+        let entry = journalMap.get(key);
 
         switch(entry){
             case null{
@@ -438,50 +403,9 @@ shared(msg) actor class Journal (principal : Principal) = this {
                     filesMetaData  = journalEntry.filesMetaData;
 
                 };
-
-                let (newJournal, oldValueForThisKey) = Trie.put(
-                    journalV2,
-                    natKey(key),
-                    Nat.equal,
-                    completeEntry
-                );
-
-                journalV2:= newJournal;
-                let journalAsArray = Iter.toArray(Trie.iter(journalV2));
+                journalMap.put(key,completeEntry);
+                let journalAsArray = Iter.toArray(journalMap.entries());
                 #ok((journalAsArray, biography));
-            }
-        }
-
-    };
-
-    public shared(msg) func updateJournalEntryFile(fileId: Text, chunkId: Nat, blobChunk : Blob) : async Result.Result<(),JournalTypes.Error> {
-        let callerId = msg.caller;
-        if( Principal.toText(callerId) != mainCanisterId_) {
-           return #err(#NotAuthorized);
-        };
-        let file = Trie.find(
-            files,
-            textKey(fileId),
-            Text.equal
-        );
-
-        switch(file){
-            case null{
-                #err(#NotFound);
-            };
-            case (? existingFile){
-                let updatedFiles = Trie.put2D(
-                    files,
-                    textKey(fileId),
-                    Text.equal,
-                    natKey(chunkId),
-                    Nat.equal,
-                    blobChunk
-                );
-
-                files := updatedFiles;
-                #ok(());
-
             }
         }
 
@@ -493,28 +417,17 @@ shared(msg) actor class Journal (principal : Principal) = this {
         if( Principal.toText(callerId) != mainCanisterId_) {
            return #err(#NotAuthorized);
         };
-        let entry = Trie.find(
-            journalV2,
-            natKey(key),
-            Nat.equal,
-        );
+        let entry = journalMap.get(key);
 
         switch(entry){
             case null{
                 #err(#NotFound);
             };
             case (? v){
-                let updatedJournal = Trie.replace(
-                    journalV2,
-                    natKey(key),
-                    Nat.equal,
-                    null
-                );
+                let updatedJournal = journalMap.delete(key);
 
-                journalV2 := updatedJournal.0;
-                let journalAsArray = Iter.toArray(Trie.iter(journalV2));
+                let journalAsArray = Iter.toArray(journalMap.entries());
                 #ok((journalAsArray), biography);
-
             };
         };
 
@@ -525,30 +438,16 @@ shared(msg) actor class Journal (principal : Principal) = this {
         if( Principal.toText(callerId) != mainCanisterId_) {
            return #err(#NotAuthorized);
         };
-        let entryFiles = Trie.find(
-            files,
-            textKey(fileId),
-            Text.equal,
-        );
-
+        let entryFiles = filesMap.get(fileId);
         switch(entryFiles){
             case null{
                 #err(#NotFound);
             };
             case (? v){
-                let (updatedFiles, existingFiles) = Trie.replace(
-                    files,
-                    textKey(fileId),
-                    Text.equal,
-                    null
-                );
-
-                files := updatedFiles;
+                filesMap.delete(fileId);
                 #ok(());
-
             };
         };
-
     };
 
     public shared(msg) func transferICP(amount: Nat64, recipientAccountId: Account.AccountIdentifier) : async Bool {
@@ -589,7 +488,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
             throw Error.reject("Unauthorized access.");
         };
         
-        Iter.toArray(Trie.iter(txHistory));
+        Iter.toArray(txHistoryMap.entries());
     };
 
     public shared(msg) func updateTxHistory(tx : JournalTypes.Transaction) : async () {
@@ -597,13 +496,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         if( Principal.toText(callerId) != mainCanisterId_) {
             throw Error.reject("Unauthorized access.");
         };
-        let (newTxHistoryTrie, oldValueForThisKey) = Trie.put(
-            txHistory,
-            natKey(txTrieIndex),
-            Nat.equal,
-            tx
-        );
-        txHistory := newTxHistoryTrie;
+        txHistoryMap.put(txTrieIndex, tx);
         txTrieIndex += 1; 
     };
 
@@ -630,6 +523,21 @@ shared(msg) actor class Journal (principal : Principal) = this {
             throw Error.reject("Unauthorized access.");
         };
         await ledger.account_balance({ account = userAccountId() })
+    };
+
+    system func preupgrade() {
+        journalArray := Iter.toArray(journalMap.entries());
+        filesArray := Iter.toArray(filesMap.entries());
+        txHistoryArray := Iter.toArray(txHistoryMap.entries());
+        unsubmittedFilesArray := Iter.toArray(unsubmittedFiles.entries());
+
+    };
+
+    system func postupgrade() {
+        journalArray := [];
+        filesArray := [];
+        txHistoryArray := [];
+        unsubmittedFilesArray := [];
     };
    
     private  func key(x: Principal) : Trie.Key<Principal> {

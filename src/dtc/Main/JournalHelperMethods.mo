@@ -17,19 +17,19 @@ module{
 
     private let oneICP : Nat64 = 100_000_000;
 
-    public func readJournal (callerId: Principal, profilesTree: MainTypes.ProfilesTree) : async Result.Result<({
-    userJournalData : ([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio); email: ?Text; userName: ?Text;}), 
+    public func readJournal (callerId: Principal, profilesMap: MainTypes.ProfilesMap) : async Result.Result<({
+        userJournalData : ([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio); 
+        email: ?Text; 
+        userName: ?Text;
+        principal: Text;
+    }), 
     JournalTypes.Error> {
 
         if(Principal.toText(callerId) == "2vxsx-fae"){
            return #err(#NotAuthorized);
         };
 
-        let result = Trie.find(
-            profilesTree,
-            key(callerId),
-            Principal.equal
-        );
+        let result = profilesMap.get(callerId);
 
         switch(result){
             case null{
@@ -40,9 +40,10 @@ module{
                 let userJournalData = await journal.readJournal();
                 
                 return #ok({
-                    userJournalData = userJournalData;
+                    userJournalData = (userJournalData.0, userJournalData.1);
                     email = v.email;
                     userName = v.userName;
+                    principal = userJournalData.2;
                 });
                 
             };
@@ -50,18 +51,14 @@ module{
 
     };
 
-    public func readWalletData(callerId: Principal, profilesTree: MainTypes.ProfilesTree) : 
+    public func readWalletData(callerId: Principal, profilesMap: MainTypes.ProfilesMap) : 
     async Result.Result<({ balance : Ledger.ICP; address: [Nat8]; } ), JournalTypes.Error> {
 
         if(Principal.toText(callerId) == "2vxsx-fae"){
            return #err(#NotAuthorized);
         };
 
-        let result = Trie.find(
-            profilesTree,
-            key(callerId),
-            Principal.equal
-        );
+        let result = profilesMap.get(callerId);
 
         switch(result){
             case null{
@@ -81,16 +78,12 @@ module{
         };
     };
 
-    public func readEntry(callerId: Principal, profilesTree: MainTypes.ProfilesTree, entryKey: JournalTypes.EntryKey) : async Result.Result<JournalTypes.JournalEntry, JournalTypes.Error> {
+    public func readEntry(callerId: Principal, profilesMap: MainTypes.ProfilesMap, entryKey: JournalTypes.EntryKey) : async Result.Result<JournalTypes.JournalEntry, JournalTypes.Error> {
         if(Principal.toText(callerId) == "2vxsx-fae"){
            return #err(#NotAuthorized);
         };
 
-        let result = Trie.find(
-            profilesTree,
-            key(callerId),
-            Principal.equal
-        );
+        let result = profilesMap.get(callerId);
 
         switch(result){
             case null{
@@ -104,17 +97,13 @@ module{
         };
     };
 
-    public func readEntryFileChunk(callerId: Principal, profilesTree: MainTypes.ProfilesTree, fileId: Text, chunkId: Nat) : async Result.Result<(Blob),JournalTypes.Error>{
+    public func readEntryFileChunk(callerId: Principal, profilesMap: MainTypes.ProfilesMap, fileId: Text, chunkId: Nat) : async Result.Result<(Blob),JournalTypes.Error>{
 
         if(Principal.toText(callerId) == "2vxsx-fae"){
            return #err(#NotAuthorized);
         };
 
-        let result = Trie.find(
-            profilesTree,
-            key(callerId),
-            Principal.equal
-        );
+        let result = profilesMap.get(callerId);
 
         switch(result){
             case null{
@@ -129,18 +118,14 @@ module{
 
     };
 
-    public func readEntryFileSize(callerId: Principal, profilesTree: MainTypes.ProfilesTree,fileId: Text) : 
+    public func readEntryFileSize(callerId: Principal, profilesMap: MainTypes.ProfilesMap,fileId: Text) : 
     async Result.Result<(Nat),JournalTypes.Error>{
 
         if(Principal.toText(callerId) == "2vxsx-fae"){
            return #err(#NotAuthorized);
         };
 
-        let result = Trie.find(
-            profilesTree,
-            key(callerId),
-            Principal.equal
-        );
+        let result = profilesMap.get(callerId);
 
         switch(result){
             case null{
@@ -155,18 +140,14 @@ module{
 
     };
 
-    public func updatePhotos(callerId: Principal, profilesTree: MainTypes.ProfilesTree, photos: [JournalTypes.FileMetaData]) : 
+    public func updatePhotos(callerId: Principal, profilesMap: MainTypes.ProfilesMap, photos: [JournalTypes.FileMetaData]) : 
     async Result.Result<(JournalTypes.Bio), JournalTypes.Error> {
         
         if(Principal.toText(callerId) == "2vxsx-fae"){
            return #err(#NotAuthorized);
         };
 
-        let result = Trie.find(
-            profilesTree,
-            key(callerId),
-            Principal.equal
-        );
+        let result = profilesMap.get(callerId);
 
         switch(result){
             case null{
@@ -180,18 +161,14 @@ module{
         };
     };
 
-    public func updateBio(callerId: Principal, profilesTree: MainTypes.ProfilesTree, bio: JournalTypes.Bio) : 
+    public func updateBio(callerId: Principal, profilesMap: MainTypes.ProfilesMap, bio: JournalTypes.Bio) : 
     async Result.Result<(JournalTypes.Bio), JournalTypes.Error> {
         
         if(Principal.toText(callerId) == "2vxsx-fae"){
            return #err(#NotAuthorized);
         };
 
-        let result = Trie.find(
-            profilesTree,
-            key(callerId),
-            Principal.equal
-        );
+        let result = profilesMap.get(callerId);
 
         switch(result){
             case null{
@@ -207,7 +184,7 @@ module{
 
     public func updateJournalEntry(
         callerId: Principal, 
-        profilesTree: MainTypes.ProfilesTree, 
+        profilesMap: MainTypes.ProfilesMap, 
         entryKey : ?JournalTypes.EntryKey, 
         entry : ?JournalTypes.JournalEntryInput
     ) : 
@@ -216,11 +193,7 @@ module{
            return #err(#NotAuthorized);
         };
 
-        let result = Trie.find(
-            profilesTree,
-            key(callerId),
-            Principal.equal
-        );
+        let result = profilesMap.get(callerId);
 
         switch(result){
             case null{
@@ -257,14 +230,10 @@ module{
         };
     };
 
-    public func deleteSubmittedFile(callerId: Principal, profilesTree: MainTypes.ProfilesTree, fileId: Text) :
+    public func deleteSubmittedFile(callerId: Principal, profilesMap: MainTypes.ProfilesMap, fileId: Text) :
     async Result.Result<(), JournalTypes.Error> {
 
-        let result = Trie.find(
-            profilesTree,
-            key(callerId),
-            Principal.equal
-        );
+        let result = profilesMap.get(callerId);
         switch(result){
             case null{
                 return #err(#NotFound);
@@ -277,14 +246,10 @@ module{
         };
     };
 
-    public func deleteUnsubmittedFile(callerId: Principal, profilesTree: MainTypes.ProfilesTree, fileId: Text) :
+    public func deleteUnsubmittedFile(callerId: Principal, profilesMap: MainTypes.ProfilesMap, fileId: Text) :
     async Result.Result<(), JournalTypes.Error> {
 
-        let result = Trie.find(
-            profilesTree,
-            key(callerId),
-            Principal.equal
-        );
+        let result = profilesMap.get(callerId);
         switch(result){
             case null{
                 return #err(#NotFound);
@@ -297,14 +262,10 @@ module{
         };
     };
 
-    public func submitFiles(callerId: Principal, profilesTree: MainTypes.ProfilesTree) : 
+    public func submitFiles(callerId: Principal, profilesMap: MainTypes.ProfilesMap) : 
     async Result.Result<(), JournalTypes.Error> {
 
-        let result = Trie.find(
-            profilesTree,
-            key(callerId),
-            Principal.equal
-        );
+        let result = profilesMap.get(callerId);
 
         switch(result){
             case null{
@@ -318,18 +279,14 @@ module{
         };
     };
 
-    public func clearUnsubmittedFiles(callerId: Principal, profilesTree: MainTypes.ProfilesTree): 
+    public func clearUnsubmittedFiles(callerId: Principal, profilesMap: MainTypes.ProfilesMap): 
     async Result.Result<(), JournalTypes.Error>{
 
         if(Principal.toText(callerId) == "2vxsx-fae"){
            return #err(#NotAuthorized);
         };
 
-        let result = Trie.find(
-            profilesTree,
-            key(callerId),
-            Principal.equal
-        );
+        let result = profilesMap.get(callerId);
 
         switch(result){
             case null{
@@ -343,18 +300,14 @@ module{
         };
     };
 
-    public func uploadJournalEntryFile(callerId: Principal, profilesTree: MainTypes.ProfilesTree,fileId: Text, chunkId: Nat, blobChunk: Blob): 
+    public func uploadJournalEntryFile(callerId: Principal, profilesMap: MainTypes.ProfilesMap, fileId: Text, chunkId: Nat, blobChunk: Blob): 
     async Result.Result<(Text), JournalTypes.Error>{
 
         if(Principal.toText(callerId) == "2vxsx-fae"){
            return #err(#NotAuthorized);
         };
 
-        let result = Trie.find(
-            profilesTree,
-            key(callerId),
-            Principal.equal
-        );
+        let result = profilesMap.get(callerId);
 
         switch(result){
             case null{
@@ -369,18 +322,14 @@ module{
         
     };
 
-    public func getEntriesToBeSent(callerId: Principal, profilesTree: MainTypes.ProfilesTree) : 
+    public func getEntriesToBeSent(callerId: Principal, profilesMap: MainTypes.ProfilesMap) : 
     async Result.Result<[(Text,[(Nat, JournalTypes.JournalEntry)])], JournalTypes.Error>{
 
         if(Principal.toText(callerId) == "2vxsx-fae"){
            return #err(#NotAuthorized);
         };
 
-        let callerProfile = Trie.find(
-            profilesTree,
-            key(callerId), //Key
-            Principal.equal 
-        );
+        let callerProfile = profilesMap.get(callerId);
 
         switch(callerProfile){
             case null{
@@ -395,8 +344,8 @@ module{
                     case(? userName){
                         if(userName == "admin"){
                             var index = 0;
-                            let numberOfProfiles = Trie.size(profilesTree);
-                            let profilesIter = Trie.iter(profilesTree);
+                            let numberOfProfiles = profilesMap.size();
+                            let profilesIter = profilesMap.entries();
                             let profilesArray = Iter.toArray(profilesIter);
                             let AllEntriesToBeSentBuffer = Buffer.Buffer<(Text, [(Nat, JournalTypes.JournalEntry)])>(1);
 

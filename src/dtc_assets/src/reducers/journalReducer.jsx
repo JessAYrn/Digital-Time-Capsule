@@ -4,8 +4,6 @@ import { getDateAsString } from "../Utils";
 export const types = {
     SET_ENTIRE_REDUX_STATE: "SET_ENTIRE_REDUX_STATE",
     SET_ACTOR: "SET_ACTOR",
-    SET_AUTH_CLIENT: "SET_AUTH_CLIENT",
-    SET_STOIC_IDENTITY: "SET_STOIC_IDENTITY",
     SET_AUTHENTICATE_FUNCTION_CALL_COUNT: "SET_AUTHENTICATE_FUNCTION_CALL_COUNT",
     SET_CREATE_ACTOR_FUNCTION_CALL_COUNT: "SET_CREATE_ACTOR_FUNCTION_CALL_COUNT",
     SET_CANISTER_DATA: "SET_CANISTER_DATA",
@@ -64,13 +62,11 @@ export const types = {
 
 export const initialState = {
     actor: undefined,
-    authClient: undefined,
     authenticateFunctionCallCount: 0,
     createActorFunctionCallCount: 0,
-    stoicIdentity: undefined,
     journalCount: 0,
     canisterData: {
-        users: [],
+        profilesMetaData: [],
         journalCount: 0,
         backEndCyclesBurnRatePerDay: 1,
         backEndPrincipal: NULL_STRING_CAPITALIZED,
@@ -179,16 +175,6 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
-        case types.SET_AUTH_CLIENT:
-        state.authClient = payload;
-        return {
-            ...state
-        }
-        case types.SET_STOIC_IDENTITY:
-        state.stoicIdentity = payload;
-        return {
-            ...state
-        }
         case types.SET_CANISTER_DATA:
         state.canisterData = payload;
         return {

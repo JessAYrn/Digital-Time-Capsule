@@ -1,6 +1,6 @@
 export const mapBackendCanisterDataToFrontEndObj = (props) => {
     const {
-        users,
+        profilesMetaData,
         backEndCyclesBurnRatePerDay,
         backEndPrincipal,
         frontEndPrincipal,
@@ -16,7 +16,7 @@ export const mapBackendCanisterDataToFrontEndObj = (props) => {
     } = props;
 
     return {
-        users: users,
+        profilesMetaData: profilesMetaData,
         backEndCyclesBurnRatePerDay: parseInt(backEndCyclesBurnRatePerDay),
         backEndPrincipal: backEndPrincipal,
         frontEndPrincipal: frontEndPrincipal,

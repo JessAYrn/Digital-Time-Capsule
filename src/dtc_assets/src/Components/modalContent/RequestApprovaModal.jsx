@@ -1,14 +1,13 @@
 import React, {useContext} from "react";
-import { AppContext as NftContext} from '../../NFTs';
-import { AppContext as  WalletContext} from '../../Wallet';
-import { AppContext as JournalContext } from '../../App';
-import { AppContext as  HomePageContext} from '../../HomePage';
-import { AppContext as  AccountContext} from '../../Account';
+import { AppContext as NftContext} from '../../Routes/NFTs';
+import { AppContext as  WalletContext} from '../../Routes/Wallet';
+import { AppContext as JournalContext } from '../../Routes/App';
+import { AppContext as  HomePageContext} from '../../Routes/HomePage';
+import { AppContext as  AccountContext} from '../../Routes/Account';
 import { UI_CONTEXTS } from '../../Contexts';
-import { types } from "../../reducers/journalReducer";
-import { logout } from "../authentication/AuthenticationMethods";
+import { initialState, types } from "../../reducers/journalReducer";
 import "./RequestApprovaModal.scss";
-import ButtonField from "../Fields/Button";
+import { ConnectButton, ConnectDialog, useConnect } from "@connect2ic/react";
 import LoadScreen from "../LoadScreen";
 
 const RequestApprovalResponseModal = (props) => {
@@ -34,17 +33,15 @@ const RequestApprovalResponseModal = (props) => {
     }
     const {journalState, dispatch} = useContext(AppContext);
 
-    const handleClick = async () => {
-        dispatch({
-            actionType: types.SET_IS_LOADING,
-            payload: true
-        });
-        await logout(journalState, dispatch);
-        dispatch({
-            actionType: types.SET_IS_LOADING,
-            payload: false
-        });
-    };
+    useConnect({
+        onConnect: () => {},
+        onDisconnect: () => {
+            dispatch({
+                actionType: types.SET_ENTIRE_REDUX_STATE,
+                payload: initialState
+            });
+        }
+    });
 
     return (
         journalState.isLoading ? 
@@ -62,12 +59,8 @@ const RequestApprovalResponseModal = (props) => {
                     </h3>
                 </>
             }
-            <ButtonField
-                text={'OK'}
-                className={'button'}
-                onClick={handleClick}
-                withBox={true}
-            />
+            <ConnectButton/>
+            <ConnectDialog />
         </div>
     )
 

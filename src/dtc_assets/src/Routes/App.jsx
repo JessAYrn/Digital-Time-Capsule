@@ -1,13 +1,13 @@
 import * as React from 'react';
 import { createContext, useState, useEffect, useReducer} from 'react';
 import { useLocation } from 'react-router-dom';
-import Journal from './Components/Journal';
-import LoginPage from './Components/authentication/LoginPage';
-import { UI_CONTEXTS } from './Contexts';
-import journalReducer, {initialState, types} from './reducers/journalReducer';
-import { TEST_DATA_FOR_NOTIFICATIONS } from './testData/notificationsTestData';
-import { AuthenticateClient, CreateActor, CreateUserJournal, TriggerAuththenticateClientFunction } from './Components/authentication/AuthenticationMethods';
-import { handleErrorOnFirstLoad, loadCanisterData, loadJournalData, loadWalletData } from './Components/loadingFunctions';
+import Journal from '../Components/Journal';
+import LoginPage from '../Components/authentication/LoginPage';
+import { UI_CONTEXTS } from '../Contexts';
+import journalReducer, {initialState, types} from '../reducers/journalReducer';
+import { TEST_DATA_FOR_NOTIFICATIONS } from '../testData/notificationsTestData';
+import { CreateUserJournal } from '../Components/authentication/AuthenticationMethods';
+import { loadCanisterData, loadJournalData, loadWalletData } from '../Components/loadingFunctions';
 
 export const AppContext = createContext({
     journalState:{},
@@ -30,38 +30,19 @@ const App = () => {
         location.state = null;
     };
 
-    // login function used when Authenticating the client (aka user)
-    useEffect(() => {
-        const authenticate = async () => {
-            await AuthenticateClient(journalState, dispatch, types)
-        };
-        authenticate();
-    }, [journalState.authenticateFunctionCallCount]);
-
-    //Creating the canisterActor that enables us to be able to call the functions defined on the backend
-    useEffect(() => {
-        const constructActor = async () => {
-            await CreateActor(journalState, dispatch, types)
-        };
-        constructActor();
-    }, [journalState.createActorFunctionCallCount]);
-
+   
     // clears useLocation().state upon page refresh so that when the user refreshes the page,
     // changes made to this route aren't overrided by the useLocation().state of the previous route.
     window.onbeforeunload = window.history.replaceState(null, '');
 
     useEffect(async () => {
-        if(!journalState.isAuthenticated || !journalState.actor) return;
+        if( !journalState.actor) return;
         if(journalState.reloadStatuses.journalData){
             dispatch({
                 actionType: types.SET_IS_LOADING,
                 payload: true
             });
-            let journal = await handleErrorOnFirstLoad(
-                journalState.actor.readJournal, 
-                TriggerAuththenticateClientFunction, 
-                { journalState, dispatch, types }
-            );
+            let journal = await journalState.actor.readJournal();
             if(!journal) return;
             if("err" in journal) journal = await CreateUserJournal(journalState, dispatch, 'readJournal');
             if("err" in journal) {

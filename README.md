@@ -37,7 +37,7 @@ add the follow properties to the "canisters" object in the dfx.json file:
 start local replica by running the following line:
 
 ```
-dfx start --background --clean
+dfx start --clean
 ```
 
 Create a new identity that will work as a minting account by running the following lines:
@@ -174,4 +174,7 @@ dfx canister --network ic  update-settings <canister_id> --freezing-threshold <N
 ### Add a new controller
 
 dfx canister update-settings dtc --add-controller <ADD_CONTROLLER>
+
+### gzip wasm module before upgrading canister (note: after gzipping, you'll have to change the file name from dtc.wasm.gz back to dtc.wasm)
+gzip -f -1 ./.dfx/ic/canisters/dtc/dtc.wasm  
 

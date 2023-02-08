@@ -2,7 +2,7 @@ import React, {useState, useContext, useMemo, useCallback, useEffect} from "reac
 import FileUpload from "./Fields/fileManger/FileUpload";
 import InputBox from "./Fields/InputBox";
 import {types} from "../reducers/journalReducer";
-import  {AppContext} from "../App";
+import  {AppContext} from "../Routes/App";
 import "./JournalPage.scss";
 import DatePicker from "./Fields/DatePicker";
 import LoadScreen from "./LoadScreen";
@@ -302,15 +302,18 @@ const JournalPage = (props) => {
                                     />
                                 }
                                 <FileUpload
+                                    videoHeight = {'443'}
                                     label={`file_${metaData.fileIndex}`}
                                     elementId={`file_${metaData.fileIndex}`}
                                     disabled={!journalPageData.draft}
                                     fileIndex={fileIndex}
                                     key={fileIndex}
-                                    page={PAGES.JOURNAL_PAGE}
                                     context={UI_CONTEXTS.JOURNAL}
                                     setChangesWereMade={setPageChangesMade}
                                     index={index}
+                                    dispatchActionToChangeFileMetaData={types.CHANGE_FILE_METADATA}
+                                    dispatchActionToChangeFileLoadStatus={types.CHANGE_FILE_LOAD_STATUS}
+                                    filesMetaDataArray={journalState.journal[index].filesMetaData}
                                 />
                             </div>
                         )

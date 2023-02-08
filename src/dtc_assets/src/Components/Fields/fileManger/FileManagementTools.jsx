@@ -1,5 +1,4 @@
-import { UI_CONTEXTS } from "../../../Contexts";
-import { getFileArrayBuffer, fileToBlob } from "../../../Utils";
+import { fileToBlob, flattenUint8array } from "../../../Utils";
 import { CHUNK_SIZE, PAGES } from "../../../Constants";
 
 export const retrieveChunk = async (journalState, fileName, chunkIndex) => {
@@ -10,7 +9,7 @@ export const retrieveChunk = async (journalState, fileName, chunkIndex) => {
 }; 
 
 export const getFileURL = async (file) => {
-    let fileAsBuffer = await getFileArrayBuffer(file);
+    let fileAsBuffer = await file.arrayBuffer();
     let fileBlob = new Blob([new Uint8Array(fileAsBuffer)], { type: file.type });
     let url = window.URL.createObjectURL(fileBlob);
     return url;
@@ -110,7 +109,7 @@ export const getFileFromApi = async (
             index_ += 1;
         };
         let fileBytes = await Promise.all(promises);
-        fileBytes = fileBytes.flat(1);
+        fileBytes = flattenUint8array(fileBytes);
         const fileArrayBuffer = new Uint8Array(fileBytes).buffer;
         let metaData_ = fileData.metaData ? fileData.metaData : fileData;
         const fileBlob = new Blob(

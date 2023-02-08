@@ -1,39 +1,7 @@
 .cameraDiv{
-    @media screen and (min-width: 1018px) and (max-width: 1200px) {    
-        margin-left: 28%;
-    };
-    @media screen and (min-width: 885px) and (max-width: 1017px) {    
-        margin-left: 26%;
-    };
-    @media screen and (min-width: 769px) and (max-width: 884px) {    
-        margin-left: 23%;
-    };
-    @media screen and (min-width: 680px) and (max-width: 768px) {    
-        margin-left: 19%;
-    };
-    @media screen and (min-width: 598px) and (max-width: 679px) {    
-        margin-left: 14%;
-    };
-    @media screen and (min-width: 530px) and (max-width: 597px) {    
-        margin-left: 8%;
-    };
-    @media screen and (min-width: 490px) and (max-width: 529px) {    
-        margin-left: 3%;
-    };
-    @media screen and (min-width: 477px) and (max-width: 489px) {    
-        margin-left: 2%;
-    };
-    @media screen and (min-width: 469px) and (max-width: 476px) {    
-        margin-left: 1%;
-    };
-    @media screen and (max-width: 468px) {    
-        margin-left: 0;
-        width: 100%;
-    };
     width: 300px;
     height: 300px;
-    margin-left: 33%;
-
+    max-width: 100%;
 }
 .qrCancelButtonDiv{
     width: 90%;

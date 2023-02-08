@@ -6,7 +6,7 @@ import { deviceType } from '../../../Utils';
 import { DEVICE_TYPES, MAX_DURATION_OF_VIDEO_IN_SECONDS, NULL_STRING_ALL_LOWERCASE, PAGES } from '../../../Constants';
 import { MODALS_TYPES } from '../../../Constants';
 import { getFileFromApi, getFileURL, mapAndSendFileToApi, getDuration, updateFileMetadataInStore } from './FileManagementTools';
-import { AppContext as JournalContext} from '../../../App';
+import { AppContext as JournalContext} from '../../../Routes/App';
 import { UI_CONTEXTS } from '../../../Contexts';
 
 const forbiddenFileTypes = [
@@ -15,7 +15,6 @@ const forbiddenFileTypes = [
 
 const FileUpload = (props) => {
     const {
-        label,
         index,
         elementId,
         forceDisplayDefaultFileSrc,
@@ -23,14 +22,19 @@ const FileUpload = (props) => {
         fileIndex,
         context,
         disabled,
-        page,
+        classNameMod,
+        dispatchActionToChangeFileMetaData,
+        dispatchActionToChangeFileLoadStatus,
+        filesMetaDataArray,
+        videoHeight
     } = props;
     let inputRef = useRef();
 
-    const [constructedFile, setConstructedFile] = useState(null);
-    const [fileSrc, setFileSrc]  = useState("dtc-logo-black.png");
-    const [fileType, setFileType] = useState("image/png");
     const defaultFileSrc = "dtc-logo-black.png";
+    const [constructedFile, setConstructedFile] = useState(null);
+    const [fileSrc, setFileSrc]  = useState(defaultFileSrc);
+    const [fileType, setFileType] = useState("image/png");
+    
 
     var uploadedFile;
     var fileURL;
@@ -43,27 +47,7 @@ const FileUpload = (props) => {
     }
     const { journalState, dispatch } = useContext(AppContext);
 
-    let dispatchActionToChangeFileMetaData;
-    let dispatchActionToChangeFileLoadStatus;
-    let fileData;
-    let filesMetaDataArray;
-    let videoHeight;
-    let classNameMod = '';
-
-    //selects the appropriate fileMetaDataArray, and dispatchActions for updating that array in the redux store
-    if(page === PAGES.JOURNAL_COVER){
-        dispatchActionToChangeFileMetaData = types.CHANGE_FILE_METADATA_JOURNAL_COVER_PAGE;
-        dispatchActionToChangeFileLoadStatus = types.CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE;
-        classNameMod = 'coverPhoto';
-        filesMetaDataArray = journalState.bio.photos;
-        videoHeight = '330';
-    } else if(page === PAGES.JOURNAL_PAGE) {
-        dispatchActionToChangeFileMetaData= types.CHANGE_FILE_METADATA;
-        dispatchActionToChangeFileLoadStatus= types.CHANGE_FILE_LOAD_STATUS;
-        filesMetaDataArray = journalState.journal[index].filesMetaData;
-        videoHeight = '443';
-    }
-    fileData = filesMetaDataArray[fileIndex];
+    let fileData = filesMetaDataArray[fileIndex];
     let fileName = fileData.fileName;
     let fileNameIsNull = fileName === NULL_STRING_ALL_LOWERCASE;
 
@@ -97,7 +81,7 @@ const FileUpload = (props) => {
         if(constructedFile){
             setFileType(constructedFile.type);
             fileURL = await getFileURL(constructedFile);
-            setFileSrc(fileURL)
+            setFileSrc(fileURL);
         };
     },[constructedFile]);
 
@@ -109,7 +93,7 @@ const FileUpload = (props) => {
         if(uploadedFile.name.match(/\.(avi|mp3|mp4|mpeg|ogg|webm|mov|MOV)$/i)){
             const duration = await getDuration(uploadedFile);
             if(duration > MAX_DURATION_OF_VIDEO_IN_SECONDS || forbiddenFileTypes.includes(uploadedFile.type)){
-                setFileSrc("dtc-logo-black.png");
+                setFileSrc(defaultFileSrc);
                 setFileType("image/png");
                 dispatch({
                         actionType: types.SET_MODAL_STATUS,
@@ -124,7 +108,6 @@ const FileUpload = (props) => {
             } else {
                 setFileType(uploadedFile.type);
                 fileURL = await getFileURL(uploadedFile);
-                setFileSrc(fileURL);
                 let fileId = updateFileMetadataInStore(
                     dispatch, 
                     dispatchActionToChangeFileMetaData, 
@@ -140,7 +123,6 @@ const FileUpload = (props) => {
             //triggers useEffect which displays the video
             setFileType(uploadedFile.type);
             fileURL = await getFileURL(uploadedFile);
-            setFileSrc(fileURL)
             let fileId = updateFileMetadataInStore(
                 dispatch, 
                 dispatchActionToChangeFileMetaData, 

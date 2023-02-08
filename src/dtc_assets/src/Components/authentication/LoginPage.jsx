@@ -1,13 +1,11 @@
 import React, {useContext, useEffect, useState, useCallback} from "react";
-import {createActor, canisterId} from "../../../../declarations/dtc/index";
 import { useNavigate } from "react-router-dom";
-import { AppContext as JournalContext } from "../../App";
-import { AppContext as AccountContext } from "../../Account";
-import { AppContext as WalletContex } from "../../Wallet";
-import { AppContext as HomePageContext } from "../../HomePage";
-import { AppContext as NftPageContext } from "../../NFTs";
+import { AppContext as JournalContext } from "../../Routes/App";
+import { AppContext as AccountContext } from "../../Routes/Account";
+import { AppContext as WalletContex } from "../../Routes/Wallet";
+import { AppContext as HomePageContext } from "../../Routes/HomePage";
+import { AppContext as NftPageContext } from "../../Routes/NFTs";
 import { UI_CONTEXTS } from "../../Contexts";
-import {StoicIdentity} from "ic-stoic-identity";
 import * as IoiosIcons from 'react-icons/io';
 import * as AiIcons from 'react-icons/ai';
 import * as RiIcons from 'react-icons/ri';
@@ -16,11 +14,12 @@ import { NAV_LINKS } from "../../Constants";
 import "./LoginPage.scss";
 import "../../Components/animations/Animation.scss";
 import { getIntObserverFunc, visibilityFunctionLoginPage } from "../animations/IntersectionObserverFunctions";
-import { TriggerAuththenticateClientFunction } from "./AuthenticationMethods";
-import { types } from "../../reducers/journalReducer";
-import { delay } from "../../Utils";
+import { ConnectButton, ConnectDialog, useConnect, useCanister } from "@connect2ic/react";
+import "@connect2ic/core/style.css"
 import ButtonField from "../Fields/Button";
 import DataField from "../Fields/DataField";
+import { types } from "../../reducers/journalReducer";
+import { backendActor } from "../../Utils";
 
 const LoginPage = (props) => {
 
@@ -46,11 +45,10 @@ const LoginPage = (props) => {
         dispatch
     } = useContext(properContext);
 
-    const [isUsingII, setIsUsingII] = useState(false);
-    const [checks, setChecks] = useState(0);
     const [frontendCanisterBalance, setFrontendCanisterBalance] = useState(0);
     const [backendCanisterBalance, setBackendCanisterBalance] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
+    const [anonymousActor] = useCanister('dtc');
 
     let navigate = useNavigate();
 
@@ -78,68 +76,35 @@ const LoginPage = (props) => {
         navigate(NAV_LINKS.account, { replace: false, state: journalStateWithoutFunction });
     },[journalState.reloadStatuses]);
 
-    useEffect(() => {
-        if(!checks) return;
-        const listenForIIAuthentication = async () => {
-            let client = journalState.authClient;
-            let authenticated_;
-            if(client) authenticated_ = await client.isAuthenticated();
-            if(authenticated_) TriggerAuththenticateClientFunction(journalState, dispatch, types);
-            else setChecks( checks + 1);
-        }
-        const listenForReduxStoreStoicIdToUpdate = async () => {
-            let stoicId = journalState.stoicIdentity;
-            if(stoicId) TriggerAuththenticateClientFunction(journalState, dispatch, types);
-            else{
-                await delay(1000);
-                setChecks( checks + 1);
-            };
-        }
-        if (isUsingII) listenForIIAuthentication();
-        else listenForReduxStoreStoicIdToUpdate();
-    }, [checks]);
+    const connectionResult = useConnect({
+        onConnect: () => {
+            //try updating the actor property in the redux store here
 
-    const handleClick_Stoic = async () => {
-        setIsUsingII(false);
-        if(!journalState.isAuthenticated){
-            await StoicIdentity.load().then(async identity => {
-                if (identity !== false) StoicIdentity.disconnect();
-                identity = await StoicIdentity.connect();
-                dispatch({
-                    actionType: types.SET_STOIC_IDENTITY,
-                    payload: identity
-                });
-            });
-            setChecks(checks + 1);
-        };
-    };
-
-    const handleClick_II = async () => {
-        setIsUsingII(true);
-        if(!journalState.isAuthenticated){
-            await StoicIdentity.load().then(async identity => {
-                if (identity !== false) StoicIdentity.disconnect(); 
-            });
-            await journalState.authClient.login({identityProvider : process.env.II_URL});
-            setChecks(checks + 1);
-        };
-    };
+        },
+        onDisconnect: () => {}
+    });
 
     useEffect(async () => {
-        setIsLoading(true);
-        if(journalState.authClient){
-            let identity = journalState.authClient.getIdentity();
-            const actor_ = createActor(canisterId, {
-                agentOptions: {
-                    identity
-                }
-            });
-            let result = await actor_.getCanisterCyclesBalances();
-            setBackendCanisterBalance(parseInt(result.backendCyclesBalance));
-            setFrontendCanisterBalance(parseInt(result.frontendCyclesBalance));
-        };
+        let result = await anonymousActor.getCanisterCyclesBalances();
+        setBackendCanisterBalance(parseInt(result.backendCyclesBalance));
+        setFrontendCanisterBalance(parseInt(result.frontendCyclesBalance));
         setIsLoading(false);
-    },[journalState.authClient]);
+    },[]);
+
+    useEffect(async () => {
+        if(connectionResult.activeProvider){
+            const newActor = await backendActor(connectionResult.activeProvider);
+            dispatch({
+                actionType: types.SET_ACTOR,
+                payload: newActor
+            });
+        }
+        setIsLoading(true);
+        dispatch({
+            actionType: types.SET_IS_AUTHENTICATED,
+            payload: connectionResult.isConnected
+        });
+    }, [connectionResult.isConnected]);
 
     const containers = document.querySelectorAll(".contentContainer");
     containers.forEach( (container, index) => {
@@ -166,6 +131,7 @@ const LoginPage = (props) => {
                             <ButtonField
                                 Icon={IoiosIcons.IoIosWallet}
                                 iconSize={25}
+                                iconColor={'#917153'}
                                 className={`walletIconDiv loginPage ${(context === UI_CONTEXTS.WALLET) ? 'active' : ''}`}
                                 onClick={handleClickWallet}
                                 withBox={true}
@@ -173,6 +139,7 @@ const LoginPage = (props) => {
                             <ButtonField
                                 Icon={IoiosIcons.IoIosJournal}
                                 iconSize={25}
+                                iconColor={'#917153'}
                                 className={`journalIconDiv loginPage ${(context === UI_CONTEXTS.JOURNAL) ? 'active' : ''}`}
                                 onClick={handleClickJournal}
                                 withBox={true}
@@ -182,6 +149,7 @@ const LoginPage = (props) => {
                             <ButtonField
                                 Icon={AiIcons.AiFillDashboard}
                                 iconSize={25}
+                                iconColor={'#917153'}
                                 className={`dashboardIconDiv loginPage ${(context === UI_CONTEXTS.HOME_PAGE) ? 'active' : ''}`}
                                 onClick={handleClickDashboard}
                                 withBox={true}
@@ -189,23 +157,16 @@ const LoginPage = (props) => {
                             <ButtonField
                                 Icon={RiIcons.RiAccountPinCircleFill}
                                 iconSize={25}
+                                iconColor={'#917153'}
                                 className={`accountIconDiv loginPage ${(context === UI_CONTEXTS.ACCOUNT_PAGE) ? 'active' : ''}`}
                                 onClick={handleClickAccount}
                                 withBox={true}
                             />
                         </div>
-                        <ButtonField
-                            text={'Log In Using Internet Identity'}
-                            className={`loginButtonDiv active`}
-                            onClick={handleClick_II}
-                            withBox={true}
-                        />
-                        <ButtonField
-                            text={'Log In Using Stoic Identity'}
-                            className={`loginButtonDiv active`}
-                            onClick={handleClick_Stoic}
-                            withBox={true}
-                        />
+
+                        <ConnectButton/>
+                        <ConnectDialog />
+                        
                         <DataField
                             label={'Front-end Canister Balance: '}
                             className={'loginPage'}

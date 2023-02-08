@@ -9,9 +9,14 @@ const DataField = (props) => {
     const {
         text,
         label,
+        onClick_0,
+        onClick_1,
+        buttonIcon_0,
+        buttonIcon_1,
         className,
         isCycles,
-        isPrincipal
+        isPrincipal,
+        vertical
     } = props;
     
     let text_;
@@ -22,25 +27,39 @@ const DataField = (props) => {
     const copyPrincipal = () => copyWalletAddressHelper(text);
 
     return(
-        <div className={`canisterDataDiv ${className ? className : ' '}`}>
-            <div className={'section'}>
+        <div className={`canisterDataDiv ${className ? className : ' '} ${vertical ? 'vertical' : ' '}`}>
+            {buttonIcon_0 &&
+            <ButtonField
+                Icon={buttonIcon_0}
+                iconSize={25}
+                className={'section'}
+                onClick={onClick_0}
+            />}
+            {label && <div className={'section'}>
                 <h5 className={'lebelH5'}>
                     {label} 
                 </h5>
-            </div>
+            </div>}
             <div className={'section'}>
                 <h5 className={'h5DataField'}>
                     {(text_) ? text_ : 'Loading...'} {(isCycles && text_) ? "T" : ''} 
-                    {isPrincipal && 
-                        <ButtonField
-                            Icon={FaIcons.FaCopy}
-                            iconSize={17.5}
-                            onClick={copyPrincipal}
-                            withBox={false}
-                        />
-                    }
                 </h5>
+                {isPrincipal && 
+                    <ButtonField
+                        Icon={FaIcons.FaCopy}
+                        iconSize={17.5}
+                        onClick={copyPrincipal}
+                        withBox={false}
+                    />
+                }
             </div>
+            {buttonIcon_1 &&
+            <ButtonField
+                Icon={buttonIcon_1}
+                iconSize={25}
+                className={'section'}
+                onClick={onClick_1}
+            />}
         </div>
     )
 };

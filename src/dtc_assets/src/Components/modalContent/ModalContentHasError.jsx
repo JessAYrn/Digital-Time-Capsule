@@ -1,6 +1,6 @@
 import React, {useContext} from 'react';
 import { MAX_DURATION_OF_VIDEO_IN_SECONDS } from '../../Constants';
-import { AppContext } from '../../App';
+import { AppContext } from '../../Routes/App';
 import { MODALS_TYPES } from '../../Constants';
 import { round2Decimals } from '../../Utils';
 import "./ModalContentHasError.scss";

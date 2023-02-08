@@ -9,6 +9,7 @@
         justify-content: center;    
         .lebelH5{
             font-family: 'Courier New', monospace;
+            text-align: center;
         }
         .h5DataField{
             @media screen and (max-width: 650px) {
@@ -30,4 +31,8 @@
             display: block;
         }
     }
+}
+
+.canisterDataDiv.vertical{
+    flex-direction: column;
 }

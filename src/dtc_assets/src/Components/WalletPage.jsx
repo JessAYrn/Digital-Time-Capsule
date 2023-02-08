@@ -1,5 +1,5 @@
 import React, {useCallback, useContext, useEffect, useState} from 'react';
-import { AppContext } from '../Wallet';
+import { AppContext } from '../Routes/Wallet';
 import { NavBar } from './navigation/NavBar';
 import { Modal } from './Modal';
 import './WalletPage.scss';
@@ -22,7 +22,6 @@ import ButtonField from './Fields/Button';
 
 const WalletPage = (props) => {
 
-    const mql = window.matchMedia('(max-width: 939px)');
     const { journalState, dispatch } = useContext(AppContext);
     const [loadingTx, setIsLoadingTx] = useState(false);
     const [showReloadButton, setShowReloadButton] = useState(false);
@@ -80,11 +79,9 @@ const WalletPage = (props) => {
                         <div className={"container__wallet"}>
                             <div className={'transparentDiv__wallet'}>
                                 <div className={`infoDiv contentContainer _${contentContainerIndex++} animatedLeft`} >
-                                    { mql.matches &&
-                                        <RenderQrCode
-                                            imgUrl={journalState.walletData.qrCodeImgUrl}
-                                        />  
-                                    }
+                                    <RenderQrCode
+                                        imgUrl={journalState.walletData.qrCodeImgUrl}
+                                    />  
                                     <div className={'textsDiv'}>
                                         <div className="balanceDiv">
                                             Wallet Balance: {journalState.walletData.balance /  e8sInOneICP} ICP
@@ -106,11 +103,6 @@ const WalletPage = (props) => {
                                             </div>
                                         </div>
                                     </div>
-                                    { !mql.matches &&
-                                        <RenderQrCode
-                                            imgUrl={journalState.walletData.qrCodeImgUrl}
-                                        />  
-                                    }
                                 </div>
                                 { loadingTx ? 
                                     <div className={`loadGifContainer contentContainer _${contentContainerIndex} animatedLeft`}>
@@ -122,14 +114,14 @@ const WalletPage = (props) => {
                                         !showReloadButton && 
                                         <ButtonField
                                             text={'Load Transaction History'}
-                                            className={'loadTxHistory'}
+                                            className={'loadTxHistory active'}
                                             onClick={loadTxs}
                                             withBox={true}
                                         /> :
                                         journalState.walletData.txHistory.data.map((tx) => {
                                             return(
                                                     <Transaction
-                                                        class_={`contentContainer _${contentContainerIndex++} animatedLeft`}
+                                                        class_={`contentContainer _${contentContainerIndex++}`}
                                                         balanceDelta={tx[1].balanceDelta}
                                                         increase={tx[1].increase}
                                                         recipient={tx[1].recipient[0]}

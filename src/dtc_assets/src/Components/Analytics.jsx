@@ -1,6 +1,6 @@
-import React, { useContext, useEffect} from 'react';
+import React, { useContext, useEffect, useState} from 'react';
 import { getIntObserverFunc, visibilityFunctionDefault } from './animations/IntersectionObserverFunctions';
-import { AppContext } from '../HomePage';
+import { AppContext } from '../Routes/HomePage';
 import { NavBar } from './navigation/NavBar';
 import { UI_CONTEXTS } from '../Contexts';
 import { Modal } from './Modal';
@@ -16,43 +16,22 @@ import * as FaIcons from 'react-icons/fa';
 import * as AiIcons from 'react-icons/ai';
 import ButtonField from './Fields/Button';
 import { IconContext } from 'react-icons/lib';
-import { shortenHexString } from '../Utils';
-import { copyWalletAddressHelper } from './walletFunctions/CopyWalletAddress';
 
 
-const DataFieldArray = (props) => {
-    const {
-        journalState,
-        dataField,
-        dataSubField,
-        label,
-        isListOfRequests,
-        isOwner,
-        dispatch
-    } = props;
-    
-    let array = journalState[dataField][dataSubField] || [];
+const Analytics = () => {
+    const { journalState, dispatch } = useContext(AppContext);
+    const [showUserPrincipals, setShowUserPrincipals] = useState(false);
 
-    const handleAddPrincipal = async (principal) => {
+    const handleDenyAccess = async (principal) => {
         dispatch({
             actionType: types.SET_IS_LOADING,
             payload: true
         });
-        let result_0 = await journalState.actor.removePrincipalFromRequestsArray(principal);
-        let result_1 = await journalState.actor.addApprovedUser(principal);
-        let success = false;
-        if("ok" in result_1 && "ok" in result_0){
-            success = true;
-            result_0 = result_0.ok;
-            result_1 = result_1.ok;
-            dispatch({
-                actionType: types.SET_CANISTER_DATA,
-                payload: {...journalState.canisterData, requestsForApproval: result_0, users: result_1}
-            });
-        }
+        let result = await journalState.actor.removeFromRequestsList(principal);
+        result = result.ok;
         dispatch({
-            actionType: types.SET_MODAL_STATUS,
-            payload: {show: true, which: MODALS_TYPES.onRegisterNewOwner, success: success}
+            actionType: types.SET_CANISTER_DATA,
+            payload: { ...journalState.canisterData, requestsForApproval: result }
         });
         dispatch({
             actionType: types.SET_IS_LOADING,
@@ -60,99 +39,40 @@ const DataFieldArray = (props) => {
         });
     };
 
-    const handleRemovePrincipal = async (principal, requestingApproval) => {
+    const handleGrantAccess = async (principal) => {
         dispatch({
             actionType: types.SET_IS_LOADING,
             payload: true
         });
-        let apiFunctionToCall = requestingApproval ? journalState.actor.removePrincipalFromRequestsArray : journalState.actor.removeApprovedUser;
-        let result = await apiFunctionToCall(principal);
-        let success = false;
-        if("ok" in result){
-            success = true;
-            result = result.ok;
-            let payload = requestingApproval ? { ...journalState.canisterData, requestsForApproval: result } : { ...journalState.canisterData, users: result }
-            dispatch({
-                actionType: types.SET_CANISTER_DATA,
-                payload: payload
-            });
-        }
+        let result = await journalState.actor.grantAccess(principal);
+        result = result.ok;
         dispatch({
-            actionType: types.SET_MODAL_STATUS,
-            payload: {show: true, which: MODALS_TYPES.onRegisterNewOwner, success: success}
+            actionType: types.SET_CANISTER_DATA,
+            payload: { ...journalState.canisterData, requestsForApproval: result }
         });
         dispatch({
             actionType: types.SET_IS_LOADING,
             payload: false
         });
-    } 
+    };
 
-    const copyPrincipal = (principal) => copyWalletAddressHelper(principal);
-
-    let requestingApproval = dataSubField === CANISTER_DATA_FIELDS.requestsForApproval;
-
-    return(
-        <div className={'canisterDataDiv'}>
-            <div className={'section'}>
-                <h5 className={'lebelH5'}>
-                    {label} 
-                </h5>
-            </div>
-            <div className={'section array'}>
-                <>
-                    {
-                        array.map((obj, index) => {
-                            let principal = !isListOfRequests ? obj[0] : obj;
-                            let permissions = !isListOfRequests ? obj[1] : null;
-                            return (
-                                <div className={'dataFieldRow'}>
-                                    <div className={'rowSection1'}>  
-                                        {isOwner && (isListOfRequests || permissions.approved === false) &&
-                                        <IconContext.Provider value={{ size: '25px'}}>
-                                            <FaIcons.FaCheckSquare onClick={() => handleAddPrincipal(principal)}/>
-                                        </IconContext.Provider>}
-                                        <h5 className={'h5DataField'}>
-                                            {shortenHexString(principal)}
-                                            {<ButtonField
-                                                Icon={FaIcons.FaCopy}
-                                                iconSize={17.5}
-                                                onClick={() => copyPrincipal(principal)}
-                                                withBox={false}
-                                            />}
-                                        </h5>
-                                        {isOwner && (isListOfRequests || permissions.approved === true) &&
-                                        <IconContext.Provider value={{ size: '25px'}}>
-                                            <RiIcons.RiDeleteBin2Line onClick={() => handleRemovePrincipal(principal, requestingApproval)}/>
-                                        </IconContext.Provider>}
-                                    </div>
-                                    {!isListOfRequests && permissions.approved &&
-                                    <div className={'rowSection2'}>
-                                        <IconContext.Provider value={{ size: '15px'}}>
-                                            <AiIcons.AiTwotoneLike/>
-                                        </IconContext.Provider>
-                                        <h6>approved to post content</h6>
-                                    </div>
-                                    }
-                                    {!isListOfRequests && !permissions.approved &&
-                                    <div className={'rowSection2'}>
-                                        <IconContext.Provider value={{ size: '15px'}}>
-                                            <AiIcons.AiTwotoneDislike/>
-                                        </IconContext.Provider>
-                                        <h6>not approved to post content</h6>
-                                    </div>
-                                    }
-                                </div>
-                            )
-                        })
-                    }
-                </>
-            </div>
-        </div>
-    )
-};
-
-const Analytics = () => {
-    const { journalState, dispatch } = useContext(AppContext);
+    const handleUpdateApprovalStatus = async (principal, newApprovalStatus) => {
+        dispatch({
+            actionType: types.SET_IS_LOADING,
+            payload: true
+        });
+        let result = await journalState.actor.updateApprovalStatus(principal, newApprovalStatus);
+        result = result.ok;
+        console.log(result);
+        dispatch({
+            actionType: types.SET_CANISTER_DATA,
+            payload: { ...journalState.canisterData, profilesMetaData: result }
+        });
+        dispatch({
+            actionType: types.SET_IS_LOADING,
+            payload: false
+        });
+    };
 
     const toggleAcceptRequest = async () => {
         dispatch({
@@ -264,81 +184,134 @@ const Analytics = () => {
                                             <DataField
                                                 label={'Journals Created:'}
                                                 text={journalState.canisterData[CANISTER_DATA_FIELDS.journalCount]}
-                                                dispatch={dispatch}
                                             />
                                             <DataField
                                                 label={'Frontend Canister Principal:'}
                                                 text={journalState.canisterData[CANISTER_DATA_FIELDS.frontEndPrincipal]}
-                                                dispatch={dispatch}
                                                 isPrincipal={true}
                                             />
                                             <DataField
                                                 label={'Backend Canister Principal:'}
                                                 text={journalState.canisterData[CANISTER_DATA_FIELDS.backEndPrincipal]}
-                                                dispatch={dispatch}
                                                 isPrincipal={true}
                                             />
                                             <DataField
                                                 label={'Cycles Burned Per Day:'}
-                                                dispatch={dispatch}
                                                 text={journalState.canisterData[CANISTER_DATA_FIELDS.backEndCyclesBurnRatePerDay]}
                                                 isCycles={true}
                                             />
                                             <DataField
                                                 label={'Frontend Cycles Balance:'}
                                                 text={journalState.canisterData[CANISTER_DATA_FIELDS.currentCyclesBalance_frontend]}
-                                                dispatch={dispatch}
                                                 isCycles={true}
                                             />
                                             <DataField
                                                 label={'Backend Cycles Balance:'}
                                                 text={journalState.canisterData[CANISTER_DATA_FIELDS.currentCyclesBalance_backend]}
-                                                dispatch={dispatch}
                                                 isCycles={true}
                                             />
                                             <DataField
                                                 label={'Canister Owner:'}
                                                 text={journalState.canisterData[CANISTER_DATA_FIELDS.nftOwner]}
-                                                dispatch={dispatch}
                                                 isPrincipal={true}
                                             />
                                             <DataField
                                                 label={'NFT ID:'}
                                                 text={journalState.canisterData[CANISTER_DATA_FIELDS.nftId]}
-                                                dispatch={dispatch}
                                             />
                                         </div>
                                     </div>
                                 </div>
                                 {   journalState.canisterData.isOwner &&
-                                    <div className={'transparentDiv__homePage__dataFields approvedPrincipals  animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
+                                    <div className={'transparentDiv__homePage__dataFields animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
                                         <div className={'AnalyticsDiv'}>
-                                            <div className={'AnalyticsContentContainer'}>
-                                                <DataFieldArray
-                                                    label={'Principals Requesting Approval:'}
-                                                    dispatch={dispatch}
-                                                    journalState={journalState}
-                                                    dataField={'canisterData'}
-                                                    dataSubField={CANISTER_DATA_FIELDS.requestsForApproval}
-                                                    isListOfRequests={true}
-                                                    isOwner={journalState.canisterData.isOwner}
-                                                />
+                                            <div className={'AnalyticsContentContainer array'}>
+                                                <h4 className='requestingAccessH4'>  Principals Requesting Access </h4>
+                                                {journalState.canisterData.requestsForApproval && 
+                                                    journalState.canisterData.requestsForApproval.map(([principal, approvalStatus]) => {
+                                                    return (
+                                                        <div className={'dataFieldRow'}>
+                                                            <DataField
+                                                                text={principal}
+                                                                isPrincipal={true}
+                                                                buttonIcon_1={RiIcons.RiDeleteBin2Line}
+                                                                buttonIcon_0={FaIcons.FaCheckSquare}
+                                                                onClick_1={() => handleDenyAccess(principal)}
+                                                                onClick_0={() => handleGrantAccess(principal)}
+                                                            />
+                                                            {approvalStatus &&
+                                                            <div className={'approvalStatusDiv'}>
+                                                                <IconContext.Provider value={{ size: '15px', margin: '5px'}}>
+                                                                    <AiIcons.AiTwotoneLike/>
+                                                                </IconContext.Provider>
+                                                                <h6>   approved </h6>
+                                                            </div>}
+                                                            {!approvalStatus &&
+                                                            <div className={'approvalStatusDiv'}>
+                                                                <IconContext.Provider value={{ size: '15px', margin: '5px'}}>
+                                                                    <AiIcons.AiTwotoneDislike/>
+                                                                </IconContext.Provider>
+                                                                <h6>   not yet approved </h6>
+                                                            </div>}
+                                                        </div>
+                                                    )
+                                                })}    
                                             </div>
                                         </div>
                                     </div> 
                                 }
-                                <div className={'transparentDiv__homePage__dataFields approvedPrincipals  animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
+                                <div className={'transparentDiv__homePage__dataFields  animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
                                     <div className={'AnalyticsDiv'}>
-                                        <div className={'AnalyticsContentContainer'}>
-                                            <DataFieldArray
-                                                label={'User Principals:'}
-                                                dispatch={dispatch}
-                                                isListOfRequests={false}
-                                                journalState={journalState}
-                                                dataField={'canisterData'}
-                                                dataSubField={CANISTER_DATA_FIELDS.users}
-                                                isOwner={journalState.canisterData.isOwner}
+                                        <div className={'AnalyticsContentContainer array'}>
+                                        <h4 className='requestingAccessH4'>  User Principals </h4>
+                                        {   
+                                            !showUserPrincipals &&
+                                            <ButtonField
+                                                className={'active'}
+                                                Icon={AiIcons.AiOutlineArrowDown}
+                                                iconSize={25}
+                                                onClick={() => {setShowUserPrincipals(!showUserPrincipals)}}
+                                                withBox={true}
                                             />
+                                        }
+                                        {
+                                            showUserPrincipals &&
+                                            journalState.canisterData.profilesMetaData.map(([principal, approvalStatus]) => {
+                                                const onClick1 = (approvalStatus) ? 
+                                                () => handleUpdateApprovalStatus(principal, !approvalStatus) : 
+                                                () => {};
+
+                                                const onClick0 = (approvalStatus) ? 
+                                                () => {} : 
+                                                () => handleUpdateApprovalStatus(principal, !approvalStatus);
+                                                return (
+                                                    <div className={'dataFieldRow'}>
+                                                        <DataField
+                                                            text={principal}
+                                                            isPrincipal={true}
+                                                            buttonIcon_1={journalState.canisterData.isOwner ? RiIcons.RiDeleteBin2Line : null}
+                                                            buttonIcon_0={journalState.canisterData.isOwner ? FaIcons.FaCheckSquare : null}
+                                                            onClick_1={onClick1}
+                                                            onClick_0={onClick0}
+                                                        />
+                                                        {approvalStatus &&
+                                                        <div className={'approvalStatusDiv'}>
+                                                            <IconContext.Provider value={{ size: '15px', margin: '5px'}}>
+                                                                <AiIcons.AiTwotoneLike/>
+                                                            </IconContext.Provider>
+                                                            <h6> Subsidized </h6>
+                                                        </div>}
+                                                        {!approvalStatus &&
+                                                        <div className={'approvalStatusDiv'}>
+                                                            <IconContext.Provider value={{ size: '15px', margin: '5px'}}>
+                                                                <AiIcons.AiTwotoneDislike/>
+                                                            </IconContext.Provider>
+                                                            <h6> Unsubsidized </h6>
+                                                        </div>}
+                                                    </div>
+                                                )
+                                            })
+                                        }
                                         </div>
                                     </div>
                                 </div>
@@ -372,10 +345,17 @@ const Analytics = () => {
                                 </div>}
                                 <ButtonField
                                     text={' Register As New Owner '}
-                                    className={'registryButtonDiv animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}
+                                    className={'registryButtonDiv active animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}
                                     onClick={handleRegistration}
                                     withBox={true}
                                 />
+                                { showUserPrincipals && <ButtonField
+                                    Icon={AiIcons.AiOutlineArrowUp}
+                                    iconSize={25}
+                                    className={'collapseArrayButton active'}
+                                    onClick={() => {setShowUserPrincipals(!showUserPrincipals)}}
+                                    withBox={true}
+                                />}
                             </div>
                         </div>}
                 </div>

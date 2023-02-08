@@ -1,11 +1,11 @@
 import React, {useContext} from 'react';
 import { MODALS_TYPES } from '../../Constants';
 import { UI_CONTEXTS } from '../../Contexts';
-import { AppContext as AccountContext } from '../../Account';
-import { AppContext as WalletContext} from '../../Wallet';
-import { AppContext as HomePageContext} from '../../HomePage';
-import { AppContext as NftContext} from '../../NFTs';
-import { AppContext as JournalContext} from '../../App';
+import { AppContext as AccountContext } from '../../Routes/Account';
+import { AppContext as WalletContext} from '../../Routes/Wallet';
+import { AppContext as HomePageContext} from '../../Routes/HomePage';
+import { AppContext as NftContext} from '../../Routes/NFTs';
+import { AppContext as JournalContext} from '../../Routes/App';
 import ButtonField from '../Fields/Button';
 
 import "./ModalContentOnSubmit.scss";

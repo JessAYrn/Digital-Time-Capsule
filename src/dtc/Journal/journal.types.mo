@@ -1,5 +1,6 @@
 import Account "../Ledger/Account";
 import Trie "mo:base/Trie";
+import HashMap "mo:base/HashMap";
 
 module {
     public type EntryKey = {
@@ -18,6 +19,8 @@ module {
     public type Files = Trie.Trie2D<Text,Nat,Blob>;
 
     public type File = Trie.Trie<Nat,Blob>;
+
+    public type FileMap = HashMap.HashMap<Text, File>;
 
 
     public type FileMetaData = {
@@ -54,6 +57,8 @@ module {
         filesMetaData : [FileMetaData];
     };
 
+    public type JournalMap = HashMap.HashMap<Nat, JournalEntry>;
+
     public type Transaction = {
         balanceDelta: Nat64;
         increase: Bool;
@@ -61,6 +66,8 @@ module {
         timeStamp: ?Nat64;
         source: ?Account.AccountIdentifier;
     };
+
+    public type TxHistoryMap = HashMap.HashMap<Nat, Transaction>;
 
     public type Error ={
         #NotFound;
