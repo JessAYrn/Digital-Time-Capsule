@@ -227,7 +227,8 @@ const Analytics = () => {
                                         <div className={'AnalyticsDiv'}>
                                             <div className={'AnalyticsContentContainer array'}>
                                                 <h4 className='requestingAccessH4'>  Principals Requesting Access </h4>
-                                                {journalState.canisterData.requestsForApproval.map(([principal, approvalStatus]) => {
+                                                {journalState.canisterData.requestsForApproval && 
+                                                    journalState.canisterData.requestsForApproval.map(([principal, approvalStatus]) => {
                                                     return (
                                                         <div className={'dataFieldRow'}>
                                                             <DataField
@@ -288,8 +289,8 @@ const Analytics = () => {
                                                         <DataField
                                                             text={principal}
                                                             isPrincipal={true}
-                                                            buttonIcon_1={RiIcons.RiDeleteBin2Line}
-                                                            buttonIcon_0={FaIcons.FaCheckSquare}
+                                                            buttonIcon_1={journalState.canisterData.isOwner ? RiIcons.RiDeleteBin2Line : null}
+                                                            buttonIcon_0={journalState.canisterData.isOwner ? FaIcons.FaCheckSquare : null}
                                                             onClick_1={onClick1}
                                                             onClick_0={onClick0}
                                                         />
