@@ -1,26 +1,26 @@
 import React, {useState, useContext, useMemo, useCallback, useEffect} from "react";
-import FileUpload from "./Fields/fileManger/FileUpload";
-import InputBox from "./Fields/InputBox";
-import {types} from "../reducers/journalReducer";
-import  {AppContext} from "../Routes/App";
+import FileUpload from "../Fields/fileManger/FileUpload";
+import InputBox from "../Fields/InputBox";
+import {types} from "../../reducers/journalReducer";
+import  {AppContext} from "../../Routes/App";
 import "./JournalPage.scss";
-import DatePicker from "./Fields/DatePicker";
-import LoadScreen from "./LoadScreen";
-import { UI_CONTEXTS } from "../Contexts";
-import { MODALS_TYPES, monthInMilliSeconds, PAGES} from "../Constants";
-import { dateAisLaterThanOrSameAsDateB, getDateAsString, getDateInMilliseconds, milisecondsToNanoSeconds, scrollToBottom, scrollToTop } from "../Utils";
-import { loadJournalDataResponseAfterSubmit } from "./loadingFunctions";
+import DatePicker from "../Fields/DatePicker";
+import LoadScreen from "../LoadScreen";
+import { MODALS_TYPES, monthInMilliSeconds, NULL_STRING_ALL_LOWERCASE} from "../../Constants";
+import { dateAisLaterThanOrSameAsDateB, getDateAsString, getDateInMilliseconds, milisecondsToNanoSeconds, scrollToBottom, scrollToTop } from "../../Utils";
+import { loadJournalDataResponseAfterSubmit } from "../loadingFunctions";
 import * as RiIcons from 'react-icons/ri';
 import * as BiIcons from 'react-icons/bi';
 import * as ImIcons from 'react-icons/im';
-import ButtonField from "./Fields/Button";
-import { IconContext } from 'react-icons/lib';
-import Switch from "./Fields/Switch";
+import ButtonField from "../Fields/Button";
+import FileCarousel from "../Fields/fileManger/FileCarousel";
+import { getFileFromApiAndLoadThemToStore } from "../Fields/fileManger/FileManagementTools";
 
 const JournalPage = (props) => {
 
     const [pageChangesMade, setPageChangesMade] = useState(false);  
     const [firstTimeOpeningPage, setFirstTimeOpeningPage] = useState(true);
+    const [photosLoaded, setPhotosLoaded] = useState(false);
     
     const {
         index
@@ -42,6 +42,26 @@ const JournalPage = (props) => {
     const journalPageData = useMemo(() => {
         return journalState.journal[index];
     }, [journalState.journal[index]]);
+
+    useEffect(async () => {
+        if(photosLoaded) return;
+        const promises = [];
+        journalPageData.filesMetaData.forEach((fileData, fileIndex) => {
+            if(fileData.fileName === NULL_STRING_ALL_LOWERCASE) return;
+            if(fileData.file) return;
+            promises.push(getFileFromApiAndLoadThemToStore(
+                journalState,
+                dispatch, 
+                types.CHANGE_FILE_LOAD_STATUS, 
+                fileData,
+                index, 
+                fileIndex,
+                types.SET_FILE
+            ));
+        });
+        if(promises.length) setPhotosLoaded(true);
+        Promise.all(promises);
+    },[journalPageData.filesMetaData]);
 
     useEffect(() => {
         scrollToBottom();
@@ -287,37 +307,26 @@ const JournalPage = (props) => {
                             value={(journalPageData) ? journalPageData.entry : ''}
                         />
                     </div>
-                    {journalPageData.filesMetaData.map((metaData, fileIndex) => {
-                        return(
-                            <div className='fileContainer'>
-                                {
-                                    (journalPageData.filesMetaData.length-1 === fileIndex) && journalPageData.draft &&
-                                    <ButtonField
-                                        Icon={RiIcons.RiDeleteBin2Line}
-                                        iconSize={25}
-                                        iconColor={'red'}
-                                        className={'removeFileDiv'}
-                                        onClick={handleDeleteFile}
-                                        withBox={true}
-                                    />
-                                }
-                                <FileUpload
-                                    videoHeight = {'443'}
-                                    label={`file_${metaData.fileIndex}`}
-                                    elementId={`file_${metaData.fileIndex}`}
-                                    disabled={!journalPageData.draft}
-                                    fileIndex={fileIndex}
-                                    key={fileIndex}
-                                    context={UI_CONTEXTS.JOURNAL}
-                                    setChangesWereMade={setPageChangesMade}
-                                    index={index}
-                                    dispatchActionToChangeFileMetaData={types.CHANGE_FILE_METADATA}
-                                    dispatchActionToChangeFileLoadStatus={types.CHANGE_FILE_LOAD_STATUS}
-                                    filesMetaDataArray={journalState.journal[index].filesMetaData}
-                                />
-                            </div>
-                        )
-                    })}
+                    {journalState.journal[index].filesMetaData.length > 0 &&
+                        <div className='photosSection'>
+                            <FileCarousel
+                                videoHeight = {'330'}
+                                filesMetaDataArray={journalState.journal[index].filesMetaData}
+                                journalState={journalState}
+                                setChangesWereMade={setPageChangesMade}
+                                editModeDefault={true}
+                                disabled={!journalPageData.draft}
+                                dispatch={dispatch}
+                                index={index}
+                                dispatchActionToAddFile={types.ADD_JOURNAL_ENTRY_FILE}
+                                dispatchActionToDeleteFile={types.REMOVE_JOURNAL_ENTRY_FILE}
+                                classNameMod={'coverPhoto'}
+                                dispatchActionToChangeFileMetaData={types.CHANGE_FILE_METADATA}
+                                dispatchActionToChangeFileLoadStatus={types.CHANGE_FILE_LOAD_STATUS}
+                                withoutButtons={true}
+                            />
+                        </div>    
+                    }
                     {
                         journalPageData.draft &&
                         <ButtonField

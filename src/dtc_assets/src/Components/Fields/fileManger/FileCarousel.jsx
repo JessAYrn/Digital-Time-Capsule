@@ -22,12 +22,16 @@ const FileCarousel = (props) => {
         dispatchActionToDeleteFile,
         setChangesWereMade,
         classNameMod,
+        editModeDefault,
+        disabled,
+        index,
         dispatchActionToChangeFileMetaData,
         dispatchActionToChangeFileLoadStatus,
-        videoHeight
+        videoHeight,
+        withoutButtons
     } = props;
 
-    const [editMode, setEditMode] = useState(false);
+    const [editMode, setEditMode] = useState(editModeDefault);
 
     const toggleEditMode = async () => {
         let updatedEditMode = !editMode
@@ -72,6 +76,7 @@ const FileCarousel = (props) => {
         let fileName = fileMetaData.fileName;
         dispatch({
             actionType: dispatchActionToDeleteFile,
+            index: index,
             fileIndex: fileIndex
         });
         if(fileIsUnsubmitted){
@@ -113,7 +118,6 @@ const FileCarousel = (props) => {
         let carouselDiv = document.getElementById('photoCarouselDiv');
         carouselDiv.scrollLeft = carouselDiv.scrollWidth;
     },[filesMetaDataArray]);
-
     let lastFileIsPopulated = filesMetaDataArray[filesMetaDataArray.length-1].fileName !== NULL_STRING_ALL_LOWERCASE;
     let maxNumberOfFilesReached = filesMetaDataArray.length >= 4;
 
@@ -137,7 +141,8 @@ const FileCarousel = (props) => {
                             <FileUpload
                                 label={`file_${fileIndex}`}
                                 elementId={`file_${fileIndex}`}
-                                disabled={!editMode}
+                                disabled={!editMode || disabled}
+                                index={index}
                                 fileIndex={fileIndex}
                                 key={fileIndex}
                                 forceDisplayDefaultFileSrc={forceDisplayDefaultFileSrc}
@@ -146,27 +151,28 @@ const FileCarousel = (props) => {
                                 classNameMod={classNameMod}
                                 dispatchActionToChangeFileMetaData={dispatchActionToChangeFileMetaData}
                                 dispatchActionToChangeFileLoadStatus={dispatchActionToChangeFileLoadStatus}
-                                filesMetaDataArray={filesMetaDataArray}
+                                fileData={fileMetaData}
                                 videoHeight={videoHeight}
                             />
                         </div>
                     )
                 })}
             </div>
-            {editMode && lastFileIsPopulated && !maxNumberOfFilesReached && <ButtonField
+            {editMode && lastFileIsPopulated && !maxNumberOfFilesReached && !withoutButtons &&
+                <ButtonField
                 Icon={BiIcons.BiImageAdd}
                 iconSize={25}
+                iconColor={'white'}
                 className={'addFileDiv'}
                 onClick={addFile}
-                withBox={false}
             />}
-            <ButtonField
+            {!withoutButtons && <ButtonField
                 Icon={(editMode) ? MdIcons.MdOutlineCancelPresentation : RiIcons.RiImageEditFill}
                 iconSize={25}
+                iconColor={'white'}
                 className={'editFileCarousel'}
                 onClick={toggleEditMode}
-                withBox={false}
-            />
+            />}
         </div>
     )
 };

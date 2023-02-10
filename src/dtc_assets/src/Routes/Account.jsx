@@ -1,11 +1,12 @@
 import React, {useReducer, createContext, useState, useEffect} from 'react';
 import journalReducer, { types, initialState } from '../reducers/journalReducer';
-import AccountSection from '../Components/AccountPage';
+import AccountSection from '../Components/Pages/AccountPage';
 import { useLocation } from 'react-router-dom';
 import LoginPage from '../Components/authentication/LoginPage';
 import { UI_CONTEXTS } from '../Contexts';
-import { PopulateStore, CreateActor, TriggerAuththenticateClientFunction, CreateUserJournal } from '../Components/authentication/AuthenticationMethods';
-import { loadJournalData, loadCanisterData, loadWalletData, handleErrorOnFirstLoad } from '../Components/loadingFunctions';
+import { CreateUserJournal } from '../Components/authentication/AuthenticationMethods';
+import { loadJournalData, loadCanisterData, loadWalletData, recoverState  } from '../Components/loadingFunctions';
+import { useConnect } from '@connect2ic/react';
 
 export const AppContext = createContext({
     journalState:{},
@@ -20,17 +21,13 @@ const AccountPage = () => {
     //changes made to this route aren't overrided by the useLocation().state of the previous route.
     window.onbeforeunload = window.history.replaceState(null, '');
 
-    //gets state from previous route
+    const connectionResult = useConnect({ onConnect: () => {}, onDisconnect: () => {} });
+
+    // gets state from previous route
     const location = useLocation();
-    //dispatch state from previous route to redux store if that state exists
-    if(location.state){
-        dispatch({
-            actionType: types.SET_ENTIRE_REDUX_STATE,
-            payload: location.state
-        });
-        //wipe previous location state to prevent infinite loop
-        location.state = null;
-    }
+
+    // dispatch state from previous route to redux store if that state exists
+    recoverState(journalState, location, dispatch, types, connectionResult)
 
     useEffect(async () => {
         if(!journalState.actor) return;

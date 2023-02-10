@@ -2,6 +2,7 @@ import { mapApiObjectToFrontEndJournalEntriesObject } from "../mappers/journalPa
 import { delay, toHexString } from "../Utils";
 import { generateQrCode } from "./walletFunctions/GenerateQrCode";
 import { mapBackendCanisterDataToFrontEndObj } from "../mappers/dashboardMapperFunctions";
+import { backendActor } from "../Utils";
 
 export const loadJournalData = (journal, dispatch, types) => {
     const journalEntriesObject = mapApiObjectToFrontEndJournalEntriesObject(journal);
@@ -146,3 +147,20 @@ export const handleErrorOnFirstLoad = async (fnForLoadingData, fnForRefiringAuth
         return null
     }
 }
+
+export const recoverState = async (journalState, location, dispatch, types, connectionResult) => {
+    // dispatch state from previous route to redux store if that state exists
+    if(location.state){
+        dispatch({
+            actionType: types.SET_ENTIRE_REDUX_STATE,
+            payload: location.state
+        });
+        //wipe previous location state to prevent infinite loop
+        location.state = null;
+        const newActor = await backendActor(connectionResult.activeProvider);
+        dispatch({
+            actionType: types.SET_ACTOR,
+            payload: newActor
+        });
+    };
+};

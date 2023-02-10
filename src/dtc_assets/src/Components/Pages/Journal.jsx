@@ -1,25 +1,46 @@
 import JournalPage from "./JournalPage";
 import React, { useContext, useEffect, useState } from "react";
-import {initialState, types} from "../reducers/journalReducer";
+import {initialState, types} from "../../reducers/journalReducer";
 import "./Journal.scss";
-import { AppContext } from "../Routes/App";
-import InputBox from "./Fields/InputBox";
+import { AppContext } from "../../Routes/App";
+import InputBox from "../Fields/InputBox";
 import * as AiIcons from 'react-icons/ai';
-import ButtonField from "./Fields/Button";
-import LoadScreen from "./LoadScreen";
-import { Modal } from "./Modal";
-import { NavBar } from "./navigation/NavBar";
-import { MODALS_TYPES } from "../Constants";
-import { UI_CONTEXTS } from "../Contexts";
-import { getIntObserverFunc, visibilityFunctionDefault } from "./animations/IntersectionObserverFunctions";
-import { dateAisLaterThanOrSameAsDateB, getDateAsString, getDateInMilliseconds } from "../Utils";
-import FileCarousel from "./Fields/fileManger/FileCarousel";
+import ButtonField from "../Fields/Button";
+import LoadScreen from "../LoadScreen";
+import { Modal } from "../Modal";
+import { NavBar } from "../navigation/NavBar";
+import { MODALS_TYPES, NULL_STRING_ALL_LOWERCASE } from "../../Constants";
+import { UI_CONTEXTS } from "../../Contexts";
+import { getIntObserverFunc, visibilityFunctionDefault } from "../animations/IntersectionObserverFunctions";
+import { dateAisLaterThanOrSameAsDateB, getDateAsString, getDateInMilliseconds } from "../../Utils";
+import FileCarousel from "../Fields/fileManger/FileCarousel";
+import { getFileFromApiAndLoadThemToStore } from "../Fields/fileManger/FileManagementTools";
 
 const Journal = (props) => {
 
-    const mql = window.matchMedia('(max-width: 650px)');
     const { journalState, dispatch} = useContext(AppContext);
-    const [pageChangesMade, setPageChangesMade] = useState(false);    
+    const [photosLoaded, setPhotosLoaded] = useState(false);
+    const [pageChangesMade, setPageChangesMade] = useState(false); 
+    
+    useEffect(async () => {
+        if(photosLoaded) return;
+        const promises = [];
+        journalState.bio.photos.forEach((fileData, index) => {
+            if(fileData.fileName === NULL_STRING_ALL_LOWERCASE) return;
+            if(fileData.file) return;
+            promises.push(getFileFromApiAndLoadThemToStore(
+                journalState,
+                dispatch, 
+                types.CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE, 
+                fileData,
+                null, 
+                index,
+                types.SET_FILE_JOURNAL_COVER_PAGE
+            ));
+        });
+        if(promises.length) setPhotosLoaded(true);
+        Promise.all(promises);
+    },[journalState.bio.photos]);
 
     const handleSubmit = async () => {
         setPageChangesMade(false);
@@ -160,64 +181,38 @@ const Journal = (props) => {
                         {journalState.isLoading ? 
                         <LoadScreen/> : 
                         <div className={"container__Journal"}>
-                            <div className={"section__1"}>
-                                <div className={'biography'}>
-                                    <div className={"contentContainer animatedLeft"+` _${animatedLeftElementIndex++}`}>
-                                        <InputBox
-                                            label={"This Journal Belongs To: "}
-                                            setChangesWereMade={setPageChangesMade}
-                                            rows={"1"}
-                                            dispatch={dispatch}
-                                            dispatchAction={types.CHANGE_NAME}
-                                            value={journalState.bio.name}
-                                        />
-                                    </div>
-                                    <div className={"contentContainer animatedLeft"+` _${animatedLeftElementIndex++}`}>
-                                        <InputBox
-                                            label={"Date of Birth: "}
-                                            setChangesWereMade={setPageChangesMade}
-                                            rows={"1"}
-                                            dispatch={dispatch}
-                                            dispatchAction={types.CHANGE_DOB}
-                                            value={journalState.bio.dob}
-                                        />
-                                    </div>
-                                    <div className={"contentContainer animatedLeft"+` _${animatedLeftElementIndex++}`}>
-                                        <InputBox
-                                            label={"Place of Birth: "}
-                                            setChangesWereMade={setPageChangesMade}
-                                            className={"animatedLeft"}
-                                            rows={"1"}
-                                            dispatch={dispatch}
-                                            dispatchAction={types.CHANGE_POB}
-                                            value={journalState.bio.pob}
-                                        />
-                                    </div>
-                                    <div className={"contentContainer animatedLeft"+` _${animatedLeftElementIndex++}`}>
-                                        <InputBox
-                                            divClassName={'dedications'}
-                                            setChangesWereMade={setPageChangesMade}
-                                            label={"Dedications: "}
-                                            rows={"8"}
-                                            dispatch={dispatch}
-                                            dispatchAction={types.CHANGE_DEDICATIONS}
-                                            value={journalState.bio.dedications}
-                                        />
-                                    </div>
-                                    <div className={"contentContainer animatedLeft"+` _${animatedLeftElementIndex++}`}>
-                                        <InputBox
-                                            divClassName={'preface'}
-                                            setChangesWereMade={setPageChangesMade}
-                                            label={"Preface: "}
-                                            rows={"29"}
-                                            dispatch={dispatch}
-                                            dispatchAction={types.CHANGE_PREFACE}
-                                            value={journalState.bio.preface}
-                                        />
-                                    </div>
+                            <div className={'biography'}>
+                                <div className={"contentContainer animatedLeft"+` _${animatedLeftElementIndex++}`}>
+                                    <InputBox
+                                        label={"This Journal Belongs To: "}
+                                        setChangesWereMade={setPageChangesMade}
+                                        rows={"1"}
+                                        dispatch={dispatch}
+                                        dispatchAction={types.CHANGE_NAME}
+                                        value={journalState.bio.name}
+                                    />
                                 </div>
-                            </div>
-                            <div className={"section__2"}> 
+                                <div className={"contentContainer animatedLeft"+` _${animatedLeftElementIndex++}`}>
+                                    <InputBox
+                                        label={"Date of Birth: "}
+                                        setChangesWereMade={setPageChangesMade}
+                                        rows={"1"}
+                                        dispatch={dispatch}
+                                        dispatchAction={types.CHANGE_DOB}
+                                        value={journalState.bio.dob}
+                                    />
+                                </div>
+                                <div className={"contentContainer animatedLeft"+` _${animatedLeftElementIndex++}`}>
+                                    <InputBox
+                                        label={"Place of Birth: "}
+                                        setChangesWereMade={setPageChangesMade}
+                                        className={"animatedLeft"}
+                                        rows={"1"}
+                                        dispatch={dispatch}
+                                        dispatchAction={types.CHANGE_POB}
+                                        value={journalState.bio.pob}
+                                    />
+                                </div>
                                 <div 
                                     className={'coverPhotoDiv contentContainer animatedLeft'+ 
                                     ` _${animatedLeftElementIndex++}`}
@@ -233,6 +228,28 @@ const Journal = (props) => {
                                         classNameMod={'coverPhoto'}
                                         dispatchActionToChangeFileMetaData={types.CHANGE_FILE_METADATA_JOURNAL_COVER_PAGE}
                                         dispatchActionToChangeFileLoadStatus={types.CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE}
+                                    />
+                                </div>
+                                <div className={"contentContainer animatedLeft"+` _${animatedLeftElementIndex++}`}>
+                                    <InputBox
+                                        divClassName={'dedications'}
+                                        setChangesWereMade={setPageChangesMade}
+                                        label={"Dedications: "}
+                                        rows={"8"}
+                                        dispatch={dispatch}
+                                        dispatchAction={types.CHANGE_DEDICATIONS}
+                                        value={journalState.bio.dedications}
+                                    />
+                                </div>
+                                <div className={"contentContainer animatedLeft"+` _${animatedLeftElementIndex++}`}>
+                                    <InputBox
+                                        divClassName={'preface'}
+                                        setChangesWereMade={setPageChangesMade}
+                                        label={"Preface: "}
+                                        rows={"29"}
+                                        dispatch={dispatch}
+                                        dispatchAction={types.CHANGE_PREFACE}
+                                        value={journalState.bio.preface}
                                     />
                                 </div>
                                 {displayJournalTable()}

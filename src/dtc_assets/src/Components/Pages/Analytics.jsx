@@ -1,20 +1,20 @@
 import React, { useContext, useEffect, useState} from 'react';
-import { getIntObserverFunc, visibilityFunctionDefault } from './animations/IntersectionObserverFunctions';
-import { AppContext } from '../Routes/HomePage';
-import { NavBar } from './navigation/NavBar';
-import { UI_CONTEXTS } from '../Contexts';
-import { Modal } from './Modal';
+import { getIntObserverFunc, visibilityFunctionDefault } from '../animations/IntersectionObserverFunctions';
+import { AppContext } from '../../Routes/HomePage';
+import { NavBar } from '../navigation/NavBar';
+import { UI_CONTEXTS } from '../../Contexts';
+import { Modal } from '../Modal';
 import "./Analytics.scss"
-import DataField from './Fields/DataField';
-import LoadScreen from './LoadScreen';
-import { types } from '../reducers/journalReducer';
-import { MODALS_TYPES } from '../Constants';
-import Switch from './Fields/Switch';
-import { CANISTER_DATA_FIELDS } from '../Constants';
+import DataField from '../Fields/DataField';
+import LoadScreen from '../LoadScreen';
+import { types } from '../../reducers/journalReducer';
+import { MODALS_TYPES } from '../../Constants';
+import Switch from '../Fields/Switch';
+import { CANISTER_DATA_FIELDS } from '../../Constants';
 import * as RiIcons from 'react-icons/ri';
 import * as FaIcons from 'react-icons/fa';
 import * as AiIcons from 'react-icons/ai';
-import ButtonField from './Fields/Button';
+import ButtonField from '../Fields/Button';
 import { IconContext } from 'react-icons/lib';
 
 

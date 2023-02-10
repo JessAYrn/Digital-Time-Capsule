@@ -79,23 +79,27 @@ export const mapAndSendFileToApi = async (journalState, fileId, file) => {
     const results = await Promise.all(promises); 
 };
 
-export const getFileFromApi = async (
+export const getFileFromApiAndLoadThemToStore = async (
     journalState, 
     dispatch, 
-    dispatchAction,
+    dispatchActionForChangingLoadStatus,
     fileData, 
     index, 
     fileIndex,
-    setConstructedFile
+    dispatchActionForSettingFile,
+    blockReload
     ) => {
     let fileName = fileData.fileName;
     if(fileName === 'null') return;
+
     dispatch({ 
-        actionType: dispatchAction,
+        actionType: dispatchActionForChangingLoadStatus,
+        blockReload: blockReload,
         payload: true,
         index: index,
         fileIndex: fileIndex 
     });
+
     let index_ = 0;
     let promises = [];
     let fileChunkCounteObj;
@@ -104,10 +108,12 @@ export const getFileFromApi = async (
     fileChunkCount = parseInt(fileChunkCounteObj.ok);
 
     if( fileChunkCount > 0){
+
         while(index_ < fileChunkCount){
             promises.push(retrieveChunk(journalState, fileName, index_));
             index_ += 1;
         };
+
         let fileBytes = await Promise.all(promises);
         fileBytes = flattenUint8array(fileBytes);
         const fileArrayBuffer = new Uint8Array(fileBytes).buffer;
@@ -126,10 +132,17 @@ export const getFileFromApi = async (
                 lastModified: parseInt(metaData_.lastModified)
             } 
         );
-        setConstructedFile(fileAsFile);
+        dispatch({ 
+            actionType: dispatchActionForSettingFile,
+            payload: fileAsFile,
+            blockReload: blockReload,
+            index: index,
+            fileIndex: fileIndex 
+        });
     }
     dispatch({ 
-        actionType: dispatchAction,
+        actionType: dispatchActionForChangingLoadStatus,
+        blockReload: blockReload,
         payload: false,
         index: index,
         fileIndex: fileIndex 

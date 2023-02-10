@@ -1,13 +1,14 @@
 import * as React from 'react';
 import { createContext, useState, useEffect, useReducer} from 'react';
 import { useLocation } from 'react-router-dom';
-import Journal from '../Components/Journal';
+import Journal from '../Components/Pages/Journal';
 import LoginPage from '../Components/authentication/LoginPage';
 import { UI_CONTEXTS } from '../Contexts';
 import journalReducer, {initialState, types} from '../reducers/journalReducer';
 import { TEST_DATA_FOR_NOTIFICATIONS } from '../testData/notificationsTestData';
 import { CreateUserJournal } from '../Components/authentication/AuthenticationMethods';
-import { loadCanisterData, loadJournalData, loadWalletData } from '../Components/loadingFunctions';
+import { loadCanisterData, loadJournalData, loadWalletData, recoverState} from '../Components/loadingFunctions';
+import { useConnect } from "@connect2ic/react";
 
 export const AppContext = createContext({
     journalState:{},
@@ -18,25 +19,20 @@ const App = () => {
     const [journalState, dispatch] = useReducer(journalReducer, initialState);
     const [submissionsMade, setSubmissionsMade] = useState(0);
 
+    const connectionResult = useConnect({ onConnect: () => {}, onDisconnect: () => {} });
+
     // gets state from previous route
     const location = useLocation();
-    // dispatch state from previous route to redux store if that state exists
-    if(location.state){
-        dispatch({
-            actionType: types.SET_ENTIRE_REDUX_STATE,
-            payload: location.state
-        });
-        //wipe previous location state to prevent infinite loop
-        location.state = null;
-    };
 
+    // dispatch state from previous route to redux store if that state exists
+    recoverState(journalState, location, dispatch, types, connectionResult)
    
     // clears useLocation().state upon page refresh so that when the user refreshes the page,
     // changes made to this route aren't overrided by the useLocation().state of the previous route.
     window.onbeforeunload = window.history.replaceState(null, '');
 
     useEffect(async () => {
-        if( !journalState.actor) return;
+        if(!journalState.actor) return;
         if(journalState.reloadStatuses.journalData){
             dispatch({
                 actionType: types.SET_IS_LOADING,
