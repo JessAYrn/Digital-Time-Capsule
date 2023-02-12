@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import journalReducer, {initialState, types} from "../reducers/journalReducer";
 import LoginPage from '../Components/authentication/LoginPage';
 import { UI_CONTEXTS } from '../Contexts';
-import Analytics from '../Components/Pages/Analytics';
+import Analytics from '../Pages/Analytics';
 import "./HomePage.scss";
 import { CreateUserJournal } from '../Components/authentication/AuthenticationMethods';
 import { loadCanisterData, loadJournalData, loadWalletData, recoverState } from '../Components/loadingFunctions';

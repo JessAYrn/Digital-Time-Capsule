@@ -1,20 +1,19 @@
 import React, {useState, useContext, useMemo, useCallback, useEffect} from "react";
-import FileUpload from "../Fields/fileManger/FileUpload";
-import InputBox from "../Fields/InputBox";
-import {types} from "../../reducers/journalReducer";
-import  {AppContext} from "../../Routes/App";
+import InputBox from "../Components/Fields/InputBox";
+import {types} from "../reducers/journalReducer";
+import  {AppContext} from "../Routes/App";
 import "./JournalPage.scss";
-import DatePicker from "../Fields/DatePicker";
-import LoadScreen from "../LoadScreen";
-import { MODALS_TYPES, monthInMilliSeconds, NULL_STRING_ALL_LOWERCASE} from "../../Constants";
-import { dateAisLaterThanOrSameAsDateB, getDateAsString, getDateInMilliseconds, milisecondsToNanoSeconds, scrollToBottom, scrollToTop } from "../../Utils";
-import { loadJournalDataResponseAfterSubmit } from "../loadingFunctions";
+import DatePicker from "../Components/Fields/DatePicker";
+import LoadScreen from "../Components/LoadScreen";
+import { MODALS_TYPES, monthInMilliSeconds, NULL_STRING_ALL_LOWERCASE} from "../Constants";
+import { dateAisLaterThanOrSameAsDateB, getDateAsString, getDateInMilliseconds, milisecondsToNanoSeconds, scrollToBottom, scrollToTop } from "../Utils";
+import { loadJournalDataResponseAfterSubmit } from "../Components/loadingFunctions";
 import * as RiIcons from 'react-icons/ri';
 import * as BiIcons from 'react-icons/bi';
 import * as ImIcons from 'react-icons/im';
-import ButtonField from "../Fields/Button";
-import FileCarousel from "../Fields/fileManger/FileCarousel";
-import { getFileFromApiAndLoadThemToStore } from "../Fields/fileManger/FileManagementTools";
+import ButtonField from "../Components/Fields/Button";
+import FileCarousel from "../Components/Fields/fileManger/FileCarousel";
+import { getFileUrl_fromApi } from "../Components/Fields/fileManger/FileManagementTools";
 
 const JournalPage = (props) => {
 
@@ -49,7 +48,7 @@ const JournalPage = (props) => {
         journalPageData.filesMetaData.forEach((fileData, fileIndex) => {
             if(fileData.fileName === NULL_STRING_ALL_LOWERCASE) return;
             if(fileData.file) return;
-            promises.push(getFileFromApiAndLoadThemToStore(
+            promises.push(getFileUrl_fromApi(
                 journalState,
                 dispatch, 
                 types.CHANGE_FILE_LOAD_STATUS, 

@@ -1,6 +1,6 @@
-import React, {useReducer, createContext, useState, useEffect} from 'react';
+import React, {useReducer, createContext, useEffect} from 'react';
 import journalReducer, { types, initialState } from '../reducers/journalReducer';
-import AccountSection from '../Components/Pages/AccountPage';
+import AccountSection from '../Pages/AccountPage';
 import { useLocation } from 'react-router-dom';
 import LoginPage from '../Components/authentication/LoginPage';
 import { UI_CONTEXTS } from '../Contexts';

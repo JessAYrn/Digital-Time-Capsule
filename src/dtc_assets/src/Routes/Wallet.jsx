@@ -3,7 +3,7 @@ import LoginPage from '../Components/authentication/LoginPage';
 import { useLocation } from 'react-router-dom';
 import journalReducer, {initialState, types} from '../reducers/journalReducer';
 import { UI_CONTEXTS } from '../Contexts';
-import WalletPage from '../Components/Pages/WalletPage';
+import WalletPage from '../Pages/WalletPage';
 import { testTx } from '../testData/Transactions';
 import { CreateUserJournal } from '../Components/authentication/AuthenticationMethods';
 import { loadJournalData, loadWalletData, loadCanisterData, recoverState } from '../Components/loadingFunctions';

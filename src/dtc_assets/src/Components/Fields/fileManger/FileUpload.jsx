@@ -3,9 +3,9 @@ import "./FileUpload.scss";
 import { types } from '../../../reducers/journalReducer';
 import { useEffect } from '../../../../../../dist/dtc_assets';
 import { deviceType } from '../../../Utils';
-import { DEVICE_TYPES, MAX_DURATION_OF_VIDEO_IN_SECONDS, NULL_STRING_ALL_LOWERCASE, PAGES } from '../../../Constants';
+import { DEVICE_TYPES, MAX_DURATION_OF_VIDEO_IN_SECONDS, NULL_STRING_ALL_LOWERCASE } from '../../../Constants';
 import { MODALS_TYPES } from '../../../Constants';
-import { getFileFromApiAndLoadThemToStore, getFileURL, mapAndSendFileToApi, getDuration, updateFileMetadataInStore } from './FileManagementTools';
+import { getFileURL, mapAndSendFileToApi, getDuration, updateFileMetadataInStore } from './FileManagementTools';
 import { AppContext as JournalContext} from '../../../Routes/App';
 import { UI_CONTEXTS } from '../../../Contexts';
 
@@ -65,8 +65,9 @@ const FileUpload = (props) => {
     useEffect( async () => {
         if(constructedFile){
             setFileType(constructedFile.type);
-            fileURL = await getFileURL(constructedFile);
-            setFileSrc(fileURL);
+            fileURL = await getFileURL(constructedFile, setFileSrc);
+            console.log(fileURL);
+            // setFileSrc(fileURL);
         };
     },[constructedFile]);
 
@@ -92,7 +93,7 @@ const FileUpload = (props) => {
                 return null;
             } else {
                 setFileType(uploadedFile.type);
-                fileURL = await getFileURL(uploadedFile);
+                fileURL = await getFileURL(uploadedFile, setFileSrc);
                 let fileId = updateFileMetadataInStore(
                     dispatch, 
                     dispatchActionToChangeFileMetaData, 
@@ -107,7 +108,7 @@ const FileUpload = (props) => {
         } else {
             //triggers useEffect which displays the video
             setFileType(uploadedFile.type);
-            fileURL = await getFileURL(uploadedFile);
+            fileURL = await getFileURL(uploadedFile, setFileSrc);
             let fileId = updateFileMetadataInStore(
                 dispatch, 
                 dispatchActionToChangeFileMetaData, 

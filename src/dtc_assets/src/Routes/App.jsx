@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { createContext, useState, useEffect, useReducer} from 'react';
 import { useLocation } from 'react-router-dom';
-import Journal from '../Components/Pages/Journal';
+import Journal from '../Pages/Journal';
 import LoginPage from '../Components/authentication/LoginPage';
 import { UI_CONTEXTS } from '../Contexts';
 import journalReducer, {initialState, types} from '../reducers/journalReducer';

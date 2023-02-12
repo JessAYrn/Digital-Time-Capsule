@@ -1,14 +1,14 @@
 import React, { useContext, useState } from 'react';
-import  InputBox  from '../Fields/InputBox';
-import { types } from '../../reducers/journalReducer'
-import AdminSection from '../AdminSection';
+import  InputBox  from '../Components/Fields/InputBox';
+import { types } from '../reducers/journalReducer'
+import AdminSection from '../Components/AdminSection';
 import "./AccountPage.scss";
 import "./SubscriptionPage.scss";
-import { AppContext } from '../../Routes/Account';
-import { NavBar } from '../navigation/NavBar';
-import { UI_CONTEXTS } from '../../Contexts';
-import LoadScreen from '../LoadScreen';
-import { Modal } from '../Modal';
+import { AppContext } from '../Routes/Account';
+import { NavBar } from '../Components/navigation/NavBar';
+import { UI_CONTEXTS } from '../Contexts';
+import LoadScreen from '../Components/LoadScreen';
+import { Modal } from '../Components/Modal';
 
 
 

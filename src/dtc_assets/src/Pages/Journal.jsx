@@ -1,20 +1,20 @@
 import JournalPage from "./JournalPage";
 import React, { useContext, useEffect, useState } from "react";
-import {initialState, types} from "../../reducers/journalReducer";
+import {initialState, types} from "../reducers/journalReducer";
 import "./Journal.scss";
-import { AppContext } from "../../Routes/App";
-import InputBox from "../Fields/InputBox";
+import { AppContext } from "../Routes/App";
+import InputBox from "../Components/Fields/InputBox";
 import * as AiIcons from 'react-icons/ai';
-import ButtonField from "../Fields/Button";
-import LoadScreen from "../LoadScreen";
-import { Modal } from "../Modal";
-import { NavBar } from "../navigation/NavBar";
-import { MODALS_TYPES, NULL_STRING_ALL_LOWERCASE } from "../../Constants";
-import { UI_CONTEXTS } from "../../Contexts";
-import { getIntObserverFunc, visibilityFunctionDefault } from "../animations/IntersectionObserverFunctions";
-import { dateAisLaterThanOrSameAsDateB, getDateAsString, getDateInMilliseconds } from "../../Utils";
-import FileCarousel from "../Fields/fileManger/FileCarousel";
-import { getFileFromApiAndLoadThemToStore } from "../Fields/fileManger/FileManagementTools";
+import ButtonField from "../Components/Fields/Button";
+import LoadScreen from "../Components/LoadScreen";
+import { Modal } from "../Components/Modal";
+import { NavBar } from "../Components/navigation/NavBar";
+import { MODALS_TYPES, NULL_STRING_ALL_LOWERCASE } from "../Constants";
+import { UI_CONTEXTS } from "../Contexts";
+import { getIntObserverFunc, visibilityFunctionDefault } from "../Components/animations/IntersectionObserverFunctions";
+import { dateAisLaterThanOrSameAsDateB, getDateAsString, getDateInMilliseconds } from "../Utils";
+import FileCarousel from "../Components/Fields/fileManger/FileCarousel";
+import { getFileUrl_fromApi } from "../Components/Fields/fileManger/FileManagementTools";
 
 const Journal = (props) => {
 
@@ -25,22 +25,38 @@ const Journal = (props) => {
     useEffect(async () => {
         if(photosLoaded) return;
         const promises = [];
-        journalState.bio.photos.forEach((fileData, index) => {
+        journalState.bio.photos.forEach((fileData, fileIndex) => {
             if(fileData.fileName === NULL_STRING_ALL_LOWERCASE) return;
             if(fileData.file) return;
-            promises.push(getFileFromApiAndLoadThemToStore(
-                journalState,
-                dispatch, 
-                types.CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE, 
-                fileData,
-                null, 
-                index,
-                types.SET_FILE_JOURNAL_COVER_PAGE
-            ));
+            
+            promises.push(async () => {
+                dispatch({
+                    actionType: types.CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE,
+                    payload: true,
+                    blockReload: true,
+                    fileIndex: fileIndex
+                });
+                const dataURL = await getFileUrl_fromApi(journalState, fileData);
+                dispatch({
+                    actionType: types.SET_FILE_JOURNAL_COVER_PAGE,
+                    payload: dataURL,
+                    blockReload: true,
+                    fileIndex: fileIndex
+                });
+                dispatch({
+                    actionType: types.CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE,
+                    payload: false,
+                    blockReload: true,
+                    fileIndex: fileIndex
+                });
+            });
+        
         });
         if(promises.length) setPhotosLoaded(true);
-        Promise.all(promises);
+        const result = await Promise.all(promises);
     },[journalState.bio.photos]);
+
+    console.log(journalState);
 
     const handleSubmit = async () => {
         setPageChangesMade(false);

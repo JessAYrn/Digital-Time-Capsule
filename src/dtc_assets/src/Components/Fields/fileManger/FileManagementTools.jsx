@@ -9,10 +9,16 @@ export const retrieveChunk = async (journalState, fileName, chunkIndex) => {
 }; 
 
 export const getFileURL = async (file) => {
-    let fileAsBuffer = await file.arrayBuffer();
-    let fileBlob = new Blob([new Uint8Array(fileAsBuffer)], { type: file.type });
-    let url = window.URL.createObjectURL(fileBlob);
-    return url;
+    return new Promise((res, rej) => {
+        var reader = new FileReader();  
+        reader.onload = function(e) { 
+            var myDataUrl = e.target.result;
+            res(myDataUrl);
+            // do something with the URL in the DOM,
+            // then save it to local storage
+        };  
+        reader.readAsDataURL(file);
+    });
 };
 
 export const uploadChunk = async (journalState, fileId, chunkId, fileChunk) => {    
@@ -79,26 +85,13 @@ export const mapAndSendFileToApi = async (journalState, fileId, file) => {
     const results = await Promise.all(promises); 
 };
 
-export const getFileFromApiAndLoadThemToStore = async (
+export const getFileUrl_fromApi = async (
     journalState, 
-    dispatch, 
-    dispatchActionForChangingLoadStatus,
-    fileData, 
-    index, 
-    fileIndex,
-    dispatchActionForSettingFile,
-    blockReload
+    fileData
     ) => {
+
     let fileName = fileData.fileName;
     if(fileName === 'null') return;
-
-    dispatch({ 
-        actionType: dispatchActionForChangingLoadStatus,
-        blockReload: blockReload,
-        payload: true,
-        index: index,
-        fileIndex: fileIndex 
-    });
 
     let index_ = 0;
     let promises = [];
@@ -106,14 +99,13 @@ export const getFileFromApiAndLoadThemToStore = async (
     let fileChunkCount;
     fileChunkCounteObj = await journalState.actor.readEntryFileSize(fileName);
     fileChunkCount = parseInt(fileChunkCounteObj.ok);
+    let fileURL;
 
     if( fileChunkCount > 0){
-
         while(index_ < fileChunkCount){
             promises.push(retrieveChunk(journalState, fileName, index_));
             index_ += 1;
         };
-
         let fileBytes = await Promise.all(promises);
         fileBytes = flattenUint8array(fileBytes);
         const fileArrayBuffer = new Uint8Array(fileBytes).buffer;
@@ -132,19 +124,7 @@ export const getFileFromApiAndLoadThemToStore = async (
                 lastModified: parseInt(metaData_.lastModified)
             } 
         );
-        dispatch({ 
-            actionType: dispatchActionForSettingFile,
-            payload: fileAsFile,
-            blockReload: blockReload,
-            index: index,
-            fileIndex: fileIndex 
-        });
-    }
-    dispatch({ 
-        actionType: dispatchActionForChangingLoadStatus,
-        blockReload: blockReload,
-        payload: false,
-        index: index,
-        fileIndex: fileIndex 
-    });
+        fileURL = await getFileURL(fileAsFile);
+    };
+    return fileURL;
 };

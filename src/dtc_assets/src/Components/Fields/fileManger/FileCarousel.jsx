@@ -130,7 +130,7 @@ const FileCarousel = (props) => {
                     (editMode &&  hasUnsubmittedFiles && fileIndex === filesMetaDataArray.length-1);
                     return(
                         <div className = {'fileContainer'}>
-                            {displayRemoveButton && <ButtonField
+                            {displayRemoveButton && !disabled && <ButtonField
                                 Icon={RiIcons.RiDeleteBin2Line}
                                 iconSize={25}
                                 iconColor={'red'}
