@@ -25,38 +25,39 @@ const Journal = (props) => {
     useEffect(async () => {
         if(photosLoaded) return;
         const promises = [];
+        const loaderHelp = async (fileData, fileIndex) => {
+            dispatch({
+                actionType: types.CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE,
+                payload: true,
+                blockReload: true,
+                fileIndex: fileIndex
+            });
+            const dataURL = await getFileUrl_fromApi(journalState, fileData);
+            dispatch({
+                actionType: types.SET_FILE_JOURNAL_COVER_PAGE,
+                payload: dataURL,
+                blockReload: true,
+                fileIndex: fileIndex
+            });
+            dispatch({
+                actionType: types.CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE,
+                payload: false,
+                blockReload: true,
+                fileIndex: fileIndex
+            });
+            return dataURL;
+        }
+
+
         journalState.bio.photos.forEach((fileData, fileIndex) => {
             if(fileData.fileName === NULL_STRING_ALL_LOWERCASE) return;
             if(fileData.file) return;
-            
-            promises.push(async () => {
-                dispatch({
-                    actionType: types.CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE,
-                    payload: true,
-                    blockReload: true,
-                    fileIndex: fileIndex
-                });
-                const dataURL = await getFileUrl_fromApi(journalState, fileData);
-                dispatch({
-                    actionType: types.SET_FILE_JOURNAL_COVER_PAGE,
-                    payload: dataURL,
-                    blockReload: true,
-                    fileIndex: fileIndex
-                });
-                dispatch({
-                    actionType: types.CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE,
-                    payload: false,
-                    blockReload: true,
-                    fileIndex: fileIndex
-                });
-            });
-        
+            promises.push(loaderHelp(fileData, fileIndex));
         });
         if(promises.length) setPhotosLoaded(true);
         const result = await Promise.all(promises);
     },[journalState.bio.photos]);
 
-    console.log(journalState);
 
     const handleSubmit = async () => {
         setPageChangesMade(false);

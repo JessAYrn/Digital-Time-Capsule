@@ -63,6 +63,7 @@ const FileUpload = (props) => {
 
     //updates the fileSrc whenever the constructedFile variable is updated with the proper file
     useEffect( async () => {
+        console.log(constructedFile);
         if(constructedFile){
             setFileType(constructedFile.type);
             fileURL = await getFileURL(constructedFile, setFileSrc);
