@@ -1,0 +1,342 @@
+type User = 
+ service {
+   canisterAccount: () -> (AccountIdentifier) query;
+   canisterBalance: () -> (ICP);
+   clearUnsubmittedFiles: () -> (Result_2);
+   configureApp: (text, int) -> (Result_2);
+   create: () -> (Result_18);
+   createNFTCollection: (Dip721NonFungibleTokenInput) -> (Result_17);
+   delete: () -> (Result_2);
+   deleteSubmittedFile: (text) -> (Result_2);
+   deleteUnsubmittedFile: (text) -> (Result_2);
+   getCanisterCongtrollers: (principal) -> (vec text);
+   getCanisterCyclesBalances: () -> (CanisterCyclesBalances);
+   getCanisterData: () -> (Result_16);
+   getEntriesToBeSent: () -> (Result_15);
+   getNftChunk: (nat, nat64, nat) -> (MetadataResult);
+   getPrincipalsList: () -> (vec principal);
+   getRequestingPrincipals: () -> (Result_7);
+   getUserNFTsInfo: () -> (Result_14);
+   grantAccess: (text) -> (Result_7);
+   installCode: (blob) -> ();
+   mainCanisterCyclesBalance: () -> (nat);
+   mintNft: (nat, text, nat) -> (MintReceipt);
+   readEntry: (EntryKey) -> (Result_13);
+   readEntryFileChunk: (text, nat) -> (Result_12);
+   readEntryFileSize: (text) -> (Result_11);
+   readJournal: () -> (Result_10);
+   readTransaction: () -> (Result_9);
+   readWalletData: () -> (Result_8);
+   registerOwner: () -> (Result_2);
+   removeFromRequestsList: (text) -> (Result_7);
+   requestApproval: () -> (Result_7);
+   safeTransferNFT: (nat, principal, TokenId) -> (TxReceipt);
+   submitFiles: () -> (Result_2);
+   toggleAcceptRequest: () -> (Result_6);
+   toggleSupportMode: () -> (Result_2);
+   transferICP: (nat64, AccountIdentifier) -> (Result_2);
+   updateApprovalStatus: (text, bool) -> (Result_5);
+   updateBio: (Bio) -> (Result_3);
+   updateJournalEntry: (opt EntryKey, opt JournalEntryInput) -> (Result_4);
+   updatePhotos: (vec FileMetaData) -> (Result_3);
+   updateProfile: (ProfileInput) -> (Result_2);
+   uploadJournalEntryFile: (text, nat, blob) -> (Result_1);
+   uploadNftChunk: (nat, nat, blob) -> (Result);
+   wallet_receive: () -> (record {accepted: nat64;});
+   whoAmI: () -> (text);
+ };
+type TxReceipt = 
+ variant {
+   Err: ApiError;
+   Ok: nat;
+ };
+type Transaction = 
+ record {
+   balanceDelta: nat64;
+   increase: bool;
+   recipient: opt AccountIdentifier;
+   source: opt AccountIdentifier;
+   timeStamp: opt nat64;
+ };
+type TokenMetaData = 
+ record {
+   fileType: text;
+   id: TokenId;
+   nftDataTrieSize: nat;
+   numberOfCopiesOwned: nat;
+ };
+type TokenId = nat64;
+type Result_9 = 
+ variant {
+   err: Error;
+   ok: vec record {
+             nat;
+             Transaction;
+           };
+ };
+type Result_8 = 
+ variant {
+   err: Error;
+   ok: record {
+         address: vec nat8;
+         balance: ICP;
+       };
+ };
+type Result_7 = 
+ variant {
+   err: Error;
+   ok: RequestsForAccess;
+ };
+type Result_6 = 
+ variant {
+   err: Error;
+   ok: CanisterData;
+ };
+type Result_5 = 
+ variant {
+   err: Error;
+   ok: ProfilesApprovalStatuses;
+ };
+type Result_4 = 
+ variant {
+   err: Error;
+   ok: record {
+         vec record {
+               nat;
+               JournalEntry;
+             };
+         Bio;
+       };
+ };
+type Result_3 = 
+ variant {
+   err: Error;
+   ok: Bio;
+ };
+type Result_2 = 
+ variant {
+   err: Error;
+   ok;
+ };
+type Result_18 = 
+ variant {
+   err: Error;
+   ok: AmountAccepted;
+ };
+type Result_17 = 
+ variant {
+   err: Error;
+   ok: nat64;
+ };
+type Result_16 = 
+ variant {
+   err: Error;
+   ok: CanisterDataExport;
+ };
+type Result_15 = 
+ variant {
+   err: Error;
+   ok: vec record {
+             text;
+             vec record {
+                   nat;
+                   JournalEntry;
+                 };
+           };
+ };
+type Result_14 = 
+ variant {
+   err: Error;
+   ok: vec record {
+             record {nftCollectionKey: nat;};
+             TokenMetaData;
+           };
+ };
+type Result_13 = 
+ variant {
+   err: Error;
+   ok: JournalEntry;
+ };
+type Result_12 = 
+ variant {
+   err: Error;
+   ok: blob;
+ };
+type Result_11 = 
+ variant {
+   err: Error;
+   ok: nat;
+ };
+type Result_10 = 
+ variant {
+   err: Error;
+   ok:
+    record {
+      email: opt text;
+      "principal": text;
+      userJournalData: record {
+                         vec record {
+                               nat;
+                               JournalEntry;
+                             };
+                         Bio;
+                       };
+      userName: opt text;
+    };
+ };
+type Result_1 = 
+ variant {
+   err: Error;
+   ok: text;
+ };
+type Result = 
+ variant {
+   err: ApiError;
+   ok;
+ };
+type RequestsForAccess = 
+ vec record {
+       text;
+       Approved;
+     };
+type ProfilesApprovalStatuses = 
+ vec record {
+       text;
+       Approved;
+     };
+type ProfileInput = 
+ record {
+   email: opt text;
+   userName: opt text;
+ };
+type MintReceiptPart = 
+ record {
+   id: nat;
+   token_id: TokenId;
+ };
+type MintReceipt = 
+ variant {
+   Err: ApiError;
+   Ok: MintReceiptPart;
+ };
+type MetadataResult = 
+ variant {
+   Err: ApiError;
+   Ok: blob;
+ };
+type LogoResult = 
+ record {
+   data: text;
+   logo_type: text;
+ };
+type JournalEntryInput = 
+ record {
+   date: text;
+   draft: bool;
+   emailOne: text;
+   emailThree: text;
+   emailTwo: text;
+   entryTitle: text;
+   filesMetaData: vec FileMetaData;
+   location: text;
+   "text": text;
+   unlockTime: int;
+ };
+type JournalEntry = 
+ record {
+   date: text;
+   draft: bool;
+   emailOne: text;
+   emailThree: text;
+   emailTwo: text;
+   entryTitle: text;
+   filesMetaData: vec FileMetaData;
+   location: text;
+   read: bool;
+   sent: bool;
+   "text": text;
+   unlockTime: int;
+ };
+type ICP = record {e8s: nat64;};
+type FileMetaData = 
+ record {
+   fileName: text;
+   fileType: text;
+   lastModified: int;
+ };
+type Error = 
+ variant {
+   AlreadyExists;
+   InsufficientFunds;
+   NoInputGiven;
+   NotAcceptingRequests;
+   NotAuthorized;
+   NotFound;
+   TxFailed;
+   UserNameTaken;
+   WalletBalanceTooLow;
+   ZeroAddress;
+ };
+type EntryKey = record {entryKey: nat;};
+type Dip721NonFungibleTokenInput = 
+ record {
+   logo: LogoResult;
+   maxLimit: nat16;
+   name: text;
+   symbol: text;
+ };
+type CanisterDataExport = 
+ record {
+   acceptingRequests: bool;
+   backEndCyclesBurnRatePerDay: nat;
+   backEndPrincipal: text;
+   currentCyclesBalance_backend: nat;
+   currentCyclesBalance_frontend: nat;
+   frontEndPrincipal: text;
+   isOwner: bool;
+   journalCount: nat;
+   lastRecordedBackEndCyclesBalance: nat;
+   lastRecordedTime: int;
+   managerCanisterPrincipal: text;
+   nftId: int;
+   nftOwner: text;
+   profilesMetaData: ProfilesApprovalStatuses;
+   supportMode: bool;
+ };
+type CanisterData = 
+ record {
+   acceptingRequests: bool;
+   backEndCyclesBurnRatePerDay: nat;
+   backEndPrincipal: text;
+   frontEndPrincipal: text;
+   lastRecordedBackEndCyclesBalance: nat;
+   lastRecordedTime: int;
+   managerCanisterPrincipal: text;
+   nftId: int;
+   nftOwner: text;
+ };
+type CanisterCyclesBalances = 
+ record {
+   backendCyclesBalance: nat;
+   frontendCyclesBalance: nat;
+ };
+type Bio = 
+ record {
+   dedications: text;
+   dob: text;
+   name: text;
+   photos: vec FileMetaData;
+   pob: text;
+   preface: text;
+ };
+type Approved = bool;
+type ApiError = 
+ variant {
+   InvalidTokenId;
+   Other;
+   Unauthorized;
+   ZeroAddress;
+ };
+type AmountAccepted = record {accepted: nat64;};
+type AccountIdentifier = blob;
+service : () -> User
