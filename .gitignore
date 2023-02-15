@@ -3,4 +3,3 @@ node_modules
 dist
 src/declarations
 .DS_Store
-canister_ids.json
