@@ -14,7 +14,7 @@ import { UI_CONTEXTS } from "../Contexts";
 import { getIntObserverFunc, visibilityFunctionDefault } from "../Components/animations/IntersectionObserverFunctions";
 import { dateAisLaterThanOrSameAsDateB, getDateAsString, getDateInMilliseconds } from "../Utils";
 import FileCarousel from "../Components/Fields/fileManger/FileCarousel";
-import { getFileUrl_fromApi } from "../Components/Fields/fileManger/FileManagementTools";
+import { fileLoaderHelper } from "../Components/loadingFunctions";
 
 const Journal = (props) => {
 
@@ -25,34 +25,19 @@ const Journal = (props) => {
     useEffect(async () => {
         if(photosLoaded) return;
         const promises = [];
-        const loaderHelp = async (fileData, fileIndex) => {
-            dispatch({
-                actionType: types.CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE,
-                payload: true,
-                blockReload: true,
-                fileIndex: fileIndex
-            });
-            const dataURL = await getFileUrl_fromApi(journalState, fileData);
-            dispatch({
-                actionType: types.SET_FILE_JOURNAL_COVER_PAGE,
-                payload: dataURL,
-                blockReload: true,
-                fileIndex: fileIndex
-            });
-            dispatch({
-                actionType: types.CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE,
-                payload: false,
-                blockReload: true,
-                fileIndex: fileIndex
-            });
-            return dataURL;
-        }
-
 
         journalState.bio.photos.forEach((fileData, fileIndex) => {
             if(fileData.fileName === NULL_STRING_ALL_LOWERCASE) return;
             if(fileData.file) return;
-            promises.push(loaderHelp(fileData, fileIndex));
+            promises.push(fileLoaderHelper(
+                fileData, 
+                fileIndex,
+                null,
+                journalState,
+                dispatch,
+                types.CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE,
+                types.SET_FILE_JOURNAL_COVER_PAGE
+            ));
         });
         if(promises.length) setPhotosLoaded(true);
         const result = await Promise.all(promises);

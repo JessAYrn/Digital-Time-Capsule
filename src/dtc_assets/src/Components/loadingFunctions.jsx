@@ -3,6 +3,7 @@ import { delay, toHexString } from "../Utils";
 import { generateQrCode } from "./walletFunctions/GenerateQrCode";
 import { mapBackendCanisterDataToFrontEndObj } from "../mappers/dashboardMapperFunctions";
 import { backendActor } from "../Utils";
+import { getFileUrl_fromApi } from "./Fields/fileManger/FileManagementTools";
 
 export const loadJournalData = (journal, dispatch, types) => {
     const journalEntriesObject = mapApiObjectToFrontEndJournalEntriesObject(journal);
@@ -164,3 +165,37 @@ export const recoverState = async (journalState, location, dispatch, types, conn
         });
     };
 };
+
+export const fileLoaderHelper =  async (
+    fileData, 
+    fileIndex,
+    pageIndex,
+    journalState, 
+    dispatch, 
+    actionTypeToChangeFileLoadStatus,
+    actionTypeToSetFile
+    ) => {
+    dispatch({
+        actionType: actionTypeToChangeFileLoadStatus,
+        payload: true,
+        blockReload: true,
+        fileIndex: fileIndex,
+        index: pageIndex
+    });
+    const dataURL = await getFileUrl_fromApi(journalState, fileData);
+    dispatch({
+        actionType: actionTypeToSetFile,
+        payload: dataURL,
+        blockReload: true,
+        fileIndex: fileIndex,
+        index: pageIndex
+    });
+    dispatch({
+        actionType: actionTypeToChangeFileLoadStatus,
+        payload: false,
+        blockReload: true,
+        fileIndex: fileIndex,
+        index: pageIndex
+    });
+    return dataURL;
+}

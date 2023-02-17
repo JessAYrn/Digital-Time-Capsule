@@ -14,6 +14,7 @@ import * as ImIcons from 'react-icons/im';
 import ButtonField from "../Components/Fields/Button";
 import FileCarousel from "../Components/Fields/fileManger/FileCarousel";
 import { getFileUrl_fromApi } from "../Components/Fields/fileManger/FileManagementTools";
+import { fileLoaderHelper } from "../Components/loadingFunctions";
 
 const JournalPage = (props) => {
 
@@ -48,18 +49,18 @@ const JournalPage = (props) => {
         journalPageData.filesMetaData.forEach((fileData, fileIndex) => {
             if(fileData.fileName === NULL_STRING_ALL_LOWERCASE) return;
             if(fileData.file) return;
-            promises.push(getFileUrl_fromApi(
-                journalState,
-                dispatch, 
-                types.CHANGE_FILE_LOAD_STATUS, 
-                fileData,
-                index, 
+            promises.push(fileLoaderHelper(
+                fileData, 
                 fileIndex,
+                index,
+                journalState,
+                dispatch,
+                types.CHANGE_FILE_LOAD_STATUS,
                 types.SET_FILE
             ));
         });
         if(promises.length) setPhotosLoaded(true);
-        Promise.all(promises);
+        const result = await Promise.all(promises);
     },[journalPageData.filesMetaData]);
 
     useEffect(() => {

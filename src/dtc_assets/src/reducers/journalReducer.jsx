@@ -445,7 +445,8 @@ const changeValue = (state = initialState, action) => {
                 ...state.journal[index].filesMetaData[fileIndex],
                 fileName: payload.fileName,
                 lastModified: payload.lastModified,
-                fileType: payload.fileType
+                fileType: payload.fileType,
+                file: payload.file
             };
             updatedFilesMetaDataArry = [...state.journal[index].filesMetaData];
             updatedFilesMetaDataArry[fileIndex] = updatedFileMetaData;
@@ -469,7 +470,8 @@ const changeValue = (state = initialState, action) => {
                 ...state.bio.photos[fileIndex],
                 fileName: payload.fileName,
                 lastModified: payload.lastModified,
-                fileType: payload.fileType
+                fileType: payload.fileType,
+                file: payload.file
             };
             updatedFilesMetaDataArry = [...state.bio.photos];
             updatedFilesMetaDataArry[fileIndex] = updatedFileMetaData;

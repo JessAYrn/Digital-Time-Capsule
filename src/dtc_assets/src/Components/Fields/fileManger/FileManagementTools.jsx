@@ -40,18 +40,19 @@ export const getDuration = async (file) => {
       audio.preload= "metadata";
       audio.appendChild(source);
       audio.onloadedmetadata = function(){
-         resolve(audio.duration)
+         resolve({duration :audio.duration, url: obUrl})
       };
     });
 }
 
-export const updateFileMetadataInStore = (dispatch, dispatchAction, index, fileIndex, changesMadeFn, file) => {
+export const updateFileMetadataInStore = (dispatch, dispatchAction, index, fileIndex, changesMadeFn, file, fileURL) => {
     let fileId = `${file.name}-${Date.now()}`;
     dispatch({
         payload: {
             fileName: fileId,
             lastModified: file.lastModified,
-            fileType: file.type
+            fileType: file.type,
+            file: fileURL
         },
         actionType: dispatchAction,
         index: index,
@@ -128,3 +129,4 @@ export const getFileUrl_fromApi = async (
     };
     return fileURL;
 };
+
