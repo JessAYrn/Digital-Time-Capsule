@@ -1,2 +1,5 @@
 node_modules
+.dfx
+dist
+src/declarations
 .DS_Store
