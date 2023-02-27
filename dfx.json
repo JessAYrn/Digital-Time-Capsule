@@ -8,6 +8,10 @@
       "main": "src/dtc/Journal/Journal.mo",
       "type": "motoko"
     },
+    "manager": {
+      "main": "src/dtc/Manager/Manager.mo",
+      "type": "motoko"
+    },
     "ledger": {
       "type": "custom",
       "wasm": "ledger.wasm",
