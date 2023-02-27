@@ -16,6 +16,7 @@ import * as FaIcons from 'react-icons/fa';
 import * as AiIcons from 'react-icons/ai';
 import ButtonField from '../Components/Fields/Button';
 import { IconContext } from 'react-icons/lib';
+import "../SCSS/scrollable.scss";
 
 
 const Analytics = () => {

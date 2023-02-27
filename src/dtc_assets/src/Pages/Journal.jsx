@@ -15,6 +15,7 @@ import { getIntObserverFunc, visibilityFunctionDefault } from "../Components/ani
 import { dateAisLaterThanOrSameAsDateB, getDateAsString, getDateInMilliseconds } from "../Utils";
 import FileCarousel from "../Components/Fields/fileManger/FileCarousel";
 import { fileLoaderHelper } from "../Components/loadingFunctions";
+import "../SCSS/scrollable.scss";
 
 const Journal = (props) => {
 
