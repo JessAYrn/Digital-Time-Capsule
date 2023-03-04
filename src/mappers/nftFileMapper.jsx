@@ -1,0 +1,1 @@
+//Create nft file mapper function that maps the data from the backend to a front end object that will be loaded to the redux store

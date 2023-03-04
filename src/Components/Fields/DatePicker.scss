@@ -1,0 +1,57 @@
+.inputBox__datePicker{
+    width: 90%;
+    @media screen and (max-width: 480px) {
+        margin-left: -8px;
+    }
+    @media screen and (max-width: 550px) {
+        margin-left: 4px;
+    }
+    margin-left: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-bottom: 15px;
+    .label-element-div_datepicker{
+        width: 235px;
+        display: flex;
+        justify-content: center;
+        border-radius: 10px;
+        .label.disabled{
+            width: 93%;
+            font-family: 'Courier New', monospace;
+            font-size: .80rem;
+            color: white
+        }
+        .label.enabled{
+            width: 93%;
+            font-family: 'Courier New', monospace;
+            font-size: .95rem;
+            color: white
+        }
+    }
+    .input-element-div{
+        width: 120px;
+        display: flex;
+        justify-content: center;
+        .enabled{
+            font-family: 'Courier New', monospace;
+            outline: 0;
+            border-width: 0 0 1px;
+            border-radius: 10px;
+            border-color: rgb(0, 0, 0);
+            background-color: white;
+            box-shadow: 0 5px 16px rgb(0 0 0 / 50%);
+            width: 95%;
+        }
+        
+        .disabled{
+            font-family: 'Courier New', monospace;
+            outline: 0;
+            border-width: 0 0 1px;
+            border-radius: 10px;
+            background-color: white;
+            box-shadow: 0 5px 16px rgb(0 0 0 / 50%);
+            width: 95%;
+        }
+    }
+}

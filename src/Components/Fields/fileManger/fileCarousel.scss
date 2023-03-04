@@ -1,0 +1,51 @@
+.photoCarouselContainer{
+    width: 100%;
+    height: 410px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    .photoCarouselDiv{
+        height: 334px;
+        width: 95%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        white-space: nowrap;
+        display: flex;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        .fileContainer{
+            height: 357px;
+            margin-left: 10px;
+            margin-right: 10px;
+            display: flex;
+            justify-content: center;
+            .removeFileDiv{
+                position: relative;
+                top: 30px;
+                left: 10px;
+                z-index: 10;
+                width: 0;
+            }
+            .imageDivContainer{
+                position: relative;
+                top: 0px;
+            }
+        }
+    }
+    .addFileDiv{
+        background-color: white;
+        position: relative;
+        bottom: 0;
+        left: 42%;
+        height: 0;
+        width: 0;
+    }
+    .editFileCarousel{
+        position: relative;
+        height: 0px;
+        right: 44%;
+        top: 0;
+    }
+}

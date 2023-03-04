@@ -1,0 +1,72 @@
+.linkDiv_Journal{
+    background-color: #060b26;
+    border: solid black;
+    height: 45px;
+    width: 100%;
+    padding-top: 10px;
+    position:fixed;
+    top: 0;
+    left: 0px;
+    z-index: 100;
+    .navbar{
+        padding-left: 10px;
+        height: 30px;
+        .menuIcon{
+            float: left;
+            padding-left: 1%;
+        }
+        .notificationsIcon{
+            float: right;  
+            padding-right: 5%;
+        }
+    }
+    .navBar_Journal.active{
+        transform: translateX(-3px);
+    }
+    .navBar_Journal{
+        margin-top: -10px;
+        transform: translateX(-280px);
+        transition: 750ms;
+        width: 270px;
+        background-color: #060b26;
+        height: 100vh;
+        .walletIcon_Journal{
+            width: 26px;
+            display: block;
+            margin: auto;
+            margin-left: -10px;
+            margin-top: -5px;
+        }
+        .unorderedList{
+            .listItem{
+                color: white;
+                display: flex;
+                .menu_icon{
+                    max-width: 37px;
+                    max-height: 37px;
+                    display: block;
+                    margin: auto;
+                    margin-left: -10px;
+                    margin-top: -5px;
+                    margin-right: 10px;
+                }
+                span{
+                    margin-left: 5px;
+                    font-family: 'Courier New', monospace;
+                }
+                img{
+                    max-width: 37px;
+                    max-height: 37px;
+                    display: block;
+                    margin: auto;
+                    margin-left: -10px;
+                    margin-top: -5px;
+                }
+            }
+        }
+        .unorderedList.bottom{
+            position: absolute;
+            bottom: 60px;
+        }
+    }
+}

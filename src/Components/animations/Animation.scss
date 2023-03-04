@@ -1,0 +1,43 @@
+.animatedLeft{
+    opacity: 0;
+    transform: translateX(-50px);
+    transition: 750ms;
+}
+
+.animatedRight{
+    opacity: 0;
+    transform: translateX(50px);
+    transition: 750ms;
+}
+
+.animatedRight.scrollForMore{
+    opacity: 0;
+    transform: translateX(50px);
+    transition: 7500ms;
+}
+
+.animatedLeft.animate{
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.animatedRight.animate{
+    opacity: 1;
+    transform: translateX(0);
+}
+.rotate{
+    transform: rotate(0deg);
+    transition: 500ms;
+}
+.rotate.right{
+    transform: rotate(90deg);
+    transition: 500ms;
+}
+.rotate.down{
+    transform: rotate(180deg);
+    transition: 500ms;
+}
+.rotate.left{
+    transform: rotate(270deg);
+    transition: 500ms;
+}

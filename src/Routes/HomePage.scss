@@ -1,0 +1,63 @@
+
+.container{
+    .scrollable{
+        height: 100%; /* or any value */
+        background-color: transparent;
+        display: flex;
+        flex-direction: column;
+        .transparentDiv__homePage{
+            @media screen and (max-width: 480px) {
+                padding-left: 1.5%;    
+                width: 100%;        
+            };
+            width: 65%;
+            height: 75%;
+            padding-left: 17.5%;
+            padding-top: 4%;
+            padding-bottom: 4%;
+            .carouselDiv{
+                @media screen and (max-width: 480px) {
+                    width: 408px;
+                    height: 100%;
+                };
+                background-color: black;
+                border: solid black;
+                border-radius: 10px;
+                width: 100%;
+                height: 90%;
+                .videoContainerDiv{
+                    @media screen and (max-width: 480px) {
+                        padding: 1.5%;    
+                        padding-top: 0
+
+                    };
+                    padding-top: .75%;
+
+                }
+            }
+        }
+    }
+    .carouselContainer{
+        height: 15%;
+        width: 45%;
+        background-color: black;
+    }
+}
+.linkDiv{
+    background-color: black;
+    border: solid black;
+    height: 35px;
+    border-radius: 10px;
+    .navBar{
+        text-align: center;
+        color: white;
+        .navLink{
+            font-family: 'Julius Sans One', sans-serif;
+            @media screen and (max-width: 480px) {
+                font-size: large;            
+            };
+            color: white;
+            text-decoration: none;
+        }
+    }
+}

@@ -1,0 +1,11 @@
+.buttonFieldDiv{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    border: solid;
+    border-color: rgb(255, 255, 255);
+}
+.buttonFieldDiv.active{
+    box-shadow: 0 0px 7px rgb(255, 255, 255);
+}

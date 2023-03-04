@@ -1,0 +1,66 @@
+.notificationsTableDivContainer{
+    width: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    .tableDiv{
+      width: 100%;
+      float: left;
+      height: 405px;
+      margin-bottom: 8px;
+      border-radius: 10px;
+      .tableHeader{
+        font-family: 'Courier New', monospace;
+        font-size: 1rem;
+        color: white;
+        border-collapse: collapse;
+        width: 100%;
+        .tableRow{
+          border-bottom: solid white;
+          width: 100%;
+          padding-bottom: .5rem;
+          .tableCell{
+            width: 25%;
+            text-align: center;
+            padding: 0.5rem;
+            .openButton{
+              border-radius: 10px;
+            }
+          }
+        }
+      }
+      .scrollable{
+        height: 430px;
+        .table{
+          font-family: 'Courier New', monospace;
+          font-size: 1rem;
+          color: rgb(122, 122, 122);
+          border-collapse: collapse;
+          width: 100%;
+          .tableRow{
+            border-bottom: solid rgb(122, 122, 122) .5px;
+            width: 100%;
+            padding-bottom: .5rem;
+            .tableCell{
+              width: 25%;
+              text-align: center;
+              padding: 0.5rem;
+            }
+          }
+        }
+    
+      }
+    
+    }
+  
+    .addNewEntryButtonDiv{
+      width: 150px;
+      .addNewEntryButton{
+        border-radius: 25px;
+        border-color: rgb(230, 230, 230);
+        width: 100%;
+      }
+    }
+  }

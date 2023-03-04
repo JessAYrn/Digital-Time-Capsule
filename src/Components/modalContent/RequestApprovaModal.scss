@@ -1,0 +1,22 @@
+.contentDiv__requestApprovalResponse{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    .success{
+        color: green;
+        width: 75%;
+        text-align: center;
+    }
+    .fail{
+        color: red;
+        width: 75%;
+        text-align: center;
+    }
+    .button{
+        width: 200px;
+        height: 50px;
+        border-radius: 10px;
+    }
+}
