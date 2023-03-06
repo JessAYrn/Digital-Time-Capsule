@@ -47,7 +47,9 @@ export const types = {
     CHANGE_RECIPIENT_EMAIL_THREE: "CHANGE_RECIPIENT_EMAIL_THREE",
     CHANGE_PAGE_IS_DISABLED_STATUS: "CHANGE_PAGE_IS_DISABLED_STATUS",
     CHANGE_FILE_METADATA: "CHANGE_FILE_METADATA",
+    SET_FILE: "SET_FILE",
     CHANGE_FILE_METADATA_JOURNAL_COVER_PAGE: "CHANGE_FILE_METADATA_JOURNAL_COVER_PAGE",
+    SET_FILE_JOURNAL_COVER_PAGE: "CHANGE_FILE_JOURNAL_COVER_PAGE",
     CHANGE_FILE_ERROR_STATUS: "CHANGE_FILE_ERROR_STATUS",
     CHANGE_FILE_LOAD_STATUS: "CHANGE_FILE_LOAD_STATUS",
     CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE: "CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE",
@@ -134,6 +136,7 @@ const defaultFileMetaData = {
     fileName: NULL_STRING_ALL_LOWERCASE,
     lastModified: 0,
     fileType: NULL_STRING_ALL_LOWERCASE,
+    file: null,
     isLoading: false,
     error: false,
     fileIsUnsubmitted: true
@@ -157,7 +160,7 @@ const freshPage = {
 
 const changeValue = (state = initialState, action) => {
 
-    const {actionType, payload, index, fileIndex } = action;
+    const {actionType, payload, index, fileIndex, blockReload } = action;
     let updatedFileMetaData;
     let updatedJournalPage;
     let updatedNftFile;
@@ -237,7 +240,8 @@ const changeValue = (state = initialState, action) => {
         }
         case types.SET_BIO:
             state.bio = payload;
-            state.bio.photos = (state.bio.photos.length) ? state.bio.photos : [defaultFileMetaData];
+            while(state.bio.photos.length < 3) state.bio.photos.push(defaultFileMetaData);
+            state.bio.photos
             return {
                 ...state
             }
@@ -424,6 +428,7 @@ const changeValue = (state = initialState, action) => {
         case types.ADD_JOURNAL_ENTRY_FILE:
             updatedFilesMetaDataArry = [...state.journal[index].filesMetaData];
             updatedFilesMetaDataArry.push(defaultFileMetaData);
+            while(updatedFilesMetaDataArry.length < 3) updatedFilesMetaDataArry.push(defaultFileMetaData);
             state.journal[index].filesMetaData = updatedFilesMetaDataArry;
             return {
                 ...state
@@ -440,9 +445,21 @@ const changeValue = (state = initialState, action) => {
                 ...state.journal[index].filesMetaData[fileIndex],
                 fileName: payload.fileName,
                 lastModified: payload.lastModified,
-                fileType: payload.fileType
+                fileType: payload.fileType,
+                file: payload.file
             };
             updatedFilesMetaDataArry = [...state.journal[index].filesMetaData];
+            updatedFilesMetaDataArry[fileIndex] = updatedFileMetaData;
+            state.journal[index].filesMetaData = updatedFilesMetaDataArry;
+            return {
+                ...state
+            }
+        case types.SET_FILE:
+            updatedFileMetaData = {
+                ...state.journal[index].filesMetaData[fileIndex],
+                file: payload
+            };
+            updatedFilesMetaDataArry =  blockReload ? state.journal[index].filesMetaData : [...state.journal[index].filesMetaData];
             updatedFilesMetaDataArry[fileIndex] = updatedFileMetaData;
             state.journal[index].filesMetaData = updatedFilesMetaDataArry;
             return {
@@ -453,9 +470,21 @@ const changeValue = (state = initialState, action) => {
                 ...state.bio.photos[fileIndex],
                 fileName: payload.fileName,
                 lastModified: payload.lastModified,
-                fileType: payload.fileType
+                fileType: payload.fileType,
+                file: payload.file
             };
             updatedFilesMetaDataArry = [...state.bio.photos];
+            updatedFilesMetaDataArry[fileIndex] = updatedFileMetaData;
+            state.bio.photos = updatedFilesMetaDataArry;
+            return {
+                ...state
+            }
+        case types.SET_FILE_JOURNAL_COVER_PAGE:
+            updatedFileMetaData = {
+                ...state.bio.photos[fileIndex],
+                file: payload
+            };
+            updatedFilesMetaDataArry = blockReload ? state.bio.photos : [...state.bio.photos];
             updatedFilesMetaDataArry[fileIndex] = updatedFileMetaData;
             state.bio.photos = updatedFilesMetaDataArry;
             return {
@@ -477,7 +506,7 @@ const changeValue = (state = initialState, action) => {
                 ...state.journal[index].filesMetaData[fileIndex],
                 isLoading: payload,
             };
-            updatedFilesMetaDataArry = [...state.journal[index].filesMetaData];
+            updatedFilesMetaDataArry = blockReload ? state.journal[index].filesMetaData : [...state.journal[index].filesMetaData];
             updatedFilesMetaDataArry[fileIndex] = updatedFileMetaData;
             state.journal[index].filesMetaData = updatedFilesMetaDataArry;
             return {
@@ -488,7 +517,7 @@ const changeValue = (state = initialState, action) => {
                 ...state.bio.photos[fileIndex],
                 isLoading: payload,
             };
-            updatedFilesMetaDataArry = [...state.bio.photos];
+            updatedFilesMetaDataArry = blockReload ? state.bio.photos : [...state.bio.photos];
             updatedFilesMetaDataArry[fileIndex] = updatedFileMetaData;
             state.bio.photos = updatedFilesMetaDataArry;
             return {

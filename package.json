@@ -9,12 +9,11 @@
     "Canister"
   ],
   "scripts": {
-    "devStart": "nodemon server.jsx",
     "build": "webpack",
-    "prebuild": "npm run copy:types",
+    "prebuild": "npm run generate",
     "start": "webpack serve --mode development --env development",
-    "prestart": "npm run copy:types",
-    "copy:types": "rsync -avr .dfx/$(echo ${DFX_NETWORK:-'**'})/canisters/** --exclude='assets/' --exclude='idl/' --exclude='*.wasm' --delete src/declarations"
+    "prestart": "npm run generate",
+    "generate": "dfx generate dtc"
   },
   "devDependencies": {
     "@dfinity/agent": "^0.10.4",
@@ -32,10 +31,9 @@
     "ic-stoic-identity": "^2.0.0",
     "mini-css-extract-plugin": "^2.4.3",
     "node-gyp": "9.0.0",
-    "node-sass": "^7.0.1",
     "process": "0.11.10",
     "redux-devtools-extension": "^2.13.9",
-    "sass": "^1.43.3",
+    "sass": "^1.58.1",
     "sass-loader": "^12.2.0",
     "stream-browserify": "3.0.0",
     "style-loader": "^3.3.1",

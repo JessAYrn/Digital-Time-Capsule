@@ -1,24 +1,24 @@
 import React, {useCallback, useContext, useEffect, useState} from 'react';
 import { AppContext } from '../Routes/Wallet';
-import { NavBar } from './navigation/NavBar';
-import { Modal } from './Modal';
+import { NavBar } from '../Components/navigation/NavBar';
+import { Modal } from '../Components/Modal';
 import './WalletPage.scss';
 import { shortenHexString } from '../Utils';
 import { e8sInOneICP, MODALS_TYPES } from '../Constants';
-import {  RenderQrCode } from './walletFunctions/GenerateQrCode';
-import { copyWalletAddressHelper } from './walletFunctions/CopyWalletAddress';
-import { Transaction } from './walletFunctions/Transaction';
-import { loadTxHistory } from './loadingFunctions';
+import {  RenderQrCode } from '../Components/walletFunctions/GenerateQrCode';
+import { copyWalletAddressHelper } from '../Components/walletFunctions/CopyWalletAddress';
+import { Transaction } from '../Components/walletFunctions/Transaction';
+import { loadTxHistory } from '../Components/loadingFunctions';
 import * as GrIcons from 'react-icons/gr';
 import * as FaIcons from 'react-icons/fa';
 import * as AiIcons from 'react-icons/ai'
 import { IconContext } from 'react-icons/lib';
 import { testTx } from '../testData/Transactions';
-import LoadScreen from './LoadScreen';
+import LoadScreen from '../Components/LoadScreen';
 import { types } from '../reducers/journalReducer';
 import { UI_CONTEXTS } from '../Contexts';
-import { visibilityFunctionDefault, getIntObserverFunc } from './animations/IntersectionObserverFunctions';
-import ButtonField from './Fields/Button';
+import { visibilityFunctionDefault, getIntObserverFunc } from '../Components/animations/IntersectionObserverFunctions';
+import ButtonField from '../Components/Fields/Button';
 
 const WalletPage = (props) => {
 

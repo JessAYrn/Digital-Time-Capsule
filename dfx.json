@@ -8,6 +8,10 @@
       "main": "src/dtc/Journal/Journal.mo",
       "type": "motoko"
     },
+    "manager": {
+      "main": "src/dtc/Manager/Manager.mo",
+      "type": "motoko"
+    },
     "ledger": {
       "type": "custom",
       "wasm": "ledger.wasm",
@@ -46,13 +50,6 @@
     "build": {
       "args": "",
       "packtool": ""
-    }
-  },
-  "dfx": "0.12.1",
-  "networks": {
-    "local": {
-      "bind": "127.0.0.1:8000",
-      "type": "ephemeral"
     }
   },
   "version": 1

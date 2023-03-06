@@ -76,13 +76,7 @@ const LoginPage = (props) => {
         navigate(NAV_LINKS.account, { replace: false, state: journalStateWithoutFunction });
     },[journalState.reloadStatuses]);
 
-    const connectionResult = useConnect({
-        onConnect: () => {
-            //try updating the actor property in the redux store here
-
-        },
-        onDisconnect: () => {}
-    });
+    const connectionResult = useConnect({ onConnect: () => {}, onDisconnect: () => {} });
 
     useEffect(async () => {
         let result = await anonymousActor.getCanisterCyclesBalances();

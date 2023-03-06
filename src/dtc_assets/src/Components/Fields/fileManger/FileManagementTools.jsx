@@ -9,10 +9,16 @@ export const retrieveChunk = async (journalState, fileName, chunkIndex) => {
 }; 
 
 export const getFileURL = async (file) => {
-    let fileAsBuffer = await file.arrayBuffer();
-    let fileBlob = new Blob([new Uint8Array(fileAsBuffer)], { type: file.type });
-    let url = window.URL.createObjectURL(fileBlob);
-    return url;
+    return new Promise((res, rej) => {
+        var reader = new FileReader();  
+        reader.onload = function(e) { 
+            var myDataUrl = e.target.result;
+            res(myDataUrl);
+            // do something with the URL in the DOM,
+            // then save it to local storage
+        };  
+        reader.readAsDataURL(file);
+    });
 };
 
 export const uploadChunk = async (journalState, fileId, chunkId, fileChunk) => {    
@@ -34,18 +40,19 @@ export const getDuration = async (file) => {
       audio.preload= "metadata";
       audio.appendChild(source);
       audio.onloadedmetadata = function(){
-         resolve(audio.duration)
+         resolve({duration :audio.duration, url: obUrl})
       };
     });
 }
 
-export const updateFileMetadataInStore = (dispatch, dispatchAction, index, fileIndex, changesMadeFn, file) => {
+export const updateFileMetadataInStore = (dispatch, dispatchAction, index, fileIndex, changesMadeFn, file, fileURL) => {
     let fileId = `${file.name}-${Date.now()}`;
     dispatch({
         payload: {
             fileName: fileId,
             lastModified: file.lastModified,
-            fileType: file.type
+            fileType: file.type,
+            file: fileURL
         },
         actionType: dispatchAction,
         index: index,
@@ -79,29 +86,21 @@ export const mapAndSendFileToApi = async (journalState, fileId, file) => {
     const results = await Promise.all(promises); 
 };
 
-export const getFileFromApi = async (
+export const getFileUrl_fromApi = async (
     journalState, 
-    dispatch, 
-    dispatchAction,
-    fileData, 
-    index, 
-    fileIndex,
-    setConstructedFile
+    fileData
     ) => {
+
     let fileName = fileData.fileName;
     if(fileName === 'null') return;
-    dispatch({ 
-        actionType: dispatchAction,
-        payload: true,
-        index: index,
-        fileIndex: fileIndex 
-    });
+
     let index_ = 0;
     let promises = [];
     let fileChunkCounteObj;
     let fileChunkCount;
     fileChunkCounteObj = await journalState.actor.readEntryFileSize(fileName);
     fileChunkCount = parseInt(fileChunkCounteObj.ok);
+    let fileURL;
 
     if( fileChunkCount > 0){
         while(index_ < fileChunkCount){
@@ -126,12 +125,8 @@ export const getFileFromApi = async (
                 lastModified: parseInt(metaData_.lastModified)
             } 
         );
-        setConstructedFile(fileAsFile);
-    }
-    dispatch({ 
-        actionType: dispatchAction,
-        payload: false,
-        index: index,
-        fileIndex: fileIndex 
-    });
+        fileURL = await getFileURL(fileAsFile);
+    };
+    return fileURL;
 };
+

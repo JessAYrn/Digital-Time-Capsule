@@ -3,9 +3,9 @@ import "./FileUpload.scss";
 import { types } from '../../../reducers/journalReducer';
 import { useEffect } from '../../../../../../dist/dtc_assets';
 import { deviceType } from '../../../Utils';
-import { DEVICE_TYPES, MAX_DURATION_OF_VIDEO_IN_SECONDS, NULL_STRING_ALL_LOWERCASE, PAGES } from '../../../Constants';
+import { DEVICE_TYPES, MAX_DURATION_OF_VIDEO_IN_SECONDS, NULL_STRING_ALL_LOWERCASE } from '../../../Constants';
 import { MODALS_TYPES } from '../../../Constants';
-import { getFileFromApi, getFileURL, mapAndSendFileToApi, getDuration, updateFileMetadataInStore } from './FileManagementTools';
+import { getFileURL, mapAndSendFileToApi, getDuration, updateFileMetadataInStore } from './FileManagementTools';
 import { AppContext as JournalContext} from '../../../Routes/App';
 import { UI_CONTEXTS } from '../../../Contexts';
 
@@ -25,20 +25,15 @@ const FileUpload = (props) => {
         classNameMod,
         dispatchActionToChangeFileMetaData,
         dispatchActionToChangeFileLoadStatus,
-        filesMetaDataArray,
-        videoHeight
+        videoHeight,
+        fileData,
     } = props;
     let inputRef = useRef();
 
     const defaultFileSrc = "dtc-logo-black.png";
-    const [constructedFile, setConstructedFile] = useState(null);
     const [fileSrc, setFileSrc]  = useState(defaultFileSrc);
     const [fileType, setFileType] = useState("image/png");
-    
-
-    var uploadedFile;
-    var fileURL;
-    
+        
     const typeOfDevice = deviceType();
 
     let AppContext;
@@ -47,43 +42,16 @@ const FileUpload = (props) => {
     }
     const { journalState, dispatch } = useContext(AppContext);
 
-    let fileData = filesMetaDataArray[fileIndex];
     let fileName = fileData.fileName;
     let fileNameIsNull = fileName === NULL_STRING_ALL_LOWERCASE;
 
     //Upon uploading a file, this function updates the file metadata from its default settings 
     //to that of the file that was uploaded. 
     useEffect(() => {
-        filesMetaDataArray[fileIndex];
         fileName = fileData.fileName;
         fileNameIsNull = fileName === NULL_STRING_ALL_LOWERCASE;
-    }, [filesMetaDataArray[fileIndex]]);
-
-    //Retrieves file chunks from API and used them, along with the file metadata, to construct
-    //a the file and set the constructedFile variable to the newly constructed file. 
-    //it only does this if the fileName property of the fileMetaData object is not equal
-    //to NULL_STRING_ALL_LOWERCASE. Otherwise, this function does nothing.
-    useEffect(() => {
-        const getFiles = async () => getFileFromApi(
-            journalState,
-            dispatch, 
-            dispatchActionToChangeFileLoadStatus, 
-            fileData,
-            index, 
-            fileIndex,
-            setConstructedFile
-        );
-        getFiles();
-    }, []);
-
-    //updates the fileSrc whenever the constructedFile variable is updated with the proper file
-    useEffect( async () => {
-        if(constructedFile){
-            setFileType(constructedFile.type);
-            fileURL = await getFileURL(constructedFile);
-            setFileSrc(fileURL);
-        };
-    },[constructedFile]);
+        if (fileData.file) setFileSrc(fileData.file);
+    }, [fileData]);
 
     //returns the fileId of a newly uploaded file, but only of the file fits the format requirements.
     const uploadFileToFrontend = async (uploadedFile) => {
@@ -91,7 +59,8 @@ const FileUpload = (props) => {
         //this if statement will ultimately end up triggering the 
         //canPlayThrough() function.
         if(uploadedFile.name.match(/\.(avi|mp3|mp4|mpeg|ogg|webm|mov|MOV)$/i)){
-            const duration = await getDuration(uploadedFile);
+            const { duration, url } = await getDuration(uploadedFile);
+            URL.revokeObjectURL(url);
             if(duration > MAX_DURATION_OF_VIDEO_IN_SECONDS || forbiddenFileTypes.includes(uploadedFile.type)){
                 setFileSrc(defaultFileSrc);
                 setFileType("image/png");
@@ -103,41 +72,40 @@ const FileUpload = (props) => {
                             duration: duration
                         }
                 });
-                URL.revokeObjectURL(fileURL);
                 return null;
             } else {
                 setFileType(uploadedFile.type);
-                fileURL = await getFileURL(uploadedFile);
+                const fileURL = await getFileURL(uploadedFile);
                 let fileId = updateFileMetadataInStore(
                     dispatch, 
                     dispatchActionToChangeFileMetaData, 
                     index, 
                     fileIndex, 
                     setChangesWereMade, 
-                    uploadedFile
+                    uploadedFile,
+                    fileURL
                 );
-                setConstructedFile(uploadedFile);
                 return fileId;
             }
         } else {
             //triggers useEffect which displays the video
             setFileType(uploadedFile.type);
-            fileURL = await getFileURL(uploadedFile);
+            const fileURL = await getFileURL(uploadedFile);
             let fileId = updateFileMetadataInStore(
                 dispatch, 
                 dispatchActionToChangeFileMetaData, 
                 index, 
                 fileIndex, 
                 setChangesWereMade, 
-                uploadedFile
+                uploadedFile,
+                fileURL
             );
-            setConstructedFile(uploadedFile);
             return fileId;
         }
     };
 
     const handleUpload = async () => {
-        uploadedFile = inputRef.current.files[0] || constructedFile;
+        const uploadedFile = inputRef.current.files[0];
         dispatch({ 
             actionType: dispatchActionToChangeFileLoadStatus,
             payload: true,

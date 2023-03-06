@@ -1,75 +1,51 @@
 .container{
   flex-direction: column;
+  width: 100%;
   .container__Journal{
-    @media screen and (max-width: 650px) {
-      flex-direction: column;
-    };
-    @media screen and (min-width: 480px) {
-      margin-top: 50px;
-    };
-    width: 103%;
+    flex-direction: column;
+    width: 100%;
     height: auto;
     display: flex;
     align-items: center;
     justify-content: center;
-    .section__1{
-      @media screen and (max-width: 650px) {
-        width: 95%;
-        margin-top: 60px;
-      };
-      flex-direction: column;
-      display: flex;
-      width: 45%;
-      margin-top: 35px;
-      .biography{
-        margin-top: 25px;
-        width: 100%;
-        float: left;
-        .coverPhotoDiv{
-          width: 100%;
-          height: auto;
-          align-items: center;
-          display: flex;
-          justify-content: center;
-          @media screen and (max-width: 650px) {
-            margin-bottom: 20px;
-          };
-            
-        }
-        
-        .inputBox{
-          .input-element-div__dedications{
-            
-            .enabled{
-              border-width: 1px 1px 1px !important;
-              border-radius: 10px;
-            }
-          
-            .disabled{
-                border-radius: 10px;
-            }
-          }
-        }
-      }
-    }
-    .section__2{
-      @media screen and (max-width: 650px) {
-        width: 95%;
-        margin-top: 0px;
-      };
-      flex-direction: column;
-      display: flex;
-      width: 50%;
-      margin-top: 30px;
-  
+    .biography{
+      margin-top: 60px;
+      width: 1000px;
+      max-width: 95%;
       .coverPhotoDiv{
         width: 100%;
         height: auto;
         align-items: center;
         display: flex;
         justify-content: center;
-        
+        @media screen and (max-width: 650px) {
+          margin-bottom: 20px;
+        };
+          
       }
+      
+      .inputBox{
+        .input-element-div__dedications{
+          
+          .enabled{
+            border-width: 1px 1px 1px !important;
+            border-radius: 10px;
+          }
+        
+          .disabled{
+              border-radius: 10px;
+          }
+        }
+      }
+    }
+  
+    .coverPhotoDiv{
+      width: 100%;
+      height: auto;
+      align-items: center;
+      display: flex;
+      justify-content: center;
+      
     }
     .submitButtonDiv{
       font-family: 'Courier New', monospace;

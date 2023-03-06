@@ -10,6 +10,15 @@
     z-index: 100;
     .navbar{
         padding-left: 10px;
+        height: 30px;
+        .menuIcon{
+            float: left;
+            padding-left: 1%;
+        }
+        .notificationsIcon{
+            float: right;  
+            padding-right: 5%;
+        }
     }
     .navBar_Journal.active{
         transform: translateX(-3px);

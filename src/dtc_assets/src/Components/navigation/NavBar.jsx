@@ -98,20 +98,25 @@ export const NavBar = (props) => {
     });
 
     const NotificationIcon = unreadNotifications ?
-        <FaIcons.FaBell onClick={toggleDisplayNotifications}/> : 
-        <FaIcons.FaRegBell onClick={toggleDisplayNotifications}/>;
+        <FaIcons.FaBell/> : 
+        <FaIcons.FaRegBell/>;
 
     return(
         <div className={'linkDiv_Journal'}>
             <div className={'navbar'}> 
-                <Link to='#' className='menu-bars'>
-                    <IconContext.Provider value={{ color: 'white'}}>
+                <div className='menuIcon'>
+                    <IconContext.Provider value={{ color: 'white', size: 25}}>
                         { sideBar ? 
                             <ImIcons.ImCross onClick={showSideBar}/> : 
                             <FaIcons.FaBars onClick={showSideBar}/>
                         }
+                    </IconContext.Provider> 
+                </div>
+                <div className={'notificationsIcon'} onClick={toggleDisplayNotifications}>   
+                    <IconContext.Provider value={{ color: 'white', size: 25}}>
+                        {NotificationIcon}
                     </IconContext.Provider>
-                </Link>                            
+                </div>                          
             </div>
             <nav className={`navBar_Journal ${sideBar ? 'active' : ''}`}>
                 <ul className={'unorderedList'}>
@@ -129,14 +134,6 @@ export const NavBar = (props) => {
                         </IconContext.Provider>
                         <span>
                             journal
-                        </span>
-                    </li>
-                    <li className={'listItem'} onClick={toggleDisplayNotifications}>   
-                        <IconContext.Provider value={{ color: 'white'}}>
-                            {NotificationIcon}
-                        </IconContext.Provider>
-                        <span>
-                            notifications
                         </span>
                     </li>
                     <li className={'listItem'} onClick={handleClickDashboard}>
