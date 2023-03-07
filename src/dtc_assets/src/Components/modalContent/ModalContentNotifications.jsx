@@ -10,6 +10,7 @@ import { AppContext as  HomePageContext} from "../../Routes/HomePage";
 import { MODALS_TYPES } from '../../Constants';
 import { types } from '../../reducers/journalReducer';
 import ButtonField from '../Fields/Button';
+import "../../SCSS/scrollable.scss";
 
 const Notifications = (props) => {
     const {

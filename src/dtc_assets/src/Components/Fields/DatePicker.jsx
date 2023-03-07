@@ -69,7 +69,7 @@ const DatePicker = (props) => {
 
     return(
         <div className={'inputBox__datePicker'}>
-            <div className={'label-element-div '}>
+            <div className={'label-element-div_datepicker '}>
                 <label className={"label "+disabledOrEnabled} htmlFor='Label'> {label}  &nbsp; </label>
             </div>
             <div className={`input-element-div ${(divClassName) ? divClassName : " "}`}>

@@ -19,6 +19,8 @@ import { types } from '../reducers/journalReducer';
 import { UI_CONTEXTS } from '../Contexts';
 import { visibilityFunctionDefault, getIntObserverFunc } from '../Components/animations/IntersectionObserverFunctions';
 import ButtonField from '../Components/Fields/Button';
+import '../SCSS/contentContainer.scss'
+
 
 const WalletPage = (props) => {
 
@@ -78,7 +80,7 @@ const WalletPage = (props) => {
                         <LoadScreen/> :
                         <div className={"container__wallet"}>
                             <div className={'transparentDiv__wallet'}>
-                                <div className={`infoDiv contentContainer _${contentContainerIndex++} animatedLeft`} >
+                                <div className={`infoDiv_wallet contentContainer _${contentContainerIndex++} animatedLeft`} >
                                     <RenderQrCode
                                         imgUrl={journalState.walletData.qrCodeImgUrl}
                                     />  

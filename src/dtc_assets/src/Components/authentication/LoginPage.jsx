@@ -20,6 +20,7 @@ import ButtonField from "../Fields/Button";
 import DataField from "../Fields/DataField";
 import { types } from "../../reducers/journalReducer";
 import { backendActor } from "../../Utils";
+import '../../SCSS/contentContainer.scss'
 
 const LoginPage = (props) => {
 
@@ -115,10 +116,10 @@ const LoginPage = (props) => {
 
     return(
         <div className={"container_loginPage"}>
-            <div className={'container_1'}>
+            <div className={'containerInner_loginPage'}>
                 <div className={`contentContainer _${animatedLeftElementIndex} login`}>
                     <div className={`contentDiv__loginContent _${animatedLeftElementIndex++}`}>
-                        <div className={`logoDiv`}>
+                        <div className={`logoDiv login`}>
                             <img className={`logoImg`}src="dtc-logo-black.png" alt="Logo"/>
                         </div>
                         <div className={'row'}>
