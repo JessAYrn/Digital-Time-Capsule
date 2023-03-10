@@ -119,7 +119,7 @@ const Journal = (props) => {
                     className={'tableDivContainer contentContainer animatedLeft' + 
                     ` _${animatedLeftElementIndex++}`}
                 >
-                    <div className={'tableDiv '}>
+                    <div className={'tableDiv journal'}>
                         <table className={"tableHeader "}>
                             <tbody>
                                 <tr className={"tableRow "}>
