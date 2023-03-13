@@ -230,7 +230,7 @@ const JournalPage = (props) => {
         journalState.isLoading ? 
             <LoadScreen/> : 
                 <div className={"journalPageContainer"}>
-                    <div className={"logoDiv.journal"}>
+                    <div className={"logoDiv journal"}>
                         <div className={'buttonContainer left'}>
                             <ButtonField
                                 Icon={RiIcons.RiArrowGoBackLine}
