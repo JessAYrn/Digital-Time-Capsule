@@ -9,7 +9,11 @@
     left: 0px;
     z-index: 100;
     .navbar{
-        padding-left: 10px;
+        display:flex;
+        max-width:95vw;
+        margin: 0 auto;
+        justify-content: space-between;
+        // padding-left: 10px;
         height: 30px;
         .menuIcon{
             float: left;

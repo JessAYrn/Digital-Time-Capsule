@@ -1,4 +1,4 @@
-import { MODALS_TYPES, NULL_STRING_ALL_LOWERCASE, NULL_STRING_CAPITALIZED } from "../Constants"
+import { JOURNAL_TABS, MODALS_TYPES, NULL_STRING_ALL_LOWERCASE, NULL_STRING_CAPITALIZED } from "../Constants"
 import { getDateAsString } from "../Utils";
 
 export const types = {
@@ -9,6 +9,8 @@ export const types = {
     SET_CANISTER_DATA: "SET_CANISTER_DATA",
     SET_IS_LOGGING_IN: "SET_IS_LOGGING_IN",
     SET_JOURNAL: "SET_JOURNAL",
+    SET_JOURNAL_TAB:"SET_JOURNAL_TAB",
+    SET_WALLET_TABS:'SET_WALLET_TABS',
     SET_JOURNAL_UNREAD_ENTRIES:"SET_JOURNAL_UNREAD_ENTRIES",
     SET_BIO: "SET_BIO",
     SET_METADATA: "SET_METADATA",
@@ -62,11 +64,15 @@ export const types = {
 
 }
 
+
+
 export const initialState = {
     actor: undefined,
     authenticateFunctionCallCount: 0,
     createActorFunctionCallCount: 0,
     journalCount: 0,
+    journalPageTab:JOURNAL_TABS.diaryTab,
+    walletPageTab:'icp_tab',
     canisterData: {
         profilesMetaData: [],
         journalCount: 0,
@@ -231,6 +237,16 @@ const changeValue = (state = initialState, action) => {
         case types.SET_IS_LOADING:
             state.isLoading = payload;
             return {
+                ...state
+            }
+        case types.SET_JOURNAL_TAB:
+            state.journalPageTab=payload;
+            return{
+                ...state
+            }
+        case types.SET_WALLET_TABS:
+            state.walletPageTab=payload;
+            return{
                 ...state
             }
         case types.SET_JOURNAL_UNREAD_ENTRIES:

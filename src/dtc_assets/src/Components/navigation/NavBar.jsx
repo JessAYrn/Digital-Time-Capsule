@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useState } from 'react';
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { NAV_LINKS } from '../../Constants';
 import { UI_CONTEXTS } from '../../Contexts';
 import { AppContext as AccountContext} from '../../Routes/Account';
@@ -17,7 +17,11 @@ import { types } from '../../reducers/journalReducer';
 import { MODALS_TYPES } from '../../Constants';
 import { ConnectButton, ConnectDialog, useConnect } from "@connect2ic/react";
 import { initialState } from '../../reducers/journalReducer';
+import JournalButtons from '../JournalButton';
 import "./NavBar.scss";
+import WalletPageButtons from '../WalletPageButton';
+
+
 
 export const NavBar = (props) => {
     const {
@@ -97,6 +101,8 @@ export const NavBar = (props) => {
         }
     });
 
+    const {pathname} = useLocation();
+
     const NotificationIcon = unreadNotifications ?
         <FaIcons.FaBell/> : 
         <FaIcons.FaRegBell/>;
@@ -112,6 +118,8 @@ export const NavBar = (props) => {
                         }
                     </IconContext.Provider> 
                 </div>
+                {pathname === '/app'? <JournalButtons/>:''}
+                {pathname === '/wallet'? <WalletPageButtons/>:''}
                 <div className={'notificationsIcon'} onClick={toggleDisplayNotifications}>   
                     <IconContext.Provider value={{ color: 'white', size: 25}}>
                         {NotificationIcon}

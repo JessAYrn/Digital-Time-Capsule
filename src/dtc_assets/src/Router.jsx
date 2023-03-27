@@ -26,7 +26,7 @@ const Router = (props) => {
             dtc: {
                 canisterId: dtc_canisterId,
                 idlFactory: dtc_idlFactory
-            }    
+            } 
         },
         providers: defaultProviders
     });

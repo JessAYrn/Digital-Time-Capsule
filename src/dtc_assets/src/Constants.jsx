@@ -75,3 +75,7 @@ export const PROVIDER_STATUS = {
     idle: 'idle'
 }
 
+export const JOURNAL_TABS={
+    diaryTab:'diaryTab',
+    notesTab:'notesTab'
+}
