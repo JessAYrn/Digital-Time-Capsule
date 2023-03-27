@@ -20,6 +20,7 @@ import { initialState } from '../../reducers/journalReducer';
 import JournalButtons from '../JournalButton';
 import "./NavBar.scss";
 import WalletPageButtons from '../WalletPageButton';
+import Dropdown from '../Fields/Dropdown';
 
 
 
@@ -101,6 +102,20 @@ export const NavBar = (props) => {
         }
     });
 
+    const walletTabOptions = [
+        {text: 'icp_tab',icon: null}, 
+        {text: 'eth_tab',icon: null}, 
+        {text: 'btc_tab',icon: null},
+        {text: 'ckBtc_tab',icon: null}
+    ];
+
+    const changeHandler_walletTab = (option) => {
+        dispatch({
+            actionType: types.SET_WALLET_TABS,
+            payload: option.text
+        });
+    };
+
     const {pathname} = useLocation();
 
     const NotificationIcon = unreadNotifications ?
@@ -119,7 +134,13 @@ export const NavBar = (props) => {
                     </IconContext.Provider> 
                 </div>
                 {pathname === '/app'? <JournalButtons/>:''}
-                {pathname === '/wallet'? <WalletPageButtons/>:''}
+                {pathname === '/wallet'? 
+                    <Dropdown 
+                        options={walletTabOptions}
+                        changeHandler={changeHandler_walletTab}
+                    />:
+                    ''
+                }
                 <div className={'notificationsIcon'} onClick={toggleDisplayNotifications}>   
                     <IconContext.Provider value={{ color: 'white', size: 25}}>
                         {NotificationIcon}
