@@ -39,6 +39,7 @@ import Hex "Ledger/Hex";
 import ManagerCanister "Manager/Manager";
 import ManagerTypes "Manager/manager.types";
 import Manager "Manager/Manager";
+import AssetCanister "AssetCanister/AssetCanister";
 
 shared (msg) actor class User() = this {
 
@@ -461,7 +462,16 @@ shared (msg) actor class User() = this {
         } else {
             return #err(#NotAuthorized);
         };
-        
+    };
+
+    public shared(msg) func authorizeBackendCanisterToUpdateAssets(): async () {
+        let backendPrincipal = Principal.fromText(canisterData.backEndPrincipal);
+        let result = await CanisterManagementMethods.authorizeBackendCanisterToUpdateAssets(Principal.fromActor(this),backendPrincipal);
+    };
+
+    public shared(msg) func getAssetCanisterAuthorizedPrincipals() : async [Principal] {
+        let assetCanister: AssetCanister.Interface = actor(canisterData.frontEndPrincipal);
+        let result = await assetCanister.list_authorized();
     };
 
     public shared(msg) func toggleAcceptRequest() : async  Result.Result<(MainTypes.CanisterData), JournalTypes.Error>{

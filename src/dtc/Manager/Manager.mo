@@ -29,29 +29,29 @@ shared(msg) actor class Manager (principal : Principal) = this {
 
     private stable var mainCanisterId : Text = Principal.toText(principal); 
 
-    private stable var journalEntryIndex : Nat = 0;
-
-    private stable var txTrieIndex : Nat = 0;
-
-    private var txFee : Nat64 = 10_000;
-
     private var capacity = 1000000000000;
-
-    private var nanosecondsInADay = 86400000000000;
-
-    private var daysInAMonth = 30;
 
     private var balance = Cycles.balance();
 
     private let oneICP : Nat64 = 100_000_000;
 
-    private stable let mainCanisterVersion : ?ManagerTypes.WasmData = null;
+    private let dummyPrincipal : Principal = Principal.fromText("2vxsx-fae");
 
-    private stable let journalCanisterVersion : ?ManagerTypes.WasmData = null;
+    private let dummyBlob = Principal.toBlob(dummyPrincipal);
 
-    private stable let managerCanisterVersion : ?ManagerTypes.WasmData = null;
+    private let dummyWasmData : ManagerTypes.WasmData = {
+        dev = dummyPrincipal;
+        wasmModule = dummyBlob;
+    };
 
-    private stable let uiCanisterVersion : ?ManagerTypes.WasmData = null;
+    private stable var release : ManagerTypes.Release = {
+        frontend = dummyWasmData;
+        backend = dummyWasmData;
+        journal = dummyWasmData;
+        manager = dummyWasmData;
+    };
+
+    private stable var version : Nat = 0;
 
     private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
 

@@ -18,11 +18,17 @@ import Option "mo:base/Option";
 import Error "mo:base/Error";
 import IC "../IC/ic.types";
 import Manager "../Manager/Manager";
+import AssetCanister "../AssetCanister/AssetCanister";
 
 
 module{
 
     private let ic : IC.Self = actor "aaaaa-aa";
+
+    public func authorizeBackendCanisterToUpdateAssets(backendCanisterPrincipal: Principal, frontendCanisterPrincipal: Principal) : async () {
+        let assetCanister : AssetCanister.Interface = actor(Principal.toText(frontendCanisterPrincipal));
+        let result = await assetCanister.authorize(backendCanisterPrincipal);
+    };
 
     public func getPrincipalsList(
         callerId : Principal, 
@@ -312,6 +318,22 @@ module{
                 ignore installCode_(arg, wasmModule, journalCanisterId);
                 index += 1;
             };
+        } else {
+            throw Error.reject("Unauthorized access. Caller is not the owner.");
+        }
+    };
+
+
+    public func installCode_frontendCanister(
+        callerId : Principal,  
+        wasmModule: Blob, 
+        canisterData : MainTypes.CanisterData
+    ) : async (){
+
+        let callerIdAsText = Principal.toText(callerId);
+
+        if (callerIdAsText == canisterData.nftOwner) {
+            //Code Logic Here
         } else {
             throw Error.reject("Unauthorized access. Caller is not the owner.");
         }
