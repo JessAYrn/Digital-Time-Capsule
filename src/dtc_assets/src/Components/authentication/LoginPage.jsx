@@ -186,7 +186,7 @@ const LoginPage = (props) => {
                             <h6 className={`h6Tag`}>
                                 Store Your Memories
                             </h6>
-                            <img className={`cameraImg`}src="camera.png" alt="camera"/>
+                            <img className={`cameraImg`}src="../../../assets/camera.png" alt="camera"/>
                         </div>
                     </div>
                 </div>
