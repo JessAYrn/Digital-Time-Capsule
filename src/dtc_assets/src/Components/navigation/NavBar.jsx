@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useState } from 'react';
 import { useNavigate, Link, useLocation } from "react-router-dom";
-import { NAV_LINKS } from '../../Constants';
+import { JOURNAL_TABS, NAV_LINKS, WALLET_TABS } from '../../Constants';
 import { UI_CONTEXTS } from '../../Contexts';
 import { AppContext as AccountContext} from '../../Routes/Account';
 import { AppContext as HomePageContext} from '../../Routes/HomePage';
@@ -103,10 +103,10 @@ export const NavBar = (props) => {
     });
 
     const walletTabOptions = [
-        {text: 'icp_tab',icon: null}, 
-        {text: 'eth_tab',icon: null}, 
-        {text: 'btc_tab',icon: null},
-        {text: 'ckBtc_tab',icon: null}
+        {text: WALLET_TABS.icpTab,icon: null}, 
+        {text: WALLET_TABS.ethTab,icon: null}, 
+        {text: WALLET_TABS.btcTab,icon: null},
+        {text: WALLET_TABS.ckBtcTab,icon: null}
     ];
 
     const changeHandler_walletTab = (option) => {
@@ -116,6 +116,17 @@ export const NavBar = (props) => {
         });
     };
 
+    const journalTabOptions=[
+        {text: JOURNAL_TABS.diaryTab,icon:null},
+        {text: JOURNAL_TABS.notesTab,icon:null},
+    ]
+
+    const changeHandler_journalTab=(option)=>{
+        dispatch({
+            actionType:types.SET_JOURNAL_TAB,
+            payload:option.text
+        })
+    }
     const {pathname} = useLocation();
 
     const NotificationIcon = unreadNotifications ?
@@ -133,7 +144,16 @@ export const NavBar = (props) => {
                         }
                     </IconContext.Provider> 
                 </div>
-                {pathname === '/app'? <JournalButtons/>:''}
+                
+                
+                
+                
+                <div className={'leftNav'}>
+                {pathname === '/app'? <Dropdown
+                options={journalTabOptions}
+                changeHandler={changeHandler_journalTab}
+                />:''}
+                
                 {pathname === '/wallet'? 
                     <Dropdown 
                         options={walletTabOptions}
@@ -141,11 +161,15 @@ export const NavBar = (props) => {
                     />:
                     ''
                 }
-                <div className={'notificationsIcon'} onClick={toggleDisplayNotifications}>   
+                <div className={'notificationsIcon'} onClick={toggleDisplayNotifications}>  
+                
                     <IconContext.Provider value={{ color: 'white', size: 25}}>
                         {NotificationIcon}
                     </IconContext.Provider>
-                </div>                          
+                </div>
+                </div>
+                
+                                         
             </div>
             <nav className={`navBar_Journal ${sideBar ? 'active' : ''}`}>
                 <ul className={'unorderedList'}>

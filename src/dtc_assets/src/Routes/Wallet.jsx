@@ -11,6 +11,7 @@ import { useConnect } from '@connect2ic/react';
 import CkBtcPage from '../Pages/CkBtcPage';
 import EthPage from '../Pages/EthPage';
 import BtcPage from '../Pages/BtcPage';
+import { WALLET_TABS } from '../Constants';
 
 export const AppContext = createContext({
     journalState:{},
@@ -36,16 +37,15 @@ const WalletApp = () => {
 
     
     const WalletTabComponent=useMemo(()=>{
-        if(journalState.walletPageTab==='icp_tab'){
+        if(journalState.walletPageTab===WALLET_TABS.icpTab){
             return WalletPage;
-        }else if(journalState.walletPageTab==='btc_tab'){
+        }else if(journalState.walletPageTab===WALLET_TABS.btcTab){
             return BtcPage;
         }
-        else if(journalState.walletPageTab==='eth_tab'){
+        else if(journalState.walletPageTab===WALLET_TABS.ethTab){
             return EthPage;
         }
-        else if(journalState.walletPageTab==='ckBtc_tab'){
-            console.log('CKBTC')
+        else if(journalState.walletPageTab===WALLET_TABS.ckBtcTab){
             return CkBtcPage;
         }
     },[journalState.walletPageTab])

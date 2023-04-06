@@ -23,6 +23,12 @@
             float: right;  
             padding-right: 5%;
         }
+        .leftNav{
+            display: flex;
+            width: 100px;
+            justify-content: space-between;
+            align-items: center;
+        }
     }
     .navBar_Journal.active{
         transform: translateX(-3px);
@@ -67,6 +73,9 @@
                     margin-top: -5px;
                 }
             }
+        }
+        .listItem:hover{
+            background-color:rgba(32,42,68,0.3);
         }
         .unorderedList.bottom{
             position: absolute;

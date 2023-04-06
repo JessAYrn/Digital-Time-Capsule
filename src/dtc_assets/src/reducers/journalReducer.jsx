@@ -1,4 +1,4 @@
-import { JOURNAL_TABS, MODALS_TYPES, NULL_STRING_ALL_LOWERCASE, NULL_STRING_CAPITALIZED } from "../Constants"
+import { JOURNAL_TABS, MODALS_TYPES, NULL_STRING_ALL_LOWERCASE, NULL_STRING_CAPITALIZED, WALLET_TABS } from "../Constants"
 import { getDateAsString } from "../Utils";
 
 export const types = {
@@ -72,7 +72,7 @@ export const initialState = {
     createActorFunctionCallCount: 0,
     journalCount: 0,
     journalPageTab:JOURNAL_TABS.diaryTab,
-    walletPageTab:'icp_tab',
+    walletPageTab:WALLET_TABS.icpTab,
     canisterData: {
         profilesMetaData: [],
         journalCount: 0,

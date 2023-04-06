@@ -4,6 +4,7 @@ import * as FaIcons from 'react-icons/fa';
 import './WalletPageButton.scss';
 import journalReducer, {initialState, types} from '../reducers/journalReducer';
 import { AppContext } from '../Routes/Wallet';
+import { WALLET_TABS } from '../Constants';
 
 
 
@@ -31,8 +32,8 @@ const WalletPageButtons = () => {
         Icon={FaIcons.FaWallet}
         iconSize={25}
         iconColor={'#fff'}
-        className={journalState.walletPageTab==='icp_tab'?'walletButtonOne active':'walletButtonOne'}
-        onClick={()=>changeTab('icp_tab')}
+        className={journalState.walletPageTab===WALLET_TABS.icpTab?'walletButtonOne active':'walletButtonOne'}
+        onClick={()=>changeTab(WALLET_TABS.icpTab)}
         withBox={true}
         />
         
@@ -40,8 +41,8 @@ const WalletPageButtons = () => {
         Icon={FaIcons.FaEthereum}
         iconSize={25}
         iconColor={'#fff'}
-        className={journalState.walletPageTab==='eth_tab'?'walletButtonTwo active':'walletButtonTwo'}
-        onClick={()=>changeTab('eth_tab')}
+        className={journalState.walletPageTab===WALLET_TABS.ethTab?'walletButtonTwo active':'walletButtonTwo'}
+        onClick={()=>changeTab(WALLET_TABS.ethTab)}
         withBox={true}
         />
         
@@ -49,8 +50,8 @@ const WalletPageButtons = () => {
         Icon={FaIcons.FaBitcoin}
         iconSize={25}
         iconColor={'orange'}
-        className={journalState.walletPageTab==='btc_tab'?'walletButtonThree active':'walletButtonThree'}
-        onClick={()=>changeTab('btc_tab')}
+        className={journalState.walletPageTab===WALLET_TABS.btcTab?'walletButtonThree active':'walletButtonThree'}
+        onClick={()=>changeTab(WALLET_TABS.btcTab)}
         withBox={true}
         />
        
@@ -59,8 +60,8 @@ const WalletPageButtons = () => {
         iconSize={25}
         iconColor={'purple'}
         // className={'journalButtonTwo'}
-        className={journalState.walletPageTab==='ckBtc_tab'?'walletButtonFour active':'walletButtonFour'}
-        onClick={()=>changeTab('ckBtc_tab')}
+        className={journalState.walletPageTab===WALLET_TABS.ckBtcTab?'walletButtonFour active':'walletButtonFour'}
+        onClick={()=>changeTab(WALLET_TABS.ckBtcTab)}
         withBox={true}
         />
     </div>
