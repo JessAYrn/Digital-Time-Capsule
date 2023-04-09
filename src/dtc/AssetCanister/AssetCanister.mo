@@ -3,6 +3,34 @@ module {
     public type ChunkId = Nat;
     public type Key = Text;
     public type Time = Int;
+    public type Content_encoding = Text;
+    public type Sha256 = ? Blob;
+    public type Chunk = Blob;
+
+    public type ChunkData = (Content_encoding, Sha256, Chunk);
+
+
+    public type ListResultObject = {
+        content_type : Text;
+        encodings: [{
+            content_encoding : Text;
+            length : Nat;
+            modified :Int;
+            sha256 : ?Blob;
+        }];
+        key : Key;
+    };
+
+    public type AssetArgs = {
+        content_type: Text;
+        max_age: ? Nat64;
+        headers: ? [HeaderField];
+        enable_aliasing: ? Bool;
+        allow_raw_access: ? Bool;
+        chunks: [(ChunkId, (Content_encoding, Sha256, Chunk))];
+    };
+
+    public type Assets = [(Key, AssetArgs)];
 
     public type CreateAssetArguments = {
         key: Key;

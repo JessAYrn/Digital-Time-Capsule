@@ -31,13 +31,13 @@ import JournalHelperMethods "Main/JournalHelperMethods";
 import NftHelperMethods "Main/NftHelperMethods";
 import MainTypes "Main/types";
 import TxHelperMethods "Main/TransactionHelperMethods";
-import CanisterManagementMethods "Manager/CanisterManagementMethods";
+import CanisterManagementMethods "Main/CanisterManagementMethods";
 import NftCollection "NftCollection/NftCollection";
 import Support "SupportCanisterIds/SupportCanisterIds";
 import IC "IC/ic.types";
 import Hex "Ledger/Hex";
 import ManagerCanister "Manager/Manager";
-import ManagerTypes "Manager/manager.types";
+import ManagerTypes "Manager/WasmStore";
 import Manager "Manager/Manager";
 import AssetCanister "AssetCanister/AssetCanister";
 
@@ -464,9 +464,10 @@ shared (msg) actor class User() = this {
         };
     };
 
-    public shared(msg) func authorizeBackendCanisterToUpdateAssets(): async () {
-        let backendPrincipal = Principal.fromText(canisterData.backEndPrincipal);
-        let result = await CanisterManagementMethods.authorizeBackendCanisterToUpdateAssets(Principal.fromActor(this),backendPrincipal);
+    public shared(msg) func authorizePrinicpalToViewAssets(prinicpal: Principal): async () {
+        assert(Principal.toText(msg.caller) == canisterData.nftOwner);
+        let frontEndPrincipal = Principal.fromText(canisterData.frontEndPrincipal);
+        let result = await CanisterManagementMethods.authorizePrinicpalToViewAssets(prinicpal, frontEndPrincipal);
     };
 
     public shared(msg) func getAssetCanisterAuthorizedPrincipals() : async [Principal] {

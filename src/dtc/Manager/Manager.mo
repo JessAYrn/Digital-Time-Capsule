@@ -19,8 +19,8 @@ import Account "../Ledger/Account";
 import Bool "mo:base/Bool";
 import Option "mo:base/Option";
 import IC "../IC/ic.types";
-import ManagerTypes "manager.types";
-
+import AssetCanister "../AssetCanister/AssetCanister";
+import WasmStore "WasmStore";
 
 shared(msg) actor class Manager (principal : Principal) = this {
     let callerId = msg.caller;
@@ -39,12 +39,13 @@ shared(msg) actor class Manager (principal : Principal) = this {
 
     private let dummyBlob = Principal.toBlob(dummyPrincipal);
 
-    private let dummyWasmData : ManagerTypes.WasmData = {
+    private let dummyWasmData : WasmStore.WasmData = {
         dev = dummyPrincipal;
         wasmModule = dummyBlob;
     };
 
-    private stable var release : ManagerTypes.Release = {
+    private stable var release : WasmStore.Release = {
+        assets = [];
         frontend = dummyWasmData;
         backend = dummyWasmData;
         journal = dummyWasmData;
@@ -65,6 +66,9 @@ shared(msg) actor class Manager (principal : Principal) = this {
 
     public shared(msg) func installCode( args: Blob, wasmModule: Blob ): async() {
         let callerId = msg.caller;
+        if( Principal.toText(callerId) != mainCanisterId) {
+            throw Error.reject("Unauthorized access.");
+        };
         let callerIdAsText = Principal.toText(callerId);
         let mainCanisterIdAsBlob  = Principal.fromText(mainCanisterId);
         await ic.stop_canister({canister_id = mainCanisterIdAsBlob});
@@ -76,6 +80,83 @@ shared(msg) actor class Manager (principal : Principal) = this {
         });
         await ic.start_canister({canister_id = mainCanisterIdAsBlob});
     };
+
+    
+
+    public shared(msg) func loadNextRelease(): async (){
+        let callerId = msg.caller;
+        if( Principal.toText(callerId) != mainCanisterId) {
+            throw Error.reject("Unauthorized access.");
+        };
+        await updateModules();
+        await updateAssets();
+        version += 1;
+    };
+
+    private func updateModules(): async(){
+        let wasmStore: WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
+        let { backend; frontend; manager; journal; } = WasmStore.wasmTypes;
+        let backendWasm = await wasmStore.getModule(version + 1, backend);
+        let frontendWasm = await wasmStore.getModule(version + 1, frontend);
+        let managerWasm = await wasmStore.getModule(version + 1, manager);
+        let journalWasm = await wasmStore.getModule(version + 1, journal);
+
+        release := {
+            assets = release.assets;
+            frontend = frontendWasm;
+            backend = backendWasm;
+            journal = managerWasm;
+            manager = journalWasm;
+        };
+    };
+
+    private func updateAssets(): async (){
+        let wasmStore: WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
+        let keys = await wasmStore.getAssetKeys();
+        let length = keys.size();
+        var index = 0;
+        let AssetBuffer = Buffer.Buffer<(AssetCanister.Key, AssetCanister.AssetArgs)>(1);
+        while(index < length){
+            let key = keys[index];
+            let assetMetaData = await wasmStore.getAssetMetaDataWithoutChunksData(version + 1, key);
+            let {content_type; max_age; headers; enable_aliasing; allow_raw_access;} = assetMetaData;
+            let ChunksBuffer = Buffer.Buffer<(AssetCanister.ChunkId, AssetCanister.ChunkData)>(1);
+            var continue_ = true;
+            var chunkIndex = 0;
+            while(continue_){
+                try{
+                    let (chunkId, chunkData) = await wasmStore.getAssetChunk(version + 1, key, chunkIndex);
+                    ChunksBuffer.add((chunkId, chunkData));
+                    chunkIndex += 1;
+                } catch(e){
+                    continue_ := false;
+                };
+            };
+
+            let chunks = ChunksBuffer.toArray();
+
+            let asset: AssetCanister.AssetArgs = {
+                content_type;
+                max_age;
+                headers; 
+                enable_aliasing;
+                allow_raw_access;
+                chunks;
+            };
+            AssetBuffer.add(key, asset);
+            index += 1;
+        };
+
+        release := {
+            assets = AssetBuffer.toArray();
+            frontend = release.frontend;
+            backend = release.backend;
+            journal = release.journal;
+            manager = release.manager;
+        };
+    };
+
+
 
     // Return the cycles received up to the capacity allowed
     public func wallet_receive() : async { accepted: Nat64 } {
