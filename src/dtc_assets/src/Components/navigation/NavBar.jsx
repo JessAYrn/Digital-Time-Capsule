@@ -17,9 +17,7 @@ import { types } from '../../reducers/journalReducer';
 import { MODALS_TYPES } from '../../Constants';
 import { ConnectButton, ConnectDialog, useConnect } from "@connect2ic/react";
 import { initialState } from '../../reducers/journalReducer';
-import JournalButtons from '../JournalButton';
 import "./NavBar.scss";
-import WalletPageButtons from '../WalletPageButton';
 import Dropdown from '../Fields/Dropdown';
 
 
@@ -149,12 +147,12 @@ export const NavBar = (props) => {
                 
                 
                 <div className={'leftNav'}>
-                {pathname === '/app'? <Dropdown
+                {pathname === NAV_LINKS.journal? <Dropdown
                 options={journalTabOptions}
                 changeHandler={changeHandler_journalTab}
                 />:''}
                 
-                {pathname === '/wallet'? 
+                {pathname === NAV_LINKS.wallet? 
                     <Dropdown 
                         options={walletTabOptions}
                         changeHandler={changeHandler_walletTab}

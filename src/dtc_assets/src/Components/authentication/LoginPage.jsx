@@ -13,8 +13,6 @@ import * as RiIcons from 'react-icons/ri';
 import { NAV_LINKS } from "../../Constants";
 
 
-// GiStabbedNote
-// import { AppContext as PodcastContext } from "../PodcastPage"
 import "./LoginPage.scss";
 import "../../Components/animations/Animation.scss";
 import { getIntObserverFunc, visibilityFunctionLoginPage } from "../animations/IntersectionObserverFunctions";
