@@ -17,6 +17,7 @@ import RequestApprovalResponseModal from './modalContent/RequestApprovaModal';
 import { getIntObserverFunc, visibilityFunctionDefault } from './animations/IntersectionObserverFunctions';
 import DateOutOfRange from './modalContent/DateOutOfRange';
 import "./Modal.scss";
+import '../SCSS/contentContainer.scss'
 
 export const Modal = (props) => {
 
@@ -92,7 +93,7 @@ export const Modal = (props) => {
     return(
         <> 
             { journalState.modalStatus.show ? 
-            <div className={"container__modal"}>
+            <div className={"modalContainer"}>
                 <div className="modalDiv" >
                     <div className={`modalTransparentDiv contentContainer _${animatedLeftElementIndex} animatedLeft`}>
                         <div className={'modalWrapper'}>

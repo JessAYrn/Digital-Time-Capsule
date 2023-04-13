@@ -16,6 +16,12 @@ import * as FaIcons from 'react-icons/fa';
 import * as AiIcons from 'react-icons/ai';
 import ButtonField from '../Components/Fields/Button';
 import { IconContext } from 'react-icons/lib';
+import "../SCSS/scrollable.scss";
+
+import '../SCSS/container.scss';
+import '../SCSS/contentContainer.scss'
+import '../SCSS/section.scss'
+
 
 
 const Analytics = () => {
@@ -299,7 +305,7 @@ const Analytics = () => {
                                                             <IconContext.Provider value={{ size: '15px', margin: '5px'}}>
                                                                 <AiIcons.AiTwotoneLike/>
                                                             </IconContext.Provider>
-                                                            <h6> Subsidized </h6>
+                                                            <h6> Suibsidized </h6>
                                                         </div>}
                                                         {!approvalStatus &&
                                                         <div className={'approvalStatusDiv'}>

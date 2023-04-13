@@ -2,8 +2,6 @@
 .container{
     .scrollable{
         height: 100%; /* or any value */
-        overflow-y: auto;
-        width: 100%;
         background-color: transparent;
         display: flex;
         flex-direction: column;

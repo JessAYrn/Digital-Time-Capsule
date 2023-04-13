@@ -75,3 +75,14 @@ export const PROVIDER_STATUS = {
     idle: 'idle'
 }
 
+export const JOURNAL_TABS={
+    diaryTab:'diaryTab',
+    notesTab:'notesTab'
+}
+
+export const WALLET_TABS={
+    icpTab:'icp_tab',
+    ethTab:'eth_tab',
+    btcTab:'btc_tab',
+    ckBtcTab:'ckBtc_tab'
+}

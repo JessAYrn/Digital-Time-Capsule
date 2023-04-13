@@ -9,7 +9,11 @@
     left: 0px;
     z-index: 100;
     .navbar{
-        padding-left: 10px;
+        display:flex;
+        max-width:95vw;
+        margin: 0 auto;
+        justify-content: space-between;
+        // padding-left: 10px;
         height: 30px;
         .menuIcon{
             float: left;
@@ -18,6 +22,12 @@
         .notificationsIcon{
             float: right;  
             padding-right: 5%;
+        }
+        .leftNav{
+            display: flex;
+            width: 100px;
+            justify-content: space-between;
+            align-items: center;
         }
     }
     .navBar_Journal.active{
@@ -63,6 +73,9 @@
                     margin-top: -5px;
                 }
             }
+        }
+        .listItem:hover{
+            background-color:rgba(32,42,68,0.3);
         }
         .unorderedList.bottom{
             position: absolute;

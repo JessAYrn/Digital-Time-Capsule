@@ -55,7 +55,7 @@ return(
         />
         {journalState.isLoading ?
             <LoadScreen/> :
-            <div className={`logoDiv ${isAdmin ? 'admin' : ''}`}>
+            <div className={`logoDiv account ${isAdmin ? 'admin' : ''}`}>
                 <img className={'logoImg'}src="dtc-logo-black.png" alt="Logo"/>
                 <div className={`subscriptionSection ${isAdmin ? 'admin_' : ''}`}>
                     <InputBox
