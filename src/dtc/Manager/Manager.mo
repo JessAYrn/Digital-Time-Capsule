@@ -21,6 +21,10 @@ import Option "mo:base/Option";
 import IC "../IC/ic.types";
 import AssetCanister "../AssetCanister/AssetCanister";
 import WasmStore "WasmStore";
+import HashMap "mo:base/HashMap";
+import MainTypes "../Main/types";
+import CanisterManagementMethods "CanisterManagementMethods";
+import AssetManagementFunctions "../AssetCanister/AssetManagementFunctions";
 
 shared(msg) actor class Manager (principal : Principal) = this {
     let callerId = msg.caller;
@@ -38,6 +42,8 @@ shared(msg) actor class Manager (principal : Principal) = this {
     private let dummyPrincipal : Principal = Principal.fromText("2vxsx-fae");
 
     private let dummyBlob = Principal.toBlob(dummyPrincipal);
+
+    private stable var permitUpdateToBackend = false;
 
     private let dummyWasmData : WasmStore.WasmData = {
         dev = dummyPrincipal;
@@ -64,33 +70,146 @@ shared(msg) actor class Manager (principal : Principal) = this {
         return balance
     };
 
-    public shared(msg) func installCode( args: Blob, wasmModule: Blob ): async() {
-        let callerId = msg.caller;
-        if( Principal.toText(callerId) != mainCanisterId) {
-            throw Error.reject("Unauthorized access.");
-        };
-        let callerIdAsText = Principal.toText(callerId);
-        let mainCanisterIdAsBlob  = Principal.fromText(mainCanisterId);
-        await ic.stop_canister({canister_id = mainCanisterIdAsBlob});
-        await ic.install_code({
-            arg = args;
-            wasm_module = wasmModule;
-            mode = #upgrade;
-            canister_id = mainCanisterIdAsBlob;
-        });
-        await ic.start_canister({canister_id = mainCanisterIdAsBlob});
-    };
-
-    
-
     public shared(msg) func loadNextRelease(): async (){
         let callerId = msg.caller;
         if( Principal.toText(callerId) != mainCanisterId) {
             throw Error.reject("Unauthorized access.");
         };
-        await updateModules();
-        await updateAssets();
-        version += 1;
+        try{
+            await updateModules();
+            await updateAssets();
+            version += 1;
+        } catch(e){};
+    };
+
+    public shared(msg) func getCurrentReleaseVersion(): async Nat {
+        let callerId = msg.caller;
+        if( Principal.toText(callerId) != mainCanisterId) {
+            throw Error.reject("Unauthorized access.");
+        };
+        return version;
+    };
+
+    public shared(msg) func allowUpdatesToBackendCanister(): async (){
+        let callerId = msg.caller;
+        if( Principal.toText(callerId) != mainCanisterId) {
+            throw Error.reject("Unauthorized access.");
+        };
+        permitUpdateToBackend := true;
+    };
+
+    public shared(msg) func installCode_backendCanister(): async () {
+        if(not permitUpdateToBackend) {
+            throw Error.reject("Unauthorized access.");
+        };
+        let {backend} = release;
+        let {wasmModule} = backend;
+        await CanisterManagementMethods.installCodeBackendWasm(mainCanisterId, wasmModule);
+        permitUpdateToBackend := false;
+    };
+
+    public shared(msg) func installCode_journalCanisters(
+        profilesArray: MainTypes.UserProfilesArray
+    ): async (){
+        let mainCanisterPrincipal = msg.caller;
+        if(Principal.toText(mainCanisterPrincipal) != mainCanisterId) {
+            throw Error.reject("Unauthorized access.");
+        };
+        let {journal} = release;
+        let {wasmModule} = journal;
+        await CanisterManagementMethods.installCodeJournalWasms(wasmModule, profilesArray);
+    };
+
+    public shared(msg) func installCode_frontendCanister(canisterData: MainTypes.CanisterData): 
+    async ([AssetCanister.BatchOperationKind]){
+        let mainCanisterPrincipal = msg.caller;
+        if(Principal.toText(mainCanisterPrincipal) != mainCanisterId) {
+            throw Error.reject("Unauthorized access.");
+        };
+        let {frontend} = release;
+        let {wasmModule} = frontend;
+        await CanisterManagementMethods.installFrontendWasm(canisterData, wasmModule);
+
+        let frontendCanisterId = canisterData.frontEndPrincipal;
+        let frontendCanister: AssetCanister.Interface = actor(frontendCanisterId);
+        let batch_id_for_clearing_operation = await frontendCanister.create_batch({});
+        let batch_operation_clear_array: [AssetCanister.BatchOperationKind] = [#Clear({})];
+        await frontendCanister.commit_batch({
+            batch_id = batch_id_for_clearing_operation.batch_id;
+            operations = batch_operation_clear_array;
+        });
+
+        let {batch_id} = await frontendCanister.create_batch({});
+
+        let batchOperationsBuffer = Buffer.Buffer<AssetCanister.BatchOperationKind>(1);
+
+        let {assets} = release;
+
+        let numberOfAssets = assets.size();
+
+        var index_ = 0;
+
+        while(index_ < numberOfAssets){
+            let (key, assetArgs) = assets[index_];
+            let { allow_raw_access; chunks; content_type; enable_aliasing; headers; max_age;} = assetArgs;
+            let batch_operation_create = await AssetManagementFunctions.getCreateAssetBatchOperation({
+                key;
+                content_type;
+                enable_aliasing;
+                headers;
+                max_age;
+                allow_raw_access; 
+            });
+
+            batchOperationsBuffer.add(batch_operation_create);
+
+            var index__ = 0;
+            let numberOfChunks = chunks.size();
+            let chunksHashMap = HashMap.HashMap<AssetCanister.Content_encoding, (AssetCanister.Sha256, [AssetCanister.ChunkId])>(1, Text.equal, Text.hash);
+            while(index__ < numberOfChunks){
+                let (chunkIndex, (content_encoding, sha256, content)) = chunks[index__];
+                let {chunk_id} = await frontendCanister.create_chunk({content; batch_id;});
+                let chunkIdsArray = chunksHashMap.get(content_encoding);
+                switch(chunkIdsArray){
+                    case null{ chunksHashMap.put(content_encoding, (sha256, [chunk_id])); };
+                    case(?(sha256, chunk_ids_array)){
+                        let buffer = Buffer.fromArray<AssetCanister.ChunkId>(chunk_ids_array);
+                        buffer.add(chunk_id);
+                        chunksHashMap.put(content_encoding,(sha256, buffer.toArray()));
+                    };
+                };
+                index__ += 1;
+            };
+
+            let chunksArraysByContentEncoding : [(AssetCanister.Content_encoding, (AssetCanister.Sha256,[AssetCanister.ChunkId]))] = 
+            Iter.toArray(chunksHashMap.entries());
+
+            let numberOfChunksArrays = chunksArraysByContentEncoding.size();
+            index__ := 0;
+
+            while(index__ < numberOfChunksArrays){
+                let (content_encoding, (sha256, chunk_ids)) = chunksArraysByContentEncoding[index__];
+                let batch_operation_set_asset_content = await AssetManagementFunctions.getSetAssetBatchOperation({
+                    key; 
+                    sha256; 
+                    chunk_ids; 
+                    content_encoding;
+                });
+
+                batchOperationsBuffer.add(batch_operation_set_asset_content);
+                index__ +=1;
+            };
+            index_ += 1;
+        };
+
+        let operations = batchOperationsBuffer.toArray();
+
+        let result = await frontendCanister.commit_batch({
+            batch_id;
+            operations;
+        });
+
+        return operations;
     };
 
     private func updateModules(): async(){
@@ -128,9 +247,7 @@ shared(msg) actor class Manager (principal : Principal) = this {
                     let (chunkId, chunkData) = await wasmStore.getAssetChunk(version + 1, key, chunkIndex);
                     ChunksBuffer.add((chunkId, chunkData));
                     chunkIndex += 1;
-                } catch(e){
-                    continue_ := false;
-                };
+                } catch(e){ continue_ := false; };
             };
 
             let chunks = ChunksBuffer.toArray();
@@ -155,8 +272,6 @@ shared(msg) actor class Manager (principal : Principal) = this {
             manager = release.manager;
         };
     };
-
-
 
     // Return the cycles received up to the capacity allowed
     public func wallet_receive() : async { accepted: Nat64 } {

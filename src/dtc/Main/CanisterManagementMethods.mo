@@ -21,6 +21,7 @@ import Manager "../Manager/Manager";
 import AssetCanister "../AssetCanister/AssetCanister";
 import HashMap "mo:base/HashMap";
 import AssetManagementFunctions "../AssetCanister/AssetManagementFunctions";
+import WasmStore "../Manager/WasmStore";
 
 
 module{
@@ -34,7 +35,7 @@ module{
 
     public func getPrincipalsList(
         callerId : Principal, 
-        profilesMap : MainTypes.ProfilesMap, 
+        profilesMap : MainTypes.UserProfilesMap, 
         canisterData: MainTypes.CanisterData
         ) : async [Principal] {
 
@@ -105,7 +106,7 @@ module{
         return #ok(ArrayBuffer.toArray());
     };
 
-    public func updateApprovalStatus( principal: Principal, profilesMap: MainTypes.ProfilesMap, newApprovalStatuse: Bool) : 
+    public func updateApprovalStatus( principal: Principal, profilesMap: MainTypes.UserProfilesMap, newApprovalStatuse: Bool) : 
     async Result.Result<(), JournalTypes.Error>{
 
         let userProfile = profilesMap.get(principal);
@@ -114,11 +115,11 @@ module{
                 return #err(#NotFound);
             };
             case(?profile){
-                let updatedProfile : MainTypes.Profile = {
-                    journal = profile.journal;
+                let updatedProfile : MainTypes.UserProfile = {
+                    canisterId = profile.canisterId;
                     email = profile.email;
                     userName = profile.userName;
-                    id = profile.id;
+                    userPrincipal = profile.userPrincipal;
                     accountId = profile.accountId;
                     approved = ?newApprovalStatuse;
                     treasuryMember = profile.treasuryMember;
@@ -198,7 +199,7 @@ module{
         canisterData: MainTypes.CanisterData, 
         cyclesBalance_backend: Nat, 
         supportMode: Bool, 
-        profilesMap : MainTypes.ProfilesMap
+        profilesMap : MainTypes.UserProfilesMap
     ) : async Result.Result<(MainTypes.CanisterDataExport), JournalTypes.Error> {
 
         let profile = profilesMap.get(callerId);
@@ -298,31 +299,17 @@ module{
         };
     };
 
-    public func installCode_journalCanisters( 
-        callerId : Principal,  
-        wasmModule: Blob, 
-        profilesMap : MainTypes.ProfilesMap,
-        canisterData : MainTypes.CanisterData
-        ): async() {
-
-        let callerIdAsText = Principal.toText(callerId);
-
-        if (callerIdAsText == canisterData.nftOwner) {
-            let profilesIter = profilesMap.entries();
-            let profilesSize = profilesMap.size();
-            let profilesArray = Iter.toArray(profilesIter);
-            var index = 0;
-            while(index < profilesSize){
-                let (principal, profile ) = profilesArray[index];
-                let userJournal = profile.journal;
-                let journalCanisterId = Principal.fromActor(userJournal);
-                let arg = principal;
-                ignore installCode_(arg, wasmModule, journalCanisterId);
-                index += 1;
-            };
-        } else {
-            throw Error.reject("Unauthorized access. Caller is not the owner.");
-        }
+    public func installCode_managerCanister(
+        canisterData: MainTypes.CanisterData
+    ): async (){
+        let {managerCanisterPrincipal; backEndPrincipal} = canisterData;
+        let managerActor : Manager.Manager = actor(managerCanisterPrincipal);
+        let wasmStoreCanister : WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
+        let currentReleaseVersion = await managerActor.getCurrentReleaseVersion();
+        let {wasmModule} = await wasmStoreCanister.getModule(currentReleaseVersion, WasmStore.wasmTypes.manager);
+        let arg = Principal.fromText(backEndPrincipal);
+        let managerPrincipal = Principal.fromText(managerCanisterPrincipal);
+        await installCode_(arg, wasmModule, managerPrincipal);
     };
 
     private func installCode_ (arg: Principal, wasmModule: Blob, canister_id: Principal) : async () {
@@ -342,12 +329,12 @@ module{
         return cyclesBalance;
     };
 
-    public func getProfilesMetaData(profilesMap: MainTypes.ProfilesMap) : MainTypes.ProfilesApprovalStatuses {
+    public func getProfilesMetaData(profilesMap: MainTypes.UserProfilesMap) : MainTypes.ProfilesApprovalStatuses {
         let profilesMapEntries = profilesMap.entries();
         let profilesMapEntriesArray = Iter.toArray(profilesMapEntries);
-        let profilesApprovalStatus = Array.map<(Principal, MainTypes.Profile), (Text, MainTypes.Approved)>(
+        let profilesApprovalStatus = Array.map<(Principal, MainTypes.UserProfile), (Text, MainTypes.Approved)>(
             profilesMapEntriesArray, 
-            func (x: (Principal, MainTypes.Profile)) : (Text, MainTypes.Approved) {
+            func (x: (Principal, MainTypes.UserProfile)) : (Text, MainTypes.Approved) {
                 let (principal, profile) = x;
                 let principalAsText = Principal.toText(principal);
                 let isApproved = Option.get(profile.approved, false);

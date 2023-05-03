@@ -168,11 +168,11 @@ module {
         create_chunk: ({ batch_id: BatchId; content: Blob }) -> async ({ chunk_id: ChunkId });
         // Perform all operations successfully, or reject
         commit_batch: ({ batch_id: BatchId; operations: [BatchOperationKind] }) -> async ();
-        create_asset: (CreateAssetArguments) -> ();
-        set_asset_content: (SetAssetContentArguments) -> ();
+        create_asset: (CreateAssetArguments) -> async ();
+        set_asset_content: (SetAssetContentArguments) -> async ();
         unset_asset_content: (UnsetAssetContentArguments) -> ();
         delete_asset: (DeleteAssetArguments) -> ();
-        clear: (ClearArguments) -> ();
+        clear: (ClearArguments) -> async ();
         // Single call to create an asset with content for a single content encoding that
         // fits within the message ingress limit.
         store: ({
@@ -190,7 +190,7 @@ module {
         grant_permission: (GrantPermission) -> ();
         revoke_permission: (RevokePermission) -> ();
         list_permitted: query (ListPermitted) -> async ([Principal]);
-        take_ownership: () -> ();
+        take_ownership: () -> async ();
         get_asset_properties : query (key: Key) -> async ({
             max_age: ? Nat64;
             headers: ? [HeaderField];

@@ -20,7 +20,7 @@ module{
     public func create (
         callerId: Principal, 
         requestsForAccess: MainTypes.RequestsForAccess, 
-        profilesMap: MainTypes.ProfilesMap, 
+        profilesMap: MainTypes.UserProfilesMap, 
         isLocal: Bool,
         defaultControllers: [Principal],
         canisterData: MainTypes.CanisterData
@@ -61,11 +61,11 @@ module{
                 );
                 let settingMainCanister = await newUserJournal.setMainCanisterPrincipalId();
                 let userAccountId = await newUserJournal.canisterAccount();
-                let userProfile: MainTypes.Profile = {
-                    journal = newUserJournal;
+                let userProfile: MainTypes.UserProfile = {
+                    canisterId = Principal.fromActor(newUserJournal);
                     email = null;
                     userName = null;
-                    id = callerId;
+                    userPrincipal = callerId;
                     accountId = ?userAccountId;
                     approved = ?true;
                     treasuryMember = ?false;
@@ -82,7 +82,7 @@ module{
         };
     };
 
-    public func updateProfile(callerId: Principal, profilesMap: MainTypes.ProfilesMap, profile: MainTypes.ProfileInput) : 
+    public func updateProfile(callerId: Principal, profilesMap: MainTypes.UserProfilesMap, profile: MainTypes.ProfileInput) : 
     async Result.Result<(), JournalTypes.Error> {
 
         let result = profilesMap.get(callerId);
@@ -96,11 +96,11 @@ module{
 
                 let userNameAvailable = isUserNameAvailable(profile.userName, callerId, profilesMap);
                 if(userNameAvailable == true){
-                    let userProfile : MainTypes.Profile = {
-                        journal = v.journal;
+                    let userProfile : MainTypes.UserProfile = {
+                        canisterId = v.canisterId;
                         email = profile.email;
                         userName = profile.userName;
-                        id = callerId;
+                        userPrincipal = callerId;
                         accountId = v.accountId;
                         approved = ?true;
                         treasuryMember = ?false;
@@ -119,7 +119,7 @@ module{
     };
 
 
-    public func delete(callerId: Principal, profilesMap: MainTypes.ProfilesMap) : 
+    public func delete(callerId: Principal, profilesMap: MainTypes.UserProfilesMap) : 
     async Result.Result<(), JournalTypes.Error> {
 
         let result = profilesMap.get(callerId);
@@ -137,7 +137,7 @@ module{
         };
     };
 
-    public func isUserNameAvailable(userName: ?Text, callerId: Principal, profilesMap: MainTypes.ProfilesMap) : Bool {
+    public func isUserNameAvailable(userName: ?Text, callerId: Principal, profilesMap: MainTypes.UserProfilesMap) : Bool {
         switch(userName){
             case null{
                 true
@@ -147,7 +147,7 @@ module{
                 let numberOfProfiles = profilesMap.size();
                 let profilesIter = profilesMap.entries();
                 let profilesArray = Iter.toArray(profilesIter);
-                let ArrayBuffer = Buffer.Buffer<(Principal,Types.Profile)>(1);
+                let ArrayBuffer = Buffer.Buffer<(Principal,Types.UserProfile)>(1);
 
                 while(index < numberOfProfiles){
                     let userProfile = profilesArray[index];
@@ -157,7 +157,7 @@ module{
                         };
                         case (? username){
                             if((username == userNameValue)){
-                                if(userProfile.1.id != callerId){
+                                if(userProfile.1.userPrincipal != callerId){
                                     ArrayBuffer.add(userProfile);
                                 };
                             };
@@ -175,7 +175,7 @@ module{
         };
     };
 
-    public func refillCanisterCycles(profilesMap : MainTypes.ProfilesMap) : async () {
+    public func refillCanisterCycles(profilesMap : MainTypes.UserProfilesMap) : async () {
         let numberOfProfiles = profilesMap.size();
         let profilesIter = profilesMap.entries();
         let profilesArray = Iter.toArray(profilesIter);
@@ -185,7 +185,8 @@ module{
             let approved = Option.get(profile.approved, false);
             if(approved){
                 Cycles.add(100_000_000_000);
-                let amountAccepted = ignore profile.journal.wallet_receive();
+                let userCanister : Journal.Journal = actor(Principal.toText(profile.canisterId));
+                let amountAccepted = ignore userCanister.wallet_receive();
             };
             index += 1;
         };

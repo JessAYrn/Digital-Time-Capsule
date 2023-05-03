@@ -8,6 +8,7 @@ import Ledger "../Ledger/Ledger";
 import LedgerCandid "../Ledger/LedgerCandid";
 import Iter "mo:base/Iter";
 import Blob "mo:base/Blob";
+import Journal "../Journal/Journal";
 
 module{
 
@@ -15,7 +16,7 @@ module{
 
     private let Gas: Nat64 = 10000;
 
-    public func transferICP(callerId: Principal, profilesMap: MainTypes.ProfilesMap ,amount: Nat64, canisterAccountId: Account.AccountIdentifier) : 
+    public func transferICP(callerId: Principal, profilesMap: MainTypes.UserProfilesMap ,amount: Nat64, canisterAccountId: Account.AccountIdentifier) : 
     async Result.Result<(), JournalTypes.Error> {
 
         let userProfile = profilesMap.get(callerId);
@@ -24,7 +25,7 @@ module{
                 #err(#NotFound)
             }; 
             case (? profile){
-                let userJournal = profile.journal;
+                let userJournal : Journal.Journal = actor(Principal.toText(profile.canisterId));
                 let icpTransferStatus = await userJournal.transferICP(amount, canisterAccountId);
                 if(icpTransferStatus == true){
                     #ok(());
@@ -35,7 +36,7 @@ module{
         };
     };
 
-    public func readTransaction(callerId: Principal, profilesMap: MainTypes.ProfilesMap) : 
+    public func readTransaction(callerId: Principal, profilesMap: MainTypes.UserProfilesMap) : 
     async Result.Result<[(Nat, JournalTypes.Transaction)], JournalTypes.Error> {
 
         let callerProfile = profilesMap.get(callerId);
@@ -45,14 +46,14 @@ module{
                 #err(#NotFound);
             }; 
             case ( ? profile){
-                let userJournal = profile.journal;
+                let userJournal : Journal.Journal = actor(Principal.toText(profile.canisterId));
                 let tx = await userJournal.readWalletTxHistory();
                 return #ok(tx);
             };
         };
     };
 
-    public func updateUsersTxHistory(queryResponse: Ledger.QueryBlocksResponse, profilesMap: MainTypes.ProfilesMap) : 
+    public func updateUsersTxHistory(queryResponse: Ledger.QueryBlocksResponse, profilesMap: MainTypes.UserProfilesMap) : 
     async () {
         let blocksArray = queryResponse.blocks;
         let blocksArraySize = Iter.size(Iter.fromArray(blocksArray));
@@ -82,6 +83,7 @@ module{
                                 switch(userAccountId){
                                     case null{};
                                     case(? existingUAID){
+                                        let userJournal : Journal.Journal = actor(Principal.toText(userProfile.canisterId));
                                         if(Blob.equal(existingUAID, source) == true){
                                             let tx : JournalTypes.Transaction = {
                                                 balanceDelta = amount + fee;
@@ -90,7 +92,6 @@ module{
                                                 timeStamp = ?timeOfCreation;
                                                 source = ?source;
                                             };
-                                            let userJournal = userProfile.journal;
                                             await userJournal.updateTxHistory(tx);
                                         };
                                         if(Blob.equal(existingUAID, recipient) == true){                                    
@@ -101,7 +102,6 @@ module{
                                                 timeStamp = ?timeOfCreation;
                                                 source = ?source;
                                             };
-                                            let userJournal = userProfile.journal;
                                             await userJournal.updateTxHistory(tx);
                                         };
                                     };

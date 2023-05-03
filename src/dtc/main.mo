@@ -40,6 +40,7 @@ import ManagerCanister "Manager/Manager";
 import ManagerTypes "Manager/WasmStore";
 import Manager "Manager/Manager";
 import AssetCanister "AssetCanister/AssetCanister";
+import WasmStore "Manager/WasmStore";
 
 shared (msg) actor class User() = this {
 
@@ -56,11 +57,11 @@ shared (msg) actor class User() = this {
 
     private let ic : IC.Self = actor "aaaaa-aa";
 
-    private stable var profilesArray : [(Principal, MainTypes.Profile)] = [];
+    private stable var userProfilesArray : [(Principal, MainTypes.UserProfile)] = [];
 
-    private var profilesMap : MainTypes.ProfilesMap = HashMap.fromIter<Principal, MainTypes.Profile>(
-        Iter.fromArray(profilesArray), 
-        Iter.size(Iter.fromArray(profilesArray)), 
+    private var userProfilesMap : MainTypes.UserProfilesMap = HashMap.fromIter<Principal, MainTypes.UserProfile>(
+        Iter.fromArray(userProfilesArray), 
+        Iter.size(Iter.fromArray(userProfilesArray)), 
         Principal.equal,
         Principal.hash
     );
@@ -128,7 +129,7 @@ shared (msg) actor class User() = this {
     };
 
     private func refillCanisterCycles() : async () {
-        let result = await MainMethods.refillCanisterCycles(profilesMap);
+        let result = await MainMethods.refillCanisterCycles(userProfilesMap);
     };
 
     public shared(msg) func whoAmI () : async Text{
@@ -142,7 +143,7 @@ shared (msg) actor class User() = this {
     //Result.Result returns a varient type that has attributes from success case(the first input) and from your error case (your second input). both inputs must be varient types. () is a unit type.
     public shared(msg) func create () : async Result.Result<MainTypes.AmountAccepted, JournalTypes.Error> {
         let callerId = msg.caller;
-        let amountAccepted = await MainMethods.create(callerId, requestsForAccess, profilesMap, isLocal, defaultControllers, canisterData);
+        let amountAccepted = await MainMethods.create(callerId, requestsForAccess, userProfilesMap, isLocal, defaultControllers, canisterData);
         let updatedRequestsList = await CanisterManagementMethods.removeFromRequestsList(callerId, requestsForAccess);
         switch(amountAccepted){
             case(#ok(amount)){
@@ -158,7 +159,7 @@ shared (msg) actor class User() = this {
     //update profile
     public shared(msg) func updateProfile(profile: MainTypes.ProfileInput) : async Result.Result<(),JournalTypes.Error> {
         let callerId = msg.caller;
-        let result = await MainMethods.updateProfile(callerId, profilesMap, profile);
+        let result = await MainMethods.updateProfile(callerId, userProfilesMap, profile);
         switch(result){
             case(#ok(_)){
                 #ok(());
@@ -173,7 +174,7 @@ shared (msg) actor class User() = this {
     public shared(msg) func delete() : async Result.Result<(), JournalTypes.Error> {
         
         let callerId = msg.caller;
-        let result = await MainMethods.delete(callerId, profilesMap);
+        let result = await MainMethods.delete(callerId, userProfilesMap);
         switch(result){
             case(#ok(_)){
                 #ok(());
@@ -195,87 +196,87 @@ shared (msg) actor class User() = this {
         }), JournalTypes.Error> {
 
         let callerId = msg.caller;
-        let result = await JournalHelperMethods.readJournal(callerId, profilesMap);
+        let result = await JournalHelperMethods.readJournal(callerId, userProfilesMap);
         return result; 
     };
 
     public shared(msg) func readWalletData() : async Result.Result<({ balance : Ledger.ICP; address: [Nat8]; } ), JournalTypes.Error> {
         let callerId = msg.caller;
-        let result = await JournalHelperMethods.readWalletData(callerId, profilesMap);
+        let result = await JournalHelperMethods.readWalletData(callerId, userProfilesMap);
         return result;
     };
 
     public shared(msg) func readEntry(entryKey: JournalTypes.EntryKey) : async Result.Result<JournalTypes.JournalEntry, JournalTypes.Error> {
         let callerId = msg.caller;
-        let result = await JournalHelperMethods.readEntry(callerId, profilesMap, entryKey);
+        let result = await JournalHelperMethods.readEntry(callerId, userProfilesMap, entryKey);
         return result;
     };
 
     public shared(msg) func readEntryFileChunk(fileId: Text, chunkId: Nat) : async Result.Result<(Blob),JournalTypes.Error>{
         let callerId = msg.caller;
-        let result = await JournalHelperMethods.readEntryFileChunk(callerId, profilesMap, fileId, chunkId);
+        let result = await JournalHelperMethods.readEntryFileChunk(callerId, userProfilesMap, fileId, chunkId);
         return result;
     };
 
     public shared(msg) func readEntryFileSize(fileId: Text) : async Result.Result<(Nat),JournalTypes.Error>{
         let callerId = msg.caller;
-        let result = await JournalHelperMethods.readEntryFileSize(callerId, profilesMap, fileId);
+        let result = await JournalHelperMethods.readEntryFileSize(callerId, userProfilesMap, fileId);
         return result;
     };
 
     public shared(msg) func updateBio(bio: JournalTypes.Bio) : async Result.Result<(JournalTypes.Bio), JournalTypes.Error> {
         let callerId = msg.caller;
-        let result = await JournalHelperMethods.updateBio(callerId, profilesMap, bio);
+        let result = await JournalHelperMethods.updateBio(callerId, userProfilesMap, bio);
         return result;
     };
 
     public shared(msg) func updatePhotos(photos: [JournalTypes.FileMetaData]) : async Result.Result<(JournalTypes.Bio), JournalTypes.Error> {
         let callerId = msg.caller;
-        let result = await JournalHelperMethods.updatePhotos(callerId, profilesMap, photos);
+        let result = await JournalHelperMethods.updatePhotos(callerId, userProfilesMap, photos);
         return result;
     };
 
     public shared(msg) func updateJournalEntry(entryKey : ?JournalTypes.EntryKey, entry : ?JournalTypes.JournalEntryInput) : 
     async Result.Result<([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio), JournalTypes.Error> {
         let callerId = msg.caller;
-        let result = await JournalHelperMethods.updateJournalEntry(callerId, profilesMap, entryKey, entry);
+        let result = await JournalHelperMethods.updateJournalEntry(callerId, userProfilesMap, entryKey, entry);
         return result;
     };
 
     public shared(msg) func deleteUnsubmittedFile(fileId: Text) : async Result.Result<(), JournalTypes.Error> {
         let callerId = msg.caller;
-        let result = await JournalHelperMethods.deleteUnsubmittedFile(callerId, profilesMap, fileId);
+        let result = await JournalHelperMethods.deleteUnsubmittedFile(callerId, userProfilesMap, fileId);
         return result;
     };
 
     public shared(msg) func deleteSubmittedFile(fileId: Text) : async Result.Result<(), JournalTypes.Error> {
         let callerId = msg.caller;
-        let result = await JournalHelperMethods.deleteSubmittedFile(callerId, profilesMap, fileId);
+        let result = await JournalHelperMethods.deleteSubmittedFile(callerId, userProfilesMap, fileId);
         return result;
     };
 
     public shared(msg) func submitFiles() : async Result.Result<(), JournalTypes.Error> {
         let callerId = msg.caller;
-        let result = await JournalHelperMethods.submitFiles(callerId, profilesMap);
+        let result = await JournalHelperMethods.submitFiles(callerId, userProfilesMap);
         return result;
     };
 
     public shared(msg) func clearUnsubmittedFiles(): async Result.Result<(), JournalTypes.Error>{
         let callerId = msg.caller;
-        let result = await JournalHelperMethods.clearUnsubmittedFiles(callerId, profilesMap);
+        let result = await JournalHelperMethods.clearUnsubmittedFiles(callerId, userProfilesMap);
         return result;
     };
 
     public shared(msg) func uploadJournalEntryFile(fileId: Text, chunkId: Nat, blobChunk: Blob): async Result.Result<(Text), JournalTypes.Error>{
         let callerId = msg.caller;
-        let result = await JournalHelperMethods.uploadJournalEntryFile(callerId, profilesMap, fileId, chunkId, blobChunk);
+        let result = await JournalHelperMethods.uploadJournalEntryFile(callerId, userProfilesMap, fileId, chunkId, blobChunk);
         return result;
     };
 
     public shared(msg) func getEntriesToBeSent() : async Result.Result<[(Text,[(Nat, JournalTypes.JournalEntry)])], JournalTypes.Error>{
 
         let callerId = msg.caller;
-        let result = await JournalHelperMethods.getEntriesToBeSent(callerId, profilesMap);
+        let result = await JournalHelperMethods.getEntriesToBeSent(callerId, userProfilesMap);
         return result;
     };
     //Transaction Mehtods
@@ -283,13 +284,13 @@ shared (msg) actor class User() = this {
 
     public shared(msg) func transferICP(amount: Nat64, canisterAccountId: Account.AccountIdentifier) : async Result.Result<(), JournalTypes.Error> {
         let callerId = msg.caller;
-        let result = await TxHelperMethods.transferICP(callerId, profilesMap, amount, canisterAccountId);
+        let result = await TxHelperMethods.transferICP(callerId, userProfilesMap, amount, canisterAccountId);
         return result;
     };
 
     public shared(msg) func readTransaction() : async Result.Result<[(Nat, JournalTypes.Transaction)], JournalTypes.Error> {
         let callerId = msg.caller;
-        let result = await TxHelperMethods.readTransaction(callerId, profilesMap);
+        let result = await TxHelperMethods.readTransaction(callerId, userProfilesMap);
         return result;
     };
 
@@ -309,7 +310,7 @@ shared (msg) actor class User() = this {
 
         let queryResponse = await ledger.query_blocks(getBlocksArgs);
 
-        await TxHelperMethods.updateUsersTxHistory(queryResponse, profilesMap);
+        await TxHelperMethods.updateUsersTxHistory(queryResponse, userProfilesMap);
     };
 
     //NFT Methods
@@ -321,7 +322,7 @@ shared (msg) actor class User() = this {
         let result = await NftHelperMethods.createNFTCollection(
             callerId, 
             mainCanisterPrincipal,
-            profilesMap,
+            userProfilesMap,
             initInput,
             nftCollectionsIndex
         );
@@ -349,25 +350,25 @@ shared (msg) actor class User() = this {
 
     public shared(msg) func mintNft( nftCollectionIndex: Nat, file_type: Text, numberOfCopies: Nat) : async DIP721Types.MintReceipt {
         let callerId = msg.caller;
-        let result = await NftHelperMethods.mintNft(callerId, profilesMap, nftCollections, nftCollectionIndex, file_type, numberOfCopies);
+        let result = await NftHelperMethods.mintNft(callerId, userProfilesMap, nftCollections, nftCollectionIndex, file_type, numberOfCopies);
         return result;
     };
 
     public shared(msg) func uploadNftChunk(nftCollectionIndex : Nat, chunkId: Nat, blobChunk: Blob) : async Result.Result<(), DIP721Types.ApiError>{
         let callerId = msg.caller;
-        let result = await NftHelperMethods.uploadNftChunk(callerId, profilesMap, nftCollections, nftCollectionIndex, chunkId, blobChunk);
+        let result = await NftHelperMethods.uploadNftChunk(callerId, userProfilesMap, nftCollections, nftCollectionIndex, chunkId, blobChunk);
         return result;
     };
 
     public shared(msg) func safeTransferNFT( nftCollectionIndex: Nat, to: Principal, token_id: DIP721Types.TokenId) : async DIP721Types.TxReceipt{
         let callerId = msg.caller;
-        let result = await NftHelperMethods.safeTransferNFT( callerId, profilesMap, nftCollections, nftCollectionIndex, to, token_id);
+        let result = await NftHelperMethods.safeTransferNFT( callerId, userProfilesMap, nftCollections, nftCollectionIndex, to, token_id);
         return result;
     };
 
     public shared(msg) func getUserNFTsInfo() : async Result.Result<[({nftCollectionKey: Nat}, DIP721Types.TokenMetaData)], JournalTypes.Error> {
         let callerId = msg.caller;
-        let result = await NftHelperMethods.getUserNFTsInfo(callerId, profilesMap, nftCollections);
+        let result = await NftHelperMethods.getUserNFTsInfo(callerId, userProfilesMap, nftCollections);
         return result;
     };
 
@@ -395,7 +396,7 @@ shared (msg) actor class User() = this {
 
     public shared(msg) func getPrincipalsList() : async [Principal] {
         let callerId = msg.caller;
-        let result = await CanisterManagementMethods.getPrincipalsList(callerId, profilesMap, canisterData);
+        let result = await CanisterManagementMethods.getPrincipalsList(callerId, userProfilesMap, canisterData);
         return result;
     };
 
@@ -425,10 +426,10 @@ shared (msg) actor class User() = this {
         if(callerIdAsText != canisterData.nftOwner){
             return #err(#NotAuthorized);
         };
-        let result = await CanisterManagementMethods.updateApprovalStatus(Principal.fromText(principal), profilesMap, newApprovalStatus);
+        let result = await CanisterManagementMethods.updateApprovalStatus(Principal.fromText(principal), userProfilesMap, newApprovalStatus);
         switch(result){
             case(#ok(_)){
-                let profilesApprovalStatuses = CanisterManagementMethods.getProfilesMetaData(profilesMap);
+                let profilesApprovalStatuses = CanisterManagementMethods.getProfilesMetaData(userProfilesMap);
                 return #ok(profilesApprovalStatuses);
             };
             case(#err(e)){
@@ -532,7 +533,7 @@ shared (msg) actor class User() = this {
     public shared(msg) func getCanisterData() : async Result.Result<(MainTypes.CanisterDataExport), JournalTypes.Error> {
         let callerId = msg.caller;
         let cyclesBalance_backend = Cycles.balance();
-        let canisterDataPackagedForExport = await CanisterManagementMethods.getCanisterData(callerId, canisterData, cyclesBalance_backend, supportMode, profilesMap);
+        let canisterDataPackagedForExport = await CanisterManagementMethods.getCanisterData(callerId, canisterData, cyclesBalance_backend, supportMode, userProfilesMap);
         return canisterDataPackagedForExport;
     };
 
@@ -549,9 +550,28 @@ shared (msg) actor class User() = this {
         canisterData := updatedCanisterData;
     };
 
-    public shared(msg) func installCode(wasmModule: Blob): async() {
+    public shared(msg) func upgradeApp_exceptForBackendCanister(): async ([AssetCanister.BatchOperationKind]){
         let callerId = msg.caller;
-        let result = await CanisterManagementMethods.installCode_journalCanisters(callerId,wasmModule, profilesMap, canisterData);
+        if(callerId != canisterData.nftOwner){
+            throw Error.reject("Unauthorized Access");
+        };
+        let managerCanister: Manager.Manager = actor(canisterData.managerCanisterPrincipal);
+        await managerCanister.loadNextRelease();
+        await CanisterManagementMethods.installCode_managerCanister(canisterData);
+        let result_0 = await managerCanister.installCode_frontendCanister(canisterData);
+        let result_1 = await managerCanister.installCode_journalCanisters(userProfilesArray);
+        await managerCanister.allowUpdatesToBackendCanister();
+        return result_0;
+    };
+
+    public shared(msg) func getCurrentReleaseVersion(): async Nat{
+        let callerId = msg.caller;
+        if(canisterData.nftOwner != Principal.toText(callerId)){
+            throw Error.reject("Not Authorized");
+        };
+        let managerCanister: Manager.Manager = actor(canisterData.managerCanisterPrincipal);
+        let version = await managerCanister.getCurrentReleaseVersion();
+        return version;
     };
     
     private func verifyOwnership( principal: Principal ): async Bool {
@@ -701,11 +721,11 @@ shared (msg) actor class User() = this {
     };
 
     system func preupgrade() {
-        profilesArray := Iter.toArray(profilesMap.entries());
+        userProfilesArray := Iter.toArray(userProfilesMap.entries());
     };
 
     system func postupgrade() {
-        profilesArray := [];
+        userProfilesArray:= [];
     };
 
     private  func key(x: Principal) : Trie.Key<Principal> {
