@@ -39,7 +39,6 @@ const Dropdown = (props) => {
         return DropdownItem(option)
       })}
       </div>}
-      
     </div>
   );
 }

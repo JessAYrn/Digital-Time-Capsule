@@ -15,7 +15,9 @@ export const NAV_LINKS = {
     journal : '/app',
     nft : '/nft',
     account: '/account',
-    dashboard: '/'
+    dashboard: '/',
+    treasury:'/treasury',
+    groupJournal:'/groupjournal'
 };
 
 export const DEVICE_TYPES = {

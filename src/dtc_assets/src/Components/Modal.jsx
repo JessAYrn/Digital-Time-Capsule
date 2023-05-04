@@ -5,6 +5,7 @@ import { AppContext as WalletContext} from '../Routes/Wallet';
 import { AppContext as HomePageContext} from '../Routes/HomePage';
 import { AppContext as NftContext} from '../Routes/NFTs';
 import { AppContext as JournalContext} from '../Routes/App';
+import { AppContext as TreasuryContext} from '../Routes/Treasury';
 import { MODALS_TYPES } from '../Constants';
 import FileHasError from './modalContent/ModalContentHasError';
 import ExitWithoutSubmit from './modalContent/ModalContentExitWithoutSubmitModal';
@@ -43,6 +44,9 @@ export const Modal = (props) => {
     }
     if(context === UI_CONTEXTS.ACCOUNT_PAGE){
         AppContext = AccountContext;
+    }
+    if(context === UI_CONTEXTS.TREASURY){
+        AppContext = TreasuryContext;
     }
     
     const { journalState, dispatch } = useContext(AppContext);

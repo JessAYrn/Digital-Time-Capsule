@@ -11,6 +11,8 @@ import { Connect2ICProvider } from "@connect2ic/react"
 import { NAV_LINKS } from './Constants';
 import * as canisterIds from "../../../canister_ids.json";
 import * as dtcFiles from "../../declarations/dtc"
+import Treasury from './Routes/Treasury';
+import GroupJournal from './Routes/GroupJournal';
 
 const Router = (props) => {
     const dtc_canisterId = canisterIds.dtc.ic;
@@ -40,6 +42,8 @@ const Router = (props) => {
                     <Route path={NAV_LINKS.account} element={<AccountPage />}/>
                     <Route path={NAV_LINKS.wallet} element={<WalletApp />}/>
                     <Route path={NAV_LINKS.nft} element={<NFTapp />}/>
+                    <Route path={NAV_LINKS.treasury} element={<Treasury/>}/>
+                    <Route path={NAV_LINKS.groupJournal} element={<GroupJournal/>}/>
                 </Routes>
             </HashRouter>
         </Connect2ICProvider>
