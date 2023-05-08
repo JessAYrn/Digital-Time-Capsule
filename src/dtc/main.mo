@@ -623,56 +623,54 @@ shared (msg) actor class User() = this {
         let callerIdAsText = Principal.toText(callerId);
         if(callerIdAsText != canisterData.nftOwner){
             return #err(#NotAuthorized)
-        } else {
-            if(supportMode == false){
-                let result1 = await CanisterManagementMethods.addController(
-                    Support.TechSupportPrincipal1, 
-                    Principal.fromActor(this), 
-                    defaultControllers
-                );
-                let result2 = await CanisterManagementMethods.addController(
-                    Support.TechSupportPrincipal2, 
-                    Principal.fromActor(this), 
-                    defaultControllers
-                );
-                let result3 = await CanisterManagementMethods.addController(
-                    Support.TechSupportPrincipal1, 
-                    Principal.fromText(canisterData.managerCanisterPrincipal),
-                    defaultControllers
-                );
-                let result4 = await CanisterManagementMethods.addController(
-                    Support.TechSupportPrincipal2, 
-                    Principal.fromText(canisterData.managerCanisterPrincipal),
-                    defaultControllers
-                );
-                let result5 = await CanisterManagementMethods.addController(
-                    Support.TechSupportPrincipal1, 
-                    Principal.fromText(canisterData.frontEndPrincipal),
-                    defaultControllers
-                );
-                let result6 = await CanisterManagementMethods.addController(
-                    Support.TechSupportPrincipal2, 
-                    Principal.fromText(canisterData.frontEndPrincipal),
-                    defaultControllers
-                );
-            } else {
-                let result1 = await CanisterManagementMethods.setToDefualtControllerSettings(
-                    Principal.fromActor(this), 
-                    defaultControllers
-                );
-                let result2 = await CanisterManagementMethods.setToDefualtControllerSettings(
-                    Principal.fromText(canisterData.managerCanisterPrincipal), 
-                    defaultControllers
-                );
-                let result3 = await CanisterManagementMethods.setToDefualtControllerSettings(
-                    Principal.fromText(canisterData.frontEndPrincipal), 
-                    defaultControllers
-                );
-            };
-            supportMode := not supportMode;
-            return #ok()
-
         };
+        if(supportMode == false){
+            let result1 = await CanisterManagementMethods.addController(
+                Support.TechSupportPrincipal1, 
+                Principal.fromActor(this), 
+                defaultControllers
+            );
+            let result2 = await CanisterManagementMethods.addController(
+                Support.TechSupportPrincipal2, 
+                Principal.fromActor(this), 
+                defaultControllers
+            );
+            let result3 = await CanisterManagementMethods.addController(
+                Support.TechSupportPrincipal1, 
+                Principal.fromText(canisterData.managerCanisterPrincipal),
+                defaultControllers
+            );
+            let result4 = await CanisterManagementMethods.addController(
+                Support.TechSupportPrincipal2, 
+                Principal.fromText(canisterData.managerCanisterPrincipal),
+                defaultControllers
+            );
+            let result5 = await CanisterManagementMethods.addController(
+                Support.TechSupportPrincipal1, 
+                Principal.fromText(canisterData.frontEndPrincipal),
+                defaultControllers
+            );
+            let result6 = await CanisterManagementMethods.addController(
+                Support.TechSupportPrincipal2, 
+                Principal.fromText(canisterData.frontEndPrincipal),
+                defaultControllers
+            );
+        } else {
+            let result1 = await CanisterManagementMethods.setToDefualtControllerSettings(
+                Principal.fromActor(this), 
+                defaultControllers
+            );
+            let result2 = await CanisterManagementMethods.setToDefualtControllerSettings(
+                Principal.fromText(canisterData.managerCanisterPrincipal), 
+                defaultControllers
+            );
+            let result3 = await CanisterManagementMethods.setToDefualtControllerSettings(
+                Principal.fromText(canisterData.frontEndPrincipal), 
+                defaultControllers
+            );
+        };
+        supportMode := not supportMode;
+        return #ok()
     };
 
     public shared(msg) func registerOwner() : async  Result.Result<(), JournalTypes.Error>{

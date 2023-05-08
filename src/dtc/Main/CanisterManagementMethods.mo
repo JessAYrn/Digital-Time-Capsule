@@ -168,6 +168,8 @@ module{
         Cycles.add(1_000_000_000_000);
         let managerCanister = await Manager.Manager(Principal.fromText(backEndPrincipal));
         let amountAccepted = await managerCanister.wallet_receive();
+        await managerCanister.initializeReleaseVersion();
+        await managerCanister.loadNextRelease();
         let managerCanisterPrincipal = Principal.fromActor(managerCanister);
 
         let updatedDefaultControllers_0 = addDefualtController([] , Principal.fromText(backEndPrincipal));

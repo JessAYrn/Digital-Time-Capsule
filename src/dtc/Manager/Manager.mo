@@ -27,9 +27,10 @@ import CanisterManagementMethods "CanisterManagementMethods";
 import AssetManagementFunctions "../AssetCanister/AssetManagementFunctions";
 
 shared(msg) actor class Manager (principal : Principal) = this {
-    let callerId = msg.caller;
 
     private let ic : IC.Self = actor "aaaaa-aa";
+
+    private stable var version : Nat = 0;
 
     private stable var mainCanisterId : Text = Principal.toText(principal); 
 
@@ -58,8 +59,6 @@ shared(msg) actor class Manager (principal : Principal) = this {
         manager = dummyWasmData;
     };
 
-    private stable var version : Nat = 0;
-
     private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
 
     public shared(msg) func wallet_balance() : async Nat {
@@ -70,11 +69,17 @@ shared(msg) actor class Manager (principal : Principal) = this {
         return balance
     };
 
-    public shared(msg) func loadNextRelease(): async (){
+    public shared(msg) func initializeReleaseVersion (): async () {
         let callerId = msg.caller;
-        if( Principal.toText(callerId) != mainCanisterId) {
-            throw Error.reject("Unauthorized access.");
-        };
+        if( Principal.toText(callerId) != mainCanisterId) { throw Error.reject("Unauthorized access."); };
+        let wasmStoreCanister : WasmStore.Interface = actor (WasmStore.wasmStoreCanisterId);
+        let mostRecentReleaseVersion: Nat = await wasmStoreCanister.getLatestReleaseNumber();
+        version := mostRecentReleaseVersion - 1;
+    };
+
+    public shared(msg) func loadNextRelease(): async () {
+        let callerId = msg.caller;
+        if( Principal.toText(callerId) != mainCanisterId) { throw Error.reject("Unauthorized access.");};
         try{
             await updateModules();
             await updateAssets();
@@ -132,6 +137,8 @@ shared(msg) actor class Manager (principal : Principal) = this {
 
         let frontendCanisterId = canisterData.frontEndPrincipal;
         let frontendCanister: AssetCanister.Interface = actor(frontendCanisterId);
+
+        // clearing all of the assets from the canister
         let batch_id_for_clearing_operation = await frontendCanister.create_batch({});
         let batch_operation_clear_array: [AssetCanister.BatchOperationKind] = [#Clear({})];
         await frontendCanister.commit_batch({
@@ -139,10 +146,12 @@ shared(msg) actor class Manager (principal : Principal) = this {
             operations = batch_operation_clear_array;
         });
 
+        // adding the new assets to the assets canister.
         let {batch_id} = await frontendCanister.create_batch({});
 
         let batchOperationsBuffer = Buffer.Buffer<AssetCanister.BatchOperationKind>(1);
 
+        //pulling the new assets from the latest release.
         let {assets} = release;
 
         let numberOfAssets = assets.size();

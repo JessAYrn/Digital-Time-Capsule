@@ -86,3 +86,5 @@ export const WALLET_TABS={
     btcTab:'btc_tab',
     ckBtcTab:'ckBtc_tab'
 }
+
+export const MASTER_COPY_FRONTEND_CANISTER_ID = "fkkq7-siaaa-aaaap-qaaya-cai";

@@ -31,6 +31,7 @@ module{
 
     public type Interface = actor {
         getAssetKeys:() -> async [AssetCanister.Key];
+        getLatestReleaseNumber: query () -> async Nat;
         getModule: (Nat, Text) -> async WasmData;
         getAssetMetaDataWithoutChunksData: (Nat, AssetCanister.Key) -> async AssetCanister.AssetArgs;
         getAssetChunk: (Nat, Text, Nat) -> async (AssetCanister.ChunkId, AssetCanister.ChunkData);
