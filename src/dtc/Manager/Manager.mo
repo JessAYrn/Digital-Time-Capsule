@@ -74,16 +74,16 @@ shared(msg) actor class Manager (principal : Principal) = this {
         if( Principal.toText(callerId) != mainCanisterId) { throw Error.reject("Unauthorized access."); };
         let wasmStoreCanister : WasmStore.Interface = actor (WasmStore.wasmStoreCanisterId);
         let mostRecentReleaseVersion: Nat = await wasmStoreCanister.getLatestReleaseNumber();
-        version := mostRecentReleaseVersion - 1;
+        version := mostRecentReleaseVersion;
     };
 
     public shared(msg) func loadNextRelease(): async () {
         let callerId = msg.caller;
         if( Principal.toText(callerId) != mainCanisterId) { throw Error.reject("Unauthorized access.");};
         try{
-            await updateModules();
-            await updateAssets();
-            version += 1;
+            var newVersionIndex = await updateModules();
+            newVersionIndex := await updateAssets();
+            version := newVersionIndex;
         } catch(e){};
     };
 
@@ -221,13 +221,14 @@ shared(msg) actor class Manager (principal : Principal) = this {
         return operations;
     };
 
-    private func updateModules(): async(){
+    private func updateModules(): async Nat {
         let wasmStore: WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
+        let nextRequiredReleaseIndex = await wasmStore.getNextRequiredRelease(version);
         let { backend; frontend; manager; journal; } = WasmStore.wasmTypes;
-        let backendWasm = await wasmStore.getModule(version + 1, backend);
-        let frontendWasm = await wasmStore.getModule(version + 1, frontend);
-        let managerWasm = await wasmStore.getModule(version + 1, manager);
-        let journalWasm = await wasmStore.getModule(version + 1, journal);
+        let backendWasm = await wasmStore.getModule(nextRequiredReleaseIndex, backend);
+        let frontendWasm = await wasmStore.getModule(nextRequiredReleaseIndex, frontend);
+        let managerWasm = await wasmStore.getModule(nextRequiredReleaseIndex, manager);
+        let journalWasm = await wasmStore.getModule(nextRequiredReleaseIndex, journal);
 
         release := {
             assets = release.assets;
@@ -236,24 +237,26 @@ shared(msg) actor class Manager (principal : Principal) = this {
             journal = managerWasm;
             manager = journalWasm;
         };
+        return nextRequiredReleaseIndex;
     };
 
-    private func updateAssets(): async (){
+    private func updateAssets(): async Nat{
         let wasmStore: WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
+        let nextRequiredReleaseIndex = await wasmStore.getNextRequiredRelease(version);
         let keys = await wasmStore.getAssetKeys();
         let length = keys.size();
         var index = 0;
         let AssetBuffer = Buffer.Buffer<(AssetCanister.Key, AssetCanister.AssetArgs)>(1);
         while(index < length){
             let key = keys[index];
-            let assetMetaData = await wasmStore.getAssetMetaDataWithoutChunksData(version + 1, key);
+            let assetMetaData = await wasmStore.getAssetMetaDataWithoutChunksData(nextRequiredReleaseIndex, key);
             let {content_type; max_age; headers; enable_aliasing; allow_raw_access;} = assetMetaData;
             let ChunksBuffer = Buffer.Buffer<(AssetCanister.ChunkId, AssetCanister.ChunkData)>(1);
             var continue_ = true;
             var chunkIndex = 0;
             while(continue_){
                 try{
-                    let (chunkId, chunkData) = await wasmStore.getAssetChunk(version + 1, key, chunkIndex);
+                    let (chunkId, chunkData) = await wasmStore.getAssetChunk(nextRequiredReleaseIndex, key, chunkIndex);
                     ChunksBuffer.add((chunkId, chunkData));
                     chunkIndex += 1;
                 } catch(e){ continue_ := false; };
@@ -280,6 +283,7 @@ shared(msg) actor class Manager (principal : Principal) = this {
             journal = release.journal;
             manager = release.manager;
         };
+        return nextRequiredReleaseIndex;
     };
 
     // Return the cycles received up to the capacity allowed

@@ -52,7 +52,7 @@ const Journal = (props) => {
             actionType: types.SET_IS_LOADING,
             payload: true
         });
-        const result = await journalState.actor.updateBio({
+        const result = await journalState.backendActor.updateBio({
             dob: journalState.bio.dob,
             pob: journalState.bio.pob,
             name: journalState.bio.name,
@@ -90,7 +90,7 @@ const Journal = (props) => {
 
     const addJournalPage = () => {
         //Ensures that there are no unsubmitted entries left over from a previous post
-        journalState.actor.clearUnsubmittedFiles();
+        journalState.backendActor.clearUnsubmittedFiles();
         dispatch({
             actionType: types.ADD_JOURNAL_PAGE
         });

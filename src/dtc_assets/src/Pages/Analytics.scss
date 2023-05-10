@@ -29,13 +29,15 @@
             }
         }
     }
-    .registryButtonDiv{
+    .ownerButtonsnDiv{
         color: white;
         border: solid;
         border-width: thin;
         @media screen and (max-width: 650px) {
             width: 95%;
         };
+        margin-bottom: 20px;
+        margin-top: 20px;
         width: 65%;
         .registryButton{
             width: 100%;

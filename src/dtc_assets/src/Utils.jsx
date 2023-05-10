@@ -1,5 +1,6 @@
 import * as canisterIds from "../../../canister_ids.json";
 import * as dtcFiles from "../../declarations/dtc"
+import * as managerCanisterFiles from "../../declarations/manager";
 import * as dtcAssetsFiles from "../../declarations/dtc_assets";
 import { e8sInOneICP, MASTER_COPY_FRONTEND_CANISTER_ID } from "./Constants";
 
@@ -163,19 +164,31 @@ export const scrollToBottom = (distanceFromBottom = 0) => {
 
 export const backendActor = async (activeProvider) => {
   let currentURL = getCurrentURL();
-  console.log("Current URL: ",currentURL);
   let dtc_canisterId;
   if(process.env.NODE_ENV === "development") dtc_canisterId = canisterIds.dtc.ic;
   else {
     let frontEndPrincipal = extractCanisterIdFromURL(currentURL);
     let dtcAssetsCanister = dtcAssetsFiles.createActor(frontEndPrincipal, {agentOptions: {host: "https://icp-api.io"}});
-    console.log("dtcAssetsCanister: ", dtcAssetsCanister);
     let authorizedPrincipals = await dtcAssetsCanister.list_authorized();
-    console.log("authorizedPrincipals: ", authorizedPrincipals);
     dtc_canisterId = authorizedPrincipals[0];
   }
   const dtc_idlFactory = dtcFiles.idlFactory;
   let { value: actor } = await activeProvider?.createActor(dtc_canisterId, dtc_idlFactory);
+  return actor;
+};
+
+export const managerActor = async (activeProvider) => {
+  let currentURL = getCurrentURL();
+  let managerCanister_canisterId;
+  if(process.env.NODE_ENV === "development") managerCanister_canisterId = canisterIds.manager.ic;
+  else {
+    let frontEndPrincipal = extractCanisterIdFromURL(currentURL);
+    let dtcAssetsCanister = dtcAssetsFiles.createActor(frontEndPrincipal, {agentOptions: {host: "https://icp-api.io"}});
+    let authorizedPrincipals = await dtcAssetsCanister.list_authorized();
+    managerCanister_canisterId = authorizedPrincipals[1];
+  }
+  const managerCanister_idlFactory = managerCanisterFiles.idlFactory;
+  let { value: actor } = await activeProvider?.createActor(managerCanister_canisterId, managerCanister_idlFactory);
   return actor;
 };
 

@@ -27,7 +27,7 @@ const AdminSection = (props) => {
 
     const handleSubmit = async () => {
 
-        const listOfCapsules = await journalState.actor.getEntriesToBeSent();
+        const listOfCapsules = await journalState.backendActor.getEntriesToBeSent();
         const emailAddressesArray = listOfCapsules.ok.map((profile) => {
             return profile[0];
         });
@@ -42,7 +42,7 @@ const AdminSection = (props) => {
 
     const handleUpgrade = async () => {
         const wasmModule = await fileToBlob(inputRef.current.files[0]);
-        await journalState.actor.installCode(wasmModule);
+        await journalState.backendActor.installCode(wasmModule);
         console.log('done');
 
     };
