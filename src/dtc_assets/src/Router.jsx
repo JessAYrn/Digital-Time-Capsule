@@ -65,7 +65,7 @@ const Router = (props) => {
     },[]);
     
     return(
-      { client &&
+       client &&
         <Connect2ICProvider client={client}>
             <HashRouter>
                 <Routes>
@@ -79,7 +79,6 @@ const Router = (props) => {
                 </Routes>
             </HashRouter>
         </Connect2ICProvider>
-      }
     );
 };
 
