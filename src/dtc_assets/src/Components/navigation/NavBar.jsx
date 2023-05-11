@@ -75,7 +75,8 @@ export const NavBar = (props) => {
     let journalStateWithoutFunction = {
         ...journalState,
         handlePageSubmitFunction:'',
-        actor: undefined
+        backendActor: undefined,
+        managerActor: undefined
     };
 
     const  handleClickDashboard = useCallback(() =>  {

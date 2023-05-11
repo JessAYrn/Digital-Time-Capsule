@@ -17,11 +17,11 @@ export const TriggerCreateActorFunction = (journalState, dispatch, types) => {
 
 export const CreateUserJournal = async (journalState, dispatch, nameOfLoadFunction) => {
     try{
-        let registrationResult = await journalState.actor.registerOwner();
+        let registrationResult = await journalState.backendActor.registerOwner();
     } catch(e) {
         console.log('could not be verified');
     }
-    let result = await journalState.actor.create()
+    let result = await journalState.backendActor.create()
     if("err" in result){
         let payload = { show: true, which: MODALS_TYPES.notAuthorizedByOwner };
         dispatch({
@@ -29,7 +29,7 @@ export const CreateUserJournal = async (journalState, dispatch, nameOfLoadFuncti
             payload: payload
         });
     } else {
-        const loadFunction = journalState.actor[nameOfLoadFunction];
+        const loadFunction = journalState.backendActor[nameOfLoadFunction];
         result = await loadFunction();
     }
     return result;

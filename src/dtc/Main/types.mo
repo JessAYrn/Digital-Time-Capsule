@@ -8,11 +8,11 @@ import HashMap "mo:base/HashMap";
 
 module{
 
-    public type Profile = {
-        journal : Journal.Journal;
-        email: ?Text;
-        userName: ?Text;
-        id: Principal;
+    public type UserProfile = {
+        canisterId : Principal;
+        email: ? Text;
+        userName : ? Text;
+        userPrincipal: Principal;
         accountId: ?Account.AccountIdentifier;
         approved: ?Bool;
         treasuryMember: ?Bool;
@@ -81,11 +81,10 @@ module{
         frontendCyclesBalance: Nat
     };
 
-    public type ProfilesTree = Trie.Trie<Principal, Profile>;
 
-    public type ProfilesMap = HashMap.HashMap<Principal, Profile>;
+    public type UserProfilesMap = HashMap.HashMap<Principal, UserProfile>;
 
-    public type ProfilesArray = [(Principal, Profile)];
+    public type UserProfilesArray = [(Principal, UserProfile)];
 
     public type NftCollectionsTree = Trie.Trie<Nat, Nft>;
 
