@@ -10,7 +10,9 @@ import { createClient } from "@connect2ic/core"
 import { Connect2ICProvider } from "@connect2ic/react"
 import { NAV_LINKS } from './Constants';
 import * as canisterIds from "../../../canister_ids.json";
-import * as dtcFiles from "../../declarations/dtc";
+import * as dtcFiles from "../../declarations/dtc"
+import Treasury from './Routes/Treasury';
+import GroupJournal from './Routes/GroupJournal';
 import * as managerCanisterFiles from "../../declarations/manager";
 import * as dtcAssetsFiles from "../../declarations/dtc_assets";
 import { extractCanisterIdFromURL, getCurrentURL } from './Utils';
@@ -63,21 +65,21 @@ const Router = (props) => {
     },[]);
     
     return(
-        <>
-            { client &&
-                <Connect2ICProvider client={client}>
-                    <HashRouter>
-                        <Routes>
-                            <Route path={NAV_LINKS.dashboard} element={<HomePage />}/>
-                            <Route path={NAV_LINKS.journal} element={<App />}/>
-                            <Route path={NAV_LINKS.account} element={<AccountPage />}/>
-                            <Route path={NAV_LINKS.wallet} element={<WalletApp />}/>
-                            <Route path={NAV_LINKS.nft} element={<NFTapp />}/>
-                        </Routes>
-                    </HashRouter>
-                </Connect2ICProvider>
-            }
-        </>
+      { client &&
+        <Connect2ICProvider client={client}>
+            <HashRouter>
+                <Routes>
+                    <Route path={NAV_LINKS.dashboard} element={<HomePage />}/>
+                    <Route path={NAV_LINKS.journal} element={<App />}/>
+                    <Route path={NAV_LINKS.account} element={<AccountPage />}/>
+                    <Route path={NAV_LINKS.wallet} element={<WalletApp />}/>
+                    <Route path={NAV_LINKS.nft} element={<NFTapp />}/>
+                    <Route path={NAV_LINKS.treasury} element={<Treasury/>}/>
+                    <Route path={NAV_LINKS.groupJournal} element={<GroupJournal/>}/>
+                </Routes>
+            </HashRouter>
+        </Connect2ICProvider>
+      }
     );
 };
 

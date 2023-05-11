@@ -5,6 +5,7 @@ import { AppContext as AccountContext } from "../../Routes/Account";
 import { AppContext as WalletContex } from "../../Routes/Wallet";
 import { AppContext as HomePageContext } from "../../Routes/HomePage";
 import { AppContext as NftPageContext } from "../../Routes/NFTs";
+import { AppContext as TreasuryPageContext } from "../../Routes/Treasury";
 import { UI_CONTEXTS } from "../../Contexts";
 import * as IoiosIcons from 'react-icons/io';
 import * as AiIcons from 'react-icons/ai';
@@ -23,6 +24,13 @@ import DataField from "../Fields/DataField";
 import { types } from "../../reducers/journalReducer";
 import { backendActor, managerActor } from "../../Utils";
 import '../../SCSS/contentContainer.scss'
+import Dropdown from "../Fields/Dropdown";
+import Accordion from "../Fields/Accordion";
+
+const AccordionContent=[
+    {text:'Get our App, Become a holder of Personal DAO', image:'assets/dtcscreengrab1.png'},
+    
+]
 
 const LoginPage = (props) => {
 
@@ -41,6 +49,8 @@ const LoginPage = (props) => {
         properContext = HomePageContext
     } else if(context === UI_CONTEXTS.NFT){
         properContext = NftPageContext
+    } else if(context === UI_CONTEXTS.TREASURY){
+        properContext = TreasuryPageContext
     } 
 
     const {    
@@ -78,6 +88,10 @@ const LoginPage = (props) => {
 
     const  handleClickAccount = useCallback(() =>  {
         navigate(NAV_LINKS.account, { replace: false, state: journalStateWithoutFunction });
+    },[journalState.reloadStatuses]);
+   
+    const  handleClickTreasury = useCallback(() =>  {
+        navigate(NAV_LINKS.treasury, { replace: false, state: journalStateWithoutFunction });
     },[journalState.reloadStatuses]);
 
     const connectionResult = useConnect({ onConnect: () => {}, onDisconnect: () => {} });
@@ -184,6 +198,11 @@ const LoginPage = (props) => {
                             className={'loginPage'}
                             isCycles={true}
                             text={isLoading ? 'Loading...' : backendCanisterBalance}
+                        />
+
+                        <Accordion
+                        title='Install App'
+                        content={AccordionContent}
                         />
                     </div>
                 </div>

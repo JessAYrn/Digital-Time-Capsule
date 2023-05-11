@@ -7,7 +7,10 @@ import { AppContext as HomePageContext} from '../../Routes/HomePage';
 import { AppContext as NftContext} from '../../Routes/NFTs';
 import { AppContext as JournalContext} from '../../Routes/App';
 import { AppContext as WalletContext} from '../../Routes/Wallet';
+import { AppContext as TreasuryContext} from '../../Routes/Treasury';
+import { AppContext as GroupJournal} from '../../Routes/GroupJournal';
 import * as FaIcons from 'react-icons/fa';
+import * as GiIcons from 'react-icons/gi';
 import * as IoiosIcons from 'react-icons/io';
 import * as AiIcons from 'react-icons/ai';
 import * as RiIcons from 'react-icons/ri';
@@ -26,7 +29,6 @@ export const NavBar = (props) => {
     const {
         unreadNotifications,
         context
-
     } = props;
 
     let AppContext;
@@ -44,6 +46,12 @@ export const NavBar = (props) => {
     }
     if(context === UI_CONTEXTS.ACCOUNT_PAGE){
         AppContext = AccountContext;
+    }
+    if(context === UI_CONTEXTS.TREASURY){
+        AppContext = TreasuryContext;
+    }
+    if(context === UI_CONTEXTS.GROUPJOURNAL){
+        AppContext = GroupJournal;
     }
 
     const {
@@ -85,6 +93,14 @@ export const NavBar = (props) => {
 
     const  handleClickAccount = useCallback(() =>  {
         navigate(NAV_LINKS.account, { replace: false, state: journalStateWithoutFunction });
+    },[journalState.reloadStatuses]);
+   
+    const  handleClickTreasury = useCallback(() =>  {
+        navigate(NAV_LINKS.treasury, { replace: false, state: journalStateWithoutFunction });
+    },[journalState.reloadStatuses]);
+
+    const  handleClickGroupJournal = useCallback(() =>  {
+        navigate(NAV_LINKS.groupJournal, { replace: false, state: journalStateWithoutFunction });
     },[journalState.reloadStatuses]);
 
     const showSideBar = () => {
@@ -202,6 +218,22 @@ export const NavBar = (props) => {
                         </IconContext.Provider>
                         <span>
                             account
+                        </span>
+                    </li>
+                    <li className={'listItem'} onClick={handleClickTreasury}>
+                        <IconContext.Provider value={{ color: 'white'}}>
+                            <GiIcons.GiOpenTreasureChest/> 
+                        </IconContext.Provider>
+                        <span>
+                            treasury
+                        </span>
+                    </li>
+                    <li className={'listItem'} onClick={handleClickGroupJournal}>
+                        <IconContext.Provider value={{ color: 'white'}}>
+                            <GiIcons.GiOpenTreasureChest/> 
+                        </IconContext.Provider>
+                        <span>
+                            Group journal
                         </span>
                     </li>
                 </ul>
