@@ -1,6 +1,8 @@
 import * as canisterIds from "../../../canister_ids.json";
 import * as dtcFiles from "../../declarations/dtc"
-import { e8sInOneICP } from "./Constants";
+import * as managerCanisterFiles from "../../declarations/manager";
+import * as dtcAssetsFiles from "../../declarations/dtc_assets";
+import { e8sInOneICP, MASTER_COPY_FRONTEND_CANISTER_ID } from "./Constants";
 
 
 export const toHexString = (byteArray)  =>{
@@ -161,9 +163,32 @@ export const scrollToBottom = (distanceFromBottom = 0) => {
 }
 
 export const backendActor = async (activeProvider) => {
-  const dtc_canisterId = canisterIds.dtc.ic;
+  let currentURL = getCurrentURL();
+  let dtc_canisterId;
+  if(process.env.NODE_ENV === "development") dtc_canisterId = canisterIds.dtc.ic;
+  else {
+    let frontEndPrincipal = extractCanisterIdFromURL(currentURL);
+    let dtcAssetsCanister = dtcAssetsFiles.createActor(frontEndPrincipal, {agentOptions: {host: "https://icp-api.io"}});
+    let authorizedPrincipals = await dtcAssetsCanister.list_authorized();
+    dtc_canisterId = authorizedPrincipals[0];
+  }
   const dtc_idlFactory = dtcFiles.idlFactory;
   let { value: actor } = await activeProvider?.createActor(dtc_canisterId, dtc_idlFactory);
+  return actor;
+};
+
+export const managerActor = async (activeProvider) => {
+  let currentURL = getCurrentURL();
+  let managerCanister_canisterId;
+  if(process.env.NODE_ENV === "development") managerCanister_canisterId = canisterIds.manager.ic;
+  else {
+    let frontEndPrincipal = extractCanisterIdFromURL(currentURL);
+    let dtcAssetsCanister = dtcAssetsFiles.createActor(frontEndPrincipal, {agentOptions: {host: "https://icp-api.io"}});
+    let authorizedPrincipals = await dtcAssetsCanister.list_authorized();
+    managerCanister_canisterId = authorizedPrincipals[1];
+  }
+  const managerCanister_idlFactory = managerCanisterFiles.idlFactory;
+  let { value: actor } = await activeProvider?.createActor(managerCanister_canisterId, managerCanister_idlFactory);
   return actor;
 };
 
@@ -179,5 +204,19 @@ export const flattenUint8array = (array) => {
     nextUnpopulatedIndex += uint8array.length;
   })
   return uint8stream;
+};
+
+export const getCurrentURL = () => {
+  return window.location.href
+};
+
+export const extractCanisterIdFromURL = (URL) => {
+  if(process.env.NODE_ENV === "development") return MASTER_COPY_FRONTEND_CANISTER_ID;
+  let canisterId = "";
+  for(let i = 8; i < URL.length; i++){
+    if(URL[i] === ".") break;
+    canisterId += URL[i];
+  };
+  return canisterId;
 };
 

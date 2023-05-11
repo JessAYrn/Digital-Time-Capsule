@@ -15,6 +15,8 @@ import { getIntObserverFunc, visibilityFunctionDefault } from "../Components/ani
 import { dateAisLaterThanOrSameAsDateB, getDateAsString, getDateInMilliseconds } from "../Utils";
 import FileCarousel from "../Components/Fields/fileManger/FileCarousel";
 import { fileLoaderHelper } from "../Components/loadingFunctions";
+import "../SCSS/scrollable.scss";
+import "../SCSS/contentContainer.scss";
 
 const Journal = (props) => {
 
@@ -50,7 +52,7 @@ const Journal = (props) => {
             actionType: types.SET_IS_LOADING,
             payload: true
         });
-        const result = await journalState.actor.updateBio({
+        const result = await journalState.backendActor.updateBio({
             dob: journalState.bio.dob,
             pob: journalState.bio.pob,
             name: journalState.bio.name,
@@ -88,7 +90,7 @@ const Journal = (props) => {
 
     const addJournalPage = () => {
         //Ensures that there are no unsubmitted entries left over from a previous post
-        journalState.actor.clearUnsubmittedFiles();
+        journalState.backendActor.clearUnsubmittedFiles();
         dispatch({
             actionType: types.ADD_JOURNAL_PAGE
         });
@@ -117,7 +119,7 @@ const Journal = (props) => {
                     className={'tableDivContainer contentContainer animatedLeft' + 
                     ` _${animatedLeftElementIndex++}`}
                 >
-                    <div className={'tableDiv '}>
+                    <div className={'tableDiv journal'}>
                         <table className={"tableHeader "}>
                             <tbody>
                                 <tr className={"tableRow "}>
@@ -160,7 +162,7 @@ const Journal = (props) => {
 
     return(
         journalState.modalStatus.show ?
-        <div className={"container"}>
+        <div className={"container journal"}>
             <Modal 
                 context={UI_CONTEXTS.JOURNAL}
                 index={getIndexOfVisiblePage()}
@@ -169,7 +171,7 @@ const Journal = (props) => {
         <React.Fragment>
             <>
                 { (getIndexOfVisiblePage() < 0) ? 
-                    <div className={"container"}>
+                    <div className={"container journal"}>
                         <NavBar
                             walletLink={true}
                             journalLink={false}

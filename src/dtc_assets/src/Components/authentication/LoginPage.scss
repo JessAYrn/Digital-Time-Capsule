@@ -2,7 +2,7 @@
     height: auto;
     display: flex;
     align-items: center;
-    .container_1{
+    .containerInner_loginPage{
         height: auto;
         display: flex;
         width: 90%;
@@ -10,9 +10,7 @@
         flex-direction: column;
         align-items: center;
         .contentContainer{
-            width: 100%;
-            display: flex;
-            justify-content: center;
+            
             .contentDiv{
                 border-radius: 10px;
                 box-shadow: 0 3px 11px rgba(255, 255, 255);
@@ -120,7 +118,7 @@
                         margin-bottom: 20px;
                     }
             
-                    .logoDiv{
+                    .logoDiv.login{
                         position: relative;
                         bottom: -187px;
                         margin-top: -154px;

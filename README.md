@@ -178,3 +178,5 @@ dfx canister update-settings dtc --add-controller <ADD_CONTROLLER>
 ### gzip wasm module before upgrading canister (note: after gzipping, you'll have to change the file name from dtc.wasm.gz back to dtc.wasm)
 gzip -f -1 ./.dfx/ic/canisters/dtc/dtc.wasm  
 
+### grant permissions within asset canister
+dfx canister call dtc_assets grant_permission '(record {to_principal = principal "22xax-4iaaa-aaaap-qbaiq-cai"; permission = variant {ManagePermissions} })' --network ic

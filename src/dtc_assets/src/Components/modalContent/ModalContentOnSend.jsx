@@ -39,7 +39,7 @@ const ModalContentOnSend = (props) => {
 
     const onSendConfirm = async () => {
         setIsLoading(true);
-        await journalState.actor.transferICP(
+        await journalState.backendActor.transferICP(
             parseInt(toE8s(amountToSend)), fromHexString(recipientAddress)
             ).then((status) => {
                 setResponseFromApi(true);

@@ -3,6 +3,7 @@ import { initialState, types } from "../reducers/journalReducer";
 import { AppContext } from "../Routes/App";
 import "./LoadScreen.scss";
 import { getIntObserverFunc, visibilityFunctionDefault } from "./animations/IntersectionObserverFunctions";
+import '../SCSS/contentContainer.scss'
 
 
 const LoadScreen = () => {

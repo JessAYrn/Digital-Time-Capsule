@@ -29,13 +29,15 @@
             }
         }
     }
-    .registryButtonDiv{
+    .ownerButtonsnDiv{
         color: white;
         border: solid;
         border-width: thin;
         @media screen and (max-width: 650px) {
             width: 95%;
         };
+        margin-bottom: 20px;
+        margin-top: 20px;
         width: 65%;
         .registryButton{
             width: 100%;
@@ -150,11 +152,8 @@
     width: 100%;
     flex-direction: column;
 }
-.section{
-    width: 45%;
-    display: flex;
-    align-items: center;
-    justify-content: center;    
+
+.section{  
     .lebelH5{
         font-family: 'Courier New', monospace;
     }

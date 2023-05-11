@@ -51,7 +51,7 @@ const InputBox = (props) => {
 
     return(
         <div className={'inputBox'}>
-            <div className={'label-element-div '}>
+            <div className={'label-element-div_input '}>
                 <label className={"label "+disabledOrEnabled} htmlFor='Label'> {label}  &nbsp; </label>
             </div>
             <div className={`input-element-div ${(divClassName) ? divClassName : " "}`}>

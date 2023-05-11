@@ -72,7 +72,7 @@ const JournalPage = (props) => {
     },[firstTimeOpeningPage]);
     
     //marks this page as read so that it no longer shows in the notifications section
-    if(journalPageData.entryKey) journalState.actor.readEntry({entryKey: journalPageData.entryKey});
+    if(journalPageData.entryKey) journalState.backendActor.readEntry({entryKey: journalPageData.entryKey});
 
     const toggleSwitch = () => {
         if(journalPageData.draft){
@@ -120,7 +120,7 @@ const JournalPage = (props) => {
 
         const entryKeyAsApiObject = (entryKey >= 0 && entryKey < journalSize - 1 ) ? [{entryKey: entryKey}] : [];
         
-        let result = await journalState.actor.updateJournalEntry(
+        let result = await journalState.backendActor.updateJournalEntry(
             entryKeyAsApiObject,
             entryAsApiObject
         );
@@ -140,7 +140,7 @@ const JournalPage = (props) => {
         let files = journalPageData.filesMetaData.filter(fileData => fileData.fileName !== 'null' && !fileData.error);
         journalPageData.filesMetaData = files;
         let filesSuccessfullyUploaded = true;
-        let result = await journalState.actor.submitFiles();
+        let result = await journalState.backendActor.submitFiles();
         if('err' in result) filesSuccessfullyUploaded = false;
     
         let result_1 = await mapAndSendEntryToApi(index, journalPageData, !filesSuccessfullyUploaded);
@@ -208,7 +208,7 @@ const JournalPage = (props) => {
         });
         let fileCount = journalPageData.filesMetaData.length;
         let fileName = journalPageData.filesMetaData[fileCount-1].fileName;
-        let result = await journalState.actor.deleteUnsubmittedFile(fileName);
+        let result = await journalState.backendActor.deleteUnsubmittedFile(fileName);
     };
 
     const handleAddFile = async () => {
@@ -230,7 +230,7 @@ const JournalPage = (props) => {
         journalState.isLoading ? 
             <LoadScreen/> : 
                 <div className={"journalPageContainer"}>
-                    <div className={"logoDiv"}>
+                    <div className={"logoDiv journal"}>
                         <div className={'buttonContainer left'}>
                             <ButtonField
                                 Icon={RiIcons.RiArrowGoBackLine}

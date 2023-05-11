@@ -4,6 +4,7 @@ import { copyWalletAddressHelper } from "../walletFunctions/CopyWalletAddress";
 import * as FaIcons from 'react-icons/fa';
 import ButtonField from "./Button";
 import "./DataField.scss";
+import '../../SCSS/section.scss'
 
 const DataField = (props) => {
     const {

@@ -27,7 +27,7 @@ const AccountSection = (props) => {
             userName: (journalState.metaData.userName[0]) ? journalState.metaData.userName: [],
             email: (journalState.metaData.email[0]) ? journalState.metaData.email: []
         };
-        let result = await journalState.actor.updateProfile(profileInput);
+        let result = await journalState.backendActor.updateProfile(profileInput);
         dispatch({
             actionType: types.SET_IS_LOADING,
             payload: false
@@ -55,7 +55,7 @@ return(
         />
         {journalState.isLoading ?
             <LoadScreen/> :
-            <div className={`logoDiv ${isAdmin ? 'admin' : ''}`}>
+            <div className={`logoDiv account ${isAdmin ? 'admin' : ''}`}>
                 <img className={'logoImg'}src="dtc-logo-black.png" alt="Logo"/>
                 <div className={`subscriptionSection ${isAdmin ? 'admin_' : ''}`}>
                     <InputBox

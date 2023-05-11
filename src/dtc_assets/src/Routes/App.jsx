@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { createContext, useState, useEffect, useReducer} from 'react';
+import { createContext, useState, useEffect, useReducer, useMemo} from 'react';
 import { useLocation } from 'react-router-dom';
 import Journal from '../Pages/Journal';
 import LoginPage from '../Components/authentication/LoginPage';
@@ -9,6 +9,8 @@ import { TEST_DATA_FOR_NOTIFICATIONS } from '../testData/notificationsTestData';
 import { CreateUserJournal } from '../Components/authentication/AuthenticationMethods';
 import { loadCanisterData, loadJournalData, loadWalletData, recoverState} from '../Components/loadingFunctions';
 import { useConnect } from "@connect2ic/react";
+import Notes from '../Pages/Notes';
+import { JOURNAL_TABS } from '../Constants';
 
 export const AppContext = createContext({
     journalState:{},
@@ -32,13 +34,13 @@ const App = () => {
     window.onbeforeunload = window.history.replaceState(null, '');
 
     useEffect(async () => {
-        if(!journalState.actor) return;
+        if(!journalState.backendActor) return;
         if(journalState.reloadStatuses.journalData){
             dispatch({
                 actionType: types.SET_IS_LOADING,
                 payload: true
             });
-            let journal = await journalState.actor.readJournal();
+            let journal = await journalState.backendActor.readJournal();
             if(!journal) return;
             if("err" in journal) journal = await CreateUserJournal(journalState, dispatch, 'readJournal');
             if("err" in journal) {
@@ -56,16 +58,27 @@ const App = () => {
         }
         if(journalState.reloadStatuses.canisterData){
             //Load canister data in background
-            const canisterData = await journalState.actor.getCanisterData();
+            const canisterData = await journalState.backendActor.getCanisterData();
             loadCanisterData(canisterData, dispatch, types);
         }
         if(journalState.reloadStatuses.walletData){
             //Load wallet data in background
-            const walletDataFromApi = await journalState.actor.readWalletData();
+            const walletDataFromApi = await journalState.backendActor.readWalletData();
             await loadWalletData(walletDataFromApi, dispatch, types);
         };
-    },[journalState.actor]);
+    },[journalState.backendActor]);
 
+    let TabComponent = useMemo(()=>{
+        if(journalState.journalPageTab===JOURNAL_TABS.diaryTab){
+            return Journal
+        }else{
+            return Notes
+        }
+    },[journalState.journalPageTab])//variable added to the redux
+    
+    useEffect(()=>{
+        console.log(journalState);
+    },[journalState])
     return (
         <AppContext.Provider 
             value={{
@@ -77,7 +90,7 @@ const App = () => {
         >
             {
                 journalState.isAuthenticated ? 
-                    <Journal/> : 
+                    <TabComponent/> : 
                     <LoginPage
                         context={UI_CONTEXTS.JOURNAL}
                     /> 

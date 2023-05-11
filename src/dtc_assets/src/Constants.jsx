@@ -15,7 +15,9 @@ export const NAV_LINKS = {
     journal : '/app',
     nft : '/nft',
     account: '/account',
-    dashboard: '/'
+    dashboard: '/',
+    treasury:'/treasury',
+    groupJournal:'/groupjournal'
 };
 
 export const DEVICE_TYPES = {
@@ -75,3 +77,16 @@ export const PROVIDER_STATUS = {
     idle: 'idle'
 }
 
+export const JOURNAL_TABS={
+    diaryTab:'diaryTab',
+    notesTab:'notesTab'
+}
+
+export const WALLET_TABS={
+    icpTab:'icp_tab',
+    ethTab:'eth_tab',
+    btcTab:'btc_tab',
+    ckBtcTab:'ckBtc_tab'
+}
+
+export const MASTER_COPY_FRONTEND_CANISTER_ID = "fkkq7-siaaa-aaaap-qaaya-cai";

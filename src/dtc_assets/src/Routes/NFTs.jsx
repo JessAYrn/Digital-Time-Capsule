@@ -52,14 +52,14 @@ const NFTapp = () => {
     };
 
     useEffect(async () => {
-        if(!journalState.isAuthenticated || !journalState.actor) return;
+        if(!journalState.isAuthenticated || !journalState.backendActor) return;
         dispatch({
             actionType: types.SET_IS_LOADING,
             payload: true
         });
         if(journalState.reloadStatuses.nftData){
             let nftCollection = await handleErrorOnFirstLoad(
-                journalState.actor.getUserNFTsInfo, 
+                journalState.backendActor.getUserNFTsInfo, 
                 TriggerAuththenticateClientFunction, 
                 { journalState, dispatch, types }
             );
@@ -80,15 +80,15 @@ const NFTapp = () => {
         };
         if(journalState.reloadStatuses.walletData){
             //Load wallet data in background
-            const walletDataFromApi = await journalState.actor.readWalletData();
+            const walletDataFromApi = await journalState.backendActor.readWalletData();
             await loadWalletData(walletDataFromApi, dispatch, types);
         }
         if(journalState.reloadStatuses.journalData){
             //Load Journal Data in the background
-            const journal = await journalState.actor.readJournal();
+            const journal = await journalState.backendActor.readJournal();
             loadJournalData(journal, dispatch, types);            
         };
-    },[journalState.actor]);
+    },[journalState.backendActor]);
 
 
 

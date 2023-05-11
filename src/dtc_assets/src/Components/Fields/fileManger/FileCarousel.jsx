@@ -49,19 +49,19 @@ const FileCarousel = (props) => {
                     fileType: metaData.fileType,
                 };
             });
-            let result = await journalState.actor.updatePhotos(photos);
+            let result = await journalState.backendActor.updatePhotos(photos);
             result = result.ok;
             dispatch({
                 actionType: types.SET_BIO,
                 payload: result
             });
-            result = await journalState.actor.submitFiles();
+            result = await journalState.backendActor.submitFiles();
             dispatch({
                 actionType: types.SET_IS_LOADING,
                 payload: false
             });
         } else {
-            let result = await journalState.actor.clearUnsubmittedFiles();
+            let result = await journalState.backendActor.clearUnsubmittedFiles();
         }
     };
 
@@ -80,14 +80,14 @@ const FileCarousel = (props) => {
             fileIndex: fileIndex
         });
         if(fileIsUnsubmitted){
-            let result = await journalState.actor.deleteUnsubmittedFile(fileName);
+            let result = await journalState.backendActor.deleteUnsubmittedFile(fileName);
         } else {
             dispatch({
                 actionType: types.SET_IS_LOADING,
                 payload: true
             });
-            let result = await journalState.actor.deleteSubmittedFile(fileName);
-            if("ok" in result) result = await journalState.actor.updateBio({
+            let result = await journalState.backendActor.deleteSubmittedFile(fileName);
+            if("ok" in result) result = await journalState.backendActor.updateBio({
                 dob: journalState.bio.dob,
                 pob: journalState.bio.pob,
                 name: journalState.bio.name,

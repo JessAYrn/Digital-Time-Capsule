@@ -1,4 +1,4 @@
-import React, { createContext, useReducer, useState, useEffect} from 'react';
+import React, { createContext, useReducer, useState, useEffect, useMemo} from 'react';
 import LoginPage from '../Components/authentication/LoginPage';
 import { useLocation } from 'react-router-dom';
 import journalReducer, {initialState, types} from '../reducers/journalReducer';
@@ -8,6 +8,10 @@ import { testTx } from '../testData/Transactions';
 import { CreateUserJournal } from '../Components/authentication/AuthenticationMethods';
 import { loadJournalData, loadWalletData, loadCanisterData, recoverState } from '../Components/loadingFunctions';
 import { useConnect } from '@connect2ic/react';
+import CkBtcPage from '../Pages/CkBtcPage';
+import EthPage from '../Pages/EthPage';
+import BtcPage from '../Pages/BtcPage';
+import { WALLET_TABS } from '../Constants';
 
 export const AppContext = createContext({
     journalState:{},
@@ -31,9 +35,25 @@ const WalletApp = () => {
     //changes made to this route aren't overrided by the useLocation().state of the previous route.
     window.onbeforeunload = window.history.replaceState(null, '');
 
+    
+    const WalletTabComponent=useMemo(()=>{
+        if(journalState.walletPageTab===WALLET_TABS.icpTab){
+            return WalletPage;
+        }else if(journalState.walletPageTab===WALLET_TABS.btcTab){
+            return BtcPage;
+        }
+        else if(journalState.walletPageTab===WALLET_TABS.ethTab){
+            return EthPage;
+        }
+        else if(journalState.walletPageTab===WALLET_TABS.ckBtcTab){
+            return CkBtcPage;
+        }
+    },[journalState.walletPageTab])
+
+    console.log(WalletTabComponent);
     //Loading Time Capsule Data
     useEffect(async () => {
-        if(!journalState.actor){
+        if(!journalState.backendActor){
             return;
         }
         if(journalState.reloadStatuses.walletData){
@@ -41,7 +61,7 @@ const WalletApp = () => {
                 actionType: types.SET_IS_LOADING,
                 payload: true
             });
-            let walletDataFromApi = await journalState.actor.readWalletData()
+            let walletDataFromApi = await journalState.backendActor.readWalletData()
             if(!walletDataFromApi) return;
             if("err" in walletDataFromApi) walletDataFromApi = await CreateUserJournal(journalState, dispatch, 'readWalletData');
             if("err" in walletDataFromApi) {
@@ -59,16 +79,16 @@ const WalletApp = () => {
         }; 
         if(journalState.reloadStatuses.canisterData){
             //Load canister data in background
-            const canisterData = await journalState.actor.getCanisterData();
+            const canisterData = await journalState.backendActor.getCanisterData();
             loadCanisterData(canisterData, dispatch, types);
         }
         if(journalState.reloadStatuses.journalData){
             //Load Journal Data in the background
-            const journal = await journalState.actor.readJournal();
+            const journal = await journalState.backendActor.readJournal();
             loadJournalData(journal, dispatch, types);
         };
         
-    },[journalState.actor]);
+    },[journalState.backendActor]);
 
     return(
         <AppContext.Provider 
@@ -79,7 +99,7 @@ const WalletApp = () => {
             >
                 {
                     journalState.isAuthenticated ?
-                        <WalletPage/> : 
+                        <WalletTabComponent/> : 
                         <LoginPage
                             context={UI_CONTEXTS.WALLET}
                         /> 

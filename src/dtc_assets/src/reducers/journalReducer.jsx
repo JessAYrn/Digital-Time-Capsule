@@ -1,14 +1,17 @@
-import { MODALS_TYPES, NULL_STRING_ALL_LOWERCASE, NULL_STRING_CAPITALIZED } from "../Constants"
+import { JOURNAL_TABS, MODALS_TYPES, NULL_STRING_ALL_LOWERCASE, NULL_STRING_CAPITALIZED, WALLET_TABS } from "../Constants"
 import { getDateAsString } from "../Utils";
 
 export const types = {
     SET_ENTIRE_REDUX_STATE: "SET_ENTIRE_REDUX_STATE",
-    SET_ACTOR: "SET_ACTOR",
+    SET_BACKEND_ACTOR: "SET_BACKEND_ACTOR",
+    SET_MANAGER_ACTOR: "SET_MANAGER_ACTOR",
     SET_AUTHENTICATE_FUNCTION_CALL_COUNT: "SET_AUTHENTICATE_FUNCTION_CALL_COUNT",
     SET_CREATE_ACTOR_FUNCTION_CALL_COUNT: "SET_CREATE_ACTOR_FUNCTION_CALL_COUNT",
     SET_CANISTER_DATA: "SET_CANISTER_DATA",
     SET_IS_LOGGING_IN: "SET_IS_LOGGING_IN",
     SET_JOURNAL: "SET_JOURNAL",
+    SET_JOURNAL_TAB:"SET_JOURNAL_TAB",
+    SET_WALLET_TABS:'SET_WALLET_TABS',
     SET_JOURNAL_UNREAD_ENTRIES:"SET_JOURNAL_UNREAD_ENTRIES",
     SET_BIO: "SET_BIO",
     SET_METADATA: "SET_METADATA",
@@ -62,11 +65,16 @@ export const types = {
 
 }
 
+
+
 export const initialState = {
-    actor: undefined,
+    backendActor: undefined,
+    managerActor: undefined,
     authenticateFunctionCallCount: 0,
     createActorFunctionCallCount: 0,
     journalCount: 0,
+    journalPageTab:JOURNAL_TABS.diaryTab,
+    walletPageTab:WALLET_TABS.icpTab,
     canisterData: {
         profilesMetaData: [],
         journalCount: 0,
@@ -173,8 +181,13 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
-        case types.SET_ACTOR:
-            state.actor = payload;
+        case types.SET_BACKEND_ACTOR:
+            state.backendActor = payload;
+            return {
+                ...state
+            }
+        case types.SET_MANAGER_ACTOR:
+            state.managerActor = payload;
             return {
                 ...state
             }
@@ -231,6 +244,16 @@ const changeValue = (state = initialState, action) => {
         case types.SET_IS_LOADING:
             state.isLoading = payload;
             return {
+                ...state
+            }
+        case types.SET_JOURNAL_TAB:
+            state.journalPageTab=payload;
+            return{
+                ...state
+            }
+        case types.SET_WALLET_TABS:
+            state.walletPageTab=payload;
+            return{
                 ...state
             }
         case types.SET_JOURNAL_UNREAD_ENTRIES:
