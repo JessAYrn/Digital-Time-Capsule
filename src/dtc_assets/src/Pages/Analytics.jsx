@@ -197,7 +197,6 @@ const Analytics = () => {
                     <NavBar
                         walletLink={true}
                         journalLink={true}
-                        nftLink={true}
                         accountLink={true}
                         dashboardLink={false}
                         notificationIcon={false}

@@ -23,12 +23,9 @@ import Ledger "Ledger/Ledger";
 import LedgerCandid "Ledger/LedgerCandid";
 import Journal "Journal/Journal";
 import Account "Ledger/Account";
-import NFT "NFT/Dip-721-NFT-Container";
-import DIP721Types "NFT/dip721.types";
 import JournalTypes "Journal/journal.types";
 import MainMethods "Main/MainHelperMethods";
 import JournalHelperMethods "Main/JournalHelperMethods";
-import NftHelperMethods "Main/NftHelperMethods";
 import MainTypes "Main/types";
 import TxHelperMethods "Main/TransactionHelperMethods";
 import CanisterManagementMethods "Main/CanisterManagementMethods";
@@ -65,10 +62,6 @@ shared (msg) actor class User() = this {
         Principal.equal,
         Principal.hash
     );
-
-    private stable var nftCollections : Trie.Trie<Nat, MainTypes.Nft> = Trie.empty();
-
-    private stable var nftCollectionsIndex : Nat = 0;
 
     private stable var supportMode : Bool = false;
 
@@ -132,251 +125,145 @@ shared (msg) actor class User() = this {
         let result = await MainMethods.refillCanisterCycles(userProfilesMap);
     };
 
-    public shared(msg) func whoAmI () : async Text{
-        let callerId = msg.caller;
-        return Principal.toText(callerId);
+    public shared({ caller }) func whoAmI () : async Text{
+        return Principal.toText(caller);
     };
 
     //Profile Methods
     //_______________________________________________________________________________________________________________________________________________________________________________________________
 
     //Result.Result returns a varient type that has attributes from success case(the first input) and from your error case (your second input). both inputs must be varient types. () is a unit type.
-    public shared(msg) func create () : async Result.Result<MainTypes.AmountAccepted, JournalTypes.Error> {
-        let callerId = msg.caller;
-        let amountAccepted = await MainMethods.create(callerId, requestsForAccess, userProfilesMap, isLocal, defaultControllers, canisterData);
-        let updatedRequestsList = await CanisterManagementMethods.removeFromRequestsList(callerId, requestsForAccess);
+    public shared({ caller }) func create () : async Result.Result<MainTypes.AmountAccepted, JournalTypes.Error> {
+        let amountAccepted = await MainMethods.create(caller, requestsForAccess, userProfilesMap, isLocal, defaultControllers, canisterData);
+        let updatedRequestsList = await CanisterManagementMethods.removeFromRequestsList(caller, requestsForAccess);
         switch(amountAccepted){
             case(#ok(amount)){
                 requestsForAccess := updatedRequestsList;
                 return #ok(amount);
             };
-            case(#err(e)){
-                return #err(e);
-            };
+            case(#err(e)){ return #err(e); };
         };
     };
 
     //update profile
-    public shared(msg) func updateProfile(profile: MainTypes.ProfileInput) : async Result.Result<(),JournalTypes.Error> {
-        let callerId = msg.caller;
-        let result = await MainMethods.updateProfile(callerId, userProfilesMap, profile);
+    public shared({ caller }) func updateProfile(profile: MainTypes.ProfileInput) : async Result.Result<(),JournalTypes.Error> {
+        let result = await MainMethods.updateProfile(caller, userProfilesMap, profile);
         switch(result){
-            case(#ok(_)){
-                #ok(());
-            };
-            case(#err(e)){
-                #err(e);
-            };
+            case(#ok(_)){ #ok(()); };
+            case(#err(e)){ #err(e); };
         };
     };
 
     //delete profile
-    public shared(msg) func delete() : async Result.Result<(), JournalTypes.Error> {
-        
-        let callerId = msg.caller;
-        let result = await MainMethods.delete(callerId, userProfilesMap);
+    public shared({ caller }) func delete() : async Result.Result<(), JournalTypes.Error> {
+        let result = await MainMethods.delete(caller, userProfilesMap);
         switch(result){
-            case(#ok(_)){
-                #ok(());
-            };
-            case(#err(e)){
-                #err(e);
-            };
+            case(#ok(_)){ #ok(()); };
+            case(#err(e)){ #err(e); };
         };
     };
     //Journal Methods
     //_______________________________________________________________________________________________________________________________________________________________________________________________
 
     //read Journal
-    public shared(msg) func readJournal () : async Result.Result<({
-            userJournalData : ([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio,); 
-            email: ?Text; 
-            userName: ?Text;
-            principal: Text;
-        }), JournalTypes.Error> {
-
-        let callerId = msg.caller;
-        let result = await JournalHelperMethods.readJournal(callerId, userProfilesMap);
+    public shared({ caller }) func readJournal () : 
+    async Result.Result<({
+        userJournalData : ([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio,); 
+        email: ?Text; 
+        userName: ?Text;
+        principal: Text;
+    }), JournalTypes.Error> {
+        let result = await JournalHelperMethods.readJournal(caller, userProfilesMap);
         return result; 
     };
 
-    public shared(msg) func readWalletData() : async Result.Result<({ balance : Ledger.ICP; address: [Nat8]; } ), JournalTypes.Error> {
-        let callerId = msg.caller;
-        let result = await JournalHelperMethods.readWalletData(callerId, userProfilesMap);
+    public shared({ caller }) func readWalletData() : async Result.Result<({ balance : Ledger.ICP; address: [Nat8]; } ), JournalTypes.Error> {
+        let result = await JournalHelperMethods.readWalletData(caller, userProfilesMap);
         return result;
     };
 
-    public shared(msg) func readEntry(entryKey: JournalTypes.EntryKey) : async Result.Result<JournalTypes.JournalEntry, JournalTypes.Error> {
-        let callerId = msg.caller;
-        let result = await JournalHelperMethods.readEntry(callerId, userProfilesMap, entryKey);
+    public shared({ caller }) func readEntry(entryKey: JournalTypes.EntryKey) : async Result.Result<JournalTypes.JournalEntry, JournalTypes.Error> {
+        let result = await JournalHelperMethods.readEntry(caller, userProfilesMap, entryKey);
         return result;
     };
 
-    public shared(msg) func readEntryFileChunk(fileId: Text, chunkId: Nat) : async Result.Result<(Blob),JournalTypes.Error>{
-        let callerId = msg.caller;
-        let result = await JournalHelperMethods.readEntryFileChunk(callerId, userProfilesMap, fileId, chunkId);
+    public shared({ caller }) func readEntryFileChunk(fileId: Text, chunkId: Nat) : async Result.Result<(Blob),JournalTypes.Error>{
+        let result = await JournalHelperMethods.readEntryFileChunk(caller, userProfilesMap, fileId, chunkId);
         return result;
     };
 
-    public shared(msg) func readEntryFileSize(fileId: Text) : async Result.Result<(Nat),JournalTypes.Error>{
-        let callerId = msg.caller;
-        let result = await JournalHelperMethods.readEntryFileSize(callerId, userProfilesMap, fileId);
+    public shared({ caller }) func readEntryFileSize(fileId: Text) : async Result.Result<(Nat),JournalTypes.Error>{
+        let result = await JournalHelperMethods.readEntryFileSize(caller, userProfilesMap, fileId);
         return result;
     };
 
-    public shared(msg) func updateBio(bio: JournalTypes.Bio) : async Result.Result<(JournalTypes.Bio), JournalTypes.Error> {
-        let callerId = msg.caller;
-        let result = await JournalHelperMethods.updateBio(callerId, userProfilesMap, bio);
+    public shared({ caller }) func updateBio(bio: JournalTypes.Bio) : async Result.Result<(JournalTypes.Bio), JournalTypes.Error> {
+        let result = await JournalHelperMethods.updateBio(caller, userProfilesMap, bio);
         return result;
     };
 
-    public shared(msg) func updatePhotos(photos: [JournalTypes.FileMetaData]) : async Result.Result<(JournalTypes.Bio), JournalTypes.Error> {
-        let callerId = msg.caller;
-        let result = await JournalHelperMethods.updatePhotos(callerId, userProfilesMap, photos);
+    public shared({caller}) func updatePhotos(photos: [JournalTypes.FileMetaData]) : 
+    async Result.Result<(JournalTypes.Bio), JournalTypes.Error> {
+        let result = await JournalHelperMethods.updatePhotos(caller, userProfilesMap, photos);
         return result;
     };
 
-    public shared(msg) func updateJournalEntry(entryKey : ?JournalTypes.EntryKey, entry : ?JournalTypes.JournalEntryInput) : 
+    public shared({caller}) func updateJournalEntry(entryKey : ?JournalTypes.EntryKey, entry : ?JournalTypes.JournalEntryInput) : 
     async Result.Result<([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio), JournalTypes.Error> {
-        let callerId = msg.caller;
-        let result = await JournalHelperMethods.updateJournalEntry(callerId, userProfilesMap, entryKey, entry);
+        let result = await JournalHelperMethods.updateJournalEntry(caller, userProfilesMap, entryKey, entry);
         return result;
     };
 
-    public shared(msg) func deleteUnsubmittedFile(fileId: Text) : async Result.Result<(), JournalTypes.Error> {
-        let callerId = msg.caller;
-        let result = await JournalHelperMethods.deleteUnsubmittedFile(callerId, userProfilesMap, fileId);
+    public shared({caller}) func deleteUnsubmittedFile(fileId: Text) : async Result.Result<(), JournalTypes.Error> {
+        let result = await JournalHelperMethods.deleteUnsubmittedFile(caller, userProfilesMap, fileId);
         return result;
     };
 
-    public shared(msg) func deleteSubmittedFile(fileId: Text) : async Result.Result<(), JournalTypes.Error> {
-        let callerId = msg.caller;
-        let result = await JournalHelperMethods.deleteSubmittedFile(callerId, userProfilesMap, fileId);
+    public shared({caller}) func deleteSubmittedFile(fileId: Text) : async Result.Result<(), JournalTypes.Error> {
+        let result = await JournalHelperMethods.deleteSubmittedFile(caller, userProfilesMap, fileId);
         return result;
     };
 
-    public shared(msg) func submitFiles() : async Result.Result<(), JournalTypes.Error> {
-        let callerId = msg.caller;
-        let result = await JournalHelperMethods.submitFiles(callerId, userProfilesMap);
+    public shared({caller}) func submitFiles() : async Result.Result<(), JournalTypes.Error> {
+        let result = await JournalHelperMethods.submitFiles(caller, userProfilesMap);
         return result;
     };
 
-    public shared(msg) func clearUnsubmittedFiles(): async Result.Result<(), JournalTypes.Error>{
-        let callerId = msg.caller;
-        let result = await JournalHelperMethods.clearUnsubmittedFiles(callerId, userProfilesMap);
+    public shared({caller}) func clearUnsubmittedFiles(): async Result.Result<(), JournalTypes.Error>{
+        let result = await JournalHelperMethods.clearUnsubmittedFiles(caller, userProfilesMap);
         return result;
     };
 
-    public shared(msg) func uploadJournalEntryFile(fileId: Text, chunkId: Nat, blobChunk: Blob): async Result.Result<(Text), JournalTypes.Error>{
-        let callerId = msg.caller;
-        let result = await JournalHelperMethods.uploadJournalEntryFile(callerId, userProfilesMap, fileId, chunkId, blobChunk);
+    public shared({caller}) func uploadJournalEntryFile(fileId: Text, chunkId: Nat, blobChunk: Blob): async Result.Result<(Text), JournalTypes.Error>{
+        let result = await JournalHelperMethods.uploadJournalEntryFile(caller, userProfilesMap, fileId, chunkId, blobChunk);
         return result;
     };
 
-    public shared(msg) func getEntriesToBeSent() : async Result.Result<[(Text,[(Nat, JournalTypes.JournalEntry)])], JournalTypes.Error>{
-
-        let callerId = msg.caller;
-        let result = await JournalHelperMethods.getEntriesToBeSent(callerId, userProfilesMap);
+    public shared({caller}) func getEntriesToBeSent() : 
+    async Result.Result<[(Text,[(Nat, JournalTypes.JournalEntry)])], JournalTypes.Error>{
+        let result = await JournalHelperMethods.getEntriesToBeSent(caller, userProfilesMap);
         return result;
     };
     //Transaction Mehtods
     //_______________________________________________________________________________________________________________________________________________
 
-    public shared(msg) func transferICP(amount: Nat64, canisterAccountId: Account.AccountIdentifier) : async Result.Result<(), JournalTypes.Error> {
-        let callerId = msg.caller;
-        let result = await TxHelperMethods.transferICP(callerId, userProfilesMap, amount, canisterAccountId);
+    public shared({caller}) func transferICP(amount: Nat64, canisterAccountId: Account.AccountIdentifier) : async Result.Result<(), JournalTypes.Error> {
+        let result = await TxHelperMethods.transferICP(caller, userProfilesMap, amount, canisterAccountId);
         return result;
     };
 
-    public shared(msg) func readTransaction() : async Result.Result<[(Nat, JournalTypes.Transaction)], JournalTypes.Error> {
-        let callerId = msg.caller;
-        let result = await TxHelperMethods.readTransaction(callerId, userProfilesMap);
+    public shared({caller}) func readTransaction() : async Result.Result<[(Nat, JournalTypes.Transaction)], JournalTypes.Error> {
+        let result = await TxHelperMethods.readTransaction(caller, userProfilesMap);
         return result;
     };
 
     private func updateUsersTxHistory() : async () {
-        let tipOfChainInfo = await TxHelperMethods.tipOfChainDetails();
-        let tipOfChainIndex : Nat64 = tipOfChainInfo.0;
-        let startIndex : Nat64 = startIndexForBlockChainQuery;
-        let maxQueryLength : Nat64 = 2_000;
-        let newStartIndexForNextQuery = Nat64.min(tipOfChainIndex, startIndex + maxQueryLength);
-
+        let newStartIndexForNextQuery = await TxHelperMethods.updateUsersTxHistory(userProfilesMap, startIndexForBlockChainQuery);
         startIndexForBlockChainQuery := newStartIndexForNextQuery;
-
-        let getBlocksArgs = {
-            start = startIndex;
-            length = maxQueryLength;
-        };
-
-        let queryResponse = await ledger.query_blocks(getBlocksArgs);
-
-        await TxHelperMethods.updateUsersTxHistory(queryResponse, userProfilesMap);
     };
 
     //NFT Methods
     //______________________________________________________________________________________________________________________________________________
-
-    public shared(msg) func createNFTCollection(initInput : DIP721Types.Dip721NonFungibleTokenInput) : async Result.Result<Nat64, JournalTypes.Error> {
-        let callerId = msg.caller;
-        let mainCanisterPrincipal = Principal.fromActor(this);
-        let result = await NftHelperMethods.createNFTCollection(
-            callerId, 
-            mainCanisterPrincipal,
-            userProfilesMap,
-            initInput,
-            nftCollectionsIndex
-        );
-
-        switch(result){
-            case(#ok(collectionAndAmountAccepted)){
-                let collection = collectionAndAmountAccepted.0;
-                let amountAccepted = collectionAndAmountAccepted.1;
-                let (newNftTrie, oldValueForThisKey) = Trie.put(
-                    nftCollections,
-                    natKey(nftCollectionsIndex),
-                    Nat.equal,
-                    collection
-                );
-                nftCollections := newNftTrie;
-                nftCollectionsIndex += 1;
-                #ok(amountAccepted.accepted);
-            };
-            case(#err(e)){
-
-                return #err(e);
-            };
-        };
-    };
-
-    public shared(msg) func mintNft( nftCollectionIndex: Nat, file_type: Text, numberOfCopies: Nat) : async DIP721Types.MintReceipt {
-        let callerId = msg.caller;
-        let result = await NftHelperMethods.mintNft(callerId, userProfilesMap, nftCollections, nftCollectionIndex, file_type, numberOfCopies);
-        return result;
-    };
-
-    public shared(msg) func uploadNftChunk(nftCollectionIndex : Nat, chunkId: Nat, blobChunk: Blob) : async Result.Result<(), DIP721Types.ApiError>{
-        let callerId = msg.caller;
-        let result = await NftHelperMethods.uploadNftChunk(callerId, userProfilesMap, nftCollections, nftCollectionIndex, chunkId, blobChunk);
-        return result;
-    };
-
-    public shared(msg) func safeTransferNFT( nftCollectionIndex: Nat, to: Principal, token_id: DIP721Types.TokenId) : async DIP721Types.TxReceipt{
-        let callerId = msg.caller;
-        let result = await NftHelperMethods.safeTransferNFT( callerId, userProfilesMap, nftCollections, nftCollectionIndex, to, token_id);
-        return result;
-    };
-
-    public shared(msg) func getUserNFTsInfo() : async Result.Result<[({nftCollectionKey: Nat}, DIP721Types.TokenMetaData)], JournalTypes.Error> {
-        let callerId = msg.caller;
-        let result = await NftHelperMethods.getUserNFTsInfo(callerId, userProfilesMap, nftCollections);
-        return result;
-    };
-
-    public shared(msg) func getNftChunk( nftCollectionKey : Nat, tokenId: Nat64, chunkKey: Nat) : async DIP721Types.MetadataResult {
-        let callerId = msg.caller;
-        let result = await NftHelperMethods.getNftChunk(callerId, nftCollections, nftCollectionKey, tokenId, chunkKey);
-        return result;
-    };
 
     func myAccountId() : Account.AccountIdentifier {
         Account.accountIdentifier(callerId, Account.defaultSubaccount())

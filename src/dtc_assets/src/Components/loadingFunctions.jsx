@@ -105,18 +105,6 @@ export const loadTxHistory = async (journalState, dispatch, types) => {
     return {transactionHistory, tx};
 };
 
-export const loadNftData = (nftCollection, dispatch, types) => {
-    nftCollection = nftCollection.ok;
-    dispatch({
-        payload: nftCollection,
-        actionType: types.SET_NFT_DATA
-    });
-    dispatch({
-        payload: false,
-        actionType: types.SET_NFT_DATA_RELOAD_STATUS
-    });
-};
-
 export const loadCanisterData = (canisterData, dispatch, types) => {
     canisterData = canisterData.ok;
     canisterData = mapBackendCanisterDataToFrontEndObj(canisterData);

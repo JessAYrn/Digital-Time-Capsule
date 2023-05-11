@@ -4,7 +4,6 @@ import { AppContext as JournalContext } from "../../Routes/App";
 import { AppContext as AccountContext } from "../../Routes/Account";
 import { AppContext as WalletContex } from "../../Routes/Wallet";
 import { AppContext as HomePageContext } from "../../Routes/HomePage";
-import { AppContext as NftPageContext } from "../../Routes/NFTs";
 import { AppContext as TreasuryPageContext } from "../../Routes/Treasury";
 import { UI_CONTEXTS } from "../../Contexts";
 import * as IoiosIcons from 'react-icons/io';
@@ -47,8 +46,6 @@ const LoginPage = (props) => {
         properContext = WalletContex
     } else if(context === UI_CONTEXTS.HOME_PAGE){
         properContext = HomePageContext
-    } else if(context === UI_CONTEXTS.NFT){
-        properContext = NftPageContext
     } else if(context === UI_CONTEXTS.TREASURY){
         properContext = TreasuryPageContext
     } 

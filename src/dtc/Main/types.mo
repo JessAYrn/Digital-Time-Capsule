@@ -1,6 +1,5 @@
 import Journal "../Journal/Journal";
 import Account "../Ledger/Account";
-import NFT "../NFT/Dip-721-NFT-Container";
 import Trie "mo:base/Trie";
 import Principal "mo:base/Principal";
 import HashMap "mo:base/HashMap";
@@ -27,10 +26,6 @@ module{
 
     public type AmountAccepted = {
         accepted: Nat64
-    };
-
-    public type Nft = {
-       nftCollection: NFT.Dip721NFT;
     };
 
     public type UserPermissions = {
@@ -85,7 +80,5 @@ module{
     public type UserProfilesMap = HashMap.HashMap<Principal, UserProfile>;
 
     public type UserProfilesArray = [(Principal, UserProfile)];
-
-    public type NftCollectionsTree = Trie.Trie<Nat, Nft>;
 
 }

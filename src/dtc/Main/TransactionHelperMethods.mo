@@ -9,10 +9,12 @@ import LedgerCandid "../Ledger/LedgerCandid";
 import Iter "mo:base/Iter";
 import Blob "mo:base/Blob";
 import Journal "../Journal/Journal";
+import Nat64 "mo:base/Nat64";
 
 module{
 
     private let ledgerC : LedgerCandid.Interface = actor(LedgerCandid.CANISTER_ID);
+    private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
 
     private let Gas: Nat64 = 10000;
 
@@ -53,8 +55,25 @@ module{
         };
     };
 
-    public func updateUsersTxHistory(queryResponse: Ledger.QueryBlocksResponse, profilesMap: MainTypes.UserProfilesMap) : 
-    async () {
+    public func updateUsersTxHistory(
+        profilesMap: MainTypes.UserProfilesMap,
+        startIndexForBlockChainQuery: Nat64
+        ) : 
+    async (Nat64) {
+
+        let tipOfChainInfo = await tipOfChainDetails();
+        let tipOfChainIndex : Nat64 = tipOfChainInfo.0;
+        let startIndex : Nat64 = startIndexForBlockChainQuery;
+        let maxQueryLength : Nat64 = 2_000;
+        let newStartIndexForNextQuery = Nat64.min(tipOfChainIndex, startIndex + maxQueryLength);
+
+        let getBlocksArgs = {
+            start = startIndex;
+            length = maxQueryLength;
+        };
+
+        let queryResponse = await ledger.query_blocks(getBlocksArgs);
+
         let blocksArray = queryResponse.blocks;
         let blocksArraySize = Iter.size(Iter.fromArray(blocksArray));
         var index = 0;
@@ -116,6 +135,7 @@ module{
             };
             index += 1;
         };
+        return newStartIndexForNextQuery;
     };
 
     public func tipOfChainDetails() : async (Ledger.BlockIndex, LedgerCandid.Transaction) {
