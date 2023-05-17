@@ -201,16 +201,6 @@ const JournalPage = (props) => {
         }
     };
 
-    const handleDeleteFile = async () => {
-        dispatch({
-            index: index,
-            actionType: types.REMOVE_JOURNAL_ENTRY_FILE
-        });
-        let fileCount = journalPageData.filesMetaData.length;
-        let fileName = journalPageData.filesMetaData[fileCount-1].fileName;
-        let result = await journalState.backendActor.deleteUnsubmittedFile(fileName);
-    };
-
     const handleAddFile = async () => {
         dispatch({
             index: index,

@@ -23,11 +23,10 @@ import DataField from "../Fields/DataField";
 import { types } from "../../reducers/journalReducer";
 import { backendActor, managerActor } from "../../Utils";
 import '../../SCSS/contentContainer.scss'
-import Dropdown from "../Fields/Dropdown";
 import Accordion from "../Fields/Accordion";
 
 const AccordionContent=[
-    {text:'Get our App, Become a holder of Personal DAO', image:'assets/dtcscreengrab1.png'},
+    {text:'Get our App, Become a holder of Personal DAO', image:'dtcscreengrab1.png'},
     
 ]
 
@@ -180,10 +179,8 @@ const LoginPage = (props) => {
                                 withBox={true}
                             />
                         </div>
-
                         <ConnectButton/>
                         <ConnectDialog />
-                        
                         <DataField
                             label={'Front-end Canister Balance: '}
                             className={'loginPage'}
@@ -202,81 +199,6 @@ const LoginPage = (props) => {
                         content={AccordionContent}
                         />
                     </div>
-                </div>
-                <div className={`contentContainer _${animatedLeftElementIndex}`}>
-                    <div className={`contentDiv__features _${animatedLeftElementIndex++}`}>
-                        <div className={`list`}>
-                            <h6 className={`h6Tag`}>
-                                Store Your Memories
-                            </h6>
-                            <img className={`cameraImg`}src="camera.png" alt="camera"/>
-                        </div>
-                    </div>
-                </div>
-                <div className={`contentContainer animatedLeft _${animatedLeftElementIndex}`}>
-                    <div className={`contentDiv__features animatedLeft _${animatedLeftElementIndex++}`}>
-                        <div className={`list`}>
-                        <img className={`bitcoinImg`}src="bitcoin.png" alt="bitcoin"/>
-                            <h6 className={`h6Tag`}>
-                                Store Your Crypto
-                            </h6>
-                        </div>
-                    </div>
-                </div>
-                <div className={`contentContainer animatedLeft _${animatedLeftElementIndex}`}>
-                    <div className={`contentDiv__features animatedLeft _${animatedLeftElementIndex++}`}>
-                        <div className={`list`}>
-                            <h6 className={`h6Tag`}>
-                                Store Your Passwords
-                            </h6>
-                            <img className={`safeImg`}src="safe-image.png" alt="safe"/>
-                        </div>
-                    </div>
-                </div>
-                <div className={`contentContainer animatedLeft _${animatedLeftElementIndex}`}>
-                    <div className={`contentDiv__features animatedLeft _${animatedLeftElementIndex++}`}>
-                        <div className={`list`}>
-                            <h4 className={`h4Tag`}>
-                                All In One Place
-                            </h4>
-                        </div>
-                    </div>
-                </div>
-                <div className={`contentContainer animatedLeft _${animatedLeftElementIndex}`}>
-                    <div className={`contentDiv__sentences animatedLeft _${animatedLeftElementIndex++}`}>
-                        <div className={`sentences`}>
-                            <p>
-                                The invention of blockchain technology enables us be to able to store our sensitive data in a decentralized,
-                                secure manner. The Digital Time Capsule is an application built and hosted entirely on the Internet Computer blockchain.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div className={`contentContainer animatedLeft _${animatedLeftElementIndex}`}>
-                    <div className={`contentDiv__sentences animatedLeft _${animatedLeftElementIndex++}`}>
-                        <div className={`sentences`}>
-                            <p>
-                                The Digital Time Capsule leverages the security of the blockchain to allow users to store digital assets of sentimental 
-                                and monetary value all in one safe location- free of worry. Access to your data is granted using 
-                                your internet identity as opposed to the traditional username and password. 
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div className={`contentContainer animatedLeft _${animatedLeftElementIndex}`}>
-                    <div className={`contentDiv__sentences animatedLeft _${animatedLeftElementIndex++}`}>
-                        <div className={`sentences`}>
-                            <p>
-                                This access feature is more secure than a username and password: 
-                                it eliminates the possibility of bad actors being able to remotely 
-                                access your data without physical access to a device or devices of 
-                                your choice.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div>
-
                 </div>
             </div>
             <div className={"container_2"}>

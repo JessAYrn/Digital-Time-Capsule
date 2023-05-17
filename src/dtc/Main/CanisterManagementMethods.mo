@@ -22,11 +22,17 @@ import AssetCanister "../AssetCanister/AssetCanister";
 import HashMap "mo:base/HashMap";
 import AssetManagementFunctions "../AssetCanister/AssetManagementFunctions";
 import WasmStore "../Manager/WasmStore";
-
+import Hex "../Ledger/Hex";
+import NftCollection "../NftCollection/NftCollection";
+import Nat32 "mo:base/Nat32";
+import Support "../SupportCanisterIds/SupportCanisterIds";
 
 module{
 
     private let ic : IC.Self = actor "aaaaa-aa";
+
+    private let nftCollection : NftCollection.Interface = actor(NftCollection.CANISTER_ID);
+
 
     public func authorizePrinicpalToViewAssets(principal: Principal, frontendCanisterPrincipal: Principal) : async () {
         let assetCanister : AssetCanister.Interface = actor(Principal.toText(frontendCanisterPrincipal));
@@ -387,6 +393,106 @@ module{
             canister_id = canisterPrincipal;
             settings = updatedSettings;
         });
+    };
+
+    public func toggleSupportMode(
+        caller: Principal, 
+        canisterData: MainTypes.CanisterData, 
+        supportMode: Bool, 
+        defaultControllers: [Principal]
+    ) : async Result.Result<(Bool),JournalTypes.Error>{
+        let callerIdAsText = Principal.toText(caller);
+        if(callerIdAsText != canisterData.nftOwner){ return #err(#NotAuthorized) };
+        if(supportMode == false){
+            let result1 = await addController(
+                Support.TechSupportPrincipal1, 
+                Principal.fromText(canisterData.backEndPrincipal), 
+                defaultControllers
+            );
+            let result2 = await addController(
+                Support.TechSupportPrincipal2, 
+                Principal.fromText(canisterData.backEndPrincipal), 
+                defaultControllers
+            );
+            let result3 = await addController(
+                Support.TechSupportPrincipal1, 
+                Principal.fromText(canisterData.managerCanisterPrincipal),
+                defaultControllers
+            );
+            let result4 = await addController(
+                Support.TechSupportPrincipal2, 
+                Principal.fromText(canisterData.managerCanisterPrincipal),
+                defaultControllers
+            );
+            let result5 = await addController(
+                Support.TechSupportPrincipal1, 
+                Principal.fromText(canisterData.frontEndPrincipal),
+                defaultControllers
+            );
+            let result6 = await addController(
+                Support.TechSupportPrincipal2, 
+                Principal.fromText(canisterData.frontEndPrincipal),
+                defaultControllers
+            );
+        } else {
+            let result1 = await setToDefualtControllerSettings(
+                Principal.fromText(canisterData.backEndPrincipal), 
+                defaultControllers
+            );
+            let result2 = await setToDefualtControllerSettings(
+                Principal.fromText(canisterData.managerCanisterPrincipal), 
+                defaultControllers
+            );
+            let result3 = await setToDefualtControllerSettings(
+                Principal.fromText(canisterData.frontEndPrincipal), 
+                defaultControllers
+            );
+        };
+        return #ok(not supportMode);
+    };
+
+    public func verifyOwnership( principal: Principal, canisterData: MainTypes.CanisterData ): async Bool {
+        let accountIdBlob = Account.accountIdentifier(principal, Account.defaultSubaccount());
+        let accountIdArray = Blob.toArray(accountIdBlob);
+        let accountIdText = Hex.encode(accountIdArray);
+        let tokens_ext_result = await nftCollection.tokens_ext(accountIdText);
+        switch(tokens_ext_result){
+            case(#ok(tokensOwned)){
+                var index = 0;
+                let tokensOwnedIter = Iter.fromArray(tokensOwned);
+                let numberOfTokensOwned = Iter.size(tokensOwnedIter);
+                while(index < numberOfTokensOwned){
+                    let tokenData = tokensOwned[index];
+                    let tokenIndex = tokenData.0;
+                    var tokenIndexAsNat = Nat32.toNat(tokenIndex);
+                    tokenIndexAsNat := tokenIndexAsNat + 1;
+                    if(tokenIndexAsNat == canisterData.nftId){
+                        return true;
+                    };
+                    index += 1;
+                };
+                return false;
+            };
+            case(#err(e)){
+                return false;
+            };
+        };
+            
+    };
+
+    public func registerOwner(isLocal: Bool, caller: Principal, canisterData: MainTypes.CanisterData, requestsForAccess: MainTypes.RequestsForAccess ): 
+    async Result.Result<(MainTypes.CanisterData, MainTypes.RequestsForAccess), JournalTypes.Error> {
+        var isOwner = false;
+        if(isLocal == true){  isOwner := true;} 
+        else { isOwner := await verifyOwnership(caller, canisterData); };
+        if(isOwner == true){
+            let canisterData_withOwner = updateOwner(caller, canisterData);
+            let updatedRequestsForAccess = await grantAccess( caller, requestsForAccess );
+            switch(updatedRequestsForAccess){
+                case(#ok(requests)){ #ok((canisterData_withOwner, requests));};
+                case(#err(e)){ return #err(e) };
+            };
+        } else { return #err(#NotAuthorized); };
     };
 
     private  func key(x: Principal) : Trie.Key<Principal> {

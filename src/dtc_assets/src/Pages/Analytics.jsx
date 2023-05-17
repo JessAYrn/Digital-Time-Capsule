@@ -159,6 +159,7 @@ const Analytics = () => {
             await journalState.managerActor.installCode_backendCanister();
             
         } catch(e){
+            console.log(e);
             success = false;
         };
         dispatch({

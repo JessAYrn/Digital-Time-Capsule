@@ -81,4 +81,8 @@ module{
 
     public type UserProfilesArray = [(Principal, UserProfile)];
 
+    public type Notification = { text: Text; };
+
+    public type Notifications = [Notification];
+
 }

@@ -81,9 +81,14 @@ shared(msg) actor class Manager (principal : Principal) = this {
         let callerId = msg.caller;
         if( Principal.toText(callerId) != mainCanisterId) { throw Error.reject("Unauthorized access.");};
         try{
-            var newVersionIndex = await updateModules();
-            newVersionIndex := await updateAssets();
-            version := newVersionIndex;
+            let wasmStore: WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
+            let nextStableReleaseIndex = await wasmStore.getNextStableRelease(version);
+            if(nextStableReleaseIndex <= version) return;
+            let nextRequiredReleaseIndex = await wasmStore.getNextRequiredRelease(version);
+            let nextVersionToUpgradeTo = Nat.min(nextRequiredReleaseIndex, nextStableReleaseIndex);
+            await updateModules(nextVersionToUpgradeTo);
+            await updateAssets(nextVersionToUpgradeTo);
+            version := nextVersionToUpgradeTo;
         } catch(e){};
     };
 
@@ -221,15 +226,13 @@ shared(msg) actor class Manager (principal : Principal) = this {
         return operations;
     };
 
-    private func updateModules(): async Nat {
+    private func updateModules(nextVersionToUpgradeTo: Nat ): async () {
         let wasmStore: WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
-        let nextRequiredReleaseIndex = await wasmStore.getNextRequiredRelease(version);
         let { backend; frontend; manager; journal; } = WasmStore.wasmTypes;
-        let backendWasm = await wasmStore.getModule(nextRequiredReleaseIndex, backend);
-        let frontendWasm = await wasmStore.getModule(nextRequiredReleaseIndex, frontend);
-        let managerWasm = await wasmStore.getModule(nextRequiredReleaseIndex, manager);
-        let journalWasm = await wasmStore.getModule(nextRequiredReleaseIndex, journal);
-
+        let backendWasm = await wasmStore.getModule(nextVersionToUpgradeTo, backend);
+        let frontendWasm = await wasmStore.getModule(nextVersionToUpgradeTo, frontend);
+        let managerWasm = await wasmStore.getModule(nextVersionToUpgradeTo, manager);
+        let journalWasm = await wasmStore.getModule(nextVersionToUpgradeTo, journal);
         release := {
             assets = release.assets;
             frontend = frontendWasm;
@@ -237,26 +240,24 @@ shared(msg) actor class Manager (principal : Principal) = this {
             journal = managerWasm;
             manager = journalWasm;
         };
-        return nextRequiredReleaseIndex;
     };
 
-    private func updateAssets(): async Nat{
+    private func updateAssets(nextVersionToUpgradeTo: Nat ): async (){
         let wasmStore: WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
-        let nextRequiredReleaseIndex = await wasmStore.getNextRequiredRelease(version);
-        let keys = await wasmStore.getAssetKeys();
+        let keys = await wasmStore.getAssetKeys(nextVersionToUpgradeTo);
         let length = keys.size();
         var index = 0;
         let AssetBuffer = Buffer.Buffer<(AssetCanister.Key, AssetCanister.AssetArgs)>(1);
         while(index < length){
             let key = keys[index];
-            let assetMetaData = await wasmStore.getAssetMetaDataWithoutChunksData(nextRequiredReleaseIndex, key);
+            let assetMetaData = await wasmStore.getAssetMetaDataWithoutChunksData(nextVersionToUpgradeTo, key);
             let {content_type; max_age; headers; enable_aliasing; allow_raw_access;} = assetMetaData;
             let ChunksBuffer = Buffer.Buffer<(AssetCanister.ChunkId, AssetCanister.ChunkData)>(1);
             var continue_ = true;
             var chunkIndex = 0;
             while(continue_){
                 try{
-                    let (chunkId, chunkData) = await wasmStore.getAssetChunk(nextRequiredReleaseIndex, key, chunkIndex);
+                    let (chunkId, chunkData) = await wasmStore.getAssetChunk(nextVersionToUpgradeTo, key, chunkIndex);
                     ChunksBuffer.add((chunkId, chunkData));
                     chunkIndex += 1;
                 } catch(e){ continue_ := false; };
@@ -283,7 +284,6 @@ shared(msg) actor class Manager (principal : Principal) = this {
             journal = release.journal;
             manager = release.manager;
         };
-        return nextRequiredReleaseIndex;
     };
 
     // Return the cycles received up to the capacity allowed
