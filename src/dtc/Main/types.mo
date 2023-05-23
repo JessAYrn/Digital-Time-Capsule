@@ -1,4 +1,3 @@
-import Journal "../Journal/Journal";
 import Account "../Ledger/Account";
 import Trie "mo:base/Trie";
 import Principal "mo:base/Principal";
@@ -81,7 +80,7 @@ module{
 
     public type UserProfilesArray = [(Principal, UserProfile)];
 
-    public type Notification = { text: Text; };
+    public type Notification = { text: Text; key: ?Nat};
 
     public type Notifications = [Notification];
 

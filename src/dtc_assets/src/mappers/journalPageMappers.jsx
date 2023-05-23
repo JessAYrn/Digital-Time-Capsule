@@ -106,14 +106,7 @@ export const mapApiObjectToFrontEndJournalEntriesObject = (journalDataFromApi) =
         }
     });
 
-
-    //filtering all of the unread journal entries
-    let unreadJournalEntriesForFronten = journalEntriesForFrontend.filter(entry => {
-        let today = getDateAsString();
-        let notify = !entry.read && entry.capsuled && dateAisLaterThanOrSameAsDateB(today, entry.unlockTime);
-        return notify;
-    });
-    return { allEntries: journalEntriesForFrontend, unreadEntries: unreadJournalEntriesForFronten } ;
+    return { allEntries: journalEntriesForFrontend, notifications:  journalDataFromApi.ok.notifications} ;
 
 
 }

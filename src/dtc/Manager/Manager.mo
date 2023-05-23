@@ -25,6 +25,7 @@ import HashMap "mo:base/HashMap";
 import MainTypes "../Main/types";
 import CanisterManagementMethods "CanisterManagementMethods";
 import AssetManagementFunctions "../AssetCanister/AssetManagementFunctions";
+import JournalTypes "../Journal/journal.types";
 
 shared(msg) actor class Manager (principal : Principal) = this {
 
@@ -77,9 +78,8 @@ shared(msg) actor class Manager (principal : Principal) = this {
         version := mostRecentReleaseVersion;
     };
 
-    public shared(msg) func loadNextRelease(): async () {
-        let callerId = msg.caller;
-        if( Principal.toText(callerId) != mainCanisterId) { throw Error.reject("Unauthorized access.");};
+    public shared({caller}) func loadNextRelease(): async () {
+        if( Principal.toText(caller) != mainCanisterId) { throw Error.reject("Unauthorized access.");};
         try{
             let wasmStore: WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
             let nextStableReleaseIndex = await wasmStore.getNextStableRelease(version);
@@ -118,13 +118,8 @@ shared(msg) actor class Manager (principal : Principal) = this {
         permitUpdateToBackend := false;
     };
 
-    public shared(msg) func installCode_journalCanisters(
-        profilesArray: MainTypes.UserProfilesArray
-    ): async (){
-        let mainCanisterPrincipal = msg.caller;
-        if(Principal.toText(mainCanisterPrincipal) != mainCanisterId) {
-            throw Error.reject("Unauthorized access.");
-        };
+    public shared({caller}) func installCode_journalCanisters( profilesArray: MainTypes.UserProfilesArray ): async (){
+        if(Principal.toText(caller) != mainCanisterId) { throw Error.reject("Unauthorized access."); };
         let {journal} = release;
         let {wasmModule} = journal;
         await CanisterManagementMethods.installCodeJournalWasms(wasmModule, profilesArray);
@@ -237,8 +232,8 @@ shared(msg) actor class Manager (principal : Principal) = this {
             assets = release.assets;
             frontend = frontendWasm;
             backend = backendWasm;
-            journal = managerWasm;
-            manager = journalWasm;
+            journal = journalWasm;
+            manager = managerWasm;
         };
     };
 

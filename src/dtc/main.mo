@@ -129,6 +129,7 @@ shared actor class User() = this {
     public shared({ caller }) func readJournal () : 
     async Result.Result<({
         userJournalData : ([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio,); 
+        notifications: MainTypes.Notifications;
         email: ?Text; 
         userName: ?Text;
         principal: Text;
@@ -196,12 +197,6 @@ shared actor class User() = this {
 
     public shared({caller}) func uploadJournalEntryFile(fileId: Text, chunkId: Nat, blobChunk: Blob): async Result.Result<(Text), JournalTypes.Error>{
         let result = await JournalHelperMethods.uploadJournalEntryFile(caller, userProfilesMap, fileId, chunkId, blobChunk);
-        return result;
-    };
-
-    public shared({caller}) func getEntriesToBeSent() : 
-    async Result.Result<[(Text,[(Nat, JournalTypes.JournalEntry)])], JournalTypes.Error>{
-        let result = await JournalHelperMethods.getEntriesToBeSent(caller, userProfilesMap);
         return result;
     };
     
@@ -366,7 +361,7 @@ shared actor class User() = this {
         await managerCanister.loadNextRelease();
         await CanisterManagementMethods.installCode_managerCanister(canisterData);
         let result_0 = await managerCanister.installCode_frontendCanister(canisterData);
-        let result_1 = await managerCanister.installCode_journalCanisters(userProfilesArray);
+        let result_1 = await managerCanister.installCode_journalCanisters(Iter.toArray(userProfilesMap.entries()));
         await managerCanister.allowUpdatesToBackendCanister();
         return result_0;
     };
@@ -413,7 +408,22 @@ shared actor class User() = this {
         };
     };
 
-    private func notifyOfNewStableRelease(): async (){
+    public shared({ caller }) func getNotifications(): async MainTypes.Notifications{
+        let notifications_ = await NotificationProtocolMethods.appendNotificationsFromJournal(caller, userProfilesMap, notifications);
+        return notifications_;
+    };
+
+    public shared({ caller }) func clearJournalNotifications(): async (){
+        await NotificationProtocolMethods.clearJournalNotifications(caller, userProfilesMap);
+    };
+
+    public shared({ caller }) func clearBackendCanisterNotifications(): async(){
+        if(Principal.toText(caller) != canisterData.nftOwner){ throw Error.reject("Not Authorized")};
+        notifications := [];
+    };
+
+    private func updateNotifications(): async (){
+        ignore NotificationProtocolMethods.updateUserCanisterNotifications(userProfilesMap);
         let result = await NotificationProtocolMethods.notifyOfNewStableRelease(canisterData, notifications);
         notifications := result;
     };
@@ -439,7 +449,7 @@ shared actor class User() = this {
         if(heartBeatCount % heartBeatInterval == 0){ ignore updateUsersTxHistory(); };
         if(heartBeatCount % heartBeatInterval_refill == 0){ 
             let result = ignore refillCanisterCycles(); 
-            ignore notifyOfNewStableRelease();
+            ignore updateNotifications();
         };
     };
 

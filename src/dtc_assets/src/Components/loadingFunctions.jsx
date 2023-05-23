@@ -7,10 +7,11 @@ import { getFileUrl_fromApi } from "./Fields/fileManger/FileManagementTools";
 export const loadJournalData = (journal, dispatch, types) => {
     const journalEntriesObject = mapApiObjectToFrontEndJournalEntriesObject(journal);
     let journalEntries = journalEntriesObject.allEntries;
-    let unreadEntries = journalEntriesObject.unreadEntries;
+    let notifications = journalEntriesObject.notifications;
+    console.log(notifications);
     dispatch({
-        payload: unreadEntries,
-        actionType: types.SET_JOURNAL_UNREAD_ENTRIES
+        payload: notifications,
+        actionType: types.SET_NOTIFICATIONS
     })
     let userJournalData = journal.ok.userJournalData || journal.ok
     const journalBio = userJournalData[1];
@@ -37,10 +38,10 @@ export const loadJournalData = (journal, dispatch, types) => {
 export const loadJournalDataResponseAfterSubmit = (journal, dispatch, types) => {
     const journalEntriesObject = mapApiObjectToFrontEndJournalEntriesObject(journal);
     let journalEntries = journalEntriesObject.allEntries;
-    let unreadEntries = journalEntriesObject.unreadEntries;
+    let notifications = journalEntriesObject.notifications;
     dispatch({
-        payload: unreadEntries,
-        actionType: types.SET_JOURNAL_UNREAD_ENTRIES
+        payload: notifications,
+        actionType: types.SET_NOTIFICATIONS
     })
     let userJournalData = journal.ok
     const journalBio = userJournalData[1];

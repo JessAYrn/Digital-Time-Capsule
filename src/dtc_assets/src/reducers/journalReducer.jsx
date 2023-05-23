@@ -12,7 +12,7 @@ export const types = {
     SET_JOURNAL: "SET_JOURNAL",
     SET_JOURNAL_TAB:"SET_JOURNAL_TAB",
     SET_WALLET_TABS:'SET_WALLET_TABS',
-    SET_JOURNAL_UNREAD_ENTRIES:"SET_JOURNAL_UNREAD_ENTRIES",
+    SET_NOTIFICATIONS:"SET_NOTIFICATIONS",
     SET_BIO: "SET_BIO",
     SET_METADATA: "SET_METADATA",
     SET_WALLET_DATA: "SET_WALLET_DATA",
@@ -110,7 +110,7 @@ export const initialState = {
         photos: []
     },
     journal: [],
-    unreadEntries:[],
+    notifications:[],
     reloadStatuses: {
         walletData: true,
         journalData: true,
@@ -234,8 +234,8 @@ const changeValue = (state = initialState, action) => {
             return{
                 ...state
             }
-        case types.SET_JOURNAL_UNREAD_ENTRIES:
-        state.unreadEntries = payload;
+        case types.SET_NOTIFICATIONS:
+        state.notifications = payload;
         return {
             ...state
         }

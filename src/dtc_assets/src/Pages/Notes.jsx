@@ -13,7 +13,7 @@ const Notes = (props) => {
     accountLink={true}
     dashboardLink={true}
     notificationIcon={true}
-    unreadNotifications={journalState.unreadEntries.length}
+    unreadNotifications={journalState.notifications.length}
     context={UI_CONTEXTS.JOURNAL}
   />
   <div className='NotesPage_container'>
