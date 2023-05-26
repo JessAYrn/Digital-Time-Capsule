@@ -127,13 +127,7 @@ shared actor class User() = this {
     };
     
     public shared({ caller }) func readJournal () : 
-    async Result.Result<({
-        userJournalData : ([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio,); 
-        notifications: MainTypes.Notifications;
-        email: ?Text; 
-        userName: ?Text;
-        principal: Text;
-    }), JournalTypes.Error> {
+    async Result.Result<(MainTypes.JournalData), JournalTypes.Error> {
         let result = await JournalHelperMethods.readJournal(caller, userProfilesMap);
         return result; 
     };
@@ -258,9 +252,7 @@ shared actor class User() = this {
                 let profilesApprovalStatuses = CanisterManagementMethods.getProfilesMetaData(userProfilesMap);
                 return #ok(profilesApprovalStatuses);
             };
-            case(#err(e)){
-                return #err(e);
-            }
+            case(#err(e)){ return #err(e); }
         };
     };
 
@@ -277,15 +269,11 @@ shared actor class User() = this {
         if(canisterData.frontEndPrincipal == "Null" or canisterData.nftId == -1 or canisterData.managerCanisterPrincipal == "Null"){
             let backEndPrincipalAsPrincipal = Principal.fromActor(this);
             let backEndPrincipal = Principal.toText(backEndPrincipalAsPrincipal);
-            let result = await CanisterManagementMethods.configureApp( backEndPrincipal, frontEndPrincipal, nftId, canisterData);
-            let updatedCanisterData = result.0;
-            let defaultControllers_ = result.1;
+            let (updatedCanisterData, defaultControllers_) = await CanisterManagementMethods.configureApp( backEndPrincipal, frontEndPrincipal, nftId, canisterData);
             canisterData := updatedCanisterData;
             defaultControllers := defaultControllers_;
             #ok(());
-        } else {
-            return #err(#NotAuthorized);
-        };
+        } else { return #err(#NotAuthorized); };
     };
 
     public shared({caller}) func authorizePrinicpalToViewAssets(prinicpal: Principal): async () {

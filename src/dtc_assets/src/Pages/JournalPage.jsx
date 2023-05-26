@@ -7,7 +7,7 @@ import DatePicker from "../Components/Fields/DatePicker";
 import LoadScreen from "../Components/LoadScreen";
 import { MODALS_TYPES, monthInMilliSeconds, NULL_STRING_ALL_LOWERCASE} from "../Constants";
 import { dateAisLaterThanOrSameAsDateB, getDateAsString, getDateInMilliseconds, milisecondsToNanoSeconds, scrollToBottom, scrollToTop } from "../Utils";
-import { loadJournalDataResponseAfterSubmit } from "../Components/loadingFunctions";
+import { loadJournalData } from "../Components/loadingFunctions";
 import * as RiIcons from 'react-icons/ri';
 import * as BiIcons from 'react-icons/bi';
 import * as ImIcons from 'react-icons/im';
@@ -119,16 +119,11 @@ const JournalPage = (props) => {
         }];
 
         const entryKeyAsApiObject = (entryKey >= 0 && entryKey < journalSize - 1 ) ? [{entryKey: entryKey}] : [];
-        
-        let result = await journalState.backendActor.updateJournalEntry(
-            entryKeyAsApiObject,
-            entryAsApiObject
-        );
-        if('ok' in result){
-            loadJournalDataResponseAfterSubmit(result, dispatch, types);
-        }
-        return result;
 
+        let result = await journalState.backendActor.updateJournalEntry( entryKeyAsApiObject, entryAsApiObject );
+        let userJournalData = result.ok;
+        loadJournalData({userJournalData}, dispatch, types);
+        return result;
     };
 
     const handleSubmit = useCallback(async () => {

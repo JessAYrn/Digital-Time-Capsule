@@ -46,7 +46,7 @@ const AccountPage = () => {
                 });
                 return;
             }
-            loadJournalData(journal, dispatch, types);
+            loadJournalData(journal.ok, dispatch, types);
             dispatch({
                 actionType: types.SET_IS_LOADING,
                 payload: false

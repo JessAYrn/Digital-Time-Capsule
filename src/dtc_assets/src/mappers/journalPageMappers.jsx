@@ -37,9 +37,8 @@ export const mapAndSendJournalPageRequestToApi = async (key, pageData, files, ac
 
 };
 
-export const mapApiObjectToFrontEndJournalEntriesObject = (journalDataFromApi) => {
-    let journalEntriesForFrontend_ = journalDataFromApi.ok.userJournalData || journalDataFromApi.ok
-    let journalEntriesForFrontend = journalEntriesForFrontend_[0].map((arrayWithKeyAndPage) => {
+export const mapApiObjectToFrontEndJournalEntriesObject = (journalEntries) => {
+    let journalEntriesForFrontend = journalEntries.map((arrayWithKeyAndPage) => {
         const backEndObj = arrayWithKeyAndPage[1];
         const entryKey  = arrayWithKeyAndPage[0];
         const filesMetaData = backEndObj.filesMetaData.map(fileData => {
@@ -106,7 +105,7 @@ export const mapApiObjectToFrontEndJournalEntriesObject = (journalDataFromApi) =
         }
     });
 
-    return { allEntries: journalEntriesForFrontend, notifications:  journalDataFromApi.ok.notifications} ;
+    return journalEntriesForFrontend  ;
 
 
 }

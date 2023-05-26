@@ -2,9 +2,18 @@ import Account "../Ledger/Account";
 import Trie "mo:base/Trie";
 import Principal "mo:base/Principal";
 import HashMap "mo:base/HashMap";
+import JournalTypes "../Journal/journal.types";
 
 
 module{
+
+    public type JournalData = {
+        userJournalData : ([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio,); 
+        notifications: Notifications;
+        email: ?Text; 
+        userName: ?Text;
+        principal: Text;
+    };
 
     public type UserProfile = {
         canisterId : Principal;

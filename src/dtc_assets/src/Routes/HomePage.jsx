@@ -70,7 +70,7 @@ const HomePage = () => {
         if(journalState.reloadStatuses.journalData){
             //Load Journal Data in the background
             const journal = await journalState.backendActor.readJournal();
-            loadJournalData(journal, dispatch, types);
+            loadJournalData(journal.ok, dispatch, types);
         };
         if(journalState.reloadStatuses.walletData){
             //Load wallet data in background
