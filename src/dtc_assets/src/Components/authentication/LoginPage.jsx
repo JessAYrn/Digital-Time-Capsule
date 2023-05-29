@@ -28,7 +28,10 @@ import Dropdown from "../Fields/Dropdown";
 import Accordion from "../Fields/Accordion";
 
 const AccordionContent=[
-    {text:'Get our App, Become a holder of Personal DAO', image:'assets/dtcscreengrab1.png'},
+    {text:"1.) Navigate to your Personal DAO's unique URL and press the share button circled below ", image:'assets/dtcscreengrab2.png'},
+    {text:"2.) Select the 'Add to Home Screen' button", image:'assets/dtcscreengrab3.png'},
+    {text:"3.) Enter a title and then press the 'add' button", image:'assets/dtcscreengrab4.png'},
+    {text:"4.) Your Personal DAO app will then be installed and visible on yoru Home Screen", image:'assets/dtcscreengrab1.png'},
     
 ]
 

@@ -69,7 +69,7 @@ const Analytics = () => {
         });
         let result = await journalState.actor.updateApprovalStatus(principal, newApprovalStatus);
         result = result.ok;
-        console.log(result);
+     
         dispatch({
             actionType: types.SET_CANISTER_DATA,
             payload: { ...journalState.canisterData, profilesMetaData: result }

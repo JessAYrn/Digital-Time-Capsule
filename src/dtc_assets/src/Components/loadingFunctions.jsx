@@ -5,6 +5,8 @@ import { mapBackendCanisterDataToFrontEndObj } from "../mappers/dashboardMapperF
 import { backendActor } from "../Utils";
 import { getFileUrl_fromApi } from "./Fields/fileManger/FileManagementTools";
 
+
+
 export const loadJournalData = (journal, dispatch, types) => {
     const journalEntriesObject = mapApiObjectToFrontEndJournalEntriesObject(journal);
     let journalEntries = journalEntriesObject.allEntries;
@@ -63,7 +65,8 @@ export const loadJournalDataResponseAfterSubmit = (journal, dispatch, types) => 
 
 
 export const loadWalletData = async (walletDataFromApi, dispatch, types ) => {
-    const address = toHexString(new Uint8Array( [...walletDataFromApi.ok.address]))
+
+    const address = toHexString(new Uint8Array( [...walletDataFromApi.ok.address]));
     const walletData = { 
         balance : parseInt(walletDataFromApi.ok.balance.e8s), 
         address: address
@@ -149,18 +152,39 @@ export const handleErrorOnFirstLoad = async (fnForLoadingData, fnForRefiringAuth
     }
 }
 
-export const recoverState = async (journalState, location, dispatch, types, connectionResult) => {
+export const recoverState = async (journalState, location, dispatch,types,connectionResult) => {
+    // console.log('types :', types);
+    // let{journalTypes,walletTypes}=types;
+    // let{SET_ENTIRE_REDUX_STATE}= journalTypes;
+    // console.log(SET_ENTIRE_REDUX_STATE);
+    // console.log(journalTypes);
+    // console.log(walletTypes);
+    // console.log('types:', journalTypes.SET_ENTIRE_REDUX_STATE)
+
     // dispatch state from previous route to redux store if that state exists
     if(location.state){
-        dispatch({
-            actionType: types.SET_ENTIRE_REDUX_STATE,
-            payload: location.state
-        });
+        const{journal,wallet}=location.state;
+        console.log(wallet)
+        if(dispatch.journalDispatch){
+            dispatch.journalDispatch({
+                actionType: types.journalTypes.SET_ENTIRE_REDUX_STATE,
+                payload: journal
+            });
+        }
+
+        if(dispatch.walletDispatch){
+            dispatch.walletDispatch({
+                actionType: types.walletTypes.SET_ENTIRE_WALLET_REDUX_STATE,
+                payload:wallet
+            })
+        }
+        
+
         //wipe previous location state to prevent infinite loop
         location.state = null;
         const newActor = await backendActor(connectionResult.activeProvider);
-        dispatch({
-            actionType: types.SET_ACTOR,
+        dispatch.journalDispatch({
+            actionType: types.journalTypes.SET_ACTOR,
             payload: newActor
         });
     };

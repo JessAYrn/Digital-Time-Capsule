@@ -78,7 +78,7 @@ const NFTapp = () => {
                 payload: false
             });
         };
-        if(journalState.reloadStatuses.walletData){
+        if(walletState.shouldReload){
             //Load wallet data in background
             const walletDataFromApi = await journalState.actor.readWalletData();
             await loadWalletData(walletDataFromApi, dispatch, types);

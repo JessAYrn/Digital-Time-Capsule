@@ -7,15 +7,13 @@ import { CreateUserJournal } from '../Components/authentication/AuthenticationMe
 import { loadJournalData, loadCanisterData, loadWalletData, recoverState  } from '../Components/loadingFunctions';
 import { useConnect } from '@connect2ic/react';
 import GroupJournalPage from '../Pages/GroupJournalPage';
+import { DEFAULT_APP_CONTEXTS } from '../Constants';
 
 
 
 
 
-export const AppContext = createContext({
-    journalState:{},
-    dispatch: () => {}
-});
+export const AppContext = createContext(DEFAULT_APP_CONTEXTS);
 
 const GroupJournal = () => {
     const [journalState, dispatch] = useReducer(journalReducer, initialState);
@@ -60,7 +58,7 @@ const GroupJournal = () => {
             const canisterData = await journalState.actor.getCanisterData();
             loadCanisterData(canisterData, dispatch, types);
         }
-        if(journalState.reloadStatuses.walletData){
+        if(walletState.shouldReload){
             //Load wallet data in background
             const walletDataFromApi = await journalState.actor.readWalletData();
             await loadWalletData(walletDataFromApi, dispatch, types);

@@ -22,6 +22,8 @@ import { ConnectButton, ConnectDialog, useConnect } from "@connect2ic/react";
 import { initialState } from '../../reducers/journalReducer';
 import "./NavBar.scss";
 import Dropdown from '../Fields/Dropdown';
+import { walletInitialState, walletTypes } from '../../reducers/walletReducer';
+
 
 
 
@@ -56,7 +58,11 @@ export const NavBar = (props) => {
 
     const {
         journalState,
-        dispatch
+        dispatch,
+        walletState,
+        walletDispatch,
+        accountState,
+        accountDispatch
     } = useContext(AppContext);
 
     const toggleDisplayNotifications = () => {
@@ -78,29 +84,80 @@ export const NavBar = (props) => {
         actor: undefined
     };
 
+    let walletStateWithoutFunction={
+        ...walletState,
+    }
+    
+    let accountStateWithoutFunction={
+        ...accountState,
+    }
+
+
     const  handleClickDashboard = useCallback(() =>  {
-        navigate(NAV_LINKS.dashboard, { replace: false, state: journalStateWithoutFunction});
-    }, [journalState.reloadStatuses]);
+        navigate(NAV_LINKS.dashboard, { 
+            replace: false, 
+            state:{
+                journal:journalStateWithoutFunction,
+                wallet:walletStateWithoutFunction,
+                account:accountStateWithoutFunction
+            }
+        });
+    }, [journalState.reloadStatuses, walletState?.shouldReload]);
 
     const  handleClickWallet = useCallback(() =>  {
-        navigate(NAV_LINKS.wallet, { replace: false, state: journalStateWithoutFunction});
-    }, [journalState.reloadStatuses]);
+       
+        navigate(NAV_LINKS.wallet, { 
+            replace: false, 
+            state: {
+                journal:journalStateWithoutFunction,
+                wallet:walletStateWithoutFunction,
+                account:accountStateWithoutFunction
+            }
+        });
+    }, [walletState?.shouldReload,journalState.reloadStatuses]);
 
     const  handleClickJournal = useCallback(() =>  {
-        navigate(NAV_LINKS.journal, { replace: false, state: journalStateWithoutFunction });
-    }, [journalState.reloadStatuses]);
+        navigate(NAV_LINKS.journal, { 
+            replace: false, 
+            state: {
+                journal:journalStateWithoutFunction,
+                wallet:walletStateWithoutFunction,
+                accountStateWithoutFunction
+            }
+        });
+    }, [walletState?.shouldReload,journalState.reloadStatuses]);
 
     const  handleClickAccount = useCallback(() =>  {
-        navigate(NAV_LINKS.account, { replace: false, state: journalStateWithoutFunction });
-    },[journalState.reloadStatuses]);
+        navigate(NAV_LINKS.account, { 
+            replace: false, 
+            state: {
+                journal:journalStateWithoutFunction,
+                wallet:walletStateWithoutFunction,
+                account:accountStateWithoutFunction
+            }    
+        });
+    },[walletState?.shouldReload,journalState.reloadStatuses]);
    
     const  handleClickTreasury = useCallback(() =>  {
-        navigate(NAV_LINKS.treasury, { replace: false, state: journalStateWithoutFunction });
-    },[journalState.reloadStatuses]);
+        navigate(NAV_LINKS.treasury, { 
+            replace: false, 
+            state: {
+                journal:journalStateWithoutFunction,
+                wallet:walletStateWithoutFunction,
+                account:accountStateWithoutFunction
+            }
+        });
+    },[walletState?.shouldReload,journalState.reloadStatuses]);
 
     const  handleClickGroupJournal = useCallback(() =>  {
-        navigate(NAV_LINKS.groupJournal, { replace: false, state: journalStateWithoutFunction });
-    },[journalState.reloadStatuses]);
+        navigate(NAV_LINKS.groupJournal, { 
+            replace: false, 
+            state: {
+                journal:journalStateWithoutFunction,
+                wallet:walletStateWithoutFunction,
+                account:accountStateWithoutFunction
+            }});
+    },[walletState?.shouldReload,journalState.reloadStatuses]);
 
     const showSideBar = () => {
         setSideBar(!sideBar)
@@ -124,8 +181,8 @@ export const NavBar = (props) => {
     ];
 
     const changeHandler_walletTab = (option) => {
-        dispatch({
-            actionType: types.SET_WALLET_TABS,
+        walletDispatch({
+            actionType: walletTypes.SET_WALLET_TABS,
             payload: option.text
         });
     };

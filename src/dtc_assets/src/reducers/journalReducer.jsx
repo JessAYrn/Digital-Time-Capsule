@@ -1,4 +1,4 @@
-import { JOURNAL_TABS, MODALS_TYPES, NULL_STRING_ALL_LOWERCASE, NULL_STRING_CAPITALIZED, WALLET_TABS } from "../Constants"
+import { JOURNAL_TABS, MODALS_TYPES, NULL_STRING_ALL_LOWERCASE, NULL_STRING_CAPITALIZED} from "../Constants"
 import { getDateAsString } from "../Utils";
 
 export const types = {
@@ -10,16 +10,12 @@ export const types = {
     SET_IS_LOGGING_IN: "SET_IS_LOGGING_IN",
     SET_JOURNAL: "SET_JOURNAL",
     SET_JOURNAL_TAB:"SET_JOURNAL_TAB",
-    SET_WALLET_TABS:'SET_WALLET_TABS',
     SET_JOURNAL_UNREAD_ENTRIES:"SET_JOURNAL_UNREAD_ENTRIES",
     SET_BIO: "SET_BIO",
     SET_METADATA: "SET_METADATA",
-    SET_WALLET_DATA: "SET_WALLET_DATA",
-    SET_WALLET_QR_CODE_IMG_URL:"SET_WALLET_QR_CODE_IMG_URL",
     SET_MODAL_STATUS: "SET_MODAL_STATUS",
     SET_NFT_DATA: "SET_NFT_DATA",
     SET_NFT_DATA_RELOAD_STATUS: "SET_NFT_DATA_RELOAD_STATUS",
-    SET_WALLET_DATA_RELOAD_STATUS: "SET_WALLET_DATA_RELOAD_STATUS",
     SET_JOURNAL_DATA_RELOAD_STATUS: "SET_JOURNAL_DATA_RELOAD_STATUS",
     SET_CANISTER_DATA_RELOAD_STATUS: "SET_CANISTER_DATA_RELOAD_STATUS",
     SET_IS_AUTHENTICATED: "SET_IS_AUTHENTICATED",
@@ -42,8 +38,6 @@ export const types = {
     ADD_COVER_PHOTO: "ADD_COVER_PHOTO",
     REMOVE_COVER_PHOTO: "REMOVE_COVER_PHOTO",
     CHANGE_ENTRY_TITLE: "CHANGE_ENTRY_TITLE",
-    CHANGE_EMAIL: "CHANGE_EMAIL",
-    CHANGE_USERNAME: "CHANGE_USERNAME",
     CHANGE_RECIPIENT_EMAIL_ONE: "CHANGE_RECIPIENT_EMAIL_ONE",
     CHANGE_RECIPIENT_EMAIL_TWO: "CHANGE_RECIPIENT_EMAIL_TWO",
     CHANGE_RECIPIENT_EMAIL_THREE: "CHANGE_RECIPIENT_EMAIL_THREE",
@@ -72,7 +66,6 @@ export const initialState = {
     createActorFunctionCallCount: 0,
     journalCount: 0,
     journalPageTab:JOURNAL_TABS.diaryTab,
-    walletPageTab:WALLET_TABS.icpTab,
     canisterData: {
         profilesMetaData: [],
         journalCount: 0,
@@ -90,19 +83,6 @@ export const initialState = {
         requestsForApproval: []
     },
     isLoggingIn: false,
-    metaData: {
-        email: [],
-        userName: []
-    },
-    walletData: {
-        balance:'',
-        address:'',
-        qrCodeImgUrl:'',
-        txHistory: {
-            isLoading: false,
-            data: []
-        }
-    },
     nftData:[
         [ {nftCollectionKey: -1},
             {
@@ -129,7 +109,7 @@ export const initialState = {
         walletData: true,
         journalData: true,
         canisterData: true
-    }, 
+    },
     isAuthenticated: false,
     isLoading: true,
     modalStatus: {
@@ -244,11 +224,6 @@ const changeValue = (state = initialState, action) => {
             return{
                 ...state
             }
-        case types.SET_WALLET_TABS:
-            state.walletPageTab=payload;
-            return{
-                ...state
-            }
         case types.SET_JOURNAL_UNREAD_ENTRIES:
         state.unreadEntries = payload;
         return {
@@ -263,23 +238,6 @@ const changeValue = (state = initialState, action) => {
             }
         case types.SET_METADATA:
         state.metaData = payload;
-        return {
-            ...state
-        }
-        case types.SET_WALLET_DATA:
-        state.walletData = {
-            ...state.walletData,
-            balance: payload.balance,
-            address: payload.address
-        }
-        return {
-            ...state
-        }
-        case types.SET_WALLET_QR_CODE_IMG_URL:
-        state.walletData = {
-            ...state.walletData,
-            qrCodeImgUrl: payload
-        };
         return {
             ...state
         }
@@ -307,14 +265,6 @@ const changeValue = (state = initialState, action) => {
         return {
             ...state
         }
-        case types.SET_WALLET_DATA_RELOAD_STATUS:
-        state.reloadStatuses = {
-            ...state.reloadStatuses,
-            walletData: payload
-        };
-        return {
-            ...state
-        }
         case types.SET_NFT_DATA_RELOAD_STATUS:
         state.reloadStatuses = {
             ...state.reloadStatuses,
@@ -331,26 +281,6 @@ const changeValue = (state = initialState, action) => {
         return {
             ...state
         }
-        case types.CHANGE_EMAIL:
-            state.bio = {
-                ...state.bio,
-                email: payload
-            }
-            state.metaData = {
-                ...state.metaData,
-                email: [payload]
-            }
-            return{
-                ...state
-            }
-        case types.CHANGE_USERNAME:
-            state.metaData = {
-                ...state.metaData,
-                userName: [payload]
-            }
-            return{
-                ...state
-            }
         case types.CHANGE_DATE:
             updatedJournalPage = {
                 ... state.journal[index],

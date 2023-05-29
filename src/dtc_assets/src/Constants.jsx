@@ -88,3 +88,13 @@ export const WALLET_TABS={
     btcTab:'btc_tab',
     ckBtcTab:'ckBtc_tab'
 }
+
+export const DEFAULT_APP_CONTEXTS={
+    journalState:{},
+    dispatch: () => {},
+    walletState:{},
+    walletDispatch:()=>{},
+    accountState:{},
+    accountDispatch:()=>{},
+
+}

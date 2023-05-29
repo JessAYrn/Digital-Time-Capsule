@@ -4,21 +4,21 @@ import { useLocation } from 'react-router-dom';
 import Journal from '../Pages/Journal';
 import LoginPage from '../Components/authentication/LoginPage';
 import { UI_CONTEXTS } from '../Contexts';
+import walletReducer, { walletTypes,walletInitialState } from '../reducers/walletReducer';
 import journalReducer, {initialState, types} from '../reducers/journalReducer';
 import { TEST_DATA_FOR_NOTIFICATIONS } from '../testData/notificationsTestData';
 import { CreateUserJournal } from '../Components/authentication/AuthenticationMethods';
 import { loadCanisterData, loadJournalData, loadWalletData, recoverState} from '../Components/loadingFunctions';
 import { useConnect } from "@connect2ic/react";
 import Notes from '../Pages/Notes';
-import { JOURNAL_TABS } from '../Constants';
+import { DEFAULT_APP_CONTEXTS, JOURNAL_TABS } from '../Constants';
 
-export const AppContext = createContext({
-    journalState:{},
-    dispatch: () => {}
-});
+export const AppContext = createContext(DEFAULT_APP_CONTEXTS);
 
 const App = () => {
     const [journalState, dispatch] = useReducer(journalReducer, initialState);
+    const [walletState, walletDispatch] = useReducer(walletReducer, walletInitialState);
+
     const [submissionsMade, setSubmissionsMade] = useState(0);
 
     const connectionResult = useConnect({ onConnect: () => {}, onDisconnect: () => {} });
@@ -26,15 +26,28 @@ const App = () => {
     // gets state from previous route
     const location = useLocation();
 
+    const ReducerDispatch={
+        journalDispatch:dispatch,
+        walletDispatch
+    }
+
+    const ReducerType={
+        journalTypes:types,       
+        walletTypes
+    }
+
     // dispatch state from previous route to redux store if that state exists
-    recoverState(journalState, location, dispatch, types, connectionResult)
+    recoverState(journalState, location, ReducerDispatch, ReducerType, connectionResult);
    
     // clears useLocation().state upon page refresh so that when the user refreshes the page,
     // changes made to this route aren't overrided by the useLocation().state of the previous route.
     window.onbeforeunload = window.history.replaceState(null, '');
 
+    
+
     useEffect(async () => {
         if(!journalState.actor) return;
+        
         if(journalState.reloadStatuses.journalData){
             dispatch({
                 actionType: types.SET_IS_LOADING,
@@ -61,10 +74,10 @@ const App = () => {
             const canisterData = await journalState.actor.getCanisterData();
             loadCanisterData(canisterData, dispatch, types);
         }
-        if(journalState.reloadStatuses.walletData){
+        if(walletState.shouldReload){
             //Load wallet data in background
             const walletDataFromApi = await journalState.actor.readWalletData();
-            await loadWalletData(walletDataFromApi, dispatch, types);
+            await loadWalletData(walletDataFromApi, walletDispatch, walletTypes);
         };
     },[journalState.actor]);
 
@@ -76,14 +89,14 @@ const App = () => {
         }
     },[journalState.journalPageTab])//variable added to the redux
     
-    useEffect(()=>{
-        console.log(journalState);
-    },[journalState])
+   
     return (
         <AppContext.Provider 
             value={{
                 journalState,
                 dispatch,
+                walletState,
+                walletDispatch,
                 submissionsMade,
                 setSubmissionsMade
             }}

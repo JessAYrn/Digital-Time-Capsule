@@ -7,28 +7,43 @@ import { CreateUserJournal } from '../Components/authentication/AuthenticationMe
 import { loadJournalData, loadCanisterData, loadWalletData, recoverState  } from '../Components/loadingFunctions';
 import { useConnect } from '@connect2ic/react';
 import TreasuryPage from '../Pages/TreasuryPage'
+import { DEFAULT_APP_CONTEXTS } from '../Constants';
+import accountReducer , {accountTypes, accountInitialState} from '../reducers/accountReducer';
+import walletReducer,{ walletInitialState, walletTypes } from '../reducers/walletReducer';
 
 
 
 
-export const AppContext = createContext({
-    journalState:{},
-    dispatch: () => {}
-});
+export const AppContext = createContext(DEFAULT_APP_CONTEXTS);
 
 const Treasury = () => {
     const [journalState, dispatch] = useReducer(journalReducer, initialState);
+    const [accountState, accountDispatch] = useReducer(accountReducer, accountInitialState);
+    const [walletState, walletDispatch]=useReducer(walletReducer,walletInitialState);
+
+
+
 
     window.onbeforeunload = window.history.replaceState(null, '');
     
     const connectionResult = useConnect({ onConnect: () => {}, onDisconnect: () => {} });
     
+    const ReducerDispatches={
+        walletDispatch:walletDispatch,
+        journalDispatch:dispatch,
+        accountDispatch
+    }
+
+    const ReducerTypes={
+        journalTypes:types,
+        walletTypes,
+        accountTypes
+    }
+    
     //gets state from previous route
     const location = useLocation()
 
-    recoverState(journalState, location, dispatch, types, connectionResult);
-
-
+    recoverState(journalState, location, ReducerDispatches, ReducerTypes, connectionResult);
     
     
     useEffect(async () => {
@@ -59,17 +74,21 @@ const Treasury = () => {
             const canisterData = await journalState.actor.getCanisterData();
             loadCanisterData(canisterData, dispatch, types);
         }
-        if(journalState.reloadStatuses.walletData){
+        if(walletState.shouldReload){
             //Load wallet data in background
             const walletDataFromApi = await journalState.actor.readWalletData();
-            await loadWalletData(walletDataFromApi, dispatch, types);
+            await loadWalletData(walletDataFromApi, walletDispatch, walletTypes);
         }
     },[journalState.actor]);
   return (
     <AppContext.Provider
     value={{
         journalState,
-        dispatch
+        dispatch,
+        accountState,
+        accountDispatch,
+        walletDispatch,
+        walletState
     }}
     >
         {           

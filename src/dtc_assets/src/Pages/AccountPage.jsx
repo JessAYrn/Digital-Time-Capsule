@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useReducer, useState } from 'react';
 import  InputBox  from '../Components/Fields/InputBox';
 import { types } from '../reducers/journalReducer'
 import AdminSection from '../Components/AdminSection';
@@ -9,14 +9,15 @@ import { NavBar } from '../Components/navigation/NavBar';
 import { UI_CONTEXTS } from '../Contexts';
 import LoadScreen from '../Components/LoadScreen';
 import { Modal } from '../Components/Modal';
-
+import { walletInitialState, walletTypes } from '../reducers/walletReducer';
+import accountReducer, { accountInitialState, accountTypes } from '../reducers/accountReducer';
 
 
 const AccountSection = (props) => {
 
     const { journalState, dispatch } = useContext(AppContext);
-    const [pageChangesMade, setPageChangesMade] = useState(false);    
-
+    const [pageChangesMade, setPageChangesMade] = useState(false); 
+    const [accountState,accountDispatch]=useReducer(accountReducer,accountInitialState);
     const handleUpdate = async () => {
         setPageChangesMade(false);
         dispatch({
@@ -34,7 +35,7 @@ const AccountSection = (props) => {
         });
 
     };
-    const isAdmin = journalState.metaData.userName[0] === 'admin';
+    const isAdmin = journalState?.metaData?.userName[0] === 'admin';
 
 return(
     journalState.modalStatus.show ?
@@ -63,8 +64,8 @@ return(
                         setChangesWereMade={setPageChangesMade}
                         label={"Email: "}
                         rows={"1"}
-                        dispatch={dispatch}
-                        dispatchAction={types.CHANGE_EMAIL}
+                        dispatch={accountDispatch}
+                        dispatchAction={accountTypes.CHANGE_EMAIL}
                         value={journalState.metaData.email}
                     />
                     <InputBox
@@ -72,8 +73,8 @@ return(
                         setChangesWereMade={setPageChangesMade}
                         label={"Username: "}
                         rows={"1"}
-                        dispatch={dispatch}
-                        dispatchAction={types.CHANGE_USERNAME}
+                        dispatch={accountDispatch}
+                        dispatchAction={accountTypes.CHANGE_USERNAME}
                         value={journalState.metaData.userName}
                     />
                     {isAdmin && <AdminSection/>}
