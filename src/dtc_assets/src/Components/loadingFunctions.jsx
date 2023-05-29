@@ -1,8 +1,7 @@
 import { mapApiObjectToFrontEndJournalEntriesObject } from "../mappers/journalPageMappers";
-import { delay, toHexString } from "../Utils";
+import { delay, managerActor, backendActor, toHexString } from "../Utils";
 import { generateQrCode } from "./walletFunctions/GenerateQrCode";
 import { mapBackendCanisterDataToFrontEndObj } from "../mappers/dashboardMapperFunctions";
-import { backendActor } from "../Utils";
 import { getFileUrl_fromApi } from "./Fields/fileManger/FileManagementTools";
 
 
@@ -88,11 +87,11 @@ export const loadWalletData = async (walletDataFromApi, dispatch, types ) => {
 };
 
 export const loadTxHistory = async (journalState, dispatch, types) => {
-    if(!journalState.actor){
+    if(!journalState.backendActor){
         throw 'No actor defined'
     };
 
-    const tx = await journalState.actor.readTransaction();
+    const tx = await journalState.backendActor.readTransaction();
     const transactionHistory = tx.ok.sort(function(a,b){
         const mapKeyOfA = parseInt(a[0]);
         const mapKeyOfB = parseInt(b[0]);
@@ -182,10 +181,18 @@ export const recoverState = async (journalState, location, dispatch,types,connec
 
         //wipe previous location state to prevent infinite loop
         location.state = null;
-        const newActor = await backendActor(connectionResult.activeProvider);
-        dispatch.journalDispatch({
-            actionType: types.journalTypes.SET_ACTOR,
-            payload: newActor
+        const promises = [
+            backendActor(connectionResult.activeProvider),
+            managerActor(connectionResult.activeProvider)
+        ];
+        const [backendActor_, managerActor_] = await Promise.all(promises);
+        dispatch({
+            actionType: types.journalTypes.SET_BACKEND_ACTOR,
+            payload: backendActor_
+        });
+        dispatch({
+            actionType: types.journalTypes.SET_MANAGER_ACTOR,
+            payload: managerActor_
         });
     };
 };

@@ -98,3 +98,4 @@ export const DEFAULT_APP_CONTEXTS={
     accountDispatch:()=>{},
 
 }
+export const MASTER_COPY_FRONTEND_CANISTER_ID = "fkkq7-siaaa-aaaap-qaaya-cai";

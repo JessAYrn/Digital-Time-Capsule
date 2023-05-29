@@ -3,7 +3,8 @@ import { getDateAsString } from "../Utils";
 
 export const types = {
     SET_ENTIRE_REDUX_STATE: "SET_ENTIRE_REDUX_STATE",
-    SET_ACTOR: "SET_ACTOR",
+    SET_BACKEND_ACTOR: "SET_BACKEND_ACTOR",
+    SET_MANAGER_ACTOR: "SET_MANAGER_ACTOR",
     SET_AUTHENTICATE_FUNCTION_CALL_COUNT: "SET_AUTHENTICATE_FUNCTION_CALL_COUNT",
     SET_CREATE_ACTOR_FUNCTION_CALL_COUNT: "SET_CREATE_ACTOR_FUNCTION_CALL_COUNT",
     SET_CANISTER_DATA: "SET_CANISTER_DATA",
@@ -61,7 +62,8 @@ export const types = {
 
 
 export const initialState = {
-    actor: undefined,
+    backendActor: undefined,
+    managerActor: undefined,
     authenticateFunctionCallCount: 0,
     createActorFunctionCallCount: 0,
     journalCount: 0,
@@ -159,8 +161,13 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
-        case types.SET_ACTOR:
-            state.actor = payload;
+        case types.SET_BACKEND_ACTOR:
+            state.backendActor = payload;
+            return {
+                ...state
+            }
+        case types.SET_MANAGER_ACTOR:
+            state.managerActor = payload;
             return {
                 ...state
             }

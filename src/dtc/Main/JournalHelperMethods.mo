@@ -17,7 +17,7 @@ module{
 
     private let oneICP : Nat64 = 100_000_000;
 
-    public func readJournal (callerId: Principal, profilesMap: MainTypes.ProfilesMap) : async Result.Result<({
+    public func readJournal (callerId: Principal, profilesMap: MainTypes.UserProfilesMap) : async Result.Result<({
         userJournalData : ([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio); 
         email: ?Text; 
         userName: ?Text;
@@ -36,7 +36,7 @@ module{
                 return #err(#NotFound);
             };
             case(? v){
-                let journal = v.journal; 
+                let journal: Journal.Journal = actor(Principal.toText(v.canisterId)); 
                 let userJournalData = await journal.readJournal();
                 
                 return #ok({
@@ -51,7 +51,7 @@ module{
 
     };
 
-    public func readWalletData(callerId: Principal, profilesMap: MainTypes.ProfilesMap) : 
+    public func readWalletData(callerId: Principal, profilesMap: MainTypes.UserProfilesMap) : 
     async Result.Result<({ balance : Ledger.ICP; address: [Nat8]; } ), JournalTypes.Error> {
 
         if(Principal.toText(callerId) == "2vxsx-fae"){
@@ -65,7 +65,7 @@ module{
                 return #err(#NotFound);
             };
             case(? v){
-                let journal = v.journal; 
+                let journal: Journal.Journal = actor(Principal.toText(v.canisterId)); 
                 let userBalance = await journal.canisterBalance();
                 let userAccountId = await journal.canisterAccount();
                 
@@ -78,7 +78,7 @@ module{
         };
     };
 
-    public func readEntry(callerId: Principal, profilesMap: MainTypes.ProfilesMap, entryKey: JournalTypes.EntryKey) : async Result.Result<JournalTypes.JournalEntry, JournalTypes.Error> {
+    public func readEntry(callerId: Principal, profilesMap: MainTypes.UserProfilesMap, entryKey: JournalTypes.EntryKey) : async Result.Result<JournalTypes.JournalEntry, JournalTypes.Error> {
         if(Principal.toText(callerId) == "2vxsx-fae"){
            return #err(#NotAuthorized);
         };
@@ -90,14 +90,14 @@ module{
                 #err(#NotAuthorized)
             };
             case(? v){
-                let journal = v.journal;
+                let journal: Journal.Journal = actor(Principal.toText(v.canisterId));
                 let entry = await journal.readJournalEntry(entryKey.entryKey);
                 return entry;
             };
         };
     };
 
-    public func readEntryFileChunk(callerId: Principal, profilesMap: MainTypes.ProfilesMap, fileId: Text, chunkId: Nat) : async Result.Result<(Blob),JournalTypes.Error>{
+    public func readEntryFileChunk(callerId: Principal, profilesMap: MainTypes.UserProfilesMap, fileId: Text, chunkId: Nat) : async Result.Result<(Blob),JournalTypes.Error>{
 
         if(Principal.toText(callerId) == "2vxsx-fae"){
            return #err(#NotAuthorized);
@@ -110,15 +110,15 @@ module{
                 #err(#NotFound);
             };
             case ( ? existingProfile){
-                let userJournal = existingProfile.journal;
-                let entryFile = await userJournal.readJournalFileChunk(fileId, chunkId);
+                let journal: Journal.Journal = actor(Principal.toText(existingProfile.canisterId));
+                let entryFile = await journal.readJournalFileChunk(fileId, chunkId);
                 entryFile;
             };
         };
 
     };
 
-    public func readEntryFileSize(callerId: Principal, profilesMap: MainTypes.ProfilesMap,fileId: Text) : 
+    public func readEntryFileSize(callerId: Principal, profilesMap: MainTypes.UserProfilesMap,fileId: Text) : 
     async Result.Result<(Nat),JournalTypes.Error>{
 
         if(Principal.toText(callerId) == "2vxsx-fae"){
@@ -132,15 +132,15 @@ module{
                 #err(#NotFound);
             };
             case ( ? existingProfile){
-                let userJournal = existingProfile.journal;
-                let entryFileSize = await userJournal.readJournalFileSize(fileId);
+                let journal: Journal.Journal = actor(Principal.toText(existingProfile.canisterId));
+                let entryFileSize = await journal.readJournalFileSize(fileId);
                 entryFileSize;
             };
         };
 
     };
 
-    public func updatePhotos(callerId: Principal, profilesMap: MainTypes.ProfilesMap, photos: [JournalTypes.FileMetaData]) : 
+    public func updatePhotos(callerId: Principal, profilesMap: MainTypes.UserProfilesMap, photos: [JournalTypes.FileMetaData]) : 
     async Result.Result<(JournalTypes.Bio), JournalTypes.Error> {
         
         if(Principal.toText(callerId) == "2vxsx-fae"){
@@ -153,15 +153,15 @@ module{
             case null{
                 #err(#NotAuthorized);
             };
-            case (? existingJournal){
-                let journal = existingJournal.journal;
+            case (? existingProfile){
+                let journal: Journal.Journal = actor(Principal.toText(existingProfile.canisterId));
                 let status = await journal.updatePhotos(photos);
                 return status;
             };
         };
     };
 
-    public func updateBio(callerId: Principal, profilesMap: MainTypes.ProfilesMap, bio: JournalTypes.Bio) : 
+    public func updateBio(callerId: Principal, profilesMap: MainTypes.UserProfilesMap, bio: JournalTypes.Bio) : 
     async Result.Result<(JournalTypes.Bio), JournalTypes.Error> {
         
         if(Principal.toText(callerId) == "2vxsx-fae"){
@@ -174,8 +174,8 @@ module{
             case null{
                 #err(#NotAuthorized);
             };
-            case (? existingJournal){
-                let journal = existingJournal.journal;
+            case (? existingProfile){
+                let journal: Journal.Journal = actor(Principal.toText(existingProfile.canisterId));
                 let status = await journal.updateBio(bio);
                 return status;
             };
@@ -184,7 +184,7 @@ module{
 
     public func updateJournalEntry(
         callerId: Principal, 
-        profilesMap: MainTypes.ProfilesMap, 
+        profilesMap: MainTypes.UserProfilesMap, 
         entryKey : ?JournalTypes.EntryKey, 
         entry : ?JournalTypes.JournalEntryInput
     ) : 
@@ -200,7 +200,7 @@ module{
                 #err(#NotAuthorized);
             };
             case(?result){
-                let journal = result.journal;
+                let journal: Journal.Journal = actor(Principal.toText(result.canisterId));
                 switch(entry){
                     case null{
                         switch(entryKey){
@@ -230,7 +230,7 @@ module{
         };
     };
 
-    public func deleteSubmittedFile(callerId: Principal, profilesMap: MainTypes.ProfilesMap, fileId: Text) :
+    public func deleteSubmittedFile(callerId: Principal, profilesMap: MainTypes.UserProfilesMap, fileId: Text) :
     async Result.Result<(), JournalTypes.Error> {
 
         let result = profilesMap.get(callerId);
@@ -239,14 +239,14 @@ module{
                 return #err(#NotFound);
             };
             case(? v){
-                let journal = v.journal;
+                let journal: Journal.Journal = actor(Principal.toText(v.canisterId));
                 let result_ = await journal.deleteSubmittedFile(fileId);
                 return result_;
             };
         };
     };
 
-    public func deleteUnsubmittedFile(callerId: Principal, profilesMap: MainTypes.ProfilesMap, fileId: Text) :
+    public func deleteUnsubmittedFile(callerId: Principal, profilesMap: MainTypes.UserProfilesMap, fileId: Text) :
     async Result.Result<(), JournalTypes.Error> {
 
         let result = profilesMap.get(callerId);
@@ -255,14 +255,14 @@ module{
                 return #err(#NotFound);
             };
             case(? v){
-                let journal = v.journal;
+                let journal: Journal.Journal = actor(Principal.toText(v.canisterId));
                 let result_ = await journal.deleteUnsubmittedFile(fileId);
                 return result_;
             };
         };
     };
 
-    public func submitFiles(callerId: Principal, profilesMap: MainTypes.ProfilesMap) : 
+    public func submitFiles(callerId: Principal, profilesMap: MainTypes.UserProfilesMap) : 
     async Result.Result<(), JournalTypes.Error> {
 
         let result = profilesMap.get(callerId);
@@ -272,14 +272,14 @@ module{
                 return #err(#NotFound)
             };
             case (? v){
-                let journal = v.journal;
+                let journal: Journal.Journal = actor(Principal.toText(v.canisterId));
                 let result = await journal.submitFiles();
                 return result;
             };
         };
     };
 
-    public func clearUnsubmittedFiles(callerId: Principal, profilesMap: MainTypes.ProfilesMap): 
+    public func clearUnsubmittedFiles(callerId: Principal, profilesMap: MainTypes.UserProfilesMap): 
     async Result.Result<(), JournalTypes.Error>{
 
         if(Principal.toText(callerId) == "2vxsx-fae"){
@@ -293,14 +293,14 @@ module{
                 return #err(#NotFound)
             };
             case (? v){
-                let journal = v.journal;
+                let journal: Journal.Journal = actor(Principal.toText(v.canisterId));
                 let result = journal.clearUnsubmittedFiles();
                 #ok(());
             };
         };
     };
 
-    public func uploadJournalEntryFile(callerId: Principal, profilesMap: MainTypes.ProfilesMap, fileId: Text, chunkId: Nat, blobChunk: Blob): 
+    public func uploadJournalEntryFile(callerId: Principal, profilesMap: MainTypes.UserProfilesMap, fileId: Text, chunkId: Nat, blobChunk: Blob): 
     async Result.Result<(Text), JournalTypes.Error>{
 
         if(Principal.toText(callerId) == "2vxsx-fae"){
@@ -314,7 +314,7 @@ module{
                 return #err(#NotFound)
             };
             case (? v){
-                let journal = v.journal;
+                let journal: Journal.Journal = actor(Principal.toText(v.canisterId));
                 let status = await journal.uploadFileChunk(fileId: Text, chunkId, blobChunk);
                 return status;
             };
@@ -322,7 +322,7 @@ module{
         
     };
 
-    public func getEntriesToBeSent(callerId: Principal, profilesMap: MainTypes.ProfilesMap) : 
+    public func getEntriesToBeSent(callerId: Principal, profilesMap: MainTypes.UserProfilesMap) : 
     async Result.Result<[(Text,[(Nat, JournalTypes.JournalEntry)])], JournalTypes.Error>{
 
         if(Principal.toText(callerId) == "2vxsx-fae"){
@@ -357,7 +357,7 @@ module{
                                     };
                                     case (? email){
                                         let userEmail = email;
-                                        let userJournal = userProfile.1.journal;
+                                        let userJournal: Journal.Journal = actor(Principal.toText(userProfile.1.canisterId)); 
                                         let userEntriesToBeSent = await userJournal.getEntriesToBeSent();
                                         if(userEntriesToBeSent != []){
                                             AllEntriesToBeSentBuffer.add((userEmail, userEntriesToBeSent))

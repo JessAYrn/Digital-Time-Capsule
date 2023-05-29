@@ -23,7 +23,7 @@ module{
     public func createNFTCollection( 
         callerId: Principal, 
         mainCanisterPrincipal: Principal, 
-        profilesMap: MainTypes.ProfilesMap, 
+        profilesMap: MainTypes.UserProfilesMap, 
         initInput: DIP721Types.Dip721NonFungibleTokenInput,
         nftCollectionIndex: Nat
     ) : async Result.Result<(MainTypes.Nft, MainTypes.AmountAccepted), JournalTypes.Error> {
@@ -60,7 +60,7 @@ module{
 
     public func mintNft( 
         callerId: Principal, 
-        profilesMap: MainTypes.ProfilesMap, 
+        profilesMap: MainTypes.UserProfilesMap, 
         nftCollections: MainTypes.NftCollectionsTree,
         nftCollectionIndex: Nat, 
         file_type: Text, 
@@ -96,7 +96,7 @@ module{
 
     public func uploadNftChunk(
     callerId: Principal, 
-    profilesMap: MainTypes.ProfilesMap,
+    profilesMap: MainTypes.UserProfilesMap,
     nftCollections: MainTypes.NftCollectionsTree,
     nftCollectionIndex : Nat, 
     chunkId: Nat, 
@@ -132,7 +132,7 @@ module{
 
     public func safeTransferNFT( 
     callerId: Principal, 
-    profilesMap: MainTypes.ProfilesMap, 
+    profilesMap: MainTypes.UserProfilesMap, 
     nftCollections:MainTypes.NftCollectionsTree, 
     nftCollectionIndex: Nat, 
     to: Principal, 
@@ -174,7 +174,7 @@ module{
 
     public func getUserNFTsInfo(
     callerId: Principal,
-    profilesMap: MainTypes.ProfilesMap, 
+    profilesMap: MainTypes.UserProfilesMap, 
     nftCollections: MainTypes.NftCollectionsTree) : 
     async Result.Result<[({nftCollectionKey: Nat}, DIP721Types.TokenMetaData)], JournalTypes.Error> {
 

@@ -22,7 +22,7 @@ import "@connect2ic/core/style.css"
 import ButtonField from "../Fields/Button";
 import DataField from "../Fields/DataField";
 import { types } from "../../reducers/journalReducer";
-import { backendActor } from "../../Utils";
+import { backendActor, managerActor } from "../../Utils";
 import '../../SCSS/contentContainer.scss'
 import Dropdown from "../Fields/Dropdown";
 import Accordion from "../Fields/Accordion";
@@ -64,7 +64,7 @@ const LoginPage = (props) => {
     const [frontendCanisterBalance, setFrontendCanisterBalance] = useState(0);
     const [backendCanisterBalance, setBackendCanisterBalance] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
-    const [anonymousActor] = useCanister('dtc');
+    const [anonymousActor_dtc] = useCanister('dtc');
 
     let navigate = useNavigate();
 
@@ -73,7 +73,8 @@ const LoginPage = (props) => {
     let journalStateWithoutFunction = {
         ...journalState,
         handlePageSubmitFunction:'',
-        actor: undefined
+        backendActor: undefined,
+        managerActor: undefined,
     };
 
     const  handleClickDashboard = useCallback(() =>  {
@@ -99,7 +100,7 @@ const LoginPage = (props) => {
     const connectionResult = useConnect({ onConnect: () => {}, onDisconnect: () => {} });
 
     useEffect(async () => {
-        let result = await anonymousActor.getCanisterCyclesBalances();
+        let result = await anonymousActor_dtc.getCanisterCyclesBalances();
         setBackendCanisterBalance(parseInt(result.backendCyclesBalance));
         setFrontendCanisterBalance(parseInt(result.frontendCyclesBalance));
         setIsLoading(false);
@@ -107,10 +108,18 @@ const LoginPage = (props) => {
 
     useEffect(async () => {
         if(connectionResult.activeProvider){
-            const newActor = await backendActor(connectionResult.activeProvider);
+            const promises = [
+                backendActor(connectionResult.activeProvider),
+                managerActor(connectionResult.activeProvider)
+            ];
+            const [backendActor_, managerActor_] = await Promise.all(promises);
             dispatch({
-                actionType: types.SET_ACTOR,
-                payload: newActor
+                actionType: types.SET_BACKEND_ACTOR,
+                payload: backendActor_
+            });
+            dispatch({
+                actionType: types.SET_MANAGER_ACTOR,
+                payload: managerActor_
             });
         }
         setIsLoading(true);

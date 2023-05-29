@@ -38,7 +38,7 @@ const NotAuthorizedByOwner = (props) => {
             actionType: types.SET_IS_LOADING,
             payload: true
         });
-        let result = await journalState.actor.requestApproval();
+        let result = await journalState.backendActor.requestApproval();
         if("ok" in result){
             dispatch({
                 actionType: types.SET_MODAL_STATUS,

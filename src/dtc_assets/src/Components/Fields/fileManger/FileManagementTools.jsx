@@ -3,7 +3,7 @@ import { CHUNK_SIZE, PAGES } from "../../../Constants";
 
 export const retrieveChunk = async (journalState, fileName, chunkIndex) => {
     let chunk;
-    chunk = await journalState.actor.readEntryFileChunk(fileName, chunkIndex);
+    chunk = await journalState.backendActor.readEntryFileChunk(fileName, chunkIndex);
     chunk = chunk.ok;
     return chunk
 }; 
@@ -23,7 +23,7 @@ export const getFileURL = async (file) => {
 
 export const uploadChunk = async (journalState, fileId, chunkId, fileChunk) => {    
     const fileChunkAsBlob = await fileToBlob(fileChunk);
-    return journalState.actor.uploadJournalEntryFile(
+    return journalState.backendActor.uploadJournalEntryFile(
         fileId, 
         chunkId, 
         fileChunkAsBlob
@@ -98,7 +98,7 @@ export const getFileUrl_fromApi = async (
     let promises = [];
     let fileChunkCounteObj;
     let fileChunkCount;
-    fileChunkCounteObj = await journalState.actor.readEntryFileSize(fileName);
+    fileChunkCounteObj = await journalState.backendActor.readEntryFileSize(fileName);
     fileChunkCount = parseInt(fileChunkCounteObj.ok);
     let fileURL;
 

@@ -46,13 +46,13 @@ const HomePage = () => {
     window.onbeforeunload = window.history.replaceState(null, '');
 
     useEffect( async () => {
-        if(!journalState.actor) return;
+        if(!journalState.backendActor) return;
         if(journalState.reloadStatuses.canisterData){
             dispatch({
                 actionType: types.SET_IS_LOADING,
                 payload: true
             });
-            let canisterData = await journalState.actor.getCanisterData();
+            let canisterData = await journalState.backendActor.getCanisterData();
             if(!canisterData) return;
             if("err" in canisterData) canisterData = await CreateUserJournal(journalState, dispatch, 'getCanisterData');
             if("err" in canisterData) {
@@ -65,7 +65,7 @@ const HomePage = () => {
             canisterData = loadCanisterData(canisterData, dispatch, types);
             let requestsForApproval;
             if(canisterData.isOwner){
-                requestsForApproval = await journalState.actor.getRequestingPrincipals();
+                requestsForApproval = await journalState.backendActor.getRequestingPrincipals();
                 requestsForApproval = requestsForApproval.ok;
                 let updatedCanisterData = {...canisterData, requestsForApproval};
                 dispatch({
@@ -84,17 +84,17 @@ const HomePage = () => {
         };
         if(journalState.reloadStatuses.journalData){
             //Load Journal Data in the background
-            const journal = await journalState.actor.readJournal();
+            const journal = await journalState.backendActor.readJournal();
             loadJournalData(journal, dispatch, types);
         };
         if(walletState.shouldReload){
             //Load wallet data in background
-            const walletDataFromApi = await journalState.actor.readWalletData();
+            const walletDataFromApi = await journalState.backendActor.readWalletData();
             await loadWalletData(walletDataFromApi, walletDispatch, walletTypes);
         };
 
 
-    }, [journalState.actor]);
+    }, [journalState.backendActor]);
 
     return (
         <AppContext.Provider 

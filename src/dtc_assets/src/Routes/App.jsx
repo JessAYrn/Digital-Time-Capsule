@@ -46,14 +46,13 @@ const App = () => {
     
 
     useEffect(async () => {
-        if(!journalState.actor) return;
-        
+        if(!journalState.backendActor) return;
         if(journalState.reloadStatuses.journalData){
             dispatch({
                 actionType: types.SET_IS_LOADING,
                 payload: true
             });
-            let journal = await journalState.actor.readJournal();
+            let journal = await journalState.backendActor.readJournal();
             if(!journal) return;
             if("err" in journal) journal = await CreateUserJournal(journalState, dispatch, 'readJournal');
             if("err" in journal) {
@@ -71,15 +70,15 @@ const App = () => {
         }
         if(journalState.reloadStatuses.canisterData){
             //Load canister data in background
-            const canisterData = await journalState.actor.getCanisterData();
+            const canisterData = await journalState.backendActor.getCanisterData();
             loadCanisterData(canisterData, dispatch, types);
         }
         if(walletState.shouldReload){
             //Load wallet data in background
-            const walletDataFromApi = await journalState.actor.readWalletData();
+            const walletDataFromApi = await journalState.backendActor.readWalletData();
             await loadWalletData(walletDataFromApi, walletDispatch, walletTypes);
         };
-    },[journalState.actor]);
+    },[journalState.backendActor]);
 
     let TabComponent = useMemo(()=>{
         if(journalState.journalPageTab===JOURNAL_TABS.diaryTab){

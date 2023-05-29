@@ -78,7 +78,7 @@ const WalletApp = () => {
 
     //Loading Time Capsule Data
     useEffect(async () => {
-        if(!journalState.actor){
+        if(!journalState.backendActor){
             return;
         }
         if(walletState.shouldReload){
@@ -86,7 +86,7 @@ const WalletApp = () => {
                 actionType: types.SET_IS_LOADING,
                 payload: true
             });
-            let walletDataFromApi = await journalState.actor.readWalletData();
+            let walletDataFromApi = await journalState.backendActor.readWalletData()
             if(!walletDataFromApi) return;
             if("err" in walletDataFromApi) walletDataFromApi = await CreateUserJournal(journalState, dispatch, 'readWalletData');
             if("err" in walletDataFromApi) {
@@ -104,16 +104,16 @@ const WalletApp = () => {
         }; 
         if(journalState.reloadStatuses.canisterData){
             //Load canister data in background
-            const canisterData = await journalState.actor.getCanisterData();
+            const canisterData = await journalState.backendActor.getCanisterData();
             loadCanisterData(canisterData, dispatch, types);
         }
         if(journalState.reloadStatuses.journalData){
             //Load Journal Data in the background
-            const journal = await journalState.actor.readJournal();
+            const journal = await journalState.backendActor.readJournal();
             loadJournalData(journal, dispatch, types);
         };
         
-    },[journalState.actor]);
+    },[journalState.backendActor]);
 
     return(
         <AppContext.Provider 

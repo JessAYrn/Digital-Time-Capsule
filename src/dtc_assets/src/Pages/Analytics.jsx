@@ -33,7 +33,7 @@ const Analytics = () => {
             actionType: types.SET_IS_LOADING,
             payload: true
         });
-        let result = await journalState.actor.removeFromRequestsList(principal);
+        let result = await journalState.backendActor.removeFromRequestsList(principal);
         result = result.ok;
         dispatch({
             actionType: types.SET_CANISTER_DATA,
@@ -50,7 +50,7 @@ const Analytics = () => {
             actionType: types.SET_IS_LOADING,
             payload: true
         });
-        let result = await journalState.actor.grantAccess(principal);
+        let result = await journalState.backendActor.grantAccess(principal);
         result = result.ok;
         dispatch({
             actionType: types.SET_CANISTER_DATA,
@@ -67,7 +67,7 @@ const Analytics = () => {
             actionType: types.SET_IS_LOADING,
             payload: true
         });
-        let result = await journalState.actor.updateApprovalStatus(principal, newApprovalStatus);
+        let result = await journalState.backendActor.updateApprovalStatus(principal, newApprovalStatus);
         result = result.ok;
      
         dispatch({
@@ -86,7 +86,7 @@ const Analytics = () => {
             payload: true
         });
         let success = false;
-        let result = await journalState.actor.toggleAcceptRequest();
+        let result = await journalState.backendActor.toggleAcceptRequest();
         if('ok' in result)  {
             success = true;
             dispatch({
@@ -110,7 +110,7 @@ const Analytics = () => {
             payload: true
         });
         let success = false;
-        let result = await journalState.actor.toggleSupportMode();
+        let result = await journalState.backendActor.toggleSupportMode();
         if('ok' in result)  {
             success = true;
             dispatch({
@@ -135,9 +135,32 @@ const Analytics = () => {
             payload: true
         });
         let success;
-        let result = await journalState.actor.registerOwner();
+        let result = await journalState.backendActor.registerOwner();
         if('err' in result) success = false;
         else success = true;
+        dispatch({
+            actionType: types.SET_MODAL_STATUS,
+            payload: {show: true, which: MODALS_TYPES.onRegisterNewOwner, success: success}
+        })
+        dispatch({
+            actionType: types.SET_IS_LOADING,
+            payload: false
+        });
+    };
+
+    const handleUpgrade = async () => {
+        dispatch({
+            actionType: types.SET_IS_LOADING,
+            payload: true
+        });
+        let success = true;
+        try{
+            await journalState.backendActor.upgradeApp_exceptForBackendCanister();
+            await journalState.managerActor.installCode_backendCanister();
+            
+        } catch(e){
+            success = false;
+        };
         dispatch({
             actionType: types.SET_MODAL_STATUS,
             payload: {show: true, which: MODALS_TYPES.onRegisterNewOwner, success: success}
@@ -351,10 +374,18 @@ const Analytics = () => {
                                 </div>}
                                 <ButtonField
                                     text={' Register As New Owner '}
-                                    className={'registryButtonDiv active animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}
+                                    className={'ownerButtonsnDiv active animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}
                                     onClick={handleRegistration}
                                     withBox={true}
                                 />
+                                {journalState.canisterData.isOwner &&
+                                    <ButtonField
+                                        text={' Upgrade Application '}
+                                        className={'ownerButtonsnDiv ButtonDiv active animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}
+                                        onClick={handleUpgrade}
+                                        withBox={true}
+                                    />
+                                }
                                 { showUserPrincipals && <ButtonField
                                     Icon={AiIcons.AiOutlineArrowUp}
                                     iconSize={25}

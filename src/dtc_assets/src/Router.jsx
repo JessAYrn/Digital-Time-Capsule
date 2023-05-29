@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import { Route, Routes, HashRouter } from 'react-router-dom';
 import HomePage from './Routes/HomePage';
 import App from './Routes/App';
@@ -13,27 +13,59 @@ import * as canisterIds from "../../../canister_ids.json";
 import * as dtcFiles from "../../declarations/dtc"
 import Treasury from './Routes/Treasury';
 import GroupJournal from './Routes/GroupJournal';
+import * as managerCanisterFiles from "../../declarations/manager";
+import * as dtcAssetsFiles from "../../declarations/dtc_assets";
+import { extractCanisterIdFromURL, getCurrentURL } from './Utils';
 
 const Router = (props) => {
-    const dtc_canisterId = canisterIds.dtc.ic;
+
+    const [client, setClient] = useState(null);
     const dtc_idlFactory = dtcFiles.idlFactory;
+    const managerCanister_idlFactory = managerCanisterFiles.idlFactory;
+    
 
-    const client = createClient({
-        globalProviderConfig: {
-            host: 'https://mainnet.ic0.app',
-            whitelist: [dtc_canisterId],
-            appName: ''
-        },
-        canisters: {
-            dtc: {
-                canisterId: dtc_canisterId,
-                idlFactory: dtc_idlFactory
-            } 
-        },
-        providers: defaultProviders
-    });
+    useEffect(() => {
+        
+        const loadClient = async () => {
+            let dtc_canisterId;
+            let managerCanister_canisterId;
+            if(process.env.NODE_ENV === "development") {
+                dtc_canisterId = canisterIds.dtc.ic;
+                managerCanister_canisterId = canisterIds.manager.ic;
+            } else {
+                let URL = getCurrentURL();
+                let frontEndPrincipal = extractCanisterIdFromURL(URL);
+                let dtcAssetsCanister = dtcAssetsFiles.createActor(frontEndPrincipal,{agentOptions: {host: "https://icp-api.io"}});
+                let authorizedPrincipals = await dtcAssetsCanister.list_authorized();
+                dtc_canisterId = authorizedPrincipals[0];
+                managerCanister_canisterId = authorizedPrincipals[1];
 
+            }
+            let client_ = createClient({
+                globalProviderConfig: {
+                    host: 'https://mainnet.ic0.app',
+                    whitelist: [dtc_canisterId],
+                    appName: ''
+                },
+                canisters: {
+                    dtc: {
+                        canisterId: dtc_canisterId,
+                        idlFactory: dtc_idlFactory
+                    }, manager: {
+                        canisterId: managerCanister_canisterId,
+                        idlFactory: managerCanister_idlFactory
+                    }
+                },
+                providers: defaultProviders
+            });
+            setClient(client_);
+        };
+
+      loadClient();
+    },[]);
+    
     return(
+      { client &&
         <Connect2ICProvider client={client}>
             <HashRouter>
                 <Routes>
@@ -47,6 +79,7 @@ const Router = (props) => {
                 </Routes>
             </HashRouter>
         </Connect2ICProvider>
+      }
     );
 };
 
