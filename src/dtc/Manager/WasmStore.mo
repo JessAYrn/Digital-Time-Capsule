@@ -13,12 +13,18 @@ module{
         assets: AssetCanister.Assets;
         frontend: WasmData;
         backend: WasmData;
+        backend_without_timer: WasmData;
         journal: WasmData;
         manager: WasmData;
     };
 
-    public let wasmTypes : { backend: Text; frontend: Text; manager: Text; journal: Text; } = 
-    { backend = "BACKEND"; frontend = "FRONTEND"; manager = "MANAGER"; journal = "JOURNAL"};
+    public let wasmTypes : { backend: Text; frontend: Text; manager: Text; journal: Text; backend_without_timer: Text } = { 
+        backend = "BACKEND"; 
+        frontend = "FRONTEND"; 
+        manager = "MANAGER"; 
+        journal = "JOURNAL"; 
+        backend_without_timer = "BACKEND_WITHOUT_TIMER";
+    };
 
     public type Error = {
         #NoNewVersionAvailable;

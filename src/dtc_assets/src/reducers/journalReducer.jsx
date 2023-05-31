@@ -83,6 +83,7 @@ export const initialState = {
         isOwner: false,
         nftId: NULL_STRING_CAPITALIZED,
         supportMode: false,
+        cycleSaveMode: false,
         acceptingRequests: false,
         requestsForApproval: []
     },

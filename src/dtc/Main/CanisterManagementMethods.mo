@@ -39,11 +39,8 @@ module{
         let result = await assetCanister.authorize(principal);
     };
 
-    public func getPrincipalsList(
-        callerId : Principal, 
-        profilesMap : MainTypes.UserProfilesMap, 
-        canisterData: MainTypes.CanisterData
-        ) : async [Principal] {
+    public func getPrincipalsList( callerId : Principal, profilesMap : MainTypes.UserProfilesMap, canisterData: MainTypes.CanisterData): 
+    async [Principal] {
 
         let callerIdAsText = Principal.toText(callerId);
             
@@ -64,10 +61,7 @@ module{
 
             return ArrayBuffer.toArray();
 
-        } else {
-            throw Error.reject("Unauthorized access. Caller is not the owner.");
-
-        }
+        } else { throw Error.reject("Unauthorized access. Caller is not the owner."); }
         
     };
 
@@ -83,6 +77,7 @@ module{
             acceptingRequests = canisterData.acceptingRequests;
             nftId = canisterData.nftId;
             lastRecordedTime = canisterData.lastRecordedTime;
+            cyclesSaveMode = canisterData.cyclesSaveMode;
         };
         return newCanisterData;
 
@@ -191,6 +186,7 @@ module{
             acceptingRequests = canisterData.acceptingRequests;
             nftId = nftId;
             lastRecordedTime = canisterData.lastRecordedTime;
+            cyclesSaveMode = canisterData.cyclesSaveMode;
         };
 
         return (updatedCanisterData,updatedDefaultControllers_1);
@@ -237,7 +233,8 @@ module{
                     lastRecordedTime = canisterData.lastRecordedTime;
                     profilesMetaData = profilesApprovalStatus;
                     isOwner = isOwner;
-                    supportMode = supportMode
+                    supportMode = supportMode;
+                    cyclesSaveMode = canisterData.cyclesSaveMode;
                 };
                 return #ok(canisterDataPackagedForExport);
             }
@@ -260,11 +257,10 @@ module{
                 nftId = canisterData.nftId;
                 acceptingRequests = canisterData.acceptingRequests;
                 lastRecordedTime = canisterData.lastRecordedTime;
+                cyclesSaveMode = canisterData.cyclesSaveMode;
             };
             return updatedCanisterData;
-        } else {
-            return canisterData
-        };
+        } else { return canisterData };
     };
 
     public func setLastRecordedBackEndCyclesBalance(currentCylcesBalance: Nat, currentTime: Int, canisterData : MainTypes.CanisterData) : 
@@ -280,6 +276,7 @@ module{
             nftId = canisterData.nftId;
             lastRecordedTime = currentTime;
             acceptingRequests = canisterData.acceptingRequests;
+            cyclesSaveMode = canisterData.cyclesSaveMode;
         };
 
         return updatedCanisterData;
@@ -288,28 +285,41 @@ module{
     public func toggleAcceptRequest(callerId: Principal, canisterData: MainTypes.CanisterData) : 
     Result.Result<(MainTypes.CanisterData), JournalTypes.Error>{
         let callerIdAsText = Principal.toText(callerId);
-        if(callerIdAsText != canisterData.nftOwner){
-            return #err(#NotAuthorized);
-        } else {
-            let updatedCanisterData = {
-                managerCanisterPrincipal = canisterData.managerCanisterPrincipal;
-                frontEndPrincipal = canisterData.frontEndPrincipal;
-                backEndPrincipal = canisterData.backEndPrincipal;
-                lastRecordedBackEndCyclesBalance = canisterData.lastRecordedBackEndCyclesBalance;
-                backEndCyclesBurnRatePerDay = canisterData.backEndCyclesBurnRatePerDay;
-                nftOwner = canisterData.nftOwner;
-                nftId = canisterData.nftId;
-                lastRecordedTime = canisterData.lastRecordedTime;
-                acceptingRequests = not canisterData.acceptingRequests;
-            };
-
-            return #ok(updatedCanisterData);
+        if(callerIdAsText != canisterData.nftOwner){ return #err(#NotAuthorized);};
+        let updatedCanisterData = {
+            managerCanisterPrincipal = canisterData.managerCanisterPrincipal;
+            frontEndPrincipal = canisterData.frontEndPrincipal;
+            backEndPrincipal = canisterData.backEndPrincipal;
+            lastRecordedBackEndCyclesBalance = canisterData.lastRecordedBackEndCyclesBalance;
+            backEndCyclesBurnRatePerDay = canisterData.backEndCyclesBurnRatePerDay;
+            nftOwner = canisterData.nftOwner;
+            nftId = canisterData.nftId;
+            lastRecordedTime = canisterData.lastRecordedTime;
+            acceptingRequests = not canisterData.acceptingRequests;
+            cyclesSaveMode = canisterData.cyclesSaveMode;
         };
+        return #ok(updatedCanisterData);
     };
 
-    public func installCode_managerCanister(
-        canisterData: MainTypes.CanisterData
-    ): async (){
+    public func toggleCyclesSaveMode(callerId: Principal, canisterData: MainTypes.CanisterData) : async MainTypes.CanisterData{
+        let callerIdAsText = Principal.toText(callerId);
+        if(callerIdAsText != canisterData.nftOwner) { throw Error.reject("Unauthorized access. Caller is not the owner.") };
+        let updatedCanisterData = {
+            managerCanisterPrincipal = canisterData.managerCanisterPrincipal;
+            frontEndPrincipal = canisterData.frontEndPrincipal;
+            backEndPrincipal = canisterData.backEndPrincipal;
+            lastRecordedBackEndCyclesBalance = canisterData.lastRecordedBackEndCyclesBalance;
+            backEndCyclesBurnRatePerDay = canisterData.backEndCyclesBurnRatePerDay;
+            nftOwner = canisterData.nftOwner;
+            nftId = canisterData.nftId;
+            lastRecordedTime = canisterData.lastRecordedTime;
+            acceptingRequests = canisterData.acceptingRequests;
+            cyclesSaveMode = not canisterData.cyclesSaveMode;
+        };
+        return updatedCanisterData;
+    };
+
+    public func installCode_managerCanister( canisterData: MainTypes.CanisterData ): async (){
         let {managerCanisterPrincipal; backEndPrincipal} = canisterData;
         let managerActor : Manager.Manager = actor(managerCanisterPrincipal);
         let wasmStoreCanister : WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);

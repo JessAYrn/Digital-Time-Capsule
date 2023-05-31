@@ -154,8 +154,36 @@ const Analytics = () => {
         });
         let success = true;
         try{
-            await journalState.backendActor.upgradeApp_exceptForBackendCanister();
-            await journalState.managerActor.installCode_backendCanister();
+            let canisterData = await journalState.backendActor.upgradeApp_exceptForBackendCanister();
+            await journalState.managerActor.installCode_backendCanister(canisterData);
+            
+        } catch(e){
+            console.log("Error: ", e);
+            success = false;
+        };
+        dispatch({
+            actionType: types.SET_MODAL_STATUS,
+            payload: {show: true, which: MODALS_TYPES.onRegisterNewOwner, success: success}
+        })
+        dispatch({
+            actionType: types.SET_IS_LOADING,
+            payload: false
+        });
+    };
+
+    const toggleCyclesSaveMode = async () => {
+        dispatch({
+            actionType: types.SET_IS_LOADING,
+            payload: true
+        });
+        let success = true;
+        try{
+            let canisterData = await journalState.backendActor.toggleCyclesSaveMode();
+            await journalState.managerActor.installCode_backendCanister(canisterData);
+            dispatch({
+                actionType: types.SET_CANISTER_DATA,
+                payload: { ...journalState.canisterData, cyclesSaveMode: !journalState.canisterData.cyclesSaveMode }
+            });
             
         } catch(e){
             console.log("Error: ", e);
@@ -368,6 +396,20 @@ const Analytics = () => {
                                         <Switch
                                             active={journalState.canisterData.acceptingRequests}
                                             onClick={toggleAcceptRequest}
+                                        />
+                                    </div>
+                                </div>}
+                                {journalState.canisterData.isOwner && 
+                                <div className={'switchDiv animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
+                                    <div className='section'>
+                                        <h5 className={'lebelH5'}> 
+                                            Cycles Saver Mode:  
+                                        </h5>
+                                    </div>
+                                    <div className='section'>
+                                        <Switch
+                                            active={journalState.canisterData.cyclesSaveMode}
+                                            onClick={toggleCyclesSaveMode}
                                         />
                                     </div>
                                 </div>}

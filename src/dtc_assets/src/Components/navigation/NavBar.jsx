@@ -140,7 +140,7 @@ export const NavBar = (props) => {
     }
     const {pathname} = useLocation();
 
-    const NotificationIcon = unreadNotifications.length ?
+    const NotificationIcon = unreadNotifications && unreadNotifications.length ?
         <FaIcons.FaBell/> : 
         <FaIcons.FaRegBell/>;
 

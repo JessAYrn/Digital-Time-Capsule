@@ -61,10 +61,11 @@ module{
         currentCyclesBalance_backend: Nat;
         currentCyclesBalance_frontend: Nat;
         supportMode: Bool;
+        cyclesSaveMode: Bool;
     };
 
     public type CanisterData = {
-        managerCanisterPrincipal: Text;
+        managerCanisterPrincipal: Text; 
         frontEndPrincipal: Text;
         backEndPrincipal: Text;
         lastRecordedBackEndCyclesBalance: Nat;
@@ -73,6 +74,7 @@ module{
         nftId: Int;
         acceptingRequests: Bool;
         lastRecordedTime: Int;
+        cyclesSaveMode: Bool;
     };
 
     public type Approved = Bool;
@@ -92,5 +94,18 @@ module{
     public type Notification = { text: Text; key: ?Nat};
 
     public type Notifications = [Notification];
+
+    public let DEFAULT_CANISTER_DATA: CanisterData = {
+        managerCanisterPrincipal = "Null";
+        frontEndPrincipal = "Null";
+        backEndPrincipal = "Null";
+        lastRecordedBackEndCyclesBalance = 0;
+        backEndCyclesBurnRatePerDay = 0;
+        nftOwner = "Null";
+        nftId = -1;
+        acceptingRequests = true;
+        lastRecordedTime = 0;
+        cyclesSaveMode = false;
+    };
 
 }

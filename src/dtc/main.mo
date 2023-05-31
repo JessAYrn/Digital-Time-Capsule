@@ -61,17 +61,7 @@ shared actor class User() = this {
 
     private stable var defaultControllers : [Principal] = [];
 
-    private stable var canisterData : MainTypes.CanisterData = {
-        managerCanisterPrincipal = "Null";
-        frontEndPrincipal = "Null";
-        backEndPrincipal = "Null";
-        lastRecordedBackEndCyclesBalance = 0;
-        backEndCyclesBurnRatePerDay = 0;
-        nftOwner = "Null";
-        nftId = -1;
-        acceptingRequests = true;
-        lastRecordedTime = 0;
-    };
+    private stable var canisterData : MainTypes.CanisterData = MainTypes.DEFAULT_CANISTER_DATA;
 
     private stable var requestsForAccess: MainTypes.RequestsForAccess = [];
 
@@ -287,13 +277,20 @@ shared actor class User() = this {
         let result = await assetCanister.list_authorized();
     };
 
-    public shared(msg) func toggleAcceptRequest() : async  Result.Result<(MainTypes.CanisterData), JournalTypes.Error>{
-        let callerId = msg.caller;
-        let result = CanisterManagementMethods.toggleAcceptRequest(callerId, canisterData);
+    public shared({caller}) func toggleAcceptRequest() : async  Result.Result<(MainTypes.CanisterData), JournalTypes.Error>{
+        let result = CanisterManagementMethods.toggleAcceptRequest(caller, canisterData);
         switch(result){
             case(#err(e)){ return #err(e); };
             case(#ok(updatedCanisterData)){ canisterData := updatedCanisterData; return #ok(updatedCanisterData);}
         };
+    };
+
+    public shared({caller}) func toggleCyclesSaveMode() : async MainTypes.CanisterData{
+        let updatedCanisterData = await CanisterManagementMethods.toggleCyclesSaveMode(caller, canisterData);
+        let managerCanister: Manager.Manager = actor(canisterData.managerCanisterPrincipal);
+        await managerCanister.allowUpdatesToBackendCanister();
+        canisterData := updatedCanisterData;
+        return updatedCanisterData;
     };
 
     public shared({caller}) func getRequestingPrincipals() : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error>{
@@ -343,7 +340,7 @@ shared actor class User() = this {
         canisterData := updatedCanisterData;
     };
 
-    public shared({ caller }) func upgradeApp_exceptForBackendCanister(): async ([AssetCanister.BatchOperationKind]){
+    public shared({ caller }) func upgradeApp_exceptForBackendCanister(): async MainTypes.CanisterData{
         if(Principal.toText(caller) != canisterData.nftOwner){ throw Error.reject("Unauthorized Access"); };
         let managerCanister: Manager.Manager = actor(canisterData.managerCanisterPrincipal);
         await managerCanister.loadNextRelease();
@@ -351,7 +348,7 @@ shared actor class User() = this {
         let result_0 = await managerCanister.installCode_frontendCanister(canisterData);
         let result_1 = await managerCanister.installCode_journalCanisters(Iter.toArray(userProfilesMap.entries()));
         await managerCanister.allowUpdatesToBackendCanister();
-        return result_0;
+        return canisterData;
     };
 
     public shared({ caller }) func getCurrentReleaseVersion(): async Nat{
