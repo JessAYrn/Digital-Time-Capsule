@@ -3,11 +3,8 @@ import { getDateAsString } from "../Utils";
 
 export const types = {
     SET_ENTIRE_REDUX_STATE: "SET_ENTIRE_REDUX_STATE",
-    SET_BACKEND_ACTOR: "SET_BACKEND_ACTOR",
-    SET_MANAGER_ACTOR: "SET_MANAGER_ACTOR",
     SET_AUTHENTICATE_FUNCTION_CALL_COUNT: "SET_AUTHENTICATE_FUNCTION_CALL_COUNT",
     SET_CREATE_ACTOR_FUNCTION_CALL_COUNT: "SET_CREATE_ACTOR_FUNCTION_CALL_COUNT",
-    SET_CANISTER_DATA: "SET_CANISTER_DATA",
     SET_IS_LOGGING_IN: "SET_IS_LOGGING_IN",
     SET_JOURNAL: "SET_JOURNAL",
     SET_JOURNAL_TAB:"SET_JOURNAL_TAB",
@@ -56,14 +53,11 @@ export const types = {
     REMOVE_NFT_FILE:"REMOVE_NFT_FILE",
     REMOVE_JOURNAL_ENTRY_FILE: "REMOVE_JOURNAL_ENTRY_FILE",
     SET_HANDLE_PAGE_SUBMIT_FUNCTION: "SET_HANDLE_PAGE_SUBMIT_FUNCTION"
-
 }
 
 
 
 export const initialState = {
-    backendActor: undefined,
-    managerActor: undefined,
     authenticateFunctionCallCount: 0,
     createActorFunctionCallCount: 0,
     journalCount: 0,
@@ -161,21 +155,6 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
-        case types.SET_BACKEND_ACTOR:
-            state.backendActor = payload;
-            return {
-                ...state
-            }
-        case types.SET_MANAGER_ACTOR:
-            state.managerActor = payload;
-            return {
-                ...state
-            }
-        case types.SET_CANISTER_DATA:
-        state.canisterData = payload;
-        return {
-            ...state
-        }
         case types.SET_AUTHENTICATE_FUNCTION_CALL_COUNT:
         state.authenticateFunctionCallCount = payload;
         return {

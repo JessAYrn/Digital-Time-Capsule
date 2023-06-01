@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useMemo} from "react";
+import React, {useState, useEffect, useMemo, useReducer} from "react";
 import FileUpload from "./FileUpload";
 import { UI_CONTEXTS } from "../../../Contexts";
 import { PAGES } from "../../../Constants";
@@ -10,7 +10,7 @@ import * as MdIcons from 'react-icons/md';
 import ButtonField from "../Button";
 import { NULL_STRING_ALL_LOWERCASE } from "../../../Constants";
 import { types } from "../../../reducers/journalReducer";
-
+import actorReducer, { actorTypes, actorInitialState } from "../../../reducers/actorReducer";
 
 const FileCarousel = (props) => {
 
@@ -32,6 +32,7 @@ const FileCarousel = (props) => {
     } = props;
 
     const [editMode, setEditMode] = useState(editModeDefault);
+    const [actorState, actorDispatch] = useReducer(actorReducer, actorInitialState);
 
     const toggleEditMode = async () => {
         let updatedEditMode = !editMode
@@ -49,19 +50,19 @@ const FileCarousel = (props) => {
                     fileType: metaData.fileType,
                 };
             });
-            let result = await journalState.backendActor.updatePhotos(photos);
+            let result = await actorState.backendActor.updatePhotos(photos);
             result = result.ok;
             dispatch({
                 actionType: types.SET_BIO,
                 payload: result
             });
-            result = await journalState.backendActor.submitFiles();
+            result = await actorState.backendActor.submitFiles();
             dispatch({
                 actionType: types.SET_IS_LOADING,
                 payload: false
             });
         } else {
-            let result = await journalState.backendActor.clearUnsubmittedFiles();
+            let result = await actorState.backendActor.clearUnsubmittedFiles();
         }
     };
 
@@ -80,14 +81,14 @@ const FileCarousel = (props) => {
             fileIndex: fileIndex
         });
         if(fileIsUnsubmitted){
-            let result = await journalState.backendActor.deleteUnsubmittedFile(fileName);
+            let result = await actorState.backendActor.deleteUnsubmittedFile(fileName);
         } else {
             dispatch({
                 actionType: types.SET_IS_LOADING,
                 payload: true
             });
-            let result = await journalState.backendActor.deleteSubmittedFile(fileName);
-            if("ok" in result) result = await journalState.backendActor.updateBio({
+            let result = await actorState.backendActor.deleteSubmittedFile(fileName);
+            if("ok" in result) result = await actorState.backendActor.updateBio({
                 dob: journalState.bio.dob,
                 pob: journalState.bio.pob,
                 name: journalState.bio.name,

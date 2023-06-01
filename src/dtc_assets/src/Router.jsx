@@ -65,22 +65,25 @@ const Router = (props) => {
     },[]);
     
     return(
-      { client &&
-        <Connect2ICProvider client={client}>
-            <HashRouter>
-                <Routes>
-                    <Route path={NAV_LINKS.dashboard} element={<HomePage />}/>
-                    <Route path={NAV_LINKS.journal} element={<App />}/>
-                    <Route path={NAV_LINKS.account} element={<AccountPage />}/>
-                    <Route path={NAV_LINKS.wallet} element={<WalletApp />}/>
-                    <Route path={NAV_LINKS.nft} element={<NFTapp />}/>
-                    <Route path={NAV_LINKS.treasury} element={<Treasury/>}/>
-                    <Route path={NAV_LINKS.groupJournal} element={<GroupJournal/>}/>
-                </Routes>
-            </HashRouter>
-        </Connect2ICProvider>
-      }
-    );
+    <>
+    {client && 
+    <Connect2ICProvider client={client}>
+      <HashRouter>
+          <Routes>
+              <Route path={NAV_LINKS.dashboard} element={<HomePage />}/>
+              <Route path={NAV_LINKS.journal} element={<App />}/>
+              <Route path={NAV_LINKS.account} element={<AccountPage />}/>
+              <Route path={NAV_LINKS.wallet} element={<WalletApp />}/>
+              <Route path={NAV_LINKS.nft} element={<NFTapp />}/>
+              <Route path={NAV_LINKS.treasury} element={<Treasury/>}/>
+              <Route path={NAV_LINKS.groupJournal} element={<GroupJournal/>}/>
+          </Routes>
+      </HashRouter>
+  </Connect2ICProvider>
+}
+    </>
+    
+    )
 };
 
 export default Router;

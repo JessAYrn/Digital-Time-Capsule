@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState, useCallback} from "react";
+import React, {useContext, useEffect, useState, useCallback, useReducer} from "react";
 import { useNavigate } from "react-router-dom";
 import { AppContext as JournalContext } from "../../Routes/App";
 import { AppContext as AccountContext } from "../../Routes/Account";
@@ -26,6 +26,7 @@ import { backendActor, managerActor } from "../../Utils";
 import '../../SCSS/contentContainer.scss'
 import Dropdown from "../Fields/Dropdown";
 import Accordion from "../Fields/Accordion";
+import actorReducer,{ actorInitialState,actorTypes } from "../../reducers/actorReducer";
 
 const AccordionContent=[
     {text:"1.) Navigate to your Personal DAO's unique URL and press the share button circled below ", image:'assets/dtcscreengrab2.png'},
@@ -58,9 +59,11 @@ const LoginPage = (props) => {
 
     const {    
         journalState,
-        dispatch
+        dispatch,
+        
     } = useContext(properContext);
 
+    const [actorState, actorDispatch] = useReducer(actorReducer, actorInitialState);
     const [frontendCanisterBalance, setFrontendCanisterBalance] = useState(0);
     const [backendCanisterBalance, setBackendCanisterBalance] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
@@ -76,6 +79,7 @@ const LoginPage = (props) => {
         backendActor: undefined,
         managerActor: undefined,
     };
+    
 
     const  handleClickDashboard = useCallback(() =>  {
         navigate(NAV_LINKS.dashboard, { replace: false, state: journalStateWithoutFunction});
@@ -113,12 +117,12 @@ const LoginPage = (props) => {
                 managerActor(connectionResult.activeProvider)
             ];
             const [backendActor_, managerActor_] = await Promise.all(promises);
-            dispatch({
-                actionType: types.SET_BACKEND_ACTOR,
+            actorDispatch({
+                actionType: actorTypes.SET_BACKEND_ACTOR,
                 payload: backendActor_
             });
-            dispatch({
-                actionType: types.SET_MANAGER_ACTOR,
+            actorDispatch({
+                actionType: actorTypes.SET_MANAGER_ACTOR,
                 payload: managerActor_
             });
         }

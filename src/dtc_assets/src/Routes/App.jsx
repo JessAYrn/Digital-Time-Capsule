@@ -12,12 +12,18 @@ import { loadCanisterData, loadJournalData, loadWalletData, recoverState} from '
 import { useConnect } from "@connect2ic/react";
 import Notes from '../Pages/Notes';
 import { DEFAULT_APP_CONTEXTS, JOURNAL_TABS } from '../Constants';
+import homePageReducer,{ homePageInitialState, homePageTypes } from '../reducers/homePageReducer';
+import accountReducer,{ accountInitialState, accountTypes } from '../reducers/accountReducer';
+import actorReducer, { actorInitialState, actorTypes } from '../reducers/actorReducer';
 
 export const AppContext = createContext(DEFAULT_APP_CONTEXTS);
 
 const App = () => {
     const [journalState, dispatch] = useReducer(journalReducer, initialState);
     const [walletState, walletDispatch] = useReducer(walletReducer, walletInitialState);
+    const [homePageState, homePageDispatch] =  useReducer(homePageReducer, homePageInitialState)
+    const [accountState, accountDispatch] =  useReducer(accountReducer, accountInitialState)
+    const [actorState, actorDispatch] = useReducer(actorReducer, actorInitialState);
 
     const [submissionsMade, setSubmissionsMade] = useState(0);
 
@@ -28,12 +34,18 @@ const App = () => {
 
     const ReducerDispatch={
         journalDispatch:dispatch,
-        walletDispatch
+        walletDispatch,
+        homePageDispatch,
+        accountDispatch,
+        actorDispatch
     }
 
     const ReducerType={
         journalTypes:types,       
-        walletTypes
+        walletTypes,
+        homePageTypes,
+        accountTypes,
+        actorTypes
     }
 
     // dispatch state from previous route to redux store if that state exists
@@ -46,15 +58,15 @@ const App = () => {
     
 
     useEffect(async () => {
-        if(!journalState.backendActor) return;
+        if(!actorState.backendActor) return;
         if(journalState.reloadStatuses.journalData){
             dispatch({
                 actionType: types.SET_IS_LOADING,
                 payload: true
             });
-            let journal = await journalState.backendActor.readJournal();
+            let journal = await actorState.backendActor.readJournal();
             if(!journal) return;
-            if("err" in journal) journal = await CreateUserJournal(journalState, dispatch, 'readJournal');
+            if("err" in journal) journal = await CreateUserJournal(actorState, dispatch,'readJournal');
             if("err" in journal) {
                 dispatch({
                     actionType: types.SET_IS_LOADING,
@@ -70,15 +82,15 @@ const App = () => {
         }
         if(journalState.reloadStatuses.canisterData){
             //Load canister data in background
-            const canisterData = await journalState.backendActor.getCanisterData();
-            loadCanisterData(canisterData, dispatch, types);
+            const canisterData = await actorState.backendActor.getCanisterData();
+            loadCanisterData(canisterData, homePageDispatch, homePageTypes);
         }
         if(walletState.shouldReload){
             //Load wallet data in background
-            const walletDataFromApi = await journalState.backendActor.readWalletData();
+            const walletDataFromApi = await actorState.backendActor.readWalletData();
             await loadWalletData(walletDataFromApi, walletDispatch, walletTypes);
         };
-    },[journalState.backendActor]);
+    },[actorState.backendActor]);
 
     let TabComponent = useMemo(()=>{
         if(journalState.journalPageTab===JOURNAL_TABS.diaryTab){
@@ -96,6 +108,12 @@ const App = () => {
                 dispatch,
                 walletState,
                 walletDispatch,
+                accountDispatch,
+                accountState,
+                homePageDispatch,
+                homePageState,
+                actorReducer,
+                actorState,
                 submissionsMade,
                 setSubmissionsMade
             }}

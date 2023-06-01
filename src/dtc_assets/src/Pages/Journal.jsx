@@ -20,7 +20,7 @@ import "../SCSS/contentContainer.scss";
 
 const Journal = (props) => {
 
-    const { journalState, dispatch} = useContext(AppContext);
+    const { journalState, dispatch, actorState} = useContext(AppContext);
     const [photosLoaded, setPhotosLoaded] = useState(false);
     const [pageChangesMade, setPageChangesMade] = useState(false); 
     
@@ -35,7 +35,7 @@ const Journal = (props) => {
                 fileData, 
                 fileIndex,
                 null,
-                journalState,
+                actorState,
                 dispatch,
                 types.CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE,
                 types.SET_FILE_JOURNAL_COVER_PAGE
@@ -52,7 +52,7 @@ const Journal = (props) => {
             actionType: types.SET_IS_LOADING,
             payload: true
         });
-        const result = await journalState.backendActor.updateBio({
+        const result = await actorState.backendActor.updateBio({
             dob: journalState.bio.dob,
             pob: journalState.bio.pob,
             name: journalState.bio.name,
@@ -90,7 +90,7 @@ const Journal = (props) => {
 
     const addJournalPage = () => {
         //Ensures that there are no unsubmitted entries left over from a previous post
-        journalState.backendActor.clearUnsubmittedFiles();
+        actorState.backendActor.clearUnsubmittedFiles();
         dispatch({
             actionType: types.ADD_JOURNAL_PAGE
         });

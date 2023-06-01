@@ -1,4 +1,4 @@
-import React, {useReducer, createContext, useEffect} from 'react';
+import React, {useReducer, createContext, useEffect, useContext} from 'react';
 import journalReducer, { types, initialState } from '../reducers/journalReducer';
 import { useLocation } from 'react-router-dom';
 import LoginPage from '../Components/authentication/LoginPage';
@@ -8,6 +8,10 @@ import { loadJournalData, loadCanisterData, loadWalletData, recoverState  } from
 import { useConnect } from '@connect2ic/react';
 import GroupJournalPage from '../Pages/GroupJournalPage';
 import { DEFAULT_APP_CONTEXTS } from '../Constants';
+import walletReducer, { walletInitialState,walletTypes } from '../reducers/walletReducer';
+import homePageReducer, { homePageInitialState,homePageTypes } from '../reducers/homePageReducer';
+import accountReducer, { accountInitialState,accountTypes } from '../reducers/accountReducer';
+import actorReducer, { actorInitialState,actorTypes } from '../reducers/actorReducer';
 
 
 
@@ -17,6 +21,28 @@ export const AppContext = createContext(DEFAULT_APP_CONTEXTS);
 
 const GroupJournal = () => {
     const [journalState, dispatch] = useReducer(journalReducer, initialState);
+    const [walletState, walletDispatch] = useReducer(walletReducer, walletInitialState);
+    const [homePageState, homePageDispatch] =  useReducer(homePageReducer, homePageInitialState)
+    const [accountState, accountDispatch] =  useReducer(accountReducer, accountInitialState)
+    const [actorState, actorDispatch] = useReducer(actorReducer, actorInitialState);
+    // const{actorState}=useContext(AppContext);
+
+    const ReducerDispatches={
+        walletDispatch:walletDispatch,
+        journalDispatch:dispatch,
+        accountDispatch,
+        actorDispatch,
+        homePageDispatch
+    }
+
+    const ReducerTypes={
+        journalTypes:types,
+        walletTypes,
+        accountTypes,
+        actorTypes,
+        homePageTypes
+    }
+    
 
     window.onbeforeunload = window.history.replaceState(null, '');
     
@@ -25,50 +51,74 @@ const GroupJournal = () => {
     //gets state from previous route
     const location = useLocation()
 
-    recoverState(journalState, location, dispatch, types, connectionResult);
+    recoverState(journalState, location, ReducerDispatches, ReducerTypes, connectionResult);
 
 
     
     
-    useEffect(async () => {
-        if(!journalState.actor) return;
-        if(journalState.reloadStatuses.journalData){
+    useEffect( async () => {
+        if(!actorState.backendActor) return;
+        if(journalState.reloadStatuses.canisterData){
             dispatch({
                 actionType: types.SET_IS_LOADING,
                 payload: true
             });
-            let journal = await journalState.actor.readJournal();
-            if(!journal) return;
-            if("err" in journal) journal = await CreateUserJournal(journalState, dispatch, 'readJournal');
-            if("err" in journal) {
+            let canisterData = await actorState.backendActor.getCanisterData();
+            if(!canisterData) return;
+            if("err" in canisterData) canisterData = await CreateUserJournal(actorState, dispatch, 'getCanisterData');
+            if("err" in canisterData) {
                 dispatch({
                     actionType: types.SET_IS_LOADING,
                     payload: false
                 });
                 return;
             }
-            loadJournalData(journal, dispatch, types);
+            canisterData = loadCanisterData(canisterData, homePageDispatch, homePageTypes);
+            let requestsForApproval;
+            if(canisterData.isOwner){
+                requestsForApproval = await actorState.backendActor.getRequestingPrincipals();
+                requestsForApproval = requestsForApproval.ok;
+                let updatedCanisterData = {...canisterData, requestsForApproval};
+                homePageDispatch({
+                    actionType: homePageTypes.SET_CANISTER_DATA,
+                    payload: updatedCanisterData
+                });
+            }
+            dispatch({
+                actionType: types.SET_CANISTER_DATA_RELOAD_STATUS,
+                payload: false,
+            });
             dispatch({
                 actionType: types.SET_IS_LOADING,
                 payload: false
             });
-        }
-        if(journalState.reloadStatuses.canisterData){
-            //Load canister data in background
-            const canisterData = await journalState.actor.getCanisterData();
-            loadCanisterData(canisterData, dispatch, types);
-        }
+        };
+        if(journalState.reloadStatuses.journalData){
+            //Load Journal Data in the background
+            const journal = await actorState.backendActor.readJournal();
+            loadJournalData(journal, dispatch, types);
+        };
         if(walletState.shouldReload){
             //Load wallet data in background
-            const walletDataFromApi = await journalState.actor.readWalletData();
-            await loadWalletData(walletDataFromApi, dispatch, types);
-        }
-    },[journalState.actor]);
+            const walletDataFromApi = await actorState.backendActor.readWalletData();
+            await loadWalletData(walletDataFromApi, walletDispatch, walletTypes);
+        };
+
+
+    }, [actorState.backendActor]);
   return (
     <AppContext.Provider
     value={{
         journalState,
-        dispatch
+        dispatch,
+        walletState,
+        walletDispatch,
+        accountDispatch,
+        accountState,
+        homePageDispatch,
+        homePageState,
+        actorReducer,
+        actorState,
     }}
     >
         {           

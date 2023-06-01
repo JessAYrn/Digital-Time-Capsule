@@ -40,7 +40,7 @@ const FileUpload = (props) => {
     if(context === UI_CONTEXTS.JOURNAL){
         AppContext = JournalContext;
     }
-    const { journalState, dispatch } = useContext(AppContext);
+    const { journalState, dispatch, actorState } = useContext(AppContext);
 
     let fileName = fileData.fileName;
     let fileNameIsNull = fileName === NULL_STRING_ALL_LOWERCASE;
@@ -113,7 +113,7 @@ const FileUpload = (props) => {
             fileIndex: fileIndex 
         });
         let fileId = await uploadFileToFrontend(uploadedFile);
-        if(fileId) await mapAndSendFileToApi(journalState, fileId, uploadedFile);
+        if(fileId) await mapAndSendFileToApi(actorState, fileId, uploadedFile);
 
         dispatch({ 
             actionType: dispatchActionToChangeFileLoadStatus,

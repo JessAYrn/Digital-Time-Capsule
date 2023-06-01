@@ -1,9 +1,12 @@
 import { fileToBlob, flattenUint8array } from "../../../Utils";
 import { CHUNK_SIZE, PAGES } from "../../../Constants";
+// import actorReducer, { actorInitialState, actorTypes } from "../../../reducers/actorReducer";
 
-export const retrieveChunk = async (journalState, fileName, chunkIndex) => {
+
+
+export const retrieveChunk = async (actorState, fileName, chunkIndex) => {
     let chunk;
-    chunk = await journalState.backendActor.readEntryFileChunk(fileName, chunkIndex);
+    chunk = await actorState.backendActor.readEntryFileChunk(fileName, chunkIndex);
     chunk = chunk.ok;
     return chunk
 }; 
@@ -21,9 +24,9 @@ export const getFileURL = async (file) => {
     });
 };
 
-export const uploadChunk = async (journalState, fileId, chunkId, fileChunk) => {    
+export const uploadChunk = async (actorState, fileId, chunkId, fileChunk) => {    
     const fileChunkAsBlob = await fileToBlob(fileChunk);
-    return journalState.backendActor.uploadJournalEntryFile(
+    return actorState.backendActor.uploadJournalEntryFile(
         fileId, 
         chunkId, 
         fileChunkAsBlob
@@ -64,7 +67,7 @@ export const updateFileMetadataInStore = (dispatch, dispatchAction, index, fileI
     return fileId;
 };
 
-export const mapAndSendFileToApi = async (journalState, fileId, file) => {
+export const mapAndSendFileToApi = async (actorState, fileId, file) => {
     const fileSize = file.size;
 
     const chunks = Math.ceil(fileSize/CHUNK_SIZE);
@@ -79,7 +82,7 @@ export const mapAndSendFileToApi = async (journalState, fileId, file) => {
         const fileChunk = (to < fileSize -1) ? file.slice(from,to ) : file.slice(from);
 
         let chunkId = parseInt(chunk);
-        promises.push(uploadChunk(journalState, fileId, chunkId, fileChunk));
+        promises.push(uploadChunk(actorState, fileId, chunkId, fileChunk));
 
         chunk += 1;
     };
@@ -87,7 +90,7 @@ export const mapAndSendFileToApi = async (journalState, fileId, file) => {
 };
 
 export const getFileUrl_fromApi = async (
-    journalState, 
+    actorState, 
     fileData
     ) => {
 
@@ -98,13 +101,13 @@ export const getFileUrl_fromApi = async (
     let promises = [];
     let fileChunkCounteObj;
     let fileChunkCount;
-    fileChunkCounteObj = await journalState.backendActor.readEntryFileSize(fileName);
+    fileChunkCounteObj = await actorState.backendActor.readEntryFileSize(fileName);
     fileChunkCount = parseInt(fileChunkCounteObj.ok);
     let fileURL;
 
     if( fileChunkCount > 0){
         while(index_ < fileChunkCount){
-            promises.push(retrieveChunk(journalState, fileName, index_));
+            promises.push(retrieveChunk(actorState, fileName, index_));
             index_ += 1;
         };
         let fileBytes = await Promise.all(promises);

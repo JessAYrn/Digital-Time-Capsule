@@ -62,7 +62,9 @@ export const NavBar = (props) => {
         walletState,
         walletDispatch,
         accountState,
-        accountDispatch
+        accountDispatch,
+        homePageState,
+        homePageDispatch
     } = useContext(AppContext);
 
     const toggleDisplayNotifications = () => {
@@ -92,6 +94,10 @@ export const NavBar = (props) => {
     let accountStateWithoutFunction={
         ...accountState,
     }
+    
+    let homePageStateWithoutFunction={
+        ...homePageState,
+    }
 
 
     const  handleClickDashboard = useCallback(() =>  {
@@ -100,19 +106,21 @@ export const NavBar = (props) => {
             state:{
                 journal:journalStateWithoutFunction,
                 wallet:walletStateWithoutFunction,
-                account:accountStateWithoutFunction
+                account:accountStateWithoutFunction,
+                homePage:homePageStateWithoutFunction
             }
         });
     }, [journalState.reloadStatuses, walletState?.shouldReload]);
 
-    const  handleClickWallet = useCallback(() =>  {
+    const handleClickWallet = useCallback(() =>  {
        
         navigate(NAV_LINKS.wallet, { 
             replace: false, 
             state: {
                 journal:journalStateWithoutFunction,
                 wallet:walletStateWithoutFunction,
-                account:accountStateWithoutFunction
+                account:accountStateWithoutFunction,
+                homePage:homePageStateWithoutFunction
             }
         });
     }, [walletState?.shouldReload,journalState.reloadStatuses]);
@@ -123,7 +131,8 @@ export const NavBar = (props) => {
             state: {
                 journal:journalStateWithoutFunction,
                 wallet:walletStateWithoutFunction,
-                accountStateWithoutFunction
+                accountStateWithoutFunction,
+                homePage:homePageStateWithoutFunction
             }
         });
     }, [walletState?.shouldReload,journalState.reloadStatuses]);
@@ -134,7 +143,8 @@ export const NavBar = (props) => {
             state: {
                 journal:journalStateWithoutFunction,
                 wallet:walletStateWithoutFunction,
-                account:accountStateWithoutFunction
+                account:accountStateWithoutFunction,
+                homePage:homePageStateWithoutFunction
             }    
         });
     },[walletState?.shouldReload,journalState.reloadStatuses]);
@@ -145,7 +155,8 @@ export const NavBar = (props) => {
             state: {
                 journal:journalStateWithoutFunction,
                 wallet:walletStateWithoutFunction,
-                account:accountStateWithoutFunction
+                account:accountStateWithoutFunction,
+                homePage:homePageStateWithoutFunction
             }
         });
     },[walletState?.shouldReload,journalState.reloadStatuses]);
@@ -156,7 +167,8 @@ export const NavBar = (props) => {
             state: {
                 journal:journalStateWithoutFunction,
                 wallet:walletStateWithoutFunction,
-                account:accountStateWithoutFunction
+                account:accountStateWithoutFunction,
+                homePage:homePageStateWithoutFunction
             }});
     },[walletState?.shouldReload,journalState.reloadStatuses]);
 
@@ -171,6 +183,7 @@ export const NavBar = (props) => {
                 actionType: types.SET_ENTIRE_REDUX_STATE,
                 payload: initialState
             });
+            //here
         }
     });
 

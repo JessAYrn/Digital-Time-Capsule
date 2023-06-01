@@ -11,7 +11,7 @@ const AdminSection = (props) => {
     let inputRef = useRef();
 
 
-    const { journalState } = useContext(AppContext);
+    const { journalState, actorState } = useContext(AppContext);
 
     const postEmail = async (emailAddress) => {
 
@@ -27,7 +27,7 @@ const AdminSection = (props) => {
 
     const handleSubmit = async () => {
 
-        const listOfCapsules = await journalState.backendActor.getEntriesToBeSent();
+        const listOfCapsules = await actorState.backendActor.getEntriesToBeSent();
         const emailAddressesArray = listOfCapsules.ok.map((profile) => {
             return profile[0];
         });
@@ -42,7 +42,7 @@ const AdminSection = (props) => {
 
     const handleUpgrade = async () => {
         const wasmModule = await fileToBlob(inputRef.current.files[0]);
-        await journalState.backendActor.installCode(wasmModule);
+        await actorState.backendActor.installCode(wasmModule);
         console.log('done');
 
     };

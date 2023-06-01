@@ -11,6 +11,10 @@ import { useConnect } from '@connect2ic/react';
 import { DEFAULT_APP_CONTEXTS } from '../Constants';
 import walletReducer,{walletTypes, walletInitialState} from '../reducers/walletReducer'
 import accountReducer , {accountTypes, accountInitialState} from '../reducers/accountReducer';
+import homePageReducer,{homePageInitialState,homePageTypes} from '../reducers/homePageReducer';
+import actorReducer, { actorInitialState, actorTypes } from '../reducers/actorReducer';
+
+
 
 
 export const AppContext = createContext(DEFAULT_APP_CONTEXTS);
@@ -19,6 +23,9 @@ const HomePage = () => {
     const [journalState, dispatch] = useReducer(journalReducer, initialState);
     const [walletState, walletDispatch] = useReducer(walletReducer, walletInitialState);
     const [accountState, accountDispatch] = useReducer(accountReducer, accountInitialState);
+    const [homePageState, homePageDispatch] = useReducer(homePageReducer, homePageInitialState);
+    const [actorState, actorDispatch] = useReducer(actorReducer, actorInitialState);
+
 
     const connectionResult = useConnect({ onConnect: () => {}, onDisconnect: () => {} });
 
@@ -29,13 +36,17 @@ const HomePage = () => {
     const ReducerDispatches={
         walletDispatch:walletDispatch,
         journalDispatch:dispatch,
-        accountDispatch
+        accountDispatch,
+        homePageDispatch,
+        actorDispatch
     }
 
     const ReducerTypes={
         journalTypes:types,
         walletTypes,
-        accountTypes
+        accountTypes,
+        homePageTypes,
+        actorTypes
     }
 
     // dispatch state from previous route to redux store if that state exists
@@ -46,15 +57,15 @@ const HomePage = () => {
     window.onbeforeunload = window.history.replaceState(null, '');
 
     useEffect( async () => {
-        if(!journalState.backendActor) return;
+        if(!actorState.backendActor) return;
         if(journalState.reloadStatuses.canisterData){
             dispatch({
                 actionType: types.SET_IS_LOADING,
                 payload: true
             });
-            let canisterData = await journalState.backendActor.getCanisterData();
+            let canisterData = await actorState.backendActor.getCanisterData();
             if(!canisterData) return;
-            if("err" in canisterData) canisterData = await CreateUserJournal(journalState, dispatch, 'getCanisterData');
+            if("err" in canisterData) canisterData = await CreateUserJournal(actorState, dispatch, 'getCanisterData');
             if("err" in canisterData) {
                 dispatch({
                     actionType: types.SET_IS_LOADING,
@@ -62,14 +73,14 @@ const HomePage = () => {
                 });
                 return;
             }
-            canisterData = loadCanisterData(canisterData, dispatch, types);
+            canisterData = loadCanisterData(canisterData, homePageDispatch, homePageTypes);
             let requestsForApproval;
             if(canisterData.isOwner){
-                requestsForApproval = await journalState.backendActor.getRequestingPrincipals();
+                requestsForApproval = await actorState.backendActor.getRequestingPrincipals();
                 requestsForApproval = requestsForApproval.ok;
                 let updatedCanisterData = {...canisterData, requestsForApproval};
-                dispatch({
-                    actionType: types.SET_CANISTER_DATA,
+                homePageDispatch({
+                    actionType: homePageTypes.SET_CANISTER_DATA,
                     payload: updatedCanisterData
                 });
             }
@@ -84,17 +95,17 @@ const HomePage = () => {
         };
         if(journalState.reloadStatuses.journalData){
             //Load Journal Data in the background
-            const journal = await journalState.backendActor.readJournal();
+            const journal = await actorState.backendActor.readJournal();
             loadJournalData(journal, dispatch, types);
         };
         if(walletState.shouldReload){
             //Load wallet data in background
-            const walletDataFromApi = await journalState.backendActor.readWalletData();
+            const walletDataFromApi = await actorState.backendActor.readWalletData();
             await loadWalletData(walletDataFromApi, walletDispatch, walletTypes);
         };
 
 
-    }, [journalState.backendActor]);
+    }, [actorState.backendActor]);
 
     return (
         <AppContext.Provider 
@@ -104,7 +115,11 @@ const HomePage = () => {
                 accountState,
                 accountDispatch,
                 walletDispatch,
-                walletState
+                walletState,
+                homePageDispatch,
+                homePageState,
+                actorDispatch,
+                actorState
             }}
         >
 

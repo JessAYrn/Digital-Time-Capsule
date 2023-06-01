@@ -26,7 +26,7 @@ import { walletInitialState } from '../reducers/walletReducer';
 const WalletPage = (props) => {
 
     const { journalState, dispatch } = useContext(AppContext);
-    const { walletState, walletDispatch } = useContext(AppContext);
+    const { walletState, walletDispatch,actorState, actorDispatch } = useContext(AppContext);
     const [loadingTx, setIsLoadingTx] = useState(false);
     const [showReloadButton, setShowReloadButton] = useState(false);
 
@@ -40,7 +40,7 @@ const WalletPage = (props) => {
     const loadTxs = async () => {
         setIsLoadingTx(true);
         setShowReloadButton(true);
-        let result = await loadTxHistory(journalState, dispatch, types);
+        let result = await loadTxHistory(actorState, dispatch, types);
         setIsLoadingTx(false);
     };
 

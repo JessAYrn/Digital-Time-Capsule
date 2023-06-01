@@ -28,7 +28,8 @@ const JournalPage = (props) => {
 
     const { 
         journalState,
-        dispatch
+        dispatch,
+        actorState
     } = useContext(AppContext);
 
     let journalSize = journalState.journal.length;
@@ -53,7 +54,7 @@ const JournalPage = (props) => {
                 fileData, 
                 fileIndex,
                 index,
-                journalState,
+                actorState,
                 dispatch,
                 types.CHANGE_FILE_LOAD_STATUS,
                 types.SET_FILE
@@ -72,7 +73,7 @@ const JournalPage = (props) => {
     },[firstTimeOpeningPage]);
     
     //marks this page as read so that it no longer shows in the notifications section
-    if(journalPageData.entryKey) journalState.backendActor.readEntry({entryKey: journalPageData.entryKey});
+    if(journalPageData.entryKey) actorState.backendActor.readEntry({entryKey: journalPageData.entryKey});
 
     const toggleSwitch = () => {
         if(journalPageData.draft){
@@ -120,7 +121,7 @@ const JournalPage = (props) => {
 
         const entryKeyAsApiObject = (entryKey >= 0 && entryKey < journalSize - 1 ) ? [{entryKey: entryKey}] : [];
         
-        let result = await journalState.backendActor.updateJournalEntry(
+        let result = await actorState.backendActor.updateJournalEntry(
             entryKeyAsApiObject,
             entryAsApiObject
         );
@@ -140,7 +141,7 @@ const JournalPage = (props) => {
         let files = journalPageData.filesMetaData.filter(fileData => fileData.fileName !== 'null' && !fileData.error);
         journalPageData.filesMetaData = files;
         let filesSuccessfullyUploaded = true;
-        let result = await journalState.backendActor.submitFiles();
+        let result = await actorState.backendActor.submitFiles();
         if('err' in result) filesSuccessfullyUploaded = false;
     
         let result_1 = await mapAndSendEntryToApi(index, journalPageData, !filesSuccessfullyUploaded);
@@ -208,7 +209,7 @@ const JournalPage = (props) => {
         });
         let fileCount = journalPageData.filesMetaData.length;
         let fileName = journalPageData.filesMetaData[fileCount-1].fileName;
-        let result = await journalState.backendActor.deleteUnsubmittedFile(fileName);
+        let result = await actorState.backendActor.deleteUnsubmittedFile(fileName);
     };
 
     const handleAddFile = async () => {

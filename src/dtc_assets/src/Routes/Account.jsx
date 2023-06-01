@@ -10,6 +10,8 @@ import { loadJournalData, loadCanisterData, loadWalletData, recoverState  } from
 import { useConnect } from '@connect2ic/react';
 import { DEFAULT_APP_CONTEXTS } from '../Constants';
 import walletReducer,{ walletInitialState, walletTypes } from '../reducers/walletReducer';
+import homePageReducer, { homePageInitialState, homePageTypes } from '../reducers/homePageReducer';
+import actorReducer, { actorInitialState,actorTypes } from "../reducers/actorReducer";
 
 export const AppContext = createContext(DEFAULT_APP_CONTEXTS);
 
@@ -18,7 +20,8 @@ const AccountPage = () => {
     const [journalState, dispatch] = useReducer(journalReducer, initialState);
     const [accountState, accountDispatch] = useReducer(accountReducer, accountInitialState);
     const [walletState, walletDispatch]=useReducer(walletReducer,walletInitialState);
-
+    const [homePageState, homePageDispatch]=useReducer(homePageReducer,homePageInitialState);
+    const [actorState, actorDispatch] = useReducer(actorReducer, actorInitialState);
 
     //clears useLocation().state upon page refresh so that when the user refreshes the page,
     //changes made to this route aren't overrided by the useLocation().state of the previous route.
@@ -29,13 +32,17 @@ const AccountPage = () => {
     const ReducerDispatches={
         walletDispatch,
         journalDispatch:dispatch,
-        accountDispatch
+        accountDispatch,
+        homePageDispatch,
+        actorDispatch
     }
 
     const ReducerTypes={
         journalTypes:types,
         walletTypes,
-        accountTypes
+        accountTypes,
+        homePageTypes,
+        actorTypes
     }
 
     // gets state from previous route
@@ -45,15 +52,15 @@ const AccountPage = () => {
     recoverState(journalState, location, ReducerDispatches, ReducerTypes, connectionResult);
 
     useEffect(async () => {
-        if(!journalState.backendActor) return;
+        if(!actorState.backendActor) return;
         if(journalState.reloadStatuses.journalData){
             dispatch({
                 actionType: types.SET_IS_LOADING,
                 payload: true
             });
-            let journal = await journalState.backendActor.readJournal();
+            let journal = await actorState.backendActor.readJournal();
             if(!journal) return;
-            if("err" in journal) journal = await CreateUserJournal(journalState, dispatch, 'readJournal');
+            if("err" in journal) journal = await CreateUserJournal(actorState, dispatch, 'readJournal');
             if("err" in journal) {
                 dispatch({
                     actionType: types.SET_IS_LOADING,
@@ -69,18 +76,18 @@ const AccountPage = () => {
         }
         if(journalState.reloadStatuses.canisterData){
             //Load canister data in background
-            const canisterData = await journalState.backendActor.getCanisterData();
-            loadCanisterData(canisterData, dispatch, types);
+            const canisterData = await actorState.backendActor.getCanisterData();
+            loadCanisterData(canisterData, homePageDispatch, homePageTypes);
         }
         if(walletState.shouldReload){
             //Load wallet data in background
             // const walletDataFromApi = await journalState.actor.readWalletData();
             // await loadWalletData(walletDataFromApi, walletDispatch, walletTypes);
 
-            const walletDataFromApi = await journalState.backendActor.readWalletData();
+            const walletDataFromApi = await actorState.backendActor.readWalletData();
             await loadWalletData(walletDataFromApi, walletDispatch, walletTypes);
         }
-    },[journalState.backendActor]);
+    },[actorState.backendActor]);
 
     return (
         <AppContext.Provider 
@@ -90,7 +97,11 @@ const AccountPage = () => {
                 accountDispatch,
                 accountState,
                 walletDispatch,
-                walletState
+                walletState,
+                homePageState,
+                homePageDispatch,
+                actorState,
+                actorDispatch
             }}
         >
             {

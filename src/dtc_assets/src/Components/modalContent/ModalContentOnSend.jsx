@@ -20,7 +20,7 @@ const ModalContentOnSend = (props) => {
     const [isLoading, setIsLoading] = useState(false);
     const [showSummary, setShowSummary] = useState(false);
     const [showQrReader, setShowQrReader] = useState(false);
-    const {journalState, dispatch} = useContext(AppContext);
+    const {journalState, dispatch, actorState} = useContext(AppContext);
 
 
     const onCancel = () => {
@@ -39,7 +39,7 @@ const ModalContentOnSend = (props) => {
 
     const onSendConfirm = async () => {
         setIsLoading(true);
-        await journalState.backendActor.transferICP(
+        await actorState.backendActor.transferICP(
             parseInt(toE8s(amountToSend)), fromHexString(recipientAddress)
             ).then((status) => {
                 setResponseFromApi(true);

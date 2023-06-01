@@ -14,6 +14,8 @@ import EthPage from '../Pages/EthPage';
 import BtcPage from '../Pages/BtcPage';
 import { DEFAULT_APP_CONTEXTS, WALLET_TABS } from '../Constants';
 import accountReducer , {accountTypes, accountInitialState} from '../reducers/accountReducer';
+import homePageReducer,{ homePageInitialState, homePageTypes } from '../reducers/homePageReducer';
+import actorReducer , { actorInitialState, actorTypes } from '../reducers/actorReducer';
 
 
 
@@ -30,19 +32,25 @@ const WalletApp = () => {
     const [journalState, dispatch] = useReducer(journalReducer, initialState);
     const [walletState, walletDispatch] = useReducer(walletReducer, walletInitialState);
     const [accountState, accountDispatch] = useReducer(accountReducer, accountInitialState);
+    const [homePageState, homePageDispatch] = useReducer(homePageReducer, homePageInitialState);
+    const [actorState, actorDispatch] = useReducer(actorReducer, actorInitialState);
 
 
 
     const ReducerDispatches={
         walletDispatch:walletDispatch,
         journalDispatch:dispatch,
-        accountDispatch
+        accountDispatch,
+        homePageDispatch,
+        actorDispatch
     }
 
     const ReducerTypes={
         journalTypes:types,
         walletTypes,
-        accountTypes
+        accountTypes,
+        homePageTypes,
+        actorTypes
     }
 
     const connectionResult = useConnect({ onConnect: () => {}, onDisconnect: () => {} });
@@ -78,7 +86,7 @@ const WalletApp = () => {
 
     //Loading Time Capsule Data
     useEffect(async () => {
-        if(!journalState.backendActor){
+        if(!actorState.backendActor){
             return;
         }
         if(walletState.shouldReload){
@@ -86,9 +94,9 @@ const WalletApp = () => {
                 actionType: types.SET_IS_LOADING,
                 payload: true
             });
-            let walletDataFromApi = await journalState.backendActor.readWalletData()
+            let walletDataFromApi = await actorState.backendActor.readWalletData()
             if(!walletDataFromApi) return;
-            if("err" in walletDataFromApi) walletDataFromApi = await CreateUserJournal(journalState, dispatch, 'readWalletData');
+            if("err" in walletDataFromApi) walletDataFromApi = await CreateUserJournal(actorState, dispatch, 'readWalletData');
             if("err" in walletDataFromApi) {
                 dispatch({
                     actionType: types.SET_IS_LOADING,
@@ -104,16 +112,16 @@ const WalletApp = () => {
         }; 
         if(journalState.reloadStatuses.canisterData){
             //Load canister data in background
-            const canisterData = await journalState.backendActor.getCanisterData();
-            loadCanisterData(canisterData, dispatch, types);
+            const canisterData = await actorState.backendActor.getCanisterData();
+            loadCanisterData(canisterData, homePageDispatch, homePageTypes);
         }
         if(journalState.reloadStatuses.journalData){
             //Load Journal Data in the background
-            const journal = await journalState.backendActor.readJournal();
+            const journal = await actorState.backendActor.readJournal();
             loadJournalData(journal, dispatch, types);
         };
         
-    },[journalState.backendActor]);
+    },[actorState.backendActor]);
 
     return(
         <AppContext.Provider 
@@ -122,6 +130,10 @@ const WalletApp = () => {
                     dispatch,
                     walletState,
                     walletDispatch,
+                    accountDispatch,
+                    accountState,
+                    homePageDispatch,
+                    homePageState,
                     accountDispatch,
                     accountState
                 }}

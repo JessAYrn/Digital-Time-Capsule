@@ -96,6 +96,9 @@ export const DEFAULT_APP_CONTEXTS={
     walletDispatch:()=>{},
     accountState:{},
     accountDispatch:()=>{},
-
+    homePageDispatch:()=>{},
+    homePageState:{},
+    actorState:{},
+    actorDispatch:()=>{}
 }
 export const MASTER_COPY_FRONTEND_CANISTER_ID = "fkkq7-siaaa-aaaap-qaaya-cai";

@@ -86,12 +86,12 @@ export const loadWalletData = async (walletDataFromApi, dispatch, types ) => {
     });
 };
 
-export const loadTxHistory = async (journalState, dispatch, types) => {
-    if(!journalState.backendActor){
+export const loadTxHistory = async (actorState, dispatch, types) => {
+    if(!actorState.backendActor){
         throw 'No actor defined'
     };
 
-    const tx = await journalState.backendActor.readTransaction();
+    const tx = await actorState.backendActor.readTransaction();
     const transactionHistory = tx.ok.sort(function(a,b){
         const mapKeyOfA = parseInt(a[0]);
         const mapKeyOfB = parseInt(b[0]);
@@ -162,7 +162,7 @@ export const recoverState = async (journalState, location, dispatch,types,connec
 
     // dispatch state from previous route to redux store if that state exists
     if(location.state){
-        const{journal,wallet}=location.state;
+        const{journal,wallet,homePage}=location.state;
         console.log(wallet)
         if(dispatch.journalDispatch){
             dispatch.journalDispatch({
@@ -177,6 +177,14 @@ export const recoverState = async (journalState, location, dispatch,types,connec
                 payload:wallet
             })
         }
+
+        if(dispatch.homePageDispatch){
+            dispatch.homePageDispatch({
+                actionType: types.homePageTypes.SET_ENTIRE_DASHBOARD_REDUX_STATE,
+                payload:homePage
+            })
+        }
+        console.log(homePage)
         
 
         //wipe previous location state to prevent infinite loop
@@ -186,12 +194,12 @@ export const recoverState = async (journalState, location, dispatch,types,connec
             managerActor(connectionResult.activeProvider)
         ];
         const [backendActor_, managerActor_] = await Promise.all(promises);
-        dispatch({
-            actionType: types.journalTypes.SET_BACKEND_ACTOR,
+        dispatch.actorDispatch({
+            actionType: types.actorTypes.SET_BACKEND_ACTOR,
             payload: backendActor_
         });
-        dispatch({
-            actionType: types.journalTypes.SET_MANAGER_ACTOR,
+        dispatch.actorDispatch({
+            actionType: types.actorTypes.SET_MANAGER_ACTOR,
             payload: managerActor_
         });
     };
@@ -201,7 +209,7 @@ export const fileLoaderHelper =  async (
     fileData, 
     fileIndex,
     pageIndex,
-    journalState, 
+    actorState, 
     dispatch, 
     actionTypeToChangeFileLoadStatus,
     actionTypeToSetFile
@@ -213,7 +221,7 @@ export const fileLoaderHelper =  async (
         fileIndex: fileIndex,
         index: pageIndex
     });
-    const dataURL = await getFileUrl_fromApi(journalState, fileData);
+    const dataURL = await getFileUrl_fromApi(actorState, fileData);
     dispatch({
         actionType: actionTypeToSetFile,
         payload: dataURL,

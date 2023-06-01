@@ -15,9 +15,9 @@ import accountReducer, { accountInitialState, accountTypes } from '../reducers/a
 
 const AccountSection = (props) => {
 
-    const { journalState, dispatch } = useContext(AppContext);
+    const { journalState, dispatch,accountDispatch,accountState, actorState } = useContext(AppContext);
     const [pageChangesMade, setPageChangesMade] = useState(false); 
-    const [accountState,accountDispatch]=useReducer(accountReducer,accountInitialState);
+    // const [accountState,accountDispatch]=useReducer(accountReducer,accountInitialState);
     const handleUpdate = async () => {
         setPageChangesMade(false);
         dispatch({
@@ -25,17 +25,17 @@ const AccountSection = (props) => {
             payload: true
         });
         const profileInput = {
-            userName: (journalState.metaData.userName[0]) ? journalState.metaData.userName: [],
-            email: (journalState.metaData.email[0]) ? journalState.metaData.email: []
+            userName: (accountState.metaData.userName[0]) ? accountState.metaData.userName: [],
+            email: (accountState.metaData.email[0]) ? accountState.metaData.email: []
         };
-        let result = await journalState.backendActor.updateProfile(profileInput);
+        let result = await actorState.backendActor.updateProfile(profileInput);
         dispatch({
             actionType: types.SET_IS_LOADING,
             payload: false
         });
 
     };
-    const isAdmin = journalState?.metaData?.userName[0] === 'admin';
+    const isAdmin = accountState?.metaData?.userName[0] === 'admin';
 
 return(
     journalState.modalStatus.show ?
@@ -66,7 +66,7 @@ return(
                         rows={"1"}
                         dispatch={accountDispatch}
                         dispatchAction={accountTypes.CHANGE_EMAIL}
-                        value={journalState.metaData.email}
+                        value={accountState.metaData.email}
                     />
                     <InputBox
                         divClassName={"userName"}
@@ -75,7 +75,7 @@ return(
                         rows={"1"}
                         dispatch={accountDispatch}
                         dispatchAction={accountTypes.CHANGE_USERNAME}
-                        value={journalState.metaData.userName}
+                        value={accountState.metaData.userName}
                     />
                     {isAdmin && <AdminSection/>}
                 </div> 
