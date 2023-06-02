@@ -9,7 +9,7 @@ export const actorInitialState={
     managerActor: undefined,
 }
 
-const changeValue=(state = initialState, action)=>{
+const changeValue=(state = actorInitialState, action)=>{
     const {actionType, payload, index, fileIndex, blockReload } = action;
 
     switch(actionType){
@@ -23,6 +23,10 @@ const changeValue=(state = initialState, action)=>{
         return {
             ...state
         }
+        default:
+            return {
+                ...state
+            }
     }
 }
 

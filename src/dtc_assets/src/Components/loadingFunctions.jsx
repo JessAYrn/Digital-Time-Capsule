@@ -117,18 +117,10 @@ export const handleErrorOnFirstLoad = async (fnForLoadingData, fnForRefiringAuth
 }
 
 export const recoverState = async (journalState, location, dispatch,types,connectionResult) => {
-    // console.log('types :', types);
-    // let{journalTypes,walletTypes}=types;
-    // let{SET_ENTIRE_REDUX_STATE}= journalTypes;
-    // console.log(SET_ENTIRE_REDUX_STATE);
-    // console.log(journalTypes);
-    // console.log(walletTypes);
-    // console.log('types:', journalTypes.SET_ENTIRE_REDUX_STATE)
 
     // dispatch state from previous route to redux store if that state exists
     if(location.state){
         const{journal,wallet,homePage}=location.state;
-        console.log(wallet)
         if(dispatch.journalDispatch){
             dispatch.journalDispatch({
                 actionType: types.journalTypes.SET_ENTIRE_REDUX_STATE,
@@ -149,7 +141,7 @@ export const recoverState = async (journalState, location, dispatch,types,connec
                 payload:homePage
             })
         }
-        console.log(homePage)
+    
         
 
         //wipe previous location state to prevent infinite loop

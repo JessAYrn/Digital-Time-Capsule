@@ -43,7 +43,12 @@ switch(actionType){
             return{
                 ...state
             }
+    default:
+    return {
+        ...state
     }
+    }
+    
 }
 
 export default changeValue;
