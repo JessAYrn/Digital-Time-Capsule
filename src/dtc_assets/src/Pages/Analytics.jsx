@@ -73,11 +73,12 @@ const Analytics = () => {
         });
         let result = await actorState.backendActor.updateApprovalStatus(principal, newApprovalStatus);
         result = result.ok;
-     
+
         homePageDispatch({
             actionType: homePageTypes.SET_CANISTER_DATA,
             payload: { ...homePageState.canisterData, profilesMetaData: result }
-        });
+        })
+
         dispatch({
             actionType: types.SET_IS_LOADING,
             payload: false
@@ -161,8 +162,36 @@ const Analytics = () => {
         try{
             await actorState.backendActor.upgradeApp_exceptForBackendCanister();
             await actorState.managerActor.installCode_backendCanister();
+        } catch(e){
+            console.log("Error: ", e);
+            success = false;
+        };
+        dispatch({
+            actionType: types.SET_MODAL_STATUS,
+            payload: {show: true, which: MODALS_TYPES.onRegisterNewOwner, success: success}
+        })
+        dispatch({
+            actionType: types.SET_IS_LOADING,
+            payload: false
+        });
+    };
+
+    const toggleCyclesSaveMode = async () => {
+        dispatch({
+            actionType: types.SET_IS_LOADING,
+            payload: true
+        });
+        let success = true;
+        try{
+            let canisterData = await actorState.backendActor.toggleCyclesSaveMode();
+            await actorState.managerActor.installCode_backendCanister(canisterData);
+            dispatch({
+                actionType: types.SET_CANISTER_DATA,
+                payload: { ...journalState.canisterData, cyclesSaveMode: !journalState.canisterData.cyclesSaveMode }
+            });
             
         } catch(e){
+            console.log("Error: ", e);
             success = false;
         };
         dispatch({
@@ -201,7 +230,6 @@ const Analytics = () => {
                     <NavBar
                         walletLink={true}
                         journalLink={true}
-                        nftLink={true}
                         accountLink={true}
                         dashboardLink={false}
                         notificationIcon={false}
@@ -373,6 +401,20 @@ const Analytics = () => {
                                         <Switch
                                             active={homePageState.canisterData.acceptingRequests}
                                             onClick={toggleAcceptRequest}
+                                        />
+                                    </div>
+                                </div>}
+                                {journalState.canisterData.isOwner && 
+                                <div className={'switchDiv animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
+                                    <div className='section'>
+                                        <h5 className={'lebelH5'}> 
+                                            Cycles Saver Mode:  
+                                        </h5>
+                                    </div>
+                                    <div className='section'>
+                                        <Switch
+                                            active={journalState.canisterData.cyclesSaveMode}
+                                            onClick={toggleCyclesSaveMode}
                                         />
                                     </div>
                                 </div>}

@@ -52,7 +52,7 @@ const Notifications = (props) => {
                 </table>
                 <div class='scrollable'>
                     <table className={"table"}>
-                        { journalState.unreadEntries.map((page, index) => {
+                        { journalState.notifications.map((page, index) => {
                             return(
                                 <tr className={"tableRow "+index}>
                                     <td className={"tableCell "+index}>{page.date}</td>

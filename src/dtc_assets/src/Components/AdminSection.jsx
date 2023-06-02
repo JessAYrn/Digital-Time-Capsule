@@ -25,21 +25,6 @@ const AdminSection = (props) => {
         return res;
     };
 
-    const handleSubmit = async () => {
-
-        const listOfCapsules = await actorState.backendActor.getEntriesToBeSent();
-        const emailAddressesArray = listOfCapsules.ok.map((profile) => {
-            return profile[0];
-        });
-        let promises = [];
-
-        emailAddressesArray.forEach(element => {
-            promises.push(postEmail(element));
-        });
-
-        const results = await Promise.all(promises);        
-    };
-
     const handleUpgrade = async () => {
         const wasmModule = await fileToBlob(inputRef.current.files[0]);
         await actorState.backendActor.installCode(wasmModule);

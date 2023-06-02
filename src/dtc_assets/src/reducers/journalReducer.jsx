@@ -8,12 +8,12 @@ export const types = {
     SET_IS_LOGGING_IN: "SET_IS_LOGGING_IN",
     SET_JOURNAL: "SET_JOURNAL",
     SET_JOURNAL_TAB:"SET_JOURNAL_TAB",
-    SET_JOURNAL_UNREAD_ENTRIES:"SET_JOURNAL_UNREAD_ENTRIES",
+    SET_WALLET_TABS:'SET_WALLET_TABS',
+    SET_NOTIFICATIONS:"SET_NOTIFICATIONS",
     SET_BIO: "SET_BIO",
     SET_METADATA: "SET_METADATA",
     SET_MODAL_STATUS: "SET_MODAL_STATUS",
-    SET_NFT_DATA: "SET_NFT_DATA",
-    SET_NFT_DATA_RELOAD_STATUS: "SET_NFT_DATA_RELOAD_STATUS",
+    SET_WALLET_DATA_RELOAD_STATUS: "SET_WALLET_DATA_RELOAD_STATUS",
     SET_JOURNAL_DATA_RELOAD_STATUS: "SET_JOURNAL_DATA_RELOAD_STATUS",
     SET_CANISTER_DATA_RELOAD_STATUS: "SET_CANISTER_DATA_RELOAD_STATUS",
     SET_IS_AUTHENTICATED: "SET_IS_AUTHENTICATED",
@@ -26,7 +26,6 @@ export const types = {
     CHANGE_ENTRY: "CHANGE_ENTRY",
     CHANGE_UNLOCK_TIME: "CHANGE_UNLOCK_TIME",
     ADD_JOURNAL_PAGE: "ADD_JOURNAL_PAGE",
-    ADD_NFT_FILE: "ADD_NFT_FILE",
     ADD_JOURNAL_ENTRY_FILE: "ADD_JOURNAL_ENTRY_FILE",
     CHANGE_DOB: "CHANGE_DOB",
     CHANGE_POB: "CHANGE_POB",
@@ -48,9 +47,7 @@ export const types = {
     CHANGE_FILE_LOAD_STATUS: "CHANGE_FILE_LOAD_STATUS",
     CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE: "CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE",
     CHANGE_PAGE_IS_OPEN: "CHANGE_PAGE_IS_OPEN",
-    CHANGE_NFT_FILE_LOAD_STATUS: "CHANGE_NFT_FILE_LOAD_STATUS",
     REMOVE_UNSUBMITTED_PAGE: "REMOVE_UNSUBMITTED_PAGE",
-    REMOVE_NFT_FILE:"REMOVE_NFT_FILE",
     REMOVE_JOURNAL_ENTRY_FILE: "REMOVE_JOURNAL_ENTRY_FILE",
     SET_HANDLE_PAGE_SUBMIT_FUNCTION: "SET_HANDLE_PAGE_SUBMIT_FUNCTION"
 }
@@ -75,20 +72,25 @@ export const initialState = {
         isOwner: false,
         nftId: NULL_STRING_CAPITALIZED,
         supportMode: false,
+        cycleSaveMode: false,
         acceptingRequests: false,
         requestsForApproval: []
     },
     isLoggingIn: false,
-    nftData:[
-        [ {nftCollectionKey: -1},
-            {
-                nftDataTrieSize: 0,
-                id: undefined,
-                fileType: 'null',
-                numberOfCopiesOwned: 0
-            }
-        ]  
-    ],
+//     metaData: {
+//         email: [],
+//         userName: []
+//     },
+//     walletData: {
+//         balance:'',
+//         address:'',
+//         qrCodeImgUrl:'',
+//         txHistory: {
+//             isLoading: false,
+//             data: []
+//         }
+//     },
+// >>>>>>> 5f03deae2f267d13bb63afa87f566c9d2fe75523
     bio: {
         name: '',
         dob: '',
@@ -99,9 +101,8 @@ export const initialState = {
         photos: []
     },
     journal: [],
-    unreadEntries:[],
+    notifications:[],
     reloadStatuses: {
-        nftData: true,
         walletData: true,
         journalData: true,
         canisterData: true
@@ -145,7 +146,6 @@ const changeValue = (state = initialState, action) => {
     const {actionType, payload, index, fileIndex, blockReload } = action;
     let updatedFileMetaData;
     let updatedJournalPage;
-    let updatedNftFile;
     let updatedFilesMetaDataArry;
     let updatedPhotos;
 
@@ -190,11 +190,6 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
-        case types.REMOVE_NFT_FILE:
-            state.nftData = state.nftData.splice(index, 1);
-            return {
-                ...state
-            }
         case types.SET_IS_AUTHENTICATED:
             state.isAuthenticated = payload;
             return {
@@ -210,8 +205,10 @@ const changeValue = (state = initialState, action) => {
             return{
                 ...state
             }
-        case types.SET_JOURNAL_UNREAD_ENTRIES:
-        state.unreadEntries = payload;
+       
+        case types.SET_NOTIFICATIONS:
+        state.notifications = payload;
+
         return {
             ...state
         }
@@ -238,11 +235,6 @@ const changeValue = (state = initialState, action) => {
         return {
             ...state
         }
-        case types.SET_NFT_DATA:
-        state.nftData = payload;
-        return {
-            ...state
-        }
         case types.SET_JOURNAL_DATA_RELOAD_STATUS:
         state.reloadStatuses = {
             ...state.reloadStatuses,
@@ -251,10 +243,10 @@ const changeValue = (state = initialState, action) => {
         return {
             ...state
         }
-        case types.SET_NFT_DATA_RELOAD_STATUS:
+        case types.SET_WALLET_DATA_RELOAD_STATUS:
         state.reloadStatuses = {
             ...state.reloadStatuses,
-            nftData: payload
+            walletData: payload
         };
         return {
             ...state
@@ -454,16 +446,7 @@ const changeValue = (state = initialState, action) => {
             state.bio.photos = updatedFilesMetaDataArry;
             return {
                 ...state
-            }
-        case types.CHANGE_NFT_FILE_LOAD_STATUS:
-            updatedNftFile = {
-                ... state.nftData[index],
-                isLoading: payload
-            }
-            state.journal[index] = updatedNftFile;
-            return {
-                ...state
-            }    
+            } 
         case types.CHANGE_ENTRY:
             updatedJournalPage = {
                 ... state.journal[index],
@@ -490,11 +473,6 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
-        case types.ADD_NFT_FILE:
-        state.nftData.push(payload);
-        return {
-            ...state
-        }
         case types.CHANGE_NAME:
             state.bio = {
                 ...state.bio,

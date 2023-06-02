@@ -73,7 +73,9 @@ const HomePage = () => {
                 });
                 return;
             }
+
             canisterData = loadCanisterData(canisterData, homePageDispatch, homePageTypes);
+
             let requestsForApproval;
             if(canisterData.isOwner){
                 requestsForApproval = await actorState.backendActor.getRequestingPrincipals();
@@ -95,8 +97,9 @@ const HomePage = () => {
         };
         if(journalState.reloadStatuses.journalData){
             //Load Journal Data in the background
+
             const journal = await actorState.backendActor.readJournal();
-            loadJournalData(journal, dispatch, types);
+            loadJournalData(journal.ok, dispatch, types);
         };
         if(walletState.shouldReload){
             //Load wallet data in background

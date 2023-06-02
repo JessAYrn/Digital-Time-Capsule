@@ -74,7 +74,7 @@ const App = () => {
                 });
                 return;
             };
-            loadJournalData(journal, dispatch, types);
+            loadJournalData(journal.ok, dispatch, types);
             dispatch({
                 actionType: types.SET_IS_LOADING,
                 payload: false
@@ -99,8 +99,7 @@ const App = () => {
             return Notes
         }
     },[journalState.journalPageTab])//variable added to the redux
-    
-   
+
     return (
         <AppContext.Provider 
             value={{

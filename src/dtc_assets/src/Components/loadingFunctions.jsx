@@ -7,21 +7,25 @@ import { getFileUrl_fromApi } from "./Fields/fileManger/FileManagementTools";
 
 
 export const loadJournalData = (journal, dispatch, types) => {
-    const journalEntriesObject = mapApiObjectToFrontEndJournalEntriesObject(journal);
-    let journalEntries = journalEntriesObject.allEntries;
-    let unreadEntries = journalEntriesObject.unreadEntries;
-    dispatch({
-        payload: unreadEntries,
-        actionType: types.SET_JOURNAL_UNREAD_ENTRIES
-    })
-    let userJournalData = journal.ok.userJournalData || journal.ok
-    const journalBio = userJournalData[1];
-    const metaData = {email : journal.ok.email, userName: journal.ok.userName};
+    let { userJournalData, email, userName, notifications } = journal;
+    let [journalEntries, journalBio] = userJournalData;
+    journalEntries = mapApiObjectToFrontEndJournalEntriesObject(journalEntries);
+    let metaData = {};
+    if(email) metaData.email = email;
+    if(userName) metaData.userName = userName;
     
-    dispatch({
-        payload: metaData,
-        actionType: types.SET_METADATA
-    })
+    if(Object.keys(metaData).length) {
+        dispatch({
+            payload: metaData,
+            actionType: types.SET_METADATA
+        });
+    };
+    if(notifications){
+        dispatch({
+            actionType: types.SET_NOTIFICATIONS,
+            payload: notifications
+        });
+    };
     dispatch({
         payload: journalBio,
         actionType: types.SET_BIO
@@ -35,33 +39,6 @@ export const loadJournalData = (journal, dispatch, types) => {
         payload: false,
     });
 };
-
-export const loadJournalDataResponseAfterSubmit = (journal, dispatch, types) => {
-    const journalEntriesObject = mapApiObjectToFrontEndJournalEntriesObject(journal);
-    let journalEntries = journalEntriesObject.allEntries;
-    let unreadEntries = journalEntriesObject.unreadEntries;
-    dispatch({
-        payload: unreadEntries,
-        actionType: types.SET_JOURNAL_UNREAD_ENTRIES
-    })
-    let userJournalData = journal.ok
-    const journalBio = userJournalData[1];
-    
-    dispatch({
-        payload: journalBio,
-        actionType: types.SET_BIO
-    })
-    dispatch({
-        payload: journalEntries,
-        actionType: types.SET_JOURNAL
-    });
-    dispatch({
-        actionType: types.SET_JOURNAL_DATA_RELOAD_STATUS,
-        payload: false,
-    });
-};
-
-
 
 export const loadWalletData = async (walletDataFromApi, dispatch, types ) => {
 
@@ -106,18 +83,6 @@ export const loadTxHistory = async (actorState, dispatch, types) => {
         payload: transactionHistory
     });
     return {transactionHistory, tx};
-};
-
-export const loadNftData = (nftCollection, dispatch, types) => {
-    nftCollection = nftCollection.ok;
-    dispatch({
-        payload: nftCollection,
-        actionType: types.SET_NFT_DATA
-    });
-    dispatch({
-        payload: false,
-        actionType: types.SET_NFT_DATA_RELOAD_STATUS
-    });
 };
 
 export const loadCanisterData = (canisterData, dispatch, types) => {

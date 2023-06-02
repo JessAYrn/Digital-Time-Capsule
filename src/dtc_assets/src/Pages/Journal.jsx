@@ -160,6 +160,8 @@ const Journal = (props) => {
         return journalState.journal.findIndex(page => page.isOpen === true);
     }
 
+    console.log(journalState.notifications);
+
     return(
         journalState.modalStatus.show ?
         <div className={"container journal"}>
@@ -175,11 +177,10 @@ const Journal = (props) => {
                         <NavBar
                             walletLink={true}
                             journalLink={false}
-                            nftLink={true}
                             accountLink={true}
                             dashboardLink={true}
                             notificationIcon={true}
-                            unreadNotifications={journalState.unreadEntries.length}
+                            unreadNotifications={journalState.notifications}
                             context={UI_CONTEXTS.JOURNAL}
                         />
                         {journalState.isLoading ? 

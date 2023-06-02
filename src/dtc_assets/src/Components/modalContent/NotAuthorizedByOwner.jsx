@@ -1,6 +1,5 @@
 import React, {useContext}from 'react';
 import './NotAuthorizedByOwner.scss'
-import { AppContext as NftContext} from '../../Routes/NFTs';
 import { AppContext as  WalletContext} from '../../Routes/Wallet';
 import { AppContext as JournalContext } from '../../Routes/App';
 import { AppContext as  HomePageContext} from '../../Routes/HomePage';
@@ -18,9 +17,6 @@ const NotAuthorizedByOwner = (props) => {
     let AppContext;
     if(context === UI_CONTEXTS.JOURNAL){
         AppContext = JournalContext;
-    }
-    if(context === UI_CONTEXTS.NFT){
-        AppContext = NftContext
     }
     if(context === UI_CONTEXTS.HOME_PAGE){
         AppContext = HomePageContext;

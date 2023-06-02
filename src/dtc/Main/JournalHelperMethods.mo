@@ -19,6 +19,7 @@ module{
 
     public func readJournal (callerId: Principal, profilesMap: MainTypes.UserProfilesMap) : async Result.Result<({
         userJournalData : ([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio); 
+        notifications: MainTypes.Notifications;
         email: ?Text; 
         userName: ?Text;
         principal: Text;
@@ -38,10 +39,12 @@ module{
             case(? v){
                 let journal: Journal.Journal = actor(Principal.toText(v.canisterId)); 
                 let userJournalData = await journal.readJournal();
+                let notifications = await journal.getNotifications();
                 
                 return #ok({
                     userJournalData = (userJournalData.0, userJournalData.1);
                     email = v.email;
+                    notifications;
                     userName = v.userName;
                     principal = userJournalData.2;
                 });
@@ -321,64 +324,6 @@ module{
         };
         
     };
-
-    public func getEntriesToBeSent(callerId: Principal, profilesMap: MainTypes.UserProfilesMap) : 
-    async Result.Result<[(Text,[(Nat, JournalTypes.JournalEntry)])], JournalTypes.Error>{
-
-        if(Principal.toText(callerId) == "2vxsx-fae"){
-           return #err(#NotAuthorized);
-        };
-
-        let callerProfile = profilesMap.get(callerId);
-
-        switch(callerProfile){
-            case null{
-                #err(#NotFound)
-            };
-            case( ? profile){
-                let callerUserName = profile.userName;
-                switch(callerUserName){
-                    case null {
-                        #err(#NotFound)
-                    };
-                    case(? userName){
-                        if(userName == "admin"){
-                            var index = 0;
-                            let numberOfProfiles = profilesMap.size();
-                            let profilesIter = profilesMap.entries();
-                            let profilesArray = Iter.toArray(profilesIter);
-                            let AllEntriesToBeSentBuffer = Buffer.Buffer<(Text, [(Nat, JournalTypes.JournalEntry)])>(1);
-
-                            while(index < numberOfProfiles){
-                                let userProfile = profilesArray[index];
-                                switch(userProfile.1.email){
-                                    case null{
-                                        index += 1;
-                                    };
-                                    case (? email){
-                                        let userEmail = email;
-                                        let userJournal: Journal.Journal = actor(Principal.toText(userProfile.1.canisterId)); 
-                                        let userEntriesToBeSent = await userJournal.getEntriesToBeSent();
-                                        if(userEntriesToBeSent != []){
-                                            AllEntriesToBeSentBuffer.add((userEmail, userEntriesToBeSent))
-                                        };
-                                        index += 1;
-                                    };
-                                };
-                            };
-
-                            return #ok(AllEntriesToBeSentBuffer.toArray());
-                        } else {
-                            #err(#NotAuthorized);
-                        }
-                    };
-
-                };
-            };
-        };
-    };
-
-
 
 
     private  func key(x: Principal) : Trie.Key<Principal> {

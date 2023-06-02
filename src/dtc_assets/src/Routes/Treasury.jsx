@@ -69,6 +69,7 @@ const Treasury = () => {
                 });
                 return;
             }
+
             canisterData = loadCanisterData(canisterData, homePageDispatch, homePageTypes);
             let requestsForApproval;
             if(canisterData.isOwner){
@@ -84,6 +85,9 @@ const Treasury = () => {
                 actionType: types.SET_CANISTER_DATA_RELOAD_STATUS,
                 payload: false,
             });
+
+            loadJournalData(journal.ok, dispatch, types);
+
             dispatch({
                 actionType: types.SET_IS_LOADING,
                 payload: false

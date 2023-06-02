@@ -117,8 +117,10 @@ const WalletApp = () => {
         }
         if(journalState.reloadStatuses.journalData){
             //Load Journal Data in the background
+
             const journal = await actorState.backendActor.readJournal();
-            loadJournalData(journal, dispatch, types);
+            loadJournalData(journal.ok, dispatch, types);
+
         };
         
     },[actorState.backendActor]);

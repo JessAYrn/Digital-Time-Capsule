@@ -7,7 +7,7 @@ import DatePicker from "../Components/Fields/DatePicker";
 import LoadScreen from "../Components/LoadScreen";
 import { MODALS_TYPES, monthInMilliSeconds, NULL_STRING_ALL_LOWERCASE} from "../Constants";
 import { dateAisLaterThanOrSameAsDateB, getDateAsString, getDateInMilliseconds, milisecondsToNanoSeconds, scrollToBottom, scrollToTop } from "../Utils";
-import { loadJournalDataResponseAfterSubmit } from "../Components/loadingFunctions";
+import { loadJournalData } from "../Components/loadingFunctions";
 import * as RiIcons from 'react-icons/ri';
 import * as BiIcons from 'react-icons/bi';
 import * as ImIcons from 'react-icons/im';
@@ -120,16 +120,23 @@ const JournalPage = (props) => {
         }];
 
         const entryKeyAsApiObject = (entryKey >= 0 && entryKey < journalSize - 1 ) ? [{entryKey: entryKey}] : [];
+// <<<<<<< HEAD
         
-        let result = await actorState.backendActor.updateJournalEntry(
-            entryKeyAsApiObject,
-            entryAsApiObject
-        );
-        if('ok' in result){
-            loadJournalDataResponseAfterSubmit(result, dispatch, types);
-        }
-        return result;
+//         let result = await actorState.backendActor.updateJournalEntry(
+//             entryKeyAsApiObject,
+//             entryAsApiObject
+//         );
+//         if('ok' in result){
+//             loadJournalDataResponseAfterSubmit(result, dispatch, types);
+//         }
+//         return result;
+// =======
+// >>>>>>> 5f03deae2f267d13bb63afa87f566c9d2fe75523
 
+        let result = await actorState.backendActor.updateJournalEntry( entryKeyAsApiObject, entryAsApiObject );
+        let userJournalData = result.ok;
+        loadJournalData({userJournalData}, dispatch, types);
+        return result;
     };
 
     const handleSubmit = useCallback(async () => {
@@ -202,15 +209,6 @@ const JournalPage = (props) => {
         }
     };
 
-    const handleDeleteFile = async () => {
-        dispatch({
-            index: index,
-            actionType: types.REMOVE_JOURNAL_ENTRY_FILE
-        });
-        let fileCount = journalPageData.filesMetaData.length;
-        let fileName = journalPageData.filesMetaData[fileCount-1].fileName;
-        let result = await actorState.backendActor.deleteUnsubmittedFile(fileName);
-    };
 
     const handleAddFile = async () => {
         dispatch({

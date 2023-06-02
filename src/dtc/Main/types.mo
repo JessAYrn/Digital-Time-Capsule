@@ -1,12 +1,19 @@
-import Journal "../Journal/Journal";
 import Account "../Ledger/Account";
-import NFT "../NFT/Dip-721-NFT-Container";
 import Trie "mo:base/Trie";
 import Principal "mo:base/Principal";
 import HashMap "mo:base/HashMap";
+import JournalTypes "../Journal/journal.types";
 
 
 module{
+
+    public type JournalData = {
+        userJournalData : ([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio,); 
+        notifications: Notifications;
+        email: ?Text; 
+        userName: ?Text;
+        principal: Text;
+    };
 
     public type UserProfile = {
         canisterId : Principal;
@@ -27,10 +34,6 @@ module{
 
     public type AmountAccepted = {
         accepted: Nat64
-    };
-
-    public type Nft = {
-       nftCollection: NFT.Dip721NFT;
     };
 
     public type UserPermissions = {
@@ -58,10 +61,11 @@ module{
         currentCyclesBalance_backend: Nat;
         currentCyclesBalance_frontend: Nat;
         supportMode: Bool;
+        cyclesSaveMode: Bool;
     };
 
     public type CanisterData = {
-        managerCanisterPrincipal: Text;
+        managerCanisterPrincipal: Text; 
         frontEndPrincipal: Text;
         backEndPrincipal: Text;
         lastRecordedBackEndCyclesBalance: Nat;
@@ -70,6 +74,7 @@ module{
         nftId: Int;
         acceptingRequests: Bool;
         lastRecordedTime: Int;
+        cyclesSaveMode: Bool;
     };
 
     public type Approved = Bool;
@@ -86,6 +91,21 @@ module{
 
     public type UserProfilesArray = [(Principal, UserProfile)];
 
-    public type NftCollectionsTree = Trie.Trie<Nat, Nft>;
+    public type Notification = { text: Text; key: ?Nat};
+
+    public type Notifications = [Notification];
+
+    public let DEFAULT_CANISTER_DATA: CanisterData = {
+        managerCanisterPrincipal = "Null";
+        frontEndPrincipal = "Null";
+        backEndPrincipal = "Null";
+        lastRecordedBackEndCyclesBalance = 0;
+        backEndCyclesBurnRatePerDay = 0;
+        nftOwner = "Null";
+        nftId = -1;
+        acceptingRequests = true;
+        lastRecordedTime = 0;
+        cyclesSaveMode = false;
+    };
 
 }
