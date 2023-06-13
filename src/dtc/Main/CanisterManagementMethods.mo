@@ -26,6 +26,9 @@ import Hex "../Ledger/Hex";
 import NftCollection "../NftCollection/NftCollection";
 import Nat32 "mo:base/Nat32";
 import Support "../SupportCanisterIds/SupportCanisterIds";
+import Time "mo:base/Time";
+import Float "mo:base/Float";
+import Int "mo:base/Int";
 
 module{
 
@@ -33,6 +36,9 @@ module{
 
     private let nftCollection : NftCollection.Interface = actor(NftCollection.CANISTER_ID);
 
+    private let nanosecondsInADay: Float = 86400000000000;
+
+    private let nanosecondsInAMinute: Float = 60000000000;
 
     public func authorizePrinicpalToViewAssets(principal: Principal, frontendCanisterPrincipal: Principal) : async () {
         let assetCanister : AssetCanister.Interface = actor(Principal.toText(frontendCanisterPrincipal));
@@ -96,14 +102,10 @@ module{
             if(thisPrincipalAsText == principalAsText){
                 ArrayBuffer.add((thisPrincipalAsText, true));
                 requestPresent := true;
-            } else {
-                ArrayBuffer.add((thisPrincipalAsText, approved));
-            };
+            } else { ArrayBuffer.add((thisPrincipalAsText, approved)); };
             index += 1;
         };
-        if(requestPresent == false){
-            ArrayBuffer.add((principalAsText, true));
-        };
+        if(requestPresent == false){ ArrayBuffer.add((principalAsText, true)); };
         return #ok(ArrayBuffer.toArray());
     };
 
@@ -112,9 +114,7 @@ module{
 
         let userProfile = profilesMap.get(principal);
         switch(userProfile){
-            case null{
-                return #err(#NotFound);
-            };
+            case null{ return #err(#NotFound); };
             case(?profile){
                 let updatedProfile : MainTypes.UserProfile = {
                     canisterId = profile.canisterId;
@@ -144,9 +144,7 @@ module{
         var index = 0;
         while(index < requestsForAccessSize){
             let (thisPrincipalAsText, approved) = requestsForAccess[index];
-            if(thisPrincipalAsText != principalAsText){
-                ArrayBuffer.add((principalAsText, approved));
-            };
+            if(thisPrincipalAsText != principalAsText){ ArrayBuffer.add((principalAsText, approved)); };
             index += 1;
         };
         return ArrayBuffer.toArray();
@@ -209,14 +207,14 @@ module{
         let profile = profilesMap.get(callerId);
 
         switch(profile){
-            case null{
-                return #err(#NotAuthorized);
-            };
+            case null{ return #err(#NotAuthorized); };
             case ( ? existingProfile){
 
                 let profilesApprovalStatus = getProfilesMetaData(profilesMap);
                 let frontendPrincipal = Principal.fromText(canisterData.frontEndPrincipal);
+                let managerPrincipal = Principal.fromText(canisterData.managerCanisterPrincipal);
                 let cyclesBalance_frontend = await getCyclesBalance(frontendPrincipal);
+                let currentCyclesBalance_manager = await getCyclesBalance(managerPrincipal);
                 let isOwner = Principal.toText(callerId) == canisterData.nftOwner;
                 let canisterDataPackagedForExport = {
                     journalCount = profilesMap.size();
@@ -226,6 +224,7 @@ module{
                     lastRecordedBackEndCyclesBalance = canisterData.lastRecordedBackEndCyclesBalance;
                     currentCyclesBalance_frontend = cyclesBalance_frontend;
                     currentCyclesBalance_backend = cyclesBalance_backend;
+                    currentCyclesBalance_manager = currentCyclesBalance_manager;
                     backEndCyclesBurnRatePerDay = canisterData.backEndCyclesBurnRatePerDay;
                     nftOwner = canisterData.nftOwner;
                     acceptingRequests = canisterData.acceptingRequests;
@@ -241,45 +240,60 @@ module{
         }
     };
 
-    public func setCyclesBurnRate(currentCylcesBalance: Nat, canisterData : MainTypes.CanisterData) : MainTypes.CanisterData{
+    private func refillCanisterCycles(canisterData: MainTypes.CanisterData, profilesMap : MainTypes.UserProfilesMap) : async () {
+        let numberOfProfiles = profilesMap.size();
+        let profilesIter = profilesMap.entries();
+        let profilesArray = Iter.toArray(profilesIter);
+        var index = 0;
+        let frontendCanisterStatus = await ic.canister_status({ canister_id = Principal.fromText(canisterData.frontEndPrincipal) });
+        let managerCanisterStatus = await ic.canister_status({ canister_id = Principal.fromText(canisterData.managerCanisterPrincipal)});
+        if(frontendCanisterStatus.cycles < 2_000_000_000_000){
+            await ic.provisional_top_up_canister({ 
+                canister_id = Principal.fromText(canisterData.frontEndPrincipal);
+                amount = 1_000_000_000_000
+            });
+        };
+        if(managerCanisterStatus.cycles < 2_000_000_000_000) {
+            await ic.provisional_top_up_canister({ 
+                canister_id = Principal.fromText(canisterData.managerCanisterPrincipal);
+                amount = 1_000_000_000_000
+            });
+        };
+        while(index < numberOfProfiles){
+            let (principal, profile) = profilesArray[index];
+            let approved = Option.get(profile.approved, false);
+            if(approved){
+                Cycles.add(100_000_000_000);
+                let userCanister : Journal.Journal = actor(Principal.toText(profile.canisterId));
+                let amountAccepted = ignore userCanister.wallet_receive();
+            };
+            index += 1;
+        };
+    };
 
-        let cylesDecreased : Bool = Nat.less(currentCylcesBalance, canisterData.lastRecordedBackEndCyclesBalance);
-        if(cylesDecreased == true){
-            let cyclesBurned : Nat = canisterData.lastRecordedBackEndCyclesBalance - currentCylcesBalance;
+    public func updateCanistersData(currentCylcesBalance: Nat, canisterData : MainTypes.CanisterData, profilesMap: MainTypes.UserProfilesMap): 
+    async MainTypes.CanisterData{
 
+        let cyclesBurned : Float = Float.fromInt(canisterData.lastRecordedBackEndCyclesBalance - currentCylcesBalance);
+        let timeLapsed : Float = Float.fromInt(Time.now() - canisterData.lastRecordedTime);
+        let timeLapsedInDays : Float = timeLapsed / nanosecondsInADay;
+        let dailyBurnRate : Nat = Int.abs(Float.toInt(cyclesBurned / timeLapsedInDays));
+        if(timeLapsedInDays > 1){
+            ignore refillCanisterCycles(canisterData, profilesMap);
             let updatedCanisterData = {
                 managerCanisterPrincipal = canisterData.managerCanisterPrincipal;
                 frontEndPrincipal = canisterData.frontEndPrincipal;
                 backEndPrincipal = canisterData.backEndPrincipal;
-                lastRecordedBackEndCyclesBalance = canisterData.lastRecordedBackEndCyclesBalance;
-                backEndCyclesBurnRatePerDay = cyclesBurned;
+                lastRecordedBackEndCyclesBalance = currentCylcesBalance;
+                backEndCyclesBurnRatePerDay = dailyBurnRate;
                 nftOwner = canisterData.nftOwner;
                 nftId = canisterData.nftId;
                 acceptingRequests = canisterData.acceptingRequests;
-                lastRecordedTime = canisterData.lastRecordedTime;
+                lastRecordedTime = Time.now();
                 cyclesSaveMode = canisterData.cyclesSaveMode;
             };
             return updatedCanisterData;
         } else { return canisterData };
-    };
-
-    public func setLastRecordedBackEndCyclesBalance(currentCylcesBalance: Nat, currentTime: Int, canisterData : MainTypes.CanisterData) : 
-    MainTypes.CanisterData{
-
-        let updatedCanisterData = {
-            managerCanisterPrincipal = canisterData.managerCanisterPrincipal;
-            frontEndPrincipal = canisterData.frontEndPrincipal;
-            backEndPrincipal = canisterData.backEndPrincipal;
-            lastRecordedBackEndCyclesBalance = currentCylcesBalance;
-            backEndCyclesBurnRatePerDay = canisterData.backEndCyclesBurnRatePerDay;
-            nftOwner = canisterData.nftOwner;
-            nftId = canisterData.nftId;
-            lastRecordedTime = currentTime;
-            acceptingRequests = canisterData.acceptingRequests;
-            cyclesSaveMode = canisterData.cyclesSaveMode;
-        };
-
-        return updatedCanisterData;
     };
 
     public func toggleAcceptRequest(callerId: Principal, canisterData: MainTypes.CanisterData) : 

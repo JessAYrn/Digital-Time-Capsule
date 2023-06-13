@@ -1,7 +1,7 @@
 import Account "../Ledger/Account";
 import Trie "mo:base/Trie";
 import HashMap "mo:base/HashMap";
-
+import NotificationsTypes "../Main/types.notifications";
 module {
     public type EntryKey = {
         entryKey: Nat;
@@ -81,5 +81,30 @@ module {
         #ZeroAddress;
         #NotAcceptingRequests;
     };
+
+    public type ReadJournalResult = {
+        userJournalData : ([(Nat,JournalEntry)], Bio); 
+        notifications: NotificationsTypes.Notifications;
+        email: ?Text; 
+        userName: ?Text;
+        principal: Text;
+    };
+
+    public let DEFAULT_BIO: Bio = {
+        name = "";
+        dob = "";
+        pob = "";
+        dedications = "";
+        preface = "";
+        photos = [];
+    };
+
+    public let DEFAULT_MAIN_CANISTER_ID: Text = "null";
+
+    public let ZERO_NAT : Nat = 0;
+
+    public let TX_FEE : Nat64 = 10_000;
+
+    public let MAX_CYCLES_CAPACITY : Nat = 1_000_000_000_000;
     
 }

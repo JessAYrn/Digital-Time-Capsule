@@ -3,13 +3,14 @@ import Trie "mo:base/Trie";
 import Principal "mo:base/Principal";
 import HashMap "mo:base/HashMap";
 import JournalTypes "../Journal/journal.types";
+import NotificationTypes "../Main/types.notifications";
 
 
 module{
 
     public type JournalData = {
         userJournalData : ([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio,); 
-        notifications: Notifications;
+        notifications: NotificationTypes.Notifications;
         email: ?Text; 
         userName: ?Text;
         principal: Text;
@@ -60,6 +61,7 @@ module{
         isOwner: Bool;
         currentCyclesBalance_backend: Nat;
         currentCyclesBalance_frontend: Nat;
+        currentCyclesBalance_manager: Nat;
         supportMode: Bool;
         cyclesSaveMode: Bool;
     };
@@ -90,10 +92,6 @@ module{
     public type UserProfilesMap = HashMap.HashMap<Principal, UserProfile>;
 
     public type UserProfilesArray = [(Principal, UserProfile)];
-
-    public type Notification = { text: Text; key: ?Nat};
-
-    public type Notifications = [Notification];
 
     public let DEFAULT_CANISTER_DATA: CanisterData = {
         managerCanisterPrincipal = "Null";

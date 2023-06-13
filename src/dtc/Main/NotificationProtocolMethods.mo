@@ -1,4 +1,3 @@
-import JournalTypes "../Journal/journal.types";
 import MainTypes "types";
 import Manager "../Manager/Manager";
 import WasmStore "../Manager/WasmStore";
@@ -10,22 +9,23 @@ import Journal "../Journal/Journal";
 import Principal "mo:base/Principal";
 import Array "mo:base/Array";
 import Iter "mo:base/Iter";
+import NotificationTypes "types.notifications";
 
 module{
 
     public func appendNotificationsFromJournal(
         caller: Principal, 
         userProfilesMap: MainTypes.UserProfilesMap, 
-        notifications: MainTypes.Notifications
-    ): async [MainTypes.Notification]{
+        notifications: NotificationTypes.Notifications
+    ): async [NotificationTypes.Notification]{
         let userJournal = userProfilesMap.get(caller);
         switch(userJournal){
             case null {throw Error.reject("user profile not found")};
             case(?journal){
                 let userCanister: Journal.Journal = actor(Principal.toText(journal.canisterId));
                 let notifications_ = await userCanister.getNotifications();
-                let notificationsBuffer = Buffer.fromArray<MainTypes.Notification>(notifications);
-                let notificationsBuffer_ = Buffer.fromArray<MainTypes.Notification>(notifications_);
+                let notificationsBuffer = Buffer.fromArray<NotificationTypes.Notification>(notifications);
+                let notificationsBuffer_ = Buffer.fromArray<NotificationTypes.Notification>(notifications_);
                 notificationsBuffer.append(notificationsBuffer_);
                 return notificationsBuffer.toArray();
             };
@@ -58,13 +58,13 @@ module{
         };
     };
 
-    public func notifyOfNewStableRelease(canisterData: MainTypes.CanisterData, notifications: MainTypes.Notifications): 
-    async [MainTypes.Notification]{
+    public func notifyOfNewStableRelease(canisterData: MainTypes.CanisterData, notifications: NotificationTypes.Notifications): 
+    async [NotificationTypes.Notification]{
         let managerCanister : Manager.Manager = actor(canisterData.managerCanisterPrincipal);
         let wasmStore: WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
         let currentReleaseVersion = await managerCanister.getCurrentReleaseVersion();
         let nextStableVersion = await wasmStore.getNextStableRelease(currentReleaseVersion);
-        let buffer = Buffer.fromArray<MainTypes.Notification>(notifications);
+        let buffer = Buffer.fromArray<NotificationTypes.Notification>(notifications);
         if(nextStableVersion > nextStableVersion){
             let text = Text.concat("New Stable Version Availabe: Version #", Nat.toText(nextStableVersion));
             let key = null;

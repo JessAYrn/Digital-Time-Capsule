@@ -14,8 +14,13 @@ import Array "mo:base/Array";
 import Journal "../Journal/Journal";
 import CanisterManagementMethods "../Main/CanisterManagementMethods";
 import HashMap "mo:base/HashMap";
+import AssetCanister "../AssetCanister/AssetCanister";
+import Manager "../Manager/Manager";
+import IC "../IC/ic.types";
 
 module{
+
+    private let ic : IC.Self = actor "aaaaa-aa";
 
     public func create (
         callerId: Principal, 
@@ -26,25 +31,18 @@ module{
         canisterData: MainTypes.CanisterData
     ) : async Result.Result<MainTypes.AmountAccepted, JournalTypes.Error> {
 
-        if(not isLocal and Principal.toText(callerId) == "2vxsx-fae"){
-           return #err(#NotAuthorized);
-        };
+        if(not isLocal and Principal.toText(callerId) == "2vxsx-fae"){ return #err(#NotAuthorized);};
 
         let callerIdAsText = Principal.toText(callerId);
         let isApprovedOption = Array.find(
             requestsForAccess, func (x: (Text, MainTypes.Approved)) : Bool {
                 let (principalAsText, approved) = x;
-                if(principalAsText == callerIdAsText and approved == true){
-                    return true;
-                } else {
-                    false
-                };
+                if(principalAsText == callerIdAsText and approved == true){ return true;}
+                else { false };
             }
         );
 
-        if(Option.isNull(isApprovedOption) == true){
-            return #err(#NotAuthorized);
-        };
+        if(Option.isNull(isApprovedOption) == true){ return #err(#NotAuthorized);};
 
         let existing = profilesMap.get(callerId);
 
@@ -76,44 +74,31 @@ module{
                 
                 return #ok(amountAccepted);
             };
-            case ( ? v) {
-                return #err(#AlreadyExists);
-            }
+            case ( ? v) { return #err(#AlreadyExists); }
         };
     };
 
     public func updateProfile(callerId: Principal, profilesMap: MainTypes.UserProfilesMap, profile: MainTypes.ProfileInput) : 
     async Result.Result<(), JournalTypes.Error> {
-
         let result = profilesMap.get(callerId);
-
         switch (result){
-            //Preventing updates to profiles that haven't been created yet
-            case null {
-                #err(#NotFound);
-            };
+            case null { return #err(#NotFound); };
             case(? v) {
-
                 let userNameAvailable = isUserNameAvailable(profile.userName, callerId, profilesMap);
-                if(userNameAvailable == true){
-                    let userProfile : MainTypes.UserProfile = {
-                        canisterId = v.canisterId;
-                        email = profile.email;
-                        userName = profile.userName;
-                        userPrincipal = callerId;
-                        accountId = v.accountId;
-                        approved = ?true;
-                        treasuryMember = ?false;
-                        treasuryContribution = ?0;
-                        monthsSpentAsTreasuryMember = ?0;
-
-                    };
-
-                    let newProfile = profilesMap.replace(callerId, userProfile);            
-                    #ok(());
-                } else {
-                    #err(#UserNameTaken);
-                }
+                if(not userNameAvailable){ return #err(#UserNameTaken); };
+                let userProfile : MainTypes.UserProfile = {
+                    canisterId = v.canisterId;
+                    email = profile.email;
+                    userName = profile.userName;
+                    userPrincipal = callerId;
+                    accountId = v.accountId;
+                    approved = ?true;
+                    treasuryMember = ?false;
+                    treasuryContribution = ?0;
+                    monthsSpentAsTreasuryMember = ?0;
+                };
+                let newProfile = profilesMap.replace(callerId, userProfile);            
+                return #ok(());
             };
         };
     };
@@ -121,16 +106,10 @@ module{
 
     public func delete(callerId: Principal, profilesMap: MainTypes.UserProfilesMap) : 
     async Result.Result<(), JournalTypes.Error> {
-
         let result = profilesMap.get(callerId);
-
         switch (result){
-            //Preventing updates to profiles that haven't been created yet
-            case null {
-                #err(#NotFound);
-            };
+            case null { #err(#NotFound); };
             case(? v) {
-
                 let newProfile = profilesMap.delete(callerId);
                 #ok(());
             };
@@ -172,23 +151,6 @@ module{
                     true
                 }
             };
-        };
-    };
-
-    public func refillCanisterCycles(profilesMap : MainTypes.UserProfilesMap) : async () {
-        let numberOfProfiles = profilesMap.size();
-        let profilesIter = profilesMap.entries();
-        let profilesArray = Iter.toArray(profilesIter);
-        var index = 0;
-        while(index < numberOfProfiles){
-            let (principal, profile) = profilesArray[index];
-            let approved = Option.get(profile.approved, false);
-            if(approved){
-                Cycles.add(100_000_000_000);
-                let userCanister : Journal.Journal = actor(Principal.toText(profile.canisterId));
-                let amountAccepted = ignore userCanister.wallet_receive();
-            };
-            index += 1;
         };
     };
 

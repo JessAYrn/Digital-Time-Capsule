@@ -39,6 +39,8 @@ import Manager "Manager/Manager";
 import AssetCanister "AssetCanister/AssetCanister";
 import WasmStore "Manager/WasmStore";
 import NotificationProtocolMethods "Main/NotificationProtocolMethods";
+import NotificationsTypes "Main/types.notifications";
+import Float "mo:base/Float";
 
 shared actor class User() = this {
 
@@ -55,7 +57,7 @@ shared actor class User() = this {
         Principal.hash
     );
 
-    private stable var notifications : MainTypes.Notifications = [];
+    private stable var notifications : NotificationsTypes.Notifications = [];
 
     private stable var supportMode : Bool = false;
 
@@ -323,21 +325,10 @@ shared actor class User() = this {
 
     public shared({caller}) func getCanisterData() : async Result.Result<(MainTypes.CanisterDataExport), JournalTypes.Error> {
         let cyclesBalance_backend = Cycles.balance();
-        let canisterDataPackagedForExport = await CanisterManagementMethods.getCanisterData(caller, canisterData, cyclesBalance_backend, supportMode, userProfilesMap);
+        let updatedCanisterData = await CanisterManagementMethods.updateCanistersData(cyclesBalance_backend, canisterData, userProfilesMap);
+        let canisterDataPackagedForExport = await CanisterManagementMethods.getCanisterData(caller, updatedCanisterData, cyclesBalance_backend, supportMode, userProfilesMap);
+        canisterData := updatedCanisterData;
         return canisterDataPackagedForExport;
-    };
-
-    private func setCyclesBurnRate() : (){
-        let currentCylcesBalance : Nat = Cycles.balance();
-        let updatedCanisterData = CanisterManagementMethods.setCyclesBurnRate(currentCylcesBalance, canisterData);
-        canisterData := updatedCanisterData;
-    };
-
-    private func setLastRecordedBackEndCyclesBalance() : (){
-        let currentCylcesBalance = Cycles.balance();
-        let currentTime = Time.now();
-        let updatedCanisterData = CanisterManagementMethods.setLastRecordedBackEndCyclesBalance(currentCylcesBalance, currentTime, canisterData);
-        canisterData := updatedCanisterData;
     };
 
     public shared({ caller }) func upgradeApp_exceptForBackendCanister(): async MainTypes.CanisterData{
@@ -393,7 +384,7 @@ shared actor class User() = this {
         };
     };
 
-    public shared({ caller }) func getNotifications(): async MainTypes.Notifications{
+    public shared({ caller }) func getNotifications(): async NotificationsTypes.Notifications{
         let notifications_ = await NotificationProtocolMethods.appendNotificationsFromJournal(caller, userProfilesMap, notifications);
         return notifications_;
     };
@@ -413,8 +404,6 @@ shared actor class User() = this {
         notifications := result;
     };
 
-    private func refillCanisterCycles() : async () { let result = await MainMethods.refillCanisterCycles(userProfilesMap); };
-
     public func wallet_receive() : async { accepted: Nat64 } {
         let amount = Cycles.available();
         let limit : Nat = capacity - balance;
@@ -425,18 +414,14 @@ shared actor class User() = this {
         { accepted = Nat64.fromNat(accepted) };
     };
 
-    system func heartbeat() : async () {
-        heartBeatCount += 1;
-        if(Time.now() - canisterData.lastRecordedTime > nanosecondsInADay){
-            setCyclesBurnRate();
-            setLastRecordedBackEndCyclesBalance();
-        };
-        if(heartBeatCount % heartBeatInterval == 0){ ignore updateUsersTxHistory(); };
-        if(heartBeatCount % heartBeatInterval_refill == 0){ 
-            let result = ignore refillCanisterCycles(); 
-            ignore updateNotifications();
-        };
-    };
+    // system func heartbeat() : async () {
+    //     heartBeatCount += 1;
+    //     if(heartBeatCount % heartBeatInterval == 0){ ignore updateUsersTxHistory(); };
+    //     if(heartBeatCount % heartBeatInterval_refill == 0){ 
+    //         ignore CanisterManagementMethods.updateCanistersData(Cycles.balance(), canisterData, userProfilesMap); 
+    //         ignore updateNotifications();
+    //     };
+    // };
 
     system func preupgrade() { userProfilesArray := Iter.toArray(userProfilesMap.entries()); };
 

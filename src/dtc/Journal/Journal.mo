@@ -21,6 +21,7 @@ import Option "mo:base/Option";
 import JournalTypes "journal.types";
 import HashMap "mo:base/HashMap";
 import MainTypes "../Main/types";
+import NotificationsTypes "../Main/types.notifications";
 
 shared(msg) actor class Journal (principal : Principal) = this {
 
@@ -69,7 +70,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         photos = [];
     };
 
-    private stable var notifications : MainTypes.Notifications = [];
+    private stable var notifications : NotificationsTypes.Notifications = [];
 
     private stable var mainCanisterId_ : Text = "null"; 
 
@@ -212,7 +213,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     public shared({caller}) func updateNotifications(): async (){
         if( Principal.toText(caller) != mainCanisterId_) { throw Error.reject("Unauthorized access."); };
-        let notificationsBuffer = Buffer.fromArray<MainTypes.Notification>(notifications);
+        let notificationsBuffer = Buffer.fromArray<NotificationsTypes.Notification>(notifications);
         let journalIter = journalMap.entries();
         Iter.iterate<(Nat, JournalTypes.JournalEntry)>(journalIter, func((key, entry) : (Nat, JournalTypes.JournalEntry), _index) {
             let {
@@ -231,7 +232,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         notifications := notificationsBuffer.toArray();
     };
 
-    public query({caller}) func getNotifications(): async MainTypes.Notifications{
+    public query({caller}) func getNotifications(): async NotificationsTypes.Notifications{
         if( Principal.toText(caller) != mainCanisterId_) { throw Error.reject("Unauthorized access."); };
         return notifications;
     };

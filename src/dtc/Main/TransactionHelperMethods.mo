@@ -23,17 +23,12 @@ module{
 
         let userProfile = profilesMap.get(callerId);
         switch(userProfile) {
-            case null{
-                #err(#NotFound)
-            }; 
+            case null{ #err(#NotFound) }; 
             case (? profile){
                 let userJournal : Journal.Journal = actor(Principal.toText(profile.canisterId));
                 let icpTransferStatus = await userJournal.transferICP(amount, canisterAccountId);
-                if(icpTransferStatus == true){
-                    #ok(());
-                } else {
-                    #err(#TxFailed);
-                }
+                if(icpTransferStatus == true){ #ok(()); } 
+                else { #err(#TxFailed); }
             };
         };
     };
@@ -44,9 +39,7 @@ module{
         let callerProfile = profilesMap.get(callerId);
 
         switch(callerProfile){
-            case null{
-                #err(#NotFound);
-            }; 
+            case null{ #err(#NotFound); }; 
             case ( ? profile){
                 let userJournal : Journal.Journal = actor(Principal.toText(profile.canisterId));
                 let tx = await userJournal.readWalletTxHistory();
@@ -58,8 +51,7 @@ module{
     public func updateUsersTxHistory(
         profilesMap: MainTypes.UserProfilesMap,
         startIndexForBlockChainQuery: Nat64
-        ) : 
-    async (Nat64) {
+    ) : async (Nat64) {
 
         let tipOfChainInfo = await tipOfChainDetails();
         let tipOfChainIndex : Nat64 = tipOfChainInfo.0;

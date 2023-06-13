@@ -47,7 +47,6 @@ const HomePage = () => {
                 });
                 return;
             }
-            console.log(canisterData);
             canisterData = loadCanisterData(canisterData, dispatch, types);
             let requestsForApproval;
             if(canisterData.isOwner){
