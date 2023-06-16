@@ -58,19 +58,18 @@ module{
         };
     };
 
-    public func notifyOfNewStableRelease(canisterData: MainTypes.CanisterData, notifications: NotificationTypes.Notifications): 
-    async [NotificationTypes.Notification]{
+    public func notifyOfNewStableRelease(canisterData: MainTypes.CanisterData): 
+    async [NotificationTypes.Notification] {
         let managerCanister : Manager.Manager = actor(canisterData.managerCanisterPrincipal);
         let wasmStore: WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
         let currentReleaseVersion = await managerCanister.getCurrentReleaseVersion();
         let nextStableVersion = await wasmStore.getNextStableRelease(currentReleaseVersion);
-        let buffer = Buffer.fromArray<NotificationTypes.Notification>(notifications);
-        if(nextStableVersion > nextStableVersion){
+        if(nextStableVersion > currentReleaseVersion){
             let text = Text.concat("New Stable Version Availabe: Version #", Nat.toText(nextStableVersion));
             let key = null;
-            buffer.insert(0, {text; key;});
+            return [{text; key;}];
         };
-        return buffer.toArray();
+        return [];
     };
 
 };

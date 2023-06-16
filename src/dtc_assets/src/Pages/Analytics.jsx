@@ -332,18 +332,18 @@ const Analytics = () => {
                                         }
                                         {
                                             showUserPrincipals &&
-                                            journalState.canisterData.profilesMetaData.map(([principal, approvalStatus]) => {
+                                            journalState.canisterData.profilesMetaData.map(({userPrincipal, approvalStatus, canisterId}) => {
                                                 const onClick1 = (approvalStatus) ? 
-                                                () => handleUpdateApprovalStatus(principal, !approvalStatus) : 
+                                                () => handleUpdateApprovalStatus(userPrincipal, !approvalStatus) : 
                                                 () => {};
 
                                                 const onClick0 = (approvalStatus) ? 
                                                 () => {} : 
-                                                () => handleUpdateApprovalStatus(principal, !approvalStatus);
+                                                () => handleUpdateApprovalStatus(userPrincipal, !approvalStatus);
                                                 return (
                                                     <div className={'dataFieldRow'}>
                                                         <DataField
-                                                            text={principal}
+                                                            text={userPrincipal}
                                                             isPrincipal={true}
                                                             buttonIcon_1={journalState.canisterData.isOwner ? RiIcons.RiDeleteBin2Line : null}
                                                             buttonIcon_0={journalState.canisterData.isOwner ? FaIcons.FaCheckSquare : null}

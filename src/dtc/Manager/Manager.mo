@@ -81,11 +81,9 @@ shared(msg) actor class Manager (principal : Principal) = this {
             let wasmStore: WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
             let nextStableReleaseIndex = await wasmStore.getNextStableRelease(version);
             if(nextStableReleaseIndex <= version) return;
-            let nextRequiredReleaseIndex = await wasmStore.getNextRequiredRelease(version);
-            let nextVersionToUpgradeTo = Nat.min(nextRequiredReleaseIndex, nextStableReleaseIndex);
-            await updateModules(nextVersionToUpgradeTo);
-            await updateAssets(nextVersionToUpgradeTo);
-            version := nextVersionToUpgradeTo;
+            await updateModules(nextStableReleaseIndex);
+            await updateAssets(nextStableReleaseIndex);
+            version := nextStableReleaseIndex;
         } catch(e){};
     };
 

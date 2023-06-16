@@ -209,13 +209,15 @@ module{
         switch(profile){
             case null{ return #err(#NotAuthorized); };
             case ( ? existingProfile){
-
+                let managerCanister : Manager.Manager = actor(canisterData.managerCanisterPrincipal);
                 let profilesApprovalStatus = getProfilesMetaData(profilesMap);
                 let frontendPrincipal = Principal.fromText(canisterData.frontEndPrincipal);
                 let managerPrincipal = Principal.fromText(canisterData.managerCanisterPrincipal);
                 let cyclesBalance_frontend = await getCyclesBalance(frontendPrincipal);
                 let currentCyclesBalance_manager = await getCyclesBalance(managerPrincipal);
                 let isOwner = Principal.toText(callerId) == canisterData.nftOwner;
+                let currentVersion = await managerCanister.getCurrentReleaseVersion();
+
                 let canisterDataPackagedForExport = {
                     journalCount = profilesMap.size();
                     managerCanisterPrincipal = canisterData.managerCanisterPrincipal;
@@ -234,6 +236,7 @@ module{
                     isOwner = isOwner;
                     supportMode = supportMode;
                     cyclesSaveMode = canisterData.cyclesSaveMode;
+                    releaseVersion = currentVersion;
                 };
                 return #ok(canisterDataPackagedForExport);
             }
@@ -271,29 +274,28 @@ module{
         };
     };
 
-    public func updateCanistersData(currentCylcesBalance: Nat, canisterData : MainTypes.CanisterData, profilesMap: MainTypes.UserProfilesMap): 
+    public func heartBeat(currentCylcesBalance: Nat, canisterData : MainTypes.CanisterData, profilesMap: MainTypes.UserProfilesMap): 
     async MainTypes.CanisterData{
 
         let cyclesBurned : Float = Float.fromInt(canisterData.lastRecordedBackEndCyclesBalance - currentCylcesBalance);
         let timeLapsed : Float = Float.fromInt(Time.now() - canisterData.lastRecordedTime);
         let timeLapsedInDays : Float = timeLapsed / nanosecondsInADay;
         let dailyBurnRate : Nat = Int.abs(Float.toInt(cyclesBurned / timeLapsedInDays));
-        if(timeLapsedInDays > 1){
-            ignore refillCanisterCycles(canisterData, profilesMap);
-            let updatedCanisterData = {
-                managerCanisterPrincipal = canisterData.managerCanisterPrincipal;
-                frontEndPrincipal = canisterData.frontEndPrincipal;
-                backEndPrincipal = canisterData.backEndPrincipal;
-                lastRecordedBackEndCyclesBalance = currentCylcesBalance;
-                backEndCyclesBurnRatePerDay = dailyBurnRate;
-                nftOwner = canisterData.nftOwner;
-                nftId = canisterData.nftId;
-                acceptingRequests = canisterData.acceptingRequests;
-                lastRecordedTime = Time.now();
-                cyclesSaveMode = canisterData.cyclesSaveMode;
-            };
-            return updatedCanisterData;
-        } else { return canisterData };
+        if(timeLapsedInDays < 1){ return canisterData };
+        ignore refillCanisterCycles(canisterData, profilesMap);
+        let updatedCanisterData = {
+            managerCanisterPrincipal = canisterData.managerCanisterPrincipal;
+            frontEndPrincipal = canisterData.frontEndPrincipal;
+            backEndPrincipal = canisterData.backEndPrincipal;
+            lastRecordedBackEndCyclesBalance = currentCylcesBalance;
+            backEndCyclesBurnRatePerDay = dailyBurnRate;
+            nftOwner = canisterData.nftOwner;
+            nftId = canisterData.nftId;
+            acceptingRequests = canisterData.acceptingRequests;
+            lastRecordedTime = Time.now();
+            cyclesSaveMode = canisterData.cyclesSaveMode;
+        };
+        return updatedCanisterData;
     };
 
     public func toggleAcceptRequest(callerId: Principal, canisterData: MainTypes.CanisterData) : 
@@ -361,16 +363,19 @@ module{
         return cyclesBalance;
     };
 
-    public func getProfilesMetaData(profilesMap: MainTypes.UserProfilesMap) : MainTypes.ProfilesApprovalStatuses {
+    public func getProfilesMetaData(profilesMap: MainTypes.UserProfilesMap) : MainTypes.ProfilesMetaData {
         let profilesMapEntries = profilesMap.entries();
         let profilesMapEntriesArray = Iter.toArray(profilesMapEntries);
-        let profilesApprovalStatus = Array.map<(Principal, MainTypes.UserProfile), (Text, MainTypes.Approved)>(
+        let profilesApprovalStatus = Array.map<(Principal, MainTypes.UserProfile), MainTypes.ProfileMetaData>(
             profilesMapEntriesArray, 
-            func (x: (Principal, MainTypes.UserProfile)) : (Text, MainTypes.Approved) {
-                let (principal, profile) = x;
-                let principalAsText = Principal.toText(principal);
-                let isApproved = Option.get(profile.approved, false);
-                return (principalAsText, isApproved);
+            func (x: (Principal, MainTypes.UserProfile)) : MainTypes.ProfileMetaData {
+                let (principal, {canisterId; approved}) = x;
+                let isApproved = Option.get(approved, false);
+                return {
+                    approvalStatus = isApproved; 
+                    userPrincipal = Principal.toText(principal); 
+                    canisterId = Principal.toText(canisterId) 
+                };
             }
         );
         return profilesApprovalStatus;

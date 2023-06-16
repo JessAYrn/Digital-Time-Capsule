@@ -57,8 +57,6 @@ shared actor class User() = this {
         Principal.hash
     );
 
-    private stable var notifications : NotificationsTypes.Notifications = [];
-
     private stable var supportMode : Bool = false;
 
     private stable var defaultControllers : [Principal] = [];
@@ -235,7 +233,7 @@ shared actor class User() = this {
     };
 
     public shared({caller}) func updateApprovalStatus(principal: Text, newApprovalStatus: Bool) : 
-    async Result.Result<(MainTypes.ProfilesApprovalStatuses), JournalTypes.Error>{
+    async Result.Result<(MainTypes.ProfilesMetaData), JournalTypes.Error>{
         let callerIdAsText = Principal.toText(caller);
         if(callerIdAsText != canisterData.nftOwner){ return #err(#NotAuthorized); };
         let result = await CanisterManagementMethods.updateApprovalStatus(Principal.fromText(principal), userProfilesMap, newApprovalStatus);
@@ -323,11 +321,16 @@ shared actor class User() = this {
         return balances;
     };
 
+    public shared({caller}) func heartBeat(): async (){
+        let cyclesBalance_backend = Cycles.balance();
+        ignore NotificationProtocolMethods.updateUserCanisterNotifications(userProfilesMap);
+        let updatedCanisterData = await CanisterManagementMethods.heartBeat(cyclesBalance_backend, canisterData, userProfilesMap);
+        canisterData := updatedCanisterData;
+    };  
+
     public shared({caller}) func getCanisterData() : async Result.Result<(MainTypes.CanisterDataExport), JournalTypes.Error> {
         let cyclesBalance_backend = Cycles.balance();
-        let updatedCanisterData = await CanisterManagementMethods.updateCanistersData(cyclesBalance_backend, canisterData, userProfilesMap);
-        let canisterDataPackagedForExport = await CanisterManagementMethods.getCanisterData(caller, updatedCanisterData, cyclesBalance_backend, supportMode, userProfilesMap);
-        canisterData := updatedCanisterData;
+        let canisterDataPackagedForExport = await CanisterManagementMethods.getCanisterData(caller, canisterData, cyclesBalance_backend, supportMode, userProfilesMap);
         return canisterDataPackagedForExport;
     };
 
@@ -340,13 +343,6 @@ shared actor class User() = this {
         let result_1 = await managerCanister.installCode_journalCanisters(Iter.toArray(userProfilesMap.entries()));
         await managerCanister.allowUpdatesToBackendCanister();
         return canisterData;
-    };
-
-    public shared({ caller }) func getCurrentReleaseVersion(): async Nat{
-        if(canisterData.nftOwner != Principal.toText(caller)){ throw Error.reject("Not Authorized"); };
-        let managerCanister: Manager.Manager = actor(canisterData.managerCanisterPrincipal);
-        let version = await managerCanister.getCurrentReleaseVersion();
-        return version;
     };
 
     public func getCanisterCongtrollers(canisterPrincipal: Principal) : async ([Text]) {
@@ -385,23 +381,13 @@ shared actor class User() = this {
     };
 
     public shared({ caller }) func getNotifications(): async NotificationsTypes.Notifications{
+        let notifications = await NotificationProtocolMethods.notifyOfNewStableRelease(canisterData);
         let notifications_ = await NotificationProtocolMethods.appendNotificationsFromJournal(caller, userProfilesMap, notifications);
         return notifications_;
     };
 
     public shared({ caller }) func clearJournalNotifications(): async (){
         await NotificationProtocolMethods.clearJournalNotifications(caller, userProfilesMap);
-    };
-
-    public shared({ caller }) func clearBackendCanisterNotifications(): async(){
-        if(Principal.toText(caller) != canisterData.nftOwner){ throw Error.reject("Not Authorized")};
-        notifications := [];
-    };
-
-    private func updateNotifications(): async (){
-        ignore NotificationProtocolMethods.updateUserCanisterNotifications(userProfilesMap);
-        let result = await NotificationProtocolMethods.notifyOfNewStableRelease(canisterData, notifications);
-        notifications := result;
     };
 
     public func wallet_receive() : async { accepted: Nat64 } {
@@ -418,8 +404,7 @@ shared actor class User() = this {
     //     heartBeatCount += 1;
     //     if(heartBeatCount % heartBeatInterval == 0){ ignore updateUsersTxHistory(); };
     //     if(heartBeatCount % heartBeatInterval_refill == 0){ 
-    //         ignore CanisterManagementMethods.updateCanistersData(Cycles.balance(), canisterData, userProfilesMap); 
-    //         ignore updateNotifications();
+    //         ignore heartBeat();
     //     };
     // };
 

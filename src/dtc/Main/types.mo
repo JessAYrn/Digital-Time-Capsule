@@ -43,8 +43,11 @@ module{
         treasuryContribution: Nat64;
         monthsSpentAsTreasuryMember: Nat;
     };
+    
 
-    public type ProfilesApprovalStatuses = [(Text, Approved)];
+    public type ProfileMetaData = {userPrincipal : Text; canisterId : Text; approvalStatus: Bool;};
+
+    public type ProfilesMetaData = [ProfileMetaData];
 
     public type CanisterDataExport = {
         journalCount: Nat;
@@ -57,13 +60,14 @@ module{
         nftId: Int;
         acceptingRequests: Bool;
         lastRecordedTime: Int;
-        profilesMetaData: ProfilesApprovalStatuses;
+        profilesMetaData: ProfilesMetaData;
         isOwner: Bool;
         currentCyclesBalance_backend: Nat;
         currentCyclesBalance_frontend: Nat;
         currentCyclesBalance_manager: Nat;
         supportMode: Bool;
         cyclesSaveMode: Bool;
+        releaseVersion: Nat;
     };
 
     public type CanisterData = {
