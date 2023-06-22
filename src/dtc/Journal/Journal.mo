@@ -396,7 +396,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         switch (res) {
           case (#Ok(blockIndex)) {
 
-            Debug.print("Paid reward to " # debug_show principal # " in block " # debug_show blockIndex);
+            Debug.print("Paid reward to " # debug_show Principal.fromActor(this) # " in block " # debug_show blockIndex);
             return true;
           };
           case (#Err(#InsufficientFunds { balance })) {

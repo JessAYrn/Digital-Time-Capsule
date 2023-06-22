@@ -70,7 +70,7 @@ module{
         releaseVersion: Nat;
     };
 
-    public type CanisterData = {
+    public type AppMetaData = {
         managerCanisterPrincipal: Text; 
         frontEndPrincipal: Text;
         backEndPrincipal: Text;
@@ -81,6 +81,9 @@ module{
         acceptingRequests: Bool;
         lastRecordedTime: Int;
         cyclesSaveMode: Bool;
+        supportMode: Bool;
+        requestsForAccess: RequestsForAccess;
+        defaultControllers: [Principal];
     };
 
     public type Approved = Bool;
@@ -97,7 +100,7 @@ module{
 
     public type UserProfilesArray = [(Principal, UserProfile)];
 
-    public let DEFAULT_CANISTER_DATA: CanisterData = {
+    public let DEFAULT_APP_METADATA: AppMetaData = {
         managerCanisterPrincipal = "Null";
         frontEndPrincipal = "Null";
         backEndPrincipal = "Null";
@@ -108,6 +111,9 @@ module{
         acceptingRequests = true;
         lastRecordedTime = 0;
         cyclesSaveMode = false;
+        supportMode = false;
+        requestsForAccess = [];
+        defaultControllers = [];
     };
 
 }

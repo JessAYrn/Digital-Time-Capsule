@@ -57,13 +57,7 @@ shared actor class User() = this {
         Principal.hash
     );
 
-    private stable var supportMode : Bool = false;
-
-    private stable var defaultControllers : [Principal] = [];
-
-    private stable var canisterData : MainTypes.CanisterData = MainTypes.DEFAULT_CANISTER_DATA;
-
-    private stable var requestsForAccess: MainTypes.RequestsForAccess = [];
+    private stable var appMetaData : MainTypes.AppMetaData = MainTypes.DEFAULT_APP_METADATA;
 
     private stable var startIndexForBlockChainQuery : Nat64 = 3_512_868;
 
@@ -92,10 +86,10 @@ shared actor class User() = this {
     private stable var heartBeatCount : Nat64 = 0;
 
     public shared({ caller }) func create () : async Result.Result<MainTypes.AmountAccepted, JournalTypes.Error> {
-        let amountAccepted = await MainMethods.create(caller, requestsForAccess, userProfilesMap, isLocal, defaultControllers, canisterData);
-        let updatedRequestsList = await CanisterManagementMethods.removeFromRequestsList(caller, requestsForAccess);
+        let amountAccepted = await MainMethods.create(caller, userProfilesMap, isLocal, appMetaData);
+        let updatedAppMetaData = await CanisterManagementMethods.removeFromRequestsList(caller, appMetaData);
         switch(amountAccepted){
-            case(#ok(amount)){ requestsForAccess := updatedRequestsList; return #ok(amount); };
+            case(#ok(amount)){ appMetaData := updatedAppMetaData; return #ok(amount); };
             case(#err(e)){ return #err(e); };
         };
     };
@@ -217,17 +211,17 @@ shared actor class User() = this {
 
     public shared(msg) func getPrincipalsList() : async [Principal] {
         let callerId = msg.caller;
-        let result = await CanisterManagementMethods.getPrincipalsList(callerId, userProfilesMap, canisterData);
+        let result = await CanisterManagementMethods.getPrincipalsList(callerId, userProfilesMap, appMetaData);
         return result;
     };
 
     public shared({caller}) func grantAccess(principal : Text) : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error> {
         let callerIdAsText = Principal.toText(caller);
-        if(callerIdAsText != canisterData.nftOwner){ return #err(#NotAuthorized); };
+        if(callerIdAsText != appMetaData.nftOwner){ return #err(#NotAuthorized); };
         let principalAsBlob = Principal.fromText(principal);
-        let updatedCanisterData = await CanisterManagementMethods.grantAccess(principalAsBlob, requestsForAccess);
-        switch(updatedCanisterData){
-            case(#ok(data)){ requestsForAccess := data; return #ok(data); };
+        let updatedAppMetaData = await CanisterManagementMethods.grantAccess(principalAsBlob, appMetaData);
+        switch(updatedAppMetaData){
+            case(#ok(metaData)){ appMetaData := metaData; return #ok(metaData.requestsForAccess); };
             case(#err(e)){ return #err(e); };
         };
     };
@@ -235,7 +229,7 @@ shared actor class User() = this {
     public shared({caller}) func updateApprovalStatus(principal: Text, newApprovalStatus: Bool) : 
     async Result.Result<(MainTypes.ProfilesMetaData), JournalTypes.Error>{
         let callerIdAsText = Principal.toText(caller);
-        if(callerIdAsText != canisterData.nftOwner){ return #err(#NotAuthorized); };
+        if(callerIdAsText != appMetaData.nftOwner){ return #err(#NotAuthorized); };
         let result = await CanisterManagementMethods.updateApprovalStatus(Principal.fromText(principal), userProfilesMap, newApprovalStatus);
         switch(result){
             case(#ok(_)){
@@ -248,108 +242,102 @@ shared actor class User() = this {
 
     public shared({caller}) func removeFromRequestsList(principal: Text) : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error> {
         let callerIdAsText = Principal.toText(caller);
-        if(callerIdAsText != canisterData.nftOwner){ return #err(#NotAuthorized); };
+        if(callerIdAsText != appMetaData.nftOwner){ return #err(#NotAuthorized); };
         let principalAsBlob = Principal.fromText(principal);
-        let updatedRequestsList = await CanisterManagementMethods.removeFromRequestsList(principalAsBlob, requestsForAccess);
-        requestsForAccess := updatedRequestsList;
-        return #ok(updatedRequestsList);
+        let updatedAppMetaDataList = await CanisterManagementMethods.removeFromRequestsList(principalAsBlob, appMetaData);
+        appMetaData := updatedAppMetaDataList;
+        return #ok(appMetaData.requestsForAccess);
     };
 
     public shared({caller}) func configureApp(frontEndPrincipal : Text, nftId: Int ) : async Result.Result<(), JournalTypes.Error> {
-        if(canisterData.frontEndPrincipal == "Null" or canisterData.nftId == -1 or canisterData.managerCanisterPrincipal == "Null"){
+        if(appMetaData.frontEndPrincipal == "Null" or appMetaData.nftId == -1 or appMetaData.managerCanisterPrincipal == "Null"){
             let backEndPrincipalAsPrincipal = Principal.fromActor(this);
             let backEndPrincipal = Principal.toText(backEndPrincipalAsPrincipal);
-            let (updatedCanisterData, defaultControllers_) = await CanisterManagementMethods.configureApp( backEndPrincipal, frontEndPrincipal, nftId, canisterData);
-            canisterData := updatedCanisterData;
-            defaultControllers := defaultControllers_;
+            let updatedMetaData = await CanisterManagementMethods.configureApp( backEndPrincipal, frontEndPrincipal, nftId, appMetaData);
+            appMetaData := updatedMetaData;
             #ok(());
         } else { return #err(#NotAuthorized); };
     };
 
     public shared({caller}) func authorizePrinicpalToViewAssets(prinicpal: Principal): async () {
-        assert(Principal.toText(caller) == canisterData.nftOwner);
-        let frontEndPrincipal = Principal.fromText(canisterData.frontEndPrincipal);
+        assert(Principal.toText(caller) == appMetaData.nftOwner);
+        let frontEndPrincipal = Principal.fromText(appMetaData.frontEndPrincipal);
         let result = await CanisterManagementMethods.authorizePrinicpalToViewAssets(prinicpal, frontEndPrincipal);
     };
 
     public shared(msg) func getAssetCanisterAuthorizedPrincipals() : async [Principal] {
-        let assetCanister: AssetCanister.Interface = actor(canisterData.frontEndPrincipal);
+        let assetCanister: AssetCanister.Interface = actor(appMetaData.frontEndPrincipal);
         let result = await assetCanister.list_authorized();
     };
 
-    public shared({caller}) func toggleAcceptRequest() : async  Result.Result<(MainTypes.CanisterData), JournalTypes.Error>{
-        let result = CanisterManagementMethods.toggleAcceptRequest(caller, canisterData);
+    public shared({caller}) func toggleAcceptRequest() : async  Result.Result<(MainTypes.AppMetaData), JournalTypes.Error>{
+        let result = CanisterManagementMethods.toggleAcceptRequest(caller, appMetaData);
         switch(result){
             case(#err(e)){ return #err(e); };
-            case(#ok(updatedCanisterData)){ canisterData := updatedCanisterData; return #ok(updatedCanisterData);}
+            case(#ok(updatedMetaData)){ appMetaData := updatedMetaData; return #ok(updatedMetaData);}
         };
     };
 
-    public shared({caller}) func toggleCyclesSaveMode() : async MainTypes.CanisterData{
-        let updatedCanisterData = await CanisterManagementMethods.toggleCyclesSaveMode(caller, canisterData);
-        let managerCanister: Manager.Manager = actor(canisterData.managerCanisterPrincipal);
+    public shared({caller}) func toggleCyclesSaveMode() : async MainTypes.AppMetaData{
+        let updatedMetaData = await CanisterManagementMethods.toggleCyclesSaveMode(caller, appMetaData);
+        let managerCanister: Manager.Manager = actor(appMetaData.managerCanisterPrincipal);
         await managerCanister.allowUpdatesToBackendCanister();
-        canisterData := updatedCanisterData;
-        return updatedCanisterData;
+        appMetaData := updatedMetaData;
+        return updatedMetaData;
     };
 
     public shared({caller}) func getRequestingPrincipals() : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error>{
         let callerIdAsText = Principal.toText(caller);
-        if(callerIdAsText != canisterData.nftOwner){ return #err(#NotAuthorized); } 
-        else { return #ok(requestsForAccess) };
+        if(callerIdAsText != appMetaData.nftOwner){ return #err(#NotAuthorized); } 
+        else { return #ok(appMetaData.requestsForAccess) };
     };
 
     public shared({caller}) func requestApproval() : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error>{
-        if(canisterData.acceptingRequests == false){ return #err(#NotAcceptingRequests); };
-        let callerIdAsText = Principal.toText(caller);
-        let ArrayBuffer = Buffer.Buffer<(Text, MainTypes.Approved)>(1);
-        var inListAlready = false;
-        let requestsForAccessIter = Iter.fromArray(requestsForAccess);
-        Iter.iterate<(Text, MainTypes.Approved)>(requestsForAccessIter, func (x : (Text, MainTypes.Approved), index: Nat){
-            let (principalAsText, approved) = x;
-            if(principalAsText == callerIdAsText){ inListAlready := true };
-            ArrayBuffer.add((principalAsText, approved));
-        });
-        if(inListAlready == false){ ArrayBuffer.add((callerIdAsText, false)); };
-        requestsForAccess := ArrayBuffer.toArray();
-        return #ok(requestsForAccess);
+        let result = CanisterManagementMethods.requestApproval(caller, appMetaData);
+        switch(result){
+            case (#err(e)){ return #err(e)};
+            case (#ok(updatedAppMetaData)){ 
+                appMetaData := updatedAppMetaData;
+                return #ok(updatedAppMetaData.requestsForAccess)
+            };
+        };
     };
 
     public shared(msg) func getCanisterCyclesBalances() : async MainTypes.CanisterCyclesBalances{
         let cyclesBalance_backend = Cycles.balance();
-        let balances = await CanisterManagementMethods.getCanisterCyclesBalances(cyclesBalance_backend, canisterData);
+        let balances = await CanisterManagementMethods.getCanisterCyclesBalances(cyclesBalance_backend, appMetaData);
         return balances;
     };
 
     public shared({caller}) func heartBeat(): async (){
         let cyclesBalance_backend = Cycles.balance();
         ignore NotificationProtocolMethods.updateUserCanisterNotifications(userProfilesMap);
-        let updatedCanisterData = await CanisterManagementMethods.heartBeat(cyclesBalance_backend, canisterData, userProfilesMap);
-        canisterData := updatedCanisterData;
+        let updatedMetaData = await CanisterManagementMethods.heartBeat(cyclesBalance_backend, appMetaData, userProfilesMap);
+        appMetaData := updatedMetaData;
     };  
 
     public shared({caller}) func getCanisterData() : async Result.Result<(MainTypes.CanisterDataExport), JournalTypes.Error> {
         let cyclesBalance_backend = Cycles.balance();
-        let canisterDataPackagedForExport = await CanisterManagementMethods.getCanisterData(caller, canisterData, cyclesBalance_backend, supportMode, userProfilesMap);
-        return canisterDataPackagedForExport;
+        let appMetaDataPackagedForExport = await CanisterManagementMethods.getCanisterData(caller, appMetaData, cyclesBalance_backend, userProfilesMap);
+        return appMetaDataPackagedForExport;
     };
 
-    public shared({ caller }) func upgradeApp_exceptForBackendCanister(): async MainTypes.CanisterData{
-        if(Principal.toText(caller) != canisterData.nftOwner){ throw Error.reject("Unauthorized Access"); };
-        let managerCanister: Manager.Manager = actor(canisterData.managerCanisterPrincipal);
+    public shared({ caller }) func upgradeApp_exceptForBackendCanister(): async MainTypes.AppMetaData{
+        if(Principal.toText(caller) != appMetaData.nftOwner){ throw Error.reject("Unauthorized Access"); };
+        let managerCanister: Manager.Manager = actor(appMetaData.managerCanisterPrincipal);
         await managerCanister.loadNextRelease();
-        await CanisterManagementMethods.installCode_managerCanister(canisterData);
-        let result_0 = await managerCanister.installCode_frontendCanister(canisterData);
+        await CanisterManagementMethods.installCode_managerCanister(appMetaData);
+        let result_0 = await managerCanister.installCode_frontendCanister(appMetaData);
         let result_1 = await managerCanister.installCode_journalCanisters(Iter.toArray(userProfilesMap.entries()));
         await managerCanister.allowUpdatesToBackendCanister();
-        return canisterData;
+        return appMetaData;
     };
 
     public func getCanisterCongtrollers(canisterPrincipal: Principal) : async ([Text]) {
         let canisterStatus = await ic.canister_status({ canister_id = canisterPrincipal });
         let settings = canisterStatus.settings;
         let controllersOption = settings.controllers;
-        var controllers = Option.get(controllersOption, defaultControllers);
+        var controllers = Option.get(controllersOption, appMetaData.defaultControllers);
         let ArrayBuffer = Buffer.Buffer<(Text)>(1);
         let controllersIter = Iter.fromArray(controllers);
         Iter.iterate<Principal>(controllersIter, func (x: Principal, index: Nat){
@@ -361,27 +349,23 @@ shared actor class User() = this {
     };
 
     public shared({caller}) func toggleSupportMode() : async Result.Result<(),JournalTypes.Error>{
-        let result = await CanisterManagementMethods.toggleSupportMode(caller, canisterData, supportMode, defaultControllers);
+        let result = await CanisterManagementMethods.toggleSupportMode(caller, appMetaData);
         switch(result){
-            case (#ok(boolean)){ supportMode := boolean; return #ok();};
+            case (#ok(metaData)){ appMetaData := metaData; return #ok();};
             case (#err(e)){ return #err(e)};
         }
     };
 
     public shared({ caller }) func registerOwner() : async  Result.Result<(), JournalTypes.Error>{
-        let result = await CanisterManagementMethods.registerOwner(isLocal, caller, canisterData, requestsForAccess);
+        let result = await CanisterManagementMethods.registerOwner(isLocal, caller, appMetaData);
         switch(result){
-            case(#ok(canisterData_, requestsForAccess_)){
-                canisterData := canisterData_;
-                requestsForAccess := requestsForAccess_;
-                return #ok(());
-            };
+            case(#ok(metaData)){ appMetaData := metaData; return #ok(());};
             case(#err(e)){ return #err(e)};
         };
     };
 
     public shared({ caller }) func getNotifications(): async NotificationsTypes.Notifications{
-        let notifications = await NotificationProtocolMethods.notifyOfNewStableRelease(canisterData);
+        let notifications = await NotificationProtocolMethods.notifyOfNewStableRelease(appMetaData);
         let notifications_ = await NotificationProtocolMethods.appendNotificationsFromJournal(caller, userProfilesMap, notifications);
         return notifications_;
     };

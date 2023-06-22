@@ -24,18 +24,16 @@ module{
 
     public func create (
         callerId: Principal, 
-        requestsForAccess: MainTypes.RequestsForAccess, 
         profilesMap: MainTypes.UserProfilesMap, 
         isLocal: Bool,
-        defaultControllers: [Principal],
-        canisterData: MainTypes.CanisterData
+        appMetaData: MainTypes.AppMetaData
     ) : async Result.Result<MainTypes.AmountAccepted, JournalTypes.Error> {
 
         if(not isLocal and Principal.toText(callerId) == "2vxsx-fae"){ return #err(#NotAuthorized);};
 
         let callerIdAsText = Principal.toText(callerId);
         let isApprovedOption = Array.find(
-            requestsForAccess, func (x: (Text, MainTypes.Approved)) : Bool {
+            appMetaData.requestsForAccess, func (x: (Text, MainTypes.Approved)) : Bool {
                 let (principalAsText, approved) = x;
                 if(principalAsText == callerIdAsText and approved == true){ return true;}
                 else { false };
@@ -53,9 +51,9 @@ module{
                 let newUserJournal = await Journal.Journal(callerId);
                 let amountAccepted = await newUserJournal.wallet_receive();
                 ignore CanisterManagementMethods.addController(
-                    canisterData.managerCanisterPrincipal,
+                    appMetaData.managerCanisterPrincipal,
                     Principal.fromActor(newUserJournal),
-                    defaultControllers
+                    appMetaData.defaultControllers
                 );
                 let settingMainCanister = await newUserJournal.setMainCanisterPrincipalId();
                 let userAccountId = await newUserJournal.canisterAccount();

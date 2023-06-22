@@ -97,7 +97,7 @@ shared(msg) actor class Manager (principal : Principal) = this {
         permitUpdateToBackend := true;
     };
 
-    public shared({caller}) func installCode_backendCanister(canisterData: MainTypes.CanisterData): async () {
+    public shared({caller}) func installCode_backendCanister(canisterData: MainTypes.AppMetaData): async () {
         if(not permitUpdateToBackend) { throw Error.reject("Unauthorized access."); };
         let {backend; backend_without_timer} = release;
         var moduleToUse = backend;
@@ -114,7 +114,7 @@ shared(msg) actor class Manager (principal : Principal) = this {
         await CanisterManagementMethods.installCodeJournalWasms(wasmModule, profilesArray);
     };
 
-    public shared({caller}) func installCode_frontendCanister(canisterData: MainTypes.CanisterData): 
+    public shared({caller}) func installCode_frontendCanister(canisterData: MainTypes.AppMetaData): 
     async ([AssetCanister.BatchOperationKind]){
         if(Principal.toText(caller) != mainCanisterId) { throw Error.reject("Unauthorized access."); };
         let {frontend} = release;

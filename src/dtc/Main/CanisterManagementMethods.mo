@@ -45,7 +45,7 @@ module{
         let result = await assetCanister.authorize(principal);
     };
 
-    public func getPrincipalsList( callerId : Principal, profilesMap : MainTypes.UserProfilesMap, canisterData: MainTypes.CanisterData): 
+    public func getPrincipalsList( callerId : Principal, profilesMap : MainTypes.UserProfilesMap, canisterData: MainTypes.AppMetaData): 
     async [Principal] {
 
         let callerIdAsText = Principal.toText(callerId);
@@ -71,26 +71,35 @@ module{
         
     };
 
-    public func updateOwner(ownerPrincipal: Principal, canisterData: MainTypes.CanisterData) : MainTypes.CanisterData {
+    public func updateOwner(ownerPrincipal: Principal, metaData: MainTypes.AppMetaData) : MainTypes.AppMetaData {
         let callerIdAsText = Principal.toText(ownerPrincipal);
         let newCanisterData = {
-            managerCanisterPrincipal = canisterData.managerCanisterPrincipal;
-            frontEndPrincipal = canisterData.frontEndPrincipal;
-            backEndPrincipal = canisterData.backEndPrincipal;
-            lastRecordedBackEndCyclesBalance = canisterData.lastRecordedBackEndCyclesBalance;
-            backEndCyclesBurnRatePerDay = canisterData.backEndCyclesBurnRatePerDay;
+            managerCanisterPrincipal = metaData.managerCanisterPrincipal;
+            frontEndPrincipal = metaData.frontEndPrincipal;
+            backEndPrincipal = metaData.backEndPrincipal;
+            lastRecordedBackEndCyclesBalance = metaData.lastRecordedBackEndCyclesBalance;
+            backEndCyclesBurnRatePerDay = metaData.backEndCyclesBurnRatePerDay;
             nftOwner = callerIdAsText;
-            acceptingRequests = canisterData.acceptingRequests;
-            nftId = canisterData.nftId;
-            lastRecordedTime = canisterData.lastRecordedTime;
-            cyclesSaveMode = canisterData.cyclesSaveMode;
+            acceptingRequests = metaData.acceptingRequests;
+            nftId = metaData.nftId;
+            lastRecordedTime = metaData.lastRecordedTime;
+            cyclesSaveMode = metaData.cyclesSaveMode;
+            supportMode = metaData.supportMode;
+            requestsForAccess = metaData.requestsForAccess;
+            defaultControllers = metaData.defaultControllers;
+
         };
         return newCanisterData;
 
     };
 
-    public func grantAccess( principal: Principal, requestsForAccess: MainTypes.RequestsForAccess) : 
-    async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error> {
+    public func grantAccess( principal: Principal, appMetaData: MainTypes.AppMetaData) : 
+    async Result.Result<(MainTypes.AppMetaData), JournalTypes.Error> {
+        let {
+            requestsForAccess; defaultControllers; supportMode; cyclesSaveMode;
+            lastRecordedTime; acceptingRequests; nftId; nftOwner; backEndCyclesBurnRatePerDay;
+            lastRecordedBackEndCyclesBalance; backEndPrincipal; frontEndPrincipal; managerCanisterPrincipal;
+        } = appMetaData;
 
         let principalAsText = Principal.toText(principal);
         let requestsForAccessSize = Iter.size(Iter.fromArray(requestsForAccess));
@@ -106,7 +115,12 @@ module{
             index += 1;
         };
         if(requestPresent == false){ ArrayBuffer.add((principalAsText, true)); };
-        return #ok(ArrayBuffer.toArray());
+        let updatedAppMetaData: MainTypes.AppMetaData = {
+            requestsForAccess = ArrayBuffer.toArray(); defaultControllers; supportMode;
+            cyclesSaveMode; lastRecordedTime; acceptingRequests; nftId; nftOwner; backEndCyclesBurnRatePerDay;
+            lastRecordedBackEndCyclesBalance; backEndPrincipal; frontEndPrincipal; managerCanisterPrincipal;
+        }; 
+        return #ok(updatedAppMetaData);
     };
 
     public func updateApprovalStatus( principal: Principal, profilesMap: MainTypes.UserProfilesMap, newApprovalStatuse: Bool) : 
@@ -133,11 +147,39 @@ module{
         };
     };
 
-    public func removeFromRequestsList(
-        principal: Principal, 
-        requestsForAccess: MainTypes.RequestsForAccess
-    ) : async MainTypes.RequestsForAccess {
+    public func requestApproval (caller: Principal, appMetaData:  MainTypes.AppMetaData) : 
+    Result.Result<MainTypes.AppMetaData, JournalTypes.Error>{
+        if(appMetaData.acceptingRequests == false){ return #err(#NotAcceptingRequests); };
+        let{
+            requestsForAccess; defaultControllers; supportMode; cyclesSaveMode;
+            lastRecordedTime; acceptingRequests; nftId; nftOwner; backEndCyclesBurnRatePerDay;
+            lastRecordedBackEndCyclesBalance; backEndPrincipal; frontEndPrincipal; managerCanisterPrincipal;
+        } = appMetaData;
+        let callerIdAsText = Principal.toText(caller);
+        let ArrayBuffer = Buffer.Buffer<(Text, MainTypes.Approved)>(1);
+        var inListAlready = false;
+        let requestsForAccessIter = Iter.fromArray(requestsForAccess);
+        Iter.iterate<(Text, MainTypes.Approved)>(requestsForAccessIter, func (x : (Text, MainTypes.Approved), index: Nat){
+            let (principalAsText, approved) = x;
+            if(principalAsText == callerIdAsText){ inListAlready := true };
+            ArrayBuffer.add((principalAsText, approved));
+        });
+        if(inListAlready == false){ ArrayBuffer.add((callerIdAsText, false)); };
+        let updatedAppMetaData : MainTypes.AppMetaData = {
+            requestsForAccess = ArrayBuffer.toArray(); defaultControllers; supportMode;
+            cyclesSaveMode; lastRecordedTime; acceptingRequests; nftId; nftOwner; backEndCyclesBurnRatePerDay;
+            lastRecordedBackEndCyclesBalance; backEndPrincipal; frontEndPrincipal; managerCanisterPrincipal;
+        };
+        return #ok(updatedAppMetaData);
+    };
 
+    public func removeFromRequestsList( principal: Principal, appMetaData: MainTypes.AppMetaData) : 
+    async MainTypes.AppMetaData {
+        let {
+            requestsForAccess; defaultControllers; supportMode; cyclesSaveMode;
+            lastRecordedTime; acceptingRequests; nftId; nftOwner; backEndCyclesBurnRatePerDay;
+            lastRecordedBackEndCyclesBalance; backEndPrincipal; frontEndPrincipal; managerCanisterPrincipal;
+        } = appMetaData;
         let principalAsText = Principal.toText(principal);
         let requestsForAccessSize = Iter.size(Iter.fromArray(requestsForAccess));
         let ArrayBuffer = Buffer.Buffer<(Text, MainTypes.Approved)>(1);
@@ -147,7 +189,12 @@ module{
             if(thisPrincipalAsText != principalAsText){ ArrayBuffer.add((principalAsText, approved)); };
             index += 1;
         };
-        return ArrayBuffer.toArray();
+        let updatedAppMetaData : MainTypes.AppMetaData = {
+            requestsForAccess = ArrayBuffer.toArray(); defaultControllers; supportMode;
+            cyclesSaveMode; lastRecordedTime; acceptingRequests; nftId; nftOwner; backEndCyclesBurnRatePerDay;
+            lastRecordedBackEndCyclesBalance; backEndPrincipal; frontEndPrincipal; managerCanisterPrincipal;
+        };
+        return updatedAppMetaData;
     };
 
     private func addDefualtController(defaultControllers : [Principal], principal: Principal) : [Principal]{
@@ -161,8 +208,8 @@ module{
         return updatedDefualtControllersArray;
     };
 
-    public func configureApp( backEndPrincipal : Text, frontEndPrincipal : Text, nftId : Int,   canisterData : MainTypes.CanisterData) 
-    : async (MainTypes.CanisterData,[Principal]) {
+    public func configureApp( backEndPrincipal : Text, frontEndPrincipal : Text, nftId : Int,   metaData : MainTypes.AppMetaData) 
+    : async (MainTypes.AppMetaData) {
 
         Cycles.add(1_000_000_000_000);
         let managerCanister = await Manager.Manager(Principal.fromText(backEndPrincipal));
@@ -174,23 +221,26 @@ module{
         let updatedDefaultControllers_0 = addDefualtController([] , Principal.fromText(backEndPrincipal));
         let updatedDefaultControllers_1 = addDefualtController(updatedDefaultControllers_0 ,managerCanisterPrincipal);
 
-        let updatedCanisterData = {
+        let updatedMetaData = {
             managerCanisterPrincipal = Principal.toText(managerCanisterPrincipal);
             frontEndPrincipal = frontEndPrincipal;
             backEndPrincipal = backEndPrincipal;
-            lastRecordedBackEndCyclesBalance = canisterData.lastRecordedBackEndCyclesBalance;
-            backEndCyclesBurnRatePerDay = canisterData.backEndCyclesBurnRatePerDay;
-            nftOwner = canisterData.nftOwner;
-            acceptingRequests = canisterData.acceptingRequests;
+            lastRecordedBackEndCyclesBalance = metaData.lastRecordedBackEndCyclesBalance;
+            backEndCyclesBurnRatePerDay = metaData.backEndCyclesBurnRatePerDay;
+            nftOwner = metaData.nftOwner;
+            acceptingRequests = metaData.acceptingRequests;
             nftId = nftId;
-            lastRecordedTime = canisterData.lastRecordedTime;
-            cyclesSaveMode = canisterData.cyclesSaveMode;
+            lastRecordedTime = metaData.lastRecordedTime;
+            cyclesSaveMode = metaData.cyclesSaveMode;
+            supportMode = metaData.supportMode;
+            requestsForAccess = metaData.requestsForAccess;
+            defaultControllers = updatedDefaultControllers_1;
         };
 
-        return (updatedCanisterData,updatedDefaultControllers_1);
+        return (updatedMetaData);
     };
 
-    public func getCanisterCyclesBalances(backendCyclesBalance: Nat, canisterData: MainTypes.CanisterData) 
+    public func getCanisterCyclesBalances(backendCyclesBalance: Nat, canisterData: MainTypes.AppMetaData) 
     : async  MainTypes.CanisterCyclesBalances {
 
         let frontendCyclesBalance = await getCyclesBalance(Principal.fromText(canisterData.frontEndPrincipal));
@@ -198,9 +248,8 @@ module{
     };
 
     public func getCanisterData(callerId: Principal, 
-        canisterData: MainTypes.CanisterData, 
+        appMetaData: MainTypes.AppMetaData, 
         cyclesBalance_backend: Nat, 
-        supportMode: Bool, 
         profilesMap : MainTypes.UserProfilesMap
     ) : async Result.Result<(MainTypes.CanisterDataExport), JournalTypes.Error> {
 
@@ -209,33 +258,33 @@ module{
         switch(profile){
             case null{ return #err(#NotAuthorized); };
             case ( ? existingProfile){
-                let managerCanister : Manager.Manager = actor(canisterData.managerCanisterPrincipal);
+                let managerCanister : Manager.Manager = actor(appMetaData.managerCanisterPrincipal);
                 let profilesApprovalStatus = getProfilesMetaData(profilesMap);
-                let frontendPrincipal = Principal.fromText(canisterData.frontEndPrincipal);
-                let managerPrincipal = Principal.fromText(canisterData.managerCanisterPrincipal);
+                let frontendPrincipal = Principal.fromText(appMetaData.frontEndPrincipal);
+                let managerPrincipal = Principal.fromText(appMetaData.managerCanisterPrincipal);
                 let cyclesBalance_frontend = await getCyclesBalance(frontendPrincipal);
                 let currentCyclesBalance_manager = await getCyclesBalance(managerPrincipal);
-                let isOwner = Principal.toText(callerId) == canisterData.nftOwner;
+                let isOwner = Principal.toText(callerId) == appMetaData.nftOwner;
                 let currentVersion = await managerCanister.getCurrentReleaseVersion();
 
                 let canisterDataPackagedForExport = {
                     journalCount = profilesMap.size();
-                    managerCanisterPrincipal = canisterData.managerCanisterPrincipal;
-                    frontEndPrincipal = canisterData.frontEndPrincipal;
-                    backEndPrincipal = canisterData.backEndPrincipal;
-                    lastRecordedBackEndCyclesBalance = canisterData.lastRecordedBackEndCyclesBalance;
+                    managerCanisterPrincipal = appMetaData.managerCanisterPrincipal;
+                    frontEndPrincipal = appMetaData.frontEndPrincipal;
+                    backEndPrincipal = appMetaData.backEndPrincipal;
+                    lastRecordedBackEndCyclesBalance = appMetaData.lastRecordedBackEndCyclesBalance;
                     currentCyclesBalance_frontend = cyclesBalance_frontend;
                     currentCyclesBalance_backend = cyclesBalance_backend;
                     currentCyclesBalance_manager = currentCyclesBalance_manager;
-                    backEndCyclesBurnRatePerDay = canisterData.backEndCyclesBurnRatePerDay;
-                    nftOwner = canisterData.nftOwner;
-                    acceptingRequests = canisterData.acceptingRequests;
-                    nftId = canisterData.nftId;
-                    lastRecordedTime = canisterData.lastRecordedTime;
+                    backEndCyclesBurnRatePerDay = appMetaData.backEndCyclesBurnRatePerDay;
+                    nftOwner = appMetaData.nftOwner;
+                    acceptingRequests = appMetaData.acceptingRequests;
+                    nftId = appMetaData.nftId;
+                    lastRecordedTime = appMetaData.lastRecordedTime;
                     profilesMetaData = profilesApprovalStatus;
                     isOwner = isOwner;
-                    supportMode = supportMode;
-                    cyclesSaveMode = canisterData.cyclesSaveMode;
+                    supportMode = appMetaData.supportMode;
+                    cyclesSaveMode = appMetaData.cyclesSaveMode;
                     releaseVersion = currentVersion;
                 };
                 return #ok(canisterDataPackagedForExport);
@@ -243,22 +292,22 @@ module{
         }
     };
 
-    private func refillCanisterCycles(canisterData: MainTypes.CanisterData, profilesMap : MainTypes.UserProfilesMap) : async () {
+    private func refillCanisterCycles(appMetaData: MainTypes.AppMetaData, profilesMap : MainTypes.UserProfilesMap) : async () {
         let numberOfProfiles = profilesMap.size();
         let profilesIter = profilesMap.entries();
         let profilesArray = Iter.toArray(profilesIter);
         var index = 0;
-        let frontendCanisterStatus = await ic.canister_status({ canister_id = Principal.fromText(canisterData.frontEndPrincipal) });
-        let managerCanisterStatus = await ic.canister_status({ canister_id = Principal.fromText(canisterData.managerCanisterPrincipal)});
+        let frontendCanisterStatus = await ic.canister_status({ canister_id = Principal.fromText(appMetaData.frontEndPrincipal) });
+        let managerCanisterStatus = await ic.canister_status({ canister_id = Principal.fromText(appMetaData.managerCanisterPrincipal)});
         if(frontendCanisterStatus.cycles < 2_000_000_000_000){
             await ic.provisional_top_up_canister({ 
-                canister_id = Principal.fromText(canisterData.frontEndPrincipal);
+                canister_id = Principal.fromText(appMetaData.frontEndPrincipal);
                 amount = 1_000_000_000_000
             });
         };
         if(managerCanisterStatus.cycles < 2_000_000_000_000) {
             await ic.provisional_top_up_canister({ 
-                canister_id = Principal.fromText(canisterData.managerCanisterPrincipal);
+                canister_id = Principal.fromText(appMetaData.managerCanisterPrincipal);
                 amount = 1_000_000_000_000
             });
         };
@@ -274,68 +323,77 @@ module{
         };
     };
 
-    public func heartBeat(currentCylcesBalance: Nat, canisterData : MainTypes.CanisterData, profilesMap: MainTypes.UserProfilesMap): 
-    async MainTypes.CanisterData{
+    public func heartBeat(currentCylcesBalance: Nat, appMetaData : MainTypes.AppMetaData, profilesMap: MainTypes.UserProfilesMap): 
+    async MainTypes.AppMetaData{
 
-        let cyclesBurned : Float = Float.fromInt(canisterData.lastRecordedBackEndCyclesBalance - currentCylcesBalance);
-        let timeLapsed : Float = Float.fromInt(Time.now() - canisterData.lastRecordedTime);
+        let cyclesBurned : Float = Float.fromInt(appMetaData.lastRecordedBackEndCyclesBalance - currentCylcesBalance);
+        let timeLapsed : Float = Float.fromInt(Time.now() - appMetaData.lastRecordedTime);
         let timeLapsedInDays : Float = timeLapsed / nanosecondsInADay;
         let dailyBurnRate : Nat = Int.abs(Float.toInt(cyclesBurned / timeLapsedInDays));
-        if(timeLapsedInDays < 1){ return canisterData };
-        ignore refillCanisterCycles(canisterData, profilesMap);
+        if(timeLapsedInDays < 1){ return appMetaData };
+        ignore refillCanisterCycles(appMetaData, profilesMap);
         let updatedCanisterData = {
-            managerCanisterPrincipal = canisterData.managerCanisterPrincipal;
-            frontEndPrincipal = canisterData.frontEndPrincipal;
-            backEndPrincipal = canisterData.backEndPrincipal;
+            managerCanisterPrincipal = appMetaData.managerCanisterPrincipal;
+            frontEndPrincipal = appMetaData.frontEndPrincipal;
+            backEndPrincipal = appMetaData.backEndPrincipal;
             lastRecordedBackEndCyclesBalance = currentCylcesBalance;
             backEndCyclesBurnRatePerDay = dailyBurnRate;
-            nftOwner = canisterData.nftOwner;
-            nftId = canisterData.nftId;
-            acceptingRequests = canisterData.acceptingRequests;
+            nftOwner = appMetaData.nftOwner;
+            nftId = appMetaData.nftId;
+            acceptingRequests = appMetaData.acceptingRequests;
             lastRecordedTime = Time.now();
-            cyclesSaveMode = canisterData.cyclesSaveMode;
+            cyclesSaveMode = appMetaData.cyclesSaveMode;
+            supportMode = appMetaData.supportMode;
+            requestsForAccess = appMetaData.requestsForAccess;
+            defaultControllers = appMetaData.defaultControllers;
         };
         return updatedCanisterData;
     };
 
-    public func toggleAcceptRequest(callerId: Principal, canisterData: MainTypes.CanisterData) : 
-    Result.Result<(MainTypes.CanisterData), JournalTypes.Error>{
+    public func toggleAcceptRequest(callerId: Principal, appMetaData: MainTypes.AppMetaData) : 
+    Result.Result<(MainTypes.AppMetaData), JournalTypes.Error>{
         let callerIdAsText = Principal.toText(callerId);
-        if(callerIdAsText != canisterData.nftOwner){ return #err(#NotAuthorized);};
-        let updatedCanisterData = {
-            managerCanisterPrincipal = canisterData.managerCanisterPrincipal;
-            frontEndPrincipal = canisterData.frontEndPrincipal;
-            backEndPrincipal = canisterData.backEndPrincipal;
-            lastRecordedBackEndCyclesBalance = canisterData.lastRecordedBackEndCyclesBalance;
-            backEndCyclesBurnRatePerDay = canisterData.backEndCyclesBurnRatePerDay;
-            nftOwner = canisterData.nftOwner;
-            nftId = canisterData.nftId;
-            lastRecordedTime = canisterData.lastRecordedTime;
-            acceptingRequests = not canisterData.acceptingRequests;
-            cyclesSaveMode = canisterData.cyclesSaveMode;
+        if(callerIdAsText != appMetaData.nftOwner){ return #err(#NotAuthorized);};
+        let updatedMetaData = {
+            managerCanisterPrincipal = appMetaData.managerCanisterPrincipal;
+            frontEndPrincipal = appMetaData.frontEndPrincipal;
+            backEndPrincipal = appMetaData.backEndPrincipal;
+            lastRecordedBackEndCyclesBalance = appMetaData.lastRecordedBackEndCyclesBalance;
+            backEndCyclesBurnRatePerDay = appMetaData.backEndCyclesBurnRatePerDay;
+            nftOwner = appMetaData.nftOwner;
+            nftId = appMetaData.nftId;
+            lastRecordedTime = appMetaData.lastRecordedTime;
+            acceptingRequests = not appMetaData.acceptingRequests;
+            cyclesSaveMode = appMetaData.cyclesSaveMode;
+            supportMode = appMetaData.supportMode;
+            requestsForAccess = appMetaData.requestsForAccess;
+            defaultControllers = appMetaData.defaultControllers;
         };
-        return #ok(updatedCanisterData);
+        return #ok(updatedMetaData);
     };
 
-    public func toggleCyclesSaveMode(callerId: Principal, canisterData: MainTypes.CanisterData) : async MainTypes.CanisterData{
+    public func toggleCyclesSaveMode(callerId: Principal, appMetaData: MainTypes.AppMetaData) : async MainTypes.AppMetaData{
         let callerIdAsText = Principal.toText(callerId);
-        if(callerIdAsText != canisterData.nftOwner) { throw Error.reject("Unauthorized access. Caller is not the owner.") };
-        let updatedCanisterData = {
-            managerCanisterPrincipal = canisterData.managerCanisterPrincipal;
-            frontEndPrincipal = canisterData.frontEndPrincipal;
-            backEndPrincipal = canisterData.backEndPrincipal;
-            lastRecordedBackEndCyclesBalance = canisterData.lastRecordedBackEndCyclesBalance;
-            backEndCyclesBurnRatePerDay = canisterData.backEndCyclesBurnRatePerDay;
-            nftOwner = canisterData.nftOwner;
-            nftId = canisterData.nftId;
-            lastRecordedTime = canisterData.lastRecordedTime;
-            acceptingRequests = canisterData.acceptingRequests;
-            cyclesSaveMode = not canisterData.cyclesSaveMode;
+        if(callerIdAsText != appMetaData.nftOwner) { throw Error.reject("Unauthorized access. Caller is not the owner.") };
+        let updatedMetaData = {
+            managerCanisterPrincipal = appMetaData.managerCanisterPrincipal;
+            frontEndPrincipal = appMetaData.frontEndPrincipal;
+            backEndPrincipal = appMetaData.backEndPrincipal;
+            lastRecordedBackEndCyclesBalance = appMetaData.lastRecordedBackEndCyclesBalance;
+            backEndCyclesBurnRatePerDay = appMetaData.backEndCyclesBurnRatePerDay;
+            nftOwner = appMetaData.nftOwner;
+            nftId = appMetaData.nftId;
+            lastRecordedTime = appMetaData.lastRecordedTime;
+            acceptingRequests = appMetaData.acceptingRequests;
+            cyclesSaveMode = not appMetaData.cyclesSaveMode;
+            supportMode = appMetaData.supportMode;
+            requestsForAccess = appMetaData.requestsForAccess;
+            defaultControllers = appMetaData.defaultControllers;
         };
-        return updatedCanisterData;
+        return updatedMetaData;
     };
 
-    public func installCode_managerCanister( canisterData: MainTypes.CanisterData ): async (){
+    public func installCode_managerCanister( canisterData: MainTypes.AppMetaData ): async (){
         let {managerCanisterPrincipal; backEndPrincipal} = canisterData;
         let managerActor : Manager.Manager = actor(managerCanisterPrincipal);
         let wasmStoreCanister : WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
@@ -426,61 +484,69 @@ module{
 
     public func toggleSupportMode(
         caller: Principal, 
-        canisterData: MainTypes.CanisterData, 
-        supportMode: Bool, 
-        defaultControllers: [Principal]
-    ) : async Result.Result<(Bool),JournalTypes.Error>{
+        appMetaData: MainTypes.AppMetaData
+    ) : async Result.Result<(MainTypes.AppMetaData),JournalTypes.Error>{
         let callerIdAsText = Principal.toText(caller);
-        if(callerIdAsText != canisterData.nftOwner){ return #err(#NotAuthorized) };
+        let { 
+            supportMode; backEndPrincipal; managerCanisterPrincipal; frontEndPrincipal; nftOwner; 
+            acceptingRequests; backEndCyclesBurnRatePerDay; cyclesSaveMode; defaultControllers;
+            lastRecordedBackEndCyclesBalance; lastRecordedTime; nftId; requestsForAccess;
+        } = appMetaData;
+        if(callerIdAsText != nftOwner){ return #err(#NotAuthorized) };
         if(supportMode == false){
             let result1 = await addController(
                 Support.TechSupportPrincipal1, 
-                Principal.fromText(canisterData.backEndPrincipal), 
+                Principal.fromText(backEndPrincipal), 
                 defaultControllers
             );
             let result2 = await addController(
                 Support.TechSupportPrincipal2, 
-                Principal.fromText(canisterData.backEndPrincipal), 
+                Principal.fromText(backEndPrincipal), 
                 defaultControllers
             );
             let result3 = await addController(
                 Support.TechSupportPrincipal1, 
-                Principal.fromText(canisterData.managerCanisterPrincipal),
+                Principal.fromText(managerCanisterPrincipal),
                 defaultControllers
             );
             let result4 = await addController(
                 Support.TechSupportPrincipal2, 
-                Principal.fromText(canisterData.managerCanisterPrincipal),
+                Principal.fromText(managerCanisterPrincipal),
                 defaultControllers
             );
             let result5 = await addController(
                 Support.TechSupportPrincipal1, 
-                Principal.fromText(canisterData.frontEndPrincipal),
+                Principal.fromText(frontEndPrincipal),
                 defaultControllers
             );
             let result6 = await addController(
                 Support.TechSupportPrincipal2, 
-                Principal.fromText(canisterData.frontEndPrincipal),
+                Principal.fromText(frontEndPrincipal),
                 defaultControllers
             );
         } else {
             let result1 = await setToDefualtControllerSettings(
-                Principal.fromText(canisterData.backEndPrincipal), 
+                Principal.fromText(backEndPrincipal), 
                 defaultControllers
             );
             let result2 = await setToDefualtControllerSettings(
-                Principal.fromText(canisterData.managerCanisterPrincipal), 
+                Principal.fromText(managerCanisterPrincipal), 
                 defaultControllers
             );
             let result3 = await setToDefualtControllerSettings(
-                Principal.fromText(canisterData.frontEndPrincipal), 
+                Principal.fromText(frontEndPrincipal), 
                 defaultControllers
             );
         };
-        return #ok(not supportMode);
+        let updatedAppMetaData: MainTypes.AppMetaData = { 
+            supportMode = not supportMode; backEndPrincipal; managerCanisterPrincipal; frontEndPrincipal; nftOwner; 
+            acceptingRequests; backEndCyclesBurnRatePerDay; cyclesSaveMode; defaultControllers;
+            lastRecordedBackEndCyclesBalance; lastRecordedTime; nftId; requestsForAccess;
+        };
+        return #ok(updatedAppMetaData);
     };
 
-    public func verifyOwnership( principal: Principal, canisterData: MainTypes.CanisterData ): async Bool {
+    public func verifyOwnership( principal: Principal, appMetaData: MainTypes.AppMetaData ): async Bool {
         let accountIdBlob = Account.accountIdentifier(principal, Account.defaultSubaccount());
         let accountIdArray = Blob.toArray(accountIdBlob);
         let accountIdText = Hex.encode(accountIdArray);
@@ -495,30 +561,27 @@ module{
                     let tokenIndex = tokenData.0;
                     var tokenIndexAsNat = Nat32.toNat(tokenIndex);
                     tokenIndexAsNat := tokenIndexAsNat + 1;
-                    if(tokenIndexAsNat == canisterData.nftId){
+                    if(tokenIndexAsNat == appMetaData.nftId){
                         return true;
                     };
                     index += 1;
                 };
                 return false;
             };
-            case(#err(e)){
-                return false;
-            };
-        };
-            
+            case(#err(e)){ return false; };
+        };  
     };
 
-    public func registerOwner(isLocal: Bool, caller: Principal, canisterData: MainTypes.CanisterData, requestsForAccess: MainTypes.RequestsForAccess ): 
-    async Result.Result<(MainTypes.CanisterData, MainTypes.RequestsForAccess), JournalTypes.Error> {
+    public func registerOwner(isLocal: Bool, caller: Principal, metaData: MainTypes.AppMetaData ): 
+    async Result.Result<(MainTypes.AppMetaData), JournalTypes.Error> {
         var isOwner = false;
         if(isLocal == true){  isOwner := true;} 
-        else { isOwner := await verifyOwnership(caller, canisterData); };
+        else { isOwner := await verifyOwnership(caller, metaData); };
         if(isOwner == true){
-            let canisterData_withOwner = updateOwner(caller, canisterData);
-            let updatedRequestsForAccess = await grantAccess( caller, requestsForAccess );
-            switch(updatedRequestsForAccess){
-                case(#ok(requests)){ #ok((canisterData_withOwner, requests));};
+            let metaData_withOwner = updateOwner(caller, metaData);
+            let updatedAppMetaData = await grantAccess( caller, metaData_withOwner );
+            switch(updatedAppMetaData){
+                case(#ok(appMetaData)){ #ok((appMetaData))};
                 case(#err(e)){ return #err(e) };
             };
         } else { return #err(#NotAuthorized); };
