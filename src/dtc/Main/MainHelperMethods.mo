@@ -25,22 +25,23 @@ module{
     public func create (
         callerId: Principal, 
         profilesMap: MainTypes.UserProfilesMap, 
-        isLocal: Bool,
         appMetaData: MainTypes.AppMetaData
     ) : async Result.Result<MainTypes.AmountAccepted, JournalTypes.Error> {
 
-        if(not isLocal and Principal.toText(callerId) == "2vxsx-fae"){ return #err(#NotAuthorized);};
+        if(Principal.toText(callerId) == "2vxsx-fae"){ return #err(#NotAuthorized);};
 
         let callerIdAsText = Principal.toText(callerId);
-        let isApprovedOption = Array.find(
+        let requestForAccess = Array.find(
             appMetaData.requestsForAccess, func (x: (Text, MainTypes.Approved)) : Bool {
                 let (principalAsText, approved) = x;
-                if(principalAsText == callerIdAsText and approved == true){ return true;}
+                if(principalAsText == callerIdAsText and approved){ return true;}
                 else { false };
             }
         );
+        if(Option.isNull(requestForAccess)) { return #err(#NotAuthorized);};
 
-        if(Option.isNull(isApprovedOption) == true){ return #err(#NotAuthorized);};
+        let ?(principal, isApproved) = requestForAccess;
+        if(not isApproved){ return #err(#NotAuthorized);};
 
         let existing = profilesMap.get(callerId);
 

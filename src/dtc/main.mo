@@ -1,27 +1,16 @@
-import Debug "mo:base/Debug";
 import Error "mo:base/Error";
 import Nat64 "mo:base/Nat64";
-import Nat32 "mo:base/Nat32";
-import Nat8 "mo:base/Nat8";
 import Trie "mo:base/Trie";
 import HashMap "mo:base/HashMap";
 import Hash "mo:base/Hash";
-import Nat "mo:base/Nat";
 import Result "mo:base/Result";
 import Principal "mo:base/Principal"; 
-import Time "mo:base/Time";
 import Cycles "mo:base/ExperimentalCycles";
 import Buffer "mo:base/Buffer";
-import Blob "mo:base/Blob";
 import Iter "mo:base/Iter";
-import Array "mo:base/Array";
-import Int "mo:base/Int";
 import Text "mo:base/Text";
-import Bool "mo:base/Bool";
 import Option "mo:base/Option";
 import Ledger "Ledger/Ledger";
-import LedgerCandid "Ledger/LedgerCandid";
-import Journal "Journal/Journal";
 import Account "Ledger/Account";
 import JournalTypes "Journal/journal.types";
 import MainMethods "Main/MainHelperMethods";
@@ -29,24 +18,14 @@ import JournalHelperMethods "Main/JournalHelperMethods";
 import MainTypes "Main/types";
 import TxHelperMethods "Main/TransactionHelperMethods";
 import CanisterManagementMethods "Main/CanisterManagementMethods";
-import NftCollection "NftCollection/NftCollection";
-import Support "SupportCanisterIds/SupportCanisterIds";
-import IC "IC/ic.types";
-import Hex "Ledger/Hex";
-import ManagerCanister "Manager/Manager";
-import ManagerTypes "Manager/WasmStore";
 import Manager "Manager/Manager";
 import AssetCanister "AssetCanister/AssetCanister";
-import WasmStore "Manager/WasmStore";
 import NotificationProtocolMethods "Main/NotificationProtocolMethods";
 import NotificationsTypes "Main/types.notifications";
-import Float "mo:base/Float";
 
 shared actor class User() = this {
 
-    private var isLocal : Bool = false;
-
-    private let ic : IC.Self = actor "aaaaa-aa";
+    private stable var appMetaData : MainTypes.AppMetaData = MainTypes.DEFAULT_APP_METADATA;
 
     private stable var userProfilesArray : [(Principal, MainTypes.UserProfile)] = [];
 
@@ -57,36 +36,12 @@ shared actor class User() = this {
         Principal.hash
     );
 
-    private stable var appMetaData : MainTypes.AppMetaData = MainTypes.DEFAULT_APP_METADATA;
-
     private stable var startIndexForBlockChainQuery : Nat64 = 3_512_868;
-
-    private var Gas: Nat64 = 10000;
-    
-    private var Fee : Nat64 = 9980000 + Gas;
-
-    private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
-
-    private let ledgerC : LedgerCandid.Interface = actor(LedgerCandid.CANISTER_ID);
-
-    private var balance = Cycles.balance();
-
-    private var oneICP : Nat64 = 100_000_000;
-
-    private var capacity = 1000000000000000;
-
-    private var nanosecondsInADay = 86400000000000;
-
-    private var daysInAMonth = 30;
-
-    private let heartBeatInterval : Nat64 = 100;
-
-    private let heartBeatInterval_refill : Nat64 = 25000;
     
     private stable var heartBeatCount : Nat64 = 0;
 
     public shared({ caller }) func create () : async Result.Result<MainTypes.AmountAccepted, JournalTypes.Error> {
-        let amountAccepted = await MainMethods.create(caller, userProfilesMap, isLocal, appMetaData);
+        let amountAccepted = await MainMethods.create(caller, userProfilesMap, appMetaData);
         let updatedAppMetaData = await CanisterManagementMethods.removeFromRequestsList(caller, appMetaData);
         switch(amountAccepted){
             case(#ok(amount)){ appMetaData := updatedAppMetaData; return #ok(amount); };
@@ -206,7 +161,7 @@ shared actor class User() = this {
     };
 
     public func canisterBalance() : async Ledger.ICP {
-        await ledger.account_balance({ account = myAccountId() })
+        await MainTypes.ledger.account_balance({ account = myAccountId() })
     };
 
     public shared(msg) func getPrincipalsList() : async [Principal] {
@@ -334,7 +289,7 @@ shared actor class User() = this {
     };
 
     public func getCanisterCongtrollers(canisterPrincipal: Principal) : async ([Text]) {
-        let canisterStatus = await ic.canister_status({ canister_id = canisterPrincipal });
+        let canisterStatus = await MainTypes.self.canister_status({ canister_id = canisterPrincipal });
         let settings = canisterStatus.settings;
         let controllersOption = settings.controllers;
         var controllers = Option.get(controllersOption, appMetaData.defaultControllers);
@@ -357,7 +312,7 @@ shared actor class User() = this {
     };
 
     public shared({ caller }) func registerOwner() : async  Result.Result<(), JournalTypes.Error>{
-        let result = await CanisterManagementMethods.registerOwner(isLocal, caller, appMetaData);
+        let result = await CanisterManagementMethods.registerOwner(caller, appMetaData);
         switch(result){
             case(#ok(metaData)){ appMetaData := metaData; return #ok(());};
             case(#err(e)){ return #err(e)};
@@ -374,23 +329,14 @@ shared actor class User() = this {
         await NotificationProtocolMethods.clearJournalNotifications(caller, userProfilesMap);
     };
 
-    public func wallet_receive() : async { accepted: Nat64 } {
-        let amount = Cycles.available();
-        let limit : Nat = capacity - balance;
-        let accepted = if (amount <= limit) amount else limit;
-        let deposit = Cycles.accept(accepted);
-        assert (deposit == accepted);
-        balance += accepted;
-        { accepted = Nat64.fromNat(accepted) };
+    system func heartbeat() : async () {
+        heartBeatCount += 1;
+        let {heartBeatInterval; heartBeatInterval_refill;} = MainTypes;
+        if(heartBeatCount % heartBeatInterval == 0){ ignore updateUsersTxHistory(); };
+        if(heartBeatCount % heartBeatInterval_refill == 0){ 
+            ignore heartBeat();
+        };
     };
-
-    // system func heartbeat() : async () {
-    //     heartBeatCount += 1;
-    //     if(heartBeatCount % heartBeatInterval == 0){ ignore updateUsersTxHistory(); };
-    //     if(heartBeatCount % heartBeatInterval_refill == 0){ 
-    //         ignore heartBeat();
-    //     };
-    // };
 
     system func preupgrade() { userProfilesArray := Iter.toArray(userProfilesMap.entries()); };
 

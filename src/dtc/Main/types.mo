@@ -4,9 +4,25 @@ import Principal "mo:base/Principal";
 import HashMap "mo:base/HashMap";
 import JournalTypes "../Journal/journal.types";
 import NotificationTypes "../Main/types.notifications";
+import IC "../IC/ic.types";
+import Ledger "../Ledger/Ledger";
 
 
 module{
+
+    public let self : IC.Self = actor "aaaaa-aa";
+
+    public let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
+
+    public let heartBeatInterval : Nat64 = 100;
+
+    public let heartBeatInterval_refill : Nat64 = 25000;
+
+    public let oneICP : Nat64 = 100_000_000;
+
+    public let nanosecondsInADay = 86400000000000;
+
+    public let daysInAMonth = 30;
 
     public type JournalData = {
         userJournalData : ([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio,); 

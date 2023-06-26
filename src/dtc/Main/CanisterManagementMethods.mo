@@ -572,19 +572,16 @@ module{
         };  
     };
 
-    public func registerOwner(isLocal: Bool, caller: Principal, metaData: MainTypes.AppMetaData ): 
+    public func registerOwner(caller: Principal, metaData: MainTypes.AppMetaData ): 
     async Result.Result<(MainTypes.AppMetaData), JournalTypes.Error> {
-        var isOwner = false;
-        if(isLocal == true){  isOwner := true;} 
-        else { isOwner := await verifyOwnership(caller, metaData); };
-        if(isOwner == true){
-            let metaData_withOwner = updateOwner(caller, metaData);
-            let updatedAppMetaData = await grantAccess( caller, metaData_withOwner );
-            switch(updatedAppMetaData){
-                case(#ok(appMetaData)){ #ok((appMetaData))};
-                case(#err(e)){ return #err(e) };
-            };
-        } else { return #err(#NotAuthorized); };
+        let isOwner = await verifyOwnership(caller, metaData);
+        if(not isOwner){ return #err(#NotAuthorized);};
+        let metaData_withOwner = updateOwner(caller, metaData);
+        let updatedAppMetaData = await grantAccess( caller, metaData_withOwner );
+        switch(updatedAppMetaData){
+            case(#ok(appMetaData)){ #ok((appMetaData))};
+            case(#err(e)){ return #err(e) };
+        };
     };
 
     private  func key(x: Principal) : Trie.Key<Principal> {
