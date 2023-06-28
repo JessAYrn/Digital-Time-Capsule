@@ -284,17 +284,15 @@ shared(msg) actor class Manager (principal : Principal) = this {
     };
 
 
-    private func userAccountId() : Account.AccountIdentifier {
+    private func canisterAccountId() : Account.AccountIdentifier {
         let canisterId =  Principal.fromActor(this);
         Account.accountIdentifier(canisterId, Account.defaultSubaccount())
     };
 
     public query(msg) func canisterAccount() : async Account.AccountIdentifier {
         let callerId = msg.caller;
-        if( Principal.toText(callerId) != mainCanisterId) {
-            throw Error.reject("Unauthorized access.");
-        };
-        userAccountId()
+        if( Principal.toText(callerId) != mainCanisterId) { throw Error.reject("Unauthorized access."); };
+        canisterAccountId();
     };
 
     public shared(msg) func canisterBalance() : async Ledger.ICP {
@@ -303,10 +301,8 @@ shared(msg) actor class Manager (principal : Principal) = this {
         if(  
             Principal.toText(callerId) !=  Principal.toText(canisterId)
             and Principal.toText(callerId) != mainCanisterId
-        ) {
-            throw Error.reject("Unauthorized access.");
-        };
-        await ledger.account_balance({ account = userAccountId() })
+        ) { throw Error.reject("Unauthorized access."); };
+        await ledger.account_balance({ account = canisterAccountId() })
     };
    
     private  func key(x: Principal) : Trie.Key<Principal> {

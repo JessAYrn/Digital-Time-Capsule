@@ -300,24 +300,20 @@ module{
         let frontendCanisterStatus = await ic.canister_status({ canister_id = Principal.fromText(appMetaData.frontEndPrincipal) });
         let managerCanisterStatus = await ic.canister_status({ canister_id = Principal.fromText(appMetaData.managerCanisterPrincipal)});
         if(frontendCanisterStatus.cycles < 2_000_000_000_000){
-            await ic.provisional_top_up_canister({ 
-                canister_id = Principal.fromText(appMetaData.frontEndPrincipal);
-                amount = 1_000_000_000_000
-            });
+            Cycles.add(1_000_000_000_000);
+            ignore ic.deposit_cycles({ canister_id = Principal.fromText(appMetaData.frontEndPrincipal); });
         };
         if(managerCanisterStatus.cycles < 2_000_000_000_000) {
-            await ic.provisional_top_up_canister({ 
-                canister_id = Principal.fromText(appMetaData.managerCanisterPrincipal);
-                amount = 1_000_000_000_000
-            });
+            Cycles.add(1_000_000_000_000);
+            ignore ic.deposit_cycles({ canister_id = Principal.fromText(appMetaData.managerCanisterPrincipal); });
         };
         while(index < numberOfProfiles){
-            let (principal, profile) = profilesArray[index];
-            let approved = Option.get(profile.approved, false);
-            if(approved){
-                Cycles.add(100_000_000_000);
-                let userCanister : Journal.Journal = actor(Principal.toText(profile.canisterId));
-                let amountAccepted = ignore userCanister.wallet_receive();
+            let (principal, {canisterId; approved; }) = profilesArray[index];
+            let approved_ = Option.get(approved, false);
+            let {cycles;} = await ic.canister_status({ canister_id = canisterId });
+            if(approved_ and cycles < 1_000_000_000_000){
+                Cycles.add(250_000_000_000);
+                ignore ic.deposit_cycles({ canister_id = canisterId });
             };
             index += 1;
         };
@@ -325,13 +321,12 @@ module{
 
     public func heartBeat(currentCylcesBalance: Nat, appMetaData : MainTypes.AppMetaData, profilesMap: MainTypes.UserProfilesMap): 
     async MainTypes.AppMetaData{
-
-        let cyclesBurned : Float = Float.fromInt(appMetaData.lastRecordedBackEndCyclesBalance - currentCylcesBalance);
+        ignore refillCanisterCycles(appMetaData, profilesMap);
         let timeLapsed : Float = Float.fromInt(Time.now() - appMetaData.lastRecordedTime);
         let timeLapsedInDays : Float = timeLapsed / nanosecondsInADay;
-        let dailyBurnRate : Nat = Int.abs(Float.toInt(cyclesBurned / timeLapsedInDays));
         if(timeLapsedInDays < 1){ return appMetaData };
-        ignore refillCanisterCycles(appMetaData, profilesMap);
+        let cyclesBurned : Float = Float.fromInt(appMetaData.lastRecordedBackEndCyclesBalance - currentCylcesBalance);
+        let dailyBurnRate : Nat = Int.abs(Float.toInt(cyclesBurned / timeLapsedInDays));
         let updatedCanisterData = {
             managerCanisterPrincipal = appMetaData.managerCanisterPrincipal;
             frontEndPrincipal = appMetaData.frontEndPrincipal;

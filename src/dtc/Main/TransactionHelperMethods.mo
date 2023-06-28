@@ -10,6 +10,7 @@ import Iter "mo:base/Iter";
 import Blob "mo:base/Blob";
 import Journal "../Journal/Journal";
 import Nat64 "mo:base/Nat64";
+import Error "mo:base/Error";
 
 module{
 
@@ -53,24 +54,14 @@ module{
         startIndexForBlockChainQuery: Nat64
     ) : async (Nat64) {
 
-        let tipOfChainInfo = await tipOfChainDetails();
-        let tipOfChainIndex : Nat64 = tipOfChainInfo.0;
-        let startIndex : Nat64 = startIndexForBlockChainQuery;
-        let maxQueryLength : Nat64 = 2_000;
-        let newStartIndexForNextQuery = Nat64.min(tipOfChainIndex, startIndex + maxQueryLength);
-
-        let getBlocksArgs = {
-            start = startIndex;
-            length = maxQueryLength;
-        };
-
-        let queryResponse = await ledger.query_blocks(getBlocksArgs);
-
-        let blocksArray = queryResponse.blocks;
-        let blocksArraySize = Iter.size(Iter.fromArray(blocksArray));
+        let tipOfChainIndex = await tipOfChainDetails();
+        let newStartIndexForNextQuery = Nat64.min( tipOfChainIndex, startIndexForBlockChainQuery + LedgerCandid.maxBlockQueryLength );
+        let getBlocksArgs = { start = startIndexForBlockChainQuery; length = LedgerCandid.maxBlockQueryLength; };
+        let {blocks} = await ledger.query_blocks(getBlocksArgs);
+        let numberOfBlocks = Iter.size(Iter.fromArray(blocks));
         var index = 0;
-        while(index < blocksArraySize){
-            let block = blocksArray[index];
+        while(index < numberOfBlocks){
+            let block = blocks[index];
             let transaction = block.transaction;
             let operation = transaction.operation;
             switch(operation){
@@ -130,33 +121,11 @@ module{
         return newStartIndexForNextQuery;
     };
 
-    public func tipOfChainDetails() : async (Ledger.BlockIndex, LedgerCandid.Transaction) {
+    public func tipOfChainDetails() : async (Ledger.BlockIndex) {
         let tip = await ledgerC.tip_of_chain();
         switch (tip) {
-            case (#Err(_)) {
-                assert(false);
-                loop {};
-            };
-            case (#Ok(t)) {
-                let block = await ledgerC.block(t.tip_index);
-                switch (block) {
-                    case (#Err(_)) {
-                        assert(false);
-                        loop {};
-                    };
-                    case (#Ok(r)) {
-                        switch (r) {
-                            case (#Err(_)) {
-                                assert(false);
-                                loop {};
-                            };
-                            case (#Ok(b)) {
-                                (t.tip_index, b.transaction);
-                            };
-                        };
-                    };
-                };
-            };
+            case (#Err(_)) { throw Error.reject("Tip of chain could not be read"); };
+            case (#Ok(t)) { return t.tip_index; };
         };
     };
 

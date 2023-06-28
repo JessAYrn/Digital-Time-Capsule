@@ -22,6 +22,7 @@ import Manager "Manager/Manager";
 import AssetCanister "AssetCanister/AssetCanister";
 import NotificationProtocolMethods "Main/NotificationProtocolMethods";
 import NotificationsTypes "Main/types.notifications";
+import IC "IC/ic.types";
 
 shared actor class User() = this {
 
@@ -329,14 +330,14 @@ shared actor class User() = this {
         await NotificationProtocolMethods.clearJournalNotifications(caller, userProfilesMap);
     };
 
-    system func heartbeat() : async () {
-        heartBeatCount += 1;
-        let {heartBeatInterval; heartBeatInterval_refill;} = MainTypes;
-        if(heartBeatCount % heartBeatInterval == 0){ ignore updateUsersTxHistory(); };
-        if(heartBeatCount % heartBeatInterval_refill == 0){ 
-            ignore heartBeat();
-        };
-    };
+    // system func heartbeat() : async () {
+    //     heartBeatCount += 1;
+    //     let {heartBeatInterval; heartBeatInterval_refill;} = MainTypes;
+    //     if(heartBeatCount % heartBeatInterval == 0){ ignore updateUsersTxHistory(); };
+    //     if(heartBeatCount % heartBeatInterval_refill == 0){ 
+    //         ignore heartBeat();
+    //     };
+    // };
 
     system func preupgrade() { userProfilesArray := Iter.toArray(userProfilesMap.entries()); };
 
