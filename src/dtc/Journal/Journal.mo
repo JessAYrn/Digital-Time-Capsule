@@ -76,8 +76,6 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     private stable var journalEntryIndex : Nat = 0;
 
-    private stable var txTrieIndex : Nat = 0;
-
     private var txFee : Nat64 = 10_000;
 
     private var capacity = 1000000000000;
@@ -415,10 +413,9 @@ shared(msg) actor class Journal (principal : Principal) = this {
         Iter.toArray(txHistoryMap.entries());
     };
 
-    public shared({caller}) func updateTxHistory(tx : JournalTypes.Transaction) : async () {
+    public shared({caller}) func updateTxHistory(timeStamp: Nat64, tx : JournalTypes.Transaction) : async () {
         if( Principal.toText(caller) != mainCanisterId_) { throw Error.reject("Unauthorized access."); };
-        txHistoryMap.put(txTrieIndex, tx);
-        txTrieIndex += 1; 
+        txHistoryMap.put(Nat64.toNat(timeStamp), tx);
     };
 
     private func userAccountId() : Account.AccountIdentifier {

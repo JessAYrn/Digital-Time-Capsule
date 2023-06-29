@@ -61,18 +61,13 @@ module{
         let numberOfBlocks = Iter.size(Iter.fromArray(blocks));
         var index = 0;
         while(index < numberOfBlocks){
-            let block = blocks[index];
-            let transaction = block.transaction;
-            let operation = transaction.operation;
+            let {transaction} = blocks[index];
+            let {operation} = transaction;
             switch(operation){
                 case null {};
                 case(? existingOperation){
                     switch(existingOperation){
-                        case(#Transfer(r)){
-                            let recipient = r.to;
-                            let source = r.from;
-                            let amount = r.amount.e8s;
-                            let fee = r.fee.e8s;
+                        case(#Transfer({to; from; amount; fee;})){
                             let timeOfCreation = transaction.created_at_time.timestamp_nanos;
                             let profilesSize = profilesMap.size();
                             let profilesIter = profilesMap.entries();
@@ -86,25 +81,27 @@ module{
                                     case null{};
                                     case(? existingUAID){
                                         let userJournal : Journal.Journal = actor(Principal.toText(userProfile.canisterId));
-                                        if(Blob.equal(existingUAID, source) == true){
-                                            let tx : JournalTypes.Transaction = {
-                                                balanceDelta = amount + fee;
-                                                increase = false;
-                                                recipient = ?recipient;
-                                                timeStamp = ?timeOfCreation;
-                                                source = ?source;
-                                            };
-                                            await userJournal.updateTxHistory(tx);
+                                        let tx_from : JournalTypes.Transaction = {
+                                            balanceDelta = amount.e8s + fee.e8s;
+                                            increase = false;
+                                            recipient = ?to;
+                                            timeStamp = ?timeOfCreation;
+                                            source = ?from;
                                         };
-                                        if(Blob.equal(existingUAID, recipient) == true){                                    
-                                            let tx : JournalTypes.Transaction = {
-                                                balanceDelta = amount;
-                                                increase = true;
-                                                recipient = ?recipient;
-                                                timeStamp = ?timeOfCreation;
-                                                source = ?source;
-                                            };
-                                            await userJournal.updateTxHistory(tx);
+                                        let tx_to : JournalTypes.Transaction = {
+                                            balanceDelta = amount.e8s;
+                                            increase = true;
+                                            recipient = ?to;
+                                            timeStamp = ?timeOfCreation;
+                                            source = ?from;
+                                        };
+                                        if( Blob.equal(existingUAID, from) and Blob.equal(existingUAID, to)){
+                                            ignore userJournal.updateTxHistory(timeOfCreation,tx_from);
+                                            ignore userJournal.updateTxHistory(timeOfCreation + 1, tx_to);
+                                        } else if(Blob.equal(existingUAID, from) == true){
+                                            ignore userJournal.updateTxHistory(timeOfCreation,tx_from);
+                                        } else if(Blob.equal(existingUAID, to) == true){                                    
+                                            ignore userJournal.updateTxHistory(timeOfCreation,tx_to);
                                         };
                                     };
                                 };

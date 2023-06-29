@@ -23,6 +23,7 @@ import AssetCanister "AssetCanister/AssetCanister";
 import NotificationProtocolMethods "Main/NotificationProtocolMethods";
 import NotificationsTypes "Main/types.notifications";
 import IC "IC/ic.types";
+import Timer "mo:base/Timer";
 
 shared actor class User() = this {
 
@@ -39,8 +40,6 @@ shared actor class User() = this {
 
     private stable var startIndexForBlockChainQuery : Nat64 = 3_512_868;
     
-    private stable var heartBeatCount : Nat64 = 0;
-
     public shared({ caller }) func create () : async Result.Result<MainTypes.AmountAccepted, JournalTypes.Error> {
         let amountAccepted = await MainMethods.create(caller, userProfilesMap, appMetaData);
         let updatedAppMetaData = await CanisterManagementMethods.removeFromRequestsList(caller, appMetaData);
@@ -265,13 +264,6 @@ shared actor class User() = this {
         return balances;
     };
 
-    public shared({caller}) func heartBeat(): async (){
-        let cyclesBalance_backend = Cycles.balance();
-        ignore NotificationProtocolMethods.updateUserCanisterNotifications(userProfilesMap);
-        let updatedMetaData = await CanisterManagementMethods.heartBeat(cyclesBalance_backend, appMetaData, userProfilesMap);
-        appMetaData := updatedMetaData;
-    };  
-
     public shared({caller}) func getCanisterData() : async Result.Result<(MainTypes.CanisterDataExport), JournalTypes.Error> {
         let cyclesBalance_backend = Cycles.balance();
         let appMetaDataPackagedForExport = await CanisterManagementMethods.getCanisterData(caller, appMetaData, cyclesBalance_backend, userProfilesMap);
@@ -330,14 +322,25 @@ shared actor class User() = this {
         await NotificationProtocolMethods.clearJournalNotifications(caller, userProfilesMap);
     };
 
-    // system func heartbeat() : async () {
-    //     heartBeatCount += 1;
-    //     let {heartBeatInterval; heartBeatInterval_refill;} = MainTypes;
-    //     if(heartBeatCount % heartBeatInterval == 0){ ignore updateUsersTxHistory(); };
-    //     if(heartBeatCount % heartBeatInterval_refill == 0){ 
-    //         ignore heartBeat();
-    //     };
-    // };
+    public shared({caller}) func heartBeat(): async (){
+        let cyclesBalance_backend = Cycles.balance();
+        ignore NotificationProtocolMethods.updateUserCanisterNotifications(userProfilesMap);
+        let updatedMetaData = await CanisterManagementMethods.heartBeat(cyclesBalance_backend, appMetaData, userProfilesMap);
+        appMetaData := updatedMetaData;
+    };  
+
+    private func heartBeat_unshared(): async () {
+        let cyclesBalance_backend = Cycles.balance();
+        ignore NotificationProtocolMethods.updateUserCanisterNotifications(userProfilesMap);
+        let updatedMetaData = await CanisterManagementMethods.heartBeat(cyclesBalance_backend, appMetaData, userProfilesMap);
+        appMetaData := updatedMetaData;
+    };
+
+    let {recurringTimer} = Timer;
+
+    // let daily = recurringTimer(#seconds (24 * 60 * 60), heartBeat_unshared);
+
+    // let everyFiveSeconds = recurringTimer(#seconds (5), updateUsersTxHistory);
 
     system func preupgrade() { userProfilesArray := Iter.toArray(userProfilesMap.entries()); };
 
