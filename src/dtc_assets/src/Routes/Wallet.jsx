@@ -119,8 +119,8 @@ const WalletApp = () => {
                     accountState,
                     homePageDispatch,
                     homePageState,
-                    accountDispatch,
-                    accountState
+                    actorDispatch,
+                    actorState
                 }}
             >
                 {
