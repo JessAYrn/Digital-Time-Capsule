@@ -20,7 +20,7 @@ import actorReducer, { actorInitialState, actorTypes } from '../reducers/actorRe
 export const AppContext = createContext(DEFAULT_APP_CONTEXTS);
 
 const HomePage = () => {
-    const [journalState, dispatch] = useReducer(journalReducer, initialState);
+    const [journalState, journalDispatch] = useReducer(journalReducer, initialState);
     const [walletState, walletDispatch] = useReducer(walletReducer, walletInitialState);
     const [accountState, accountDispatch] = useReducer(accountReducer, accountInitialState);
     const [homePageState, homePageDispatch] = useReducer(homePageReducer, homePageInitialState);
@@ -34,8 +34,8 @@ const HomePage = () => {
 
 
     const ReducerDispatches={
-        walletDispatch:walletDispatch,
-        journalDispatch:dispatch,
+        walletDispatch,
+        journalDispatch,
         accountDispatch,
         homePageDispatch,
         actorDispatch
@@ -59,15 +59,15 @@ const HomePage = () => {
     useEffect( async () => {
         if(!actorState.backendActor) return;
         if(journalState.reloadStatuses.canisterData){
-            dispatch({
+            journalDispatch({
                 actionType: types.SET_IS_LOADING,
                 payload: true
             });
             let canisterData = await actorState.backendActor.getCanisterData();
             if(!canisterData) return;
-            if("err" in canisterData) canisterData = await CreateUserJournal(actorState, dispatch, 'getCanisterData');
+            if("err" in canisterData) canisterData = await CreateUserJournal(actorState, journalDispatch, 'getCanisterData');
             if("err" in canisterData) {
-                dispatch({
+                journalDispatch({
                     actionType: types.SET_IS_LOADING,
                     payload: false
                 });
@@ -86,11 +86,11 @@ const HomePage = () => {
                     payload: updatedCanisterData
                 });
             }
-            dispatch({
+            journalDispatch({
                 actionType: types.SET_CANISTER_DATA_RELOAD_STATUS,
                 payload: false,
             });
-            dispatch({
+            journalDispatch({
                 actionType: types.SET_IS_LOADING,
                 payload: false
             });
@@ -99,7 +99,7 @@ const HomePage = () => {
             //Load Journal Data in the background
 
             const journal = await actorState.backendActor.readJournal();
-            loadJournalData(journal.ok, dispatch, types);
+            loadJournalData(journal.ok, journalDispatch, types);
         };
         if(walletState.shouldReload){
             //Load wallet data in background
@@ -114,7 +114,7 @@ const HomePage = () => {
         <AppContext.Provider 
             value={{
                 journalState,
-                dispatch,
+                journalDispatch,
                 accountState,
                 accountDispatch,
                 walletDispatch,

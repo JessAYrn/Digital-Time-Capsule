@@ -27,13 +27,13 @@ import actorReducer,{ actorInitialState, actorTypes } from '../reducers/actorRed
 
 
 const Analytics = () => {
-    const { journalState, dispatch, homePageDispatch, homePageState,actorDispatch,actorState} = useContext(AppContext);
+    const { journalState, journalDispatch, homePageDispatch, homePageState, actorDispatch, actorState} = useContext(AppContext);
     const [showUserPrincipals, setShowUserPrincipals] = useState(false);
 
 
 
     const handleDenyAccess = async (principal) => {
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: true
         });
@@ -43,14 +43,14 @@ const Analytics = () => {
             actionType: homePageTypes.SET_CANISTER_DATA,
             payload: { ...homePageState.canisterData, requestsForApproval: result }
         });
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: false
         });
     };
 
     const handleGrantAccess = async (principal) => {
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: true
         });
@@ -60,14 +60,14 @@ const Analytics = () => {
             actionType: homePageTypes.SET_CANISTER_DATA,
             payload: { ...homePageState.canisterData, requestsForApproval: result }
         });
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: false
         });
     };
 
     const handleUpdateApprovalStatus = async (principal, newApprovalStatus) => {
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: true
         });
@@ -79,14 +79,14 @@ const Analytics = () => {
             payload: { ...homePageState.canisterData, profilesMetaData: result }
         })
 
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: false
         });
     };
 
     const toggleAcceptRequest = async () => {
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: true
         });
@@ -99,18 +99,18 @@ const Analytics = () => {
                 payload: { ...homePageState.canisterData, acceptingRequests: !homePageState.canisterData.acceptingRequests }
             });
         }
-        dispatch({
+        journalDispatch({
             actionType: types.SET_MODAL_STATUS,
             payload: {show: true, which: MODALS_TYPES.onRegisterNewOwner, success: success}
         });
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: false
         });
     };
 
     const toggleSupportMode = async () => {
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: true
         });
@@ -123,19 +123,19 @@ const Analytics = () => {
                 payload: { ...homePageState.canisterData, supportMode: !homePageState.canisterData.supportMode }
             });
         }
-        dispatch({
+        journalDispatch({
             actionType: types.SET_MODAL_STATUS,
             payload: {show: true, which: MODALS_TYPES.onRegisterNewOwner, success: success}
         });
 
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: false
         });
     }
 
     const handleRegistration = async () => {
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: true
         });
@@ -143,18 +143,18 @@ const Analytics = () => {
         let result = await actorState.backendActor.registerOwner();
         if('err' in result) success = false;
         else success = true;
-        dispatch({
+        journalDispatch({
             actionType: types.SET_MODAL_STATUS,
             payload: {show: true, which: MODALS_TYPES.onRegisterNewOwner, success: success}
         })
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: false
         });
     };
 
     const handleUpgrade = async () => {
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: true
         });
@@ -166,18 +166,18 @@ const Analytics = () => {
             console.log("Error: ", e);
             success = false;
         };
-        dispatch({
+        journalDispatch({
             actionType: types.SET_MODAL_STATUS,
             payload: {show: true, which: MODALS_TYPES.onRegisterNewOwner, success: success}
         })
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: false
         });
     };
 
     const toggleCyclesSaveMode = async () => {
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: true
         });
@@ -185,7 +185,7 @@ const Analytics = () => {
         try{
             let canisterData = await actorState.backendActor.toggleCyclesSaveMode();
             await actorState.managerActor.installCode_backendCanister(canisterData);
-            dispatch({
+            journalDispatch({
                 actionType: types.SET_CANISTER_DATA,
                 payload: { ...journalState.canisterData, cyclesSaveMode: !journalState.canisterData.cyclesSaveMode }
             });
@@ -194,11 +194,11 @@ const Analytics = () => {
             console.log("Error: ", e);
             success = false;
         };
-        dispatch({
+        journalDispatch({
             actionType: types.SET_MODAL_STATUS,
             payload: {show: true, which: MODALS_TYPES.onRegisterNewOwner, success: success}
         })
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: false
         });

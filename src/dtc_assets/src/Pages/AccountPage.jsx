@@ -15,12 +15,12 @@ import accountReducer, { accountInitialState, accountTypes } from '../reducers/a
 
 const AccountSection = (props) => {
 
-    const { journalState, dispatch,accountDispatch,accountState, actorState } = useContext(AppContext);
+    const { journalState, journalDispatch, accountDispatch, accountState, actorState } = useContext(AppContext);
     const [pageChangesMade, setPageChangesMade] = useState(false); 
     // const [accountState,accountDispatch]=useReducer(accountReducer,accountInitialState);
     const handleUpdate = async () => {
         setPageChangesMade(false);
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: true
         });
@@ -29,7 +29,7 @@ const AccountSection = (props) => {
             email: (accountState.metaData.email[0]) ? accountState.metaData.email: []
         };
         let result = await actorState.backendActor.updateProfile(profileInput);
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: false
         });

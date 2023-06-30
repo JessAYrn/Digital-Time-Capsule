@@ -17,7 +17,7 @@ export const AppContext = createContext(DEFAULT_APP_CONTEXTS);
 
 const AccountPage = () => {
 
-    const [journalState, dispatch] = useReducer(journalReducer, initialState);
+    const [journalState, journalDispatch] = useReducer(journalReducer, initialState);
     const [accountState, accountDispatch] = useReducer(accountReducer, accountInitialState);
     const [walletState, walletDispatch]=useReducer(walletReducer,walletInitialState);
     const [homePageState, homePageDispatch]=useReducer(homePageReducer,homePageInitialState);
@@ -31,7 +31,7 @@ const AccountPage = () => {
 
     const ReducerDispatches={
         walletDispatch,
-        journalDispatch:dispatch,
+        journalDispatch,
         accountDispatch,
         homePageDispatch,
         actorDispatch
@@ -54,22 +54,22 @@ const AccountPage = () => {
     useEffect(async () => {
         if(!actorState.backendActor) return;
         if(journalState.reloadStatuses.journalData){
-            dispatch({
+            journalDispatch({
                 actionType: types.SET_IS_LOADING,
                 payload: true
             });
             let journal = await actorState.backendActor.readJournal();
             if(!journal) return;
-            if("err" in journal) journal = await CreateUserJournal(actorState, dispatch, 'readJournal');
+            if("err" in journal) journal = await CreateUserJournal(actorState, journalDispatch, 'readJournal');
             if("err" in journal) {
-                dispatch({
+                journalDispatch({
                     actionType: types.SET_IS_LOADING,
                     payload: false
                 });
                 return;
             }
-            loadJournalData(journal.ok, dispatch, types);
-            dispatch({
+            loadJournalData(journal.ok, journalDispatch, types);
+            journalDispatch({
                 actionType: types.SET_IS_LOADING,
                 payload: false
             });
@@ -93,7 +93,7 @@ const AccountPage = () => {
         <AppContext.Provider 
             value={{
                 journalState,
-                dispatch,
+                journalDispatch,
                 accountDispatch,
                 accountState,
                 walletDispatch,

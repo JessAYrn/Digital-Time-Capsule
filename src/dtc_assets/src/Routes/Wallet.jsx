@@ -21,25 +21,17 @@ import actorReducer , { actorInitialState, actorTypes } from '../reducers/actorR
 
 export const AppContext = createContext(DEFAULT_APP_CONTEXTS);
 
-
-
-
-
-
-
 const WalletApp = () => {
 
-    const [journalState, dispatch] = useReducer(journalReducer, initialState);
+    const [journalState, journalDispatch] = useReducer(journalReducer, initialState);
     const [walletState, walletDispatch] = useReducer(walletReducer, walletInitialState);
     const [accountState, accountDispatch] = useReducer(accountReducer, accountInitialState);
     const [homePageState, homePageDispatch] = useReducer(homePageReducer, homePageInitialState);
     const [actorState, actorDispatch] = useReducer(actorReducer, actorInitialState);
 
-
-
     const ReducerDispatches={
-        walletDispatch:walletDispatch,
-        journalDispatch:dispatch,
+        walletDispatch,
+        journalDispatch,
         accountDispatch,
         homePageDispatch,
         actorDispatch
@@ -69,43 +61,34 @@ const WalletApp = () => {
     window.onbeforeunload = window.history.replaceState(null, '');
 
     
-    const WalletTabComponent=useMemo(()=>{
-        if(walletState.walletPageTab===WALLET_TABS.icpTab){
-            return WalletPage;
-        }else if(walletState.walletPageTab===WALLET_TABS.btcTab){
-            return BtcPage;
-        }
-        else if(walletState.walletPageTab===WALLET_TABS.ethTab){
-            return EthPage;
-        }
-        else if(walletState.walletPageTab===WALLET_TABS.ckBtcTab){
-            return CkBtcPage;
-        }
+    const WalletTabComponent = useMemo(() => {
+        if(walletState.walletPageTab===WALLET_TABS.icpTab) return WalletPage;
+        else if(walletState.walletPageTab===WALLET_TABS.btcTab) return BtcPage;
+        else if(walletState.walletPageTab===WALLET_TABS.ethTab) return EthPage;
+        else if(walletState.walletPageTab===WALLET_TABS.ckBtcTab) return CkBtcPage;
     },[walletState.walletPageTab]);
 
 
     //Loading Time Capsule Data
     useEffect(async () => {
-        if(!actorState.backendActor){
-            return;
-        }
+        if(!actorState.backendActor) return; 
         if(walletState.shouldReload){
-            dispatch({
+            journalDispatch({
                 actionType: types.SET_IS_LOADING,
                 payload: true
             });
             let walletDataFromApi = await actorState.backendActor.readWalletData()
             if(!walletDataFromApi) return;
-            if("err" in walletDataFromApi) walletDataFromApi = await CreateUserJournal(actorState, dispatch, 'readWalletData');
+            if("err" in walletDataFromApi) walletDataFromApi = await CreateUserJournal(actorState, journalDispatch, 'readWalletData');
             if("err" in walletDataFromApi) {
-                dispatch({
+                journalDispatch({
                     actionType: types.SET_IS_LOADING,
                     payload: false
                 });
                 return;
             };
             await loadWalletData(walletDataFromApi, walletDispatch, walletTypes);
-            dispatch({
+            journalDispatch({
                 actionType: types.SET_IS_LOADING,
                 payload: false
             });
@@ -119,7 +102,7 @@ const WalletApp = () => {
             //Load Journal Data in the background
 
             const journal = await actorState.backendActor.readJournal();
-            loadJournalData(journal.ok, dispatch, types);
+            loadJournalData(journal.ok, journalDispatch, types);
 
         };
         
@@ -129,7 +112,7 @@ const WalletApp = () => {
         <AppContext.Provider 
                 value={{
                     journalState,
-                    dispatch,
+                    journalDispatch,
                     walletState,
                     walletDispatch,
                     accountDispatch,

@@ -20,14 +20,14 @@ const ModalContentOnSend = (props) => {
     const [isLoading, setIsLoading] = useState(false);
     const [showSummary, setShowSummary] = useState(false);
     const [showQrReader, setShowQrReader] = useState(false);
-    const {journalState, dispatch, actorState} = useContext(AppContext);
+    const {journalState, journalDispatch, actorState} = useContext(AppContext);
 
 
     const onCancel = () => {
         setShowSummary(false);
         setSendSuccessful(false);
         setResponseFromApi(false);
-        dispatch({
+        journalDispatch({
             actionType: types.SET_MODAL_STATUS,
             payload: {show: false, which: MODALS_TYPES.onSend}
         });
@@ -60,7 +60,7 @@ const ModalContentOnSend = (props) => {
         setShowSummary(false);
         setSendSuccessful(false);
         setResponseFromApi(false);
-        dispatch({
+        journalDispatch({
             actionType: types.SET_MODAL_STATUS,
             payload: {show: false, which:MODALS_TYPES.onSend}
         });

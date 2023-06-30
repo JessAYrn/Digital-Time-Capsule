@@ -77,20 +77,6 @@ export const initialState = {
         requestsForApproval: []
     },
     isLoggingIn: false,
-//     metaData: {
-//         email: [],
-//         userName: []
-//     },
-//     walletData: {
-//         balance:'',
-//         address:'',
-//         qrCodeImgUrl:'',
-//         txHistory: {
-//             isLoading: false,
-//             data: []
-//         }
-//     },
-// >>>>>>> 5f03deae2f267d13bb63afa87f566c9d2fe75523
     bio: {
         name: '',
         dob: '',

@@ -5,14 +5,8 @@ import { AppContext } from "../Routes/App";
 import './GroupJournalPage.scss'
 
 const GroupJournalPage = (props) => {
-  const { journalState, dispatch} = useContext(AppContext);
-  
-//   const openModal = () => {
-//     dispatch({
-//         actionType: types.SET_MODAL_STATUS,
-//         payload: {show: true, which: MODALS_TYPES.onSend}
-//     });
-// };
+  const { journalState, journalDispatch} = useContext(AppContext);
+
   return (
    journalState?.modalStatus?.show ?
     <div >
@@ -22,21 +16,21 @@ const GroupJournalPage = (props) => {
     </div>:
     <div>
     {
-    journalState.isLoading ?
-    <LoadScreen/> :
-    <div>
-    <NavBar
-     walletLink={false}
-     journalLink={true}
-     accountLink={true}
-     dashboardLink={true}
-     notificationIcon={false}
-    context={UI_CONTEXTS.GROUPJOURNAL}
-  />
-  <div className='GroupJournalPage_container'>
-    coming soon
-  </div>
-    </div> 
+      journalState.isLoading ?
+      <LoadScreen/> :
+      <div>
+        <NavBar
+        walletLink={false}
+        journalLink={true}
+        accountLink={true}
+        dashboardLink={true}
+        notificationIcon={false}
+        context={UI_CONTEXTS.GROUPJOURNAL}
+      />
+      <div className='GroupJournalPage_container'>
+        coming soon
+      </div>
+      </div> 
     }
     </div>
     

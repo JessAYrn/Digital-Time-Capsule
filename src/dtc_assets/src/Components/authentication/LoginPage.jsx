@@ -54,13 +54,7 @@ const LoginPage = (props) => {
         properContext = TreasuryPageContext
     } 
 
-    const {    
-        journalState,
-        dispatch,
-        
-    } = useContext(properContext);
-
-    const [actorState, actorDispatch] = useReducer(actorReducer, actorInitialState);
+    const { journalState, journalDispatch, actorState, actorDispatch } = useContext(properContext);
     const [frontendCanisterBalance, setFrontendCanisterBalance] = useState(0);
     const [backendCanisterBalance, setBackendCanisterBalance] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
@@ -124,7 +118,7 @@ const LoginPage = (props) => {
             });
         }
         setIsLoading(true);
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_AUTHENTICATED,
             payload: connectionResult.isConnected
         });

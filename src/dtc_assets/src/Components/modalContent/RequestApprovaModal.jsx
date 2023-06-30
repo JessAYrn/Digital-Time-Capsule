@@ -27,12 +27,12 @@ const RequestApprovalResponseModal = (props) => {
     if(context === UI_CONTEXTS.ACCOUNT_PAGE){
         AppContext = AccountContext;
     }
-    const {journalState, dispatch} = useContext(AppContext);
+    const {journalState, journalDispatch} = useContext(AppContext);
 
     useConnect({
         onConnect: () => {},
         onDisconnect: () => {
-            dispatch({
+            journalDispatch({
                 actionType: types.SET_ENTIRE_REDUX_STATE,
                 payload: initialState
             });

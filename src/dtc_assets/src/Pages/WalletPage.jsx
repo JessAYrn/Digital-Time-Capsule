@@ -25,13 +25,12 @@ import { walletInitialState } from '../reducers/walletReducer';
 
 const WalletPage = (props) => {
 
-    const { journalState, dispatch } = useContext(AppContext);
-    const { walletState, walletDispatch,actorState, actorDispatch } = useContext(AppContext);
+    const { journalState, journalDispatch, walletState, walletDispatch, actorState, actorDispatch } = useContext(AppContext);
     const [loadingTx, setIsLoadingTx] = useState(false);
     const [showReloadButton, setShowReloadButton] = useState(false);
 
     const openModal = () => {
-        dispatch({
+        journalDispatch({
             actionType: types.SET_MODAL_STATUS,
             payload: {show: true, which: MODALS_TYPES.onSend}
         });
@@ -40,7 +39,7 @@ const WalletPage = (props) => {
     const loadTxs = async () => {
         setIsLoadingTx(true);
         setShowReloadButton(true);
-        let result = await loadTxHistory(actorState, dispatch, types);
+        let result = await loadTxHistory(actorState, journalDispatch, types);
         setIsLoadingTx(false);
     };
 

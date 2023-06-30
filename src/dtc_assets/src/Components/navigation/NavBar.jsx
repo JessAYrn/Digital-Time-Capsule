@@ -54,7 +54,7 @@ export const NavBar = (props) => {
 
     const {
         journalState,
-        dispatch,
+        journalDispatch,
         walletState,
         walletDispatch,
         accountState,
@@ -64,7 +64,7 @@ export const NavBar = (props) => {
     } = useContext(AppContext);
 
     const toggleDisplayNotifications = () => {
-        dispatch({
+        journalDispatch({
             actionType: types.SET_MODAL_STATUS,
             payload: {show: !journalState.modalStatus.show, which: MODALS_TYPES.notifications}
         });
@@ -175,7 +175,7 @@ export const NavBar = (props) => {
     useConnect({
         onConnect: () => {},
         onDisconnect: () => {
-            dispatch({
+            journalDispatch({
                 actionType: types.SET_ENTIRE_REDUX_STATE,
                 payload: initialState
             });
@@ -203,7 +203,7 @@ export const NavBar = (props) => {
     ]
 
     const changeHandler_journalTab=(option)=>{
-        dispatch({
+        journalDispatch({
             actionType:types.SET_JOURNAL_TAB,
             payload:option.text
         })

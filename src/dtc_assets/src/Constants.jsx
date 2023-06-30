@@ -90,7 +90,7 @@ export const WALLET_TABS={
 
 export const DEFAULT_APP_CONTEXTS={
     journalState:{},
-    dispatch: () => {},
+    journalDispatch: () => {},
     walletState:{},
     walletDispatch:()=>{},
     accountState:{},

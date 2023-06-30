@@ -15,7 +15,7 @@ export const TriggerCreateActorFunction = (journalState, dispatch, types) => {
     });
 }
 
-export const CreateUserJournal = async (actorState, dispatch, nameOfLoadFunction) => {
+export const CreateUserJournal = async (actorState, journalDispatch, nameOfLoadFunction) => {
     try{
         let registrationResult = await actorState.backendActor.registerOwner();
     } catch(e) {
@@ -24,7 +24,7 @@ export const CreateUserJournal = async (actorState, dispatch, nameOfLoadFunction
     let result = await actorState.backendActor.create()
     if("err" in result){
         let payload = { show: true, which: MODALS_TYPES.notAuthorizedByOwner };
-        dispatch({
+        journalDispatch({
             actionType: types.SET_MODAL_STATUS, 
             payload: payload
         });

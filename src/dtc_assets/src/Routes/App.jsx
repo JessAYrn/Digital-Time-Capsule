@@ -19,7 +19,7 @@ import actorReducer, { actorInitialState, actorTypes } from '../reducers/actorRe
 export const AppContext = createContext(DEFAULT_APP_CONTEXTS);
 
 const App = () => {
-    const [journalState, dispatch] = useReducer(journalReducer, initialState);
+    const [journalState, journalDispatch] = useReducer(journalReducer, initialState);
     const [walletState, walletDispatch] = useReducer(walletReducer, walletInitialState);
     const [homePageState, homePageDispatch] =  useReducer(homePageReducer, homePageInitialState)
     const [accountState, accountDispatch] =  useReducer(accountReducer, accountInitialState)
@@ -33,7 +33,7 @@ const App = () => {
     const location = useLocation();
 
     const ReducerDispatch={
-        journalDispatch:dispatch,
+        journalDispatch,
         walletDispatch,
         homePageDispatch,
         accountDispatch,
@@ -60,22 +60,22 @@ const App = () => {
     useEffect(async () => {
         if(!actorState.backendActor) return;
         if(journalState.reloadStatuses.journalData){
-            dispatch({
+            journalDispatch({
                 actionType: types.SET_IS_LOADING,
                 payload: true
             });
             let journal = await actorState.backendActor.readJournal();
             if(!journal) return;
-            if("err" in journal) journal = await CreateUserJournal(actorState, dispatch,'readJournal');
+            if("err" in journal) journal = await CreateUserJournal(actorState, journalDispatch,'readJournal');
             if("err" in journal) {
-                dispatch({
+                journalDispatch({
                     actionType: types.SET_IS_LOADING,
                     payload: false
                 });
                 return;
             };
-            loadJournalData(journal.ok, dispatch, types);
-            dispatch({
+            loadJournalData(journal.ok, journalDispatch, types);
+            journalDispatch({
                 actionType: types.SET_IS_LOADING,
                 payload: false
             });
@@ -93,18 +93,15 @@ const App = () => {
     },[actorState.backendActor]);
 
     let TabComponent = useMemo(()=>{
-        if(journalState.journalPageTab===JOURNAL_TABS.diaryTab){
-            return Journal
-        }else{
-            return Notes
-        }
-    },[journalState.journalPageTab])//variable added to the redux
+        if(journalState.journalPageTab===JOURNAL_TABS.diaryTab) return Journal;
+        else return Notes;
+    },[journalState.journalPageTab])
 
     return (
         <AppContext.Provider 
             value={{
                 journalState,
-                dispatch,
+                journalDispatch,
                 walletState,
                 walletDispatch,
                 accountDispatch,
