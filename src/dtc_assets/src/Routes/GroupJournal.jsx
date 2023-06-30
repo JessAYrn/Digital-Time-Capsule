@@ -25,7 +25,6 @@ const GroupJournal = () => {
     const [homePageState, homePageDispatch] =  useReducer(homePageReducer, homePageInitialState)
     const [accountState, accountDispatch] =  useReducer(accountReducer, accountInitialState)
     const [actorState, actorDispatch] = useReducer(actorReducer, actorInitialState);
-    // const{actorState}=useContext(AppContext);
 
     const ReducerDispatches={
         walletDispatch,

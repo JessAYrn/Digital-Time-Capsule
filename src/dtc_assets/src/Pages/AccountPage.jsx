@@ -1,4 +1,4 @@
-import React, { useContext, useReducer, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import  InputBox  from '../Components/Fields/InputBox';
 import { types } from '../reducers/journalReducer'
 import AdminSection from '../Components/AdminSection';
@@ -17,7 +17,7 @@ const AccountSection = (props) => {
 
     const { journalState, journalDispatch, accountDispatch, accountState, actorState } = useContext(AppContext);
     const [pageChangesMade, setPageChangesMade] = useState(false); 
-    // const [accountState,accountDispatch]=useReducer(accountReducer,accountInitialState);
+
     const handleUpdate = async () => {
         setPageChangesMade(false);
         journalDispatch({

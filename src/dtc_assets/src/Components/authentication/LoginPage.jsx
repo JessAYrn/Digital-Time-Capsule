@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState, useCallback, useReducer} from "react";
+import React, {useContext, useEffect, useState, useCallback} from "react";
 import { useNavigate } from "react-router-dom";
 import { AppContext as JournalContext } from "../../Routes/App";
 import { AppContext as AccountContext } from "../../Routes/Account";

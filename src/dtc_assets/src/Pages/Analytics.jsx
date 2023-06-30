@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer, useState} from 'react';
+import React, { useContext, useEffect, useState} from 'react';
 import { getIntObserverFunc, visibilityFunctionDefault } from '../Components/animations/IntersectionObserverFunctions';
 import { AppContext } from '../Routes/HomePage';
 import { NavBar } from '../Components/navigation/NavBar';
