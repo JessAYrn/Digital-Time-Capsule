@@ -21,8 +21,7 @@ import "../SCSS/scrollable.scss";
 import '../SCSS/container.scss';
 import '../SCSS/contentContainer.scss'
 import '../SCSS/section.scss'
-
-import homePageReducer,{homePageInitialState,homePageTypes} from '../reducers/homePageReducer';
+import {homePageTypes} from '../reducers/homePageReducer';
 import actorReducer,{ actorInitialState, actorTypes } from '../reducers/actorReducer';
 
 
@@ -337,18 +336,18 @@ const Analytics = () => {
                                         }
                                         {
                                             showUserPrincipals &&
-                                            homePageState.canisterData.profilesMetaData.map(([principal, approvalStatus]) => {
+                                            homePageState.canisterData.profilesMetaData.map(({userPrincipal, approvalStatus, canisterId}) => {
                                                 const onClick1 = (approvalStatus) ? 
-                                                () => handleUpdateApprovalStatus(principal, !approvalStatus) : 
+                                                () => handleUpdateApprovalStatus(userPrincipal, !approvalStatus) : 
                                                 () => {};
 
                                                 const onClick0 = (approvalStatus) ? 
                                                 () => {} : 
-                                                () => handleUpdateApprovalStatus(principal, !approvalStatus);
+                                                () => handleUpdateApprovalStatus(userPrincipal, !approvalStatus);
                                                 return (
                                                     <div className={'dataFieldRow'}>
                                                         <DataField
-                                                            text={principal}
+                                                            text={userPrincipal}
                                                             isPrincipal={true}
                                                             buttonIcon_1={homePageState.canisterData.isOwner ? RiIcons.RiDeleteBin2Line : null}
                                                             buttonIcon_0={homePageState.canisterData.isOwner ? FaIcons.FaCheckSquare : null}
