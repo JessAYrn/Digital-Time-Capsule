@@ -17,12 +17,10 @@ import * as AiIcons from 'react-icons/ai';
 import ButtonField from '../Components/Fields/Button';
 import { IconContext } from 'react-icons/lib';
 import "../SCSS/scrollable.scss";
-
 import '../SCSS/container.scss';
 import '../SCSS/contentContainer.scss'
 import '../SCSS/section.scss'
 import {homePageTypes} from '../reducers/homePageReducer';
-import actorReducer,{ actorInitialState, actorTypes } from '../reducers/actorReducer';
 
 
 const Analytics = () => {
@@ -184,9 +182,9 @@ const Analytics = () => {
         try{
             let canisterData = await actorState.backendActor.toggleCyclesSaveMode();
             await actorState.managerActor.installCode_backendCanister(canisterData);
-            journalDispatch({
-                actionType: types.SET_CANISTER_DATA,
-                payload: { ...journalState.canisterData, cyclesSaveMode: !journalState.canisterData.cyclesSaveMode }
+            homePageDispatch({
+                actionType: homePageTypes.SET_CANISTER_DATA,
+                payload: { ...homePageState.canisterData, cyclesSaveMode: !homePageState.canisterData.cyclesSaveMode }
             });
             
         } catch(e){
@@ -404,7 +402,7 @@ const Analytics = () => {
                                         />
                                     </div>
                                 </div>}
-                                {journalState.canisterData.isOwner && 
+                                {homePageState.canisterData.isOwner && 
                                 <div className={'switchDiv animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
                                     <div className='section'>
                                         <h5 className={'lebelH5'}> 
@@ -413,7 +411,7 @@ const Analytics = () => {
                                     </div>
                                     <div className='section'>
                                         <Switch
-                                            active={journalState.canisterData.cyclesSaveMode}
+                                            active={homePageState.canisterData.cyclesSaveMode}
                                             onClick={toggleCyclesSaveMode}
                                         />
                                     </div>

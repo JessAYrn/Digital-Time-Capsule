@@ -16,6 +16,7 @@ import { IconContext } from 'react-icons/lib';
 import { testTx } from '../testData/Transactions';
 import LoadScreen from '../Components/LoadScreen';
 import { types } from '../reducers/journalReducer';
+import { walletTypes } from '../reducers/walletReducer';
 import { UI_CONTEXTS } from '../Contexts';
 import { visibilityFunctionDefault, getIntObserverFunc } from '../Components/animations/IntersectionObserverFunctions';
 import ButtonField from '../Components/Fields/Button';
@@ -39,7 +40,7 @@ const WalletPage = (props) => {
     const loadTxs = async () => {
         setIsLoadingTx(true);
         setShowReloadButton(true);
-        let result = await loadTxHistory(actorState, walletDispatch, types);
+        let result = await loadTxHistory(actorState, walletDispatch, walletTypes);
         setIsLoadingTx(false);
     };
 
