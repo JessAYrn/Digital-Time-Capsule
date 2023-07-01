@@ -15,21 +15,21 @@ export const TriggerCreateActorFunction = (journalState, dispatch, types) => {
     });
 }
 
-export const CreateUserJournal = async (journalState, dispatch, nameOfLoadFunction) => {
+export const CreateUserJournal = async (actorState, journalDispatch, nameOfLoadFunction) => {
     try{
-        let registrationResult = await journalState.backendActor.registerOwner();
+        let registrationResult = await actorState.backendActor.registerOwner();
     } catch(e) {
         console.log('could not be verified');
     }
-    let result = await journalState.backendActor.create()
+    let result = await actorState.backendActor.create()
     if("err" in result){
         let payload = { show: true, which: MODALS_TYPES.notAuthorizedByOwner };
-        dispatch({
+        journalDispatch({
             actionType: types.SET_MODAL_STATUS, 
             payload: payload
         });
     } else {
-        const loadFunction = journalState.backendActor[nameOfLoadFunction];
+        const loadFunction = actorState.backendActor[nameOfLoadFunction];
         result = await loadFunction();
     }
     return result;

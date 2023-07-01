@@ -1,5 +1,5 @@
 .accordion__Container{
-    width:100%;
+    width:150%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -15,6 +15,7 @@
     background-color:#060b26;
     padding: 10px;
     border-radius: 10px;
+    height: 100%;
 }
 
 .accordion__Title{
@@ -38,22 +39,31 @@
 
 .accordion__Content{
     color:white;
-    max-height: 0;
     overflow: hidden;
+    max-height: 0;
     transition: all 0.5s cubic-bezier(0,1,0,1);
 }
 
 .accordion__Content.show{
     height: auto;
     max-height: 9999px;
+
     transition: all 0.5s cubic-bezier(1,0,1,0);
+}
+.accordion_content_container{
+    display: flex;
+    width: 100%;
 }
 
 .accordion_content_inner{
     display: flex;
+    width:25%;
+    height: 500px;
+    // flex-wrap: wrap;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
+    margin:20px
 }
 
 .accordion_content_inner p{
@@ -61,7 +71,7 @@
 }
 
 .accordion_content_inner img{
-    width: 60%;
+    width: 100%;
     height: 400px;
     object-fit: contain;
 }

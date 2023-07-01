@@ -27,26 +27,26 @@ const NotAuthorizedByOwner = (props) => {
     if(context === UI_CONTEXTS.ACCOUNT_PAGE){
         AppContext = AccountContext;
     }
-    const {journalState, dispatch} = useContext(AppContext);
+    const {journalState, journalDispatch, actorState} = useContext(AppContext);
 
     const handleSubmitRequest = async () => {
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: true
         });
-        let result = await journalState.backendActor.requestApproval();
+        let result = await actorState.backendActor.requestApproval();
         if("ok" in result){
-            dispatch({
+            journalDispatch({
                 actionType: types.SET_MODAL_STATUS,
                 payload: { show: true, which: MODALS_TYPES.requestApprovalRepsonse, success: true}
             });
         } else {
-            dispatch({
+            journalDispatch({
                 actionType: types.SET_MODAL_STATUS,
                 payload: { show: true, which: MODALS_TYPES.requestApprovalRepsonse, success: false}
             });
         }
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: false
         });

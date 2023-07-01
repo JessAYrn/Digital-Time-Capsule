@@ -24,10 +24,15 @@ import { types } from "../../reducers/journalReducer";
 import { backendActor, managerActor } from "../../Utils";
 import '../../SCSS/contentContainer.scss'
 import Accordion from "../Fields/Accordion";
+import actorReducer,{ actorInitialState,actorTypes } from "../../reducers/actorReducer";
 
 const AccordionContent=[
-    {text:'Get our App, Become a holder of Personal DAO', image:'dtcscreengrab1.png'},
-    
+
+    {text:"1.) Navigate to your Personal DAO's unique URL and press the share button circled below ", image:'assets/dtcscreengrab2.png'},
+    {text:"2.) Select the 'Add to Home Screen' button", image:'assets/dtcscreengrab3.png'},
+    {text:"3.) Enter a title and then press the 'add' button", image:'assets/dtcscreengrab4.png'},
+    {text:"4.) Your Personal DAO app will then be installed and visible on yoru Home Screen", image:'assets/dtcscreengrab1.png'},
+
 ]
 
 const LoginPage = (props) => {
@@ -49,11 +54,7 @@ const LoginPage = (props) => {
         properContext = TreasuryPageContext
     } 
 
-    const {    
-        journalState,
-        dispatch
-    } = useContext(properContext);
-
+    const { journalState, journalDispatch, actorState, actorDispatch } = useContext(properContext);
     const [frontendCanisterBalance, setFrontendCanisterBalance] = useState(0);
     const [backendCanisterBalance, setBackendCanisterBalance] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
@@ -69,6 +70,7 @@ const LoginPage = (props) => {
         backendActor: undefined,
         managerActor: undefined,
     };
+    
 
     const  handleClickDashboard = useCallback(() =>  {
         navigate(NAV_LINKS.dashboard, { replace: false, state: journalStateWithoutFunction});
@@ -107,17 +109,17 @@ const LoginPage = (props) => {
                 managerActor(connectionResult.activeProvider)
             ];
             const [backendActor_, managerActor_] = await Promise.all(promises);
-            dispatch({
-                actionType: types.SET_BACKEND_ACTOR,
+            actorDispatch({
+                actionType: actorTypes.SET_BACKEND_ACTOR,
                 payload: backendActor_
             });
-            dispatch({
-                actionType: types.SET_MANAGER_ACTOR,
+            actorDispatch({
+                actionType: actorTypes.SET_MANAGER_ACTOR,
                 payload: managerActor_
             });
         }
         setIsLoading(true);
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_AUTHENTICATED,
             payload: connectionResult.isConnected
         });

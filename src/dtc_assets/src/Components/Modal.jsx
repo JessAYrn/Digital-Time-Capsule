@@ -45,7 +45,7 @@ export const Modal = (props) => {
         AppContext = TreasuryContext;
     }
     
-    const { journalState, dispatch } = useContext(AppContext);
+    const { journalState, journalDispatch } = useContext(AppContext);
 
     const ChildComponent = useMemo(() => {
 

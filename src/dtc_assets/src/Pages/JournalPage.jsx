@@ -28,7 +28,9 @@ const JournalPage = (props) => {
 
     const { 
         journalState,
-        dispatch
+        journalDispatch,
+        actorState,
+        actorDispatch
     } = useContext(AppContext);
 
     let journalSize = journalState.journal.length;
@@ -53,8 +55,8 @@ const JournalPage = (props) => {
                 fileData, 
                 fileIndex,
                 index,
-                journalState,
-                dispatch,
+                actorState,
+                journalDispatch,
                 types.CHANGE_FILE_LOAD_STATUS,
                 types.SET_FILE
             ));
@@ -72,24 +74,24 @@ const JournalPage = (props) => {
     },[firstTimeOpeningPage]);
     
     //marks this page as read so that it no longer shows in the notifications section
-    if(journalPageData.entryKey) journalState.backendActor.readEntry({entryKey: journalPageData.entryKey});
+    if(journalPageData.entryKey) actorState.backendActor.readEntry({entryKey: journalPageData.entryKey});
 
     const toggleSwitch = () => {
         if(journalPageData.draft){
             let isCapsuled = !journalPageData.capsuled
-            dispatch({
+            journalDispatch({
                 actionType: types.CHANGE_CAPSULED,
                 payload: isCapsuled,
                 index: index
             });
             if(isCapsuled) {
-                dispatch({
+                journalDispatch({
                     actionType: types.CHANGE_UNLOCK_TIME,
                     payload: minimumDate,
                     index: index
                 });
             } else{
-                dispatch({
+                journalDispatch({
                     actionType: types.CHANGE_UNLOCK_TIME,
                     payload: thisDate,
                     index: index
@@ -119,15 +121,14 @@ const JournalPage = (props) => {
         }];
 
         const entryKeyAsApiObject = (entryKey >= 0 && entryKey < journalSize - 1 ) ? [{entryKey: entryKey}] : [];
-
-        let result = await journalState.backendActor.updateJournalEntry( entryKeyAsApiObject, entryAsApiObject );
+        let result = await actorState.backendActor.updateJournalEntry( entryKeyAsApiObject, entryAsApiObject );
         let userJournalData = result.ok;
-        loadJournalData({userJournalData}, dispatch, types);
+        loadJournalData({userJournalData}, journalDispatch, types);
         return result;
     };
 
     const handleSubmit = useCallback(async () => {
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: true
         });
@@ -135,7 +136,7 @@ const JournalPage = (props) => {
         let files = journalPageData.filesMetaData.filter(fileData => fileData.fileName !== 'null' && !fileData.error);
         journalPageData.filesMetaData = files;
         let filesSuccessfullyUploaded = true;
-        let result = await journalState.backendActor.submitFiles();
+        let result = await actorState.backendActor.submitFiles();
         if('err' in result) filesSuccessfullyUploaded = false;
     
         let result_1 = await mapAndSendEntryToApi(index, journalPageData, !filesSuccessfullyUploaded);
@@ -143,18 +144,18 @@ const JournalPage = (props) => {
         if('err' in result_1) entryDataSuccessfullyUploaded = false;
         
         const successfulUpload = filesSuccessfullyUploaded && entryDataSuccessfullyUploaded;
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: false
         });
         if(successfulUpload){
-            dispatch({
+            journalDispatch({
                 payload: false,
                 actionType: types.CHANGE_DRAFT,
                 index: index
             });
         } 
-        dispatch({
+        journalDispatch({
             actionType: types.SET_MODAL_STATUS,
             payload: {
                 show: true, 
@@ -166,7 +167,7 @@ const JournalPage = (props) => {
     }, [journalPageData]);
 
     useEffect(() => {
-        dispatch({
+        journalDispatch({
             actionType: types.SET_HANDLE_PAGE_SUBMIT_FUNCTION,
             payload: handleSubmit
         });
@@ -177,27 +178,28 @@ const JournalPage = (props) => {
         
         let isNewPage = !journalPageData.entryKey && journalPageData.entryKey !== 0;
         if(!isNewPage) {
-            dispatch({
+            journalDispatch({
                 actionType: types.CHANGE_PAGE_IS_OPEN,
                 payload: false,
                 index: index
             })
         } else {
             if(pageChangesMade){
-                dispatch({
+                journalDispatch({
                     actionType: types.SET_MODAL_STATUS,
                     payload: {show: true, which: MODALS_TYPES.exitWithoutSubmit}
                 });
             } else {
-                dispatch({
+                journalDispatch({
                     actionType: types.REMOVE_UNSUBMITTED_PAGE
                 });
             }
         }
     };
 
+
     const handleAddFile = async () => {
-        dispatch({
+        journalDispatch({
             index: index,
             actionType: types.ADD_JOURNAL_ENTRY_FILE
         });
@@ -251,7 +253,7 @@ const JournalPage = (props) => {
                             rows={"1"}
                             disabled={!journalPageData.draft}
                             setChangesWereMade={setPageChangesMade}
-                            dispatch={dispatch}
+                            dispatch={journalDispatch}
                             dispatchAction={types.CHANGE_DATE}
                             index={index}
                             value={journalPageData.date}
@@ -264,7 +266,7 @@ const JournalPage = (props) => {
                             rows={"1"}
                             disabled={!journalPageData.draft}
                             setChangesWereMade={setPageChangesMade}
-                            dispatch={dispatch}
+                            dispatch={journalDispatch}
                             dispatchAction={types.CHANGE_UNLOCK_TIME}
                             index={index}
                             value={journalPageData.unlockTime}
@@ -275,7 +277,7 @@ const JournalPage = (props) => {
                             rows={"1"}
                             disabled={!journalPageData.draft}
                             setChangesWereMade={setPageChangesMade}
-                            dispatch={dispatch}
+                            dispatch={journalDispatch}
                             dispatchAction={types.CHANGE_LOCATION}
                             index={index}
                             value={(journalPageData) ? journalPageData.location : ''}
@@ -286,7 +288,7 @@ const JournalPage = (props) => {
                             rows={"30"}
                             disabled={!journalPageData.draft}
                             setChangesWereMade={setPageChangesMade}
-                            dispatch={dispatch}
+                            dispatch={journalDispatch}
                             dispatchAction={types.CHANGE_ENTRY}
                             index={index}
                             value={(journalPageData) ? journalPageData.entry : ''}
@@ -298,10 +300,12 @@ const JournalPage = (props) => {
                                 videoHeight = {'330'}
                                 filesMetaDataArray={journalState.journal[index].filesMetaData}
                                 journalState={journalState}
+                                actorState={actorState}
+                                actorDispatch={actorDispatch}
                                 setChangesWereMade={setPageChangesMade}
                                 editModeDefault={true}
                                 disabled={!journalPageData.draft}
-                                dispatch={dispatch}
+                                journalDispatch={journalDispatch}
                                 index={index}
                                 dispatchActionToAddFile={types.ADD_JOURNAL_ENTRY_FILE}
                                 dispatchActionToDeleteFile={types.REMOVE_JOURNAL_ENTRY_FILE}

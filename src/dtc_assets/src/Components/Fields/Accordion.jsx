@@ -24,6 +24,7 @@ const Accordion = ({title,content,icon}) => {
                 >{selected? '-' :'+' }</div>
             </div>
             <div className={`accordion__Content ${selected ?' show':''}`}>
+                <div className={`accordion_content_container`}>
                 {content.map((content,index)=>(
                     (
                         <div
@@ -37,6 +38,8 @@ const Accordion = ({title,content,icon}) => {
                         
                     )
                 ))}
+                </div>
+                
             </div>
         </div>
     </div>

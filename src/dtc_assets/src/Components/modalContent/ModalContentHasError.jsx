@@ -8,11 +8,11 @@ import { types } from '../../reducers/journalReducer';
 import ButtonField from '../Fields/Button';
 const FileHasError = (props) => {
 
-    const { journalState, dispatch } = useContext(AppContext);
+    const { journalState, journalDispatch } = useContext(AppContext);
 
 
     const onClickOk = () => {
-        dispatch({
+        journalDispatch({
             actionType: types.SET_MODAL_STATUS,
             payload: {show: false, which: MODALS_TYPES.onSubmit}
         });

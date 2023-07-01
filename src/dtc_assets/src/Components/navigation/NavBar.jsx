@@ -21,6 +21,8 @@ import { ConnectButton, ConnectDialog, useConnect } from "@connect2ic/react";
 import { initialState } from '../../reducers/journalReducer';
 import "./NavBar.scss";
 import Dropdown from '../Fields/Dropdown';
+import { walletInitialState, walletTypes } from '../../reducers/walletReducer';
+
 
 
 
@@ -52,11 +54,17 @@ export const NavBar = (props) => {
 
     const {
         journalState,
-        dispatch
+        journalDispatch,
+        walletState,
+        walletDispatch,
+        accountState,
+        accountDispatch,
+        homePageState,
+        homePageDispatch
     } = useContext(AppContext);
 
     const toggleDisplayNotifications = () => {
-        dispatch({
+        journalDispatch({
             actionType: types.SET_MODAL_STATUS,
             payload: {show: !journalState.modalStatus.show, which: MODALS_TYPES.notifications}
         });
@@ -75,29 +83,90 @@ export const NavBar = (props) => {
         managerActor: undefined
     };
 
-    const  handleClickDashboard = useCallback(() =>  {
-        navigate(NAV_LINKS.dashboard, { replace: false, state: journalStateWithoutFunction});
-    }, [journalState.reloadStatuses]);
+    let walletStateWithoutFunction={
+        ...walletState,
+    }
+    
+    let accountStateWithoutFunction={
+        ...accountState,
+    }
+    
+    let homePageStateWithoutFunction={
+        ...homePageState,
+    }
 
-    const  handleClickWallet = useCallback(() =>  {
-        navigate(NAV_LINKS.wallet, { replace: false, state: journalStateWithoutFunction});
-    }, [journalState.reloadStatuses]);
+
+    const  handleClickDashboard = useCallback(() =>  {
+        navigate(NAV_LINKS.dashboard, { 
+            replace: false, 
+            state:{
+                journal:journalStateWithoutFunction,
+                wallet:walletStateWithoutFunction,
+                account:accountStateWithoutFunction,
+                homePage:homePageStateWithoutFunction
+            }
+        });
+    }, [journalState.reloadStatuses, walletState?.shouldReload]);
+
+    const handleClickWallet = useCallback(() =>  {
+       
+        navigate(NAV_LINKS.wallet, { 
+            replace: false, 
+            state: {
+                journal:journalStateWithoutFunction,
+                wallet:walletStateWithoutFunction,
+                account:accountStateWithoutFunction,
+                homePage:homePageStateWithoutFunction
+            }
+        });
+    }, [walletState?.shouldReload,journalState.reloadStatuses]);
 
     const  handleClickJournal = useCallback(() =>  {
-        navigate(NAV_LINKS.journal, { replace: false, state: journalStateWithoutFunction });
-    }, [journalState.reloadStatuses]);
+        navigate(NAV_LINKS.journal, { 
+            replace: false, 
+            state: {
+                journal:journalStateWithoutFunction,
+                wallet:walletStateWithoutFunction,
+                accountStateWithoutFunction,
+                homePage:homePageStateWithoutFunction
+            }
+        });
+    }, [walletState?.shouldReload,journalState.reloadStatuses]);
 
     const  handleClickAccount = useCallback(() =>  {
-        navigate(NAV_LINKS.account, { replace: false, state: journalStateWithoutFunction });
-    },[journalState.reloadStatuses]);
+        navigate(NAV_LINKS.account, { 
+            replace: false, 
+            state: {
+                journal:journalStateWithoutFunction,
+                wallet:walletStateWithoutFunction,
+                account:accountStateWithoutFunction,
+                homePage:homePageStateWithoutFunction
+            }    
+        });
+    },[walletState?.shouldReload,journalState.reloadStatuses]);
    
     const  handleClickTreasury = useCallback(() =>  {
-        navigate(NAV_LINKS.treasury, { replace: false, state: journalStateWithoutFunction });
-    },[journalState.reloadStatuses]);
+        navigate(NAV_LINKS.treasury, { 
+            replace: false, 
+            state: {
+                journal:journalStateWithoutFunction,
+                wallet:walletStateWithoutFunction,
+                account:accountStateWithoutFunction,
+                homePage:homePageStateWithoutFunction
+            }
+        });
+    },[walletState?.shouldReload,journalState.reloadStatuses]);
 
     const  handleClickGroupJournal = useCallback(() =>  {
-        navigate(NAV_LINKS.groupJournal, { replace: false, state: journalStateWithoutFunction });
-    },[journalState.reloadStatuses]);
+        navigate(NAV_LINKS.groupJournal, { 
+            replace: false, 
+            state: {
+                journal:journalStateWithoutFunction,
+                wallet:walletStateWithoutFunction,
+                account:accountStateWithoutFunction,
+                homePage:homePageStateWithoutFunction
+            }});
+    },[walletState?.shouldReload,journalState.reloadStatuses]);
 
     const showSideBar = () => {
         setSideBar(!sideBar)
@@ -106,10 +175,11 @@ export const NavBar = (props) => {
     useConnect({
         onConnect: () => {},
         onDisconnect: () => {
-            dispatch({
+            journalDispatch({
                 actionType: types.SET_ENTIRE_REDUX_STATE,
                 payload: initialState
             });
+            //here
         }
     });
 
@@ -121,8 +191,8 @@ export const NavBar = (props) => {
     ];
 
     const changeHandler_walletTab = (option) => {
-        dispatch({
-            actionType: types.SET_WALLET_TABS,
+        walletDispatch({
+            actionType: walletTypes.SET_WALLET_TABS,
             payload: option.text
         });
     };
@@ -133,7 +203,7 @@ export const NavBar = (props) => {
     ]
 
     const changeHandler_journalTab=(option)=>{
-        dispatch({
+        journalDispatch({
             actionType:types.SET_JOURNAL_TAB,
             payload:option.text
         })

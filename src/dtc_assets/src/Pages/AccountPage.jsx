@@ -9,32 +9,33 @@ import { NavBar } from '../Components/navigation/NavBar';
 import { UI_CONTEXTS } from '../Contexts';
 import LoadScreen from '../Components/LoadScreen';
 import { Modal } from '../Components/Modal';
-
+import { walletInitialState, walletTypes } from '../reducers/walletReducer';
+import accountReducer, { accountInitialState, accountTypes } from '../reducers/accountReducer';
 
 
 const AccountSection = (props) => {
 
-    const { journalState, dispatch } = useContext(AppContext);
-    const [pageChangesMade, setPageChangesMade] = useState(false);    
+    const { journalState, journalDispatch, accountDispatch, accountState, actorState } = useContext(AppContext);
+    const [pageChangesMade, setPageChangesMade] = useState(false); 
 
     const handleUpdate = async () => {
         setPageChangesMade(false);
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: true
         });
         const profileInput = {
-            userName: (journalState.metaData.userName[0]) ? journalState.metaData.userName: [],
-            email: (journalState.metaData.email[0]) ? journalState.metaData.email: []
+            userName: (accountState.metaData.userName[0]) ? accountState.metaData.userName: [],
+            email: (accountState.metaData.email[0]) ? accountState.metaData.email: []
         };
-        let result = await journalState.backendActor.updateProfile(profileInput);
-        dispatch({
+        let result = await actorState.backendActor.updateProfile(profileInput);
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: false
         });
 
     };
-    const isAdmin = journalState.metaData.userName[0] === 'admin';
+    const isAdmin = accountState?.metaData?.userName[0] === 'admin';
 
 return(
     journalState.modalStatus.show ?
@@ -62,18 +63,18 @@ return(
                         setChangesWereMade={setPageChangesMade}
                         label={"Email: "}
                         rows={"1"}
-                        dispatch={dispatch}
-                        dispatchAction={types.CHANGE_EMAIL}
-                        value={journalState.metaData.email}
+                        dispatch={accountDispatch}
+                        dispatchAction={accountTypes.CHANGE_EMAIL}
+                        value={accountState.metaData.email}
                     />
                     <InputBox
                         divClassName={"userName"}
                         setChangesWereMade={setPageChangesMade}
                         label={"Username: "}
                         rows={"1"}
-                        dispatch={dispatch}
-                        dispatchAction={types.CHANGE_USERNAME}
-                        value={journalState.metaData.userName}
+                        dispatch={accountDispatch}
+                        dispatchAction={accountTypes.CHANGE_USERNAME}
+                        value={accountState.metaData.userName}
                     />
                     {isAdmin && <AdminSection/>}
                 </div> 

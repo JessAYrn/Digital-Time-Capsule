@@ -6,7 +6,7 @@ import { AppContext } from "../Routes/App";
 import '../SCSS/section.scss';
 
 const BtcPage = () => {
-  const { journalState, dispatch} = useContext(AppContext);
+  const { journalState, journalDispatch} = useContext(AppContext);
   return (
     <>
 <NavBar
