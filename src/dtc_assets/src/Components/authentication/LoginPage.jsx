@@ -95,9 +95,10 @@ const LoginPage = (props) => {
     const connectionResult = useConnect({ onConnect: () => {}, onDisconnect: () => {} });
 
     useEffect(async () => {
-        let result = await anonymousActor_dtc.getCanisterCyclesBalances();
-        setBackendCanisterBalance(parseInt(result.backendCyclesBalance));
-        setFrontendCanisterBalance(parseInt(result.frontendCyclesBalance));
+        let promises = [anonymousActor_dtc.getCanisterCyclesBalances(), anonymousActor_dtc.heartBeat()];
+        let [result_0, result_1] = await Promise.all(promises);
+        setBackendCanisterBalance(parseInt(result_0.backendCyclesBalance));
+        setFrontendCanisterBalance(parseInt(result_0.frontendCyclesBalance));
         setIsLoading(false);
     },[]);
 

@@ -21,6 +21,7 @@ import Option "mo:base/Option";
 import JournalTypes "journal.types";
 import HashMap "mo:base/HashMap";
 import MainTypes "../Main/types";
+import NotificationsTypes "../Main/types.notifications";
 
 shared(msg) actor class Journal (principal : Principal) = this {
 
@@ -69,13 +70,11 @@ shared(msg) actor class Journal (principal : Principal) = this {
         photos = [];
     };
 
-    private stable var notifications : MainTypes.Notifications = [];
+    private stable var notifications : NotificationsTypes.Notifications = [];
 
     private stable var mainCanisterId_ : Text = "null"; 
 
     private stable var journalEntryIndex : Nat = 0;
-
-    private stable var txTrieIndex : Nat = 0;
 
     private var txFee : Nat64 = 10_000;
 
@@ -212,7 +211,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     public shared({caller}) func updateNotifications(): async (){
         if( Principal.toText(caller) != mainCanisterId_) { throw Error.reject("Unauthorized access."); };
-        let notificationsBuffer = Buffer.fromArray<MainTypes.Notification>(notifications);
+        let notificationsBuffer = Buffer.fromArray<NotificationsTypes.Notification>(notifications);
         let journalIter = journalMap.entries();
         Iter.iterate<(Nat, JournalTypes.JournalEntry)>(journalIter, func((key, entry) : (Nat, JournalTypes.JournalEntry), _index) {
             let {
@@ -231,7 +230,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         notifications := notificationsBuffer.toArray();
     };
 
-    public query({caller}) func getNotifications(): async MainTypes.Notifications{
+    public query({caller}) func getNotifications(): async NotificationsTypes.Notifications{
         if( Principal.toText(caller) != mainCanisterId_) { throw Error.reject("Unauthorized access."); };
         return notifications;
     };
@@ -395,7 +394,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         switch (res) {
           case (#Ok(blockIndex)) {
 
-            Debug.print("Paid reward to " # debug_show principal # " in block " # debug_show blockIndex);
+            Debug.print("Paid reward to " # debug_show Principal.fromActor(this) # " in block " # debug_show blockIndex);
             return true;
           };
           case (#Err(#InsufficientFunds { balance })) {
@@ -414,10 +413,9 @@ shared(msg) actor class Journal (principal : Principal) = this {
         Iter.toArray(txHistoryMap.entries());
     };
 
-    public shared({caller}) func updateTxHistory(tx : JournalTypes.Transaction) : async () {
+    public shared({caller}) func updateTxHistory(timeStamp: Nat64, tx : JournalTypes.Transaction) : async () {
         if( Principal.toText(caller) != mainCanisterId_) { throw Error.reject("Unauthorized access."); };
-        txHistoryMap.put(txTrieIndex, tx);
-        txTrieIndex += 1; 
+        txHistoryMap.put(Nat64.toNat(timeStamp), tx);
     };
 
     private func userAccountId() : Account.AccountIdentifier {

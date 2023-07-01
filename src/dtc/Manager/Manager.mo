@@ -81,11 +81,9 @@ shared(msg) actor class Manager (principal : Principal) = this {
             let wasmStore: WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
             let nextStableReleaseIndex = await wasmStore.getNextStableRelease(version);
             if(nextStableReleaseIndex <= version) return;
-            let nextRequiredReleaseIndex = await wasmStore.getNextRequiredRelease(version);
-            let nextVersionToUpgradeTo = Nat.min(nextRequiredReleaseIndex, nextStableReleaseIndex);
-            await updateModules(nextVersionToUpgradeTo);
-            await updateAssets(nextVersionToUpgradeTo);
-            version := nextVersionToUpgradeTo;
+            await updateModules(nextStableReleaseIndex);
+            await updateAssets(nextStableReleaseIndex);
+            version := nextStableReleaseIndex;
         } catch(e){};
     };
 
@@ -99,7 +97,7 @@ shared(msg) actor class Manager (principal : Principal) = this {
         permitUpdateToBackend := true;
     };
 
-    public shared({caller}) func installCode_backendCanister(canisterData: MainTypes.CanisterData): async () {
+    public shared({caller}) func installCode_backendCanister(canisterData: MainTypes.AppMetaData): async () {
         if(not permitUpdateToBackend) { throw Error.reject("Unauthorized access."); };
         let {backend; backend_without_timer} = release;
         var moduleToUse = backend;
@@ -116,7 +114,7 @@ shared(msg) actor class Manager (principal : Principal) = this {
         await CanisterManagementMethods.installCodeJournalWasms(wasmModule, profilesArray);
     };
 
-    public shared({caller}) func installCode_frontendCanister(canisterData: MainTypes.CanisterData): 
+    public shared({caller}) func installCode_frontendCanister(canisterData: MainTypes.AppMetaData): 
     async ([AssetCanister.BatchOperationKind]){
         if(Principal.toText(caller) != mainCanisterId) { throw Error.reject("Unauthorized access."); };
         let {frontend} = release;
@@ -286,17 +284,15 @@ shared(msg) actor class Manager (principal : Principal) = this {
     };
 
 
-    private func userAccountId() : Account.AccountIdentifier {
+    private func canisterAccountId() : Account.AccountIdentifier {
         let canisterId =  Principal.fromActor(this);
         Account.accountIdentifier(canisterId, Account.defaultSubaccount())
     };
 
     public query(msg) func canisterAccount() : async Account.AccountIdentifier {
         let callerId = msg.caller;
-        if( Principal.toText(callerId) != mainCanisterId) {
-            throw Error.reject("Unauthorized access.");
-        };
-        userAccountId()
+        if( Principal.toText(callerId) != mainCanisterId) { throw Error.reject("Unauthorized access."); };
+        canisterAccountId();
     };
 
     public shared(msg) func canisterBalance() : async Ledger.ICP {
@@ -305,10 +301,8 @@ shared(msg) actor class Manager (principal : Principal) = this {
         if(  
             Principal.toText(callerId) !=  Principal.toText(canisterId)
             and Principal.toText(callerId) != mainCanisterId
-        ) {
-            throw Error.reject("Unauthorized access.");
-        };
-        await ledger.account_balance({ account = userAccountId() })
+        ) { throw Error.reject("Unauthorized access."); };
+        await ledger.account_balance({ account = canisterAccountId() })
     };
    
     private  func key(x: Principal) : Trie.Key<Principal> {

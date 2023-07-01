@@ -30,8 +30,8 @@ module{
         await installCode_(null, wasmModule, backEndPrincipalBlob);
     };
 
-    public func installFrontendWasm( canisterData: MainTypes.CanisterData, wasmModule: Blob): async (){
-        let {frontEndPrincipal} = canisterData;
+    public func installFrontendWasm( appMetaData: MainTypes.AppMetaData, wasmModule: Blob): async (){
+        let {frontEndPrincipal} = appMetaData;
         let frontEndPrincipalBlob = Principal.fromText(frontEndPrincipal);
         await installCode_(null, wasmModule, frontEndPrincipalBlob);
     };

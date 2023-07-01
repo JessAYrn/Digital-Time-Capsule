@@ -75,7 +75,6 @@ const HomePage = () => {
             }
 
             canisterData = loadCanisterData(canisterData, homePageDispatch, homePageTypes);
-
             let requestsForApproval;
             if(canisterData.isOwner){
                 requestsForApproval = await actorState.backendActor.getRequestingPrincipals();

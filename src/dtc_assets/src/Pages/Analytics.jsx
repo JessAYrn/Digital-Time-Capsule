@@ -336,6 +336,7 @@ const Analytics = () => {
                                         }
                                         {
                                             showUserPrincipals &&
+
                                             homePageState.canisterData.profilesMetaData.map(({userPrincipal, approvalStatus, canisterId}) => {
                                                 const onClick1 = (approvalStatus) ? 
                                                 () => handleUpdateApprovalStatus(userPrincipal, !approvalStatus) : 

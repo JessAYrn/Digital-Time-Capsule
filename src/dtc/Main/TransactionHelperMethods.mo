@@ -10,6 +10,7 @@ import Iter "mo:base/Iter";
 import Blob "mo:base/Blob";
 import Journal "../Journal/Journal";
 import Nat64 "mo:base/Nat64";
+import Error "mo:base/Error";
 
 module{
 
@@ -23,17 +24,12 @@ module{
 
         let userProfile = profilesMap.get(callerId);
         switch(userProfile) {
-            case null{
-                #err(#NotFound)
-            }; 
+            case null{ #err(#NotFound) }; 
             case (? profile){
                 let userJournal : Journal.Journal = actor(Principal.toText(profile.canisterId));
                 let icpTransferStatus = await userJournal.transferICP(amount, canisterAccountId);
-                if(icpTransferStatus == true){
-                    #ok(());
-                } else {
-                    #err(#TxFailed);
-                }
+                if(icpTransferStatus == true){ #ok(()); } 
+                else { #err(#TxFailed); }
             };
         };
     };
@@ -44,9 +40,7 @@ module{
         let callerProfile = profilesMap.get(callerId);
 
         switch(callerProfile){
-            case null{
-                #err(#NotFound);
-            }; 
+            case null{ #err(#NotFound); }; 
             case ( ? profile){
                 let userJournal : Journal.Journal = actor(Principal.toText(profile.canisterId));
                 let tx = await userJournal.readWalletTxHistory();
@@ -58,38 +52,22 @@ module{
     public func updateUsersTxHistory(
         profilesMap: MainTypes.UserProfilesMap,
         startIndexForBlockChainQuery: Nat64
-        ) : 
-    async (Nat64) {
+    ) : async (Nat64) {
 
-        let tipOfChainInfo = await tipOfChainDetails();
-        let tipOfChainIndex : Nat64 = tipOfChainInfo.0;
-        let startIndex : Nat64 = startIndexForBlockChainQuery;
-        let maxQueryLength : Nat64 = 2_000;
-        let newStartIndexForNextQuery = Nat64.min(tipOfChainIndex, startIndex + maxQueryLength);
-
-        let getBlocksArgs = {
-            start = startIndex;
-            length = maxQueryLength;
-        };
-
-        let queryResponse = await ledger.query_blocks(getBlocksArgs);
-
-        let blocksArray = queryResponse.blocks;
-        let blocksArraySize = Iter.size(Iter.fromArray(blocksArray));
+        let tipOfChainIndex = await tipOfChainDetails();
+        let newStartIndexForNextQuery = Nat64.min( tipOfChainIndex, startIndexForBlockChainQuery + LedgerCandid.maxBlockQueryLength );
+        let getBlocksArgs = { start = startIndexForBlockChainQuery; length = LedgerCandid.maxBlockQueryLength; };
+        let {blocks} = await ledger.query_blocks(getBlocksArgs);
+        let numberOfBlocks = Iter.size(Iter.fromArray(blocks));
         var index = 0;
-        while(index < blocksArraySize){
-            let block = blocksArray[index];
-            let transaction = block.transaction;
-            let operation = transaction.operation;
+        while(index < numberOfBlocks){
+            let {transaction} = blocks[index];
+            let {operation} = transaction;
             switch(operation){
                 case null {};
                 case(? existingOperation){
                     switch(existingOperation){
-                        case(#Transfer(r)){
-                            let recipient = r.to;
-                            let source = r.from;
-                            let amount = r.amount.e8s;
-                            let fee = r.fee.e8s;
+                        case(#Transfer({to; from; amount; fee;})){
                             let timeOfCreation = transaction.created_at_time.timestamp_nanos;
                             let profilesSize = profilesMap.size();
                             let profilesIter = profilesMap.entries();
@@ -103,25 +81,27 @@ module{
                                     case null{};
                                     case(? existingUAID){
                                         let userJournal : Journal.Journal = actor(Principal.toText(userProfile.canisterId));
-                                        if(Blob.equal(existingUAID, source) == true){
-                                            let tx : JournalTypes.Transaction = {
-                                                balanceDelta = amount + fee;
-                                                increase = false;
-                                                recipient = ?recipient;
-                                                timeStamp = ?timeOfCreation;
-                                                source = ?source;
-                                            };
-                                            await userJournal.updateTxHistory(tx);
+                                        let tx_from : JournalTypes.Transaction = {
+                                            balanceDelta = amount.e8s + fee.e8s;
+                                            increase = false;
+                                            recipient = ?to;
+                                            timeStamp = ?timeOfCreation;
+                                            source = ?from;
                                         };
-                                        if(Blob.equal(existingUAID, recipient) == true){                                    
-                                            let tx : JournalTypes.Transaction = {
-                                                balanceDelta = amount;
-                                                increase = true;
-                                                recipient = ?recipient;
-                                                timeStamp = ?timeOfCreation;
-                                                source = ?source;
-                                            };
-                                            await userJournal.updateTxHistory(tx);
+                                        let tx_to : JournalTypes.Transaction = {
+                                            balanceDelta = amount.e8s;
+                                            increase = true;
+                                            recipient = ?to;
+                                            timeStamp = ?timeOfCreation;
+                                            source = ?from;
+                                        };
+                                        if( Blob.equal(existingUAID, from) and Blob.equal(existingUAID, to)){
+                                            ignore userJournal.updateTxHistory(timeOfCreation,tx_from);
+                                            ignore userJournal.updateTxHistory(timeOfCreation + 1, tx_to);
+                                        } else if(Blob.equal(existingUAID, from) == true){
+                                            ignore userJournal.updateTxHistory(timeOfCreation,tx_from);
+                                        } else if(Blob.equal(existingUAID, to) == true){                                    
+                                            ignore userJournal.updateTxHistory(timeOfCreation,tx_to);
                                         };
                                     };
                                 };
@@ -138,33 +118,11 @@ module{
         return newStartIndexForNextQuery;
     };
 
-    public func tipOfChainDetails() : async (Ledger.BlockIndex, LedgerCandid.Transaction) {
+    public func tipOfChainDetails() : async (Ledger.BlockIndex) {
         let tip = await ledgerC.tip_of_chain();
         switch (tip) {
-            case (#Err(_)) {
-                assert(false);
-                loop {};
-            };
-            case (#Ok(t)) {
-                let block = await ledgerC.block(t.tip_index);
-                switch (block) {
-                    case (#Err(_)) {
-                        assert(false);
-                        loop {};
-                    };
-                    case (#Ok(r)) {
-                        switch (r) {
-                            case (#Err(_)) {
-                                assert(false);
-                                loop {};
-                            };
-                            case (#Ok(b)) {
-                                (t.tip_index, b.transaction);
-                            };
-                        };
-                    };
-                };
-            };
+            case (#Err(_)) { throw Error.reject("Tip of chain could not be read"); };
+            case (#Ok(t)) { return t.tip_index; };
         };
     };
 
