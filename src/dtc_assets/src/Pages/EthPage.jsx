@@ -11,7 +11,6 @@ const EthPage = () => {
     <NavBar
     walletLink={false}
     journalLink={true}
-    nftLink={true}
     accountLink={true}
     dashboardLink={true}
     notificationIcon={false}

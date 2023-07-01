@@ -3,7 +3,6 @@ export const UI_CONTEXTS = {
     ACCOUNT_PAGE: 'accountPage',
     WALLET: 'wallet',
     HOME_PAGE: 'homePage',
-    NFT: 'nft',
     TREASURY:'treasury',
     GROUPJOURNAL:'groupjournal'
 };

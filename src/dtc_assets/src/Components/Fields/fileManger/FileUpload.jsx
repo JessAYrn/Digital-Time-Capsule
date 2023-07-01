@@ -40,7 +40,7 @@ const FileUpload = (props) => {
     if(context === UI_CONTEXTS.JOURNAL){
         AppContext = JournalContext;
     }
-    const { journalState, dispatch } = useContext(AppContext);
+    const { journalState, journalDispatch, actorState } = useContext(AppContext);
 
     let fileName = fileData.fileName;
     let fileNameIsNull = fileName === NULL_STRING_ALL_LOWERCASE;
@@ -64,7 +64,7 @@ const FileUpload = (props) => {
             if(duration > MAX_DURATION_OF_VIDEO_IN_SECONDS || forbiddenFileTypes.includes(uploadedFile.type)){
                 setFileSrc(defaultFileSrc);
                 setFileType("image/png");
-                dispatch({
+                journalDispatch({
                         actionType: types.SET_MODAL_STATUS,
                         payload: {
                             show: true, 
@@ -77,7 +77,7 @@ const FileUpload = (props) => {
                 setFileType(uploadedFile.type);
                 const fileURL = await getFileURL(uploadedFile);
                 let fileId = updateFileMetadataInStore(
-                    dispatch, 
+                    journalDispatch, 
                     dispatchActionToChangeFileMetaData, 
                     index, 
                     fileIndex, 
@@ -92,7 +92,7 @@ const FileUpload = (props) => {
             setFileType(uploadedFile.type);
             const fileURL = await getFileURL(uploadedFile);
             let fileId = updateFileMetadataInStore(
-                dispatch, 
+                journalDispatch, 
                 dispatchActionToChangeFileMetaData, 
                 index, 
                 fileIndex, 
@@ -106,16 +106,16 @@ const FileUpload = (props) => {
 
     const handleUpload = async () => {
         const uploadedFile = inputRef.current.files[0];
-        dispatch({ 
+        journalDispatch({ 
             actionType: dispatchActionToChangeFileLoadStatus,
             payload: true,
             index: index,
             fileIndex: fileIndex 
         });
         let fileId = await uploadFileToFrontend(uploadedFile);
-        if(fileId) await mapAndSendFileToApi(journalState, fileId, uploadedFile);
+        if(fileId) await mapAndSendFileToApi(actorState, fileId, uploadedFile);
 
-        dispatch({ 
+        journalDispatch({ 
             actionType: dispatchActionToChangeFileLoadStatus,
             payload: false,
             index: index,

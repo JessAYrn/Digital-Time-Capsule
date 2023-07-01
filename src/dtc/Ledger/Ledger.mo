@@ -197,7 +197,4 @@ module {
         query_blocks : shared query GetBlocksArgs -> async QueryBlocksResponse;
     };
 
-    public type InterfaceIndex = actor {
-        get_blocks : shared query GetBlocksArgs -> async GetBlocksResult;
-    };
 };

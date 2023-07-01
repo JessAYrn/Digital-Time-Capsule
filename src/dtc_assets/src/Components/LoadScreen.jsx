@@ -8,7 +8,7 @@ import '../SCSS/contentContainer.scss'
 
 const LoadScreen = () => {
 
-    const { dispatch, journalState } = useContext(AppContext);
+    const { journalDispatch, journalState } = useContext(AppContext);
     const [direction, setDirection] = useState('');
     const [seconds, setSeconds] = useState(0);
     const rotateAnimations = () => {

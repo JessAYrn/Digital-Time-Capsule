@@ -1,12 +1,36 @@
-import Journal "../Journal/Journal";
 import Account "../Ledger/Account";
-import NFT "../NFT/Dip-721-NFT-Container";
 import Trie "mo:base/Trie";
 import Principal "mo:base/Principal";
 import HashMap "mo:base/HashMap";
+import JournalTypes "../Journal/journal.types";
+import NotificationTypes "../Main/types.notifications";
+import IC "../IC/ic.types";
+import Ledger "../Ledger/Ledger";
 
 
 module{
+
+    public let self : IC.Self = actor "aaaaa-aa";
+
+    public let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
+
+    public let heartBeatInterval : Nat64 = 100;
+
+    public let heartBeatInterval_refill : Nat64 = 25000;
+
+    public let oneICP : Nat64 = 100_000_000;
+
+    public let nanosecondsInADay = 86400000000000;
+
+    public let daysInAMonth = 30;
+
+    public type JournalData = {
+        userJournalData : ([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio,); 
+        notifications: NotificationTypes.Notifications;
+        email: ?Text; 
+        userName: ?Text;
+        principal: Text;
+    };
 
     public type UserProfile = {
         canisterId : Principal;
@@ -29,18 +53,17 @@ module{
         accepted: Nat64
     };
 
-    public type Nft = {
-       nftCollection: NFT.Dip721NFT;
-    };
-
     public type UserPermissions = {
         approved: Bool;
         treasuryMember: Bool;
         treasuryContribution: Nat64;
         monthsSpentAsTreasuryMember: Nat;
     };
+    
 
-    public type ProfilesApprovalStatuses = [(Text, Approved)];
+    public type ProfileMetaData = {userPrincipal : Text; canisterId : Text; approvalStatus: Bool;};
+
+    public type ProfilesMetaData = [ProfileMetaData];
 
     public type CanisterDataExport = {
         journalCount: Nat;
@@ -53,15 +76,18 @@ module{
         nftId: Int;
         acceptingRequests: Bool;
         lastRecordedTime: Int;
-        profilesMetaData: ProfilesApprovalStatuses;
+        profilesMetaData: ProfilesMetaData;
         isOwner: Bool;
         currentCyclesBalance_backend: Nat;
         currentCyclesBalance_frontend: Nat;
+        currentCyclesBalance_manager: Nat;
         supportMode: Bool;
+        cyclesSaveMode: Bool;
+        releaseVersion: Nat;
     };
 
-    public type CanisterData = {
-        managerCanisterPrincipal: Text;
+    public type AppMetaData = {
+        managerCanisterPrincipal: Text; 
         frontEndPrincipal: Text;
         backEndPrincipal: Text;
         lastRecordedBackEndCyclesBalance: Nat;
@@ -70,6 +96,10 @@ module{
         nftId: Int;
         acceptingRequests: Bool;
         lastRecordedTime: Int;
+        cyclesSaveMode: Bool;
+        supportMode: Bool;
+        requestsForAccess: RequestsForAccess;
+        defaultControllers: [Principal];
     };
 
     public type Approved = Bool;
@@ -86,6 +116,20 @@ module{
 
     public type UserProfilesArray = [(Principal, UserProfile)];
 
-    public type NftCollectionsTree = Trie.Trie<Nat, Nft>;
+    public let DEFAULT_APP_METADATA: AppMetaData = {
+        managerCanisterPrincipal = "Null";
+        frontEndPrincipal = "Null";
+        backEndPrincipal = "Null";
+        lastRecordedBackEndCyclesBalance = 0;
+        backEndCyclesBurnRatePerDay = 0;
+        nftOwner = "Null";
+        nftId = -1;
+        acceptingRequests = true;
+        lastRecordedTime = 0;
+        cyclesSaveMode = false;
+        supportMode = false;
+        requestsForAccess = [];
+        defaultControllers = [];
+    };
 
 }

@@ -17,155 +17,185 @@ import * as AiIcons from 'react-icons/ai';
 import ButtonField from '../Components/Fields/Button';
 import { IconContext } from 'react-icons/lib';
 import "../SCSS/scrollable.scss";
-
 import '../SCSS/container.scss';
 import '../SCSS/contentContainer.scss'
 import '../SCSS/section.scss'
-
+import {homePageTypes} from '../reducers/homePageReducer';
 
 
 const Analytics = () => {
-    const { journalState, dispatch } = useContext(AppContext);
+    const { journalState, journalDispatch, homePageDispatch, homePageState, actorDispatch, actorState} = useContext(AppContext);
     const [showUserPrincipals, setShowUserPrincipals] = useState(false);
 
+
+
     const handleDenyAccess = async (principal) => {
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: true
         });
-        let result = await journalState.backendActor.removeFromRequestsList(principal);
+        let result = await actorState.backendActor.removeFromRequestsList(principal);
         result = result.ok;
-        dispatch({
-            actionType: types.SET_CANISTER_DATA,
-            payload: { ...journalState.canisterData, requestsForApproval: result }
+        homePageDispatch({
+            actionType: homePageTypes.SET_CANISTER_DATA,
+            payload: { ...homePageState.canisterData, requestsForApproval: result }
         });
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: false
         });
     };
 
     const handleGrantAccess = async (principal) => {
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: true
         });
-        let result = await journalState.backendActor.grantAccess(principal);
+        let result = await actorState.backendActor.grantAccess(principal);
         result = result.ok;
-        dispatch({
-            actionType: types.SET_CANISTER_DATA,
-            payload: { ...journalState.canisterData, requestsForApproval: result }
+        homePageDispatch({
+            actionType: homePageTypes.SET_CANISTER_DATA,
+            payload: { ...homePageState.canisterData, requestsForApproval: result }
         });
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: false
         });
     };
 
     const handleUpdateApprovalStatus = async (principal, newApprovalStatus) => {
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: true
         });
-        let result = await journalState.backendActor.updateApprovalStatus(principal, newApprovalStatus);
+        let result = await actorState.backendActor.updateApprovalStatus(principal, newApprovalStatus);
         result = result.ok;
-        console.log(result);
-        dispatch({
-            actionType: types.SET_CANISTER_DATA,
-            payload: { ...journalState.canisterData, profilesMetaData: result }
-        });
-        dispatch({
+
+        homePageDispatch({
+            actionType: homePageTypes.SET_CANISTER_DATA,
+            payload: { ...homePageState.canisterData, profilesMetaData: result }
+        })
+
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: false
         });
     };
 
     const toggleAcceptRequest = async () => {
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: true
         });
         let success = false;
-        let result = await journalState.backendActor.toggleAcceptRequest();
+        let result = await actorState.backendActor.toggleAcceptRequest();
         if('ok' in result)  {
             success = true;
-            dispatch({
-                actionType: types.SET_CANISTER_DATA,
-                payload: { ...journalState.canisterData, acceptingRequests: !journalState.canisterData.acceptingRequests }
+            homePageDispatch({
+                actionType: homePageTypes.SET_CANISTER_DATA,
+                payload: { ...homePageState.canisterData, acceptingRequests: !homePageState.canisterData.acceptingRequests }
             });
         }
-        dispatch({
+        journalDispatch({
             actionType: types.SET_MODAL_STATUS,
             payload: {show: true, which: MODALS_TYPES.onRegisterNewOwner, success: success}
         });
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: false
         });
     };
 
     const toggleSupportMode = async () => {
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: true
         });
         let success = false;
-        let result = await journalState.backendActor.toggleSupportMode();
+        let result = await actorState.backendActor.toggleSupportMode();
         if('ok' in result)  {
             success = true;
-            dispatch({
-                actionType: types.SET_CANISTER_DATA,
-                payload: { ...journalState.canisterData, supportMode: !journalState.canisterData.supportMode }
+            homePageDispatch({
+                actionType: homePageTypes.SET_CANISTER_DATA,
+                payload: { ...homePageState.canisterData, supportMode: !homePageState.canisterData.supportMode }
             });
         }
-        dispatch({
+        journalDispatch({
             actionType: types.SET_MODAL_STATUS,
             payload: {show: true, which: MODALS_TYPES.onRegisterNewOwner, success: success}
         });
 
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: false
         });
     }
 
     const handleRegistration = async () => {
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: true
         });
         let success;
-        let result = await journalState.backendActor.registerOwner();
+        let result = await actorState.backendActor.registerOwner();
         if('err' in result) success = false;
         else success = true;
-        dispatch({
+        journalDispatch({
             actionType: types.SET_MODAL_STATUS,
             payload: {show: true, which: MODALS_TYPES.onRegisterNewOwner, success: success}
         })
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: false
         });
     };
 
     const handleUpgrade = async () => {
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: true
         });
         let success = true;
         try{
-            await journalState.backendActor.upgradeApp_exceptForBackendCanister();
-            await journalState.managerActor.installCode_backendCanister();
-            
+            await actorState.backendActor.upgradeApp_exceptForBackendCanister();
+            await actorState.managerActor.installCode_backendCanister();
         } catch(e){
+            console.log("Error: ", e);
             success = false;
         };
-        dispatch({
+        journalDispatch({
             actionType: types.SET_MODAL_STATUS,
             payload: {show: true, which: MODALS_TYPES.onRegisterNewOwner, success: success}
         })
-        dispatch({
+        journalDispatch({
+            actionType: types.SET_IS_LOADING,
+            payload: false
+        });
+    };
+
+    const toggleCyclesSaveMode = async () => {
+        journalDispatch({
+            actionType: types.SET_IS_LOADING,
+            payload: true
+        });
+        let success = true;
+        try{
+            let canisterData = await actorState.backendActor.toggleCyclesSaveMode();
+            await actorState.managerActor.installCode_backendCanister(canisterData);
+            homePageDispatch({
+                actionType: homePageTypes.SET_CANISTER_DATA,
+                payload: { ...homePageState.canisterData, cyclesSaveMode: !homePageState.canisterData.cyclesSaveMode }
+            });
+            
+        } catch(e){
+            console.log("Error: ", e);
+            success = false;
+        };
+        journalDispatch({
+            actionType: types.SET_MODAL_STATUS,
+            payload: {show: true, which: MODALS_TYPES.onRegisterNewOwner, success: success}
+        })
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: false
         });
@@ -197,7 +227,6 @@ const Analytics = () => {
                     <NavBar
                         walletLink={true}
                         journalLink={true}
-                        nftLink={true}
                         accountLink={true}
                         dashboardLink={false}
                         notificationIcon={false}
@@ -212,52 +241,52 @@ const Analytics = () => {
                                         <div className={'AnalyticsContentContainer'}>
                                             <DataField
                                                 label={'Journals Created:'}
-                                                text={journalState.canisterData[CANISTER_DATA_FIELDS.journalCount]}
+                                                text={homePageState.canisterData[CANISTER_DATA_FIELDS.journalCount]}
                                             />
                                             <DataField
                                                 label={'Frontend Canister Principal:'}
-                                                text={journalState.canisterData[CANISTER_DATA_FIELDS.frontEndPrincipal]}
+                                                text={homePageState.canisterData[CANISTER_DATA_FIELDS.frontEndPrincipal]}
                                                 isPrincipal={true}
                                             />
                                             <DataField
                                                 label={'Backend Canister Principal:'}
-                                                text={journalState.canisterData[CANISTER_DATA_FIELDS.backEndPrincipal]}
+                                                text={homePageState.canisterData[CANISTER_DATA_FIELDS.backEndPrincipal]}
                                                 isPrincipal={true}
                                             />
                                             <DataField
                                                 label={'Cycles Burned Per Day:'}
-                                                text={journalState.canisterData[CANISTER_DATA_FIELDS.backEndCyclesBurnRatePerDay]}
+                                                text={homePageState.canisterData[CANISTER_DATA_FIELDS.backEndCyclesBurnRatePerDay]}
                                                 isCycles={true}
                                             />
                                             <DataField
                                                 label={'Frontend Cycles Balance:'}
-                                                text={journalState.canisterData[CANISTER_DATA_FIELDS.currentCyclesBalance_frontend]}
+                                                text={homePageState.canisterData[CANISTER_DATA_FIELDS.currentCyclesBalance_frontend]}
                                                 isCycles={true}
                                             />
                                             <DataField
                                                 label={'Backend Cycles Balance:'}
-                                                text={journalState.canisterData[CANISTER_DATA_FIELDS.currentCyclesBalance_backend]}
+                                                text={homePageState.canisterData[CANISTER_DATA_FIELDS.currentCyclesBalance_backend]}
                                                 isCycles={true}
                                             />
                                             <DataField
                                                 label={'Canister Owner:'}
-                                                text={journalState.canisterData[CANISTER_DATA_FIELDS.nftOwner]}
+                                                text={homePageState.canisterData[CANISTER_DATA_FIELDS.nftOwner]}
                                                 isPrincipal={true}
                                             />
                                             <DataField
                                                 label={'NFT ID:'}
-                                                text={journalState.canisterData[CANISTER_DATA_FIELDS.nftId]}
+                                                text={homePageState.canisterData[CANISTER_DATA_FIELDS.nftId]}
                                             />
                                         </div>
                                     </div>
                                 </div>
-                                {   journalState.canisterData.isOwner &&
+                                {   homePageState.canisterData.isOwner &&
                                     <div className={'transparentDiv__homePage__dataFields animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
                                         <div className={'AnalyticsDiv'}>
                                             <div className={'AnalyticsContentContainer array'}>
                                                 <h4 className='requestingAccessH4'>  Principals Requesting Access </h4>
-                                                {journalState.canisterData.requestsForApproval && 
-                                                    journalState.canisterData.requestsForApproval.map(([principal, approvalStatus]) => {
+                                                {homePageState.canisterData.requestsForApproval && 
+                                                    homePageState.canisterData.requestsForApproval.map(([principal, approvalStatus]) => {
                                                     return (
                                                         <div className={'dataFieldRow'}>
                                                             <DataField
@@ -305,21 +334,22 @@ const Analytics = () => {
                                         }
                                         {
                                             showUserPrincipals &&
-                                            journalState.canisterData.profilesMetaData.map(([principal, approvalStatus]) => {
+
+                                            homePageState.canisterData.profilesMetaData.map(({userPrincipal, approvalStatus, canisterId}) => {
                                                 const onClick1 = (approvalStatus) ? 
-                                                () => handleUpdateApprovalStatus(principal, !approvalStatus) : 
+                                                () => handleUpdateApprovalStatus(userPrincipal, !approvalStatus) : 
                                                 () => {};
 
                                                 const onClick0 = (approvalStatus) ? 
                                                 () => {} : 
-                                                () => handleUpdateApprovalStatus(principal, !approvalStatus);
+                                                () => handleUpdateApprovalStatus(userPrincipal, !approvalStatus);
                                                 return (
                                                     <div className={'dataFieldRow'}>
                                                         <DataField
-                                                            text={principal}
+                                                            text={userPrincipal}
                                                             isPrincipal={true}
-                                                            buttonIcon_1={journalState.canisterData.isOwner ? RiIcons.RiDeleteBin2Line : null}
-                                                            buttonIcon_0={journalState.canisterData.isOwner ? FaIcons.FaCheckSquare : null}
+                                                            buttonIcon_1={homePageState.canisterData.isOwner ? RiIcons.RiDeleteBin2Line : null}
+                                                            buttonIcon_0={homePageState.canisterData.isOwner ? FaIcons.FaCheckSquare : null}
                                                             onClick_1={onClick1}
                                                             onClick_0={onClick0}
                                                         />
@@ -344,7 +374,7 @@ const Analytics = () => {
                                         </div>
                                     </div>
                                 </div>
-                                {journalState.canisterData.isOwner && 
+                                {homePageState.canisterData.isOwner && 
                                 <div className={'switchDiv animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
                                     <div className='section'>
                                         <h5 className={'lebelH5'}> 
@@ -353,12 +383,12 @@ const Analytics = () => {
                                     </div>
                                     <div className='section'>
                                         <Switch
-                                            active={journalState.canisterData.supportMode}
+                                            active={homePageState.canisterData.supportMode}
                                             onClick={toggleSupportMode}
                                         />
                                     </div>
                                 </div>}
-                                {journalState.canisterData.isOwner && 
+                                {homePageState.canisterData.isOwner && 
                                 <div className={'switchDiv animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
                                     <div className='section'>
                                         <h5 className={'lebelH5'}> 
@@ -367,8 +397,22 @@ const Analytics = () => {
                                     </div>
                                     <div className='section'>
                                         <Switch
-                                            active={journalState.canisterData.acceptingRequests}
+                                            active={homePageState.canisterData.acceptingRequests}
                                             onClick={toggleAcceptRequest}
+                                        />
+                                    </div>
+                                </div>}
+                                {homePageState.canisterData.isOwner && 
+                                <div className={'switchDiv animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
+                                    <div className='section'>
+                                        <h5 className={'lebelH5'}> 
+                                            Cycles Saver Mode:  
+                                        </h5>
+                                    </div>
+                                    <div className='section'>
+                                        <Switch
+                                            active={homePageState.canisterData.cyclesSaveMode}
+                                            onClick={toggleCyclesSaveMode}
                                         />
                                     </div>
                                 </div>}
@@ -378,7 +422,7 @@ const Analytics = () => {
                                     onClick={handleRegistration}
                                     withBox={true}
                                 />
-                                {journalState.canisterData.isOwner &&
+                                {homePageState.canisterData.isOwner &&
                                     <ButtonField
                                         text={' Upgrade Application '}
                                         className={'ownerButtonsnDiv ButtonDiv active animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}

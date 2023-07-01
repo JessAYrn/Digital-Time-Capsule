@@ -1,24 +1,23 @@
 import React, {useState, useEffect, useMemo} from "react";
 import FileUpload from "./FileUpload";
 import { UI_CONTEXTS } from "../../../Contexts";
-import { PAGES } from "../../../Constants";
 import "./fileCarousel.scss";
 import * as RiIcons from 'react-icons/ri';
-import * as AiIcons from 'react-icons/ai';
 import * as BiIcons from 'react-icons/bi';
 import * as MdIcons from 'react-icons/md';
 import ButtonField from "../Button";
 import { NULL_STRING_ALL_LOWERCASE } from "../../../Constants";
 import { types } from "../../../reducers/journalReducer";
 
-
 const FileCarousel = (props) => {
 
     const {
         filesMetaDataArray,
-        dispatch,
+        journalDispatch,
+        actorDispatch,
         dispatchActionToAddFile,
         journalState,
+        actorState,
         dispatchActionToDeleteFile,
         setChangesWereMade,
         classNameMod,
@@ -37,7 +36,7 @@ const FileCarousel = (props) => {
         let updatedEditMode = !editMode
         setEditMode(updatedEditMode);
         if(!updatedEditMode){
-            dispatch({
+            journalDispatch({
                 actionType: types.SET_IS_LOADING,
                 payload: true
             });
@@ -49,24 +48,24 @@ const FileCarousel = (props) => {
                     fileType: metaData.fileType,
                 };
             });
-            let result = await journalState.backendActor.updatePhotos(photos);
+            let result = await actorState.backendActor.updatePhotos(photos);
             result = result.ok;
-            dispatch({
+            journalDispatch({
                 actionType: types.SET_BIO,
                 payload: result
             });
-            result = await journalState.backendActor.submitFiles();
-            dispatch({
+            result = await actorState.backendActor.submitFiles();
+            journalDispatch({
                 actionType: types.SET_IS_LOADING,
                 payload: false
             });
         } else {
-            let result = await journalState.backendActor.clearUnsubmittedFiles();
+            let result = await actorState.backendActor.clearUnsubmittedFiles();
         }
     };
 
     const addFile = () => {
-        dispatch({
+        journalDispatch({
             actionType: dispatchActionToAddFile
         });
     };
@@ -74,20 +73,20 @@ const FileCarousel = (props) => {
     const deleteFile = async (fileIndex, fileMetaData) => {
         let fileIsUnsubmitted = fileMetaData.fileIsUnsubmitted;
         let fileName = fileMetaData.fileName;
-        dispatch({
+        journalDispatch({
             actionType: dispatchActionToDeleteFile,
             index: index,
             fileIndex: fileIndex
         });
         if(fileIsUnsubmitted){
-            let result = await journalState.backendActor.deleteUnsubmittedFile(fileName);
+            let result = await actorState.backendActor.deleteUnsubmittedFile(fileName);
         } else {
-            dispatch({
+            journalDispatch({
                 actionType: types.SET_IS_LOADING,
                 payload: true
             });
-            let result = await journalState.backendActor.deleteSubmittedFile(fileName);
-            if("ok" in result) result = await journalState.backendActor.updateBio({
+            let result = await actorState.backendActor.deleteSubmittedFile(fileName);
+            if("ok" in result) result = await actorState.backendActor.updateBio({
                 dob: journalState.bio.dob,
                 pob: journalState.bio.pob,
                 name: journalState.bio.name,
@@ -95,11 +94,11 @@ const FileCarousel = (props) => {
                 preface: journalState.bio.preface,
                 photos: journalState.bio.photos
             });
-            dispatch({
+            journalDispatch({
                 actionType: types.SET_BIO,
                 payload: result.ok
             });
-            dispatch({
+            journalDispatch({
                 actionType: types.SET_IS_LOADING,
                 payload: false
             });

@@ -14,42 +14,31 @@ module{
     
     private let ic : IC.Self = actor "aaaaa-aa";
 
-    public func installCodeJournalWasms(  
-        wasmModule: Blob, 
-        profilesArray : MainTypes.UserProfilesArray
-    ): async() {
+    public func installCodeJournalWasms( wasmModule: Blob, profilesArray : MainTypes.UserProfilesArray): 
+    async () {
         let profilesSize = profilesArray.size();
         var index = 0;
-
         while(index < profilesSize){
             let (principal, profile) = profilesArray[index];
-            let arg = principal;
-            ignore installCode_(?arg, wasmModule, profile.canisterId);
+            ignore installCode_(?principal, wasmModule, profile.canisterId);
             index += 1;
         };
     };
 
-    public func installCodeBackendWasm(
-        backEndPrincipal: Text,
-        wasmModule: Blob
-    ): async (){
-        let arg = null;
+    public func installCodeBackendWasm( backEndPrincipal: Text, wasmModule: Blob): async (){
         let backEndPrincipalBlob = Principal.fromText(backEndPrincipal);
-        await installCode_(arg, wasmModule, backEndPrincipalBlob);
+        await installCode_(null, wasmModule, backEndPrincipalBlob);
     };
 
-    public func installFrontendWasm(
-        canisterData: MainTypes.CanisterData,
-        wasmModule: Blob
-    ): async (){
-        let {frontEndPrincipal} = canisterData;
-        let arg = null;
+    public func installFrontendWasm( appMetaData: MainTypes.AppMetaData, wasmModule: Blob): async (){
+        let {frontEndPrincipal} = appMetaData;
         let frontEndPrincipalBlob = Principal.fromText(frontEndPrincipal);
-        await installCode_(arg, wasmModule, frontEndPrincipalBlob);
+        await installCode_(null, wasmModule, frontEndPrincipalBlob);
     };
 
     private func installCode_ (argument: ?Principal, wasm_module: Blob, canister_id: Principal) : async () {
-        let arg = to_candid(argument);
+        var arg = to_candid(null);
+        switch(argument){ case null {}; case (?argument_){ arg := to_candid(argument_); } };
         await ic.stop_canister({canister_id});
         await ic.install_code({
             arg;

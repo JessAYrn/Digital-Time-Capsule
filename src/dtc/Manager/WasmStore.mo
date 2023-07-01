@@ -13,12 +13,18 @@ module{
         assets: AssetCanister.Assets;
         frontend: WasmData;
         backend: WasmData;
+        backend_without_timer: WasmData;
         journal: WasmData;
         manager: WasmData;
     };
 
-    public let wasmTypes : { backend: Text; frontend: Text; manager: Text; journal: Text; } = 
-    { backend = "BACKEND"; frontend = "FRONTEND"; manager = "MANAGER"; journal = "JOURNAL"};
+    public let wasmTypes : { backend: Text; frontend: Text; manager: Text; journal: Text; backend_without_timer: Text } = { 
+        backend = "BACKEND"; 
+        frontend = "FRONTEND"; 
+        manager = "MANAGER"; 
+        journal = "JOURNAL"; 
+        backend_without_timer = "BACKEND_WITHOUT_TIMER";
+    };
 
     public type Error = {
         #NoNewVersionAvailable;
@@ -30,9 +36,10 @@ module{
     public let wasmStoreCanisterId = "mow67-rqaaa-aaaap-qa6na-cai";
 
     public type Interface = actor {
-        getAssetKeys:() -> async [AssetCanister.Key];
+        getAssetKeys: query (Nat) -> async [AssetCanister.Key];
         getLatestReleaseNumber: query () -> async Nat;
         getNextRequiredRelease: query (Nat) -> async Nat;
+        getNextStableRelease: query (Nat) -> async Nat;
         getModule: (Nat, Text) -> async WasmData;
         getAssetMetaDataWithoutChunksData: (Nat, AssetCanister.Key) -> async AssetCanister.AssetArgs;
         getAssetChunk: (Nat, Text, Nat) -> async (AssetCanister.ChunkId, AssetCanister.ChunkData);

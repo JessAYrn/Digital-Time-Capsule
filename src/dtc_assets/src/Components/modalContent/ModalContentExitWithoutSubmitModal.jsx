@@ -13,7 +13,7 @@ const ExitWithoutSubmit = (props) => {
 
     const {
         journalState,
-        dispatch
+        journalDispatch
     } = useContext(AppContext);
 
     const indexOfNewPage = journalState.journal.length - 1;
@@ -29,11 +29,11 @@ const ExitWithoutSubmit = (props) => {
 
 
     const onClickSubmit = () => {
-        dispatch({
+        journalDispatch({
             actionType: types.SET_MODAL_STATUS,
             payload: {show: false, which: MODALS_TYPES.onSubmit}
         });
-        dispatch({
+        journalDispatch({
             actionType: types.CHANGE_PAGE_IS_OPEN,
             payload: false,
             index: index
@@ -42,10 +42,10 @@ const ExitWithoutSubmit = (props) => {
     };
 
     const onClickExit = () => {
-        dispatch({
+        journalDispatch({
             actionType: types.REMOVE_UNSUBMITTED_PAGE
         });
-        dispatch({
+        journalDispatch({
             actionType: types.SET_MODAL_STATUS,
             payload: {show: false, which: MODALS_TYPES.onSubmit}
         });

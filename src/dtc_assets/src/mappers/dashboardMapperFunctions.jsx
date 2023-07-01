@@ -12,7 +12,8 @@ export const mapBackendCanisterDataToFrontEndObj = (props) => {
         currentCyclesBalance_backend,
         currentCyclesBalance_frontend,
         acceptingRequests,
-        journalCount
+        journalCount,
+        cyclesSaveMode
     } = props;
 
     return {
@@ -28,6 +29,7 @@ export const mapBackendCanisterDataToFrontEndObj = (props) => {
         nftId: parseInt(nftId),
         supportMode: supportMode,
         acceptingRequests: acceptingRequests,
-        journalCount: parseInt(journalCount)
+        journalCount: parseInt(journalCount),
+        cyclesSaveMode: cyclesSaveMode
     }
 }; 

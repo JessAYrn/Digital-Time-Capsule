@@ -4,7 +4,6 @@ import { AppContext as JournalContext } from "../../Routes/App";
 import { AppContext as AccountContext } from "../../Routes/Account";
 import { AppContext as WalletContex } from "../../Routes/Wallet";
 import { AppContext as HomePageContext } from "../../Routes/HomePage";
-import { AppContext as NftPageContext } from "../../Routes/NFTs";
 import { AppContext as TreasuryPageContext } from "../../Routes/Treasury";
 import { UI_CONTEXTS } from "../../Contexts";
 import * as IoiosIcons from 'react-icons/io';
@@ -24,12 +23,16 @@ import DataField from "../Fields/DataField";
 import { types } from "../../reducers/journalReducer";
 import { backendActor, managerActor } from "../../Utils";
 import '../../SCSS/contentContainer.scss'
-import Dropdown from "../Fields/Dropdown";
 import Accordion from "../Fields/Accordion";
+import actorReducer,{ actorInitialState,actorTypes } from "../../reducers/actorReducer";
 
 const AccordionContent=[
-    {text:'Get our App, Become a holder of Personal DAO', image:'assets/dtcscreengrab1.png'},
-    
+
+    {text:"1.) Navigate to your Personal DAO's unique URL and press the share button circled below ", image:'assets/dtcscreengrab2.png'},
+    {text:"2.) Select the 'Add to Home Screen' button", image:'assets/dtcscreengrab3.png'},
+    {text:"3.) Enter a title and then press the 'add' button", image:'assets/dtcscreengrab4.png'},
+    {text:"4.) Your Personal DAO app will then be installed and visible on yoru Home Screen", image:'assets/dtcscreengrab1.png'},
+
 ]
 
 const LoginPage = (props) => {
@@ -47,17 +50,11 @@ const LoginPage = (props) => {
         properContext = WalletContex
     } else if(context === UI_CONTEXTS.HOME_PAGE){
         properContext = HomePageContext
-    } else if(context === UI_CONTEXTS.NFT){
-        properContext = NftPageContext
     } else if(context === UI_CONTEXTS.TREASURY){
         properContext = TreasuryPageContext
     } 
 
-    const {    
-        journalState,
-        dispatch
-    } = useContext(properContext);
-
+    const { journalState, journalDispatch, actorState, actorDispatch } = useContext(properContext);
     const [frontendCanisterBalance, setFrontendCanisterBalance] = useState(0);
     const [backendCanisterBalance, setBackendCanisterBalance] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
@@ -73,6 +70,7 @@ const LoginPage = (props) => {
         backendActor: undefined,
         managerActor: undefined,
     };
+    
 
     const  handleClickDashboard = useCallback(() =>  {
         navigate(NAV_LINKS.dashboard, { replace: false, state: journalStateWithoutFunction});
@@ -97,9 +95,10 @@ const LoginPage = (props) => {
     const connectionResult = useConnect({ onConnect: () => {}, onDisconnect: () => {} });
 
     useEffect(async () => {
-        let result = await anonymousActor_dtc.getCanisterCyclesBalances();
-        setBackendCanisterBalance(parseInt(result.backendCyclesBalance));
-        setFrontendCanisterBalance(parseInt(result.frontendCyclesBalance));
+        let promises = [anonymousActor_dtc.getCanisterCyclesBalances(), anonymousActor_dtc.heartBeat()];
+        let [result_0, result_1] = await Promise.all(promises);
+        setBackendCanisterBalance(parseInt(result_0.backendCyclesBalance));
+        setFrontendCanisterBalance(parseInt(result_0.frontendCyclesBalance));
         setIsLoading(false);
     },[]);
 
@@ -110,17 +109,17 @@ const LoginPage = (props) => {
                 managerActor(connectionResult.activeProvider)
             ];
             const [backendActor_, managerActor_] = await Promise.all(promises);
-            dispatch({
-                actionType: types.SET_BACKEND_ACTOR,
+            actorDispatch({
+                actionType: actorTypes.SET_BACKEND_ACTOR,
                 payload: backendActor_
             });
-            dispatch({
-                actionType: types.SET_MANAGER_ACTOR,
+            actorDispatch({
+                actionType: actorTypes.SET_MANAGER_ACTOR,
                 payload: managerActor_
             });
         }
         setIsLoading(true);
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_AUTHENTICATED,
             payload: connectionResult.isConnected
         });
@@ -183,10 +182,8 @@ const LoginPage = (props) => {
                                 withBox={true}
                             />
                         </div>
-
                         <ConnectButton/>
                         <ConnectDialog />
-                        
                         <DataField
                             label={'Front-end Canister Balance: '}
                             className={'loginPage'}
@@ -205,81 +202,6 @@ const LoginPage = (props) => {
                         content={AccordionContent}
                         />
                     </div>
-                </div>
-                <div className={`contentContainer _${animatedLeftElementIndex}`}>
-                    <div className={`contentDiv__features _${animatedLeftElementIndex++}`}>
-                        <div className={`list`}>
-                            <h6 className={`h6Tag`}>
-                                Store Your Memories
-                            </h6>
-                            <img className={`cameraImg`}src="camera.png" alt="camera"/>
-                        </div>
-                    </div>
-                </div>
-                <div className={`contentContainer animatedLeft _${animatedLeftElementIndex}`}>
-                    <div className={`contentDiv__features animatedLeft _${animatedLeftElementIndex++}`}>
-                        <div className={`list`}>
-                        <img className={`bitcoinImg`}src="bitcoin.png" alt="bitcoin"/>
-                            <h6 className={`h6Tag`}>
-                                Store Your Crypto
-                            </h6>
-                        </div>
-                    </div>
-                </div>
-                <div className={`contentContainer animatedLeft _${animatedLeftElementIndex}`}>
-                    <div className={`contentDiv__features animatedLeft _${animatedLeftElementIndex++}`}>
-                        <div className={`list`}>
-                            <h6 className={`h6Tag`}>
-                                Store Your Passwords
-                            </h6>
-                            <img className={`safeImg`}src="safe-image.png" alt="safe"/>
-                        </div>
-                    </div>
-                </div>
-                <div className={`contentContainer animatedLeft _${animatedLeftElementIndex}`}>
-                    <div className={`contentDiv__features animatedLeft _${animatedLeftElementIndex++}`}>
-                        <div className={`list`}>
-                            <h4 className={`h4Tag`}>
-                                All In One Place
-                            </h4>
-                        </div>
-                    </div>
-                </div>
-                <div className={`contentContainer animatedLeft _${animatedLeftElementIndex}`}>
-                    <div className={`contentDiv__sentences animatedLeft _${animatedLeftElementIndex++}`}>
-                        <div className={`sentences`}>
-                            <p>
-                                The invention of blockchain technology enables us be to able to store our sensitive data in a decentralized,
-                                secure manner. The Digital Time Capsule is an application built and hosted entirely on the Internet Computer blockchain.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div className={`contentContainer animatedLeft _${animatedLeftElementIndex}`}>
-                    <div className={`contentDiv__sentences animatedLeft _${animatedLeftElementIndex++}`}>
-                        <div className={`sentences`}>
-                            <p>
-                                The Digital Time Capsule leverages the security of the blockchain to allow users to store digital assets of sentimental 
-                                and monetary value all in one safe location- free of worry. Access to your data is granted using 
-                                your internet identity as opposed to the traditional username and password. 
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div className={`contentContainer animatedLeft _${animatedLeftElementIndex}`}>
-                    <div className={`contentDiv__sentences animatedLeft _${animatedLeftElementIndex++}`}>
-                        <div className={`sentences`}>
-                            <p>
-                                This access feature is more secure than a username and password: 
-                                it eliminates the possibility of bad actors being able to remotely 
-                                access your data without physical access to a device or devices of 
-                                your choice.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div>
-
                 </div>
             </div>
             <div className={"container_2"}>

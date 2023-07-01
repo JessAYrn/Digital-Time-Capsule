@@ -4,117 +4,79 @@ import { generateQrCode } from "./walletFunctions/GenerateQrCode";
 import { mapBackendCanisterDataToFrontEndObj } from "../mappers/dashboardMapperFunctions";
 import { getFileUrl_fromApi } from "./Fields/fileManger/FileManagementTools";
 
-export const loadJournalData = (journal, dispatch, types) => {
-    const journalEntriesObject = mapApiObjectToFrontEndJournalEntriesObject(journal);
-    let journalEntries = journalEntriesObject.allEntries;
-    let unreadEntries = journalEntriesObject.unreadEntries;
-    dispatch({
-        payload: unreadEntries,
-        actionType: types.SET_JOURNAL_UNREAD_ENTRIES
-    })
-    let userJournalData = journal.ok.userJournalData || journal.ok
-    const journalBio = userJournalData[1];
-    const metaData = {email : journal.ok.email, userName: journal.ok.userName};
+
+
+export const loadJournalData = (journal, journalDispatch, types) => {
+    let { userJournalData, email, userName, notifications } = journal;
+    let [journalEntries, journalBio] = userJournalData;
+    journalEntries = mapApiObjectToFrontEndJournalEntriesObject(journalEntries);
+    let metaData = {};
+    if(email) metaData.email = email;
+    if(userName) metaData.userName = userName;
     
-    dispatch({
-        payload: metaData,
-        actionType: types.SET_METADATA
-    })
-    dispatch({
+    if(Object.keys(metaData).length) {
+        journalDispatch({
+            payload: metaData,
+            actionType: types.SET_METADATA
+        });
+    };
+    if(notifications){
+        journalDispatch({
+            actionType: types.SET_NOTIFICATIONS,
+            payload: notifications
+        });
+    };
+    journalDispatch({
         payload: journalBio,
         actionType: types.SET_BIO
     })
-    dispatch({
+    journalDispatch({
         payload: journalEntries,
         actionType: types.SET_JOURNAL
     });
-    dispatch({
+    journalDispatch({
         actionType: types.SET_JOURNAL_DATA_RELOAD_STATUS,
         payload: false,
     });
 };
 
-export const loadJournalDataResponseAfterSubmit = (journal, dispatch, types) => {
-    const journalEntriesObject = mapApiObjectToFrontEndJournalEntriesObject(journal);
-    let journalEntries = journalEntriesObject.allEntries;
-    let unreadEntries = journalEntriesObject.unreadEntries;
-    dispatch({
-        payload: unreadEntries,
-        actionType: types.SET_JOURNAL_UNREAD_ENTRIES
-    })
-    let userJournalData = journal.ok
-    const journalBio = userJournalData[1];
-    
-    dispatch({
-        payload: journalBio,
-        actionType: types.SET_BIO
-    })
-    dispatch({
-        payload: journalEntries,
-        actionType: types.SET_JOURNAL
-    });
-    dispatch({
-        actionType: types.SET_JOURNAL_DATA_RELOAD_STATUS,
-        payload: false,
-    });
-};
+export const loadWalletData = async (walletDataFromApi, walletDispatch, types ) => {
 
-
-
-export const loadWalletData = async (walletDataFromApi, dispatch, types ) => {
-    const address = toHexString(new Uint8Array( [...walletDataFromApi.ok.address]))
+    const address = toHexString(new Uint8Array( [...walletDataFromApi.ok.address]));
     const walletData = { 
         balance : parseInt(walletDataFromApi.ok.balance.e8s), 
         address: address
     };
 
     const qrCodeImgUrl = await generateQrCode(address);
-    dispatch({
+    walletDispatch({
         actionType: types.SET_WALLET_QR_CODE_IMG_URL,
         payload: qrCodeImgUrl
     });
-    dispatch({
+    walletDispatch({
         payload: walletData,
         actionType: types.SET_WALLET_DATA
     });
-    dispatch({
+    walletDispatch({
         actionType: types.SET_WALLET_DATA_RELOAD_STATUS,
         payload: false,
     });
 };
 
-export const loadTxHistory = async (journalState, dispatch, types) => {
-    if(!journalState.backendActor){
-        throw 'No actor defined'
-    };
-
-    const tx = await journalState.backendActor.readTransaction();
+export const loadTxHistory = async (actorState, walletDispatch, types) => {
+    if(!actorState.backendActor) throw 'No actor defined';
+    const tx = await actorState.backendActor.readTransaction();
     const transactionHistory = tx.ok.sort(function(a,b){
         const mapKeyOfA = parseInt(a[0]);
         const mapKeyOfB = parseInt(b[0]);
-        if (mapKeyOfA > mapKeyOfB){
-            return -1
-        } else {
-            return 1
-        }
+        if (mapKeyOfA > mapKeyOfB) return -1; 
+        else return 1;
     });
-    dispatch({
+    walletDispatch({
         actionType: types.SET_TX_HISTORY_DATA,
         payload: transactionHistory
     });
     return {transactionHistory, tx};
-};
-
-export const loadNftData = (nftCollection, dispatch, types) => {
-    nftCollection = nftCollection.ok;
-    dispatch({
-        payload: nftCollection,
-        actionType: types.SET_NFT_DATA
-    });
-    dispatch({
-        payload: false,
-        actionType: types.SET_NFT_DATA_RELOAD_STATUS
-    });
 };
 
 export const loadCanisterData = (canisterData, dispatch, types) => {
@@ -148,13 +110,34 @@ export const handleErrorOnFirstLoad = async (fnForLoadingData, fnForRefiringAuth
     }
 }
 
-export const recoverState = async (journalState, location, dispatch, types, connectionResult) => {
+export const recoverState = async (journalState, location, dispatchMethods,types,connectionResult) => {
+
     // dispatch state from previous route to redux store if that state exists
     if(location.state){
-        dispatch({
-            actionType: types.SET_ENTIRE_REDUX_STATE,
-            payload: location.state
-        });
+        const{journal,wallet,homePage}=location.state;
+        if(dispatchMethods.journalDispatch){
+            dispatchMethods.journalDispatch({
+                actionType: types.journalTypes.SET_ENTIRE_REDUX_STATE,
+                payload: journal
+            });
+        }
+
+        if(dispatchMethods.walletDispatch){
+            dispatchMethods.walletDispatch({
+                actionType: types.walletTypes.SET_ENTIRE_WALLET_REDUX_STATE,
+                payload:wallet
+            })
+        }
+
+        if(dispatchMethods.homePageDispatch){
+            dispatchMethods.homePageDispatch({
+                actionType: types.homePageTypes.SET_ENTIRE_DASHBOARD_REDUX_STATE,
+                payload:homePage
+            })
+        }
+    
+        
+
         //wipe previous location state to prevent infinite loop
         location.state = null;
         const promises = [
@@ -162,12 +145,12 @@ export const recoverState = async (journalState, location, dispatch, types, conn
             managerActor(connectionResult.activeProvider)
         ];
         const [backendActor_, managerActor_] = await Promise.all(promises);
-        dispatch({
-            actionType: types.SET_BACKEND_ACTOR,
+        dispatchMethods.actorDispatch({
+            actionType: types.actorTypes.SET_BACKEND_ACTOR,
             payload: backendActor_
         });
-        dispatch({
-            actionType: types.SET_MANAGER_ACTOR,
+        dispatchMethods.actorDispatch({
+            actionType: types.actorTypes.SET_MANAGER_ACTOR,
             payload: managerActor_
         });
     };
@@ -177,27 +160,27 @@ export const fileLoaderHelper =  async (
     fileData, 
     fileIndex,
     pageIndex,
-    journalState, 
-    dispatch, 
+    actorState, 
+    journalDispatch, 
     actionTypeToChangeFileLoadStatus,
     actionTypeToSetFile
     ) => {
-    dispatch({
+    journalDispatch({
         actionType: actionTypeToChangeFileLoadStatus,
         payload: true,
         blockReload: true,
         fileIndex: fileIndex,
         index: pageIndex
     });
-    const dataURL = await getFileUrl_fromApi(journalState, fileData);
-    dispatch({
+    const dataURL = await getFileUrl_fromApi(actorState, fileData);
+    journalDispatch({
         actionType: actionTypeToSetFile,
         payload: dataURL,
         blockReload: true,
         fileIndex: fileIndex,
         index: pageIndex
     });
-    dispatch({
+    journalDispatch({
         actionType: actionTypeToChangeFileLoadStatus,
         payload: false,
         blockReload: true,

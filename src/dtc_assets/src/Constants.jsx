@@ -13,7 +13,6 @@ export const CHUNK_SIZE = 1024 * 1024;
 export const NAV_LINKS = {
     wallet : '/wallet',
     journal : '/app',
-    nft : '/nft',
     account: '/account',
     dashboard: '/',
     treasury:'/treasury',
@@ -89,4 +88,16 @@ export const WALLET_TABS={
     ckBtcTab:'ckBtc_tab'
 }
 
+export const DEFAULT_APP_CONTEXTS={
+    journalState:{},
+    journalDispatch: () => {},
+    walletState:{},
+    walletDispatch:()=>{},
+    accountState:{},
+    accountDispatch:()=>{},
+    homePageDispatch:()=>{},
+    homePageState:{},
+    actorState:{},
+    actorDispatch:()=>{}
+}
 export const MASTER_COPY_FRONTEND_CANISTER_ID = "fkkq7-siaaa-aaaap-qaaya-cai";

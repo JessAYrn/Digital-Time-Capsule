@@ -20,7 +20,7 @@ import "../SCSS/contentContainer.scss";
 
 const Journal = (props) => {
 
-    const { journalState, dispatch} = useContext(AppContext);
+    const { journalState, journalDispatch, actorState, actorDispatch} = useContext(AppContext);
     const [photosLoaded, setPhotosLoaded] = useState(false);
     const [pageChangesMade, setPageChangesMade] = useState(false); 
     
@@ -35,8 +35,8 @@ const Journal = (props) => {
                 fileData, 
                 fileIndex,
                 null,
-                journalState,
-                dispatch,
+                actorState,
+                journalDispatch,
                 types.CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE,
                 types.SET_FILE_JOURNAL_COVER_PAGE
             ));
@@ -48,11 +48,11 @@ const Journal = (props) => {
 
     const handleSubmit = async () => {
         setPageChangesMade(false);
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: true
         });
-        const result = await journalState.backendActor.updateBio({
+        const result = await actorState.backendActor.updateBio({
             dob: journalState.bio.dob,
             pob: journalState.bio.pob,
             name: journalState.bio.name,
@@ -60,18 +60,18 @@ const Journal = (props) => {
             preface: journalState.bio.preface,
             photos: journalState.bio.photos
         });
-        dispatch({
+        journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: false
         });
         
         if("ok" in result){
-            dispatch({
+            journalDispatch({
                 actionType: types.SET_MODAL_STATUS,
                 payload: {show:true, which: MODALS_TYPES.onSubmit, success: true}
             });
         } else {
-            dispatch({
+            journalDispatch({
                 actionType: types.SET_MODAL_STATUS,
                 payload: {show:true, which: MODALS_TYPES.onSubmit, success: false}
             });
@@ -80,7 +80,7 @@ const Journal = (props) => {
 
     const openPage = async (e, index, unlocked) => {
         if(unlocked){
-            dispatch({
+            journalDispatch({
                 actionType: types.CHANGE_PAGE_IS_OPEN,
                 payload: true,
                 index: index
@@ -90,8 +90,8 @@ const Journal = (props) => {
 
     const addJournalPage = () => {
         //Ensures that there are no unsubmitted entries left over from a previous post
-        journalState.backendActor.clearUnsubmittedFiles();
-        dispatch({
+        actorState.backendActor.clearUnsubmittedFiles();
+        journalDispatch({
             actionType: types.ADD_JOURNAL_PAGE
         });
     }
@@ -160,6 +160,8 @@ const Journal = (props) => {
         return journalState.journal.findIndex(page => page.isOpen === true);
     }
 
+    console.log(journalState.notifications);
+
     return(
         journalState.modalStatus.show ?
         <div className={"container journal"}>
@@ -175,11 +177,10 @@ const Journal = (props) => {
                         <NavBar
                             walletLink={true}
                             journalLink={false}
-                            nftLink={true}
                             accountLink={true}
                             dashboardLink={true}
                             notificationIcon={true}
-                            unreadNotifications={journalState.unreadEntries.length}
+                            unreadNotifications={journalState.notifications}
                             context={UI_CONTEXTS.JOURNAL}
                         />
                         {journalState.isLoading ? 
@@ -191,7 +192,7 @@ const Journal = (props) => {
                                         label={"This Journal Belongs To: "}
                                         setChangesWereMade={setPageChangesMade}
                                         rows={"1"}
-                                        dispatch={dispatch}
+                                        dispatch={journalDispatch}
                                         dispatchAction={types.CHANGE_NAME}
                                         value={journalState.bio.name}
                                     />
@@ -201,7 +202,7 @@ const Journal = (props) => {
                                         label={"Date of Birth: "}
                                         setChangesWereMade={setPageChangesMade}
                                         rows={"1"}
-                                        dispatch={dispatch}
+                                        dispatch={journalDispatch}
                                         dispatchAction={types.CHANGE_DOB}
                                         value={journalState.bio.dob}
                                     />
@@ -212,7 +213,7 @@ const Journal = (props) => {
                                         setChangesWereMade={setPageChangesMade}
                                         className={"animatedLeft"}
                                         rows={"1"}
-                                        dispatch={dispatch}
+                                        dispatch={journalDispatch}
                                         dispatchAction={types.CHANGE_POB}
                                         value={journalState.bio.pob}
                                     />
@@ -225,8 +226,10 @@ const Journal = (props) => {
                                         videoHeight = {'330'}
                                         filesMetaDataArray={journalState.bio.photos}
                                         journalState={journalState}
+                                        actorState={actorState}
+                                        actorDispatch={actorDispatch}
                                         setChangesWereMade={setPageChangesMade}
-                                        dispatch={dispatch}
+                                        journalDispatch={journalDispatch}
                                         dispatchActionToAddFile={types.ADD_COVER_PHOTO}
                                         dispatchActionToDeleteFile={types.REMOVE_COVER_PHOTO}
                                         classNameMod={'coverPhoto'}
@@ -240,7 +243,7 @@ const Journal = (props) => {
                                         setChangesWereMade={setPageChangesMade}
                                         label={"Dedications: "}
                                         rows={"8"}
-                                        dispatch={dispatch}
+                                        dispatch={journalDispatch}
                                         dispatchAction={types.CHANGE_DEDICATIONS}
                                         value={journalState.bio.dedications}
                                     />
@@ -251,7 +254,7 @@ const Journal = (props) => {
                                         setChangesWereMade={setPageChangesMade}
                                         label={"Preface: "}
                                         rows={"29"}
-                                        dispatch={dispatch}
+                                        dispatch={journalDispatch}
                                         dispatchAction={types.CHANGE_PREFACE}
                                         value={journalState.bio.preface}
                                     />

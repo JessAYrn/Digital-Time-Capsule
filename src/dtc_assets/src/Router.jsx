@@ -4,7 +4,6 @@ import HomePage from './Routes/HomePage';
 import App from './Routes/App';
 import AccountPage from "./Routes/Account"
 import WalletApp from './Routes/Wallet';
-import NFTapp from './Routes/NFTs';
 import { defaultProviders } from "@connect2ic/core/providers"
 import { createClient } from "@connect2ic/core"
 import { Connect2ICProvider } from "@connect2ic/react"
@@ -65,7 +64,7 @@ const Router = (props) => {
     },[]);
     
     return(
-      { client &&
+       client &&
         <Connect2ICProvider client={client}>
             <HashRouter>
                 <Routes>
@@ -73,13 +72,11 @@ const Router = (props) => {
                     <Route path={NAV_LINKS.journal} element={<App />}/>
                     <Route path={NAV_LINKS.account} element={<AccountPage />}/>
                     <Route path={NAV_LINKS.wallet} element={<WalletApp />}/>
-                    <Route path={NAV_LINKS.nft} element={<NFTapp />}/>
                     <Route path={NAV_LINKS.treasury} element={<Treasury/>}/>
                     <Route path={NAV_LINKS.groupJournal} element={<GroupJournal/>}/>
                 </Routes>
             </HashRouter>
         </Connect2ICProvider>
-      }
     );
 };
 

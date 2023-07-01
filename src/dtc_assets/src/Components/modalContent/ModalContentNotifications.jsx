@@ -30,10 +30,10 @@ const Notifications = (props) => {
         AppContext = AccountContext;
     }
 
-    const { journalState, dispatch } = useContext(AppContext);
+    const { journalState, journalDispatch } = useContext(AppContext);
 
     const onClick = () => {
-        dispatch({
+        journalDispatch({
             actionType: types.SET_MODAL_STATUS,
             payload: {show: false, which: MODALS_TYPES.onSubmit}
         })
@@ -52,7 +52,7 @@ const Notifications = (props) => {
                 </table>
                 <div class='scrollable'>
                     <table className={"table"}>
-                        { journalState.unreadEntries.map((page, index) => {
+                        { journalState.notifications.map((page, index) => {
                             return(
                                 <tr className={"tableRow "+index}>
                                     <td className={"tableCell "+index}>{page.date}</td>
