@@ -5,7 +5,8 @@ export const walletTypes={
     SET_WALLET_TABS:'SET_WALLET_TABS',
     SET_WALLET_DATA: "SET_WALLET_DATA",
     SET_WALLET_QR_CODE_IMG_URL:"SET_WALLET_QR_CODE_IMG_URL",
-    SET_WALLET_DATA_RELOAD_STATUS:'SET_WALLET_DATA_RELOAD_STATUS'
+    SET_WALLET_DATA_RELOAD_STATUS:'SET_WALLET_DATA_RELOAD_STATUS',
+    SET_TX_HISTORY_DATA:"SET_TX_HISTORY_DATA",
 }
 
 
@@ -33,27 +34,34 @@ const changeValue = (state =walletInitialState, action) => {
     switch(actionType){
         case walletTypes.SET_ENTIRE_WALLET_REDUX_STATE:
             state = payload;
-            return {
-                ...state
-            }
-
-
+        return {
+            ...state
+        }
         case walletTypes.SET_WALLET_DATA:
             state.walletData = {
                 ...state.walletData,
                 balance: payload.balance,
                 address: payload.address
             }
-            return {
-                ...state
-            }
-            
+        return {
+            ...state
+        }
+        case walletTypes.SET_TX_HISTORY_DATA:
+            state.walletData = {
+                ...state.walletData,
+                txHistory: {
+                    ...state.walletData.txHistory,
+                    data: payload
+                }
+            };
+        return {
+            ...state
+        } 
         case walletTypes.SET_WALLET_TABS:
-                        state.walletPageTab=payload;
-                        return{
-                            ...state
-            }
-        
+            state.walletPageTab=payload;
+        return{
+            ...state
+        }
         case walletTypes.SET_WALLET_QR_CODE_IMG_URL:
         state.walletData = {
             ...state.walletData,
@@ -62,16 +70,15 @@ const changeValue = (state =walletInitialState, action) => {
         return{
             ...state
         }
-
         case walletTypes.SET_WALLET_DATA_RELOAD_STATUS:
         state.shouldReload=payload
         return {
             ...state
         }
         default:
-            return {
-                 ...state
-         }
+        return {
+            ...state
+        }
     }
 }
 

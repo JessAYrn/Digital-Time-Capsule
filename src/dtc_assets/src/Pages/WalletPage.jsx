@@ -39,7 +39,7 @@ const WalletPage = (props) => {
     const loadTxs = async () => {
         setIsLoadingTx(true);
         setShowReloadButton(true);
-        let result = await loadTxHistory(actorState, journalDispatch, types);
+        let result = await loadTxHistory(actorState, walletDispatch, types);
         setIsLoadingTx(false);
     };
 

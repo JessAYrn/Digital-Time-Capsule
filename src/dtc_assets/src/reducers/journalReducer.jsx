@@ -18,7 +18,6 @@ export const types = {
     SET_CANISTER_DATA_RELOAD_STATUS: "SET_CANISTER_DATA_RELOAD_STATUS",
     SET_IS_AUTHENTICATED: "SET_IS_AUTHENTICATED",
     SET_IS_LOADING:"SET_IS_LOADING",
-    SET_TX_HISTORY_DATA:"SET_TX_HISTORY_DATA",
     CHANGE_DRAFT: "CHANGE_DRAFT",
     CHANGE_DATE: "CHANGE_DATE",
     CHANGE_LOCATION: "CHANGE_LOCATION",
@@ -207,17 +206,6 @@ const changeValue = (state = initialState, action) => {
             }
         case types.SET_METADATA:
         state.metaData = payload;
-        return {
-            ...state
-        }
-        case types.SET_TX_HISTORY_DATA:
-        state.walletData = {
-            ...state.walletData,
-            txHistory: {
-                ...state.walletData.txHistory,
-                data: payload
-            }
-        };
         return {
             ...state
         }
