@@ -1,4 +1,4 @@
-import React, { createContext, useReducer, useState, useEffect, useMemo} from 'react';
+import React, { createContext, useReducer, useState, useEffect, useMemo, useState} from 'react';
 import LoginPage from '../Components/authentication/LoginPage';
 import { useLocation } from 'react-router-dom';
 import journalReducer, {initialState, types} from '../reducers/journalReducer';
@@ -7,7 +7,7 @@ import { UI_CONTEXTS } from '../Contexts';
 import WalletPage from '../Pages/WalletPage';
 import { testTx } from '../testData/Transactions';
 import { CreateUserJournal } from '../Components/authentication/AuthenticationMethods';
-import { loadJournalData, loadWalletData, loadCanisterData, recoverState } from '../Components/loadingFunctions';
+import { loadJournalData, loadWalletData, loadCanisterData, recoverState, loadAllDataIntoReduxStores } from '../Components/loadingFunctions';
 import { useConnect } from '@connect2ic/react';
 import CkBtcPage from '../Pages/CkBtcPage';
 import EthPage from '../Pages/EthPage';
@@ -38,12 +38,20 @@ const WalletApp = () => {
     }
 
     const ReducerTypes={
-        journalTypes:types,
+        journalTypes: types,
         walletTypes,
         accountTypes,
         homePageTypes,
         actorTypes
     }
+
+    const ReducerStates = {
+        journalState,
+        walletState,
+        accountState,
+        homePageState,
+        actorState
+    };
 
     const connectionResult = useConnect({ onConnect: () => {}, onDisconnect: () => {} });
 
@@ -52,8 +60,7 @@ const WalletApp = () => {
     const location = useLocation();
 
     // dispatch state from previous route to redux store if that state exists
-
-    recoverState(journalState, location, ReducerDispatches, ReducerTypes, connectionResult);
+    recoverState( location, ReducerDispatches, ReducerTypes, connectionResult );
 
     //clears useLocation().state upon page refresh so that when the user refreshes the page,
     //changes made to this route aren't overrided by the useLocation().state of the previous route.
@@ -72,41 +79,12 @@ const WalletApp = () => {
     //Loading Time Capsule Data
     useEffect(async () => {
         if(!actorState.backendActor) return; 
-        if(walletState.shouldReload){
-            journalDispatch({
-                actionType: types.SET_IS_LOADING,
-                payload: true
-            });
-            let walletDataFromApi = await actorState.backendActor.readWalletData()
-            if(!walletDataFromApi) return;
-            if("err" in walletDataFromApi) walletDataFromApi = await CreateUserJournal(actorState, journalDispatch, 'readWalletData');
-            if("err" in walletDataFromApi) {
-                journalDispatch({
-                    actionType: types.SET_IS_LOADING,
-                    payload: false
-                });
-                return;
-            };
-            await loadWalletData(walletDataFromApi, walletDispatch, walletTypes);
-            journalDispatch({
-                actionType: types.SET_IS_LOADING,
-                payload: false
-            });
-        }; 
-        if(journalState.reloadStatuses.canisterData){
-            //Load canister data in background
-            const canisterData = await actorState.backendActor.getCanisterData();
-            loadCanisterData(canisterData, homePageDispatch, homePageTypes);
-        }
-        if(journalState.reloadStatuses.journalData){
-            //Load Journal Data in the background
-
-            const journal = await actorState.backendActor.readJournal();
-            loadJournalData(journal.ok, journalDispatch, types);
-
-        };
-        
+        walletDispatch( { actionType: walletTypes.SET_IS_LOADING, payload: true } );
+        await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes);
+        walletDispatch( { actionType: walletTypes.SET_IS_LOADING, payload: false } );
     },[actorState.backendActor]);
+
+    console.log(walletState);
 
     return(
         <AppContext.Provider 

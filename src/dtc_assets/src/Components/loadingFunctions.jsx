@@ -3,23 +3,51 @@ import { delay, managerActor, backendActor, toHexString } from "../Utils";
 import { generateQrCode } from "./walletFunctions/GenerateQrCode";
 import { mapBackendCanisterDataToFrontEndObj } from "../mappers/dashboardMapperFunctions";
 import { getFileUrl_fromApi } from "./Fields/fileManger/FileManagementTools";
+import { CreateUserJournal } from "./authentication/AuthenticationMethods";
 
 
+export const loadAllDataIntoReduxStores = async (states, dispatchFunctions, types) => {
+    let {walletState, homePageState, journalState, actorState, accountState} = states;
+    let {journalDispatch, walletDispatch, homePageDispatch, accountDispatch} = dispatchFunctions;
+    let {journalTypes, walletTypes, homePageTypes, accountTypes } = types;
+    let accountCreated;
+    let hasAccount = await actorState.backendActor.hasAccount();
+    if(!hasAccount) accountCreated = await CreateUserJournal(actorState, journalDispatch);
+    if(accountCreated && "err" in accountCreated) return;
+    let promises = [];
+    if(walletState.shouldReload) promises.push(loadWalletData(actorState, walletDispatch, walletTypes));
+    if(homePageState.shouldReload) promises.push(loadCanisterData(actorState, homePageDispatch, homePageTypes));
+    if(journalState.shouldReload) promises.push(loadJournalData(actorState, journalDispatch, journalTypes));
+    if(accountState. shouldReload) promises.push(loadAccountData(actorState, accountDispatch, accountTypes));
+    await Promise.all(promises);
+};
 
-export const loadJournalData = (journal, journalDispatch, types) => {
-    let { userJournalData, email, userName, notifications } = journal;
-    let [journalEntries, journalBio] = userJournalData;
-    journalEntries = mapApiObjectToFrontEndJournalEntriesObject(journalEntries);
+export const loadAccountData = async (actorState, accountDispatch, accountTypes) => {
+    let accountData = await actorState.backendActor.readJournal();
+    accountData = accountData.ok;
+    let {email, userName} = accountData;
     let metaData = {};
     if(email) metaData.email = email;
     if(userName) metaData.userName = userName;
-    
     if(Object.keys(metaData).length) {
-        journalDispatch({
+        accountDispatch({
             payload: metaData,
-            actionType: types.SET_METADATA
+            actionType: accountTypes.SET_METADATA
         });
     };
+    accountDispatch({
+        actionType: accountTypes.SET_ACCOUNT_RELOAD_STATUS,
+        payload: false,
+    });
+};
+
+export const loadJournalData = async (actorState, journalDispatch, types) => {
+    let journal = await actorState.backendActor.readJournal();
+    journal = journal.ok;
+    let { userJournalData, notifications } = journal;
+    let [journalEntries, journalBio] = userJournalData;
+    journalEntries = mapApiObjectToFrontEndJournalEntriesObject(journalEntries);
+    
     if(notifications){
         journalDispatch({
             actionType: types.SET_NOTIFICATIONS,
@@ -35,12 +63,14 @@ export const loadJournalData = (journal, journalDispatch, types) => {
         actionType: types.SET_JOURNAL
     });
     journalDispatch({
-        actionType: types.SET_JOURNAL_DATA_RELOAD_STATUS,
+        actionType: types.SET_JOURNAL_RELOAD_STATUS,
         payload: false,
     });
 };
 
-export const loadWalletData = async (walletDataFromApi, walletDispatch, types ) => {
+export const loadWalletData = async (actorState, walletDispatch, types ) => {
+
+    let walletDataFromApi = await actorState.backendActor.readWalletData();
 
     const address = toHexString(new Uint8Array( [...walletDataFromApi.ok.address]));
     const walletData = { 
@@ -79,7 +109,8 @@ export const loadTxHistory = async (actorState, walletDispatch, types) => {
     return {transactionHistory, tx};
 };
 
-export const loadCanisterData = (canisterData, dispatch, types) => {
+export const loadCanisterData = async (actorState, dispatch, types) => {
+    let canisterData = await actorState.backendActor.getCanisterData();
     canisterData = canisterData.ok;
     canisterData = mapBackendCanisterDataToFrontEndObj(canisterData);
     dispatch({
@@ -87,7 +118,7 @@ export const loadCanisterData = (canisterData, dispatch, types) => {
         payload: canisterData
     });
     dispatch({
-        actionType: types.SET_CANISTER_DATA_RELOAD_STATUS,
+        actionType: types.SET_HOME_PAGE_RELOAD_STATUS,
         payload: false,
     });
     return canisterData;
@@ -110,7 +141,7 @@ export const handleErrorOnFirstLoad = async (fnForLoadingData, fnForRefiringAuth
     }
 }
 
-export const recoverState = async (journalState, location, dispatchMethods,types,connectionResult) => {
+export const recoverState = async ( location, dispatchMethods, types, connectionResult) => {
 
     // dispatch state from previous route to redux store if that state exists
     if(location.state){

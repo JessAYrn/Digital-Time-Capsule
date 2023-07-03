@@ -77,7 +77,7 @@ const WalletPage = (props) => {
                         notificationIcon={false}
                         context={UI_CONTEXTS.WALLET}
                     />
-                    {journalState.isLoading ?
+                    {walletState.isLoading ?
                         <LoadScreen/> :
                         <div className={"container__wallet"}>
                             <div className={'transparentDiv__wallet'}>

@@ -54,7 +54,19 @@ const LoginPage = (props) => {
         properContext = TreasuryPageContext
     } 
 
-    const { journalState, journalDispatch, actorState, actorDispatch } = useContext(properContext);
+    const { 
+        journalState, 
+        journalDispatch, 
+        actorState, 
+        actorDispatch,
+        walletState,
+        walletDispatch,
+        accountState,
+        accountDispatch,
+        homePageState,
+        homePageDispatch 
+    } = useContext(properContext);
+    
     const [frontendCanisterBalance, setFrontendCanisterBalance] = useState(0);
     const [backendCanisterBalance, setBackendCanisterBalance] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
@@ -74,23 +86,23 @@ const LoginPage = (props) => {
 
     const  handleClickDashboard = useCallback(() =>  {
         navigate(NAV_LINKS.dashboard, { replace: false, state: journalStateWithoutFunction});
-    }, [journalState.reloadStatuses]);
+    }, [journalState.shouldReload, homePageState.shouldReload, walletState.shouldReload]);
 
     const  handleClickWallet = useCallback(() =>  {
         navigate(NAV_LINKS.wallet, { replace: false, state: journalStateWithoutFunction});
-    }, [journalState.reloadStatuses]);
+    }, [journalState.shouldReload, homePageState.shouldReload, walletState.shouldReload]);
 
     const  handleClickJournal = useCallback(() =>  {
         navigate(NAV_LINKS.journal, { replace: false, state: journalStateWithoutFunction });
-    }, [journalState.reloadStatuses]);
+    }, [journalState.shouldReload, homePageState.shouldReload, walletState.shouldReload]);
 
     const  handleClickAccount = useCallback(() =>  {
         navigate(NAV_LINKS.account, { replace: false, state: journalStateWithoutFunction });
-    },[journalState.reloadStatuses]);
+    },[journalState.shouldReload, homePageState.shouldReload, walletState.shouldReload]);
    
     const  handleClickTreasury = useCallback(() =>  {
         navigate(NAV_LINKS.treasury, { replace: false, state: journalStateWithoutFunction });
-    },[journalState.reloadStatuses]);
+    },[journalState.shouldReload, homePageState.shouldReload, walletState.shouldReload]);
 
     const connectionResult = useConnect({ onConnect: () => {}, onDisconnect: () => {} });
 

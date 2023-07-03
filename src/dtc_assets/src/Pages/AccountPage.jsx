@@ -20,8 +20,8 @@ const AccountSection = (props) => {
 
     const handleUpdate = async () => {
         setPageChangesMade(false);
-        journalDispatch({
-            actionType: types.SET_IS_LOADING,
+        accountDispatch({
+            actionType: accountTypes.SET_IS_LOADING,
             payload: true
         });
         const profileInput = {
@@ -29,8 +29,8 @@ const AccountSection = (props) => {
             email: (accountState.metaData.email[0]) ? accountState.metaData.email: []
         };
         let result = await actorState.backendActor.updateProfile(profileInput);
-        journalDispatch({
-            actionType: types.SET_IS_LOADING,
+        accountDispatch({
+            actionType: accountTypes.SET_IS_LOADING,
             payload: false
         });
 
@@ -53,7 +53,7 @@ return(
             notificationIcon={false}
             context={UI_CONTEXTS.ACCOUNT_PAGE}
         />
-        {journalState.isLoading ?
+        {accountState.isLoading ?
             <LoadScreen/> :
             <div className={`logoDiv account ${isAdmin ? 'admin' : ''}`}>
                 <img className={'logoImg'}src="dtc-logo-black.png" alt="Logo"/>

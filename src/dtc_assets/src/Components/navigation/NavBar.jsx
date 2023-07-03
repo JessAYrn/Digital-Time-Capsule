@@ -95,78 +95,78 @@ export const NavBar = (props) => {
         ...homePageState,
     }
 
-
     const  handleClickDashboard = useCallback(() =>  {
+        console.log(walletStateWithoutFunction);
         navigate(NAV_LINKS.dashboard, { 
             replace: false, 
             state:{
-                journal:journalStateWithoutFunction,
-                wallet:walletStateWithoutFunction,
-                account:accountStateWithoutFunction,
-                homePage:homePageStateWithoutFunction
+                journal: journalStateWithoutFunction,
+                wallet: walletStateWithoutFunction,
+                account: accountStateWithoutFunction,
+                homePage: homePageStateWithoutFunction
             }
         });
-    }, [journalState.reloadStatuses, walletState?.shouldReload]);
+    }, [journalState.shouldReload, walletState.shouldReload, homePageState.shouldReload]);
 
     const handleClickWallet = useCallback(() =>  {
        
         navigate(NAV_LINKS.wallet, { 
             replace: false, 
             state: {
-                journal:journalStateWithoutFunction,
-                wallet:walletStateWithoutFunction,
-                account:accountStateWithoutFunction,
-                homePage:homePageStateWithoutFunction
+                journal: journalStateWithoutFunction,
+                wallet: walletStateWithoutFunction,
+                account: accountStateWithoutFunction,
+                homePage: homePageStateWithoutFunction
             }
         });
-    }, [walletState?.shouldReload,journalState.reloadStatuses]);
+    }, [walletState.shouldReload, journalState.shouldReload, homePageState.shouldReload]);
 
     const  handleClickJournal = useCallback(() =>  {
         navigate(NAV_LINKS.journal, { 
             replace: false, 
             state: {
-                journal:journalStateWithoutFunction,
-                wallet:walletStateWithoutFunction,
-                accountStateWithoutFunction,
-                homePage:homePageStateWithoutFunction
+                journal: journalStateWithoutFunction,
+                wallet: walletStateWithoutFunction,
+                account: accountStateWithoutFunction,
+                homePage: homePageStateWithoutFunction
             }
         });
-    }, [walletState?.shouldReload,journalState.reloadStatuses]);
+    }, [walletState.shouldReload, journalState.shouldReload, homePageState.shouldReload]);
 
     const  handleClickAccount = useCallback(() =>  {
         navigate(NAV_LINKS.account, { 
             replace: false, 
             state: {
-                journal:journalStateWithoutFunction,
-                wallet:walletStateWithoutFunction,
-                account:accountStateWithoutFunction,
-                homePage:homePageStateWithoutFunction
+                journal: journalStateWithoutFunction,
+                wallet: walletStateWithoutFunction,
+                account: accountStateWithoutFunction,
+                homePage: homePageStateWithoutFunction
             }    
         });
-    },[walletState?.shouldReload,journalState.reloadStatuses]);
+    },[walletState.shouldReload, journalState.shouldReload, homePageState.shouldReload]);
    
     const  handleClickTreasury = useCallback(() =>  {
         navigate(NAV_LINKS.treasury, { 
             replace: false, 
             state: {
-                journal:journalStateWithoutFunction,
-                wallet:walletStateWithoutFunction,
-                account:accountStateWithoutFunction,
-                homePage:homePageStateWithoutFunction
+                journal: journalStateWithoutFunction,
+                wallet: walletStateWithoutFunction,
+                account: accountStateWithoutFunction,
+                homePage: homePageStateWithoutFunction
             }
         });
-    },[walletState?.shouldReload,journalState.reloadStatuses]);
+    },[walletState.shouldReload, journalState.shouldReload, homePageState.shouldReload]);
 
     const  handleClickGroupJournal = useCallback(() =>  {
         navigate(NAV_LINKS.groupJournal, { 
             replace: false, 
             state: {
-                journal:journalStateWithoutFunction,
-                wallet:walletStateWithoutFunction,
-                account:accountStateWithoutFunction,
-                homePage:homePageStateWithoutFunction
+                journal: journalStateWithoutFunction,
+                wallet: walletStateWithoutFunction,
+                account: accountStateWithoutFunction,
+                homePage: homePageStateWithoutFunction
             }});
-    },[walletState?.shouldReload,journalState.reloadStatuses]);
+    },[walletState.shouldReload, journalState.shouldReload, homePageState.shouldReload]);
 
     const showSideBar = () => {
         setSideBar(!sideBar)

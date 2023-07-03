@@ -15,7 +15,7 @@ export const TriggerCreateActorFunction = (journalState, dispatch, types) => {
     });
 }
 
-export const CreateUserJournal = async (actorState, journalDispatch, nameOfLoadFunction) => {
+export const CreateUserJournal = async (actorState, journalDispatch) => {
     try{
         let registrationResult = await actorState.backendActor.registerOwner();
     } catch(e) {
@@ -28,9 +28,6 @@ export const CreateUserJournal = async (actorState, journalDispatch, nameOfLoadF
             actionType: types.SET_MODAL_STATUS, 
             payload: payload
         });
-    } else {
-        const loadFunction = actorState.backendActor[nameOfLoadFunction];
-        result = await loadFunction();
     }
     return result;
     

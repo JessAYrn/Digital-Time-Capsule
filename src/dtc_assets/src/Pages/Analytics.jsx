@@ -30,8 +30,8 @@ const Analytics = () => {
 
 
     const handleDenyAccess = async (principal) => {
-        journalDispatch({
-            actionType: types.SET_IS_LOADING,
+        homePageDispatch({
+            actionType: homePageTypes.SET_IS_LOADING,
             payload: true
         });
         let result = await actorState.backendActor.removeFromRequestsList(principal);
@@ -40,15 +40,15 @@ const Analytics = () => {
             actionType: homePageTypes.SET_CANISTER_DATA,
             payload: { ...homePageState.canisterData, requestsForApproval: result }
         });
-        journalDispatch({
-            actionType: types.SET_IS_LOADING,
+        homePageDispatch({
+            actionType: homePageTypes.SET_IS_LOADING,
             payload: false
         });
     };
 
     const handleGrantAccess = async (principal) => {
-        journalDispatch({
-            actionType: types.SET_IS_LOADING,
+        homePageDispatch({
+            actionType: homePageTypes.SET_IS_LOADING,
             payload: true
         });
         let result = await actorState.backendActor.grantAccess(principal);
@@ -57,15 +57,15 @@ const Analytics = () => {
             actionType: homePageTypes.SET_CANISTER_DATA,
             payload: { ...homePageState.canisterData, requestsForApproval: result }
         });
-        journalDispatch({
-            actionType: types.SET_IS_LOADING,
+        homePageDispatch({
+            actionType: homePageTypes.SET_IS_LOADING,
             payload: false
         });
     };
 
     const handleUpdateApprovalStatus = async (principal, newApprovalStatus) => {
-        journalDispatch({
-            actionType: types.SET_IS_LOADING,
+        homePageDispatch({
+            actionType: homePageTypes.SET_IS_LOADING,
             payload: true
         });
         let result = await actorState.backendActor.updateApprovalStatus(principal, newApprovalStatus);
@@ -76,15 +76,15 @@ const Analytics = () => {
             payload: { ...homePageState.canisterData, profilesMetaData: result }
         })
 
-        journalDispatch({
-            actionType: types.SET_IS_LOADING,
+        homePageDispatch({
+            actionType: homePageTypes.SET_IS_LOADING,
             payload: false
         });
     };
 
     const toggleAcceptRequest = async () => {
-        journalDispatch({
-            actionType: types.SET_IS_LOADING,
+        homePageDispatch({
+            actionType: homePageTypes.SET_IS_LOADING,
             payload: true
         });
         let success = false;
@@ -100,15 +100,15 @@ const Analytics = () => {
             actionType: types.SET_MODAL_STATUS,
             payload: {show: true, which: MODALS_TYPES.onRegisterNewOwner, success: success}
         });
-        journalDispatch({
-            actionType: types.SET_IS_LOADING,
+        homePageDispatch({
+            actionType: homePageTypes.SET_IS_LOADING,
             payload: false
         });
     };
 
     const toggleSupportMode = async () => {
-        journalDispatch({
-            actionType: types.SET_IS_LOADING,
+        homePageDispatch({
+            actionType: homePageTypes.SET_IS_LOADING,
             payload: true
         });
         let success = false;
@@ -125,15 +125,15 @@ const Analytics = () => {
             payload: {show: true, which: MODALS_TYPES.onRegisterNewOwner, success: success}
         });
 
-        journalDispatch({
-            actionType: types.SET_IS_LOADING,
+        homePageDispatch({
+            actionType: homePageTypes.SET_IS_LOADING,
             payload: false
         });
     }
 
     const handleRegistration = async () => {
-        journalDispatch({
-            actionType: types.SET_IS_LOADING,
+        homePageDispatch({
+            actionType: homePageTypes.SET_IS_LOADING,
             payload: true
         });
         let success;
@@ -144,15 +144,15 @@ const Analytics = () => {
             actionType: types.SET_MODAL_STATUS,
             payload: {show: true, which: MODALS_TYPES.onRegisterNewOwner, success: success}
         })
-        journalDispatch({
-            actionType: types.SET_IS_LOADING,
+        homePageDispatch({
+            actionType: homePageTypes.SET_IS_LOADING,
             payload: false
         });
     };
 
     const handleUpgrade = async () => {
-        journalDispatch({
-            actionType: types.SET_IS_LOADING,
+        homePageDispatch({
+            actionType: homePageTypes.SET_IS_LOADING,
             payload: true
         });
         let success = true;
@@ -167,15 +167,15 @@ const Analytics = () => {
             actionType: types.SET_MODAL_STATUS,
             payload: {show: true, which: MODALS_TYPES.onRegisterNewOwner, success: success}
         })
-        journalDispatch({
-            actionType: types.SET_IS_LOADING,
+        homePageDispatch({
+            actionType: homePageTypes.SET_IS_LOADING,
             payload: false
         });
     };
 
     const toggleCyclesSaveMode = async () => {
-        journalDispatch({
-            actionType: types.SET_IS_LOADING,
+        homePageDispatch({
+            actionType: homePageTypes.SET_IS_LOADING,
             payload: true
         });
         let success = true;
@@ -195,8 +195,8 @@ const Analytics = () => {
             actionType: types.SET_MODAL_STATUS,
             payload: {show: true, which: MODALS_TYPES.onRegisterNewOwner, success: success}
         })
-        journalDispatch({
-            actionType: types.SET_IS_LOADING,
+        homePageDispatch({
+            actionType: homePageTypes.SET_IS_LOADING,
             payload: false
         });
     };
@@ -232,7 +232,7 @@ const Analytics = () => {
                         notificationIcon={false}
                         context={UI_CONTEXTS.HOME_PAGE}
                     />
-                    {journalState.isLoading ? 
+                    {homePageState.isLoading ? 
                         <LoadScreen/> :
                         <div class={'scrollable'}>
                             <div className='container_homePage'>

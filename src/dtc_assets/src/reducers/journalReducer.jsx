@@ -8,14 +8,11 @@ export const types = {
     SET_IS_LOGGING_IN: "SET_IS_LOGGING_IN",
     SET_JOURNAL: "SET_JOURNAL",
     SET_JOURNAL_TAB:"SET_JOURNAL_TAB",
-    SET_WALLET_TABS:'SET_WALLET_TABS',
     SET_NOTIFICATIONS:"SET_NOTIFICATIONS",
     SET_BIO: "SET_BIO",
     SET_METADATA: "SET_METADATA",
     SET_MODAL_STATUS: "SET_MODAL_STATUS",
-    SET_WALLET_DATA_RELOAD_STATUS: "SET_WALLET_DATA_RELOAD_STATUS",
-    SET_JOURNAL_DATA_RELOAD_STATUS: "SET_JOURNAL_DATA_RELOAD_STATUS",
-    SET_CANISTER_DATA_RELOAD_STATUS: "SET_CANISTER_DATA_RELOAD_STATUS",
+    SET_JOURNAL_RELOAD_STATUS: "SET_JOURNAL_RELOAD_STATUS",
     SET_IS_AUTHENTICATED: "SET_IS_AUTHENTICATED",
     SET_IS_LOADING:"SET_IS_LOADING",
     CHANGE_DRAFT: "CHANGE_DRAFT",
@@ -56,6 +53,7 @@ export const types = {
 export const initialState = {
     authenticateFunctionCallCount: 0,
     createActorFunctionCallCount: 0,
+    shouldReload: true,
     journalCount: 0,
     journalPageTab:JOURNAL_TABS.diaryTab,
     canisterData: {
@@ -209,27 +207,8 @@ const changeValue = (state = initialState, action) => {
         return {
             ...state
         }
-        case types.SET_JOURNAL_DATA_RELOAD_STATUS:
-        state.reloadStatuses = {
-            ...state.reloadStatuses,
-            journalData: payload
-        };
-        return {
-            ...state
-        }
-        case types.SET_WALLET_DATA_RELOAD_STATUS:
-        state.reloadStatuses = {
-            ...state.reloadStatuses,
-            walletData: payload
-        };
-        return {
-            ...state
-        }
-        case types.SET_CANISTER_DATA_RELOAD_STATUS:
-        state.reloadStatuses = {
-            ...state.reloadStatuses,
-            canisterData: payload
-        };
+        case types.SET_JOURNAL_RELOAD_STATUS:
+        state.shouldReload = payload
         return {
             ...state
         }

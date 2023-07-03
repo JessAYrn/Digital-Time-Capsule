@@ -5,7 +5,7 @@ import { AppContext } from "../Routes/App";
 import './GroupJournalPage.scss'
 
 const GroupJournalPage = (props) => {
-  const { journalState, journalDispatch} = useContext(AppContext);
+  const { journalState, journalDispatch, homePageState} = useContext(AppContext);
 
   return (
    journalState?.modalStatus?.show ?
@@ -16,7 +16,7 @@ const GroupJournalPage = (props) => {
     </div>:
     <div>
     {
-      journalState.isLoading ?
+      homePageState.isLoading ?
       <LoadScreen/> :
       <div>
         <NavBar
