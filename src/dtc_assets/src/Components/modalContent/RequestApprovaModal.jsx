@@ -1,9 +1,11 @@
 import React, {useContext} from "react";
-import { AppContext as  WalletContext} from '../../Routes/Wallet';
-import { AppContext as JournalContext } from '../../Routes/App';
-import { AppContext as  HomePageContext} from '../../Routes/HomePage';
-import { AppContext as  AccountContext} from '../../Routes/Account';
-import { UI_CONTEXTS } from '../../Contexts';
+import { AppContext as AccountContext} from '../../Routes/Account';
+import { AppContext as HomePageContext} from '../../Routes/HomePage';
+import { AppContext as JournalContext} from '../../Routes/App';
+import { AppContext as WalletContext} from '../../Routes/Wallet';
+import { AppContext as TreasuryContext} from '../../Routes/Treasury';
+import { AppContext as GroupJournalContext} from '../../Routes/GroupJournal';
+import { UI_CONTEXTS, retrieveContext } from '../../Contexts';
 import { initialState as journalInitialState, types as journalTypes } from "../../reducers/journalReducer";
 import "./RequestApprovaModal.scss";
 import { ConnectButton, ConnectDialog, useConnect } from "@connect2ic/react";
@@ -16,6 +18,17 @@ const RequestApprovalResponseModal = (props) => {
 
     const { context } = props;
 
+    let contexts = {
+        WalletContext,
+        JournalContext,
+        HomePageContext,
+        AccountContext,
+        TreasuryContext,
+        GroupJournalContext
+    };
+
+    let AppContext = retrieveContext(contexts, context);
+
     const {
         journalState, 
         journalDispatch, 
@@ -27,35 +40,30 @@ const RequestApprovalResponseModal = (props) => {
         walletDispatch
     } = useContext(AppContext);
 
-    let AppContext;
     let state;
     let dispatch;
     let initialState;
     let action;
 
     if(context === UI_CONTEXTS.JOURNAL){
-        AppContext = JournalContext;
         state = journalState;
         dispatch = journalDispatch;
         action = journalTypes.SET_ENTIRE_REDUX_STATE;
         initialState = journalInitialState;
     }
     if(context === UI_CONTEXTS.HOME_PAGE){
-        AppContext = HomePageContext;
         state = homePageState;
         dispatch = homePageDispatch;
         action = homePageTypes.SET_ENTIRE_DASHBOARD_REDUX_STATE;
         initialState = homePageInitialState;
     }
     if(context === UI_CONTEXTS.WALLET){
-        AppContext = WalletContext;
         state = walletState;
         dispatch = walletDispatch;
         action = walletTypes.SET_ENTIRE_WALLET_REDUX_STATE;
         initialState = walletInitialState;
     }
     if(context === UI_CONTEXTS.ACCOUNT_PAGE){
-        AppContext = AccountContext;
         state = accountState;
         dispatch = accountDispatch;
         action = accountTypes.SET_ENTIRE_ACCOUNT_REDUX_STATE;

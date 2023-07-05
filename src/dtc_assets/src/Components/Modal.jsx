@@ -1,10 +1,10 @@
 import React, {useContext, useMemo, useEffect} from 'react';
-import { UI_CONTEXTS } from '../Contexts';
-import { AppContext as AccountContext } from '../Routes/Account';
-import { AppContext as WalletContext} from '../Routes/Wallet';
+import { AppContext as AccountContext} from '../Routes/Account';
 import { AppContext as HomePageContext} from '../Routes/HomePage';
 import { AppContext as JournalContext} from '../Routes/App';
+import { AppContext as WalletContext} from '../Routes/Wallet';
 import { AppContext as TreasuryContext} from '../Routes/Treasury';
+import { AppContext as GroupJournalContext} from '../Routes/GroupJournal';
 import { MODALS_TYPES } from '../Constants';
 import FileHasError from './modalContent/ModalContentHasError';
 import ExitWithoutSubmit from './modalContent/ModalContentExitWithoutSubmitModal';
@@ -18,6 +18,7 @@ import { getIntObserverFunc, visibilityFunctionDefault } from './animations/Inte
 import DateOutOfRange from './modalContent/DateOutOfRange';
 import "./Modal.scss";
 import '../SCSS/contentContainer.scss'
+import { retrieveContext } from '../Contexts';
 
 export const Modal = (props) => {
 
@@ -28,22 +29,16 @@ export const Modal = (props) => {
         context
     } = props;
 
-    let AppContext;
-    if(context === UI_CONTEXTS.JOURNAL){
-        AppContext = JournalContext;
-    }
-    if(context === UI_CONTEXTS.HOME_PAGE){
-        AppContext = HomePageContext;
-    }
-    if(context === UI_CONTEXTS.WALLET){
-        AppContext = WalletContext
-    }
-    if(context === UI_CONTEXTS.ACCOUNT_PAGE){
-        AppContext = AccountContext;
-    }
-    if(context === UI_CONTEXTS.TREASURY){
-        AppContext = TreasuryContext;
-    }
+    let contexts = {
+        WalletContext,
+        JournalContext,
+        HomePageContext,
+        AccountContext,
+        TreasuryContext,
+        GroupJournalContext
+    };
+
+    let AppContext = retrieveContext(contexts, context);
     
     const { journalState, journalDispatch } = useContext(AppContext);
 

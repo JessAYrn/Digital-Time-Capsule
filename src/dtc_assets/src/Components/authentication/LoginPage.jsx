@@ -1,18 +1,16 @@
 import React, {useContext, useEffect, useState, useCallback} from "react";
 import { useNavigate } from "react-router-dom";
-import { AppContext as JournalContext } from "../../Routes/App";
-import { AppContext as AccountContext } from "../../Routes/Account";
-import { AppContext as WalletContex } from "../../Routes/Wallet";
-import { AppContext as HomePageContext } from "../../Routes/HomePage";
-import { AppContext as TreasuryPageContext } from "../../Routes/Treasury";
-import { UI_CONTEXTS } from "../../Contexts";
+import { AppContext as AccountContext} from '../../Routes/Account';
+import { AppContext as HomePageContext} from '../../Routes/HomePage';
+import { AppContext as JournalContext} from '../../Routes/App';
+import { AppContext as WalletContext} from '../../Routes/Wallet';
+import { AppContext as TreasuryContext} from '../../Routes/Treasury';
+import { AppContext as GroupJournalContext} from '../../Routes/GroupJournal';
+import { UI_CONTEXTS, retrieveContext } from "../../Contexts";
 import * as IoiosIcons from 'react-icons/io';
 import * as AiIcons from 'react-icons/ai';
 import * as RiIcons from 'react-icons/ri';
-
 import { NAV_LINKS } from "../../Constants";
-
-
 import "./LoginPage.scss";
 import "../../Components/animations/Animation.scss";
 import { getIntObserverFunc, visibilityFunctionLoginPage } from "../animations/IntersectionObserverFunctions";
@@ -24,7 +22,7 @@ import { types } from "../../reducers/journalReducer";
 import { backendActor, managerActor } from "../../Utils";
 import '../../SCSS/contentContainer.scss'
 import Accordion from "../Fields/Accordion";
-import actorReducer,{ actorInitialState,actorTypes } from "../../reducers/actorReducer";
+import { actorTypes } from "../../reducers/actorReducer";
 
 const AccordionContent=[
 
@@ -41,18 +39,16 @@ const LoginPage = (props) => {
         context
     } = props
 
-    let properContext;
-    if(context === UI_CONTEXTS.JOURNAL){
-        properContext = JournalContext
-    } else if(context === UI_CONTEXTS.ACCOUNT_PAGE){
-        properContext = AccountContext
-    } else if(context === UI_CONTEXTS.WALLET){
-        properContext = WalletContex
-    } else if(context === UI_CONTEXTS.HOME_PAGE){
-        properContext = HomePageContext
-    } else if(context === UI_CONTEXTS.TREASURY){
-        properContext = TreasuryPageContext
-    } 
+    let contexts = {
+        WalletContext,
+        JournalContext,
+        HomePageContext,
+        AccountContext,
+        TreasuryContext,
+        GroupJournalContext
+    };
+
+    let AppContext = retrieveContext(contexts, context);
 
     const { 
         journalState, 
@@ -65,7 +61,7 @@ const LoginPage = (props) => {
         accountDispatch,
         homePageState,
         homePageDispatch 
-    } = useContext(properContext);
+    } = useContext(AppContext);
     
     const [frontendCanisterBalance, setFrontendCanisterBalance] = useState(0);
     const [backendCanisterBalance, setBackendCanisterBalance] = useState(0);

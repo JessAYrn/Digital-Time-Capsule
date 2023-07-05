@@ -6,8 +6,13 @@ import { deviceType } from '../../../Utils';
 import { DEVICE_TYPES, MAX_DURATION_OF_VIDEO_IN_SECONDS, NULL_STRING_ALL_LOWERCASE } from '../../../Constants';
 import { MODALS_TYPES } from '../../../Constants';
 import { getFileURL, mapAndSendFileToApi, getDuration, updateFileMetadataInStore } from './FileManagementTools';
+import { AppContext as AccountContext} from '../../../Routes/Account';
+import { AppContext as HomePageContext} from '../../../Routes/HomePage';
 import { AppContext as JournalContext} from '../../../Routes/App';
-import { UI_CONTEXTS } from '../../../Contexts';
+import { AppContext as WalletContext} from '../../../Routes/Wallet';
+import { AppContext as TreasuryContext} from '../../../Routes/Treasury';
+import { AppContext as GroupJournalContext} from '../../../Routes/GroupJournal';
+import { retrieveContext } from '../../../Contexts';
 
 const forbiddenFileTypes = [
     'application/pdf'
@@ -35,11 +40,19 @@ const FileUpload = (props) => {
     const [fileType, setFileType] = useState("image/png");
         
     const typeOfDevice = deviceType();
+    
+    let contexts = {
+        WalletContext,
+        JournalContext,
+        HomePageContext,
+        AccountContext,
+        TreasuryContext,
+        GroupJournalContext
+    };
 
-    let AppContext;
-    if(context === UI_CONTEXTS.JOURNAL){
-        AppContext = JournalContext;
-    }
+    let AppContext = retrieveContext(contexts, context);
+
+    
     const { journalState, journalDispatch, actorState } = useContext(AppContext);
 
     let fileName = fileData.fileName;

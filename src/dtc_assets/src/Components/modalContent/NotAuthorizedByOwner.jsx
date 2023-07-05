@@ -1,10 +1,12 @@
 import React, {useContext}from 'react';
 import './NotAuthorizedByOwner.scss'
-import { AppContext as  WalletContext} from '../../Routes/Wallet';
-import { AppContext as JournalContext } from '../../Routes/App';
-import { AppContext as  HomePageContext} from '../../Routes/HomePage';
-import { AppContext as  AccountContext} from '../../Routes/Account';
-import { UI_CONTEXTS } from '../../Contexts';
+import { AppContext as AccountContext} from '../../Routes/Account';
+import { AppContext as HomePageContext} from '../../Routes/HomePage';
+import { AppContext as JournalContext} from '../../Routes/App';
+import { AppContext as WalletContext} from '../../Routes/Wallet';
+import { AppContext as TreasuryContext} from '../../Routes/Treasury';
+import { AppContext as GroupJournalContext} from '../../Routes/GroupJournal';
+import { retrieveContext, UI_CONTEXTS } from '../../Contexts';
 import { types as journalTypes } from '../../reducers/journalReducer';
 import { homePageTypes } from '../../reducers/homePageReducer';
 import { accountTypes } from '../../reducers/accountReducer';
@@ -15,6 +17,18 @@ import LoadScreen from '../LoadScreen';
 
 const NotAuthorizedByOwner = (props) => {
     const { context } = props;
+
+    let contexts = {
+        WalletContext,
+        JournalContext,
+        HomePageContext,
+        AccountContext,
+        TreasuryContext,
+        GroupJournalContext
+    };
+
+    let AppContext = retrieveContext(contexts, context);
+
     const {
         journalState, 
         journalDispatch, 
@@ -29,30 +43,26 @@ const NotAuthorizedByOwner = (props) => {
 
     } = useContext(AppContext);
 
-    let AppContext;
     let state;
     let dispatch;
     let action;
+
     if(context === UI_CONTEXTS.JOURNAL){
-        AppContext = JournalContext;
         dispatch = journalDispatch;
         state = journalState;
         action = journalTypes.SET_IS_LOADING;
     };
     if(context === UI_CONTEXTS.HOME_PAGE){
-        AppContext = HomePageContext;
         dispatch = homePageDispatch
         state = homePageState
         action = homePageTypes.SET_IS_LOADING
     };
     if(context === UI_CONTEXTS.WALLET){
-        AppContext = WalletContext
         dispatch = walletDispatch
         state = walletState
         action = walletTypes.SET_IS_LOADING
     };
     if(context === UI_CONTEXTS.ACCOUNT_PAGE){
-        AppContext = AccountContext;
         dispatch = accountDispatch
         state = accountState
         action = accountTypes.SET_IS_LOADING
@@ -66,17 +76,17 @@ const NotAuthorizedByOwner = (props) => {
         let result = await actorState.backendActor.requestApproval();
         if("ok" in result){
             journalDispatch({
-                actionType: types.SET_MODAL_STATUS,
+                actionType: journalTypes.SET_MODAL_STATUS,
                 payload: { show: true, which: MODALS_TYPES.requestApprovalRepsonse, success: true}
             });
         } else {
             journalDispatch({
-                actionType: types.SET_MODAL_STATUS,
+                actionType: journalTypes.SET_MODAL_STATUS,
                 payload: { show: true, which: MODALS_TYPES.requestApprovalRepsonse, success: false}
             });
         }
         dispatch({
-            actionType: types.SET_IS_LOADING,
+            actionType: journalTypes.SET_IS_LOADING,
             payload: false
         });
     };

@@ -1,13 +1,12 @@
 import React, { useCallback, useContext, useState } from 'react';
-import { useNavigate, Link, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { JOURNAL_TABS, NAV_LINKS, WALLET_TABS } from '../../Constants';
-import { UI_CONTEXTS } from '../../Contexts';
 import { AppContext as AccountContext} from '../../Routes/Account';
 import { AppContext as HomePageContext} from '../../Routes/HomePage';
 import { AppContext as JournalContext} from '../../Routes/App';
 import { AppContext as WalletContext} from '../../Routes/Wallet';
 import { AppContext as TreasuryContext} from '../../Routes/Treasury';
-import { AppContext as GroupJournal} from '../../Routes/GroupJournal';
+import { AppContext as GroupJournalContext} from '../../Routes/GroupJournal';
 import * as FaIcons from 'react-icons/fa';
 import * as GiIcons from 'react-icons/gi';
 import * as IoiosIcons from 'react-icons/io';
@@ -21,7 +20,8 @@ import { ConnectButton, ConnectDialog, useConnect } from "@connect2ic/react";
 import { initialState } from '../../reducers/journalReducer';
 import "./NavBar.scss";
 import Dropdown from '../Fields/Dropdown';
-import { walletInitialState, walletTypes } from '../../reducers/walletReducer';
+import { walletTypes } from '../../reducers/walletReducer';
+import { retrieveContext } from '../../Contexts';
 
 
 
@@ -32,25 +32,16 @@ export const NavBar = (props) => {
         context
     } = props;
 
-    let AppContext;
-    if(context === UI_CONTEXTS.JOURNAL){
-        AppContext = JournalContext;
-    }
-    if(context === UI_CONTEXTS.HOME_PAGE){
-        AppContext = HomePageContext;
-    }
-    if(context === UI_CONTEXTS.WALLET){
-        AppContext = WalletContext
-    }
-    if(context === UI_CONTEXTS.ACCOUNT_PAGE){
-        AppContext = AccountContext;
-    }
-    if(context === UI_CONTEXTS.TREASURY){
-        AppContext = TreasuryContext;
-    }
-    if(context === UI_CONTEXTS.GROUPJOURNAL){
-        AppContext = GroupJournal;
-    }
+    let contexts = {
+        WalletContext,
+        JournalContext,
+        HomePageContext,
+        AccountContext,
+        TreasuryContext,
+        GroupJournalContext
+    };
+
+    let AppContext = retrieveContext(contexts, context);
 
     const {
         journalState,
