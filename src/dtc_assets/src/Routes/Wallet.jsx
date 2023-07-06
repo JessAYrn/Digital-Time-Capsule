@@ -1,4 +1,4 @@
-import React, { createContext, useReducer, useState, useEffect, useMemo, useState} from 'react';
+import React, { createContext, useReducer, useEffect, useMemo, useState} from 'react';
 import LoginPage from '../Components/authentication/LoginPage';
 import { useLocation } from 'react-router-dom';
 import journalReducer, {initialState, types} from '../reducers/journalReducer';
@@ -6,8 +6,7 @@ import walletReducer ,{walletInitialState, walletTypes} from '../reducers/wallet
 import { UI_CONTEXTS } from '../Contexts';
 import WalletPage from '../Pages/WalletPage';
 import { testTx } from '../testData/Transactions';
-import { CreateUserJournal } from '../Components/authentication/AuthenticationMethods';
-import { loadJournalData, loadWalletData, loadCanisterData, recoverState, loadAllDataIntoReduxStores } from '../Components/loadingFunctions';
+import { recoverState, loadAllDataIntoReduxStores } from '../Components/loadingFunctions';
 import { useConnect } from '@connect2ic/react';
 import CkBtcPage from '../Pages/CkBtcPage';
 import EthPage from '../Pages/EthPage';
@@ -16,8 +15,6 @@ import { DEFAULT_APP_CONTEXTS, WALLET_TABS } from '../Constants';
 import accountReducer , {accountTypes, accountInitialState} from '../reducers/accountReducer';
 import homePageReducer,{ homePageInitialState, homePageTypes } from '../reducers/homePageReducer';
 import actorReducer , { actorInitialState, actorTypes } from '../reducers/actorReducer';
-
-
 
 export const AppContext = createContext(DEFAULT_APP_CONTEXTS);
 
@@ -29,7 +26,7 @@ const WalletApp = () => {
     const [homePageState, homePageDispatch] = useReducer(homePageReducer, homePageInitialState);
     const [actorState, actorDispatch] = useReducer(actorReducer, actorInitialState);
 
-    const ReducerDispatches={
+    const ReducerDispatches = {
         walletDispatch,
         journalDispatch,
         accountDispatch,
@@ -37,7 +34,7 @@ const WalletApp = () => {
         actorDispatch
     }
 
-    const ReducerTypes={
+    const ReducerTypes = {
         journalTypes: types,
         walletTypes,
         accountTypes,
@@ -84,7 +81,7 @@ const WalletApp = () => {
         walletDispatch( { actionType: walletTypes.SET_IS_LOADING, payload: false } );
     },[actorState.backendActor]);
 
-    console.log(walletState);
+    console.log(ReducerStates);
 
     return(
         <AppContext.Provider 

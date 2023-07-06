@@ -160,8 +160,6 @@ const Journal = (props) => {
         return journalState.journal.findIndex(page => page.isOpen === true);
     }
 
-    console.log(journalState.notifications);
-
     return(
         journalState.modalStatus.show ?
         <div className={"container journal"}>

@@ -6,14 +6,14 @@ import { NULL_STRING_CAPITALIZED } from "../Constants";
 export const homePageTypes={
     SET_ENTIRE_DASHBOARD_REDUX_STATE:'SET_ENTIRE_DASHBOARD_REDUX_STATE',
     SET_CANISTER_DATA: "SET_CANISTER_DATA",
-    SET_HOME_PAGE_RELOAD_STATUS: "SET_HOME_PAGE_RELOAD_STATUS",
+    SET_DATA_HAS_BEEN_LOADED: "SET_DATA_HAS_BEEN_LOADED",
     SET_IS_LOADING:"SET_IS_LOADING",
 
 }
 
 
 export const homePageInitialState={
-    shouldReload:true,
+    dataHasBeenLoaded: undefined,
     isLoading: true,
     canisterData: {
         profilesMetaData: [],
@@ -53,8 +53,8 @@ const changeValue=(state=homePageInitialState, action)=>{
             return {
                 ...state
             }
-        case homePageTypes.SET_HOME_PAGE_RELOAD_STATUS:
-            state.shouldReload=payload;
+        case homePageTypes.SET_DATA_HAS_BEEN_LOADED:
+            state.dataHasBeenLoaded=payload;
             return {
                 ...state
             }

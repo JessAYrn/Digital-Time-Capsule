@@ -1,4 +1,4 @@
-import React, {useReducer, createContext, useEffect, useState} from 'react';
+import React, {useReducer, createContext, useEffect} from 'react';
 import journalReducer, { types, initialState } from '../reducers/journalReducer';
 import accountReducer , {accountTypes, accountInitialState} from '../reducers/accountReducer';
 import AccountSection from '../Pages/AccountPage';
@@ -62,7 +62,6 @@ const AccountPage = () => {
         if(!actorState.backendActor) return;
         accountDispatch( { actionType: accountTypes.SET_IS_LOADING, payload: true } );
         await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes);
-        console.log('here');
         accountDispatch( { actionType: accountTypes.SET_IS_LOADING, payload: false } );
     },[actorState.backendActor]);
 

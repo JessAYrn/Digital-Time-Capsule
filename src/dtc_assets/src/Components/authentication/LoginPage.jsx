@@ -82,23 +82,23 @@ const LoginPage = (props) => {
 
     const  handleClickDashboard = useCallback(() =>  {
         navigate(NAV_LINKS.dashboard, { replace: false, state: journalStateWithoutFunction});
-    }, [journalState.shouldReload, homePageState.shouldReload, walletState.shouldReload]);
+    }, [journalState.dataHasBeenLoaded, homePageState.dataHasBeenLoaded, walletState.dataHasBeenLoaded]);
 
     const  handleClickWallet = useCallback(() =>  {
         navigate(NAV_LINKS.wallet, { replace: false, state: journalStateWithoutFunction});
-    }, [journalState.shouldReload, homePageState.shouldReload, walletState.shouldReload]);
+    }, [journalState.dataHasBeenLoaded, homePageState.dataHasBeenLoaded, walletState.dataHasBeenLoaded]);
 
     const  handleClickJournal = useCallback(() =>  {
         navigate(NAV_LINKS.journal, { replace: false, state: journalStateWithoutFunction });
-    }, [journalState.shouldReload, homePageState.shouldReload, walletState.shouldReload]);
+    }, [journalState.dataHasBeenLoaded, homePageState.dataHasBeenLoaded, walletState.dataHasBeenLoaded]);
 
     const  handleClickAccount = useCallback(() =>  {
         navigate(NAV_LINKS.account, { replace: false, state: journalStateWithoutFunction });
-    },[journalState.shouldReload, homePageState.shouldReload, walletState.shouldReload]);
+    },[journalState.dataHasBeenLoaded, homePageState.dataHasBeenLoaded, walletState.dataHasBeenLoaded]);
    
     const  handleClickTreasury = useCallback(() =>  {
         navigate(NAV_LINKS.treasury, { replace: false, state: journalStateWithoutFunction });
-    },[journalState.shouldReload, homePageState.shouldReload, walletState.shouldReload]);
+    },[journalState.dataHasBeenLoaded, homePageState.dataHasBeenLoaded, walletState.dataHasBeenLoaded]);
 
     const connectionResult = useConnect({ onConnect: () => {}, onDisconnect: () => {} });
 

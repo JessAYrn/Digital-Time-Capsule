@@ -15,10 +15,10 @@ export const loadAllDataIntoReduxStores = async (states, dispatchFunctions, type
     if(!hasAccount) accountCreated = await CreateUserJournal(actorState, journalDispatch);
     if(accountCreated && "err" in accountCreated) return;
     let promises = [];
-    if(walletState.shouldReload) promises.push(loadWalletData(actorState, walletDispatch, walletTypes));
-    if(homePageState.shouldReload) promises.push(loadCanisterData(actorState, homePageDispatch, homePageTypes));
-    if(journalState.shouldReload) promises.push(loadJournalData(actorState, journalDispatch, journalTypes));
-    if(accountState. shouldReload) promises.push(loadAccountData(actorState, accountDispatch, accountTypes));
+    if(!walletState.dataHasBeenLoaded) promises.push(loadWalletData(actorState, walletDispatch, walletTypes));
+    if(!homePageState.dataHasBeenLoaded) promises.push(loadCanisterData(actorState, homePageDispatch, homePageTypes));
+    if(!journalState.dataHasBeenLoaded) promises.push(loadJournalData(actorState, journalDispatch, journalTypes));
+    if(!accountState. dataHasBeenLoaded) promises.push(loadAccountData(actorState, accountDispatch, accountTypes));
     await Promise.all(promises);
 };
 
@@ -36,8 +36,8 @@ export const loadAccountData = async (actorState, accountDispatch, accountTypes)
         });
     };
     accountDispatch({
-        actionType: accountTypes.SET_ACCOUNT_RELOAD_STATUS,
-        payload: false,
+        actionType: accountTypes.SET_DATA_HAS_BEEN_LOADED,
+        payload: true,
     });
 };
 
@@ -63,8 +63,8 @@ export const loadJournalData = async (actorState, journalDispatch, types) => {
         actionType: types.SET_JOURNAL
     });
     journalDispatch({
-        actionType: types.SET_JOURNAL_RELOAD_STATUS,
-        payload: false,
+        actionType: types.SET_DATA_HAS_BEEN_LOADED,
+        payload: true,
     });
 };
 
@@ -88,8 +88,8 @@ export const loadWalletData = async (actorState, walletDispatch, types ) => {
         actionType: types.SET_WALLET_DATA
     });
     walletDispatch({
-        actionType: types.SET_WALLET_DATA_RELOAD_STATUS,
-        payload: false,
+        actionType: types.SET_DATA_HAS_BEEN_LOADED,
+        payload: true,
     });
 };
 
@@ -118,8 +118,8 @@ export const loadCanisterData = async (actorState, dispatch, types) => {
         payload: canisterData
     });
     dispatch({
-        actionType: types.SET_HOME_PAGE_RELOAD_STATUS,
-        payload: false,
+        actionType: types.SET_DATA_HAS_BEEN_LOADED,
+        payload: true,
     });
     return canisterData;
 }
@@ -141,50 +141,47 @@ export const handleErrorOnFirstLoad = async (fnForLoadingData, fnForRefiringAuth
     }
 }
 
-export const recoverState = async ( location, dispatchMethods, types, connectionResult) => {
+export const recoverState = async ( location, dispatchMethods, types, connectionResult ) => {
 
     // dispatch state from previous route to redux store if that state exists
-    if(location.state){
-        const{journal,wallet,homePage}=location.state;
-        if(dispatchMethods.journalDispatch){
-            dispatchMethods.journalDispatch({
-                actionType: types.journalTypes.SET_ENTIRE_REDUX_STATE,
-                payload: journal
-            });
-        }
-
-        if(dispatchMethods.walletDispatch){
-            dispatchMethods.walletDispatch({
-                actionType: types.walletTypes.SET_ENTIRE_WALLET_REDUX_STATE,
-                payload:wallet
-            })
-        }
-
-        if(dispatchMethods.homePageDispatch){
-            dispatchMethods.homePageDispatch({
-                actionType: types.homePageTypes.SET_ENTIRE_DASHBOARD_REDUX_STATE,
-                payload:homePage
-            })
-        }
-    
-        
-
-        //wipe previous location state to prevent infinite loop
-        location.state = null;
-        const promises = [
-            backendActor(connectionResult.activeProvider),
-            managerActor(connectionResult.activeProvider)
-        ];
-        const [backendActor_, managerActor_] = await Promise.all(promises);
-        dispatchMethods.actorDispatch({
-            actionType: types.actorTypes.SET_BACKEND_ACTOR,
-            payload: backendActor_
+    if(!location.state) return;
+    const{journal,wallet,homePage}=location.state;
+    if(dispatchMethods.journalDispatch){
+        dispatchMethods.journalDispatch({
+            actionType: types.journalTypes.SET_ENTIRE_REDUX_STATE,
+            payload: journal
         });
-        dispatchMethods.actorDispatch({
-            actionType: types.actorTypes.SET_MANAGER_ACTOR,
-            payload: managerActor_
-        });
-    };
+    }
+
+    if(dispatchMethods.walletDispatch){
+        dispatchMethods.walletDispatch({
+            actionType: types.walletTypes.SET_ENTIRE_WALLET_REDUX_STATE,
+            payload:wallet
+        })
+    }
+
+    if(dispatchMethods.homePageDispatch){
+        dispatchMethods.homePageDispatch({
+            actionType: types.homePageTypes.SET_ENTIRE_DASHBOARD_REDUX_STATE,
+            payload:homePage
+        })
+    }
+
+    //wipe previous location state to prevent infinite loop
+    location.state = null;
+    const promises = [
+        backendActor(connectionResult.activeProvider),
+        managerActor(connectionResult.activeProvider)
+    ];
+    const [backendActor_, managerActor_] = await Promise.all(promises);
+    dispatchMethods.actorDispatch({
+        actionType: types.actorTypes.SET_BACKEND_ACTOR,
+        payload: backendActor_
+    });
+    dispatchMethods.actorDispatch({
+        actionType: types.actorTypes.SET_MANAGER_ACTOR,
+        payload: managerActor_
+    });
 };
 
 export const fileLoaderHelper =  async (

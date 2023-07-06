@@ -216,3 +216,11 @@ export const extractCanisterIdFromURL = (URL) => {
   return canisterId;
 };
 
+export const allPropertiesInObjectAreDefined = (obj) => {
+  for (const [key, value] of Object.entries(obj)) {
+    console.log(` ${key} ` + `${value}`);
+    if (value === undefined) return false;
+  };
+  return true;
+}
+

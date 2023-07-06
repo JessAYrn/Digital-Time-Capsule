@@ -12,7 +12,7 @@ export const types = {
     SET_BIO: "SET_BIO",
     SET_METADATA: "SET_METADATA",
     SET_MODAL_STATUS: "SET_MODAL_STATUS",
-    SET_JOURNAL_RELOAD_STATUS: "SET_JOURNAL_RELOAD_STATUS",
+    SET_DATA_HAS_BEEN_LOADED: "SET_DATA_HAS_BEEN_LOADED",
     SET_IS_AUTHENTICATED: "SET_IS_AUTHENTICATED",
     SET_IS_LOADING:"SET_IS_LOADING",
     CHANGE_DRAFT: "CHANGE_DRAFT",
@@ -53,7 +53,7 @@ export const types = {
 export const initialState = {
     authenticateFunctionCallCount: 0,
     createActorFunctionCallCount: 0,
-    shouldReload: true,
+    dataHasBeenLoaded: undefined,
     journalCount: 0,
     journalPageTab:JOURNAL_TABS.diaryTab,
     canisterData: {
@@ -207,8 +207,8 @@ const changeValue = (state = initialState, action) => {
         return {
             ...state
         }
-        case types.SET_JOURNAL_RELOAD_STATUS:
-        state.shouldReload = payload
+        case types.SET_DATA_HAS_BEEN_LOADED:
+        state.dataHasBeenLoaded = payload
         return {
             ...state
         }

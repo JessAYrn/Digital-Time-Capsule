@@ -5,12 +5,12 @@ export const accountTypes={
     CHANGE_USERNAME: "CHANGE_USERNAME",
     CHANGE_EMAIL: "CHANGE_EMAIL",
     SET_IS_LOADING:"SET_IS_LOADING",
-    SET_ACCOUNT_RELOAD_STATUS: "SET_ACCOUNT_RELOAD_STATUS",
+    SET_DATA_HAS_BEEN_LOADED: "SET_DATA_HAS_BEEN_LOADED",
     SET_METADATA: "SET_METADATA"
 };
 
 export const accountInitialState={
-    shouldReload: true,
+    dataHasBeenLoaded: undefined,
     isLoading: true,
     metaData: {
         email: [],
@@ -27,8 +27,8 @@ switch(actionType){
     return {
         ...state
     }
-    case accountTypes.SET_ACCOUNT_RELOAD_STATUS:
-    state.shouldReload = payload
+    case accountTypes.SET_DATA_HAS_BEEN_LOADED:
+    state.dataHasBeenLoaded = payload
     return {
         ...state
     }

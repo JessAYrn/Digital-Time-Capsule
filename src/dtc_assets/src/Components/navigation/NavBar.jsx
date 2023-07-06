@@ -97,7 +97,7 @@ export const NavBar = (props) => {
                 homePage: homePageStateWithoutFunction
             }
         });
-    }, [journalState.shouldReload, walletState.shouldReload, homePageState.shouldReload]);
+    }, [journalState.dataHasBeenLoaded, walletState.dataHasBeenLoaded, homePageState.dataHasBeenLoaded]);
 
     const handleClickWallet = useCallback(() =>  {
        
@@ -110,7 +110,7 @@ export const NavBar = (props) => {
                 homePage: homePageStateWithoutFunction
             }
         });
-    }, [walletState.shouldReload, journalState.shouldReload, homePageState.shouldReload]);
+    }, [walletState.dataHasBeenLoaded, journalState.dataHasBeenLoaded, homePageState.dataHasBeenLoaded]);
 
     const  handleClickJournal = useCallback(() =>  {
         navigate(NAV_LINKS.journal, { 
@@ -122,7 +122,7 @@ export const NavBar = (props) => {
                 homePage: homePageStateWithoutFunction
             }
         });
-    }, [walletState.shouldReload, journalState.shouldReload, homePageState.shouldReload]);
+    }, [walletState.dataHasBeenLoaded, journalState.dataHasBeenLoaded, homePageState.dataHasBeenLoaded]);
 
     const  handleClickAccount = useCallback(() =>  {
         navigate(NAV_LINKS.account, { 
@@ -134,7 +134,7 @@ export const NavBar = (props) => {
                 homePage: homePageStateWithoutFunction
             }    
         });
-    },[walletState.shouldReload, journalState.shouldReload, homePageState.shouldReload]);
+    },[walletState.dataHasBeenLoaded, journalState.dataHasBeenLoaded, homePageState.dataHasBeenLoaded]);
    
     const  handleClickTreasury = useCallback(() =>  {
         navigate(NAV_LINKS.treasury, { 
@@ -146,7 +146,7 @@ export const NavBar = (props) => {
                 homePage: homePageStateWithoutFunction
             }
         });
-    },[walletState.shouldReload, journalState.shouldReload, homePageState.shouldReload]);
+    },[walletState.dataHasBeenLoaded, journalState.dataHasBeenLoaded, homePageState.dataHasBeenLoaded]);
 
     const  handleClickGroupJournal = useCallback(() =>  {
         navigate(NAV_LINKS.groupJournal, { 
@@ -157,7 +157,7 @@ export const NavBar = (props) => {
                 account: accountStateWithoutFunction,
                 homePage: homePageStateWithoutFunction
             }});
-    },[walletState.shouldReload, journalState.shouldReload, homePageState.shouldReload]);
+    },[walletState.dataHasBeenLoaded, journalState.dataHasBeenLoaded, homePageState.dataHasBeenLoaded]);
 
     const showSideBar = () => {
         setSideBar(!sideBar)

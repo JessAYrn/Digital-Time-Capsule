@@ -5,7 +5,7 @@ export const walletTypes={
     SET_WALLET_TABS:'SET_WALLET_TABS',
     SET_WALLET_DATA: "SET_WALLET_DATA",
     SET_WALLET_QR_CODE_IMG_URL:"SET_WALLET_QR_CODE_IMG_URL",
-    SET_WALLET_DATA_RELOAD_STATUS:'SET_WALLET_DATA_RELOAD_STATUS',
+    SET_DATA_HAS_BEEN_LOADED:'SET_DATA_HAS_BEEN_LOADED',
     SET_TX_HISTORY_DATA:"SET_TX_HISTORY_DATA",
     SET_IS_LOADING:"SET_IS_LOADING",
 }
@@ -13,7 +13,7 @@ export const walletTypes={
 
 export const walletInitialState={
     walletPageTab:WALLET_TABS.icpTab,
-    shouldReload: true,
+    dataHasBeenLoaded: undefined,
     isLoading: true,
     walletData: {
         balance:'',
@@ -77,8 +77,8 @@ const changeValue = (state =walletInitialState, action) => {
         return{
             ...state
         }
-        case walletTypes.SET_WALLET_DATA_RELOAD_STATUS:
-        state.shouldReload = payload
+        case walletTypes.SET_DATA_HAS_BEEN_LOADED:
+        state.dataHasBeenLoaded = payload
         return {
             ...state
         }

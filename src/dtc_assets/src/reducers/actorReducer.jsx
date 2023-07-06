@@ -10,16 +10,16 @@ export const actorInitialState={
 }
 
 const changeValue=(state = actorInitialState, action)=>{
-    const {actionType, payload, index, fileIndex, blockReload } = action;
+    const { actionType, payload } = action;
 
     switch(actionType){
     case actorTypes.SET_BACKEND_ACTOR:
-        actorInitialState.backendActor = payload;
+        state.backendActor = payload;
         return {
             ...state
         }
     case actorTypes.SET_MANAGER_ACTOR:
-        actorInitialState.managerActor = payload;
+        state.managerActor = payload;
         return {
             ...state
         }
