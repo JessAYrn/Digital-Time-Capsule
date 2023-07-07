@@ -25,6 +25,7 @@ const WalletApp = () => {
     const [accountState, accountDispatch] = useReducer(accountReducer, accountInitialState);
     const [homePageState, homePageDispatch] = useReducer(homePageReducer, homePageInitialState);
     const [actorState, actorDispatch] = useReducer(actorReducer, actorInitialState);
+    const [stateHasBeenRecovered, setStateHasBeenRecovered] = useState(false);
 
     const ReducerDispatches = {
         walletDispatch,
@@ -57,7 +58,7 @@ const WalletApp = () => {
     const location = useLocation();
 
     // dispatch state from previous route to redux store if that state exists
-    recoverState( location, ReducerDispatches, ReducerTypes, connectionResult );
+    recoverState( location, ReducerDispatches, ReducerTypes, connectionResult, setStateHasBeenRecovered );
 
     //clears useLocation().state upon page refresh so that when the user refreshes the page,
     //changes made to this route aren't overrided by the useLocation().state of the previous route.
@@ -76,13 +77,9 @@ const WalletApp = () => {
     //Loading Time Capsule Data
     useEffect(async () => {
         if(!actorState.backendActor) return; 
-        walletDispatch( { actionType: walletTypes.SET_IS_LOADING, payload: true } );
-        await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes);
-        walletDispatch( { actionType: walletTypes.SET_IS_LOADING, payload: false } );
+        await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes, stateHasBeenRecovered);
     },[actorState.backendActor]);
-
-    console.log(ReducerStates);
-
+    
     return(
         <AppContext.Provider 
                 value={{

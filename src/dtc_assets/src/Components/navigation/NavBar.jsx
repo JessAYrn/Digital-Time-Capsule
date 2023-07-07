@@ -67,97 +67,17 @@ export const NavBar = (props) => {
 
     //must remove function from state because useNavigate will send a null state if there is a function in the state.
     //the reason this happens is because objects retrieved from useLocation must be serializable and function are not.
-    let journalStateWithoutFunction = {
-        ...journalState,
-        handlePageSubmitFunction:'',
-        backendActor: undefined,
-        managerActor: undefined
+    
+    let reduxStates = {
+        journal: journalState,
+        wallet: walletState,
+        account: accountState,
+        homePage: homePageState
     };
 
-    let walletStateWithoutFunction={
-        ...walletState,
-    }
-    
-    let accountStateWithoutFunction={
-        ...accountState,
-    }
-    
-    let homePageStateWithoutFunction={
-        ...homePageState,
-    }
-
-    const  handleClickDashboard = useCallback(() =>  {
-        console.log(walletStateWithoutFunction);
-        navigate(NAV_LINKS.dashboard, { 
-            replace: false, 
-            state:{
-                journal: journalStateWithoutFunction,
-                wallet: walletStateWithoutFunction,
-                account: accountStateWithoutFunction,
-                homePage: homePageStateWithoutFunction
-            }
-        });
-    }, [journalState.dataHasBeenLoaded, walletState.dataHasBeenLoaded, homePageState.dataHasBeenLoaded]);
-
-    const handleClickWallet = useCallback(() =>  {
-       
-        navigate(NAV_LINKS.wallet, { 
-            replace: false, 
-            state: {
-                journal: journalStateWithoutFunction,
-                wallet: walletStateWithoutFunction,
-                account: accountStateWithoutFunction,
-                homePage: homePageStateWithoutFunction
-            }
-        });
-    }, [walletState.dataHasBeenLoaded, journalState.dataHasBeenLoaded, homePageState.dataHasBeenLoaded]);
-
-    const  handleClickJournal = useCallback(() =>  {
-        navigate(NAV_LINKS.journal, { 
-            replace: false, 
-            state: {
-                journal: journalStateWithoutFunction,
-                wallet: walletStateWithoutFunction,
-                account: accountStateWithoutFunction,
-                homePage: homePageStateWithoutFunction
-            }
-        });
-    }, [walletState.dataHasBeenLoaded, journalState.dataHasBeenLoaded, homePageState.dataHasBeenLoaded]);
-
-    const  handleClickAccount = useCallback(() =>  {
-        navigate(NAV_LINKS.account, { 
-            replace: false, 
-            state: {
-                journal: journalStateWithoutFunction,
-                wallet: walletStateWithoutFunction,
-                account: accountStateWithoutFunction,
-                homePage: homePageStateWithoutFunction
-            }    
-        });
-    },[walletState.dataHasBeenLoaded, journalState.dataHasBeenLoaded, homePageState.dataHasBeenLoaded]);
-   
-    const  handleClickTreasury = useCallback(() =>  {
-        navigate(NAV_LINKS.treasury, { 
-            replace: false, 
-            state: {
-                journal: journalStateWithoutFunction,
-                wallet: walletStateWithoutFunction,
-                account: accountStateWithoutFunction,
-                homePage: homePageStateWithoutFunction
-            }
-        });
-    },[walletState.dataHasBeenLoaded, journalState.dataHasBeenLoaded, homePageState.dataHasBeenLoaded]);
-
-    const  handleClickGroupJournal = useCallback(() =>  {
-        navigate(NAV_LINKS.groupJournal, { 
-            replace: false, 
-            state: {
-                journal: journalStateWithoutFunction,
-                wallet: walletStateWithoutFunction,
-                account: accountStateWithoutFunction,
-                homePage: homePageStateWithoutFunction
-            }});
-    },[walletState.dataHasBeenLoaded, journalState.dataHasBeenLoaded, homePageState.dataHasBeenLoaded]);
+    const changeRoute = (route, states) => {
+        navigate(route, { replace: false, state: states });
+    };
 
     const showSideBar = () => {
         setSideBar(!sideBar)
@@ -245,7 +165,7 @@ export const NavBar = (props) => {
             </div>
             <nav className={`navBar_Journal ${sideBar ? 'active' : ''}`}>
                 <ul className={'unorderedList'}>
-                    <li className={'listItem'} onClick={handleClickWallet}>
+                    <li className={'listItem'} onClick={() => changeRoute(NAV_LINKS.wallet, reduxStates)}>
                         <IconContext.Provider value={{ color: 'white'}}>
                             <IoiosIcons.IoIosWallet/> 
                         </IconContext.Provider>
@@ -253,7 +173,7 @@ export const NavBar = (props) => {
                             wallet
                         </span>
                     </li>
-                    <li className={'listItem'} onClick={handleClickJournal}>
+                    <li className={'listItem'} onClick={() => changeRoute(NAV_LINKS.journal, reduxStates)}>
                         <IconContext.Provider value={{ color: 'white'}}>
                             <IoiosIcons.IoIosJournal/> 
                         </IconContext.Provider>
@@ -261,7 +181,7 @@ export const NavBar = (props) => {
                             journal
                         </span>
                     </li>
-                    <li className={'listItem'} onClick={handleClickDashboard}>
+                    <li className={'listItem'} onClick={() => changeRoute(NAV_LINKS.dashboard, reduxStates)}>
                         <IconContext.Provider value={{ color: 'white'}}>
                             <AiIcons.AiFillDashboard/> 
                         </IconContext.Provider>
@@ -269,7 +189,7 @@ export const NavBar = (props) => {
                             dashboard
                         </span>
                     </li>
-                    <li className={'listItem'} onClick={handleClickAccount}>
+                    <li className={'listItem'} onClick={() => changeRoute(NAV_LINKS.account, reduxStates)}>
                         <IconContext.Provider value={{ color: 'white'}}>
                             <RiIcons.RiAccountPinCircleFill/> 
                         </IconContext.Provider>
@@ -277,7 +197,7 @@ export const NavBar = (props) => {
                             account
                         </span>
                     </li>
-                    <li className={'listItem'} onClick={handleClickTreasury}>
+                    <li className={'listItem'} onClick={() => changeRoute(NAV_LINKS.treasury, reduxStates)}>
                         <IconContext.Provider value={{ color: 'white'}}>
                             <GiIcons.GiOpenTreasureChest/> 
                         </IconContext.Provider>
@@ -285,7 +205,7 @@ export const NavBar = (props) => {
                             treasury
                         </span>
                     </li>
-                    <li className={'listItem'} onClick={handleClickGroupJournal}>
+                    <li className={'listItem'} onClick={() => changeRoute(NAV_LINKS.groupJournal, reduxStates)}>
                         <IconContext.Provider value={{ color: 'white'}}>
                             <GiIcons.GiOpenTreasureChest/> 
                         </IconContext.Provider>

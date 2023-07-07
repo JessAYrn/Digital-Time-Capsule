@@ -29,16 +29,6 @@ const ExitWithoutSubmit = (props) => {
 
 
     const onClickSubmit = () => {
-        journalDispatch({
-            actionType: types.SET_MODAL_STATUS,
-            payload: {show: false, which: MODALS_TYPES.onSubmit}
-        });
-        journalDispatch({
-            actionType: types.CHANGE_PAGE_IS_OPEN,
-            payload: false,
-            index: index
-        })
-        journalState.handlePageSubmitFunction();
     };
 
     const onClickExit = () => {

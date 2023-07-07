@@ -24,6 +24,7 @@ const GroupJournal = () => {
     const [homePageState, homePageDispatch] =  useReducer(homePageReducer, homePageInitialState)
     const [accountState, accountDispatch] =  useReducer(accountReducer, accountInitialState)
     const [actorState, actorDispatch] = useReducer(actorReducer, actorInitialState);
+    const [stateHasBeenRecovered, setStateHasBeenRecovered] = useState(false);
 
     const ReducerDispatches={
         walletDispatch,
@@ -56,16 +57,14 @@ const GroupJournal = () => {
     //gets state from previous route
     const location = useLocation()
 
-    recoverState( location, ReducerDispatches, ReducerTypes, connectionResult );
+    recoverState( location, ReducerDispatches, ReducerTypes, connectionResult, setStateHasBeenRecovered );
 
 
     
     
     useEffect( async () => {
         if(!actorState.backendActor) return;
-        homePageDispatch( { actionType: homePageTypes.SET_IS_LOADING, payload: true } );
-        await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes);
-        homePageDispatch( { actionType: homePageTypes.SET_IS_LOADING, payload: false } );
+        await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes, stateHasBeenRecovered);
     }, [actorState.backendActor]);
   return (
     <AppContext.Provider

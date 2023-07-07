@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { createContext, useState, useEffect, useReducer, useMemo} from 'react';
+import { createContext, useState, useEffect, useReducer, useMemo, useState} from 'react';
 import { useLocation } from 'react-router-dom';
 import Journal from '../Pages/Journal';
 import LoginPage from '../Components/authentication/LoginPage';
@@ -23,6 +23,7 @@ const App = () => {
     const [homePageState, homePageDispatch] =  useReducer(homePageReducer, homePageInitialState)
     const [accountState, accountDispatch] =  useReducer(accountReducer, accountInitialState)
     const [actorState, actorDispatch] = useReducer(actorReducer, actorInitialState);
+    const [stateHasBeenRecovered, setStateHasBeenRecovered] = useState(false);
 
     const [submissionsMade, setSubmissionsMade] = useState(0);
 
@@ -56,7 +57,7 @@ const App = () => {
     };
 
     // dispatch state from previous route to redux store if that state exists
-    recoverState( location, ReducerDispatches, ReducerTypes, connectionResult );
+    recoverState( location, ReducerDispatches, ReducerTypes, connectionResult, setStateHasBeenRecovered );
    
     // clears useLocation().state upon page refresh so that when the user refreshes the page,
     // changes made to this route aren't overrided by the useLocation().state of the previous route.
@@ -64,9 +65,7 @@ const App = () => {
 
     useEffect(async () => {
         if(!actorState.backendActor) return;
-        journalDispatch( { actionType: types.SET_IS_LOADING, payload: true } );
-        await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes);
-        journalDispatch( { actionType: types.SET_IS_LOADING, payload: false } );
+        await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes, stateHasBeenRecovered);
     },[actorState.backendActor]);
 
     let TabComponent = useMemo(()=>{

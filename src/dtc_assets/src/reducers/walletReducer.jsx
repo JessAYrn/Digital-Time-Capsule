@@ -14,7 +14,7 @@ export const walletTypes={
 export const walletInitialState={
     walletPageTab:WALLET_TABS.icpTab,
     dataHasBeenLoaded: undefined,
-    isLoading: true,
+    isLoading: false,
     walletData: {
         balance:'',
         address:'',
@@ -29,7 +29,7 @@ export const walletInitialState={
 }
 
 const changeValue = (state =walletInitialState, action) => {
-    const {actionType, payload, index, fileIndex, blockReload } = action;
+    const {actionType, payload } = action;
     
 
 

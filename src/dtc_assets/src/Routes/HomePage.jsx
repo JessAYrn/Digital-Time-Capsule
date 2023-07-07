@@ -1,4 +1,4 @@
-import React, { createContext, useReducer, useEffect} from 'react';
+import React, { createContext, useReducer, useEffect, useState} from 'react';
 import { useLocation } from 'react-router-dom';
 import journalReducer, {initialState, types} from "../reducers/journalReducer";
 import LoginPage from '../Components/authentication/LoginPage';
@@ -24,7 +24,7 @@ const HomePage = () => {
     const [accountState, accountDispatch] = useReducer(accountReducer, accountInitialState);
     const [homePageState, homePageDispatch] = useReducer(homePageReducer, homePageInitialState);
     const [actorState, actorDispatch] = useReducer(actorReducer, actorInitialState);
-
+    const [stateHasBeenRecovered, setStateHasBeenRecovered] = useState(false);
 
     const connectionResult = useConnect({ onConnect: () => {}, onDisconnect: () => {} });
 
@@ -57,7 +57,7 @@ const HomePage = () => {
     };
 
     // dispatch state from previous route to redux store if that state exists
-    recoverState( location, ReducerDispatches, ReducerTypes, connectionResult );
+    recoverState( location, ReducerDispatches, ReducerTypes, connectionResult, setStateHasBeenRecovered );
 
     //clears useLocation().state upon page refresh so that when the user refreshes the page,
     //changes made to this route aren't overrided by the useLocation().state of the previous route.
@@ -65,9 +65,7 @@ const HomePage = () => {
 
     useEffect( async () => {
         if(!actorState.backendActor) return;
-        homePageDispatch( { actionType: homePageTypes.SET_IS_LOADING, payload: true } );
-        await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes);
-        homePageDispatch( { actionType: homePageTypes.SET_IS_LOADING, payload: false } );
+        await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes, stateHasBeenRecovered);
     }, [actorState.backendActor]);
 
     return (

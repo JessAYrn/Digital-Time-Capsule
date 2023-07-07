@@ -14,7 +14,7 @@ export const homePageTypes={
 
 export const homePageInitialState={
     dataHasBeenLoaded: undefined,
-    isLoading: true,
+    isLoading: false,
     canisterData: {
         profilesMetaData: [],
         journalCount: 0,

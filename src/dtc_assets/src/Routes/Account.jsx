@@ -1,4 +1,4 @@
-import React, {useReducer, createContext, useEffect} from 'react';
+import React, {useReducer, createContext, useEffect, useState} from 'react';
 import journalReducer, { types, initialState } from '../reducers/journalReducer';
 import accountReducer , {accountTypes, accountInitialState} from '../reducers/accountReducer';
 import AccountSection from '../Pages/AccountPage';
@@ -21,6 +21,7 @@ const AccountPage = () => {
     const [walletState, walletDispatch]=useReducer(walletReducer,walletInitialState);
     const [homePageState, homePageDispatch]=useReducer(homePageReducer,homePageInitialState);
     const [actorState, actorDispatch] = useReducer(actorReducer, actorInitialState);
+    const [stateHasBeenRecovered, setStateHasBeenRecovered] = useState(false);
 
     //clears useLocation().state upon page refresh so that when the user refreshes the page,
     //changes made to this route aren't overrided by the useLocation().state of the previous route.
@@ -56,13 +57,11 @@ const AccountPage = () => {
     const location = useLocation();
 
     // dispatch state from previous route to redux store if that state exists
-    recoverState( location, ReducerDispatches, ReducerTypes, connectionResult );
+    recoverState( location, ReducerDispatches, ReducerTypes, connectionResult, setStateHasBeenRecovered );
 
     useEffect(async () => {
         if(!actorState.backendActor) return;
-        accountDispatch( { actionType: accountTypes.SET_IS_LOADING, payload: true } );
-        await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes);
-        accountDispatch( { actionType: accountTypes.SET_IS_LOADING, payload: false } );
+        await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes, stateHasBeenRecovered);
     },[actorState.backendActor]);
 
     return (

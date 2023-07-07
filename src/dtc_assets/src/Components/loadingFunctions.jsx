@@ -6,20 +6,43 @@ import { getFileUrl_fromApi } from "./Fields/fileManger/FileManagementTools";
 import { CreateUserJournal } from "./authentication/AuthenticationMethods";
 
 
-export const loadAllDataIntoReduxStores = async (states, dispatchFunctions, types) => {
+export const loadAllDataIntoReduxStores = async (states, dispatchFunctions, types, stateHasBeenRecovered) => {
+    //doesn't reload data if the data has already been recovered
+    if(stateHasBeenRecovered) return; 
+
     let {walletState, homePageState, journalState, actorState, accountState} = states;
     let {journalDispatch, walletDispatch, homePageDispatch, accountDispatch} = dispatchFunctions;
     let {journalTypes, walletTypes, homePageTypes, accountTypes } = types;
+
+    // sets isLoading property to true for all reducers
+    setAllContexsIsLoading(dispatchFunctions, types, true);
+
     let accountCreated;
+    //checks to see if user has an account. If not, then it attemptes to make an account, if 
+    //the account creation is unsuccessful, then it returns
     let hasAccount = await actorState.backendActor.hasAccount();
     if(!hasAccount) accountCreated = await CreateUserJournal(actorState, journalDispatch);
     if(accountCreated && "err" in accountCreated) return;
+
+    //calls the backend and loads the retrieved data into the appropriate redux stores.
     let promises = [];
     if(!walletState.dataHasBeenLoaded) promises.push(loadWalletData(actorState, walletDispatch, walletTypes));
     if(!homePageState.dataHasBeenLoaded) promises.push(loadCanisterData(actorState, homePageDispatch, homePageTypes));
     if(!journalState.dataHasBeenLoaded) promises.push(loadJournalData(actorState, journalDispatch, journalTypes));
     if(!accountState. dataHasBeenLoaded) promises.push(loadAccountData(actorState, accountDispatch, accountTypes));
     await Promise.all(promises);
+
+    // sets isLoading property to false for all reducers
+    setAllContexsIsLoading(dispatchFunctions, types, false);
+};
+
+export const setAllContexsIsLoading = (dispatchFunctions, types, bool) => {
+    let {journalDispatch, walletDispatch, homePageDispatch, accountDispatch} = dispatchFunctions;
+    let {journalTypes, walletTypes, homePageTypes, accountTypes } = types;
+    journalDispatch( { actionType: journalTypes.SET_IS_LOADING, payload: bool } );
+    walletDispatch( { actionType: walletTypes.SET_IS_LOADING, payload: bool } );
+    homePageDispatch( { actionType: homePageTypes.SET_IS_LOADING, payload: bool } );
+    accountDispatch( { actionType: accountTypes.SET_IS_LOADING, payload: bool } );
 };
 
 export const loadAccountData = async (actorState, accountDispatch, accountTypes) => {
@@ -141,11 +164,12 @@ export const handleErrorOnFirstLoad = async (fnForLoadingData, fnForRefiringAuth
     }
 }
 
-export const recoverState = async ( location, dispatchMethods, types, connectionResult ) => {
+export const recoverState = async ( location, dispatchMethods, types, connectionResult, setStateHasBeenRecovered ) => {
 
     // dispatch state from previous route to redux store if that state exists
     if(!location.state) return;
-    const{journal,wallet,homePage}=location.state;
+    setStateHasBeenRecovered(true);
+    const{journal,wallet,homePage, account}=location.state;
     if(dispatchMethods.journalDispatch){
         dispatchMethods.journalDispatch({
             actionType: types.journalTypes.SET_ENTIRE_REDUX_STATE,
@@ -156,14 +180,21 @@ export const recoverState = async ( location, dispatchMethods, types, connection
     if(dispatchMethods.walletDispatch){
         dispatchMethods.walletDispatch({
             actionType: types.walletTypes.SET_ENTIRE_WALLET_REDUX_STATE,
-            payload:wallet
+            payload: wallet
         })
     }
 
     if(dispatchMethods.homePageDispatch){
         dispatchMethods.homePageDispatch({
             actionType: types.homePageTypes.SET_ENTIRE_DASHBOARD_REDUX_STATE,
-            payload:homePage
+            payload: homePage
+        })
+    }
+
+    if(dispatchMethods.accountDispatch){
+        dispatchMethods.accountDispatch({
+            actionType: types.accountTypes.SET_ENTIRE_ACCOUNT_REDUX_STATE,
+            payload: account
         })
     }
 

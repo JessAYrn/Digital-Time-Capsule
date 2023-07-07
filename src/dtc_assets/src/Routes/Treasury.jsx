@@ -1,4 +1,4 @@
-import React, {useReducer, createContext, useEffect} from 'react';
+import React, {useReducer, createContext, useEffect, useState} from 'react';
 import journalReducer, { types, initialState } from '../reducers/journalReducer';
 import { useLocation } from 'react-router-dom';
 import LoginPage from '../Components/authentication/LoginPage';
@@ -20,8 +20,9 @@ const Treasury = () => {
     const [journalState, journalDispatch] = useReducer(journalReducer, initialState);
     const [accountState, accountDispatch] = useReducer(accountReducer, accountInitialState);
     const [walletState, walletDispatch]=useReducer(walletReducer,walletInitialState);
-    const [actorState, actorDispatch]= useReducer(actorReducer, actorInitialState)
-    const [homePageState, homePageDispatch]= useReducer(homePageReducer, homePageInitialState)
+    const [actorState, actorDispatch]= useReducer(actorReducer, actorInitialState);
+    const [homePageState, homePageDispatch]= useReducer(homePageReducer, homePageInitialState);
+    const [stateHasBeenRecovered, setStateHasBeenRecovered] = useState(false);
 
     window.onbeforeunload = window.history.replaceState(null, '');
     
@@ -53,14 +54,12 @@ const Treasury = () => {
     
     //gets state from previous route
     const location = useLocation()
-    recoverState( location, ReducerDispatches, ReducerTypes, connectionResult );
+    recoverState( location, ReducerDispatches, ReducerTypes, connectionResult, setStateHasBeenRecovered );
     
     
     useEffect( async () => {
         if(!actorState.backendActor) return;
-        homePageDispatch( { actionType: homePageTypes.SET_IS_LOADING, payload: true } );
-        await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes);
-        homePageDispatch( { actionType: homePageTypes.SET_IS_LOADING, payload: false } );
+        await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes, stateHasBeenRecovered);
     }, [actorState.backendActor]);
   return (
     <AppContext.Provider

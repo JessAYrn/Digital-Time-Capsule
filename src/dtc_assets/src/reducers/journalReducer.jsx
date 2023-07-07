@@ -45,7 +45,6 @@ export const types = {
     CHANGE_PAGE_IS_OPEN: "CHANGE_PAGE_IS_OPEN",
     REMOVE_UNSUBMITTED_PAGE: "REMOVE_UNSUBMITTED_PAGE",
     REMOVE_JOURNAL_ENTRY_FILE: "REMOVE_JOURNAL_ENTRY_FILE",
-    SET_HANDLE_PAGE_SUBMIT_FUNCTION: "SET_HANDLE_PAGE_SUBMIT_FUNCTION"
 }
 
 
@@ -91,12 +90,11 @@ export const initialState = {
         canisterData: true
     },
     isAuthenticated: false,
-    isLoading: true,
+    isLoading: false,
     modalStatus: {
         show: false, 
         which: MODALS_TYPES.onSubmit
-    },
-    handlePageSubmitFunction: () => {}
+    }
 };
 const defaultFileMetaData = {
     fileName: NULL_STRING_ALL_LOWERCASE,
@@ -158,11 +156,6 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
-        case types.SET_HANDLE_PAGE_SUBMIT_FUNCTION:
-        state.handlePageSubmitFunction = payload;
-        return {
-            ...state
-        }
         case types.SET_JOURNAL:
             state.journal = payload;
             return {

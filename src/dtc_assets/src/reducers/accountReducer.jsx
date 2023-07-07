@@ -11,7 +11,7 @@ export const accountTypes={
 
 export const accountInitialState={
     dataHasBeenLoaded: undefined,
-    isLoading: true,
+    isLoading: false,
     metaData: {
         email: [],
         userName: []

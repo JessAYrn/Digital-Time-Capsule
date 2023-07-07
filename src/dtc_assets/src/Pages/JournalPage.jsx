@@ -166,13 +166,6 @@ const JournalPage = (props) => {
 
     }, [journalPageData]);
 
-    useEffect(() => {
-        journalDispatch({
-            actionType: types.SET_HANDLE_PAGE_SUBMIT_FUNCTION,
-            payload: handleSubmit
-        });
-    },[handleSubmit])
-
     const handleClosePage = (e) => {
         // new pages don't have entryKey's until they've been submitted to the backend. 
         

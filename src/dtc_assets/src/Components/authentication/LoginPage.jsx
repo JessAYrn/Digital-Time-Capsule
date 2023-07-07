@@ -72,34 +72,17 @@ const LoginPage = (props) => {
 
     //must remove function from state because useNavigate will send a null state if there is a function in the state.
     //the reason this happens is because objects retrieved from useLocation must be serializable and function are not.
-    let journalStateWithoutFunction = {
-        ...journalState,
-        handlePageSubmitFunction:'',
-        backendActor: undefined,
-        managerActor: undefined,
+    let reduxStates = {
+        journal: journalState,
+        wallet: walletState,
+        account: accountState,
+        homePage: homePageState
+    };
+
+    const changeRoute = (route, states) => {
+        navigate(route, { replace: false, state: states });
     };
     
-
-    const  handleClickDashboard = useCallback(() =>  {
-        navigate(NAV_LINKS.dashboard, { replace: false, state: journalStateWithoutFunction});
-    }, [journalState.dataHasBeenLoaded, homePageState.dataHasBeenLoaded, walletState.dataHasBeenLoaded]);
-
-    const  handleClickWallet = useCallback(() =>  {
-        navigate(NAV_LINKS.wallet, { replace: false, state: journalStateWithoutFunction});
-    }, [journalState.dataHasBeenLoaded, homePageState.dataHasBeenLoaded, walletState.dataHasBeenLoaded]);
-
-    const  handleClickJournal = useCallback(() =>  {
-        navigate(NAV_LINKS.journal, { replace: false, state: journalStateWithoutFunction });
-    }, [journalState.dataHasBeenLoaded, homePageState.dataHasBeenLoaded, walletState.dataHasBeenLoaded]);
-
-    const  handleClickAccount = useCallback(() =>  {
-        navigate(NAV_LINKS.account, { replace: false, state: journalStateWithoutFunction });
-    },[journalState.dataHasBeenLoaded, homePageState.dataHasBeenLoaded, walletState.dataHasBeenLoaded]);
-   
-    const  handleClickTreasury = useCallback(() =>  {
-        navigate(NAV_LINKS.treasury, { replace: false, state: journalStateWithoutFunction });
-    },[journalState.dataHasBeenLoaded, homePageState.dataHasBeenLoaded, walletState.dataHasBeenLoaded]);
-
     const connectionResult = useConnect({ onConnect: () => {}, onDisconnect: () => {} });
 
     useEffect(async () => {
@@ -160,7 +143,7 @@ const LoginPage = (props) => {
                                 iconSize={25}
                                 iconColor={'#917153'}
                                 className={`walletIconDiv loginPage ${(context === UI_CONTEXTS.WALLET) ? 'active' : ''}`}
-                                onClick={handleClickWallet}
+                                onClick={() => changeRoute(NAV_LINKS.wallet, reduxStates)}
                                 withBox={true}
                             />
                             <ButtonField
@@ -168,7 +151,7 @@ const LoginPage = (props) => {
                                 iconSize={25}
                                 iconColor={'#917153'}
                                 className={`journalIconDiv loginPage ${(context === UI_CONTEXTS.JOURNAL) ? 'active' : ''}`}
-                                onClick={handleClickJournal}
+                                onClick={() => changeRoute(NAV_LINKS.journal, reduxStates)}
                                 withBox={true}
                             />
                         </div>
@@ -178,7 +161,7 @@ const LoginPage = (props) => {
                                 iconSize={25}
                                 iconColor={'#917153'}
                                 className={`dashboardIconDiv loginPage ${(context === UI_CONTEXTS.HOME_PAGE) ? 'active' : ''}`}
-                                onClick={handleClickDashboard}
+                                onClick={() => changeRoute(NAV_LINKS.dashboard, reduxStates)}
                                 withBox={true}
                             />
                             <ButtonField
@@ -186,7 +169,7 @@ const LoginPage = (props) => {
                                 iconSize={25}
                                 iconColor={'#917153'}
                                 className={`accountIconDiv loginPage ${(context === UI_CONTEXTS.ACCOUNT_PAGE) ? 'active' : ''}`}
-                                onClick={handleClickAccount}
+                                onClick={() => changeRoute(NAV_LINKS.account, reduxStates)}
                                 withBox={true}
                             />
                         </div>
