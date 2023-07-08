@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { createContext, useState, useEffect, useReducer, useMemo, useState} from 'react';
 import { useLocation } from 'react-router-dom';
-import Journal from '../Pages/Journal';
+import Journal from './Pages/Journal';
 import LoginPage from '../Components/authentication/LoginPage';
 import { UI_CONTEXTS } from '../Contexts';
 import walletReducer, { walletTypes,walletInitialState } from '../reducers/walletReducer';
@@ -9,7 +9,7 @@ import journalReducer, {initialState, types} from '../reducers/journalReducer';
 import { TEST_DATA_FOR_NOTIFICATIONS } from '../testData/notificationsTestData';
 import { loadAllDataIntoReduxStores, recoverState} from '../Components/loadingFunctions';
 import { useConnect } from "@connect2ic/react";
-import Notes from '../Pages/Notes';
+import Notes from './Pages/Notes';
 import { DEFAULT_APP_CONTEXTS, JOURNAL_TABS } from '../Constants';
 import homePageReducer,{ homePageInitialState, homePageTypes } from '../reducers/homePageReducer';
 import accountReducer,{ accountInitialState, accountTypes } from '../reducers/accountReducer';

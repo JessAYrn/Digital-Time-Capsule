@@ -1,22 +1,22 @@
 import JournalPage from "./JournalPage";
 import React, { useContext, useEffect, useState } from "react";
-import {initialState, types} from "../reducers/journalReducer";
+import {types} from "../../reducers/journalReducer";
 import "./Journal.scss";
-import { AppContext } from "../Routes/App";
-import InputBox from "../Components/Fields/InputBox";
+import { AppContext } from "../App";
+import InputBox from "../../Components/Fields/InputBox";
 import * as AiIcons from 'react-icons/ai';
-import ButtonField from "../Components/Fields/Button";
-import LoadScreen from "../Components/LoadScreen";
-import { Modal } from "../Components/Modal";
-import { NavBar } from "../Components/navigation/NavBar";
-import { MODALS_TYPES, NULL_STRING_ALL_LOWERCASE } from "../Constants";
-import { UI_CONTEXTS } from "../Contexts";
-import { getIntObserverFunc, visibilityFunctionDefault } from "../Components/animations/IntersectionObserverFunctions";
-import { dateAisLaterThanOrSameAsDateB, getDateAsString, getDateInMilliseconds } from "../Utils";
-import FileCarousel from "../Components/Fields/fileManger/FileCarousel";
-import { fileLoaderHelper } from "../Components/loadingFunctions";
-import "../SCSS/scrollable.scss";
-import "../SCSS/contentContainer.scss";
+import ButtonField from "../../Components/Fields/Button";
+import LoadScreen from "../../Components/LoadScreen";
+import { Modal } from "../../Components/Modal";
+import { NavBar } from "../../Components/navigation/NavBar";
+import { MODALS_TYPES, NULL_STRING_ALL_LOWERCASE } from "../../Constants";
+import { UI_CONTEXTS } from "../../Contexts";
+import { getIntObserverFunc, visibilityFunctionDefault } from "../../Components/animations/IntersectionObserverFunctions";
+import { dateAisLaterThanOrSameAsDateB, getDateAsString, getDateInMilliseconds } from "../../Utils";
+import FileCarousel from "../../Components/Fields/fileManger/FileCarousel";
+import { fileLoaderHelper } from "../../Components/loadingFunctions";
+import "../../SCSS/scrollable.scss";
+import "../../SCSS/contentContainer.scss";
 
 const Journal = (props) => {
 

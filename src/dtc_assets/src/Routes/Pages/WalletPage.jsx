@@ -1,27 +1,25 @@
 import React, {useCallback, useContext, useEffect, useState} from 'react';
-import { AppContext } from '../Routes/Wallet';
-import { NavBar } from '../Components/navigation/NavBar';
-import { Modal } from '../Components/Modal';
+import { AppContext } from '../Wallet';
+import { NavBar } from '../../Components/navigation/NavBar';
+import { Modal } from '../../Components/Modal';
 import './WalletPage.scss';
-import { shortenHexString } from '../Utils';
-import { e8sInOneICP, MODALS_TYPES } from '../Constants';
-import {  RenderQrCode } from '../Components/walletFunctions/GenerateQrCode';
-import { copyWalletAddressHelper } from '../Components/walletFunctions/CopyWalletAddress';
-import { Transaction } from '../Components/walletFunctions/Transaction';
-import { loadTxHistory } from '../Components/loadingFunctions';
+import { shortenHexString } from '../../Utils';
+import { e8sInOneICP, MODALS_TYPES } from '../../Constants';
+import {  RenderQrCode } from '../../Components/walletFunctions/GenerateQrCode';
+import { copyWalletAddressHelper } from '../../Components/walletFunctions/CopyWalletAddress';
+import { Transaction } from '../../Components/walletFunctions/Transaction';
+import { loadTxHistory } from '../../Components/loadingFunctions';
 import * as GrIcons from 'react-icons/gr';
 import * as FaIcons from 'react-icons/fa';
 import * as AiIcons from 'react-icons/ai'
-import { IconContext } from 'react-icons/lib';
-import { testTx } from '../testData/Transactions';
-import LoadScreen from '../Components/LoadScreen';
-import { types } from '../reducers/journalReducer';
-import { walletTypes } from '../reducers/walletReducer';
-import { UI_CONTEXTS } from '../Contexts';
-import { visibilityFunctionDefault, getIntObserverFunc } from '../Components/animations/IntersectionObserverFunctions';
-import ButtonField from '../Components/Fields/Button';
-import '../SCSS/contentContainer.scss'
-import { walletInitialState } from '../reducers/walletReducer';
+import { testTx } from '../../testData/Transactions';
+import LoadScreen from '../../Components/LoadScreen';
+import { types } from '../../reducers/journalReducer';
+import { walletTypes } from '../../reducers/walletReducer';
+import { UI_CONTEXTS } from '../../Contexts';
+import { visibilityFunctionDefault, getIntObserverFunc } from '../../Components/animations/IntersectionObserverFunctions';
+import ButtonField from '../../Components/Fields/Button';
+import '../../SCSS/contentContainer.scss'
 
 
 const WalletPage = (props) => {

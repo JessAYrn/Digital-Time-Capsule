@@ -5,7 +5,7 @@ import LoginPage from '../Components/authentication/LoginPage';
 import { UI_CONTEXTS } from '../Contexts';
 import { recoverState, loadAllDataIntoReduxStores  } from '../Components/loadingFunctions';
 import { useConnect } from '@connect2ic/react';
-import GroupJournalPage from '../Pages/GroupJournalPage';
+import GroupJournalPage from './Pages/GroupJournalPage';
 import { DEFAULT_APP_CONTEXTS } from '../Constants';
 import walletReducer, { walletInitialState,walletTypes } from '../reducers/walletReducer';
 import homePageReducer, { homePageInitialState,homePageTypes } from '../reducers/homePageReducer';

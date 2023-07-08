@@ -1,16 +1,14 @@
 import React, { useContext, useState } from 'react';
-import  InputBox  from '../Components/Fields/InputBox';
-import { types } from '../reducers/journalReducer'
-import AdminSection from '../Components/AdminSection';
+import  InputBox  from '../../Components/Fields/InputBox';
+import AdminSection from '../../Components/AdminSection';
 import "./AccountPage.scss";
 import "./SubscriptionPage.scss";
-import { AppContext } from '../Routes/Account';
-import { NavBar } from '../Components/navigation/NavBar';
-import { UI_CONTEXTS } from '../Contexts';
-import LoadScreen from '../Components/LoadScreen';
-import { Modal } from '../Components/Modal';
-import { walletInitialState, walletTypes } from '../reducers/walletReducer';
-import accountReducer, { accountInitialState, accountTypes } from '../reducers/accountReducer';
+import { AppContext } from '../Account';
+import { NavBar } from '../../Components/navigation/NavBar';
+import { UI_CONTEXTS } from '../../Contexts';
+import LoadScreen from '../../Components/LoadScreen';
+import { Modal } from '../../Components/Modal';
+import  { accountTypes } from '../../reducers/accountReducer';
 
 
 const AccountSection = (props) => {

@@ -1,20 +1,19 @@
 import React, {useState, useContext, useMemo, useCallback, useEffect} from "react";
-import InputBox from "../Components/Fields/InputBox";
-import {types} from "../reducers/journalReducer";
-import  {AppContext} from "../Routes/App";
+import InputBox from "../../Components/Fields/InputBox";
+import {types} from "../../reducers/journalReducer";
+import  {AppContext} from "../App";
 import "./JournalPage.scss";
-import DatePicker from "../Components/Fields/DatePicker";
-import LoadScreen from "../Components/LoadScreen";
-import { MODALS_TYPES, monthInMilliSeconds, NULL_STRING_ALL_LOWERCASE} from "../Constants";
-import { dateAisLaterThanOrSameAsDateB, getDateAsString, getDateInMilliseconds, milisecondsToNanoSeconds, scrollToBottom, scrollToTop } from "../Utils";
-import { loadJournalData } from "../Components/loadingFunctions";
+import DatePicker from "../../Components/Fields/DatePicker";
+import LoadScreen from "../../Components/LoadScreen";
+import { MODALS_TYPES, monthInMilliSeconds, NULL_STRING_ALL_LOWERCASE} from "../../Constants";
+import { dateAisLaterThanOrSameAsDateB, getDateAsString, getDateInMilliseconds, milisecondsToNanoSeconds, scrollToBottom, scrollToTop } from "../../Utils";
+import { loadJournalData } from "../../Components/loadingFunctions";
 import * as RiIcons from 'react-icons/ri';
 import * as BiIcons from 'react-icons/bi';
 import * as ImIcons from 'react-icons/im';
-import ButtonField from "../Components/Fields/Button";
-import FileCarousel from "../Components/Fields/fileManger/FileCarousel";
-import { getFileUrl_fromApi } from "../Components/Fields/fileManger/FileManagementTools";
-import { fileLoaderHelper } from "../Components/loadingFunctions";
+import ButtonField from "../../Components/Fields/Button";
+import FileCarousel from "../../Components/Fields/fileManger/FileCarousel";
+import { fileLoaderHelper } from "../../Components/loadingFunctions";
 
 const JournalPage = (props) => {
 

@@ -5,7 +5,7 @@ import LoginPage from '../Components/authentication/LoginPage';
 import { UI_CONTEXTS } from '../Contexts';
 import { loadAllDataIntoReduxStores, recoverState  } from '../Components/loadingFunctions';
 import { useConnect } from '@connect2ic/react';
-import TreasuryPage from '../Pages/TreasuryPage'
+import TreasuryPage from './Pages/TreasuryPage'
 import { DEFAULT_APP_CONTEXTS } from '../Constants';
 import accountReducer , {accountTypes, accountInitialState} from '../reducers/accountReducer';
 import walletReducer,{ walletInitialState, walletTypes } from '../reducers/walletReducer';

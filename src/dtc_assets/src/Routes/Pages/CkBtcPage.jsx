@@ -1,11 +1,12 @@
 import React, { useContext } from 'react';
-import { NavBar } from '../Components/navigation/NavBar'
+import { NavBar } from '../../Components/navigation/NavBar'
 // import { NavBar } from "../Components/navigation/NavBar";
-import { UI_CONTEXTS } from "../Contexts";
-import { AppContext } from "../Routes/App";
-import '../SCSS/section.scss';
+import { UI_CONTEXTS } from "../../Contexts";
+import { AppContext } from "../App";
+import '../../SCSS/section.scss';
 
-const EthPage = () => {
+
+const CkBtcPage = () => {
   return (
     <>
     <NavBar
@@ -18,9 +19,9 @@ const EthPage = () => {
 />    
 <div className='coming_soon_wallet_page'>
     Coming soon
-  </div>
-</>
+</div>
+    </>
   )
 }
 
-export default EthPage;
+export default CkBtcPage;

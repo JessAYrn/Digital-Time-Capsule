@@ -1,26 +1,26 @@
 import React, { useContext, useEffect, useState} from 'react';
-import { getIntObserverFunc, visibilityFunctionDefault } from '../Components/animations/IntersectionObserverFunctions';
-import { AppContext } from '../Routes/HomePage';
-import { NavBar } from '../Components/navigation/NavBar';
-import { UI_CONTEXTS } from '../Contexts';
-import { Modal } from '../Components/Modal';
+import { getIntObserverFunc, visibilityFunctionDefault } from '../../Components/animations/IntersectionObserverFunctions';
+import { AppContext } from '../HomePage';
+import { NavBar } from '../../Components/navigation/NavBar';
+import { UI_CONTEXTS } from '../../Contexts';
+import { Modal } from '../../Components/Modal';
 import "./Analytics.scss"
-import DataField from '../Components/Fields/DataField';
-import LoadScreen from '../Components/LoadScreen';
-import { types } from '../reducers/journalReducer';
-import { MODALS_TYPES } from '../Constants';
-import Switch from '../Components/Fields/Switch';
-import { CANISTER_DATA_FIELDS } from '../Constants';
+import DataField from '../../Components/Fields/DataField';
+import LoadScreen from '../../Components/LoadScreen';
+import { types } from '../../reducers/journalReducer';
+import { MODALS_TYPES } from '../../Constants';
+import Switch from '../../Components/Fields/Switch';
+import { CANISTER_DATA_FIELDS } from '../../Constants';
 import * as RiIcons from 'react-icons/ri';
 import * as FaIcons from 'react-icons/fa';
 import * as AiIcons from 'react-icons/ai';
-import ButtonField from '../Components/Fields/Button';
+import ButtonField from '../../Components/Fields/Button';
 import { IconContext } from 'react-icons/lib';
-import "../SCSS/scrollable.scss";
-import '../SCSS/container.scss';
-import '../SCSS/contentContainer.scss'
-import '../SCSS/section.scss'
-import {homePageTypes} from '../reducers/homePageReducer';
+import "../../SCSS/scrollable.scss";
+import '../../SCSS/container.scss';
+import '../../SCSS/contentContainer.scss'
+import '../../SCSS/section.scss'
+import {homePageTypes} from '../../reducers/homePageReducer';
 
 
 const Analytics = () => {

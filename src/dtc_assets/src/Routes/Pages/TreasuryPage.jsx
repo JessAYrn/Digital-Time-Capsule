@@ -1,7 +1,7 @@
-import { NavBar } from "../Components/navigation/NavBar";
+import { NavBar } from "../../Components/navigation/NavBar";
 import React, { useContext } from 'react';
-import { UI_CONTEXTS } from "../Contexts";
-import { AppContext } from "../Routes/App";
+import { UI_CONTEXTS } from "../../Contexts";
+import { AppContext } from "../App";
 import './TreasuryPage.scss'
 
 const TreasuryPage = (props) => {

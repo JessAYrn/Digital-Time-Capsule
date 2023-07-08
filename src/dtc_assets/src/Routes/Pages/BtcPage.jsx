@@ -1,9 +1,9 @@
 import React, { useContext } from 'react';
-import { NavBar } from '../Components/navigation/NavBar'
+import { NavBar } from '../../Components/navigation/NavBar'
 // import { NavBar } from "../Components/navigation/NavBar";
-import { UI_CONTEXTS } from "../Contexts";
-import { AppContext } from "../Routes/App";
-import '../SCSS/section.scss';
+import { UI_CONTEXTS } from "../../Contexts";
+import { AppContext } from "../App";
+import '../../SCSS/section.scss';
 
 const BtcPage = () => {
   const { journalState, journalDispatch} = useContext(AppContext);

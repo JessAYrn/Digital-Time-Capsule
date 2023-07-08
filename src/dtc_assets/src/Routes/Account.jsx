@@ -1,7 +1,7 @@
 import React, {useReducer, createContext, useEffect, useState} from 'react';
 import journalReducer, { types, initialState } from '../reducers/journalReducer';
 import accountReducer , {accountTypes, accountInitialState} from '../reducers/accountReducer';
-import AccountSection from '../Pages/AccountPage';
+import AccountSection from './Pages/AccountPage';
 import { useLocation } from 'react-router-dom';
 import LoginPage from '../Components/authentication/LoginPage';
 import { UI_CONTEXTS } from '../Contexts';
