@@ -1,7 +1,7 @@
 import React, {useCallback, useContext, useEffect, useState} from 'react';
 import { AppContext } from '../Wallet';
 import { NavBar } from '../../Components/navigation/NavBar';
-import { Modal } from '../../Components/Modal';
+import { Modal } from './modalContent/Modal';
 import './WalletPage.scss';
 import { shortenHexString } from '../../Utils';
 import { e8sInOneICP, MODALS_TYPES } from '../../Constants';
@@ -13,7 +13,7 @@ import * as GrIcons from 'react-icons/gr';
 import * as FaIcons from 'react-icons/fa';
 import * as AiIcons from 'react-icons/ai'
 import { testTx } from '../../testData/Transactions';
-import LoadScreen from '../../Components/LoadScreen';
+import LoadScreen from './LoadScreen';
 import { types } from '../../reducers/journalReducer';
 import { walletTypes } from '../../reducers/walletReducer';
 import { UI_CONTEXTS } from '../../Contexts';

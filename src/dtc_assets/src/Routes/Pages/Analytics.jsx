@@ -3,10 +3,10 @@ import { getIntObserverFunc, visibilityFunctionDefault } from '../../Components/
 import { AppContext } from '../HomePage';
 import { NavBar } from '../../Components/navigation/NavBar';
 import { UI_CONTEXTS } from '../../Contexts';
-import { Modal } from '../../Components/Modal';
+import { Modal } from './modalContent/Modal';
 import "./Analytics.scss"
 import DataField from '../../Components/Fields/DataField';
-import LoadScreen from '../../Components/LoadScreen';
+import LoadScreen from './LoadScreen';
 import { types } from '../../reducers/journalReducer';
 import { MODALS_TYPES } from '../../Constants';
 import Switch from '../../Components/Fields/Switch';

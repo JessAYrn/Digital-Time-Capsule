@@ -1,28 +1,28 @@
-import React, {useContext, useEffect, useState, useCallback} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import { useNavigate } from "react-router-dom";
-import { AppContext as AccountContext} from '../../Routes/Account';
-import { AppContext as HomePageContext} from '../../Routes/HomePage';
-import { AppContext as JournalContext} from '../../Routes/App';
-import { AppContext as WalletContext} from '../../Routes/Wallet';
-import { AppContext as TreasuryContext} from '../../Routes/Treasury';
-import { AppContext as GroupJournalContext} from '../../Routes/GroupJournal';
-import { UI_CONTEXTS, retrieveContext } from "../../Contexts";
+import { AppContext as AccountContext} from '../../Account';
+import { AppContext as HomePageContext} from '../../HomePage';
+import { AppContext as JournalContext} from '../../App';
+import { AppContext as WalletContext} from '../../Wallet';
+import { AppContext as TreasuryContext} from '../../Treasury';
+import { AppContext as GroupJournalContext} from '../../GroupJournal';
+import { UI_CONTEXTS, retrieveContext } from "../../../Contexts";
 import * as IoiosIcons from 'react-icons/io';
 import * as AiIcons from 'react-icons/ai';
 import * as RiIcons from 'react-icons/ri';
-import { NAV_LINKS } from "../../Constants";
+import { NAV_LINKS } from "../../../Constants";
 import "./LoginPage.scss";
-import "../../Components/animations/Animation.scss";
-import { getIntObserverFunc, visibilityFunctionLoginPage } from "../animations/IntersectionObserverFunctions";
+import "../../../Components/animations/Animation.scss";
+import { getIntObserverFunc, visibilityFunctionLoginPage } from "../../../Components/animations/IntersectionObserverFunctions";
 import { ConnectButton, ConnectDialog, useConnect, useCanister } from "@connect2ic/react";
 import "@connect2ic/core/style.css"
-import ButtonField from "../Fields/Button";
-import DataField from "../Fields/DataField";
-import { types } from "../../reducers/journalReducer";
-import { backendActor, managerActor } from "../../Utils";
-import '../../SCSS/contentContainer.scss'
-import Accordion from "../Fields/Accordion";
-import { actorTypes } from "../../reducers/actorReducer";
+import ButtonField from "../../../Components/Fields/Button";
+import DataField from "../../../Components/Fields/DataField";
+import { types } from "../../../reducers/journalReducer";
+import { backendActor, managerActor } from "../../../Utils";
+import '../../../SCSS/contentContainer.scss'
+import Accordion from "../../../Components/Fields/Accordion";
+import { actorTypes } from "../../../reducers/actorReducer";
 
 const AccordionContent=[
 

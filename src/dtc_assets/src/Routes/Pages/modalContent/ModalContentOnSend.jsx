@@ -1,13 +1,13 @@
 import React, {useState, useContext } from "react";
-import InputBox from "../Fields/InputBox";
-import { AppContext } from "../../Routes/Wallet.jsx";
-import { fromHexString } from "../../Utils.jsx";
+import InputBox from "../../../Components/Fields/InputBox";
+import { AppContext } from "../../Wallet.jsx";
+import { fromHexString } from "../../../Utils.jsx";
 import "./ModalContentOnSend.scss";
-import { toE8s, fromE8s } from "../../Utils.jsx";
-import { QrReaderContent } from "../walletFunctions/ScanQrCode";
-import { MODALS_TYPES } from "../../Constants";
-import { types } from "../../reducers/journalReducer";
-import ButtonField from "../Fields/Button";
+import { toE8s, fromE8s } from "../../../Utils.jsx";
+import { QrReaderContent } from "../../../Components/walletFunctions/ScanQrCode";
+import { MODALS_TYPES } from "../../../Constants";
+import { types } from "../../../reducers/journalReducer";
+import ButtonField from "../../../Components/Fields/Button";
 
 const ModalContentOnSend = (props) => {
 

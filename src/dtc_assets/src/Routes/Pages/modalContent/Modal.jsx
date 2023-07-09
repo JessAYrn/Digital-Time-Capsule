@@ -1,24 +1,24 @@
 import React, {useContext, useMemo, useEffect} from 'react';
-import { AppContext as AccountContext} from '../Routes/Account';
-import { AppContext as HomePageContext} from '../Routes/HomePage';
-import { AppContext as JournalContext} from '../Routes/App';
-import { AppContext as WalletContext} from '../Routes/Wallet';
-import { AppContext as TreasuryContext} from '../Routes/Treasury';
-import { AppContext as GroupJournalContext} from '../Routes/GroupJournal';
-import { MODALS_TYPES } from '../Constants';
-import FileHasError from './modalContent/ModalContentHasError';
-import ExitWithoutSubmit from './modalContent/ModalContentExitWithoutSubmitModal';
-import Notifications from './modalContent/ModalContentNotifications';
-import ModalContentOnSend from './modalContent/ModalContentOnSend';
-import ModalContentSubmit from './modalContent/ModalContentOnSubmit';
-import NotAuthorizedByOwner from "./modalContent/NotAuthorizedByOwner";
-import RegistrationResponse from './modalContent/RegistrationResponseModal';
-import RequestApprovalResponseModal from './modalContent/RequestApprovaModal';
-import { getIntObserverFunc, visibilityFunctionDefault } from './animations/IntersectionObserverFunctions';
-import DateOutOfRange from './modalContent/DateOutOfRange';
+import { AppContext as AccountContext} from '../../Account';
+import { AppContext as HomePageContext} from '../../HomePage';
+import { AppContext as JournalContext} from '../../App';
+import { AppContext as WalletContext} from '../../Wallet';
+import { AppContext as TreasuryContext} from '../../Treasury';
+import { AppContext as GroupJournalContext} from '../../GroupJournal';
+import { MODALS_TYPES } from '../../../Constants';
+import FileHasError from './ModalContentHasError';
+import ExitWithoutSubmit from './ModalContentExitWithoutSubmitModal';
+import Notifications from './ModalContentNotifications';
+import ModalContentOnSend from './ModalContentOnSend';
+import ModalContentSubmit from './ModalContentOnSubmit';
+import NotAuthorizedByOwner from "./NotAuthorizedByOwner";
+import RegistrationResponse from './RegistrationResponseModal';
+import RequestApprovalResponseModal from './RequestApprovaModal';
+import { getIntObserverFunc, visibilityFunctionDefault } from '../../../Components/animations/IntersectionObserverFunctions';
+import DateOutOfRange from './DateOutOfRange';
 import "./Modal.scss";
-import '../SCSS/contentContainer.scss'
-import { retrieveContext } from '../Contexts';
+import '../../../SCSS/contentContainer.scss'
+import { retrieveContext } from '../../../Contexts';
 
 export const Modal = (props) => {
 

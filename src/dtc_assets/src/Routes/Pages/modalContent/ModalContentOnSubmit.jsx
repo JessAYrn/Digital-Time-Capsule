@@ -1,16 +1,16 @@
 import React, {useContext} from 'react';
-import { MODALS_TYPES } from '../../Constants';
-import { AppContext as AccountContext} from '../../Routes/Account';
-import { AppContext as HomePageContext} from '../../Routes/HomePage';
-import { AppContext as JournalContext} from '../../Routes/App';
-import { AppContext as WalletContext} from '../../Routes/Wallet';
-import { AppContext as TreasuryContext} from '../../Routes/Treasury';
-import { AppContext as GroupJournalContext} from '../../Routes/GroupJournal';
-import { retrieveContext } from '../../Contexts';
-import ButtonField from '../Fields/Button';
+import { MODALS_TYPES } from '../../../Constants';
+import { AppContext as AccountContext} from '../../Account';
+import { AppContext as HomePageContext} from '../../HomePage';
+import { AppContext as JournalContext} from '../../App';
+import { AppContext as WalletContext} from '../../Wallet';
+import { AppContext as TreasuryContext} from '../../Treasury';
+import { AppContext as GroupJournalContext} from '../../GroupJournal';
+import { retrieveContext } from '../../../Contexts';
+import ButtonField from '../../../Components/Fields/Button';
 
 import "./ModalContentOnSubmit.scss";
-import { types } from '../../reducers/journalReducer';
+import { types } from '../../../reducers/journalReducer';
 
 const ModalContentSubmit = (props) => {
 

@@ -1,9 +1,9 @@
 import React, {useContext, useState, useEffect} from "react";
-import { initialState, types } from "../reducers/journalReducer";
-import { AppContext } from "../Routes/App";
+import { initialState, types } from "../../reducers/journalReducer";
+import { AppContext } from "../App";
 import "./LoadScreen.scss";
-import { getIntObserverFunc, visibilityFunctionDefault } from "./animations/IntersectionObserverFunctions";
-import '../SCSS/contentContainer.scss'
+import { getIntObserverFunc, visibilityFunctionDefault } from "../../Components/animations/IntersectionObserverFunctions";
+import '../../SCSS/contentContainer.scss'
 
 
 const LoadScreen = () => {

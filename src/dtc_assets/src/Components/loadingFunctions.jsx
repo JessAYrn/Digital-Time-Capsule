@@ -3,7 +3,7 @@ import { delay, managerActor, backendActor, toHexString } from "../Utils";
 import { generateQrCode } from "./walletFunctions/GenerateQrCode";
 import { mapBackendCanisterDataToFrontEndObj } from "../mappers/dashboardMapperFunctions";
 import { getFileUrl_fromApi } from "./Fields/fileManger/FileManagementTools";
-import { CreateUserJournal } from "./authentication/AuthenticationMethods";
+import { CreateUserJournal } from "../Routes/Pages/authentication/AuthenticationMethods";
 
 
 export const loadAllDataIntoReduxStores = async (states, dispatchFunctions, types, stateHasBeenRecovered) => {

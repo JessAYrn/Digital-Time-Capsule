@@ -1,13 +1,12 @@
 import React, { useContext, useState } from 'react';
 import  InputBox  from '../../Components/Fields/InputBox';
-import AdminSection from '../../Components/AdminSection';
 import "./AccountPage.scss";
 import "./SubscriptionPage.scss";
 import { AppContext } from '../Account';
 import { NavBar } from '../../Components/navigation/NavBar';
 import { UI_CONTEXTS } from '../../Contexts';
-import LoadScreen from '../../Components/LoadScreen';
-import { Modal } from '../../Components/Modal';
+import LoadScreen from './LoadScreen';
+import { Modal } from './modalContent/Modal';
 import  { accountTypes } from '../../reducers/accountReducer';
 
 
@@ -33,7 +32,6 @@ const AccountSection = (props) => {
         });
 
     };
-    const isAdmin = accountState?.metaData?.userName[0] === 'admin';
 
 return(
     journalState.modalStatus.show ?
@@ -53,9 +51,9 @@ return(
         />
         {accountState.isLoading ?
             <LoadScreen/> :
-            <div className={`logoDiv account ${isAdmin ? 'admin' : ''}`}>
+            <div className={`logoDiv account`}>
                 <img className={'logoImg'}src="dtc-logo-black.png" alt="Logo"/>
-                <div className={`subscriptionSection ${isAdmin ? 'admin_' : ''}`}>
+                <div className={`subscriptionSection `}>
                     <InputBox
                         divClassName={"email"}
                         setChangesWereMade={setPageChangesMade}
@@ -74,7 +72,6 @@ return(
                         dispatchAction={accountTypes.CHANGE_USERNAME}
                         value={accountState.metaData.userName}
                     />
-                    {isAdmin && <AdminSection/>}
                 </div> 
             </div>}
             {

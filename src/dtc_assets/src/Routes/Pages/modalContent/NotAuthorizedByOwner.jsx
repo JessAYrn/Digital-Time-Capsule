@@ -1,18 +1,18 @@
 import React, {useContext}from 'react';
 import './NotAuthorizedByOwner.scss'
-import { AppContext as AccountContext} from '../../Routes/Account';
-import { AppContext as HomePageContext} from '../../Routes/HomePage';
-import { AppContext as JournalContext} from '../../Routes/App';
-import { AppContext as WalletContext} from '../../Routes/Wallet';
-import { AppContext as TreasuryContext} from '../../Routes/Treasury';
-import { AppContext as GroupJournalContext} from '../../Routes/GroupJournal';
-import { retrieveContext, UI_CONTEXTS } from '../../Contexts';
-import { types as journalTypes } from '../../reducers/journalReducer';
-import { homePageTypes } from '../../reducers/homePageReducer';
-import { accountTypes } from '../../reducers/accountReducer';
-import { walletTypes } from '../../reducers/walletReducer';
-import { MODALS_TYPES } from '../../Constants';
-import ButtonField from '../Fields/Button';
+import { AppContext as AccountContext} from '../../Account';
+import { AppContext as HomePageContext} from '../../HomePage';
+import { AppContext as JournalContext} from '../../App';
+import { AppContext as WalletContext} from '../../Wallet';
+import { AppContext as TreasuryContext} from '../../Treasury';
+import { AppContext as GroupJournalContext} from '../../GroupJournal';
+import { retrieveContext, UI_CONTEXTS } from '../../../Contexts';
+import { types as journalTypes } from '../../../reducers/journalReducer';
+import { homePageTypes } from '../../../reducers/homePageReducer';
+import { accountTypes } from '../../../reducers/accountReducer';
+import { walletTypes } from '../../../reducers/walletReducer';
+import { MODALS_TYPES } from '../../../Constants';
+import ButtonField from '../../../Components/Fields/Button';
 import LoadScreen from '../LoadScreen';
 
 const NotAuthorizedByOwner = (props) => {

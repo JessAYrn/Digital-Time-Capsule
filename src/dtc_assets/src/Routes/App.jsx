@@ -2,7 +2,7 @@ import * as React from 'react';
 import { createContext, useState, useEffect, useReducer, useMemo, useState} from 'react';
 import { useLocation } from 'react-router-dom';
 import Journal from './Pages/Journal';
-import LoginPage from '../Components/authentication/LoginPage';
+import LoginPage from './Pages/authentication/LoginPage';
 import { UI_CONTEXTS } from '../Contexts';
 import walletReducer, { walletTypes,walletInitialState } from '../reducers/walletReducer';
 import journalReducer, {initialState, types} from '../reducers/journalReducer';

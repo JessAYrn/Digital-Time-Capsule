@@ -4,7 +4,7 @@ import {types} from "../../reducers/journalReducer";
 import  {AppContext} from "../App";
 import "./JournalPage.scss";
 import DatePicker from "../../Components/Fields/DatePicker";
-import LoadScreen from "../../Components/LoadScreen";
+import LoadScreen from "./LoadScreen";
 import { MODALS_TYPES, monthInMilliSeconds, NULL_STRING_ALL_LOWERCASE} from "../../Constants";
 import { dateAisLaterThanOrSameAsDateB, getDateAsString, getDateInMilliseconds, milisecondsToNanoSeconds, scrollToBottom, scrollToTop } from "../../Utils";
 import { loadJournalData } from "../../Components/loadingFunctions";

@@ -1,18 +1,18 @@
 import React, {useContext} from "react";
-import { AppContext as AccountContext} from '../../Routes/Account';
-import { AppContext as HomePageContext} from '../../Routes/HomePage';
-import { AppContext as JournalContext} from '../../Routes/App';
-import { AppContext as WalletContext} from '../../Routes/Wallet';
-import { AppContext as TreasuryContext} from '../../Routes/Treasury';
-import { AppContext as GroupJournalContext} from '../../Routes/GroupJournal';
-import { UI_CONTEXTS, retrieveContext } from '../../Contexts';
-import { initialState as journalInitialState, types as journalTypes } from "../../reducers/journalReducer";
+import { AppContext as AccountContext} from '../../Account';
+import { AppContext as HomePageContext} from '../../HomePage';
+import { AppContext as JournalContext} from '../../App';
+import { AppContext as WalletContext} from '../../Wallet';
+import { AppContext as TreasuryContext} from '../../Treasury';
+import { AppContext as GroupJournalContext} from '../../GroupJournal';
+import { UI_CONTEXTS, retrieveContext } from '../../../Contexts';
+import { initialState as journalInitialState, types as journalTypes } from "../../../reducers/journalReducer";
 import "./RequestApprovaModal.scss";
 import { ConnectButton, ConnectDialog, useConnect } from "@connect2ic/react";
 import LoadScreen from "../LoadScreen";
-import { homePageTypes, initialState as homePageInitialState } from "../../reducers/homePageReducer";
-import { walletTypes, initialState as walletInitialState } from "../../reducers/walletReducer";
-import { accountTypes, initialState as accountInitialState } from "../../reducers/accountReducer";
+import { homePageTypes, initialState as homePageInitialState } from "../../../reducers/homePageReducer";
+import { walletTypes, initialState as walletInitialState } from "../../../reducers/walletReducer";
+import { accountTypes, initialState as accountInitialState } from "../../../reducers/accountReducer";
 
 const RequestApprovalResponseModal = (props) => {
 

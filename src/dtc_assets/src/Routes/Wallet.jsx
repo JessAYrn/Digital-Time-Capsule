@@ -1,5 +1,5 @@
 import React, { createContext, useReducer, useEffect, useMemo, useState} from 'react';
-import LoginPage from '../Components/authentication/LoginPage';
+import LoginPage from './Pages/authentication/LoginPage';
 import { useLocation } from 'react-router-dom';
 import journalReducer, {initialState, types} from '../reducers/journalReducer';
 import walletReducer ,{walletInitialState, walletTypes} from '../reducers/walletReducer';
