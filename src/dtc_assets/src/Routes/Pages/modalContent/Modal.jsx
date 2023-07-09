@@ -5,7 +5,7 @@ import { AppContext as JournalContext} from '../../App';
 import { AppContext as WalletContext} from '../../Wallet';
 import { AppContext as TreasuryContext} from '../../Treasury';
 import { AppContext as GroupJournalContext} from '../../GroupJournal';
-import { MODALS_TYPES } from '../../../Constants';
+import { MODALS_TYPES } from '../../../functionsAndConstants/Constants';
 import FileHasError from './ModalContentHasError';
 import ExitWithoutSubmit from './ModalContentExitWithoutSubmitModal';
 import Notifications from './ModalContentNotifications';
@@ -18,7 +18,7 @@ import { getIntObserverFunc, visibilityFunctionDefault } from '../../../Componen
 import DateOutOfRange from './DateOutOfRange';
 import "./Modal.scss";
 import '../../../SCSS/contentContainer.scss'
-import { retrieveContext } from '../../../Contexts';
+import { retrieveContext } from '../../../functionsAndConstants/Contexts';
 
 export const Modal = (props) => {
 

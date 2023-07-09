@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { NavBar } from '../../Components/navigation/NavBar'
 // import { NavBar } from "../Components/navigation/NavBar";
-import { UI_CONTEXTS } from "../../Contexts";
+import { UI_CONTEXTS } from "../../functionsAndConstants/Contexts";
 import { AppContext } from "../App";
 import '../../SCSS/section.scss';
 

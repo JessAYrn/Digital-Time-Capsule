@@ -4,10 +4,10 @@ import accountReducer , {accountTypes, accountInitialState} from '../reducers/ac
 import AccountSection from './Pages/AccountPage';
 import { useLocation } from 'react-router-dom';
 import LoginPage from './Pages/authentication/LoginPage';
-import { UI_CONTEXTS } from '../Contexts';
-import { recoverState, loadAllDataIntoReduxStores  } from '../Components/loadingFunctions';
+import { UI_CONTEXTS } from '../functionsAndConstants/Contexts';
+import { recoverState, loadAllDataIntoReduxStores  } from '../functionsAndConstants/loadingFunctions';
 import { useConnect } from '@connect2ic/react';
-import { DEFAULT_APP_CONTEXTS } from '../Constants';
+import { DEFAULT_APP_CONTEXTS } from '../functionsAndConstants/Constants';
 import walletReducer,{ walletInitialState, walletTypes } from '../reducers/walletReducer';
 import homePageReducer, { homePageInitialState, homePageTypes } from '../reducers/homePageReducer';
 import actorReducer, { actorInitialState,actorTypes } from "../reducers/actorReducer";

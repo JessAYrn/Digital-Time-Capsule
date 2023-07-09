@@ -3,12 +3,12 @@ import { AppContext } from '../Wallet';
 import { NavBar } from '../../Components/navigation/NavBar';
 import { Modal } from './modalContent/Modal';
 import './WalletPage.scss';
-import { shortenHexString } from '../../Utils';
-import { e8sInOneICP, MODALS_TYPES } from '../../Constants';
-import {  RenderQrCode } from '../../Components/walletFunctions/GenerateQrCode';
-import { copyWalletAddressHelper } from '../../Components/walletFunctions/CopyWalletAddress';
-import { Transaction } from '../../Components/walletFunctions/Transaction';
-import { loadTxHistory } from '../../Components/loadingFunctions';
+import { shortenHexString } from '../../functionsAndConstants/Utils';
+import { e8sInOneICP, MODALS_TYPES } from '../../functionsAndConstants/Constants';
+import {  RenderQrCode } from '../../functionsAndConstants/walletFunctions/GenerateQrCode';
+import { copyWalletAddressHelper } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
+import { Transaction } from '../../functionsAndConstants/walletFunctions/Transaction';
+import { loadTxHistory } from '../../functionsAndConstants/loadingFunctions';
 import * as GrIcons from 'react-icons/gr';
 import * as FaIcons from 'react-icons/fa';
 import * as AiIcons from 'react-icons/ai'
@@ -16,7 +16,7 @@ import { testTx } from '../../testData/Transactions';
 import LoadScreen from './LoadScreen';
 import { types } from '../../reducers/journalReducer';
 import { walletTypes } from '../../reducers/walletReducer';
-import { UI_CONTEXTS } from '../../Contexts';
+import { UI_CONTEXTS } from '../../functionsAndConstants/Contexts';
 import { visibilityFunctionDefault, getIntObserverFunc } from '../../Components/animations/IntersectionObserverFunctions';
 import ButtonField from '../../Components/Fields/Button';
 import '../../SCSS/contentContainer.scss'

@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useState } from 'react';
 import { useNavigate, useLocation } from "react-router-dom";
-import { JOURNAL_TABS, NAV_LINKS, WALLET_TABS } from '../../Constants';
+import { JOURNAL_TABS, NAV_LINKS, WALLET_TABS } from '../../functionsAndConstants/Constants';
 import { AppContext as AccountContext} from '../../Routes/Account';
 import { AppContext as HomePageContext} from '../../Routes/HomePage';
 import { AppContext as JournalContext} from '../../Routes/App';
@@ -15,13 +15,13 @@ import * as RiIcons from 'react-icons/ri';
 import * as ImIcons from 'react-icons/im';
 import { IconContext } from 'react-icons/lib';
 import { types } from '../../reducers/journalReducer';
-import { MODALS_TYPES } from '../../Constants';
+import { MODALS_TYPES } from '../../functionsAndConstants/Constants';
 import { ConnectButton, ConnectDialog, useConnect } from "@connect2ic/react";
 import { initialState } from '../../reducers/journalReducer';
 import "./NavBar.scss";
 import Dropdown from '../Fields/Dropdown';
 import { walletTypes } from '../../reducers/walletReducer';
-import { retrieveContext } from '../../Contexts';
+import { retrieveContext } from '../../functionsAndConstants/Contexts';
 
 
 

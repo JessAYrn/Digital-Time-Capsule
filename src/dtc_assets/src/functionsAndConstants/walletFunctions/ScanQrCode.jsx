@@ -1,6 +1,6 @@
 import React from 'react';
 import { QrReader } from 'react-qr-reader';
-import ButtonField from '../Fields/Button';
+import ButtonField from '../../Components/Fields/Button';
 
 export const QrReaderContent = (props) => {
 

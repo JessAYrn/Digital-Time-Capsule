@@ -3,7 +3,7 @@ import { nanoSecondsToMiliSeconds,
     shortenHexString, 
     toHexString, 
     fromE8s 
-} from "../../Utils";
+} from "../Utils";
 export const Transaction = (props) => {
 
     const {

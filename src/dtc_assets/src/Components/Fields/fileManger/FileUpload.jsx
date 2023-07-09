@@ -2,9 +2,9 @@ import React, {useRef, useState, useEffect, useContext, useMemo} from 'react';
 import "./FileUpload.scss";
 import { types } from '../../../reducers/journalReducer';
 import { useEffect } from '../../../../../../dist/dtc_assets';
-import { deviceType } from '../../../Utils';
-import { DEVICE_TYPES, MAX_DURATION_OF_VIDEO_IN_SECONDS, NULL_STRING_ALL_LOWERCASE } from '../../../Constants';
-import { MODALS_TYPES } from '../../../Constants';
+import { deviceType } from '../../../functionsAndConstants/Utils';
+import { DEVICE_TYPES, MAX_DURATION_OF_VIDEO_IN_SECONDS, NULL_STRING_ALL_LOWERCASE } from '../../../functionsAndConstants/Constants';
+import { MODALS_TYPES } from '../../../functionsAndConstants/Constants';
 import { getFileURL, mapAndSendFileToApi, getDuration, updateFileMetadataInStore } from './FileManagementTools';
 import { AppContext as AccountContext} from '../../../Routes/Account';
 import { AppContext as HomePageContext} from '../../../Routes/HomePage';
@@ -12,7 +12,7 @@ import { AppContext as JournalContext} from '../../../Routes/App';
 import { AppContext as WalletContext} from '../../../Routes/Wallet';
 import { AppContext as TreasuryContext} from '../../../Routes/Treasury';
 import { AppContext as GroupJournalContext} from '../../../Routes/GroupJournal';
-import { retrieveContext } from '../../../Contexts';
+import { retrieveContext } from '../../../functionsAndConstants/Contexts';
 
 const forbiddenFileTypes = [
     'application/pdf'

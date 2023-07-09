@@ -1,5 +1,5 @@
 import { types } from "../../../reducers/journalReducer";
-import { MODALS_TYPES } from "../../../Constants";
+import { MODALS_TYPES } from "../../../functionsAndConstants/Constants";
 
 export const TriggerAuththenticateClientFunction = (journalState, dispatch, types) => {
     dispatch({

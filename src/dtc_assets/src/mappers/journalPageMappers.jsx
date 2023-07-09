@@ -1,6 +1,6 @@
-import { milisecondsToNanoSeconds } from "../Utils";
-import { file1FileIndex, file2FileIndex } from "../Constants";
-import { nanoSecondsToMiliSeconds, getDateAsString, dateAisLaterThanOrSameAsDateB } from "../Utils";
+import { milisecondsToNanoSeconds } from "../functionsAndConstants/Utils";
+import { file1FileIndex, file2FileIndex } from "../functionsAndConstants/Constants";
+import { nanoSecondsToMiliSeconds, getDateAsString, dateAisLaterThanOrSameAsDateB } from "../functionsAndConstants/Utils";
 import { TEST_DATA_FOR_NOTIFICATIONS } from "../testData/notificationsTestData";
 
 

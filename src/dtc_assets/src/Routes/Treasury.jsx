@@ -2,11 +2,11 @@ import React, {useReducer, createContext, useEffect, useState} from 'react';
 import journalReducer, { types, initialState } from '../reducers/journalReducer';
 import { useLocation } from 'react-router-dom';
 import LoginPage from './Pages/authentication/LoginPage';
-import { UI_CONTEXTS } from '../Contexts';
-import { loadAllDataIntoReduxStores, recoverState  } from '../Components/loadingFunctions';
+import { UI_CONTEXTS } from '../functionsAndConstants/Contexts';
+import { loadAllDataIntoReduxStores, recoverState  } from '../functionsAndConstants/loadingFunctions';
 import { useConnect } from '@connect2ic/react';
 import TreasuryPage from './Pages/TreasuryPage'
-import { DEFAULT_APP_CONTEXTS } from '../Constants';
+import { DEFAULT_APP_CONTEXTS } from '../functionsAndConstants/Constants';
 import accountReducer , {accountTypes, accountInitialState} from '../reducers/accountReducer';
 import walletReducer,{ walletInitialState, walletTypes } from '../reducers/walletReducer';
 import actorReducer, { actorInitialState, actorTypes } from '../reducers/actorReducer';

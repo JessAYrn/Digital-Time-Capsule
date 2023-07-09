@@ -1,4 +1,4 @@
-import { deviceType } from "../../Utils";
+import { deviceType } from "../../functionsAndConstants/Utils";
 
 
 export const visibilityFunctionLoginPage = (props) => {

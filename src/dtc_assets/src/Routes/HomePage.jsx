@@ -2,12 +2,12 @@ import React, { createContext, useReducer, useEffect, useState} from 'react';
 import { useLocation } from 'react-router-dom';
 import journalReducer, {initialState, types} from "../reducers/journalReducer";
 import LoginPage from './Pages/authentication/LoginPage';
-import { UI_CONTEXTS } from '../Contexts';
+import { UI_CONTEXTS } from '../functionsAndConstants/Contexts';
 import Analytics from './Pages/Analytics';
 import "./HomePage.scss";
-import { loadAllDataIntoReduxStores, recoverState } from '../Components/loadingFunctions';
+import { loadAllDataIntoReduxStores, recoverState } from '../functionsAndConstants/loadingFunctions';
 import { useConnect } from '@connect2ic/react';
-import { DEFAULT_APP_CONTEXTS } from '../Constants';
+import { DEFAULT_APP_CONTEXTS } from '../functionsAndConstants/Constants';
 import walletReducer,{walletTypes, walletInitialState} from '../reducers/walletReducer'
 import accountReducer , {accountTypes, accountInitialState} from '../reducers/accountReducer';
 import homePageReducer,{homePageInitialState,homePageTypes} from '../reducers/homePageReducer';

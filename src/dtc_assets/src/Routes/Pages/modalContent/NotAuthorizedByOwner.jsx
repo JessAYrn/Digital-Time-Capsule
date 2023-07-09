@@ -6,12 +6,12 @@ import { AppContext as JournalContext} from '../../App';
 import { AppContext as WalletContext} from '../../Wallet';
 import { AppContext as TreasuryContext} from '../../Treasury';
 import { AppContext as GroupJournalContext} from '../../GroupJournal';
-import { retrieveContext, UI_CONTEXTS } from '../../../Contexts';
+import { retrieveContext, UI_CONTEXTS } from '../../../functionsAndConstants/Contexts';
 import { types as journalTypes } from '../../../reducers/journalReducer';
 import { homePageTypes } from '../../../reducers/homePageReducer';
 import { accountTypes } from '../../../reducers/accountReducer';
 import { walletTypes } from '../../../reducers/walletReducer';
-import { MODALS_TYPES } from '../../../Constants';
+import { MODALS_TYPES } from '../../../functionsAndConstants/Constants';
 import ButtonField from '../../../Components/Fields/Button';
 import LoadScreen from '../LoadScreen';
 

@@ -1,5 +1,5 @@
 import React, { useContext, useMemo } from 'react';
-import { MODALS_TYPES } from '../../../Constants';
+import { MODALS_TYPES } from '../../../functionsAndConstants/Constants';
 import { AppContext } from '../../App';
 import "./ModalContentExitWithoutSubmitModal.scss";
 import { types } from '../../../reducers/journalReducer';

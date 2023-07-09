@@ -1,6 +1,6 @@
 import { NavBar } from "../../Components/navigation/NavBar";
 import React, { useContext } from 'react';
-import { UI_CONTEXTS } from "../../Contexts";
+import { UI_CONTEXTS } from "../../functionsAndConstants/Contexts";
 import { AppContext } from "../App";
 import './GroupJournalPage.scss'
 

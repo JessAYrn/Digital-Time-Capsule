@@ -3,14 +3,14 @@ import { createContext, useState, useEffect, useReducer, useMemo, useState} from
 import { useLocation } from 'react-router-dom';
 import Journal from './Pages/Journal';
 import LoginPage from './Pages/authentication/LoginPage';
-import { UI_CONTEXTS } from '../Contexts';
+import { UI_CONTEXTS } from '../functionsAndConstants/Contexts';
 import walletReducer, { walletTypes,walletInitialState } from '../reducers/walletReducer';
 import journalReducer, {initialState, types} from '../reducers/journalReducer';
 import { TEST_DATA_FOR_NOTIFICATIONS } from '../testData/notificationsTestData';
-import { loadAllDataIntoReduxStores, recoverState} from '../Components/loadingFunctions';
+import { loadAllDataIntoReduxStores, recoverState} from '../functionsAndConstants/loadingFunctions';
 import { useConnect } from "@connect2ic/react";
 import Notes from './Pages/Notes';
-import { DEFAULT_APP_CONTEXTS, JOURNAL_TABS } from '../Constants';
+import { DEFAULT_APP_CONTEXTS, JOURNAL_TABS } from '../functionsAndConstants/Constants';
 import homePageReducer,{ homePageInitialState, homePageTypes } from '../reducers/homePageReducer';
 import accountReducer,{ accountInitialState, accountTypes } from '../reducers/accountReducer';
 import actorReducer, { actorInitialState, actorTypes } from '../reducers/actorReducer';

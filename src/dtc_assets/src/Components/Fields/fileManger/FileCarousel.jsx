@@ -1,12 +1,12 @@
 import React, {useState, useEffect, useMemo} from "react";
 import FileUpload from "./FileUpload";
-import { UI_CONTEXTS } from "../../../Contexts";
+import { UI_CONTEXTS } from "../../../functionsAndConstants/Contexts";
 import "./fileCarousel.scss";
 import * as RiIcons from 'react-icons/ri';
 import * as BiIcons from 'react-icons/bi';
 import * as MdIcons from 'react-icons/md';
 import ButtonField from "../Button";
-import { NULL_STRING_ALL_LOWERCASE } from "../../../Constants";
+import { NULL_STRING_ALL_LOWERCASE } from "../../../functionsAndConstants/Constants";
 import { types } from "../../../reducers/journalReducer";
 
 const FileCarousel = (props) => {

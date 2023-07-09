@@ -1,12 +1,12 @@
 import React, {useContext} from 'react';
-import { MODALS_TYPES } from '../../../Constants';
+import { MODALS_TYPES } from '../../../functionsAndConstants/Constants';
 import { AppContext as AccountContext} from '../../Account';
 import { AppContext as HomePageContext} from '../../HomePage';
 import { AppContext as JournalContext} from '../../App';
 import { AppContext as WalletContext} from '../../Wallet';
 import { AppContext as TreasuryContext} from '../../Treasury';
 import { AppContext as GroupJournalContext} from '../../GroupJournal';
-import { retrieveContext } from '../../../Contexts';
+import { retrieveContext } from '../../../functionsAndConstants/Contexts';
 import ButtonField from '../../../Components/Fields/Button';
 
 import "./ModalContentOnSubmit.scss";

@@ -1,4 +1,4 @@
-import {WALLET_TABS} from '../Constants';
+import {WALLET_TABS} from '../functionsAndConstants/Constants';
 
 export const walletTypes={
     SET_ENTIRE_WALLET_REDUX_STATE: "SET_ENTIRE_WALLET_REDUX_STATE",

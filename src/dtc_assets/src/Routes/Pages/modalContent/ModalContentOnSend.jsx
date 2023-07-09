@@ -1,11 +1,11 @@
 import React, {useState, useContext } from "react";
 import InputBox from "../../../Components/Fields/InputBox";
 import { AppContext } from "../../Wallet.jsx";
-import { fromHexString } from "../../../Utils.jsx";
+import { fromHexString } from "../../../functionsAndConstants/Utils.jsx";
 import "./ModalContentOnSend.scss";
-import { toE8s, fromE8s } from "../../../Utils.jsx";
-import { QrReaderContent } from "../../../Components/walletFunctions/ScanQrCode";
-import { MODALS_TYPES } from "../../../Constants";
+import { toE8s, fromE8s } from "../../../functionsAndConstants/Utils.jsx";
+import { QrReaderContent } from "../../../functionsAndConstants/walletFunctions/ScanQrCode";
+import { MODALS_TYPES } from "../../../functionsAndConstants/Constants";
 import { types } from "../../../reducers/journalReducer";
 import ButtonField from "../../../Components/Fields/Button";
 

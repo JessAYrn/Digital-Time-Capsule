@@ -5,10 +5,10 @@ import { AppContext as JournalContext} from '../../App';
 import { AppContext as WalletContext} from '../../Wallet';
 import { AppContext as TreasuryContext} from '../../Treasury';
 import { AppContext as GroupJournalContext} from '../../GroupJournal';
-import { retrieveContext } from "../../../Contexts";
+import { retrieveContext } from "../../../functionsAndConstants/Contexts";
 import './RegistrationResponseModal.scss';
 import { types } from "../../../reducers/journalReducer";
-import { MODALS_TYPES } from "../../../Constants";
+import { MODALS_TYPES } from "../../../functionsAndConstants/Constants";
 import ButtonField from "../../../Components/Fields/Button";
 
 const RegistrationResponse = (props) => {

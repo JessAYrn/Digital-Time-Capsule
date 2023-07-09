@@ -5,15 +5,15 @@ import  {AppContext} from "../App";
 import "./JournalPage.scss";
 import DatePicker from "../../Components/Fields/DatePicker";
 import LoadScreen from "./LoadScreen";
-import { MODALS_TYPES, monthInMilliSeconds, NULL_STRING_ALL_LOWERCASE} from "../../Constants";
-import { dateAisLaterThanOrSameAsDateB, getDateAsString, getDateInMilliseconds, milisecondsToNanoSeconds, scrollToBottom, scrollToTop } from "../../Utils";
-import { loadJournalData } from "../../Components/loadingFunctions";
+import { MODALS_TYPES, monthInMilliSeconds, NULL_STRING_ALL_LOWERCASE} from "../../functionsAndConstants/Constants";
+import { dateAisLaterThanOrSameAsDateB, getDateAsString, getDateInMilliseconds, milisecondsToNanoSeconds, scrollToBottom, scrollToTop } from "../../functionsAndConstants/Utils";
+import { loadJournalData } from "../../functionsAndConstants/loadingFunctions";
 import * as RiIcons from 'react-icons/ri';
 import * as BiIcons from 'react-icons/bi';
 import * as ImIcons from 'react-icons/im';
 import ButtonField from "../../Components/Fields/Button";
 import FileCarousel from "../../Components/Fields/fileManger/FileCarousel";
-import { fileLoaderHelper } from "../../Components/loadingFunctions";
+import { fileLoaderHelper } from "../../functionsAndConstants/loadingFunctions";
 
 const JournalPage = (props) => {
 

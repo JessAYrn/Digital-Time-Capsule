@@ -5,7 +5,7 @@ import { AppContext as JournalContext} from '../../App';
 import { AppContext as WalletContext} from '../../Wallet';
 import { AppContext as TreasuryContext} from '../../Treasury';
 import { AppContext as GroupJournalContext} from '../../GroupJournal';
-import { UI_CONTEXTS, retrieveContext } from '../../../Contexts';
+import { UI_CONTEXTS, retrieveContext } from '../../../functionsAndConstants/Contexts';
 import { initialState as journalInitialState, types as journalTypes } from "../../../reducers/journalReducer";
 import "./RequestApprovaModal.scss";
 import { ConnectButton, ConnectDialog, useConnect } from "@connect2ic/react";

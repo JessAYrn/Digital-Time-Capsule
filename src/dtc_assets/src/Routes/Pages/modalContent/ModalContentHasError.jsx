@@ -1,8 +1,8 @@
 import React, {useContext} from 'react';
-import { MAX_DURATION_OF_VIDEO_IN_SECONDS } from '../../../Constants';
+import { MAX_DURATION_OF_VIDEO_IN_SECONDS } from '../../../functionsAndConstants/Constants';
 import { AppContext } from '../../App';
-import { MODALS_TYPES } from '../../../Constants';
-import { round2Decimals } from '../../../Utils';
+import { MODALS_TYPES } from '../../../functionsAndConstants/Constants';
+import { round2Decimals } from '../../../functionsAndConstants/Utils';
 import "./ModalContentHasError.scss";
 import { types } from '../../../reducers/journalReducer';
 import ButtonField from '../../../Components/Fields/Button';

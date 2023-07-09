@@ -2,15 +2,15 @@ import React, { useContext, useEffect, useState} from 'react';
 import { getIntObserverFunc, visibilityFunctionDefault } from '../../Components/animations/IntersectionObserverFunctions';
 import { AppContext } from '../HomePage';
 import { NavBar } from '../../Components/navigation/NavBar';
-import { UI_CONTEXTS } from '../../Contexts';
+import { UI_CONTEXTS } from '../../functionsAndConstants/Contexts';
 import { Modal } from './modalContent/Modal';
 import "./Analytics.scss"
 import DataField from '../../Components/Fields/DataField';
 import LoadScreen from './LoadScreen';
 import { types } from '../../reducers/journalReducer';
-import { MODALS_TYPES } from '../../Constants';
+import { MODALS_TYPES } from '../../functionsAndConstants/Constants';
 import Switch from '../../Components/Fields/Switch';
-import { CANISTER_DATA_FIELDS } from '../../Constants';
+import { CANISTER_DATA_FIELDS } from '../../functionsAndConstants/Constants';
 import * as RiIcons from 'react-icons/ri';
 import * as FaIcons from 'react-icons/fa';
 import * as AiIcons from 'react-icons/ai';

@@ -6,11 +6,11 @@ import { AppContext as JournalContext} from '../../App';
 import { AppContext as WalletContext} from '../../Wallet';
 import { AppContext as TreasuryContext} from '../../Treasury';
 import { AppContext as GroupJournalContext} from '../../GroupJournal';
-import { UI_CONTEXTS, retrieveContext } from "../../../Contexts";
+import { UI_CONTEXTS, retrieveContext } from "../../../functionsAndConstants/Contexts";
 import * as IoiosIcons from 'react-icons/io';
 import * as AiIcons from 'react-icons/ai';
 import * as RiIcons from 'react-icons/ri';
-import { NAV_LINKS } from "../../../Constants";
+import { NAV_LINKS } from "../../../functionsAndConstants/Constants";
 import "./LoginPage.scss";
 import "../../../Components/animations/Animation.scss";
 import { getIntObserverFunc, visibilityFunctionLoginPage } from "../../../Components/animations/IntersectionObserverFunctions";
@@ -19,7 +19,7 @@ import "@connect2ic/core/style.css"
 import ButtonField from "../../../Components/Fields/Button";
 import DataField from "../../../Components/Fields/DataField";
 import { types } from "../../../reducers/journalReducer";
-import { backendActor, managerActor } from "../../../Utils";
+import { backendActor, managerActor } from "../../../functionsAndConstants/Utils";
 import '../../../SCSS/contentContainer.scss'
 import Accordion from "../../../Components/Fields/Accordion";
 import { actorTypes } from "../../../reducers/actorReducer";

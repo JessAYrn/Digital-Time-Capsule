@@ -1,6 +1,6 @@
 // import changeValue from "./journalReducer"
 
-import { NULL_STRING_CAPITALIZED } from "../Constants";
+import { NULL_STRING_CAPITALIZED } from "../functionsAndConstants/Constants";
 
 
 export const homePageTypes={

@@ -4,7 +4,7 @@ import "./AccountPage.scss";
 import "./SubscriptionPage.scss";
 import { AppContext } from '../Account';
 import { NavBar } from '../../Components/navigation/NavBar';
-import { UI_CONTEXTS } from '../../Contexts';
+import { UI_CONTEXTS } from '../../functionsAndConstants/Contexts';
 import LoadScreen from './LoadScreen';
 import { Modal } from './modalContent/Modal';
 import  { accountTypes } from '../../reducers/accountReducer';

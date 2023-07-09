@@ -9,12 +9,12 @@ import ButtonField from "../../Components/Fields/Button";
 import LoadScreen from "./LoadScreen";
 import { Modal } from "./modalContent/Modal";
 import { NavBar } from "../../Components/navigation/NavBar";
-import { MODALS_TYPES, NULL_STRING_ALL_LOWERCASE } from "../../Constants";
-import { UI_CONTEXTS } from "../../Contexts";
+import { MODALS_TYPES, NULL_STRING_ALL_LOWERCASE } from "../../functionsAndConstants/Constants";
+import { UI_CONTEXTS } from "../../functionsAndConstants/Contexts";
 import { getIntObserverFunc, visibilityFunctionDefault } from "../../Components/animations/IntersectionObserverFunctions";
-import { dateAisLaterThanOrSameAsDateB, getDateAsString, getDateInMilliseconds } from "../../Utils";
+import { dateAisLaterThanOrSameAsDateB, getDateAsString, getDateInMilliseconds } from "../../functionsAndConstants/Utils";
 import FileCarousel from "../../Components/Fields/fileManger/FileCarousel";
-import { fileLoaderHelper } from "../../Components/loadingFunctions";
+import { fileLoaderHelper } from "../../functionsAndConstants/loadingFunctions";
 import "../../SCSS/scrollable.scss";
 import "../../SCSS/contentContainer.scss";
 

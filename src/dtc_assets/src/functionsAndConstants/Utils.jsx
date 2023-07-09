@@ -1,7 +1,7 @@
-import * as canisterIds from "../../../canister_ids.json";
-import * as dtcFiles from "../../declarations/dtc"
-import * as managerCanisterFiles from "../../declarations/manager";
-import * as dtcAssetsFiles from "../../declarations/dtc_assets";
+import * as canisterIds from "../../../../canister_ids.json";
+import * as dtcFiles from "../../../declarations/dtc"
+import * as managerCanisterFiles from "../../../declarations/manager";
+import * as dtcAssetsFiles from "../../../declarations/dtc_assets";
 import { e8sInOneICP, MASTER_COPY_FRONTEND_CANISTER_ID } from "./Constants";
 
 

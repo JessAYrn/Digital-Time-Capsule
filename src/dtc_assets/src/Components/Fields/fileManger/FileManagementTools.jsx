@@ -1,5 +1,5 @@
-import { fileToBlob, flattenUint8array } from "../../../Utils";
-import { CHUNK_SIZE, PAGES } from "../../../Constants";
+import { fileToBlob, flattenUint8array } from "../../../functionsAndConstants/Utils";
+import { CHUNK_SIZE, PAGES } from "../../../functionsAndConstants/Constants";
 // import actorReducer, { actorInitialState, actorTypes } from "../../../reducers/actorReducer";
 
 
