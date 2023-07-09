@@ -17,7 +17,6 @@ import LoadScreen from './LoadScreen';
 import { types } from '../../reducers/journalReducer';
 import { walletTypes } from '../../reducers/walletReducer';
 import { UI_CONTEXTS } from '../../functionsAndConstants/Contexts';
-import { visibilityFunctionDefault, getIntObserverFunc } from '../../Components/animations/IntersectionObserverFunctions';
 import ButtonField from '../../Components/Fields/Button';
 import '../../SCSS/contentContainer.scss'
 
@@ -44,21 +43,6 @@ const WalletPage = (props) => {
 
     const copyWalletAddress = useCallback(() => copyWalletAddressHelper(walletState.walletData.address), [walletState]);
 
-    useEffect(() => {
-        const containers = document.querySelectorAll(".contentContainer.animatedLeft");
-        containers.forEach( (container, index) => {
-            let props_ = {
-                className: "animatedLeft",
-                containerIndex: index,
-                visibilityFunction: visibilityFunctionDefault
-            };
-            const observer = new IntersectionObserver(getIntObserverFunc(props_), {threshold: .1});
-            observer.observe(container);
-        });
-    }, [journalState])
-
-    let contentContainerIndex = 0;
-
     return (
         <div className={"container"}>
             {journalState.modalStatus.show ? 
@@ -79,7 +63,7 @@ const WalletPage = (props) => {
                         <LoadScreen/> :
                         <div className={"container__wallet"}>
                             <div className={'transparentDiv__wallet'}>
-                                <div className={`infoDiv_wallet contentContainer _${contentContainerIndex++} animatedLeft`} >
+                                <div className={`infoDiv_wallet contentContainer `} >
                                     <RenderQrCode
                                         imgUrl={walletState.walletData.qrCodeImgUrl}
                                     />  
@@ -106,7 +90,7 @@ const WalletPage = (props) => {
                                     </div>
                                 </div>
                                 { loadingTx ? 
-                                    <div className={`loadGifContainer contentContainer _${contentContainerIndex} animatedLeft`}>
+                                    <div className={`loadGifContainer contentContainer `}>
                                         <div className='loadGifDiv'>
                                             <img src="Loading.gif" alt="Loading Screen" />
                                         </div>
@@ -122,7 +106,7 @@ const WalletPage = (props) => {
                                         walletState.walletData.txHistory.data.map((tx) => {
                                             return(
                                                     <Transaction
-                                                        class_={`contentContainer _${contentContainerIndex++}`}
+                                                        class_={`contentContainer `}
                                                         balanceDelta={tx[1].balanceDelta}
                                                         increase={tx[1].increase}
                                                         recipient={tx[1].recipient[0]}

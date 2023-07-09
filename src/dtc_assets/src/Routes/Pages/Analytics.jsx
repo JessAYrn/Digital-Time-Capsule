@@ -1,5 +1,4 @@
-import React, { useContext, useEffect, useState} from 'react';
-import { getIntObserverFunc, visibilityFunctionDefault } from '../../Components/animations/IntersectionObserverFunctions';
+import React, { useContext, useState} from 'react';
 import { AppContext } from '../HomePage';
 import { NavBar } from '../../Components/navigation/NavBar';
 import { UI_CONTEXTS } from '../../functionsAndConstants/Contexts';
@@ -201,21 +200,6 @@ const Analytics = () => {
         });
     };
 
-    useEffect(() => {
-        const containers = document.querySelectorAll(".contentContainer.animatedLeft");
-        containers.forEach( (container, index) => {
-            let props_ = {
-                className: "animatedLeft",
-                containerIndex: index,
-                visibilityFunction: visibilityFunctionDefault
-            };
-            const observer = new IntersectionObserver(getIntObserverFunc(props_), {threshold: .05});
-            observer.observe(container);
-        });
-    }, [journalState]);
-    
-    let animatedLeftElementIndex = 0;
-
     return(
             journalState.modalStatus.show ?
                 <div className={"container"}>
@@ -236,7 +220,7 @@ const Analytics = () => {
                         <LoadScreen/> :
                         <div class={'scrollable'}>
                             <div className='container_homePage'>
-                                <div className={'transparentDiv__homePage__dataFields  animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
+                                <div className={'transparentDiv__homePage__dataFields contentContainer '}>
                                     <div className={'AnalyticsDiv'}>
                                         <div className={'AnalyticsContentContainer'}>
                                             <DataField
@@ -281,7 +265,7 @@ const Analytics = () => {
                                     </div>
                                 </div>
                                 {   homePageState.canisterData.isOwner &&
-                                    <div className={'transparentDiv__homePage__dataFields animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
+                                    <div className={'transparentDiv__homePage__dataFields contentContainer '}>
                                         <div className={'AnalyticsDiv'}>
                                             <div className={'AnalyticsContentContainer array'}>
                                                 <h4 className='requestingAccessH4'>  Principals Requesting Access </h4>
@@ -318,7 +302,7 @@ const Analytics = () => {
                                         </div>
                                     </div> 
                                 }
-                                <div className={'transparentDiv__homePage__dataFields  animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
+                                <div className={'transparentDiv__homePage__dataFields contentContainer '}>
                                     <div className={'AnalyticsDiv'}>
                                         <div className={'AnalyticsContentContainer array'}>
                                         <h4 className='requestingAccessH4'>  User Principals </h4>
@@ -375,7 +359,7 @@ const Analytics = () => {
                                     </div>
                                 </div>
                                 {homePageState.canisterData.isOwner && 
-                                <div className={'switchDiv animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
+                                <div className={'switchDiv contentContainer '}>
                                     <div className='section'>
                                         <h5 className={'lebelH5'}> 
                                             Activate Support Mode:  
@@ -389,7 +373,7 @@ const Analytics = () => {
                                     </div>
                                 </div>}
                                 {homePageState.canisterData.isOwner && 
-                                <div className={'switchDiv animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
+                                <div className={'switchDiv contentContainer '}>
                                     <div className='section'>
                                         <h5 className={'lebelH5'}> 
                                             Receive Requests:  
@@ -403,7 +387,7 @@ const Analytics = () => {
                                     </div>
                                 </div>}
                                 {homePageState.canisterData.isOwner && 
-                                <div className={'switchDiv animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}>
+                                <div className={'switchDiv contentContainer '}>
                                     <div className='section'>
                                         <h5 className={'lebelH5'}> 
                                             Cycles Saver Mode:  
@@ -418,14 +402,14 @@ const Analytics = () => {
                                 </div>}
                                 <ButtonField
                                     text={' Register As New Owner '}
-                                    className={'ownerButtonsnDiv active animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}
+                                    className={'ownerButtonsnDiv active contentContainer '}
                                     onClick={handleRegistration}
                                     withBox={true}
                                 />
                                 {homePageState.canisterData.isOwner &&
                                     <ButtonField
                                         text={' Upgrade Application '}
-                                        className={'ownerButtonsnDiv ButtonDiv active animatedLeft contentContainer '+` _${animatedLeftElementIndex++}`}
+                                        className={'ownerButtonsnDiv ButtonDiv active contentContainer '}
                                         onClick={handleUpgrade}
                                         withBox={true}
                                     />

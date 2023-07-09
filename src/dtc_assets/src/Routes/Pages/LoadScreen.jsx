@@ -1,8 +1,6 @@
-import React, {useContext, useState, useEffect} from "react";
-import { initialState, types } from "../../reducers/journalReducer";
+import React, {useContext, useState} from "react";
 import { AppContext } from "../App";
 import "./LoadScreen.scss";
-import { getIntObserverFunc, visibilityFunctionDefault } from "../../Components/animations/IntersectionObserverFunctions";
 import '../../SCSS/contentContainer.scss'
 
 
@@ -19,19 +17,6 @@ const LoadScreen = () => {
         else if(seconds % 4 === 3) setDirection('left');
     }
     setTimeout(rotateAnimations, 1000);
-
-    useEffect(() => {
-        const containers = document.querySelectorAll(".contentContainer.animatedLeft");
-        containers.forEach( (container, index) => {
-            let props_ = {
-                className: "animatedLeft",
-                containerIndex: index,
-                visibilityFunction: visibilityFunctionDefault
-            };
-            const observer = new IntersectionObserver(getIntObserverFunc(props_), {threshold: .1});
-            observer.observe(container);
-        });
-    }, [journalState])
 
     return(
         <div className="container_loadScreen">

@@ -11,8 +11,7 @@ import { Modal } from "./modalContent/Modal";
 import { NavBar } from "../../Components/navigation/NavBar";
 import { MODALS_TYPES, NULL_STRING_ALL_LOWERCASE } from "../../functionsAndConstants/Constants";
 import { UI_CONTEXTS } from "../../functionsAndConstants/Contexts";
-import { getIntObserverFunc, visibilityFunctionDefault } from "../../Components/animations/IntersectionObserverFunctions";
-import { dateAisLaterThanOrSameAsDateB, getDateAsString, getDateInMilliseconds } from "../../functionsAndConstants/Utils";
+import { dateAisLaterThanOrSameAsDateB, getDateAsString } from "../../functionsAndConstants/Utils";
 import FileCarousel from "../../Components/Fields/fileManger/FileCarousel";
 import { fileLoaderHelper } from "../../functionsAndConstants/loadingFunctions";
 import "../../SCSS/scrollable.scss";
@@ -96,28 +95,12 @@ const Journal = (props) => {
         });
     }
 
-    useEffect(() => {
-        const containers = document.querySelectorAll(".contentContainer.animatedLeft");
-        containers.forEach( (container, index) => {
-            let props_ = {
-                className: "animatedLeft",
-                containerIndex: index,
-                visibilityFunction: visibilityFunctionDefault
-            };
-            const observer = new IntersectionObserver(getIntObserverFunc(props_), {threshold: .05});
-            observer.observe(container);
-        });
-    }, [journalState]);
-
-    let animatedLeftElementIndex = 0;
-
     const displayJournalTable = () => {
 
         return( 
             <>
                 <div 
-                    className={'tableDivContainer contentContainer animatedLeft' + 
-                    ` _${animatedLeftElementIndex++}`}
+                    className={'tableDivContainer contentContainer'}
                 >
                     <div className={'tableDiv journal'}>
                         <table className={"tableHeader "}>
@@ -185,7 +168,7 @@ const Journal = (props) => {
                         <LoadScreen/> : 
                         <div className={"container__Journal"}>
                             <div className={'biography'}>
-                                <div className={"contentContainer animatedLeft"+` _${animatedLeftElementIndex++}`}>
+                                <div className={"contentContainer "}>
                                     <InputBox
                                         label={"This Journal Belongs To: "}
                                         setChangesWereMade={setPageChangesMade}
@@ -195,7 +178,7 @@ const Journal = (props) => {
                                         value={journalState.bio.name}
                                     />
                                 </div>
-                                <div className={"contentContainer animatedLeft"+` _${animatedLeftElementIndex++}`}>
+                                <div className={"contentContainer "}>
                                     <InputBox
                                         label={"Date of Birth: "}
                                         setChangesWereMade={setPageChangesMade}
@@ -205,11 +188,10 @@ const Journal = (props) => {
                                         value={journalState.bio.dob}
                                     />
                                 </div>
-                                <div className={"contentContainer animatedLeft"+` _${animatedLeftElementIndex++}`}>
+                                <div className={"contentContainer "}>
                                     <InputBox
                                         label={"Place of Birth: "}
                                         setChangesWereMade={setPageChangesMade}
-                                        className={"animatedLeft"}
                                         rows={"1"}
                                         dispatch={journalDispatch}
                                         dispatchAction={types.CHANGE_POB}
@@ -217,8 +199,7 @@ const Journal = (props) => {
                                     />
                                 </div>
                                 <div 
-                                    className={'coverPhotoDiv contentContainer animatedLeft'+ 
-                                    ` _${animatedLeftElementIndex++}`}
+                                    className={'coverPhotoDiv contentContainer'}
                                 >
                                     <FileCarousel
                                         videoHeight = {'330'}
@@ -235,7 +216,7 @@ const Journal = (props) => {
                                         dispatchActionToChangeFileLoadStatus={types.CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE}
                                     />
                                 </div>
-                                <div className={"contentContainer animatedLeft"+` _${animatedLeftElementIndex++}`}>
+                                <div className={"contentContainer "}>
                                     <InputBox
                                         divClassName={'dedications'}
                                         setChangesWereMade={setPageChangesMade}
@@ -246,7 +227,7 @@ const Journal = (props) => {
                                         value={journalState.bio.dedications}
                                     />
                                 </div>
-                                <div className={"contentContainer animatedLeft"+` _${animatedLeftElementIndex++}`}>
+                                <div className={"contentContainer "}>
                                     <InputBox
                                         divClassName={'preface'}
                                         setChangesWereMade={setPageChangesMade}

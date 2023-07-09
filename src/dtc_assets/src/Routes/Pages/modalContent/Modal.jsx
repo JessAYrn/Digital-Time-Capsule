@@ -14,7 +14,6 @@ import ModalContentSubmit from './ModalContentOnSubmit';
 import NotAuthorizedByOwner from "./NotAuthorizedByOwner";
 import RegistrationResponse from './RegistrationResponseModal';
 import RequestApprovalResponseModal from './RequestApprovaModal';
-import { getIntObserverFunc, visibilityFunctionDefault } from '../../../Components/animations/IntersectionObserverFunctions';
 import DateOutOfRange from './DateOutOfRange';
 import "./Modal.scss";
 import '../../../SCSS/contentContainer.scss'
@@ -66,31 +65,14 @@ export const Modal = (props) => {
         }
 
         return ChildComp;
-    },[
-        journalState.modalStatus
-    ]);
-
-    useEffect(() => {
-        const containers = document.querySelectorAll(".contentContainer.animatedLeft");
-        containers.forEach( (container, index) => {
-            let props_ = {
-                className: "animatedLeft",
-                containerIndex: index,
-                visibilityFunction: visibilityFunctionDefault
-            };
-            const observer = new IntersectionObserver(getIntObserverFunc(props_), {threshold: .1});
-            observer.observe(container);
-        });
-    }, [journalState]);
-
-    let animatedLeftElementIndex = 0;
+    },[ journalState.modalStatus]);
 
     return(
         <> 
             { journalState.modalStatus.show ? 
             <div className={"modalContainer"}>
                 <div className="modalDiv" >
-                    <div className={`modalTransparentDiv contentContainer _${animatedLeftElementIndex} animatedLeft`}>
+                    <div className={`modalTransparentDiv contentContainer`}>
                         <div className={'modalWrapper'}>
                             <ChildComponent
                                 hasError={hasError}

@@ -12,8 +12,7 @@ import * as AiIcons from 'react-icons/ai';
 import * as RiIcons from 'react-icons/ri';
 import { NAV_LINKS } from "../../../functionsAndConstants/Constants";
 import "./LoginPage.scss";
-import "../../../Components/animations/Animation.scss";
-import { getIntObserverFunc, visibilityFunctionLoginPage } from "../../../Components/animations/IntersectionObserverFunctions";
+import "../../../SCSS/Animation.scss";
 import { ConnectButton, ConnectDialog, useConnect, useCanister } from "@connect2ic/react";
 import "@connect2ic/core/style.css"
 import ButtonField from "../../../Components/Fields/Button";
@@ -116,24 +115,11 @@ const LoginPage = (props) => {
         });
     }, [connectionResult.isConnected]);
 
-    const containers = document.querySelectorAll(".contentContainer");
-    containers.forEach( (container, index) => {
-        let props_ = {
-            containerIndex: index, 
-            className: "animatedLeft",
-            visibilityFunction: visibilityFunctionLoginPage
-        };
-        const observer = new IntersectionObserver(getIntObserverFunc(props_), {threshold: .6});
-        observer.observe(container);
-    });
-
-    let animatedLeftElementIndex = 0;
-
     return(
         <div className={"container_loginPage"}>
             <div className={'containerInner_loginPage'}>
-                <div className={`contentContainer _${animatedLeftElementIndex} login`}>
-                    <div className={`contentDiv__loginContent _${animatedLeftElementIndex++}`}>
+                <div className={`contentContainer login`}>
+                    <div className={`contentDiv__loginContent `}>
                         <div className={`logoDiv login`}>
                             <img className={`logoImg`}src="dtc-logo-black.png" alt="Logo"/>
                         </div>
