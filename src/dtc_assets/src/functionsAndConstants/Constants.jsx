@@ -101,3 +101,7 @@ export const DEFAULT_APP_CONTEXTS={
     actorDispatch:()=>{}
 }
 export const MASTER_COPY_FRONTEND_CANISTER_ID = "fkkq7-siaaa-aaaap-qaaya-cai";
+
+export const forbiddenFileTypes = [
+    'application/pdf'
+];

@@ -148,6 +148,7 @@ const FileCarousel = (props) => {
                                 context={UI_CONTEXTS.JOURNAL}
                                 setChangesWereMade={setChangesWereMade}
                                 classNameMod={classNameMod}
+                                dispatch={journalDispatch}
                                 dispatchActionToChangeFileMetaData={dispatchActionToChangeFileMetaData}
                                 dispatchActionToChangeFileLoadStatus={dispatchActionToChangeFileLoadStatus}
                                 fileData={fileMetaData}
