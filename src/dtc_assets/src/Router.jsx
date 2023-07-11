@@ -7,14 +7,14 @@ import WalletApp from './Routes/Wallet';
 import { defaultProviders } from "@connect2ic/core/providers"
 import { createClient } from "@connect2ic/core"
 import { Connect2ICProvider } from "@connect2ic/react"
-import { NAV_LINKS } from './Constants';
+import { NAV_LINKS } from './functionsAndConstants/Constants';
 import * as canisterIds from "../../../canister_ids.json";
 import * as dtcFiles from "../../declarations/dtc"
 import Treasury from './Routes/Treasury';
 import GroupJournal from './Routes/GroupJournal';
 import * as managerCanisterFiles from "../../declarations/manager";
 import * as dtcAssetsFiles from "../../declarations/dtc_assets";
-import { extractCanisterIdFromURL, getCurrentURL } from './Utils';
+import { extractCanisterIdFromURL, getCurrentURL } from './functionsAndConstants/Utils';
 
 const Router = (props) => {
 

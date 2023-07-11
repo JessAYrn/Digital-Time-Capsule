@@ -1,18 +1,20 @@
-import {WALLET_TABS} from '../Constants';
+import {WALLET_TABS} from '../functionsAndConstants/Constants';
 
 export const walletTypes={
     SET_ENTIRE_WALLET_REDUX_STATE: "SET_ENTIRE_WALLET_REDUX_STATE",
     SET_WALLET_TABS:'SET_WALLET_TABS',
     SET_WALLET_DATA: "SET_WALLET_DATA",
     SET_WALLET_QR_CODE_IMG_URL:"SET_WALLET_QR_CODE_IMG_URL",
-    SET_WALLET_DATA_RELOAD_STATUS:'SET_WALLET_DATA_RELOAD_STATUS',
+    SET_DATA_HAS_BEEN_LOADED:'SET_DATA_HAS_BEEN_LOADED',
     SET_TX_HISTORY_DATA:"SET_TX_HISTORY_DATA",
+    SET_IS_LOADING:"SET_IS_LOADING",
 }
 
 
 export const walletInitialState={
     walletPageTab:WALLET_TABS.icpTab,
-    shouldReload: true,
+    dataHasBeenLoaded: undefined,
+    isLoading: false,
     walletData: {
         balance:'',
         address:'',
@@ -27,13 +29,18 @@ export const walletInitialState={
 }
 
 const changeValue = (state =walletInitialState, action) => {
-    const {actionType, payload, index, fileIndex, blockReload } = action;
+    const {actionType, payload } = action;
     
 
 
     switch(actionType){
         case walletTypes.SET_ENTIRE_WALLET_REDUX_STATE:
             state = payload;
+        return {
+            ...state
+        }
+        case walletTypes.SET_IS_LOADING:
+            state.isLoading = payload;
         return {
             ...state
         }
@@ -70,8 +77,8 @@ const changeValue = (state =walletInitialState, action) => {
         return{
             ...state
         }
-        case walletTypes.SET_WALLET_DATA_RELOAD_STATUS:
-        state.shouldReload=payload
+        case walletTypes.SET_DATA_HAS_BEEN_LOADED:
+        state.dataHasBeenLoaded = payload
         return {
             ...state
         }

@@ -1,6 +1,6 @@
 import React, {useCallback} from "react";
-import { inTrillions, round2Decimals, shortenHexString } from "../../Utils";
-import { copyWalletAddressHelper } from "../walletFunctions/CopyWalletAddress";
+import { inTrillions, round2Decimals, shortenHexString } from "../../functionsAndConstants/Utils";
+import { copyWalletAddressHelper } from "../../functionsAndConstants/walletFunctions/CopyWalletAddress";
 import * as FaIcons from 'react-icons/fa';
 import ButtonField from "./Button";
 import "./DataField.scss";

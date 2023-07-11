@@ -1,17 +1,16 @@
 import React, {useRef, useState, useEffect, useContext, useMemo} from 'react';
 import "./FileUpload.scss";
-import { types } from '../../../reducers/journalReducer';
 import { useEffect } from '../../../../../../dist/dtc_assets';
-import { deviceType } from '../../../Utils';
-import { DEVICE_TYPES, MAX_DURATION_OF_VIDEO_IN_SECONDS, NULL_STRING_ALL_LOWERCASE } from '../../../Constants';
-import { MODALS_TYPES } from '../../../Constants';
-import { getFileURL, mapAndSendFileToApi, getDuration, updateFileMetadataInStore } from './FileManagementTools';
+import { deviceType } from '../../../functionsAndConstants/Utils';
+import { DEVICE_TYPES, NULL_STRING_ALL_LOWERCASE } from '../../../functionsAndConstants/Constants';
+import { mapAndSendFileToApi, displayFile, updateFileMetadataInStore } from './FileManagementTools';
+import { AppContext as AccountContext} from '../../../Routes/Account';
+import { AppContext as HomePageContext} from '../../../Routes/HomePage';
 import { AppContext as JournalContext} from '../../../Routes/App';
-import { UI_CONTEXTS } from '../../../Contexts';
-
-const forbiddenFileTypes = [
-    'application/pdf'
-];
+import { AppContext as WalletContext} from '../../../Routes/Wallet';
+import { AppContext as TreasuryContext} from '../../../Routes/Treasury';
+import { AppContext as GroupJournalContext} from '../../../Routes/GroupJournal';
+import { retrieveContext } from '../../../functionsAndConstants/Contexts';
 
 const FileUpload = (props) => {
     const {
@@ -27,6 +26,8 @@ const FileUpload = (props) => {
         dispatchActionToChangeFileLoadStatus,
         videoHeight,
         fileData,
+        dispatch,
+        reduxState
     } = props;
     let inputRef = useRef();
 
@@ -35,87 +36,47 @@ const FileUpload = (props) => {
     const [fileType, setFileType] = useState("image/png");
         
     const typeOfDevice = deviceType();
+    
+    let contexts = {
+        WalletContext,
+        JournalContext,
+        HomePageContext,
+        AccountContext,
+        TreasuryContext,
+        GroupJournalContext
+    };
 
-    let AppContext;
-    if(context === UI_CONTEXTS.JOURNAL){
-        AppContext = JournalContext;
-    }
-    const { journalState, journalDispatch, actorState } = useContext(AppContext);
+    let AppContext = retrieveContext(contexts, context);
 
-    let fileName = fileData.fileName;
-    let fileNameIsNull = fileName === NULL_STRING_ALL_LOWERCASE;
+    
+    const { actorState } = useContext(AppContext);
 
     //Upon uploading a file, this function updates the file metadata from its default settings 
     //to that of the file that was uploaded. 
-    useEffect(() => {
-        fileName = fileData.fileName;
-        fileNameIsNull = fileName === NULL_STRING_ALL_LOWERCASE;
-        if (fileData.file) setFileSrc(fileData.file);
-    }, [fileData]);
+    useEffect(() => { if (fileData.file) setFileSrc(fileData.file); }, [fileData]);
 
     //returns the fileId of a newly uploaded file, but only of the file fits the format requirements.
-    const uploadFileToFrontend = async (uploadedFile) => {
-        //check file extension for audio/video type
-        //this if statement will ultimately end up triggering the 
-        //canPlayThrough() function.
-        if(uploadedFile.name.match(/\.(avi|mp3|mp4|mpeg|ogg|webm|mov|MOV)$/i)){
-            const { duration, url } = await getDuration(uploadedFile);
-            URL.revokeObjectURL(url);
-            if(duration > MAX_DURATION_OF_VIDEO_IN_SECONDS || forbiddenFileTypes.includes(uploadedFile.type)){
-                setFileSrc(defaultFileSrc);
-                setFileType("image/png");
-                journalDispatch({
-                        actionType: types.SET_MODAL_STATUS,
-                        payload: {
-                            show: true, 
-                            which: MODALS_TYPES.fileHasError,
-                            duration: duration
-                        }
-                });
-                return null;
-            } else {
-                setFileType(uploadedFile.type);
-                const fileURL = await getFileURL(uploadedFile);
-                let fileId = updateFileMetadataInStore(
-                    journalDispatch, 
-                    dispatchActionToChangeFileMetaData, 
-                    index, 
-                    fileIndex, 
-                    setChangesWereMade, 
-                    uploadedFile,
-                    fileURL
-                );
-                return fileId;
-            }
-        } else {
-            //triggers useEffect which displays the video
-            setFileType(uploadedFile.type);
-            const fileURL = await getFileURL(uploadedFile);
-            let fileId = updateFileMetadataInStore(
-                journalDispatch, 
-                dispatchActionToChangeFileMetaData, 
-                index, 
-                fileIndex, 
-                setChangesWereMade, 
-                uploadedFile,
-                fileURL
-            );
-            return fileId;
-        }
-    };
 
     const handleUpload = async () => {
         const uploadedFile = inputRef.current.files[0];
-        journalDispatch({ 
+        dispatch({ 
             actionType: dispatchActionToChangeFileLoadStatus,
             payload: true,
             index: index,
             fileIndex: fileIndex 
         });
-        let fileId = await uploadFileToFrontend(uploadedFile);
-        if(fileId) await mapAndSendFileToApi(actorState, fileId, uploadedFile);
+        let inputForDisplayFileFunction = {
+            uploadedFile, setFileSrc, setFileType, dispatch, 
+            dispatchActionToChangeFileMetaData, index, fileIndex,
+            setChangesWereMade, defaultFileSrc, actorState
+        }
+        let fileURL = await displayFile(inputForDisplayFileFunction);
+        inputForDisplayFileFunction = { ...inputForDisplayFileFunction, fileURL};
+        let fileId = updateFileMetadataInStore(inputForDisplayFileFunction);
+        inputForDisplayFileFunction = { ...inputForDisplayFileFunction, fileId};
+        if(fileId) await mapAndSendFileToApi(inputForDisplayFileFunction);
 
-        journalDispatch({ 
+        dispatch({ 
             actionType: dispatchActionToChangeFileLoadStatus,
             payload: false,
             index: index,
@@ -184,7 +145,7 @@ const FileUpload = (props) => {
                         </> 
                 }          
             </div>
-            { !disabled && fileNameIsNull &&
+            { !disabled && fileData.fileName === NULL_STRING_ALL_LOWERCASE &&
                 <input 
                     disabled={disabled}
                     id={`uploadedImaged__${elementId}`} 

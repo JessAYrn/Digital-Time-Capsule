@@ -39,6 +39,11 @@ shared actor class User() = this {
     );
 
     private stable var startIndexForBlockChainQuery : Nat64 = 3_512_868;
+
+    public query({caller}) func hasAccount() : async Bool {
+        let userProfile = userProfilesMap.get(caller);
+        switch(userProfile){ case null { return false}; case(?profile){ return true;}};
+    };
     
     public shared({ caller }) func create () : async Result.Result<MainTypes.AmountAccepted, JournalTypes.Error> {
         let amountAccepted = await MainMethods.create(caller, userProfilesMap, appMetaData);

@@ -1,7 +1,7 @@
 import React, {useState, useRef} from 'react';
-import { MODALS_TYPES } from '../../Constants';
+import { MODALS_TYPES } from '../../functionsAndConstants/Constants';
 import { types } from '../../reducers/journalReducer';
-import { dateAisLaterThanOrSameAsDateB } from '../../Utils';
+import { dateAisLaterThanOrSameAsDateB } from '../../functionsAndConstants/Utils';
 import "./DatePicker.scss";
 
 

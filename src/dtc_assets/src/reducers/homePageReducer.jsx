@@ -1,17 +1,20 @@
 // import changeValue from "./journalReducer"
 
-import { NULL_STRING_CAPITALIZED } from "../Constants";
+import { NULL_STRING_CAPITALIZED } from "../functionsAndConstants/Constants";
 
 
 export const homePageTypes={
     SET_ENTIRE_DASHBOARD_REDUX_STATE:'SET_ENTIRE_DASHBOARD_REDUX_STATE',
     SET_CANISTER_DATA: "SET_CANISTER_DATA",
-    SET_CANISTER_DATA_RELOAD_STATUS: "SET_CANISTER_DATA_RELOAD_STATUS"
+    SET_DATA_HAS_BEEN_LOADED: "SET_DATA_HAS_BEEN_LOADED",
+    SET_IS_LOADING:"SET_IS_LOADING",
+
 }
 
 
 export const homePageInitialState={
-    shouldReload:true,
+    dataHasBeenLoaded: undefined,
+    isLoading: false,
     canisterData: {
         profilesMetaData: [],
         journalCount: 0,
@@ -43,10 +46,15 @@ const changeValue=(state=homePageInitialState, action)=>{
         case homePageTypes.SET_CANISTER_DATA:
                 state.canisterData = payload;
                 return {
-                    ...state
+                ...state
             }
-        case homePageTypes.SET_CANISTER_DATA_RELOAD_STATUS:
-            state.shouldReload=payload;
+        case homePageTypes.SET_IS_LOADING:
+            state.isLoading = payload;
+            return {
+                ...state
+            }
+        case homePageTypes.SET_DATA_HAS_BEEN_LOADED:
+            state.dataHasBeenLoaded=payload;
             return {
                 ...state
             }
