@@ -1,14 +1,13 @@
-import React, {useReducer, createContext, useEffect} from 'react';
+import React, {useReducer, createContext, useEffect, useState} from 'react';
 import journalReducer, { types, initialState } from '../reducers/journalReducer';
 import accountReducer , {accountTypes, accountInitialState} from '../reducers/accountReducer';
-import AccountSection from '../Pages/AccountPage';
+import AccountSection from './Pages/AccountPage';
 import { useLocation } from 'react-router-dom';
-import LoginPage from '../Components/authentication/LoginPage';
-import { UI_CONTEXTS } from '../Contexts';
-import { CreateUserJournal } from '../Components/authentication/AuthenticationMethods';
-import { loadJournalData, loadCanisterData, loadWalletData, recoverState  } from '../Components/loadingFunctions';
+import LoginPage from './Pages/authentication/LoginPage';
+import { UI_CONTEXTS } from '../functionsAndConstants/Contexts';
+import { recoverState, loadAllDataIntoReduxStores  } from '../functionsAndConstants/loadingFunctions';
 import { useConnect } from '@connect2ic/react';
-import { DEFAULT_APP_CONTEXTS } from '../Constants';
+import { DEFAULT_APP_CONTEXTS } from '../functionsAndConstants/Constants';
 import walletReducer,{ walletInitialState, walletTypes } from '../reducers/walletReducer';
 import homePageReducer, { homePageInitialState, homePageTypes } from '../reducers/homePageReducer';
 import actorReducer, { actorInitialState,actorTypes } from "../reducers/actorReducer";
@@ -22,6 +21,7 @@ const AccountPage = () => {
     const [walletState, walletDispatch]=useReducer(walletReducer,walletInitialState);
     const [homePageState, homePageDispatch]=useReducer(homePageReducer,homePageInitialState);
     const [actorState, actorDispatch] = useReducer(actorReducer, actorInitialState);
+    const [stateHasBeenRecovered, setStateHasBeenRecovered] = useState(false);
 
     //clears useLocation().state upon page refresh so that when the user refreshes the page,
     //changes made to this route aren't overrided by the useLocation().state of the previous route.
@@ -45,48 +45,23 @@ const AccountPage = () => {
         actorTypes
     }
 
+    const ReducerStates = {
+        journalState,
+        walletState,
+        accountState,
+        homePageState,
+        actorState
+    };
+
     // gets state from previous route
     const location = useLocation();
 
     // dispatch state from previous route to redux store if that state exists
-    recoverState(journalState, location, ReducerDispatches, ReducerTypes, connectionResult);
+    recoverState( location, ReducerDispatches, ReducerTypes, connectionResult, setStateHasBeenRecovered );
 
     useEffect(async () => {
         if(!actorState.backendActor) return;
-        if(journalState.reloadStatuses.journalData){
-            journalDispatch({
-                actionType: types.SET_IS_LOADING,
-                payload: true
-            });
-            let journal = await actorState.backendActor.readJournal();
-            if(!journal) return;
-            if("err" in journal) journal = await CreateUserJournal(actorState, journalDispatch, 'readJournal');
-            if("err" in journal) {
-                journalDispatch({
-                    actionType: types.SET_IS_LOADING,
-                    payload: false
-                });
-                return;
-            }
-            loadJournalData(journal.ok, journalDispatch, types);
-            journalDispatch({
-                actionType: types.SET_IS_LOADING,
-                payload: false
-            });
-        }
-        if(journalState.reloadStatuses.canisterData){
-            //Load canister data in background
-            const canisterData = await actorState.backendActor.getCanisterData();
-            loadCanisterData(canisterData, homePageDispatch, homePageTypes);
-        }
-        if(walletState.shouldReload){
-            //Load wallet data in background
-            // const walletDataFromApi = await journalState.actor.readWalletData();
-            // await loadWalletData(walletDataFromApi, walletDispatch, walletTypes);
-
-            const walletDataFromApi = await actorState.backendActor.readWalletData();
-            await loadWalletData(walletDataFromApi, walletDispatch, walletTypes);
-        }
+        await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes, stateHasBeenRecovered);
     },[actorState.backendActor]);
 
     return (

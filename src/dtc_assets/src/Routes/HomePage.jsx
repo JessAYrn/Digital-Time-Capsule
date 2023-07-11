@@ -1,14 +1,13 @@
-import React, { createContext, useReducer, useEffect} from 'react';
+import React, { createContext, useReducer, useEffect, useState} from 'react';
 import { useLocation } from 'react-router-dom';
 import journalReducer, {initialState, types} from "../reducers/journalReducer";
-import LoginPage from '../Components/authentication/LoginPage';
-import { UI_CONTEXTS } from '../Contexts';
-import Analytics from '../Pages/Analytics';
+import LoginPage from './Pages/authentication/LoginPage';
+import { UI_CONTEXTS } from '../functionsAndConstants/Contexts';
+import Analytics from './Pages/Analytics';
 import "./HomePage.scss";
-import { CreateUserJournal } from '../Components/authentication/AuthenticationMethods';
-import { loadCanisterData, loadJournalData, loadWalletData, recoverState } from '../Components/loadingFunctions';
+import { loadAllDataIntoReduxStores, recoverState } from '../functionsAndConstants/loadingFunctions';
 import { useConnect } from '@connect2ic/react';
-import { DEFAULT_APP_CONTEXTS } from '../Constants';
+import { DEFAULT_APP_CONTEXTS } from '../functionsAndConstants/Constants';
 import walletReducer,{walletTypes, walletInitialState} from '../reducers/walletReducer'
 import accountReducer , {accountTypes, accountInitialState} from '../reducers/accountReducer';
 import homePageReducer,{homePageInitialState,homePageTypes} from '../reducers/homePageReducer';
@@ -25,7 +24,7 @@ const HomePage = () => {
     const [accountState, accountDispatch] = useReducer(accountReducer, accountInitialState);
     const [homePageState, homePageDispatch] = useReducer(homePageReducer, homePageInitialState);
     const [actorState, actorDispatch] = useReducer(actorReducer, actorInitialState);
-
+    const [stateHasBeenRecovered, setStateHasBeenRecovered] = useState(false);
 
     const connectionResult = useConnect({ onConnect: () => {}, onDisconnect: () => {} });
 
@@ -49,8 +48,16 @@ const HomePage = () => {
         actorTypes
     }
 
+    const ReducerStates = {
+        journalState,
+        walletState,
+        accountState,
+        homePageState,
+        actorState
+    };
+
     // dispatch state from previous route to redux store if that state exists
-    recoverState(journalState, location, ReducerDispatches, ReducerTypes, connectionResult)
+    recoverState( location, ReducerDispatches, ReducerTypes, connectionResult, setStateHasBeenRecovered );
 
     //clears useLocation().state upon page refresh so that when the user refreshes the page,
     //changes made to this route aren't overrided by the useLocation().state of the previous route.
@@ -58,55 +65,7 @@ const HomePage = () => {
 
     useEffect( async () => {
         if(!actorState.backendActor) return;
-        if(journalState.reloadStatuses.canisterData){
-            journalDispatch({
-                actionType: types.SET_IS_LOADING,
-                payload: true
-            });
-            let canisterData = await actorState.backendActor.getCanisterData();
-            if(!canisterData) return;
-            if("err" in canisterData) canisterData = await CreateUserJournal(actorState, journalDispatch, 'getCanisterData');
-            if("err" in canisterData) {
-                journalDispatch({
-                    actionType: types.SET_IS_LOADING,
-                    payload: false
-                });
-                return;
-            }
-
-            canisterData = loadCanisterData(canisterData, homePageDispatch, homePageTypes);
-            let requestsForApproval;
-            if(canisterData.isOwner){
-                requestsForApproval = await actorState.backendActor.getRequestingPrincipals();
-                requestsForApproval = requestsForApproval.ok;
-                let updatedCanisterData = {...canisterData, requestsForApproval};
-                homePageDispatch({
-                    actionType: homePageTypes.SET_CANISTER_DATA,
-                    payload: updatedCanisterData
-                });
-            }
-            journalDispatch({
-                actionType: types.SET_CANISTER_DATA_RELOAD_STATUS,
-                payload: false,
-            });
-            journalDispatch({
-                actionType: types.SET_IS_LOADING,
-                payload: false
-            });
-        };
-        if(journalState.reloadStatuses.journalData){
-            //Load Journal Data in the background
-
-            const journal = await actorState.backendActor.readJournal();
-            loadJournalData(journal.ok, journalDispatch, types);
-        };
-        if(walletState.shouldReload){
-            //Load wallet data in background
-            const walletDataFromApi = await actorState.backendActor.readWalletData();
-            await loadWalletData(walletDataFromApi, walletDispatch, walletTypes);
-        };
-
-
+        await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes, stateHasBeenRecovered);
     }, [actorState.backendActor]);
 
     return (

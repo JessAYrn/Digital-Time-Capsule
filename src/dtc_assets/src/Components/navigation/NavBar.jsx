@@ -1,13 +1,12 @@
 import React, { useCallback, useContext, useState } from 'react';
-import { useNavigate, Link, useLocation } from "react-router-dom";
-import { JOURNAL_TABS, NAV_LINKS, WALLET_TABS } from '../../Constants';
-import { UI_CONTEXTS } from '../../Contexts';
+import { useNavigate, useLocation } from "react-router-dom";
+import { JOURNAL_TABS, NAV_LINKS, WALLET_TABS } from '../../functionsAndConstants/Constants';
 import { AppContext as AccountContext} from '../../Routes/Account';
 import { AppContext as HomePageContext} from '../../Routes/HomePage';
 import { AppContext as JournalContext} from '../../Routes/App';
 import { AppContext as WalletContext} from '../../Routes/Wallet';
 import { AppContext as TreasuryContext} from '../../Routes/Treasury';
-import { AppContext as GroupJournal} from '../../Routes/GroupJournal';
+import { AppContext as GroupJournalContext} from '../../Routes/GroupJournal';
 import * as FaIcons from 'react-icons/fa';
 import * as GiIcons from 'react-icons/gi';
 import * as IoiosIcons from 'react-icons/io';
@@ -16,12 +15,13 @@ import * as RiIcons from 'react-icons/ri';
 import * as ImIcons from 'react-icons/im';
 import { IconContext } from 'react-icons/lib';
 import { types } from '../../reducers/journalReducer';
-import { MODALS_TYPES } from '../../Constants';
+import { MODALS_TYPES } from '../../functionsAndConstants/Constants';
 import { ConnectButton, ConnectDialog, useConnect } from "@connect2ic/react";
 import { initialState } from '../../reducers/journalReducer';
 import "./NavBar.scss";
 import Dropdown from '../Fields/Dropdown';
-import { walletInitialState, walletTypes } from '../../reducers/walletReducer';
+import { walletTypes } from '../../reducers/walletReducer';
+import { retrieveContext } from '../../functionsAndConstants/Contexts';
 
 
 
@@ -32,25 +32,16 @@ export const NavBar = (props) => {
         context
     } = props;
 
-    let AppContext;
-    if(context === UI_CONTEXTS.JOURNAL){
-        AppContext = JournalContext;
-    }
-    if(context === UI_CONTEXTS.HOME_PAGE){
-        AppContext = HomePageContext;
-    }
-    if(context === UI_CONTEXTS.WALLET){
-        AppContext = WalletContext
-    }
-    if(context === UI_CONTEXTS.ACCOUNT_PAGE){
-        AppContext = AccountContext;
-    }
-    if(context === UI_CONTEXTS.TREASURY){
-        AppContext = TreasuryContext;
-    }
-    if(context === UI_CONTEXTS.GROUPJOURNAL){
-        AppContext = GroupJournal;
-    }
+    let contexts = {
+        WalletContext,
+        JournalContext,
+        HomePageContext,
+        AccountContext,
+        TreasuryContext,
+        GroupJournalContext
+    };
+
+    let AppContext = retrieveContext(contexts, context);
 
     const {
         journalState,
@@ -76,97 +67,17 @@ export const NavBar = (props) => {
 
     //must remove function from state because useNavigate will send a null state if there is a function in the state.
     //the reason this happens is because objects retrieved from useLocation must be serializable and function are not.
-    let journalStateWithoutFunction = {
-        ...journalState,
-        handlePageSubmitFunction:'',
-        backendActor: undefined,
-        managerActor: undefined
+    
+    let reduxStates = {
+        journal: journalState,
+        wallet: walletState,
+        account: accountState,
+        homePage: homePageState
     };
 
-    let walletStateWithoutFunction={
-        ...walletState,
-    }
-    
-    let accountStateWithoutFunction={
-        ...accountState,
-    }
-    
-    let homePageStateWithoutFunction={
-        ...homePageState,
-    }
-
-
-    const  handleClickDashboard = useCallback(() =>  {
-        navigate(NAV_LINKS.dashboard, { 
-            replace: false, 
-            state:{
-                journal:journalStateWithoutFunction,
-                wallet:walletStateWithoutFunction,
-                account:accountStateWithoutFunction,
-                homePage:homePageStateWithoutFunction
-            }
-        });
-    }, [journalState.reloadStatuses, walletState?.shouldReload]);
-
-    const handleClickWallet = useCallback(() =>  {
-       
-        navigate(NAV_LINKS.wallet, { 
-            replace: false, 
-            state: {
-                journal:journalStateWithoutFunction,
-                wallet:walletStateWithoutFunction,
-                account:accountStateWithoutFunction,
-                homePage:homePageStateWithoutFunction
-            }
-        });
-    }, [walletState?.shouldReload,journalState.reloadStatuses]);
-
-    const  handleClickJournal = useCallback(() =>  {
-        navigate(NAV_LINKS.journal, { 
-            replace: false, 
-            state: {
-                journal:journalStateWithoutFunction,
-                wallet:walletStateWithoutFunction,
-                accountStateWithoutFunction,
-                homePage:homePageStateWithoutFunction
-            }
-        });
-    }, [walletState?.shouldReload,journalState.reloadStatuses]);
-
-    const  handleClickAccount = useCallback(() =>  {
-        navigate(NAV_LINKS.account, { 
-            replace: false, 
-            state: {
-                journal:journalStateWithoutFunction,
-                wallet:walletStateWithoutFunction,
-                account:accountStateWithoutFunction,
-                homePage:homePageStateWithoutFunction
-            }    
-        });
-    },[walletState?.shouldReload,journalState.reloadStatuses]);
-   
-    const  handleClickTreasury = useCallback(() =>  {
-        navigate(NAV_LINKS.treasury, { 
-            replace: false, 
-            state: {
-                journal:journalStateWithoutFunction,
-                wallet:walletStateWithoutFunction,
-                account:accountStateWithoutFunction,
-                homePage:homePageStateWithoutFunction
-            }
-        });
-    },[walletState?.shouldReload,journalState.reloadStatuses]);
-
-    const  handleClickGroupJournal = useCallback(() =>  {
-        navigate(NAV_LINKS.groupJournal, { 
-            replace: false, 
-            state: {
-                journal:journalStateWithoutFunction,
-                wallet:walletStateWithoutFunction,
-                account:accountStateWithoutFunction,
-                homePage:homePageStateWithoutFunction
-            }});
-    },[walletState?.shouldReload,journalState.reloadStatuses]);
+    const changeRoute = (route, states) => {
+        navigate(route, { replace: false, state: states });
+    };
 
     const showSideBar = () => {
         setSideBar(!sideBar)
@@ -254,7 +165,7 @@ export const NavBar = (props) => {
             </div>
             <nav className={`navBar_Journal ${sideBar ? 'active' : ''}`}>
                 <ul className={'unorderedList'}>
-                    <li className={'listItem'} onClick={handleClickWallet}>
+                    <li className={'listItem'} onClick={() => changeRoute(NAV_LINKS.wallet, reduxStates)}>
                         <IconContext.Provider value={{ color: 'white'}}>
                             <IoiosIcons.IoIosWallet/> 
                         </IconContext.Provider>
@@ -262,7 +173,7 @@ export const NavBar = (props) => {
                             wallet
                         </span>
                     </li>
-                    <li className={'listItem'} onClick={handleClickJournal}>
+                    <li className={'listItem'} onClick={() => changeRoute(NAV_LINKS.journal, reduxStates)}>
                         <IconContext.Provider value={{ color: 'white'}}>
                             <IoiosIcons.IoIosJournal/> 
                         </IconContext.Provider>
@@ -270,7 +181,7 @@ export const NavBar = (props) => {
                             journal
                         </span>
                     </li>
-                    <li className={'listItem'} onClick={handleClickDashboard}>
+                    <li className={'listItem'} onClick={() => changeRoute(NAV_LINKS.dashboard, reduxStates)}>
                         <IconContext.Provider value={{ color: 'white'}}>
                             <AiIcons.AiFillDashboard/> 
                         </IconContext.Provider>
@@ -278,7 +189,7 @@ export const NavBar = (props) => {
                             dashboard
                         </span>
                     </li>
-                    <li className={'listItem'} onClick={handleClickAccount}>
+                    <li className={'listItem'} onClick={() => changeRoute(NAV_LINKS.account, reduxStates)}>
                         <IconContext.Provider value={{ color: 'white'}}>
                             <RiIcons.RiAccountPinCircleFill/> 
                         </IconContext.Provider>
@@ -286,7 +197,7 @@ export const NavBar = (props) => {
                             account
                         </span>
                     </li>
-                    <li className={'listItem'} onClick={handleClickTreasury}>
+                    <li className={'listItem'} onClick={() => changeRoute(NAV_LINKS.treasury, reduxStates)}>
                         <IconContext.Provider value={{ color: 'white'}}>
                             <GiIcons.GiOpenTreasureChest/> 
                         </IconContext.Provider>
@@ -294,7 +205,7 @@ export const NavBar = (props) => {
                             treasury
                         </span>
                     </li>
-                    <li className={'listItem'} onClick={handleClickGroupJournal}>
+                    <li className={'listItem'} onClick={() => changeRoute(NAV_LINKS.groupJournal, reduxStates)}>
                         <IconContext.Provider value={{ color: 'white'}}>
                             <GiIcons.GiOpenTreasureChest/> 
                         </IconContext.Provider>

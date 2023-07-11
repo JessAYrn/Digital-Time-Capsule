@@ -1,4 +1,4 @@
-import { milisecondsToNanoSeconds } from "../Utils"
+import { milisecondsToNanoSeconds } from "../functionsAndConstants/Utils"
 
 export const TEST_DATA_FOR_NOTIFICATIONS =[
     {
