@@ -1,49 +1,39 @@
-import React, { useState } from 'react'
+import React from 'react'
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import Typography from '@mui/material/Typography';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import './Accordion.scss';
 
-
-const Accordion = ({title,content,icon}) => {
-
-    const[selected,setSelected]=useState(false);
-
-
+const AccordionField = (props) => {
+    const {content} = props;
+    
   return (
-    <div className='accordion__Container'>
-        <div className='accordion__Inner'>
-            <div className='accordion__Title'
-             onClick={()=>setSelected(!selected)}
-            >
-                <p>{title}</p>
-                {/* <img 
-                className='dropdown_img__accordion'
-                onClick={()=>setSelected(!selected)}
-                src='https://t3.ftcdn.net/jpg/04/83/39/12/360_F_483391217_rDo0Gdjp71zXabPRjeaE1O3I85R6nIgB.jpg' alt='dropdown'/> */}
-                <div
-                className='plusSign'
-                onClick={()=>setSelected(!selected)}
-                >{selected? '-' :'+' }</div>
-            </div>
-            <div className={`accordion__Content ${selected ?' show':''}`}>
-                <div className={`accordion_content_container`}>
-                {content.map((content,index)=>(
-                    (
-                        <div
-                        className='accordion_content_inner'
-                        key={index}
+    <div className='accordianField_containter'>
+        {content.map((content_) => {
+            const {title, Component, text, image} = content_;
+            return (
+                <Accordion className='accordianField'>
+                    <div className='title '>
+                        <AccordionSummary
+                            expandIcon={<ExpandMoreIcon />}
+                            aria-controls="panel1a-content"
+                            id="panel1a-header"
                         >
-                            {content.text && <p>{content.text}</p>}
-
-                            {content.image && <img src={content.image}/>}
-                        </div>
-                        
-                    )
-                ))}
-                </div>
-                
-            </div>
-        </div>
+                                {title && <Typography color={'white'}>{title}</Typography>}
+                        </AccordionSummary>
+                    </div>
+                    <AccordionDetails>
+                        {text && <Typography>{text}</Typography>}
+                        {Component && <Component/>}
+                        {image && <img src={image}/>}
+                    </AccordionDetails>
+                </Accordion>
+            )}
+        )}
     </div>
-  )
+  );
 }
 
-export default Accordion;
+export default AccordionField;

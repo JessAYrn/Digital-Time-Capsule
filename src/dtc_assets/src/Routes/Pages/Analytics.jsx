@@ -10,9 +10,12 @@ import { types } from '../../reducers/journalReducer';
 import { MODALS_TYPES } from '../../functionsAndConstants/Constants';
 import Switch from '../../Components/Fields/Switch';
 import { CANISTER_DATA_FIELDS } from '../../functionsAndConstants/Constants';
-import * as RiIcons from 'react-icons/ri';
-import * as FaIcons from 'react-icons/fa';
-import * as AiIcons from 'react-icons/ai';
+import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown';
+import ArrowCircleUpIcon from '@mui/icons-material/ArrowCircleUp';
+import CheckIcon from '@mui/icons-material/Check';
+import ClearIcon from '@mui/icons-material/Clear';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import ButtonField from '../../Components/Fields/Button';
 import { IconContext } from 'react-icons/lib';
 import "../../SCSS/scrollable.scss";
@@ -276,8 +279,8 @@ const Analytics = () => {
                                                             <DataField
                                                                 text={principal}
                                                                 isPrincipal={true}
-                                                                buttonIcon_1={RiIcons.RiDeleteBin2Line}
-                                                                buttonIcon_0={FaIcons.FaCheckSquare}
+                                                                buttonIcon_1={ClearIcon}
+                                                                buttonIcon_0={CheckIcon}
                                                                 onClick_1={() => handleDenyAccess(principal)}
                                                                 onClick_0={() => handleGrantAccess(principal)}
                                                             />
@@ -309,11 +312,9 @@ const Analytics = () => {
                                         {   
                                             !showUserPrincipals &&
                                             <ButtonField
-                                                className={'active'}
-                                                Icon={AiIcons.AiOutlineArrowDown}
-                                                iconSize={25}
+                                                Icon={ArrowCircleDownIcon}
+                                                iconSize={'medium'}
                                                 onClick={() => {setShowUserPrincipals(!showUserPrincipals)}}
-                                                withBox={true}
                                             />
                                         }
                                         {
@@ -332,23 +333,19 @@ const Analytics = () => {
                                                         <DataField
                                                             text={userPrincipal}
                                                             isPrincipal={true}
-                                                            buttonIcon_1={homePageState.canisterData.isOwner ? RiIcons.RiDeleteBin2Line : null}
-                                                            buttonIcon_0={homePageState.canisterData.isOwner ? FaIcons.FaCheckSquare : null}
+                                                            buttonIcon_1={homePageState.canisterData.isOwner ? ClearIcon : null}
+                                                            buttonIcon_0={homePageState.canisterData.isOwner ? CheckIcon : null}
                                                             onClick_1={onClick1}
                                                             onClick_0={onClick0}
                                                         />
                                                         {approvalStatus &&
                                                         <div className={'approvalStatusDiv'}>
-                                                            <IconContext.Provider value={{ size: '15px', margin: '5px'}}>
-                                                                <AiIcons.AiTwotoneLike/>
-                                                            </IconContext.Provider>
+                                                                <ThumbUpIcon/>
                                                             <h6> Suibsidized </h6>
                                                         </div>}
                                                         {!approvalStatus &&
                                                         <div className={'approvalStatusDiv'}>
-                                                            <IconContext.Provider value={{ size: '15px', margin: '5px'}}>
-                                                                <AiIcons.AiTwotoneDislike/>
-                                                            </IconContext.Provider>
+                                                                <ThumbDownIcon/>
                                                             <h6> Unsubsidized </h6>
                                                         </div>}
                                                     </div>
@@ -402,24 +399,18 @@ const Analytics = () => {
                                 </div>}
                                 <ButtonField
                                     text={' Register As New Owner '}
-                                    className={'ownerButtonsnDiv active contentContainer '}
                                     onClick={handleRegistration}
-                                    withBox={true}
                                 />
                                 {homePageState.canisterData.isOwner &&
                                     <ButtonField
                                         text={' Upgrade Application '}
-                                        className={'ownerButtonsnDiv ButtonDiv active contentContainer '}
                                         onClick={handleUpgrade}
-                                        withBox={true}
                                     />
                                 }
                                 { showUserPrincipals && <ButtonField
-                                    Icon={AiIcons.AiOutlineArrowUp}
-                                    iconSize={25}
-                                    className={'collapseArrayButton active'}
+                                    Icon={ArrowCircleUpIcon}
+                                    iconSize={'medium'}
                                     onClick={() => {setShowUserPrincipals(!showUserPrincipals)}}
-                                    withBox={true}
                                 />}
                             </div>
                         </div>}

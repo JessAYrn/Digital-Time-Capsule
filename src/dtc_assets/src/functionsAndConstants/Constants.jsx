@@ -105,3 +105,10 @@ export const MASTER_COPY_FRONTEND_CANISTER_ID = "fkkq7-siaaa-aaaap-qaaya-cai";
 export const forbiddenFileTypes = [
     'application/pdf'
 ];
+
+export const BUTTON_TYPES = {
+    iconWithText: 'iconWithText',
+    icon: 'icon',
+    text: 'text',
+    loading: 'loading'
+}
