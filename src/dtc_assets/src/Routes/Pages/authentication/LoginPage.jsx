@@ -19,7 +19,7 @@ import "@connect2ic/core/style.css"
 import ButtonField from "../../../Components/Fields/Button";
 import DataField from "../../../Components/Fields/DataField";
 import { types } from "../../../reducers/journalReducer";
-import { backendActor, managerActor } from "../../../functionsAndConstants/Utils";
+import { backendActor, inTrillions, managerActor, round2Decimals } from "../../../functionsAndConstants/Utils";
 import '../../../SCSS/contentContainer.scss'
 import AccordionField from "../../../Components/Fields/Accordion";
 import AccordionField_Outter from "../../../Components/Fields/Accordian_Outter";
@@ -176,8 +176,7 @@ const LoginPage = (props) => {
                 <DataField
                     label={'Front-end Canister Balance: '}
                     className={'loginPage'}
-                    isCycles={true}
-                    text={frontendCanisterBalance}
+                    text={`${round2Decimals(inTrillions(frontendCanisterBalance))} T`}
                     isLoading={isLoading}
                     disabled={true}
                 />
@@ -186,8 +185,7 @@ const LoginPage = (props) => {
                 <DataField
                     label={'Back-end Canister Balance: '}
                     className={'loginPage'}
-                    isCycles={true}
-                    text={backendCanisterBalance}
+                    text={`${round2Decimals(inTrillions(backendCanisterBalance))} T`}
                     isLoading={isLoading}
                     disabled={true}
                 />

@@ -14,15 +14,23 @@ import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown';
 import ArrowCircleUpIcon from '@mui/icons-material/ArrowCircleUp';
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
+import Paper from '@mui/material/Paper';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import ButtonField from '../../Components/Fields/Button';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import Grid from '@mui/material/Unstable_Grid2';
+import AccordionField from '../../Components/Fields/Accordion';
 import { IconContext } from 'react-icons/lib';
 import "../../SCSS/scrollable.scss";
 import '../../SCSS/container.scss';
 import '../../SCSS/contentContainer.scss'
 import '../../SCSS/section.scss'
 import {homePageTypes} from '../../reducers/homePageReducer';
+import { inTrillions, round2Decimals, shortenHexString } from '../../functionsAndConstants/Utils';
+import { copyWalletAddressHelper } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
+import DataTable from '../../Components/Fields/Table';
+import { mapRequestsForAccessToTableRows, requestsForAccessTableColumns } from '../../mappers/dashboardMapperFunctions';
 
 
 const Analytics = () => {
@@ -40,7 +48,7 @@ const Analytics = () => {
         result = result.ok;
         homePageDispatch({
             actionType: homePageTypes.SET_CANISTER_DATA,
-            payload: { ...homePageState.canisterData, requestsForApproval: result }
+            payload: { ...homePageState.canisterData, RequestsForAccess: result }
         });
         homePageDispatch({
             actionType: homePageTypes.SET_IS_LOADING,
@@ -57,7 +65,7 @@ const Analytics = () => {
         result = result.ok;
         homePageDispatch({
             actionType: homePageTypes.SET_CANISTER_DATA,
-            payload: { ...homePageState.canisterData, requestsForApproval: result }
+            payload: { ...homePageState.canisterData, RequestsForAccess: result }
         });
         homePageDispatch({
             actionType: homePageTypes.SET_IS_LOADING,
@@ -204,76 +212,130 @@ const Analytics = () => {
     };
 
     return(
-            journalState.modalStatus.show ?
-                <div className={"container"}>
-                    <Modal 
-                        context={UI_CONTEXTS.HOME_PAGE}
-                    />
-                </div> : 
-                <div className="container">
-                    <NavBar
-                        walletLink={true}
-                        journalLink={true}
-                        accountLink={true}
-                        dashboardLink={false}
-                        notificationIcon={false}
-                        context={UI_CONTEXTS.HOME_PAGE}
-                    />
-                    {homePageState.isLoading ? 
-                        <LoadScreen/> :
-                        <div class={'scrollable'}>
-                            <div className='container_homePage'>
-                                <div className={'transparentDiv__homePage__dataFields contentContainer '}>
-                                    <div className={'AnalyticsDiv'}>
-                                        <div className={'AnalyticsContentContainer'}>
-                                            <DataField
-                                                label={'Journals Created:'}
-                                                text={homePageState.canisterData[CANISTER_DATA_FIELDS.journalCount]}
-                                            />
-                                            <DataField
-                                                label={'Frontend Canister Principal:'}
-                                                text={homePageState.canisterData[CANISTER_DATA_FIELDS.frontEndPrincipal]}
-                                                isPrincipal={true}
-                                            />
-                                            <DataField
-                                                label={'Backend Canister Principal:'}
-                                                text={homePageState.canisterData[CANISTER_DATA_FIELDS.backEndPrincipal]}
-                                                isPrincipal={true}
-                                            />
-                                            <DataField
-                                                label={'Cycles Burned Per Day:'}
-                                                text={homePageState.canisterData[CANISTER_DATA_FIELDS.backEndCyclesBurnRatePerDay]}
-                                                isCycles={true}
-                                            />
-                                            <DataField
-                                                label={'Frontend Cycles Balance:'}
-                                                text={homePageState.canisterData[CANISTER_DATA_FIELDS.currentCyclesBalance_frontend]}
-                                                isCycles={true}
-                                            />
-                                            <DataField
-                                                label={'Backend Cycles Balance:'}
-                                                text={homePageState.canisterData[CANISTER_DATA_FIELDS.currentCyclesBalance_backend]}
-                                                isCycles={true}
-                                            />
-                                            <DataField
-                                                label={'Canister Owner:'}
-                                                text={homePageState.canisterData[CANISTER_DATA_FIELDS.nftOwner]}
-                                                isPrincipal={true}
-                                            />
-                                            <DataField
-                                                label={'NFT ID:'}
-                                                text={homePageState.canisterData[CANISTER_DATA_FIELDS.nftId]}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                                {   homePageState.canisterData.isOwner &&
-                                    <div className={'transparentDiv__homePage__dataFields contentContainer '}>
-                                        <div className={'AnalyticsDiv'}>
-                                            <div className={'AnalyticsContentContainer array'}>
+        <Grid container columns={12} xs={12} rowSpacing={8} display="flex" justifyContent="center" alignItems="center" flexDirection={"column"}>
+            {   
+                journalState.modalStatus.show ?
+                    <Modal context={UI_CONTEXTS.HOME_PAGE} /> : 
+                    <>
+                        <Grid 
+                        columns={12}
+                        xs={12} 
+                        rowSpacing={8} 
+                        display="flex" 
+                        justifyContent="center" 
+                        alignItems="center" 
+                        flexDirection={"column"}
+                        >
+                            <NavBar
+                                walletLink={true}
+                                journalLink={true}
+                                accountLink={true}
+                                dashboardLink={false}
+                                notificationIcon={false}
+                                context={UI_CONTEXTS.HOME_PAGE}
+                            />
+                        </Grid>
+                        {
+                            homePageState.isLoading ? 
+                            <LoadScreen/> :
+                            <>
+                                <Grid 
+                                columns={12}
+                                xs={9} 
+                                rowSpacing={0} 
+                                display="flex" 
+                                justifyContent="center" 
+                                alignItems="center" 
+                                flexDirection={"column"}
+                                >
+                                    <Paper className='analytics paper'>
+                                        <DataField
+                                            label={'Journals Created:'}
+                                            text={homePageState.canisterData[CANISTER_DATA_FIELDS.journalCount]}
+                                            disabled={true}
+                                        />
+                                        <DataField
+                                            label={'Frontend Canister Principal:'}
+                                            text={`${shortenHexString(homePageState.canisterData[CANISTER_DATA_FIELDS.frontEndPrincipal])}`}
+                                            isPrincipal={true}
+                                            buttonIcon={ContentCopyIcon}
+                                            onClick={
+                                                () => copyWalletAddressHelper(
+                                                    homePageState.canisterData[CANISTER_DATA_FIELDS.frontEndPrincipal]
+                                                )
+                                            }
+                                        />
+                                        <DataField
+                                            label={'Backend Canister Principal:'}
+                                            text={`${shortenHexString(homePageState.canisterData[CANISTER_DATA_FIELDS.backEndPrincipal])}`}
+                                            isPrincipal={true}
+                                            buttonIcon={ContentCopyIcon}
+                                            onClick={
+                                                () => copyWalletAddressHelper(
+                                                    homePageState.canisterData[CANISTER_DATA_FIELDS.backEndPrincipal]
+                                                )
+                                            }
+                                        />
+                                        <DataField
+                                            label={'Cycles Burned Per Day:'}
+                                            text={`${round2Decimals(inTrillions(homePageState.canisterData[CANISTER_DATA_FIELDS.backEndCyclesBurnRatePerDay]))} T`}
+                                            isCycles={true}
+                                            disabled={true}
+                                        />
+                                        <DataField
+                                            label={'Frontend Cycles Balance:'}
+                                            text={`${round2Decimals(inTrillions(homePageState.canisterData[CANISTER_DATA_FIELDS.currentCyclesBalance_frontend]))} T`}
+                                            isCycles={true}
+                                            disabled={true}
+                                        />
+                                        <DataField
+                                            label={'Backend Cycles Balance:'}
+                                            text={`${round2Decimals(inTrillions(homePageState.canisterData[CANISTER_DATA_FIELDS.currentCyclesBalance_backend]))} T`}
+                                            isCycles={true}
+                                            disabled={true}
+                                        />
+                                        <DataField
+                                            label={'Canister Owner:'}
+                                            text={`${shortenHexString(homePageState.canisterData[CANISTER_DATA_FIELDS.nftOwner])}`}
+                                            isPrincipal={true}
+                                            buttonIcon={ContentCopyIcon}
+                                            onClick={
+                                                () => copyWalletAddressHelper(
+                                                    homePageState.canisterData[CANISTER_DATA_FIELDS.nftOwner]
+                                                )
+                                            }
+                                        />
+                                        <DataField
+                                            label={'NFT ID:'}
+                                            text={homePageState.canisterData[CANISTER_DATA_FIELDS.nftId]}
+                                            disabled={true}
+                                        />
+                                    </Paper>
+                                </Grid>
+                                {   
+                                    homePageState.canisterData.isOwner &&
+                                    <Grid 
+                                        columns={12}
+                                        xs={9} 
+                                        rowSpacing={0} 
+                                        display="flex" 
+                                        justifyContent="center" 
+                                        alignItems="center" 
+                                        flexDirection={"column"}
+                                    >
+                                        <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
+                                            <AccordionField content={[{title: "Principals Requesting Access", text: "test"}]}/>
+                                        </Grid>
+                                        <DataTable
+                                        columns={requestsForAccessTableColumns}
+                                        rows={mapRequestsForAccessToTableRows(homePageState.canisterData.requestsForAccess)}
+                                        />
+                                        {/* <Paper className='analytics paper'>
+
+                                             <div className={'AnalyticsContentContainer array'}>
                                                 <h4 className='requestingAccessH4'>  Principals Requesting Access </h4>
-                                                {homePageState.canisterData.requestsForApproval && 
-                                                    homePageState.canisterData.requestsForApproval.map(([principal, approvalStatus]) => {
+                                                {homePageState.canisterData.RequestsForAccess && 
+                                                    homePageState.canisterData.RequestsForAccess.map(([principal, approvalStatus]) => {
                                                     return (
                                                         <div className={'dataFieldRow'}>
                                                             <DataField
@@ -302,8 +364,8 @@ const Analytics = () => {
                                                     )
                                                 })}    
                                             </div>
-                                        </div>
-                                    </div> 
+                                        </Paper> */}
+                                    </Grid> 
                                 }
                                 <div className={'transparentDiv__homePage__dataFields contentContainer '}>
                                     <div className={'AnalyticsDiv'}>
@@ -412,10 +474,11 @@ const Analytics = () => {
                                     iconSize={'medium'}
                                     onClick={() => {setShowUserPrincipals(!showUserPrincipals)}}
                                 />}
-                            </div>
-                        </div>}
-                </div>
-
+                            </>
+                        }
+                    </>
+            }
+        </Grid>
         
     )
 

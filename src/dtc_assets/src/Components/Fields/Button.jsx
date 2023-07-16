@@ -29,7 +29,7 @@ const ButtonField = (props) => {
                 <ButtonType 
                     size={iconSize} 
                     color={color} 
-                    startIcon={(text && Icon) ?<Icon/> : null} 
+                    endIcon={(text && Icon) ?<Icon/> : null} 
                     onClick={handleClick}
                     disabled={disabled}
                     loading={isLoading}

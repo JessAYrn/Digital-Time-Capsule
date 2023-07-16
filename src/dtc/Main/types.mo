@@ -84,6 +84,7 @@ module{
         supportMode: Bool;
         cyclesSaveMode: Bool;
         releaseVersion: Nat;
+        requestsForAccess: RequestsForAccess;
     };
 
     public type AppMetaData = {

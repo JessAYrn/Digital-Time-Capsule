@@ -56,10 +56,10 @@ export const CANISTER_DATA_FIELDS = {
     currentCyclesBalance_backend: "currentCyclesBalance_backend",
     currentCyclesBalance_frontend: "currentCyclesBalance_frontend",
     nftId: "nftId",
-    requestsForApproval: "requestsForApproval",
+    RequestsForAccess: "RequestsForAccess",
     users: "users",
     journalCount: "journalCount"
-}
+};
 
 export const PAGES = {
     JOURNAL_COVER: "JOURNAL_COVER",

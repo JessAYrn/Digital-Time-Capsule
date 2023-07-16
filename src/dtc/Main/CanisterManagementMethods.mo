@@ -286,6 +286,7 @@ module{
                     supportMode = appMetaData.supportMode;
                     cyclesSaveMode = appMetaData.cyclesSaveMode;
                     releaseVersion = currentVersion;
+                    requestsForAccess = appMetaData.requestsForAccess;
                 };
                 return #ok(canisterDataPackagedForExport);
             }

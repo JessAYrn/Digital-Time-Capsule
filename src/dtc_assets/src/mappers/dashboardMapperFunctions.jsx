@@ -1,3 +1,31 @@
+export const requestsForAccessTableColumns = [
+    { field: 'id', headerName: '#', width: 90 },
+    {
+      field: 'userPrincipal',
+      headerName: 'User Principal',
+      width: 150,
+      editable: false,
+    },
+    {
+        field: 'userName',
+        headerName: 'User Name',
+        width: 150,
+        editable: false,
+    }
+];
+
+export const mapRequestsForAccessToTableRows = (requestsForAccess) => {
+    const requestsForAccess_ = requestsForAccess.map(({userPrincipal, approvalStatus}, index) => {
+        return {
+            id: index,
+            userPrincipal: userPrincipal,
+            userName: "null"
+        }
+    });
+    return requestsForAccess_;
+}
+
+
 export const mapBackendCanisterDataToFrontEndObj = (props) => {
     const {
         profilesMetaData,
@@ -13,8 +41,13 @@ export const mapBackendCanisterDataToFrontEndObj = (props) => {
         currentCyclesBalance_frontend,
         acceptingRequests,
         journalCount,
-        cyclesSaveMode
+        cyclesSaveMode,
+        requestsForAccess
     } = props;
+
+    const requestsForAccess_ = requestsForAccess.map(([userPrincipal, approvalStatus]) => {
+        return {userPrincipal, approvalStatus};
+    });
 
     return {
         profilesMetaData: profilesMetaData,
@@ -30,6 +63,7 @@ export const mapBackendCanisterDataToFrontEndObj = (props) => {
         supportMode: supportMode,
         acceptingRequests: acceptingRequests,
         journalCount: parseInt(journalCount),
-        cyclesSaveMode: cyclesSaveMode
+        cyclesSaveMode: cyclesSaveMode,
+        requestsForAccess: requestsForAccess_
     }
 }; 

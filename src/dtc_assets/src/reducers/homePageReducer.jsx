@@ -29,8 +29,8 @@ export const homePageInitialState={
         nftId: NULL_STRING_CAPITALIZED,
         supportMode: false,
         acceptingRequests: false,
-        requestsForApproval: []
-    },
+        RequestsForAccess: []
+    }
 }
 
 const changeValue=(state=homePageInitialState, action)=>{
