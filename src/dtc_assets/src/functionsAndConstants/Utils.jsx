@@ -222,5 +222,10 @@ export const allPropertiesInObjectAreDefined = (obj) => {
     if (value === undefined) return false;
   };
   return true;
+};
+
+export const objectsAreEqual = (obj1, obj2) => {
+  let equal = JSON.stringify(obj1) === JSON.stringify(obj2);
+  return equal;
 }
 

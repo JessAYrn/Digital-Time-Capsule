@@ -22,12 +22,12 @@ import { types } from "../../../reducers/journalReducer";
 import { backendActor, inTrillions, managerActor, round2Decimals } from "../../../functionsAndConstants/Utils";
 import '../../../SCSS/contentContainer.scss'
 import AccordionField from "../../../Components/Fields/Accordion";
-import AccordionField_Outter from "../../../Components/Fields/Accordian_Outter";
 import { actorTypes } from "../../../reducers/actorReducer";
 import Grid from '@mui/material/Unstable_Grid2';
+import { Typography } from "@mui/material";
 
 
-const accordionContent=[
+export const accordionContent=[
 
     {title:"1.) Navigate to your Personal DAO's unique URL and press the share button circled below ", image:'assets/dtcscreengrab2.png'},
     {title:"2.) Select the 'Add to Home Screen' button", image:'assets/dtcscreengrab3.png'},
@@ -191,7 +191,12 @@ const LoginPage = (props) => {
                 />
             </Grid>
             <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"66%"}>
-                <AccordionField content={accordionContent}/>
+                <AccordionField>
+                    <div title={accordionContent[0].title} TitleComponent={Typography} TextComponent={Typography} image={accordionContent[0].image}></div>
+                    <div title={accordionContent[1].title} TitleComponent={Typography} TextComponent={Typography} image={accordionContent[1].image}></div>
+                    <div title={accordionContent[2].title} TitleComponent={Typography} TextComponent={Typography} image={accordionContent[2].image}></div>
+                    <div title={accordionContent[3].title} TitleComponent={Typography} TextComponent={Typography} image={accordionContent[3].image}></div>
+                </AccordionField>
             </Grid>
         </Grid>
     );

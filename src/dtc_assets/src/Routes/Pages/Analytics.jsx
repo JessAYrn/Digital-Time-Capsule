@@ -10,8 +10,6 @@ import { types } from '../../reducers/journalReducer';
 import { MODALS_TYPES } from '../../functionsAndConstants/Constants';
 import Switch from '../../Components/Fields/Switch';
 import { CANISTER_DATA_FIELDS } from '../../functionsAndConstants/Constants';
-import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown';
-import ArrowCircleUpIcon from '@mui/icons-material/ArrowCircleUp';
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
 import Paper from '@mui/material/Paper';
@@ -21,7 +19,6 @@ import ButtonField from '../../Components/Fields/Button';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import Grid from '@mui/material/Unstable_Grid2';
 import AccordionField from '../../Components/Fields/Accordion';
-import { IconContext } from 'react-icons/lib';
 import "../../SCSS/scrollable.scss";
 import '../../SCSS/container.scss';
 import '../../SCSS/contentContainer.scss'
@@ -30,47 +27,47 @@ import {homePageTypes} from '../../reducers/homePageReducer';
 import { inTrillions, round2Decimals, shortenHexString } from '../../functionsAndConstants/Utils';
 import { copyWalletAddressHelper } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
 import DataTable from '../../Components/Fields/Table';
-import { mapRequestsForAccessToTableRows, requestsForAccessTableColumns } from '../../mappers/dashboardMapperFunctions';
+import { mapRequestsForAccessToTableRows, requestsForAccessTableColumns, usersTableColumns } from '../../mappers/dashboardMapperFunctions';
+import { Typography } from '@mui/material';
 
 
 const Analytics = () => {
     const { journalState, journalDispatch, homePageDispatch, homePageState, actorDispatch, actorState} = useContext(AppContext);
-    const [showUserPrincipals, setShowUserPrincipals] = useState(false);
+    const [requestsTableIsLoading, setRequestsTableIsLoading] = useState(false);
+    const [usersTableIsLoading, setUsersTableIsLoading] = useState(false);
 
-
-
-    const handleDenyAccess = async (principal) => {
-        homePageDispatch({
-            actionType: homePageTypes.SET_IS_LOADING,
-            payload: true
+    const onGrantAccess = async (args) => {
+        setRequestsTableIsLoading(true);
+        const {tableState} = args
+        let selectedRows = tableState.rowSelection;
+        let principals = selectedRows.map(rowId => {
+            let row = tableState.rows.dataRowIdToModelLookup[rowId];
+            return row.userPrincipal;
         });
-        let result = await actorState.backendActor.removeFromRequestsList(principal);
-        result = result.ok;
+        let result = await actorState.backendActor.grantAccess(principals);
+        result = mapRequestsForAccessToTableRows(result.ok);
         homePageDispatch({
             actionType: homePageTypes.SET_CANISTER_DATA,
-            payload: { ...homePageState.canisterData, RequestsForAccess: result }
+            payload: { ...homePageState.canisterData, requestsForAccess: result }
         });
-        homePageDispatch({
-            actionType: homePageTypes.SET_IS_LOADING,
-            payload: false
-        });
+        setRequestsTableIsLoading(false)
     };
 
-    const handleGrantAccess = async (principal) => {
-        homePageDispatch({
-            actionType: homePageTypes.SET_IS_LOADING,
-            payload: true
+    const onDenyAccess = async (args) => {
+        setRequestsTableIsLoading(true);
+        const {tableState} = args
+        let selectedRows = tableState.rowSelection;
+        let principals = selectedRows.map(rowId => {
+            let row = tableState.rows.dataRowIdToModelLookup[rowId];
+            return row.userPrincipal;
         });
-        let result = await actorState.backendActor.grantAccess(principal);
-        result = result.ok;
+        let result = await actorState.backendActor.removeFromRequestsList(principals);
+        result = mapRequestsForAccessToTableRows(result.ok);
         homePageDispatch({
             actionType: homePageTypes.SET_CANISTER_DATA,
-            payload: { ...homePageState.canisterData, RequestsForAccess: result }
+            payload: { ...homePageState.canisterData, requestsForAccess: result }
         });
-        homePageDispatch({
-            actionType: homePageTypes.SET_IS_LOADING,
-            payload: false
-        });
+        setRequestsTableIsLoading(false);
     };
 
     const handleUpdateApprovalStatus = async (principal, newApprovalStatus) => {
@@ -312,77 +309,90 @@ const Analytics = () => {
                                         />
                                     </Paper>
                                 </Grid>
-                                {   
-                                    homePageState.canisterData.isOwner &&
-                                    <Grid 
-                                        columns={12}
-                                        xs={9} 
-                                        rowSpacing={0} 
-                                        display="flex" 
-                                        justifyContent="center" 
-                                        alignItems="center" 
-                                        flexDirection={"column"}
-                                    >
-                                        <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
-                                            <AccordionField content={[{title: "Principals Requesting Access", text: "test"}]}/>
-                                        </Grid>
-                                        <DataTable
-                                        columns={requestsForAccessTableColumns}
-                                        rows={mapRequestsForAccessToTableRows(homePageState.canisterData.requestsForAccess)}
-                                        />
-                                        {/* <Paper className='analytics paper'>
-
-                                             <div className={'AnalyticsContentContainer array'}>
-                                                <h4 className='requestingAccessH4'>  Principals Requesting Access </h4>
-                                                {homePageState.canisterData.RequestsForAccess && 
-                                                    homePageState.canisterData.RequestsForAccess.map(([principal, approvalStatus]) => {
-                                                    return (
-                                                        <div className={'dataFieldRow'}>
-                                                            <DataField
-                                                                text={principal}
-                                                                isPrincipal={true}
-                                                                buttonIcon_1={ClearIcon}
-                                                                buttonIcon_0={CheckIcon}
-                                                                onClick_1={() => handleDenyAccess(principal)}
-                                                                onClick_0={() => handleGrantAccess(principal)}
-                                                            />
-                                                            {approvalStatus &&
-                                                            <div className={'approvalStatusDiv'}>
-                                                                <IconContext.Provider value={{ size: '15px', margin: '5px'}}>
-                                                                    <AiIcons.AiTwotoneLike/>
-                                                                </IconContext.Provider>
-                                                                <h6>   approved </h6>
-                                                            </div>}
-                                                            {!approvalStatus &&
-                                                            <div className={'approvalStatusDiv'}>
-                                                                <IconContext.Provider value={{ size: '15px', margin: '5px'}}>
-                                                                    <AiIcons.AiTwotoneDislike/>
-                                                                </IconContext.Provider>
-                                                                <h6>   not yet approved </h6>
-                                                            </div>}
-                                                        </div>
-                                                    )
-                                                })}    
-                                            </div>
-                                        </Paper> */}
-                                    </Grid> 
-                                }
-                                <div className={'transparentDiv__homePage__dataFields contentContainer '}>
+                                <Grid 
+                                    columns={12}
+                                    xs={9} 
+                                    rowSpacing={0} 
+                                    display="flex" 
+                                    justifyContent="center" 
+                                    alignItems="center" 
+                                    flexDirection={"column"}
+                                >
+                                    <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
+                                        <AccordionField>
+                                        <div 
+                                            title={"Principals Requesting Access"} 
+                                            TitleComponent={Typography} 
+                                            TextComponent={Typography}
+                                            iconSize={"medium"}
+                                            onClick_button_1={onGrantAccess}
+                                            onClick_button_2={onDenyAccess}
+                                            text_1={'Approve'}
+                                            text_2={'Deny'}
+                                            disabled={!homePageState.canisterData.isOwner}
+                                            isLoading={requestsTableIsLoading}
+                                            columns={requestsForAccessTableColumns}
+                                            rows={homePageState.canisterData.requestsForAccess}
+                                            Icon_1={CheckIcon}
+                                            Icon_2={ClearIcon}
+                                            CustomComponent={DataTable}
+                                        ></div>
+                                        <div 
+                                            title={"DAO Participants"} 
+                                            TitleComponent={Typography} 
+                                            TextComponent={Typography}
+                                            iconSize={"medium"}
+                                            onClick_button_1={() => {}}
+                                            onClick_button_2={() => {}}
+                                            text_1={'Subsidize'}
+                                            text_2={'Unsubsidize'}
+                                            disabled={!homePageState.canisterData.isOwner}
+                                            isLoading={usersTableIsLoading}
+                                            columns={usersTableColumns}
+                                            rows={homePageState.canisterData.profilesMetaData}
+                                            Icon_1={CheckIcon}
+                                            Icon_2={ClearIcon}
+                                            CustomComponent={DataTable}
+                                        ></div>
+                                        </AccordionField>
+                                    </Grid>
+                                </Grid> 
+                                {/* <Grid 
+                                    columns={12}
+                                    xs={9} 
+                                    rowSpacing={0} 
+                                    display="flex" 
+                                    justifyContent="center" 
+                                    alignItems="center" 
+                                    flexDirection={"column"}
+                                >
+                                    <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
+                                        <AccordionField>
+                                        <div 
+                                            title={"DAO Participants"} 
+                                            TitleComponent={Typography} 
+                                            TextComponent={Typography}
+                                            iconSize={"medium"}
+                                            onClick_button_1={() => {}}
+                                            onClick_button_2={() => {}}
+                                            text_1={'Subsidize'}
+                                            text_2={'Unsubsidize'}
+                                            disabled={!homePageState.canisterData.isOwner}
+                                            isLoading={usersTableIsLoading}
+                                            columns={usersTableColumns}
+                                            rows={homePageState.canisterData.profilesMetaData}
+                                            Icon_1={CheckIcon}
+                                            Icon_2={ClearIcon}
+                                            CustomComponent={DataTable}
+                                        ></div>
+                                        </AccordionField>
+                                    </Grid>
+                                </Grid>  */}
+                                {/* <div className={'transparentDiv__homePage__dataFields contentContainer '}>
                                     <div className={'AnalyticsDiv'}>
                                         <div className={'AnalyticsContentContainer array'}>
                                         <h4 className='requestingAccessH4'>  User Principals </h4>
-                                        {   
-                                            !showUserPrincipals &&
-                                            <ButtonField
-                                                Icon={ArrowCircleDownIcon}
-                                                iconSize={'medium'}
-                                                onClick={() => {setShowUserPrincipals(!showUserPrincipals)}}
-                                            />
-                                        }
-                                        {
-                                            showUserPrincipals &&
-
-                                            homePageState.canisterData.profilesMetaData.map(({userPrincipal, approvalStatus, canisterId}) => {
+                                        {homePageState.canisterData.profilesMetaData.map(({userPrincipal, approvalStatus, canisterId}) => {
                                                 const onClick1 = (approvalStatus) ? 
                                                 () => handleUpdateApprovalStatus(userPrincipal, !approvalStatus) : 
                                                 () => {};
@@ -416,7 +426,7 @@ const Analytics = () => {
                                         }
                                         </div>
                                     </div>
-                                </div>
+                                </div> */}
                                 {homePageState.canisterData.isOwner && 
                                 <div className={'switchDiv contentContainer '}>
                                     <div className='section'>
@@ -469,11 +479,6 @@ const Analytics = () => {
                                         onClick={handleUpgrade}
                                     />
                                 }
-                                { showUserPrincipals && <ButtonField
-                                    Icon={ArrowCircleUpIcon}
-                                    iconSize={'medium'}
-                                    onClick={() => {setShowUserPrincipals(!showUserPrincipals)}}
-                                />}
                             </>
                         }
                     </>

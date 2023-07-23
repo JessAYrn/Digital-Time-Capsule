@@ -29,7 +29,7 @@ export const homePageInitialState={
         nftId: NULL_STRING_CAPITALIZED,
         supportMode: false,
         acceptingRequests: false,
-        RequestsForAccess: []
+        requestsForAccess: []
     }
 }
 

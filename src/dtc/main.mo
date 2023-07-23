@@ -47,7 +47,7 @@ shared actor class User() = this {
     
     public shared({ caller }) func create () : async Result.Result<MainTypes.AmountAccepted, JournalTypes.Error> {
         let amountAccepted = await MainMethods.create(caller, userProfilesMap, appMetaData);
-        let updatedAppMetaData = await CanisterManagementMethods.removeFromRequestsList(caller, appMetaData);
+        let updatedAppMetaData = await CanisterManagementMethods.removeFromRequestsList([Principal.toText(caller)], appMetaData);
         switch(amountAccepted){
             case(#ok(amount)){ appMetaData := updatedAppMetaData; return #ok(amount); };
             case(#err(e)){ return #err(e); };
@@ -175,11 +175,10 @@ shared actor class User() = this {
         return result;
     };
 
-    public shared({caller}) func grantAccess(principal : Text) : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error> {
+    public shared({caller}) func grantAccess(principals : [Text]) : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error> {
         let callerIdAsText = Principal.toText(caller);
         if(callerIdAsText != appMetaData.nftOwner){ return #err(#NotAuthorized); };
-        let principalAsBlob = Principal.fromText(principal);
-        let updatedAppMetaData = await CanisterManagementMethods.grantAccess(principalAsBlob, appMetaData);
+        let updatedAppMetaData = await CanisterManagementMethods.grantAccess(principals, appMetaData);
         switch(updatedAppMetaData){
             case(#ok(metaData)){ appMetaData := metaData; return #ok(metaData.requestsForAccess); };
             case(#err(e)){ return #err(e); };
@@ -200,13 +199,12 @@ shared actor class User() = this {
         };
     };
 
-    public shared({caller}) func removeFromRequestsList(principal: Text) : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error> {
+    public shared({caller}) func removeFromRequestsList(principals: [Text]) : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error> {
         let callerIdAsText = Principal.toText(caller);
         if(callerIdAsText != appMetaData.nftOwner){ return #err(#NotAuthorized); };
-        let principalAsBlob = Principal.fromText(principal);
-        let updatedAppMetaDataList = await CanisterManagementMethods.removeFromRequestsList(principalAsBlob, appMetaData);
+        let updatedAppMetaDataList = await CanisterManagementMethods.removeFromRequestsList(principals, appMetaData);
         appMetaData := updatedAppMetaDataList;
-        return #ok(appMetaData.requestsForAccess);
+        return #ok(updatedAppMetaDataList.requestsForAccess);
     };
 
     public shared({caller}) func configureApp(frontEndPrincipal : Text, nftId: Int ) : async Result.Result<(), JournalTypes.Error> {
