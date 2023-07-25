@@ -25,7 +25,7 @@ const DataField = (props) => {
                     </Grid>
                     <Grid xs={6} display="flex" justifyContent="center" alignItems="center">
                         <ButtonField
-                            calledByDataFieldComponent={true}
+                            transparentBackground={true}
                             elevation={0}
                             isLoading={isLoading}
                             text={text}

@@ -7,13 +7,11 @@ import { AppContext as JournalContext} from '../../Routes/App';
 import { AppContext as WalletContext} from '../../Routes/Wallet';
 import { AppContext as TreasuryContext} from '../../Routes/Treasury';
 import { AppContext as GroupJournalContext} from '../../Routes/GroupJournal';
+import Grid from '@mui/material/Unstable_Grid2/Grid2';
 import * as FaIcons from 'react-icons/fa';
-import * as GiIcons from 'react-icons/gi';
-import * as IoiosIcons from 'react-icons/io';
-import * as AiIcons from 'react-icons/ai';
-import * as RiIcons from 'react-icons/ri';
-import * as ImIcons from 'react-icons/im';
-import { IconContext } from 'react-icons/lib';
+import MenuIcon from '@mui/icons-material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import Menu from '@mui/material/Menu';
 import { types } from '../../reducers/journalReducer';
 import { MODALS_TYPES } from '../../functionsAndConstants/Constants';
 import { ConnectButton, ConnectDialog, useConnect } from "@connect2ic/react";
@@ -22,11 +20,22 @@ import "./NavBar.scss";
 import Dropdown from '../Fields/Dropdown';
 import { walletTypes } from '../../reducers/walletReducer';
 import { retrieveContext } from '../../functionsAndConstants/Contexts';
+import ButtonField from '../Fields/Button';
 
 
 
 
 export const NavBar = (props) => {
+
+    const [anchorEl, setAnchorEl] = useState(null);
+    const open = Boolean(anchorEl);
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
     const {
         unreadNotifications,
         context
@@ -125,100 +134,85 @@ export const NavBar = (props) => {
         <FaIcons.FaBell/> : 
         <FaIcons.FaRegBell/>;
 
-    return(
-        <div className={'linkDiv_Journal'}>
-            <div className={'navbar'}> 
-                <div className='menuIcon'>
-                    <IconContext.Provider value={{ color: 'white', size: 25}}>
-                        { sideBar ? 
-                            <ImIcons.ImCross onClick={showSideBar}/> : 
-                            <FaIcons.FaBars onClick={showSideBar}/>
-                        }
-                    </IconContext.Provider> 
-                </div>
+    return (
+        <Grid xs={12} display="flex" justifyContent="center" alignItems="center" padding={0} className={'navBarContainer'}>
+            <Grid xs={12} display="flex" justifyContent="left" alignItems="center" padding={0} sx={{height: "110px"}}>
+                <ButtonField
+                    transparentBackground={true}
+                    id="basic-button"
+                    ariaControls={open ? 'basic-menu' : undefined}
+                    ariaHaspopup="true"
+                    ariaExpanded={open ? 'true' : undefined}
+                    onClick={handleClick}
+                    Icon={MenuIcon}
+                    active={true}
+                />
+                <Menu
+                    id="basic-menu"
+                    anchorEl={anchorEl}
+                    open={open}
+                    onClose={handleClose}
+                    MenuListProps={{
+                    'aria-labelledby': 'basic-button',
+                    }}
+                >
+                    <MenuItem onClick={() => changeRoute(NAV_LINKS.wallet, reduxStates)}>Wallet</MenuItem>
+                    <MenuItem onClick={() => changeRoute(NAV_LINKS.dashboard, reduxStates)}>Dashboard</MenuItem>
+                    <MenuItem onClick={() => changeRoute(NAV_LINKS.journal, reduxStates)}>Storage</MenuItem>
+                    <MenuItem onClick={() => changeRoute(NAV_LINKS.account, reduxStates)}>Account</MenuItem>
+                    <MenuItem onClick={() => changeRoute(NAV_LINKS.treasury, reduxStates)}>Treasury</MenuItem>
+                    <MenuItem onClick={() => changeRoute(NAV_LINKS.groupJournal, reduxStates)}>Community</MenuItem>
+                </Menu>
+            </Grid>
+        </Grid>
+    );
+
+    // return(
+    //     <div className={'linkDiv_Journal'}>
+    //         <div className={'navbar'}> 
+    //             <div className='menuIcon'>
+    //                 <IconContext.Provider value={{ color: 'white', size: 25}}>
+    //                     { sideBar ? 
+    //                         <ImIcons.ImCross onClick={showSideBar}/> : 
+    //                         <FaIcons.FaBars onClick={showSideBar}/>
+    //                     }
+    //                 </IconContext.Provider> 
+    //             </div>
                 
                 
                 
                 
-                <div className={'leftNav'}>
-                {pathname === NAV_LINKS.journal? <Dropdown
-                options={journalTabOptions}
-                changeHandler={changeHandler_journalTab}
-                />:''}
+    //             <div className={'leftNav'}>
+    //             {pathname === NAV_LINKS.journal? <Dropdown
+    //             options={journalTabOptions}
+    //             changeHandler={changeHandler_journalTab}
+    //             />:''}
                 
-                {pathname === NAV_LINKS.wallet? 
-                    <Dropdown 
-                        options={walletTabOptions}
-                        changeHandler={changeHandler_walletTab}
-                    />:
-                    ''
-                }
-                <div className={'notificationsIcon'} onClick={toggleDisplayNotifications}>  
+    //             {pathname === NAV_LINKS.wallet? 
+    //                 <Dropdown 
+    //                     options={walletTabOptions}
+    //                     changeHandler={changeHandler_walletTab}
+    //                 />:
+    //                 ''
+    //             }
+    //             <div className={'notificationsIcon'} onClick={toggleDisplayNotifications}>  
                 
-                    <IconContext.Provider value={{ color: 'white', size: 25}}>
-                        {NotificationIcon}
-                    </IconContext.Provider>
-                </div>
-                </div>
+    //                 <IconContext.Provider value={{ color: 'white', size: 25}}>
+    //                     {NotificationIcon}
+    //                 </IconContext.Provider>
+    //             </div>
+    //             </div>
                 
                                          
-            </div>
-            <nav className={`navBar_Journal ${sideBar ? 'active' : ''}`}>
-                <ul className={'unorderedList'}>
-                    <li className={'listItem'} onClick={() => changeRoute(NAV_LINKS.wallet, reduxStates)}>
-                        <IconContext.Provider value={{ color: 'white'}}>
-                            <IoiosIcons.IoIosWallet/> 
-                        </IconContext.Provider>
-                        <span>
-                            wallet
-                        </span>
-                    </li>
-                    <li className={'listItem'} onClick={() => changeRoute(NAV_LINKS.journal, reduxStates)}>
-                        <IconContext.Provider value={{ color: 'white'}}>
-                            <IoiosIcons.IoIosJournal/> 
-                        </IconContext.Provider>
-                        <span>
-                            journal
-                        </span>
-                    </li>
-                    <li className={'listItem'} onClick={() => changeRoute(NAV_LINKS.dashboard, reduxStates)}>
-                        <IconContext.Provider value={{ color: 'white'}}>
-                            <AiIcons.AiFillDashboard/> 
-                        </IconContext.Provider>
-                        <span>
-                            dashboard
-                        </span>
-                    </li>
-                    <li className={'listItem'} onClick={() => changeRoute(NAV_LINKS.account, reduxStates)}>
-                        <IconContext.Provider value={{ color: 'white'}}>
-                            <RiIcons.RiAccountPinCircleFill/> 
-                        </IconContext.Provider>
-                        <span>
-                            account
-                        </span>
-                    </li>
-                    <li className={'listItem'} onClick={() => changeRoute(NAV_LINKS.treasury, reduxStates)}>
-                        <IconContext.Provider value={{ color: 'white'}}>
-                            <GiIcons.GiOpenTreasureChest/> 
-                        </IconContext.Provider>
-                        <span>
-                            treasury
-                        </span>
-                    </li>
-                    <li className={'listItem'} onClick={() => changeRoute(NAV_LINKS.groupJournal, reduxStates)}>
-                        <IconContext.Provider value={{ color: 'white'}}>
-                            <GiIcons.GiOpenTreasureChest/> 
-                        </IconContext.Provider>
-                        <span>
-                            Group journal
-                        </span>
-                    </li>
-                </ul>
-                <ul className={'unorderedList bottom'}>
-                <ConnectButton/>
-                <ConnectDialog />
-                </ul>
-            </nav>
-        </div>
-    );
+    //         </div>
+    //         <nav className={`navBar_Journal ${sideBar ? 'active' : ''}`}>
+    //             <ul className={'unorderedList'}>
+    //             </ul>
+    //             <ul className={'unorderedList bottom'}>
+    //             <ConnectButton/>
+    //             <ConnectDialog />
+    //             </ul>
+    //         </nav>
+    //     </div>
+    // );
 }

@@ -5,7 +5,7 @@ import "./Button.scss";
 
 const ButtonField = (props) => {
     const {
-        calledByDataFieldComponent,
+        transparentBackground,
         isLoading,
         text,
         Icon,
@@ -13,7 +13,11 @@ const ButtonField = (props) => {
         onClick,
         disabled,
         elevation,
-        active
+        active,
+        id,
+        ariaControls,
+        ariaHaspopup,
+        ariaExpanded
     } = props;
     
     let doNothing = () => {};
@@ -25,8 +29,12 @@ const ButtonField = (props) => {
     let color = active ? 'custom' : 'white'
     let handleClick = disabled ? doNothing : onClick;
     return (
-            <Paper elevation={elevation ? elevation : 24} className={`${calledByDataFieldComponent ? "dataField" : ""} buttonField`} >
+            <Paper elevation={elevation ? elevation : 24} className={`${transparentBackground ? "transparentBackground" : ""} buttonField`} >
                 <ButtonType 
+                    aria-controls={ariaControls}
+                    aria-haspopup={ariaHaspopup}
+                    aria-expanded={ariaExpanded}
+                    id={id}
                     size={iconSize} 
                     color={color} 
                     endIcon={(text && Icon) ?<Icon/> : null} 

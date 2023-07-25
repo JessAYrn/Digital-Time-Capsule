@@ -121,10 +121,10 @@ const LoginPage = (props) => {
 
     return(
         <Grid container columns={12} xs={12} rowSpacing={8} display="flex" justifyContent="center" alignItems="center">
-            <Grid xs={12} display="flex" justifyContent="center" alignItems="center">
+            <Grid xs={11} md={9} display="flex" justifyContent="center" alignItems="center">
                 <img className={`logoImg`}src="../../../assets/P2.svg" alt="Logo"/>
             </Grid>
-            <Grid container xs={12}>
+            <Grid container xs={11} md={9}>
                 <Grid xs display="flex" justifyContent="center" alignItems="center">
                     <ButtonField
                         active={context === UI_CONTEXTS.WALLET}
@@ -146,7 +146,7 @@ const LoginPage = (props) => {
                     />
                 </Grid>
             </Grid>
-            <Grid container xs={12}>
+            <Grid container xs={11} md={9}>
                 <Grid xs display="flex" justifyContent="center" alignItems="center">
                     <ButtonField
                         active={context === UI_CONTEXTS.HOME_PAGE}
@@ -168,11 +168,11 @@ const LoginPage = (props) => {
                     />
                 </Grid>
             </Grid>
-            <Grid xs={12} display="flex" justifyContent="center" alignItems="center">
+            <Grid xs={11} md={9} display="flex" justifyContent="center" alignItems="center">
                 <ConnectButton/>
                 <ConnectDialog />
             </Grid>
-            <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"66%"}>
+            <Grid xs={11} md={9} display="flex" justifyContent="center" alignItems="center">
                 <DataField
                     label={'Front-end Canister Balance: '}
                     className={'loginPage'}
@@ -181,7 +181,7 @@ const LoginPage = (props) => {
                     disabled={true}
                 />
             </Grid>
-            <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"66%"}>
+            <Grid xs={11} md={9} display="flex" justifyContent="center" alignItems="center">
                 <DataField
                     label={'Back-end Canister Balance: '}
                     className={'loginPage'}
@@ -190,7 +190,7 @@ const LoginPage = (props) => {
                     disabled={true}
                 />
             </Grid>
-            <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"66%"}>
+            <Grid xs={11} md={9} display="flex" justifyContent="center" alignItems="center">
                 <AccordionField>
                     <div title={accordionContent[0].title} TitleComponent={Typography} TextComponent={Typography} image={accordionContent[0].image}></div>
                     <div title={accordionContent[1].title} TitleComponent={Typography} TextComponent={Typography} image={accordionContent[1].image}></div>

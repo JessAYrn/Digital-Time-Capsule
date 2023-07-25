@@ -40,7 +40,7 @@ return(
             context={UI_CONTEXTS.ACCOUNT_PAGE}
         />
     </div> : 
-    <div className='container__accountPage'>
+    <>
         <NavBar
             walletLink={true}
             journalLink={true}
@@ -49,6 +49,7 @@ return(
             notificationIcon={false}
             context={UI_CONTEXTS.ACCOUNT_PAGE}
         />
+        <div className='container__accountPage'>
         {accountState.isLoading ?
             <LoadScreen/> :
             <div className={`logoDiv account`}>
@@ -81,6 +82,7 @@ return(
                 </div>
             }
     </div>
+    </>
 )
 
 };

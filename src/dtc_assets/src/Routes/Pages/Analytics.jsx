@@ -13,8 +13,8 @@ import { CANISTER_DATA_FIELDS } from '../../functionsAndConstants/Constants';
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
 import Paper from '@mui/material/Paper';
-import ThumbUpIcon from '@mui/icons-material/ThumbUp';
-import ThumbDownIcon from '@mui/icons-material/ThumbDown';
+import HowToRegIcon from '@mui/icons-material/HowToReg';
+import UpgradeIcon from '@mui/icons-material/Upgrade';
 import ButtonField from '../../Components/Fields/Button';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import Grid from '@mui/material/Unstable_Grid2';
@@ -229,31 +229,22 @@ const Analytics = () => {
                 journalState.modalStatus.show ?
                     <Modal context={UI_CONTEXTS.HOME_PAGE} /> : 
                     <>
-                        <Grid 
-                        columns={12}
-                        xs={12} 
-                        rowSpacing={8} 
-                        display="flex" 
-                        justifyContent="center" 
-                        alignItems="center" 
-                        flexDirection={"column"}
-                        >
-                            <NavBar
-                                walletLink={true}
-                                journalLink={true}
-                                accountLink={true}
-                                dashboardLink={false}
-                                notificationIcon={false}
-                                context={UI_CONTEXTS.HOME_PAGE}
-                            />
-                        </Grid>
+                        <NavBar
+                            walletLink={true}
+                            journalLink={true}
+                            accountLink={true}
+                            dashboardLink={false}
+                            notificationIcon={false}
+                            context={UI_CONTEXTS.HOME_PAGE}
+                        />
                         {
                             homePageState.isLoading ? 
                             <LoadScreen/> :
                             <>
                                 <Grid 
                                 columns={12}
-                                xs={9} 
+                                xs={11}  
+                                md={9}
                                 rowSpacing={0} 
                                 display="flex" 
                                 justifyContent="center" 
@@ -326,7 +317,8 @@ const Analytics = () => {
                                 </Grid>
                                 <Grid 
                                     columns={12}
-                                    xs={9} 
+                                    xs={11} 
+                                    md={9}
                                     rowSpacing={0} 
                                     display="flex" 
                                     justifyContent="center" 
@@ -372,58 +364,85 @@ const Analytics = () => {
                                         </AccordionField>
                                     </Grid>
                                 </Grid> 
-                                {homePageState.canisterData.isOwner && 
-                                <div className={'switchDiv contentContainer '}>
-                                    <div className='section'>
-                                        <h5 className={'lebelH5'}> 
-                                            Activate Support Mode:  
-                                        </h5>
-                                    </div>
-                                    <div className='section'>
+                                <Grid 
+                                    columns={12}
+                                    xs={11} 
+                                    md={9}
+                                    rowSpacing={0} 
+                                >
+                                    <Grid
+                                        columns={12}
+                                        xs={12} 
+                                        rowSpacing={0} 
+                                        display="flex" 
+                                        justifyContent="center" 
+                                        alignItems="center" 
+                                        flexDirection={"column"}
+                                    >
                                         <Switch
-                                            active={homePageState.canisterData.supportMode}
+                                            labelLeft={"Activate Support Mode: "}
+                                            disabled={!homePageState.canisterData.isOwner}
+                                            checked={homePageState.canisterData.supportMode}
                                             onClick={toggleSupportMode}
                                         />
-                                    </div>
-                                </div>}
-                                {homePageState.canisterData.isOwner && 
-                                <div className={'switchDiv contentContainer '}>
-                                    <div className='section'>
-                                        <h5 className={'lebelH5'}> 
-                                            Receive Requests:  
-                                        </h5>
-                                    </div>
-                                    <div className='section'>
                                         <Switch
-                                            active={homePageState.canisterData.acceptingRequests}
+                                            checked={homePageState.canisterData.acceptingRequests}
                                             onClick={toggleAcceptRequest}
+                                            disabled={!homePageState.canisterData.isOwner}
+                                            labelLeft={"Receive Requests:  "}
                                         />
-                                    </div>
-                                </div>}
-                                {homePageState.canisterData.isOwner && 
-                                <div className={'switchDiv contentContainer '}>
-                                    <div className='section'>
-                                        <h5 className={'lebelH5'}> 
-                                            Cycles Saver Mode:  
-                                        </h5>
-                                    </div>
-                                    <div className='section'>
                                         <Switch
-                                            active={homePageState.canisterData.cyclesSaveMode}
+                                            checked={homePageState.canisterData.cyclesSaveMode}
                                             onClick={toggleCyclesSaveMode}
+                                            labelLeft={'Cycles Saver Mode: '}
+                                            disabled={!homePageState.canisterData.isOwner}
                                         />
-                                    </div>
-                                </div>}
-                                <ButtonField
-                                    text={' Register As New Owner '}
-                                    onClick={handleRegistration}
-                                />
-                                {homePageState.canisterData.isOwner &&
-                                    <ButtonField
-                                        text={' Upgrade Application '}
-                                        onClick={handleUpgrade}
-                                    />
-                                }
+                                    </Grid>
+                                    <Grid
+                                        columns={12}
+                                        xs={12} 
+                                        rowSpacing={0} 
+                                        display="flex" 
+                                        justifyContent="center" 
+                                        alignItems="center" 
+                                    >
+                                        <Grid columns={12} 
+                                            xs={6} 
+                                            width={"100%"} 
+                                            display={"flex"} 
+                                            justifyContent={"left"} 
+                                            alignItems={"center"}
+                                        >
+                                            <Grid xs={6} width={"110px"}>
+                                                <ButtonField
+                                                    text={'Manage'}
+                                                    onClick={handleRegistration}
+                                                    Icon={HowToRegIcon}
+                                                    active={homePageState.canisterData.isOwner}
+                                                    disabled={!homePageState.canisterData.isOwner}
+                                                />
+                                            </Grid>
+                                        </Grid>
+                                        <Grid 
+                                            columns={12} 
+                                            xs={6} 
+                                            width={"100%"} 
+                                            display={"flex"} 
+                                            justifyContent={"right"} 
+                                            alignItems={"center"}
+                                        >
+                                            <Grid xs={6} width={"110px"}>
+                                                <ButtonField
+                                                    Icon={UpgradeIcon}
+                                                    active={homePageState.canisterData.isOwner}
+                                                    text={'Upgrade'}
+                                                    onClick={handleUpgrade}
+                                                    disabled={!homePageState.canisterData.isOwner}
+                                                />
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
                             </>
                         }
                     </>
