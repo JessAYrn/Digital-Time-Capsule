@@ -43,7 +43,7 @@ export const usersTableColumns = [
         editable: false,
     },
     {
-        field: 'subsidyStatus',
+        field: 'approvalStatus',
         headerName: 'Subsidized',
         width: 90,
         type: 'boolean'

@@ -124,27 +124,30 @@ module{
         return #ok(updatedAppMetaData);
     };
 
-    public func updateApprovalStatus( principal: Principal, profilesMap: MainTypes.UserProfilesMap, newApprovalStatuse: Bool) : 
-    async Result.Result<(), JournalTypes.Error>{
+    public func updateApprovalStatus( principals: [Text], profilesMap: MainTypes.UserProfilesMap, newApprovalStatuse: Bool) : (){
 
-        let userProfile = profilesMap.get(principal);
-        switch(userProfile){
-            case null{ return #err(#NotFound); };
-            case(?profile){
-                let updatedProfile : MainTypes.UserProfile = {
-                    canisterId = profile.canisterId;
-                    email = profile.email;
-                    userName = profile.userName;
-                    userPrincipal = profile.userPrincipal;
-                    accountId = profile.accountId;
-                    approved = ?newApprovalStatuse;
-                    treasuryMember = profile.treasuryMember;
-                    treasuryContribution = profile.treasuryContribution;
-                    monthsSpentAsTreasuryMember = profile.monthsSpentAsTreasuryMember;
+        var index = 0;
+        while(index < principals.size()){
+            let principal = Principal.fromText(principals[index]);
+            let userProfile = profilesMap.get(principal);
+            switch(userProfile){
+                case null{};
+                case(?profile){
+                    let updatedProfile : MainTypes.UserProfile = {
+                        canisterId = profile.canisterId;
+                        email = profile.email;
+                        userName = profile.userName;
+                        userPrincipal = profile.userPrincipal;
+                        accountId = profile.accountId;
+                        approved = ?newApprovalStatuse;
+                        treasuryMember = profile.treasuryMember;
+                        treasuryContribution = profile.treasuryContribution;
+                        monthsSpentAsTreasuryMember = profile.monthsSpentAsTreasuryMember;
+                    };
+                    profilesMap.put(principal, updatedProfile);
                 };
-                profilesMap.put(principal, updatedProfile);
-                return #ok();
             };
+            index += 1;
         };
     };
 

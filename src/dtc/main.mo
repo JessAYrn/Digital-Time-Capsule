@@ -185,18 +185,13 @@ shared actor class User() = this {
         };
     };
 
-    public shared({caller}) func updateApprovalStatus(principal: Text, newApprovalStatus: Bool) : 
+    public shared({caller}) func updateApprovalStatus(principals: [Text], newApprovalStatus: Bool) : 
     async Result.Result<(MainTypes.ProfilesMetaData), JournalTypes.Error>{
         let callerIdAsText = Principal.toText(caller);
         if(callerIdAsText != appMetaData.nftOwner){ return #err(#NotAuthorized); };
-        let result = await CanisterManagementMethods.updateApprovalStatus(Principal.fromText(principal), userProfilesMap, newApprovalStatus);
-        switch(result){
-            case(#ok(_)){
-                let profilesApprovalStatuses = CanisterManagementMethods.getProfilesMetaData(userProfilesMap);
-                return #ok(profilesApprovalStatuses);
-            };
-            case(#err(e)){ return #err(e); }
-        };
+        CanisterManagementMethods.updateApprovalStatus(principals, userProfilesMap, newApprovalStatus);
+        let profilesApprovalStatuses = CanisterManagementMethods.getProfilesMetaData(userProfilesMap);
+        return #ok(profilesApprovalStatuses);
     };
 
     public shared({caller}) func removeFromRequestsList(principals: [Text]) : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error> {

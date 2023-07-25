@@ -27,7 +27,7 @@ import {homePageTypes} from '../../reducers/homePageReducer';
 import { inTrillions, round2Decimals, shortenHexString } from '../../functionsAndConstants/Utils';
 import { copyWalletAddressHelper } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
 import DataTable from '../../Components/Fields/Table';
-import { mapRequestsForAccessToTableRows, requestsForAccessTableColumns, usersTableColumns } from '../../mappers/dashboardMapperFunctions';
+import { mapRequestsForAccessToTableRows, mapUsersProfileDataToTableRows, requestsForAccessTableColumns, usersTableColumns } from '../../mappers/dashboardMapperFunctions';
 import { Typography } from '@mui/material';
 
 
@@ -70,23 +70,38 @@ const Analytics = () => {
         setRequestsTableIsLoading(false);
     };
 
-    const handleUpdateApprovalStatus = async (principal, newApprovalStatus) => {
-        homePageDispatch({
-            actionType: homePageTypes.SET_IS_LOADING,
-            payload: true
+    const subsidize = async (args) => {
+        setUsersTableIsLoading(true);
+        const {tableState} = args
+        let selectedRows = tableState.rowSelection;
+        let principals = selectedRows.map(rowId => {
+            let row = tableState.rows.dataRowIdToModelLookup[rowId];
+            return row.userPrincipal;
         });
-        let result = await actorState.backendActor.updateApprovalStatus(principal, newApprovalStatus);
-        result = result.ok;
-
+        let result = await actorState.backendActor.updateApprovalStatus(principals, true);
+        result = mapUsersProfileDataToTableRows(result.ok);
         homePageDispatch({
             actionType: homePageTypes.SET_CANISTER_DATA,
             payload: { ...homePageState.canisterData, profilesMetaData: result }
         })
+        setUsersTableIsLoading(false);
+    };
 
-        homePageDispatch({
-            actionType: homePageTypes.SET_IS_LOADING,
-            payload: false
+    const Unsubsidize = async (args) => {
+        setUsersTableIsLoading(true);
+        const {tableState} = args
+        let selectedRows = tableState.rowSelection;
+        let principals = selectedRows.map(rowId => {
+            let row = tableState.rows.dataRowIdToModelLookup[rowId];
+            return row.userPrincipal;
         });
+        let result = await actorState.backendActor.updateApprovalStatus(principals, false);
+        result = mapUsersProfileDataToTableRows(result.ok);
+        homePageDispatch({
+            actionType: homePageTypes.SET_CANISTER_DATA,
+            payload: { ...homePageState.canisterData, profilesMetaData: result }
+        })
+        setUsersTableIsLoading(false);
     };
 
     const toggleAcceptRequest = async () => {
@@ -342,8 +357,8 @@ const Analytics = () => {
                                             TitleComponent={Typography} 
                                             TextComponent={Typography}
                                             iconSize={"medium"}
-                                            onClick_button_1={() => {}}
-                                            onClick_button_2={() => {}}
+                                            onClick_button_1={subsidize}
+                                            onClick_button_2={Unsubsidize}
                                             text_1={'Subsidize'}
                                             text_2={'Unsubsidize'}
                                             disabled={!homePageState.canisterData.isOwner}
@@ -357,76 +372,6 @@ const Analytics = () => {
                                         </AccordionField>
                                     </Grid>
                                 </Grid> 
-                                {/* <Grid 
-                                    columns={12}
-                                    xs={9} 
-                                    rowSpacing={0} 
-                                    display="flex" 
-                                    justifyContent="center" 
-                                    alignItems="center" 
-                                    flexDirection={"column"}
-                                >
-                                    <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
-                                        <AccordionField>
-                                        <div 
-                                            title={"DAO Participants"} 
-                                            TitleComponent={Typography} 
-                                            TextComponent={Typography}
-                                            iconSize={"medium"}
-                                            onClick_button_1={() => {}}
-                                            onClick_button_2={() => {}}
-                                            text_1={'Subsidize'}
-                                            text_2={'Unsubsidize'}
-                                            disabled={!homePageState.canisterData.isOwner}
-                                            isLoading={usersTableIsLoading}
-                                            columns={usersTableColumns}
-                                            rows={homePageState.canisterData.profilesMetaData}
-                                            Icon_1={CheckIcon}
-                                            Icon_2={ClearIcon}
-                                            CustomComponent={DataTable}
-                                        ></div>
-                                        </AccordionField>
-                                    </Grid>
-                                </Grid>  */}
-                                {/* <div className={'transparentDiv__homePage__dataFields contentContainer '}>
-                                    <div className={'AnalyticsDiv'}>
-                                        <div className={'AnalyticsContentContainer array'}>
-                                        <h4 className='requestingAccessH4'>  User Principals </h4>
-                                        {homePageState.canisterData.profilesMetaData.map(({userPrincipal, approvalStatus, canisterId}) => {
-                                                const onClick1 = (approvalStatus) ? 
-                                                () => handleUpdateApprovalStatus(userPrincipal, !approvalStatus) : 
-                                                () => {};
-
-                                                const onClick0 = (approvalStatus) ? 
-                                                () => {} : 
-                                                () => handleUpdateApprovalStatus(userPrincipal, !approvalStatus);
-                                                return (
-                                                    <div className={'dataFieldRow'}>
-                                                        <DataField
-                                                            text={userPrincipal}
-                                                            isPrincipal={true}
-                                                            buttonIcon_1={homePageState.canisterData.isOwner ? ClearIcon : null}
-                                                            buttonIcon_0={homePageState.canisterData.isOwner ? CheckIcon : null}
-                                                            onClick_1={onClick1}
-                                                            onClick_0={onClick0}
-                                                        />
-                                                        {approvalStatus &&
-                                                        <div className={'approvalStatusDiv'}>
-                                                                <ThumbUpIcon/>
-                                                            <h6> Suibsidized </h6>
-                                                        </div>}
-                                                        {!approvalStatus &&
-                                                        <div className={'approvalStatusDiv'}>
-                                                                <ThumbDownIcon/>
-                                                            <h6> Unsubsidized </h6>
-                                                        </div>}
-                                                    </div>
-                                                )
-                                            })
-                                        }
-                                        </div>
-                                    </div>
-                                </div> */}
                                 {homePageState.canisterData.isOwner && 
                                 <div className={'switchDiv contentContainer '}>
                                     <div className='section'>
