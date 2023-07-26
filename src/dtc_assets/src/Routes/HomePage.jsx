@@ -12,14 +12,13 @@ import walletReducer,{walletTypes, walletInitialState} from '../reducers/walletR
 import accountReducer , {accountTypes, accountInitialState} from '../reducers/accountReducer';
 import homePageReducer,{homePageInitialState,homePageTypes} from '../reducers/homePageReducer';
 import actorReducer, { actorInitialState, actorTypes } from '../reducers/actorReducer';
-
-
-
+import notificationsReducer, {notificationsInitialState, notificationsTypes} from "../reducers/notificationsReducer";
 
 export const AppContext = createContext(DEFAULT_APP_CONTEXTS);
 
 const HomePage = () => {
     const [journalState, journalDispatch] = useReducer(journalReducer, initialState);
+    const [notificationsState, notificationsDispatch] = useReducer(notificationsReducer, notificationsInitialState);
     const [walletState, walletDispatch] = useReducer(walletReducer, walletInitialState);
     const [accountState, accountDispatch] = useReducer(accountReducer, accountInitialState);
     const [homePageState, homePageDispatch] = useReducer(homePageReducer, homePageInitialState);
@@ -37,7 +36,8 @@ const HomePage = () => {
         journalDispatch,
         accountDispatch,
         homePageDispatch,
-        actorDispatch
+        actorDispatch,
+        notificationsDispatch
     }
 
     const ReducerTypes={
@@ -45,7 +45,8 @@ const HomePage = () => {
         walletTypes,
         accountTypes,
         homePageTypes,
-        actorTypes
+        actorTypes,
+        notificationsTypes
     }
 
     const ReducerStates = {
@@ -53,7 +54,8 @@ const HomePage = () => {
         walletState,
         accountState,
         homePageState,
-        actorState
+        actorState,
+        notificationsState
     };
 
     // dispatch state from previous route to redux store if that state exists
@@ -80,7 +82,9 @@ const HomePage = () => {
                 homePageDispatch,
                 homePageState,
                 actorDispatch,
-                actorState
+                actorState,
+                notificationsState,
+                notificationsDispatch
             }}
         >
 

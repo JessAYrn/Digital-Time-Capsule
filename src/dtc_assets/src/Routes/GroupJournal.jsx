@@ -11,15 +11,13 @@ import walletReducer, { walletInitialState,walletTypes } from '../reducers/walle
 import homePageReducer, { homePageInitialState,homePageTypes } from '../reducers/homePageReducer';
 import accountReducer, { accountInitialState,accountTypes } from '../reducers/accountReducer';
 import actorReducer, { actorInitialState,actorTypes } from '../reducers/actorReducer';
-
-
-
-
+import notificationsReducer, {notificationsInitialState, notificationsTypes} from "../reducers/notificationsReducer";
 
 export const AppContext = createContext(DEFAULT_APP_CONTEXTS);
 
 const GroupJournal = () => {
     const [journalState, journalDispatch] = useReducer(journalReducer, initialState);
+    const [notificationsState, notificationsDispatch] = useReducer(notificationsReducer, notificationsInitialState);
     const [walletState, walletDispatch] = useReducer(walletReducer, walletInitialState);
     const [homePageState, homePageDispatch] =  useReducer(homePageReducer, homePageInitialState)
     const [accountState, accountDispatch] =  useReducer(accountReducer, accountInitialState)
@@ -31,7 +29,8 @@ const GroupJournal = () => {
         journalDispatch,
         accountDispatch,
         actorDispatch,
-        homePageDispatch
+        homePageDispatch,
+        notificationsDispatch
     }
 
     const ReducerTypes={
@@ -39,7 +38,8 @@ const GroupJournal = () => {
         walletTypes,
         accountTypes,
         actorTypes,
-        homePageTypes
+        homePageTypes,
+        notificationsTypes
     }
 
     const ReducerStates = {
@@ -47,7 +47,8 @@ const GroupJournal = () => {
         walletState,
         accountState,
         homePageState,
-        actorState
+        actorState,
+        notificationsState
     };
     
     window.onbeforeunload = window.history.replaceState(null, '');
@@ -79,6 +80,8 @@ const GroupJournal = () => {
         homePageState,
         actorReducer,
         actorState,
+        notificationsState,
+        notificationsDispatch
     }}
     >
         {           

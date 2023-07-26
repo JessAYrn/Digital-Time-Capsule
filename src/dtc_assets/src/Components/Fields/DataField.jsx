@@ -23,7 +23,7 @@ const DataField = (props) => {
                     <Grid xs={6} display="flex" justifyContent="center" alignItems="center">
                         <Typography style={{width: "100%", display:"flex", justifyContent:"left", alignItems:"center"}}>{label}</Typography>
                     </Grid>
-                    <Grid xs={6} display="flex" justifyContent="center" alignItems="center">
+                    <Grid xs={6} display="flex" justifyContent="right" alignItems="center">
                         <ButtonField
                             transparentBackground={true}
                             elevation={0}

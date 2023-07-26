@@ -11,12 +11,14 @@ import { DEFAULT_APP_CONTEXTS } from '../functionsAndConstants/Constants';
 import walletReducer,{ walletInitialState, walletTypes } from '../reducers/walletReducer';
 import homePageReducer, { homePageInitialState, homePageTypes } from '../reducers/homePageReducer';
 import actorReducer, { actorInitialState,actorTypes } from "../reducers/actorReducer";
+import notificationsReducer, {notificationsInitialState, notificationsTypes} from "../reducers/notificationsReducer";
 
 export const AppContext = createContext(DEFAULT_APP_CONTEXTS);
 
 const AccountPage = () => {
 
     const [journalState, journalDispatch] = useReducer(journalReducer, initialState);
+    const [notificationsState, notificationsDispatch] = useReducer(notificationsReducer, notificationsInitialState);
     const [accountState, accountDispatch] = useReducer(accountReducer, accountInitialState);
     const [walletState, walletDispatch]=useReducer(walletReducer,walletInitialState);
     const [homePageState, homePageDispatch]=useReducer(homePageReducer,homePageInitialState);
@@ -34,7 +36,8 @@ const AccountPage = () => {
         journalDispatch,
         accountDispatch,
         homePageDispatch,
-        actorDispatch
+        actorDispatch,
+        notificationsDispatch
     }
 
     const ReducerTypes={
@@ -42,7 +45,8 @@ const AccountPage = () => {
         walletTypes,
         accountTypes,
         homePageTypes,
-        actorTypes
+        actorTypes,
+        notificationsTypes
     }
 
     const ReducerStates = {
@@ -50,7 +54,8 @@ const AccountPage = () => {
         walletState,
         accountState,
         homePageState,
-        actorState
+        actorState,
+        notificationsState
     };
 
     // gets state from previous route
@@ -76,7 +81,9 @@ const AccountPage = () => {
                 homePageState,
                 homePageDispatch,
                 actorState,
-                actorDispatch
+                actorDispatch,
+                notificationsState,
+                notificationsDispatch
             }}
         >
             {

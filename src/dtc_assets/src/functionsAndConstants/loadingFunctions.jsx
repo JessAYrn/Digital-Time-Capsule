@@ -10,9 +10,9 @@ export const loadAllDataIntoReduxStores = async (states, dispatchFunctions, type
     //doesn't reload data if the data has already been recovered
     if(stateHasBeenRecovered) return; 
 
-    let {walletState, homePageState, journalState, actorState, accountState} = states;
-    let {journalDispatch, walletDispatch, homePageDispatch, accountDispatch} = dispatchFunctions;
-    let {journalTypes, walletTypes, homePageTypes, accountTypes } = types;
+    let {walletState, homePageState, journalState, actorState, accountState, notificationsState} = states;
+    let {journalDispatch, walletDispatch, homePageDispatch, accountDispatch, notificationsDispatch} = dispatchFunctions;
+    let {journalTypes, walletTypes, homePageTypes, accountTypes, notificationsTypes } = types;
 
     // sets isLoading property to true for all reducers
     setAllContexsIsLoading(dispatchFunctions, types, true);
@@ -30,6 +30,7 @@ export const loadAllDataIntoReduxStores = async (states, dispatchFunctions, type
     if(!homePageState.dataHasBeenLoaded) promises.push(loadCanisterData(actorState, homePageDispatch, homePageTypes));
     if(!journalState.dataHasBeenLoaded) promises.push(loadJournalData(actorState, journalDispatch, journalTypes));
     if(!accountState. dataHasBeenLoaded) promises.push(loadAccountData(actorState, accountDispatch, accountTypes));
+    if(!notificationsState.dataHasBeenLoaded) promises.push(loadNotificationsData(actorState, notificationsDispatch, notificationsTypes))
     await Promise.all(promises);
 
     // sets isLoading property to false for all reducers
@@ -43,6 +44,19 @@ export const setAllContexsIsLoading = (dispatchFunctions, types, bool) => {
     walletDispatch( { actionType: walletTypes.SET_IS_LOADING, payload: bool } );
     homePageDispatch( { actionType: homePageTypes.SET_IS_LOADING, payload: bool } );
     accountDispatch( { actionType: accountTypes.SET_IS_LOADING, payload: bool } );
+
+};
+
+export const loadNotificationsData = async (actorState, notificationsDispatch, notificationsTypes) => {
+    let notificationsData = await actorState.backendActor.getNotifications();
+    notificationsDispatch({
+        actionType: notificationsTypes.SET_NOTIFICATIONS,
+        payload: notificationsData
+    });
+    notificationsDispatch({
+        actionType: notificationsTypes.SET_DATA_HAS_BEEN_LOADED,
+        payload: true
+    });
 };
 
 export const loadAccountData = async (actorState, accountDispatch, accountTypes) => {
@@ -67,16 +81,9 @@ export const loadAccountData = async (actorState, accountDispatch, accountTypes)
 export const loadJournalData = async (actorState, journalDispatch, types) => {
     let journal = await actorState.backendActor.readJournal();
     journal = journal.ok;
-    let { userJournalData, notifications } = journal;
+    let { userJournalData } = journal;
     let [journalEntries, journalBio] = userJournalData;
     journalEntries = mapApiObjectToFrontEndJournalEntriesObject(journalEntries);
-    
-    if(notifications){
-        journalDispatch({
-            actionType: types.SET_NOTIFICATIONS,
-            payload: notifications
-        });
-    };
     journalDispatch({
         payload: journalBio,
         actionType: types.SET_BIO
@@ -169,7 +176,7 @@ export const recoverState = async ( location, dispatchMethods, types, connection
     // dispatch state from previous route to redux store if that state exists
     if(!location.state) return;
     setStateHasBeenRecovered(true);
-    const{journal,wallet,homePage, account}=location.state;
+    const{journal,wallet,homePage, account, notifications}=location.state;
     if(dispatchMethods.journalDispatch){
         dispatchMethods.journalDispatch({
             actionType: types.journalTypes.SET_ENTIRE_REDUX_STATE,
@@ -195,6 +202,13 @@ export const recoverState = async ( location, dispatchMethods, types, connection
         dispatchMethods.accountDispatch({
             actionType: types.accountTypes.SET_ENTIRE_ACCOUNT_REDUX_STATE,
             payload: account
+        })
+    }
+
+    if(dispatchMethods.notificationsDispatch){
+        dispatchMethods.notificationsDispatch({
+            actionType: types.notificationsTypes.SET_ENTIRE_NOTIFICATIONS_REDUX_STATE,
+            payload: notifications
         })
     }
 

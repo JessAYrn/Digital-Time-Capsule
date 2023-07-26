@@ -15,12 +15,14 @@ import { DEFAULT_APP_CONTEXTS, WALLET_TABS } from '../functionsAndConstants/Cons
 import accountReducer , {accountTypes, accountInitialState} from '../reducers/accountReducer';
 import homePageReducer,{ homePageInitialState, homePageTypes } from '../reducers/homePageReducer';
 import actorReducer , { actorInitialState, actorTypes } from '../reducers/actorReducer';
+import notificationsReducer, {notificationsInitialState, notificationsTypes} from "../reducers/notificationsReducer";
 
 export const AppContext = createContext(DEFAULT_APP_CONTEXTS);
 
 const WalletApp = () => {
 
     const [journalState, journalDispatch] = useReducer(journalReducer, initialState);
+    const [notificationsState, notificationsDispatch] = useReducer(notificationsReducer, notificationsInitialState);
     const [walletState, walletDispatch] = useReducer(walletReducer, walletInitialState);
     const [accountState, accountDispatch] = useReducer(accountReducer, accountInitialState);
     const [homePageState, homePageDispatch] = useReducer(homePageReducer, homePageInitialState);
@@ -32,7 +34,8 @@ const WalletApp = () => {
         journalDispatch,
         accountDispatch,
         homePageDispatch,
-        actorDispatch
+        actorDispatch,
+        notificationsDispatch
     }
 
     const ReducerTypes = {
@@ -40,7 +43,8 @@ const WalletApp = () => {
         walletTypes,
         accountTypes,
         homePageTypes,
-        actorTypes
+        actorTypes,
+        notificationsTypes
     }
 
     const ReducerStates = {
@@ -48,7 +52,8 @@ const WalletApp = () => {
         walletState,
         accountState,
         homePageState,
-        actorState
+        actorState,
+        notificationsState
     };
 
     const connectionResult = useConnect({ onConnect: () => {}, onDisconnect: () => {} });
@@ -92,7 +97,9 @@ const WalletApp = () => {
                     homePageDispatch,
                     homePageState,
                     actorDispatch,
-                    actorState
+                    actorState,
+                    notificationsState,
+                    notificationsDispatch
                 }}
             >
                 {

@@ -8,10 +8,7 @@ import { AppContext as WalletContext} from '../../Routes/Wallet';
 import { AppContext as TreasuryContext} from '../../Routes/Treasury';
 import { AppContext as GroupJournalContext} from '../../Routes/GroupJournal';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
-import * as FaIcons from 'react-icons/fa';
 import MenuIcon from '@mui/icons-material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import Menu from '@mui/material/Menu';
 import { types } from '../../reducers/journalReducer';
 import { MODALS_TYPES } from '../../functionsAndConstants/Constants';
 import { ConnectButton, ConnectDialog, useConnect } from "@connect2ic/react";
@@ -21,20 +18,13 @@ import Dropdown from '../Fields/Dropdown';
 import { walletTypes } from '../../reducers/walletReducer';
 import { retrieveContext } from '../../functionsAndConstants/Contexts';
 import ButtonField from '../Fields/Button';
-
+import MenuField from "../Fields/MenuField";
+import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
+import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 
 
 
 export const NavBar = (props) => {
-
-    const [anchorEl, setAnchorEl] = useState(null);
-    const open = Boolean(anchorEl);
-    const handleClick = (event) => {
-        setAnchorEl(event.currentTarget);
-    };
-    const handleClose = () => {
-        setAnchorEl(null);
-    };
 
     const {
         unreadNotifications,
@@ -60,15 +50,12 @@ export const NavBar = (props) => {
         accountState,
         accountDispatch,
         homePageState,
-        homePageDispatch
+        homePageDispatch,
+        notificationsState,
+        notificationsDispatch
     } = useContext(AppContext);
 
-    const toggleDisplayNotifications = () => {
-        journalDispatch({
-            actionType: types.SET_MODAL_STATUS,
-            payload: {show: !journalState.modalStatus.show, which: MODALS_TYPES.notifications}
-        });
-    };
+    console.log(notificationsState);
 
     const [sideBar, setSideBar] = useState(false);
 
@@ -81,16 +68,13 @@ export const NavBar = (props) => {
         journal: journalState,
         wallet: walletState,
         account: accountState,
-        homePage: homePageState
+        homePage: homePageState,
+        notifications: notificationsState
     };
 
     const changeRoute = (route, states) => {
         navigate(route, { replace: false, state: states });
     };
-
-    const showSideBar = () => {
-        setSideBar(!sideBar)
-    }
 
     useConnect({
         onConnect: () => {},
@@ -131,39 +115,41 @@ export const NavBar = (props) => {
     const {pathname} = useLocation();
 
     const NotificationIcon = unreadNotifications && unreadNotifications.length ?
-        <FaIcons.FaBell/> : 
-        <FaIcons.FaRegBell/>;
+        NotificationsActiveIcon : 
+        NotificationsNoneIcon;
+
+    const mainMenuItemProps = [
+        { text: "Wallet", onClick: () => changeRoute(NAV_LINKS.wallet, reduxStates) },
+        { text: "Storage", onClick: () => changeRoute(NAV_LINKS.journal, reduxStates) },
+        { text: "Treasury", onClick: () => changeRoute(NAV_LINKS.treasury, reduxStates) },
+        { text: "Dashboard", onClick: () => changeRoute(NAV_LINKS.dashboard, reduxStates) },
+        { text: "Community", onClick: () => changeRoute(NAV_LINKS.groupJournal, reduxStates) },
+        { text: "Account", onClick: () => changeRoute(NAV_LINKS.account, reduxStates) }
+    ];
 
     return (
         <Grid xs={12} display="flex" justifyContent="center" alignItems="center" padding={0} className={'navBarContainer'}>
-            <Grid xs={12} display="flex" justifyContent="left" alignItems="center" padding={0} sx={{height: "110px"}}>
-                <ButtonField
-                    transparentBackground={true}
-                    id="basic-button"
-                    ariaControls={open ? 'basic-menu' : undefined}
-                    ariaHaspopup="true"
-                    ariaExpanded={open ? 'true' : undefined}
-                    onClick={handleClick}
-                    Icon={MenuIcon}
-                    active={true}
-                />
-                <Menu
-                    id="basic-menu"
-                    anchorEl={anchorEl}
-                    open={open}
-                    onClose={handleClose}
-                    MenuListProps={{
-                    'aria-labelledby': 'basic-button',
-                    }}
-                >
-                    <MenuItem onClick={() => changeRoute(NAV_LINKS.wallet, reduxStates)}>Wallet</MenuItem>
-                    <MenuItem onClick={() => changeRoute(NAV_LINKS.dashboard, reduxStates)}>Dashboard</MenuItem>
-                    <MenuItem onClick={() => changeRoute(NAV_LINKS.journal, reduxStates)}>Storage</MenuItem>
-                    <MenuItem onClick={() => changeRoute(NAV_LINKS.account, reduxStates)}>Account</MenuItem>
-                    <MenuItem onClick={() => changeRoute(NAV_LINKS.treasury, reduxStates)}>Treasury</MenuItem>
-                    <MenuItem onClick={() => changeRoute(NAV_LINKS.groupJournal, reduxStates)}>Community</MenuItem>
-                </Menu>
-            </Grid>
+            <MenuField
+                MenuIcon={MenuIcon}
+                xs={6}
+                display={"flex"}
+                alignItems={"center"}
+                justifyContent={"left"}
+                active={true}
+                sx={{height: "110px"}}
+                menuItemProps={mainMenuItemProps}
+            />
+            <MenuField
+                MenuIcon={NotificationIcon}
+                xs={6}
+                display={"flex"}
+                alignItems={"center"}
+                justifyContent={"right"}
+                active={false}
+                sx={{height: "110px"}}
+                menuItemProps={mainMenuItemProps}
+            />
+
         </Grid>
     );
 

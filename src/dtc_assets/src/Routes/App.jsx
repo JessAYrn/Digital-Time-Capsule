@@ -14,11 +14,13 @@ import { DEFAULT_APP_CONTEXTS, JOURNAL_TABS } from '../functionsAndConstants/Con
 import homePageReducer,{ homePageInitialState, homePageTypes } from '../reducers/homePageReducer';
 import accountReducer,{ accountInitialState, accountTypes } from '../reducers/accountReducer';
 import actorReducer, { actorInitialState, actorTypes } from '../reducers/actorReducer';
+import notificationsReducer, {notificationsInitialState, notificationsTypes} from "../reducers/notificationsReducer";
 
 export const AppContext = createContext({...DEFAULT_APP_CONTEXTS, submissionsMade: 0, setSubmissionsMade: () => {} });
 
 const App = () => {
     const [journalState, journalDispatch] = useReducer(journalReducer, initialState);
+    const [notificationsState, notificationsDispatch] = useReducer(notificationsReducer, notificationsInitialState);
     const [walletState, walletDispatch] = useReducer(walletReducer, walletInitialState);
     const [homePageState, homePageDispatch] =  useReducer(homePageReducer, homePageInitialState)
     const [accountState, accountDispatch] =  useReducer(accountReducer, accountInitialState)
@@ -37,7 +39,8 @@ const App = () => {
         walletDispatch,
         homePageDispatch,
         accountDispatch,
-        actorDispatch
+        actorDispatch,
+        notificationsDispatch
     }
 
     const ReducerTypes={
@@ -45,7 +48,8 @@ const App = () => {
         walletTypes,
         homePageTypes,
         accountTypes,
-        actorTypes
+        actorTypes,
+        notificationsTypes
     }
 
     const ReducerStates = {
@@ -53,7 +57,8 @@ const App = () => {
         walletState,
         accountState,
         homePageState,
-        actorState
+        actorState,
+        notificationsState
     };
 
     // dispatch state from previous route to redux store if that state exists
@@ -88,7 +93,9 @@ const App = () => {
                 actorState,
                 submissionsMade,
                 setSubmissionsMade,
-                actorDispatch
+                actorDispatch,
+                notificationsState,
+                notificationsDispatch
             }}
         >
             {

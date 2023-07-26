@@ -11,13 +11,13 @@ import accountReducer , {accountTypes, accountInitialState} from '../reducers/ac
 import walletReducer,{ walletInitialState, walletTypes } from '../reducers/walletReducer';
 import actorReducer, { actorInitialState, actorTypes } from '../reducers/actorReducer';
 import homePageReducer,{ homePageInitialState, homePageTypes } from '../reducers/homePageReducer';
-
-
+import notificationsReducer, {notificationsInitialState, notificationsTypes} from "../reducers/notificationsReducer";
 
 export const AppContext = createContext(DEFAULT_APP_CONTEXTS);
 
 const Treasury = () => {
     const [journalState, journalDispatch] = useReducer(journalReducer, initialState);
+    const [notificationsState, notificationsDispatch] = useReducer(notificationsReducer, notificationsInitialState);
     const [accountState, accountDispatch] = useReducer(accountReducer, accountInitialState);
     const [walletState, walletDispatch]=useReducer(walletReducer,walletInitialState);
     const [actorState, actorDispatch]= useReducer(actorReducer, actorInitialState);
@@ -33,7 +33,8 @@ const Treasury = () => {
         journalDispatch,
         accountDispatch,
         actorDispatch,
-        homePageDispatch
+        homePageDispatch,
+        notificationsDispatch
     }
 
     const ReducerTypes={
@@ -41,7 +42,8 @@ const Treasury = () => {
         walletTypes,
         accountTypes,
         actorTypes,
-        homePageTypes
+        homePageTypes,
+        notificationsTypes
     }
 
     const ReducerStates = {
@@ -49,7 +51,8 @@ const Treasury = () => {
         walletState,
         accountState,
         homePageState,
-        actorState
+        actorState,
+        notificationsState
     };
     
     //gets state from previous route
@@ -73,7 +76,9 @@ const Treasury = () => {
         homePageDispatch,
         homePageState,
         actorDispatch,
-        actorState
+        actorState,
+        notificationsState,
+        notificationsDispatch
     }}
     >
         {           
