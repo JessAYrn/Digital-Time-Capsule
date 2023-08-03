@@ -26,10 +26,7 @@ import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 
 export const NavBar = (props) => {
 
-    const {
-        unreadNotifications,
-        context
-    } = props;
+    const { context, isLoading } = props;
 
     let contexts = {
         WalletContext,
@@ -55,8 +52,6 @@ export const NavBar = (props) => {
         notificationsDispatch
     } = useContext(AppContext);
 
-    console.log(notificationsState);
-
     const [sideBar, setSideBar] = useState(false);
 
     let navigate = useNavigate();
@@ -74,6 +69,11 @@ export const NavBar = (props) => {
 
     const changeRoute = (route, states) => {
         navigate(route, { replace: false, state: states });
+    };
+
+    const onClick_notifications = (key, route, states) => {
+        //call journalDispatch to openPage that corresponds to the given key
+        changeRoute(route, states);
     };
 
     useConnect({
@@ -114,9 +114,7 @@ export const NavBar = (props) => {
     }
     const {pathname} = useLocation();
 
-    const NotificationIcon = unreadNotifications && unreadNotifications.length ?
-        NotificationsActiveIcon : 
-        NotificationsNoneIcon;
+    const NotificationIcon =  notificationsState.notifications.length ? NotificationsActiveIcon : NotificationsNoneIcon;
 
     const mainMenuItemProps = [
         { text: "Wallet", onClick: () => changeRoute(NAV_LINKS.wallet, reduxStates) },
@@ -127,8 +125,20 @@ export const NavBar = (props) => {
         { text: "Account", onClick: () => changeRoute(NAV_LINKS.account, reduxStates) }
     ];
 
+    const notificationsMenuItemProps = notificationsState.notifications.map(({key, text}) => {
+        const key_ = key[0];
+        return { text, onClick: () => onClick_notifications(key_, NAV_LINKS.journal, reduxStates) };
+    });
+
     return (
-        <Grid xs={12} display="flex" justifyContent="center" alignItems="center" padding={0} className={'navBarContainer'}>
+        <Grid 
+            xs={12} 
+            display="flex" 
+            justifyContent="center" 
+            alignItems="center" 
+            padding={0} 
+            className={'navBarContainer'} 
+            zIndex={10}>
             <MenuField
                 MenuIcon={MenuIcon}
                 xs={6}
@@ -136,7 +146,8 @@ export const NavBar = (props) => {
                 alignItems={"center"}
                 justifyContent={"left"}
                 active={true}
-                sx={{height: "110px"}}
+                disabled={isLoading}
+                color={"custom"}
                 menuItemProps={mainMenuItemProps}
             />
             <MenuField
@@ -145,9 +156,10 @@ export const NavBar = (props) => {
                 display={"flex"}
                 alignItems={"center"}
                 justifyContent={"right"}
-                active={false}
-                sx={{height: "110px"}}
-                menuItemProps={mainMenuItemProps}
+                active={true}
+                isLoading={isLoading}
+                color={"custom"}
+                menuItemProps={notificationsMenuItemProps}
             />
 
         </Grid>

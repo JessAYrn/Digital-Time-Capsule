@@ -1,5 +1,8 @@
-.DataGridTable{
+.dataGridTable{
     color: white !important;
-    background-color: #343434;
+    background-color: rgba(52,52,52, 0.8);
 };
 
+.transparent.dataGridTable{
+    background-color: rgba(52,52,52, 0.5);
+}

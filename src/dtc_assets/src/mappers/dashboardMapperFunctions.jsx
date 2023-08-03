@@ -1,6 +1,9 @@
 export const requestsForAccessTableColumns = [
-    { field: 'id', 
-    headerName: '#', width: 90 },
+    { 
+        field: 'id', 
+        headerName: '#', 
+        width: 90 
+    },
     {
       field: 'userPrincipal',
       headerName: 'User Principal',
@@ -22,8 +25,11 @@ export const requestsForAccessTableColumns = [
 ];
 
 export const usersTableColumns = [
-    { field: 'id', 
-    headerName: '#', width: 90 },
+    { 
+        field: 'id', 
+        headerName: '#', 
+        width: 90 
+    },
     {
       field: 'userPrincipal',
       headerName: 'User Principal',

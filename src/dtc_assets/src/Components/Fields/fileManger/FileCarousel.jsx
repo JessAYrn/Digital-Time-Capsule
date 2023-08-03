@@ -158,7 +158,7 @@ const FileCarousel = (props) => {
                     )
                 })}
             </div>
-            {editMode && lastFileIsPopulated && !maxNumberOfFilesReached && !withoutButtons &&
+            {/* {editMode && lastFileIsPopulated && !maxNumberOfFilesReached && !withoutButtons &&
                 <ButtonField
                 Icon={BiIcons.BiImageAdd}
                 iconSize={25}
@@ -172,7 +172,7 @@ const FileCarousel = (props) => {
                 iconColor={'white'}
                 className={'editFileCarousel'}
                 onClick={toggleEditMode}
-            />}
+            />} */}
         </div>
     )
 };

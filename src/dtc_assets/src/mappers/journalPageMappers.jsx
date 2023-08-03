@@ -1,41 +1,47 @@
 import { milisecondsToNanoSeconds } from "../functionsAndConstants/Utils";
-import { file1FileIndex, file2FileIndex } from "../functionsAndConstants/Constants";
 import { nanoSecondsToMiliSeconds, getDateAsString, dateAisLaterThanOrSameAsDateB } from "../functionsAndConstants/Utils";
 import { TEST_DATA_FOR_NOTIFICATIONS } from "../testData/notificationsTestData";
 
+export const journalPagesTableColumns = [
+    { 
+        field: 'entryKey', 
+        headerName: 'Key', 
+        width: 90,
+        editable: false
+    },
+    { 
+        field: 'dateSubmitted', 
+        headerName: 'Submitted', 
+        width: 200,
+        editable: false
+    },
+    {
+      field: 'location',
+      headerName: 'Location',
+      width: 200,
+      editable: false,
+    },
+    {
+        field: 'available',
+        headerName: 'Available',
+        width: 200,
+        editable: false,
+    }
+];
 
-export const mapAndSendJournalPageRequestToApi = async (key, pageData, files, actor) => {
-
-    const [currentChunkIndex, setCurrentChunkIndex] = useState(0);
-
-    let blob1;
-    let blob2;
-
-    await files.file1.arrayBuffer().then((arrayBuffer) => {
-        blob1 = new Blob([...new Uint8Array(arrayBuffer)], {type: files.file1.type });
+export const mapRequestsForAccessToTableRows = (journalEntries) => {
+    const journalEntries_ = journalEntries.map((page) => {
+        return {
+            id: page.entryKey,
+            entryKey: page.entryKey,
+            dateSubmitted: page.date,
+            location: page.location,
+            available: page.unlockTime
+        }
     });
+    return journalEntries_;
+}
 
-    await files.file2.arrayBuffer().then((arrayBuffer) => {
-        blob2 = new Blob([...new Uint8Array(arrayBuffer)], {type: files.file2.type });
-    });
-
-
-
-    const journalEntry = {
-        date: pageData.date,
-        text: pageData.entry,
-        lockTime: pageData.lockTime * 2.592 * 10**15,
-        timeTillUnlock: pageData.lockTime * 2.592 * 10**15,
-        location: pageData.location,
-        entryTitle: "test"
-    };
-
-    
-    const entry = (journalEntry, {file1: blob1, file2: blob2});
-    const entryKey = (key) ? {entryKey: key}: [];
-    await actor.updateJournal(entryKey, entry);
-
-};
 
 export const mapApiObjectToFrontEndJournalEntriesObject = (journalEntries) => {
     let journalEntriesForFrontend = journalEntries.map((arrayWithKeyAndPage) => {

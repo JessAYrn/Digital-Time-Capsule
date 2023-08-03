@@ -17,7 +17,9 @@ const ButtonField = (props) => {
         id,
         ariaControls,
         ariaHaspopup,
-        ariaExpanded
+        ariaExpanded,
+        color,
+        className
     } = props;
     
     let doNothing = () => {};
@@ -26,17 +28,19 @@ const ButtonField = (props) => {
     if(isLoading !== undefined ) ButtonType = LoadingButton;
     else if(text) ButtonType = Button;
     else ButtonType = IconButton;
-    let color = active ? 'custom' : 'white'
+    let color_ = active ? 'custom' : 'white'
     let handleClick = disabled ? doNothing : onClick;
     return (
-            <Paper elevation={elevation ? elevation : 24} className={`${transparentBackground ? "transparentBackground" : ""} buttonField`} >
+            <Paper 
+            elevation={elevation ? elevation : 24} 
+            className={`${transparentBackground ? "transparentBackground" : ""} ${className} buttonField`} >
                 <ButtonType 
                     aria-controls={ariaControls}
                     aria-haspopup={ariaHaspopup}
                     aria-expanded={ariaExpanded}
                     id={id}
                     size={iconSize} 
-                    color={color} 
+                    color={color || color_} 
                     endIcon={(text && Icon) ?<Icon/> : null} 
                     onClick={handleClick}
                     disabled={disabled}

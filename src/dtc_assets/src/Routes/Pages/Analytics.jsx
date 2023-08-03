@@ -224,229 +224,230 @@ const Analytics = () => {
     };
 
     return(
-        <Grid container columns={12} xs={12} rowSpacing={8} display="flex" justifyContent="center" alignItems="center" flexDirection={"column"}>
-            {   
-                journalState.modalStatus.show ?
-                    <Modal context={UI_CONTEXTS.HOME_PAGE} /> : 
-                    <>
-                        <NavBar
-                            walletLink={true}
-                            journalLink={true}
-                            accountLink={true}
-                            dashboardLink={false}
-                            notificationIcon={false}
-                            context={UI_CONTEXTS.HOME_PAGE}
-                        />
-                        {
-                            homePageState.isLoading ? 
-                            <LoadScreen/> :
-                            <>
-                                <Grid 
-                                columns={12}
-                                xs={11}  
-                                md={9}
-                                rowSpacing={0} 
-                                display="flex" 
-                                justifyContent="center" 
-                                alignItems="center" 
-                                flexDirection={"column"}
-                                >
-                                    <Paper className='analytics paper'>
-                                        <DataField
-                                            label={'Journals Created:'}
-                                            text={homePageState.canisterData[CANISTER_DATA_FIELDS.journalCount]}
-                                            disabled={true}
-                                        />
-                                        <DataField
-                                            label={'Frontend Canister Principal:'}
-                                            text={`${shortenHexString(homePageState.canisterData[CANISTER_DATA_FIELDS.frontEndPrincipal])}`}
-                                            isPrincipal={true}
-                                            buttonIcon={ContentCopyIcon}
-                                            onClick={
-                                                () => copyWalletAddressHelper(
-                                                    homePageState.canisterData[CANISTER_DATA_FIELDS.frontEndPrincipal]
-                                                )
-                                            }
-                                        />
-                                        <DataField
-                                            label={'Backend Canister Principal:'}
-                                            text={`${shortenHexString(homePageState.canisterData[CANISTER_DATA_FIELDS.backEndPrincipal])}`}
-                                            isPrincipal={true}
-                                            buttonIcon={ContentCopyIcon}
-                                            onClick={
-                                                () => copyWalletAddressHelper(
-                                                    homePageState.canisterData[CANISTER_DATA_FIELDS.backEndPrincipal]
-                                                )
-                                            }
-                                        />
-                                        <DataField
-                                            label={'Cycles Burned Per Day:'}
-                                            text={`${round2Decimals(inTrillions(homePageState.canisterData[CANISTER_DATA_FIELDS.backEndCyclesBurnRatePerDay]))} T`}
-                                            isCycles={true}
-                                            disabled={true}
-                                        />
-                                        <DataField
-                                            label={'Frontend Cycles Balance:'}
-                                            text={`${round2Decimals(inTrillions(homePageState.canisterData[CANISTER_DATA_FIELDS.currentCyclesBalance_frontend]))} T`}
-                                            isCycles={true}
-                                            disabled={true}
-                                        />
-                                        <DataField
-                                            label={'Backend Cycles Balance:'}
-                                            text={`${round2Decimals(inTrillions(homePageState.canisterData[CANISTER_DATA_FIELDS.currentCyclesBalance_backend]))} T`}
-                                            isCycles={true}
-                                            disabled={true}
-                                        />
-                                        <DataField
-                                            label={'Canister Owner:'}
-                                            text={`${shortenHexString(homePageState.canisterData[CANISTER_DATA_FIELDS.nftOwner])}`}
-                                            isPrincipal={true}
-                                            buttonIcon={ContentCopyIcon}
-                                            onClick={
-                                                () => copyWalletAddressHelper(
-                                                    homePageState.canisterData[CANISTER_DATA_FIELDS.nftOwner]
-                                                )
-                                            }
-                                        />
-                                        <DataField
-                                            label={'NFT ID:'}
-                                            text={homePageState.canisterData[CANISTER_DATA_FIELDS.nftId]}
-                                            disabled={true}
-                                        />
-                                    </Paper>
+        homePageState.isLoading ? 
+        <LoadScreen/> :
+        journalState.modalStatus.show ?
+        <Modal context={UI_CONTEXTS.HOME_PAGE} /> : 
+        <Grid 
+            container 
+            columns={12} 
+            xs={12} 
+            rowSpacing={8} 
+            display="flex" 
+            justifyContent="center" 
+            alignItems="center" 
+            flexDirection={"column"}
+            className={"container_analytics"}
+        > 
+            <NavBar context={UI_CONTEXTS.HOME_PAGE}/>
+                <>
+                    <Grid 
+                    columns={12}
+                    xs={11}  
+                    md={9}
+                    rowSpacing={0} 
+                    display="flex" 
+                    justifyContent="center" 
+                    alignItems="center" 
+                    flexDirection={"column"}
+                    >
+                        <Paper className='analytics paper'>
+                            <DataField
+                                label={'Journals Created:'}
+                                text={homePageState.canisterData[CANISTER_DATA_FIELDS.journalCount]}
+                                disabled={true}
+                            />
+                            <DataField
+                                label={'Frontend Canister Principal:'}
+                                text={`${shortenHexString(homePageState.canisterData[CANISTER_DATA_FIELDS.frontEndPrincipal])}`}
+                                isPrincipal={true}
+                                buttonIcon={ContentCopyIcon}
+                                onClick={
+                                    () => copyWalletAddressHelper(
+                                        homePageState.canisterData[CANISTER_DATA_FIELDS.frontEndPrincipal]
+                                    )
+                                }
+                            />
+                            <DataField
+                                label={'Backend Canister Principal:'}
+                                text={`${shortenHexString(homePageState.canisterData[CANISTER_DATA_FIELDS.backEndPrincipal])}`}
+                                isPrincipal={true}
+                                buttonIcon={ContentCopyIcon}
+                                onClick={
+                                    () => copyWalletAddressHelper(
+                                        homePageState.canisterData[CANISTER_DATA_FIELDS.backEndPrincipal]
+                                    )
+                                }
+                            />
+                            <DataField
+                                label={'Cycles Burned Per Day:'}
+                                text={`${round2Decimals(inTrillions(homePageState.canisterData[CANISTER_DATA_FIELDS.backEndCyclesBurnRatePerDay]))} T`}
+                                isCycles={true}
+                                disabled={true}
+                            />
+                            <DataField
+                                label={'Frontend Cycles Balance:'}
+                                text={`${round2Decimals(inTrillions(homePageState.canisterData[CANISTER_DATA_FIELDS.currentCyclesBalance_frontend]))} T`}
+                                isCycles={true}
+                                disabled={true}
+                            />
+                            <DataField
+                                label={'Backend Cycles Balance:'}
+                                text={`${round2Decimals(inTrillions(homePageState.canisterData[CANISTER_DATA_FIELDS.currentCyclesBalance_backend]))} T`}
+                                isCycles={true}
+                                disabled={true}
+                            />
+                            <DataField
+                                label={'Canister Owner:'}
+                                text={`${shortenHexString(homePageState.canisterData[CANISTER_DATA_FIELDS.nftOwner])}`}
+                                isPrincipal={true}
+                                buttonIcon={ContentCopyIcon}
+                                onClick={
+                                    () => copyWalletAddressHelper(
+                                        homePageState.canisterData[CANISTER_DATA_FIELDS.nftOwner]
+                                    )
+                                }
+                            />
+                            <DataField
+                                label={'NFT ID:'}
+                                text={homePageState.canisterData[CANISTER_DATA_FIELDS.nftId]}
+                                disabled={true}
+                            />
+                        </Paper>
+                    </Grid>
+                    <Grid 
+                        columns={12}
+                        xs={11} 
+                        md={9}
+                        rowSpacing={0} 
+                        display="flex" 
+                        justifyContent="center" 
+                        alignItems="center" 
+                        flexDirection={"column"}
+                    >
+                        <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
+                            <AccordionField>
+                            <div 
+                                title={"Principals Requesting Access"} 
+                                TitleComponent={Typography} 
+                                TextComponent={Typography}
+                                iconSize={"medium"}
+                                onClick_button_1={onGrantAccess}
+                                onClick_button_2={onDenyAccess}
+                                text_1={'Approve'}
+                                text_2={'Deny'}
+                                transparent={true}
+                                checkboxSelection={true}
+                                disabled={!homePageState.canisterData.isOwner}
+                                isLoading={requestsTableIsLoading}
+                                columns={requestsForAccessTableColumns}
+                                rows={homePageState.canisterData.requestsForAccess}
+                                Icon_1={CheckIcon}
+                                Icon_2={ClearIcon}
+                                CustomComponent={DataTable}
+                            ></div>
+                            <div 
+                                title={"DAO Participants"} 
+                                TitleComponent={Typography} 
+                                TextComponent={Typography}
+                                iconSize={"medium"}
+                                onClick_button_1={subsidize}
+                                onClick_button_2={Unsubsidize}
+                                text_1={'Subsidize'}
+                                text_2={'Unsubsidize'}
+                                transparent={true}
+                                checkboxSelection={true}
+                                disabled={!homePageState.canisterData.isOwner}
+                                isLoading={usersTableIsLoading}
+                                columns={usersTableColumns}
+                                rows={homePageState.canisterData.profilesMetaData}
+                                Icon_1={CheckIcon}
+                                Icon_2={ClearIcon}
+                                CustomComponent={DataTable}
+                            ></div>
+                            </AccordionField>
+                        </Grid>
+                    </Grid> 
+                    <Grid 
+                        columns={12}
+                        xs={11} 
+                        md={9}
+                        rowSpacing={0} 
+                    >
+                        <Grid
+                            columns={12}
+                            xs={12} 
+                            rowSpacing={0} 
+                            display="flex" 
+                            justifyContent="center" 
+                            alignItems="center" 
+                            flexDirection={"column"}
+                        >
+                            <Switch
+                                labelLeft={"Activate Support Mode: "}
+                                disabled={!homePageState.canisterData.isOwner}
+                                checked={homePageState.canisterData.supportMode}
+                                onClick={toggleSupportMode}
+                            />
+                            <Switch
+                                checked={homePageState.canisterData.acceptingRequests}
+                                onClick={toggleAcceptRequest}
+                                disabled={!homePageState.canisterData.isOwner}
+                                labelLeft={"Receive Requests:  "}
+                            />
+                            <Switch
+                                checked={homePageState.canisterData.cyclesSaveMode}
+                                onClick={toggleCyclesSaveMode}
+                                labelLeft={'Cycles Saver Mode: '}
+                                disabled={!homePageState.canisterData.isOwner}
+                            />
+                        </Grid>
+                        <Grid
+                            columns={12}
+                            xs={12} 
+                            rowSpacing={0} 
+                            display="flex" 
+                            justifyContent="center" 
+                            alignItems="center" 
+                        >
+                            <Grid columns={12} 
+                                xs={6} 
+                                width={"100%"} 
+                                display={"flex"} 
+                                justifyContent={"left"} 
+                                alignItems={"center"}
+                            >
+                                <Grid xs={6} width={"110px"}>
+                                    <ButtonField
+                                        text={'Manage'}
+                                        onClick={handleRegistration}
+                                        Icon={HowToRegIcon}
+                                        active={homePageState.canisterData.isOwner}
+                                        disabled={!homePageState.canisterData.isOwner}
+                                    />
                                 </Grid>
-                                <Grid 
-                                    columns={12}
-                                    xs={11} 
-                                    md={9}
-                                    rowSpacing={0} 
-                                    display="flex" 
-                                    justifyContent="center" 
-                                    alignItems="center" 
-                                    flexDirection={"column"}
-                                >
-                                    <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
-                                        <AccordionField>
-                                        <div 
-                                            title={"Principals Requesting Access"} 
-                                            TitleComponent={Typography} 
-                                            TextComponent={Typography}
-                                            iconSize={"medium"}
-                                            onClick_button_1={onGrantAccess}
-                                            onClick_button_2={onDenyAccess}
-                                            text_1={'Approve'}
-                                            text_2={'Deny'}
-                                            disabled={!homePageState.canisterData.isOwner}
-                                            isLoading={requestsTableIsLoading}
-                                            columns={requestsForAccessTableColumns}
-                                            rows={homePageState.canisterData.requestsForAccess}
-                                            Icon_1={CheckIcon}
-                                            Icon_2={ClearIcon}
-                                            CustomComponent={DataTable}
-                                        ></div>
-                                        <div 
-                                            title={"DAO Participants"} 
-                                            TitleComponent={Typography} 
-                                            TextComponent={Typography}
-                                            iconSize={"medium"}
-                                            onClick_button_1={subsidize}
-                                            onClick_button_2={Unsubsidize}
-                                            text_1={'Subsidize'}
-                                            text_2={'Unsubsidize'}
-                                            disabled={!homePageState.canisterData.isOwner}
-                                            isLoading={usersTableIsLoading}
-                                            columns={usersTableColumns}
-                                            rows={homePageState.canisterData.profilesMetaData}
-                                            Icon_1={CheckIcon}
-                                            Icon_2={ClearIcon}
-                                            CustomComponent={DataTable}
-                                        ></div>
-                                        </AccordionField>
-                                    </Grid>
-                                </Grid> 
-                                <Grid 
-                                    columns={12}
-                                    xs={11} 
-                                    md={9}
-                                    rowSpacing={0} 
-                                >
-                                    <Grid
-                                        columns={12}
-                                        xs={12} 
-                                        rowSpacing={0} 
-                                        display="flex" 
-                                        justifyContent="center" 
-                                        alignItems="center" 
-                                        flexDirection={"column"}
-                                    >
-                                        <Switch
-                                            labelLeft={"Activate Support Mode: "}
-                                            disabled={!homePageState.canisterData.isOwner}
-                                            checked={homePageState.canisterData.supportMode}
-                                            onClick={toggleSupportMode}
-                                        />
-                                        <Switch
-                                            checked={homePageState.canisterData.acceptingRequests}
-                                            onClick={toggleAcceptRequest}
-                                            disabled={!homePageState.canisterData.isOwner}
-                                            labelLeft={"Receive Requests:  "}
-                                        />
-                                        <Switch
-                                            checked={homePageState.canisterData.cyclesSaveMode}
-                                            onClick={toggleCyclesSaveMode}
-                                            labelLeft={'Cycles Saver Mode: '}
-                                            disabled={!homePageState.canisterData.isOwner}
-                                        />
-                                    </Grid>
-                                    <Grid
-                                        columns={12}
-                                        xs={12} 
-                                        rowSpacing={0} 
-                                        display="flex" 
-                                        justifyContent="center" 
-                                        alignItems="center" 
-                                    >
-                                        <Grid columns={12} 
-                                            xs={6} 
-                                            width={"100%"} 
-                                            display={"flex"} 
-                                            justifyContent={"left"} 
-                                            alignItems={"center"}
-                                        >
-                                            <Grid xs={6} width={"110px"}>
-                                                <ButtonField
-                                                    text={'Manage'}
-                                                    onClick={handleRegistration}
-                                                    Icon={HowToRegIcon}
-                                                    active={homePageState.canisterData.isOwner}
-                                                    disabled={!homePageState.canisterData.isOwner}
-                                                />
-                                            </Grid>
-                                        </Grid>
-                                        <Grid 
-                                            columns={12} 
-                                            xs={6} 
-                                            width={"100%"} 
-                                            display={"flex"} 
-                                            justifyContent={"right"} 
-                                            alignItems={"center"}
-                                        >
-                                            <Grid xs={6} width={"110px"}>
-                                                <ButtonField
-                                                    Icon={UpgradeIcon}
-                                                    active={homePageState.canisterData.isOwner}
-                                                    text={'Upgrade'}
-                                                    onClick={handleUpgrade}
-                                                    disabled={!homePageState.canisterData.isOwner}
-                                                />
-                                            </Grid>
-                                        </Grid>
-                                    </Grid>
+                            </Grid>
+                            <Grid 
+                                columns={12} 
+                                xs={6} 
+                                width={"100%"} 
+                                display={"flex"} 
+                                justifyContent={"right"} 
+                                alignItems={"center"}
+                            >
+                                <Grid xs={6} width={"110px"}>
+                                    <ButtonField
+                                        Icon={UpgradeIcon}
+                                        active={homePageState.canisterData.isOwner}
+                                        text={'Upgrade'}
+                                        onClick={handleUpgrade}
+                                        disabled={!homePageState.canisterData.isOwner}
+                                    />
                                 </Grid>
-                            </>
-                        }
-                    </>
-            }
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </>
         </Grid>
         
     )

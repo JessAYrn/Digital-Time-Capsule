@@ -14,6 +14,7 @@ const DataTable = (props) => {
         columns, 
         onCellEditStop, 
         isLoading, 
+        onRowClick,
         Icon_1, 
         Icon_2,
         text_1, 
@@ -21,7 +22,9 @@ const DataTable = (props) => {
         iconSize,
         disabled,
         onClick_button_1, 
-        onClick_button_2 
+        onClick_button_2,
+        transparent,
+        checkboxSelection
     } = props;
     const [pageSize, setPageSize] = useState(5);
     const [tableState, setTableState] = useState({});
@@ -38,10 +41,10 @@ const DataTable = (props) => {
         <Grid display="flex" justifyContent="center" alignItems="center" width={"100%"} flexDirection="column">
             <Box sx={{ height: 400, width: '100%', color: "white" }}>
                 <DataGrid
+                    className={`${transparent ? "transparent" : ""} dataGridTable`}
                     sx={{
                         boxShadow: 2,
                         border: 2,
-                        backgroundColor: 'secondary.main',
                         '& .MuiDataGrid-cell': {
                             color: 'secondary.main'
                         },
@@ -70,12 +73,13 @@ const DataTable = (props) => {
                     onCellEditStop={rowState => {}}
                     onStateChange={ (state) => onStateChange_(state) }
                     columns={columns}
+                    onRowClick={(row) => {console.log(row)}}
                     rows={rows}
                     getRowId={(row) => row.id}
                     rowsPerPageOptions={[5,10,20]}
                     pageSizeOptions={[5,10,20]}
                     pageSize={pageSize}
-                    checkboxSelection={!disabled}
+                    checkboxSelection={!disabled && checkboxSelection}
                     onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
                     setPageSize={(newPageSize) => setPageSize(newPageSize)}
                 />

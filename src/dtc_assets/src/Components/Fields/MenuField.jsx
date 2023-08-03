@@ -6,14 +6,16 @@ import ButtonField from '../Fields/Button';
 
 const MenuField = (props) => {
     const {
+        isLoading,
         menuItemProps,
         xs,
         display,
         justifyContent,
         alignItems,
         sx,
+        disabled,
         MenuIcon,
-        active
+        color
     } = props;
 
     const [anchorEl, setAnchorEl] = useState(null);
@@ -28,14 +30,16 @@ const MenuField = (props) => {
     return(
         <Grid xs={xs} display={display} justifyContent={justifyContent} alignItems={alignItems} padding={0} sx={sx}>
             <ButtonField
+                isLoading={isLoading}
                 transparentBackground={true}
                 id="basic-button"
+                disabled={disabled}
                 ariaControls={open ? 'basic-menu' : undefined}
                 ariaHaspopup="true"
                 ariaExpanded={open ? 'true' : undefined}
                 onClick={handleClick}
                 Icon={MenuIcon}
-                active={active}
+                color={color}
             />
             <Menu
                 id="basic-menu"
