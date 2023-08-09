@@ -179,8 +179,8 @@ const Analytics = () => {
         });
         let success = true;
         try{
-            await actorState.backendActor.upgradeApp_exceptForBackendCanister();
-            await actorState.managerActor.installCode_backendCanister();
+            const canisterData = await actorState.backendActor.upgradeApp_exceptForBackendCanister();
+            await actorState.managerActor.installCode_backendCanister(canisterData);
         } catch(e){
             console.log("Error: ", e);
             success = false;

@@ -114,31 +114,14 @@ shared(msg) actor class Journal (principal : Principal) = this {
         return #ok(());
     };
 
-    public shared({caller}) func createEntry( journalEntry : JournalTypes.JournalEntryInput) : 
-    async Result.Result<([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio), JournalTypes.Error> {
+    public shared({caller}) func createEntry() : 
+    async Result.Result<([JournalTypes.JournalEntryExportKeyValuePair]), JournalTypes.Error> {
         if( Principal.toText(caller) != mainCanisterId_ ) { return #err(#NotAuthorized); };
-
-        let completeEntry  = {
-            entryTitle = journalEntry.entryTitle;
-            text = journalEntry.text;
-            location = journalEntry.location;
-            date = journalEntry.date;
-            unlockTime = journalEntry.unlockTime;
-            sent = false;
-            read = false;
-            draft = journalEntry.draft;
-            emailOne = journalEntry.emailOne;
-            emailTwo = journalEntry.emailTwo;
-            emailThree = journalEntry.emailThree;
-            filesMetaData  = journalEntry.filesMetaData;
-        };
-        
-        journalMap.put(journalEntryIndex, completeEntry);
-
+        journalMap.put(journalEntryIndex, { JournalTypes.JournalEntryDefault with timeStarted = Time.now(); });
         journalEntryIndex += 1;
-
         let journalAsArray = Iter.toArray(journalMap.entries());
-        #ok(((journalAsArray), biography));
+        let journalAsArrayExport = mapJournalEntriesArrayToExport(journalAsArray);
+        #ok(journalAsArrayExport);
     };
 
     public shared({caller}) func clearUnsubmittedFiles(): async Result.Result<(), JournalTypes.Error> {
@@ -202,28 +185,29 @@ shared(msg) actor class Journal (principal : Principal) = this {
     };
 
     public shared({caller}) func readJournal() : 
-    async ([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio, Text) {
+    async ([JournalTypes.JournalEntryExportKeyValuePair], JournalTypes.Bio, Text) {
         if( Principal.toText(caller) != mainCanisterId_ ) { throw Error.reject("Unauthorized access."); };
         let journalAsArray = Iter.toArray(journalMap.entries());
+        let currentTime = Time.now();
+        let journalAsArrayExport = mapJournalEntriesArrayToExport(journalAsArray);
         let journalCanisterPrincipal = Principal.fromActor(this); 
-        return ((journalAsArray), biography, Principal.toText(journalCanisterPrincipal));
+        return (journalAsArrayExport, biography, Principal.toText(journalCanisterPrincipal));
     };
 
     public shared({caller}) func updateNotifications(): async (){
         if( Principal.toText(caller) != mainCanisterId_) { throw Error.reject("Unauthorized access."); };
         let notificationsBuffer = Buffer.fromArray<NotificationsTypes.Notification>(notifications);
         let journalIter = journalMap.entries();
-        Iter.iterate<(Nat, JournalTypes.JournalEntry)>(journalIter, func((key, entry) : (Nat, JournalTypes.JournalEntry), _index) {
-            let {
-                entryTitle; text; location; date; unlockTime; sent; read; draft; emailOne; emailTwo; emailThree; filesMetaData;
-            } = entry;
-            if(sent == false and Time.now() >= unlockTime){
-                let text_notification = Text.concat("Journal Entry Unlocked: ", date);
+        let currentTime = Time.now();
+        Iter.iterate<JournalTypes.JournalEntryKeyValuePair>(
+            journalIter, 
+            func((key, entry) : JournalTypes.JournalEntryKeyValuePair, _index) {
+            let { notified; timeOfUnlock; title } = entry;
+            let timeOfUnlock_ = Option.get(timeOfUnlock, currentTime - 1);
+            if(notified == false and currentTime > timeOfUnlock_){
+                let text_notification = Text.concat("Journal Entry Unlocked: ", title);
                 notificationsBuffer.add({key = ?key; text = text_notification});
-                let updatedJournalEntry = {
-                    entryTitle; text; location; date; unlockTime; read; draft; emailOne; emailTwo; emailThree; filesMetaData;
-                    sent = true;
-                };
+                let updatedJournalEntry = { entry with notified = true; };
                 journalMap.put(key,updatedJournalEntry);
             };
         });
@@ -240,29 +224,18 @@ shared(msg) actor class Journal (principal : Principal) = this {
         notifications := [];
     };
 
-    public shared({caller}) func readJournalEntry(key : Nat): async Result.Result<JournalTypes.JournalEntry, JournalTypes.Error> {
+    public shared({caller}) func markJournalEntryAsRead(key : Nat): 
+    async Result.Result<(), JournalTypes.Error> {
         if( Principal.toText(caller) != mainCanisterId_) { return #err(#NotAuthorized); };
         let entry = journalMap.get(key);
-
         switch(entry){
             case null{ #err(#NotFound); };
             case(? entryValue){
-                let updatedEntryValue : JournalTypes.JournalEntry = {
-                    entryTitle = entryValue.entryTitle;
-                    text = entryValue.text;
-                    location = entryValue.location;
-                    date = entryValue.date;
-                    unlockTime = entryValue.unlockTime;
-                    sent = true;
-                    read = true;
-                    draft = entryValue.draft;
-                    emailOne = entryValue.emailOne;
-                    emailTwo = entryValue.emailTwo;
-                    emailThree = entryValue.emailThree;
-                    filesMetaData  = entryValue.filesMetaData;
+                let updatedEntryValue : JournalTypes.JournalEntryExport = { 
+                    entryValue with notified = true; read = true; locked = false;
                 };
                 journalMap.put(key,updatedEntryValue);
-                #ok(updatedEntryValue);
+                #ok(());
             };
         }
     };
@@ -320,40 +293,28 @@ shared(msg) actor class Journal (principal : Principal) = this {
         #ok(biography);
     };
 
-    public shared({caller}) func updateJournalEntry(key: Nat, journalEntry: JournalTypes.JournalEntryInput) : 
-    async Result.Result<([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio),JournalTypes.Error> {
+    public shared({caller}) func updateJournalEntry(key: Nat, journalEntry: JournalTypes.JournalEntry) : 
+    async Result.Result<([JournalTypes.JournalEntryExportKeyValuePair]),JournalTypes.Error> {
         if( Principal.toText(caller) != mainCanisterId_) { return #err(#NotAuthorized); };
         let entry = journalMap.get(key);
 
         switch(entry){
             case null{ #err(#NotFound); };
             case (? v){
-
-                let completeEntry  = {
-                    entryTitle = journalEntry.entryTitle;
-                    text = journalEntry.text;
-                    location = journalEntry.location;
-                    date = journalEntry.date;
-                    unlockTime = journalEntry.unlockTime;
-                    sent = false;
-                    read = false;
-                    draft = journalEntry.draft;
-                    emailOne = journalEntry.emailOne;
-                    emailTwo = journalEntry.emailTwo;
-                    emailThree = journalEntry.emailThree;
-                    filesMetaData  = journalEntry.filesMetaData;
-
-                };
+                let { submitted } = v;
+                if(submitted){ return #err(#NotAuthorized) };
+                let completeEntry  = { journalEntry with notified = false; read = false; };
                 journalMap.put(key,completeEntry);
                 let journalAsArray = Iter.toArray(journalMap.entries());
-                #ok((journalAsArray, biography));
+                let journalAsArrayExport = mapJournalEntriesArrayToExport(journalAsArray);
+                #ok(journalAsArrayExport);
             }
         }
 
     };
 
     public shared({caller}) func deleteJournalEntry(key: Nat) : 
-    async Result.Result<([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio),JournalTypes.Error> {
+    async Result.Result<(),JournalTypes.Error> {
         if( Principal.toText(caller) != mainCanisterId_) { return #err(#NotAuthorized); };
         let entry = journalMap.get(key);
 
@@ -362,7 +323,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
             case (? v){
                 let updatedJournal = journalMap.delete(key);
                 let journalAsArray = Iter.toArray(journalMap.entries());
-                #ok((journalAsArray), biography);
+                let journalAsArrayExport = mapJournalEntriesArrayToExport(journalAsArray);
+                #ok(());
             };
         };
 
@@ -450,6 +412,18 @@ shared(msg) actor class Journal (principal : Principal) = this {
         filesArray := [];
         txHistoryArray := [];
         unsubmittedFilesArray := [];
+    };
+
+    private func mapJournalEntriesArrayToExport(journalAsArray: [JournalTypes.JournalEntryKeyValuePair]) : 
+    [JournalTypes.JournalEntryExportKeyValuePair] {
+        let currentTime = Time.now();
+        let journalAsArrayExport = Array.map<JournalTypes.JournalEntryKeyValuePair, JournalTypes.JournalEntryExportKeyValuePair>(
+            journalAsArray, func ((key, entry): JournalTypes.JournalEntryKeyValuePair) : JournalTypes.JournalEntryExportKeyValuePair{
+                let timeOfUnlock = Option.get(entry.timeOfUnlock, currentTime - 1);
+                let entryExport = { entry with locked = currentTime < timeOfUnlock; };
+                return (key, entryExport);
+        });
+        return journalAsArrayExport;
     };
    
     private  func key(x: Principal) : Trie.Key<Principal> {

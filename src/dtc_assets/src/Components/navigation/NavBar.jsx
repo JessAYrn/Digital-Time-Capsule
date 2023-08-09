@@ -72,7 +72,11 @@ export const NavBar = (props) => {
     };
 
     const onClick_notifications = (key, route, states) => {
-        //call journalDispatch to openPage that corresponds to the given key
+        journalDispatch({
+            actionType: types.CHANGE_PAGE_IS_OPEN,
+            payload: true,
+            entryKey: key
+        });
         changeRoute(route, states);
     };
 

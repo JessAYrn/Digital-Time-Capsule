@@ -30,31 +30,47 @@ module {
     };
 
     public type JournalEntry = {
-        entryTitle: Text;
+        title: Text;
         text: Text;
         location: Text;
-        date: Text;
-        unlockTime: Int;
-        sent: Bool;
-        emailOne: Text;
-        emailTwo: Text;
-        emailThree: Text;
+        timeStarted: Int;
+        timeSubmited: ?Int;
+        timeOfUnlock: ?Int;
+        notified: Bool;
         read: Bool;
-        draft: Bool;
+        submitted: Bool;
         filesMetaData : [FileMetaData];
     }; 
 
-    public type JournalEntryInput = {
-        entryTitle: Text;
+    public type JournalEntryKeyValuePair = (Nat, JournalEntry);
+
+    public type JournalEntryExport = {
+        title: Text;
         text: Text;
         location: Text;
-        date: Text;
-        unlockTime: Int;
-        emailOne: Text;
-        emailTwo: Text;
-        emailThree: Text;
-        draft: Bool;
+        timeStarted: Int;
+        timeSubmited: ?Int;
+        timeOfUnlock: ?Int;
+        notified: Bool;
+        read: Bool;
+        submitted: Bool;
+        locked: Bool;
         filesMetaData : [FileMetaData];
+    };
+
+    public type JournalEntryExportKeyValuePair = (Nat, JournalEntryExport);
+
+    public let JournalEntryDefault = {
+        title = " ";
+        text =  " ";
+        location = " ";
+        timeStarted =  0;
+        timeSubmited = null;
+        timeOfUnlock = null;
+        submitted = false;
+        filesMetaData = [];
+        notified = false;
+        read = false;
     };
 
     public type JournalMap = HashMap.HashMap<Nat, JournalEntry>;
@@ -83,8 +99,7 @@ module {
     };
 
     public type ReadJournalResult = {
-        userJournalData : ([(Nat,JournalEntry)], Bio); 
-        notifications: NotificationsTypes.Notifications;
+        userJournalData : ([JournalEntryExportKeyValuePair], Bio); 
         email: ?Text; 
         userName: ?Text;
         principal: Text;

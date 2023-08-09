@@ -81,11 +81,6 @@ shared actor class User() = this {
         return result;
     };
 
-    public shared({ caller }) func readEntry(entryKey: JournalTypes.EntryKey) : async Result.Result<JournalTypes.JournalEntry, JournalTypes.Error> {
-        let result = await JournalHelperMethods.readEntry(caller, userProfilesMap, entryKey);
-        return result;
-    };
-
     public shared({ caller }) func readEntryFileChunk(fileId: Text, chunkId: Nat) : async Result.Result<(Blob),JournalTypes.Error>{
         let result = await JournalHelperMethods.readEntryFileChunk(caller, userProfilesMap, fileId, chunkId);
         return result;
@@ -107,9 +102,25 @@ shared actor class User() = this {
         return result;
     };
 
-    public shared({caller}) func updateJournalEntry(entryKey : ?JournalTypes.EntryKey, entry : ?JournalTypes.JournalEntryInput) : 
-    async Result.Result<([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio), JournalTypes.Error> {
-        let result = await JournalHelperMethods.updateJournalEntry(caller, userProfilesMap, entryKey, entry);
+    public shared({caller}) func createJournalEntry() : 
+    async Result.Result<([JournalTypes.JournalEntryExportKeyValuePair]), JournalTypes.Error> {
+        let result = await JournalHelperMethods.createJournalEntry(caller, userProfilesMap);
+        return result;
+    };
+
+    public shared({ caller }) func markJournalEntryAsRead(entryKey: JournalTypes.EntryKey) : async Result.Result<(), JournalTypes.Error> {
+        let result = await JournalHelperMethods.markJournalEntryAsRead(caller, userProfilesMap, entryKey);
+        return result;
+    };
+
+    public shared({caller}) func updateJournalEntry(entryKey : JournalTypes.EntryKey, entry : JournalTypes.JournalEntry) : 
+    async Result.Result<([JournalTypes.JournalEntryExportKeyValuePair]), JournalTypes.Error> {
+        let result = await JournalHelperMethods.updateJournalEntry(caller, userProfilesMap, entry, entryKey);
+        return result;
+    };
+
+    public shared({ caller }) func deleteJournalEntry(entryKey: JournalTypes.EntryKey) : async Result.Result<(), JournalTypes.Error> {
+        let result = await JournalHelperMethods.deleteJournalEntry(caller, userProfilesMap, entryKey);
         return result;
     };
 

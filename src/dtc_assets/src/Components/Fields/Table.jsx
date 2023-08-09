@@ -73,7 +73,7 @@ const DataTable = (props) => {
                     onCellEditStop={rowState => {}}
                     onStateChange={ (state) => onStateChange_(state) }
                     columns={columns}
-                    onRowClick={(row) => {console.log(row)}}
+                    onRowClick={(e) => onRowClick(e.row)}
                     rows={rows}
                     getRowId={(row) => row.id}
                     rowsPerPageOptions={[5,10,20]}

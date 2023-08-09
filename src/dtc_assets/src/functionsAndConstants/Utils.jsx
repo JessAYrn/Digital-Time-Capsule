@@ -108,9 +108,9 @@ export const getDateInMilliseconds = (date) => {
   let time = hour+":"+minute+':'+seconds;
 
   date = month + ' ' + day + ', ' + year + ' ' + time + ' UTC+00:00';
-  let unlockDate = new Date(date);
-  let unlockTime = parseInt(unlockDate.getTime());
-  return unlockTime;
+  date = new Date(date);
+  time = parseInt(date.getTime());
+  return time;
 }
 
 export const getDateAsString = (dateInMilliseconds = null) => {
@@ -228,4 +228,13 @@ export const objectsAreEqual = (obj1, obj2) => {
   let equal = JSON.stringify(obj1) === JSON.stringify(obj2);
   return equal;
 }
+
+export const getHighestEntryKey = (entries) => {
+    let max = 0;
+    for(let i = 0; i < entries.length; i++){
+      const {entryKey} = entries[i];
+      if(entryKey > max) max = entryKey;
+    };
+    return max;
+};
 

@@ -25,8 +25,7 @@ module{
     public let daysInAMonth = 30;
 
     public type JournalData = {
-        userJournalData : ([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio,); 
-        notifications: NotificationTypes.Notifications;
+        userJournalData : ([JournalTypes.JournalEntryExportKeyValuePair], JournalTypes.Bio,); 
         email: ?Text; 
         userName: ?Text;
         principal: Text;

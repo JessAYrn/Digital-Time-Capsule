@@ -28,12 +28,10 @@ module{
             case(? v){
                 let journal: Journal.Journal = actor(Principal.toText(v.canisterId)); 
                 let (entriesArray, bio, canisterPrincipal) = await journal.readJournal();
-                let notifications = await journal.getNotifications();
                 
                 return #ok({
                     userJournalData = (entriesArray, bio);
                     email = v.email;
-                    notifications;
                     userName = v.userName;
                     principal = canisterPrincipal;
                 });
@@ -58,20 +56,6 @@ module{
                     address = Blob.toArray(userAccountId);
                 });
                 
-            };
-        };
-    };
-
-    public func readEntry(callerId: Principal, profilesMap: MainTypes.UserProfilesMap, entryKey: JournalTypes.EntryKey) : async Result.Result<JournalTypes.JournalEntry, JournalTypes.Error> {
-
-        let result = profilesMap.get(callerId);
-
-        switch(result){
-            case null{ #err(#NotAuthorized) };
-            case(? v){
-                let journal: Journal.Journal = actor(Principal.toText(v.canisterId));
-                let entry = await journal.readJournalEntry(entryKey.entryKey);
-                return entry;
             };
         };
     };
@@ -138,43 +122,68 @@ module{
         };
     };
 
-    public func updateJournalEntry(
+    public func createJournalEntry(
         callerId: Principal, 
-        profilesMap: MainTypes.UserProfilesMap, 
-        entryKey : ?JournalTypes.EntryKey, 
-        entry : ?JournalTypes.JournalEntryInput
-    ) : 
-    async Result.Result<([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio), JournalTypes.Error> {
-        
+        profilesMap: MainTypes.UserProfilesMap
+    ) : async Result.Result<([JournalTypes.JournalEntryExportKeyValuePair]), JournalTypes.Error> {
         let result = profilesMap.get(callerId);
-
         switch(result){
             case null{ #err(#NotAuthorized); };
             case(?result){
                 let journal: Journal.Journal = actor(Principal.toText(result.canisterId));
-                switch(entry){
-                    case null{
-                        switch(entryKey){
-                            case null{ #err(#NoInputGiven); };
-                            case(? entryKeyValue){
-                                let journalStatus = await journal.deleteJournalEntry(entryKeyValue.entryKey);
-                                return journalStatus;
-                            };
-                        };
-                    };
-                    case(? entryValue){
-                        switch(entryKey){
-                            case null {
-                                let status = await journal.createEntry(entryValue);
-                                return status;
-                            };
-                            case (? entryKeyValue){
-                                let entryStatus = await journal.updateJournalEntry(entryKeyValue.entryKey, entryValue);
-                                return entryStatus;
-                            };
-                        };
-                    };
-                }
+                let result_ = await journal.createEntry();
+                return result_;
+            };
+        };
+    };
+
+    public func markJournalEntryAsRead(
+        callerId: Principal, 
+        profilesMap: MainTypes.UserProfilesMap, 
+        entryKey: JournalTypes.EntryKey
+    ) : async Result.Result<(), JournalTypes.Error> {
+
+        let result = profilesMap.get(callerId);
+
+        switch(result){
+            case null{ #err(#NotAuthorized) };
+            case(? v){
+                let journal: Journal.Journal = actor(Principal.toText(v.canisterId));
+                let entry = await journal.markJournalEntryAsRead(entryKey.entryKey);
+                return #ok(());
+            };
+        };
+    };
+
+    public func updateJournalEntry(
+        callerId: Principal, 
+        profilesMap: MainTypes.UserProfilesMap, 
+        entry : JournalTypes.JournalEntry,
+        entryKey : JournalTypes.EntryKey, 
+    ) : async Result.Result<([JournalTypes.JournalEntryExportKeyValuePair]), JournalTypes.Error> {
+        let result = profilesMap.get(callerId);
+        switch(result){
+            case null{ #err(#NotAuthorized); };
+            case(?result){
+                let journal: Journal.Journal = actor(Principal.toText(result.canisterId));
+                let result_ = await journal.updateJournalEntry(( entryKey.entryKey, entry ));
+                return result_;
+            };
+        };
+    };
+
+    public func deleteJournalEntry(
+        callerId: Principal, 
+        profilesMap: MainTypes.UserProfilesMap, 
+        entryKey : JournalTypes.EntryKey, 
+    ) : async Result.Result<(), JournalTypes.Error> {
+        let result = profilesMap.get(callerId);
+        switch(result){
+            case null{ #err(#NotAuthorized); };
+            case(?result){
+                let journal: Journal.Journal = actor(Principal.toText(result.canisterId));
+                let result_ = await journal.deleteJournalEntry(entryKey.entryKey);
+                return result_;
             };
         };
     };

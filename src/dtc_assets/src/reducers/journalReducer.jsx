@@ -21,7 +21,6 @@ export const types = {
     CHANGE_CAPSULED: "CHANGE_CAPSULED",
     CHANGE_ENTRY: "CHANGE_ENTRY",
     CHANGE_UNLOCK_TIME: "CHANGE_UNLOCK_TIME",
-    ADD_JOURNAL_PAGE: "ADD_JOURNAL_PAGE",
     ADD_JOURNAL_ENTRY_FILE: "ADD_JOURNAL_ENTRY_FILE",
     CHANGE_DOB: "CHANGE_DOB",
     CHANGE_POB: "CHANGE_POB",
@@ -88,22 +87,6 @@ const defaultFileMetaData = {
     error: false,
     fileIsUnsubmitted: true
 };
-
-const freshPage = {
-    date: getDateAsString(Date.now()),
-    title: '',
-    location: '',
-    entry: '',
-    unlockTime: getDateAsString(Date.now()),
-    emailOne: '',
-    emailTwo: '',
-    emailThree: '', 
-    draft: true,
-    isDisabled: false,
-    isOpen: true,
-    capsuled: false,
-    filesMetaData: []
-}
 
 const changeValue = (state = initialState, action) => {
 
@@ -391,14 +374,6 @@ const changeValue = (state = initialState, action) => {
                 unlockTime: payload
             }
             state.journal[index] = updatedJournalPage;
-            return {
-                ...state
-            }
-        case types.ADD_JOURNAL_PAGE:
-            state.journal.push({
-                ...freshPage,
-                filesMetaData : []
-            });
             return {
                 ...state
             }
