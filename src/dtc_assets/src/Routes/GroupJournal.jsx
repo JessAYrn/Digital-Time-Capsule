@@ -12,11 +12,13 @@ import homePageReducer, { homePageInitialState,homePageTypes } from '../reducers
 import accountReducer, { accountInitialState,accountTypes } from '../reducers/accountReducer';
 import actorReducer, { actorInitialState,actorTypes } from '../reducers/actorReducer';
 import notificationsReducer, {notificationsInitialState, notificationsTypes} from "../reducers/notificationsReducer";
+import modalReducer, { modalTypes, modalInitialState } from '../reducers/modalReducer';
 
 export const AppContext = createContext(DEFAULT_APP_CONTEXTS);
 
 const GroupJournal = () => {
     const [journalState, journalDispatch] = useReducer(journalReducer, initialState);
+    const [modalState, modalDispatch] = useReducer(modalReducer, modalInitialState);
     const [notificationsState, notificationsDispatch] = useReducer(notificationsReducer, notificationsInitialState);
     const [walletState, walletDispatch] = useReducer(walletReducer, walletInitialState);
     const [homePageState, homePageDispatch] =  useReducer(homePageReducer, homePageInitialState)
@@ -30,7 +32,8 @@ const GroupJournal = () => {
         accountDispatch,
         actorDispatch,
         homePageDispatch,
-        notificationsDispatch
+        notificationsDispatch,
+        modalDispatch
     }
 
     const ReducerTypes={
@@ -39,7 +42,8 @@ const GroupJournal = () => {
         accountTypes,
         actorTypes,
         homePageTypes,
-        notificationsTypes
+        notificationsTypes,
+        modalTypes
     }
 
     const ReducerStates = {
@@ -48,7 +52,8 @@ const GroupJournal = () => {
         accountState,
         homePageState,
         actorState,
-        notificationsState
+        notificationsState,
+        modalState
     };
     
     window.onbeforeunload = window.history.replaceState(null, '');
@@ -81,7 +86,9 @@ const GroupJournal = () => {
         actorReducer,
         actorState,
         notificationsState,
-        notificationsDispatch
+        notificationsDispatch,
+        modalState,
+        modalDispatch
     }}
     >
         {           

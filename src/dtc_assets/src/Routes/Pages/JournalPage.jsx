@@ -1,11 +1,12 @@
 import React, {useState, useContext, useMemo, useCallback, useEffect} from "react";
 import InputBox from "../../Components/Fields/InputBox";
 import {types} from "../../reducers/journalReducer";
+import { modalTypes } from "../../reducers/modalReducer";
 import  {AppContext} from "../App";
 import "./JournalPage.scss";
 import DatePickerField from "../../Components/Fields/DatePicker";
 import { MODALS_TYPES, monthInMilliSeconds, NULL_STRING_ALL_LOWERCASE} from "../../functionsAndConstants/Constants";
-import { dateAisLaterThanOrSameAsDateB, getDateAsString, getDateInMilliseconds, milisecondsToNanoSeconds, scrollToBottom, scrollToTop } from "../../functionsAndConstants/Utils";
+import { scrollToBottom, scrollToTop } from "../../functionsAndConstants/Utils";
 import { loadJournalData } from "../../functionsAndConstants/loadingFunctions";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ButtonField from "../../Components/Fields/Button";
@@ -27,7 +28,9 @@ const JournalPage = (props) => {
         journalState,
         journalDispatch,
         actorState,
-        actorDispatch
+        actorDispatch,
+        modalState,
+        modalDispatch
     } = useContext(AppContext);
 
     let journalSize = journalState.journal.length;
@@ -65,60 +68,44 @@ const JournalPage = (props) => {
     //marks this page as read so that it no longer shows in the notifications section
     // if(journalPageData.entryKey) actorState.backendActor.markJournalEntryAsRead({entryKey: journalPageData.entryKey});
 
-    // const toggleSwitch = () => {
-    //     if(journalPageData.draft){
-    //         let isCapsuled = !journalPageData.capsuled
-    //         journalDispatch({
-    //             actionType: types.CHANGE_CAPSULED,
-    //             payload: isCapsuled,
-    //             index: index
-    //         });
-    //         if(isCapsuled) {
-    //             journalDispatch({
-    //                 actionType: types.CHANGE_UNLOCK_TIME,
-    //                 payload: minimumDate,
-    //                 index: index
-    //             });
-    //         } else{
-    //             journalDispatch({
-    //                 actionType: types.CHANGE_UNLOCK_TIME,
-    //                 payload: thisDate,
-    //                 index: index
-    //             });
-    //         };
-    //     };
-    // };
+    useEffect(() => {if(counter % 30 === 0) sendData()},[counter]);
 
-    // const mapAndSendEntryToApi = async (entryKey, journalEntry, isDraft) => {
-    //     let unlockTimeInNanoseconds;
-    //     if(journalEntry.unlockTime) {
-    //         let unlockTimeInMilliseconds = getDateInMilliseconds(journalEntry.unlockTime);
-    //         unlockTimeInNanoseconds = milisecondsToNanoSeconds(unlockTimeInMilliseconds);
-    //     } else unlockTimeInNanoseconds = milisecondsToNanoSeconds(parseInt(Date.now()));
 
-    //     const entryAsApiObject = [{
-    //         entryTitle: journalEntry.title,
-    //         text: journalEntry.entry,
-    //         location: journalEntry.location,
-    //         date: journalEntry.date,
-    //         unlockTime: unlockTimeInNanoseconds,
-    //         emailOne: journalEntry.emailOne,
-    //         emailTwo: journalEntry.emailTwo,
-    //         emailThree: journalEntry.emailThree,
-    //         filesMetaData: journalEntry.filesMetaData,
-    //         draft: isDraft
-    //     }];
+    const onTextBoxChange = () => setCounter(counter + 1);
 
-    //     const entryKeyAsApiObject = (entryKey >= 0 && entryKey < journalSize - 1 ) ? [{entryKey: entryKey}] : [];
-    //     let result = await actorState.backendActor.updateJournalEntry( entryKeyAsApiObject, entryAsApiObject );
-    //     let userJournalData = result.ok;
-    //     loadJournalData({userJournalData}, journalDispatch, types);
-    //     return result;
-    // };
+    const sendData = async (entryKey, journalEntry, isDraft) => {
+        journalDispatch({ actionType: types.SET_IS_LOADING, payload: true });
+        let unlockTimeInNanoseconds;
+        if(journalEntry.unlockTime) {
+            let unlockTimeInMilliseconds = getDateInMilliseconds(journalEntry.unlockTime);
+            unlockTimeInNanoseconds = milisecondsToNanoSeconds(unlockTimeInMilliseconds);
+        } else unlockTimeInNanoseconds = milisecondsToNanoSeconds(parseInt(Date.now()));
+
+        const entryAsApiObject = [{
+            entryTitle: journalEntry.title,
+            text: journalEntry.entry,
+            location: journalEntry.location,
+            date: journalEntry.date,
+            unlockTime: unlockTimeInNanoseconds,
+            emailOne: journalEntry.emailOne,
+            emailTwo: journalEntry.emailTwo,
+            emailThree: journalEntry.emailThree,
+            filesMetaData: journalEntry.filesMetaData,
+            draft: isDraft
+        }];
+
+        const entryKeyAsApiObject = (entryKey >= 0 && entryKey < journalSize - 1 ) ? [{entryKey: entryKey}] : [];
+        let result = await actorState.backendActor.updateJournalEntry( entryKeyAsApiObject, entryAsApiObject );
+        let userJournalData = result.ok;
+        loadJournalData({userJournalData}, journalDispatch, types);
+        journalDispatch({ actionType: types.SET_IS_LOADING, payload: false })
+        setCounter(1);
+        return result;
+    };
 
     const handleSubmit = useCallback(async () => {
-        journalDispatch({
-            actionType: types.SET_IS_LOADING,
+        modalDispatch({
+            actionType: modalTypes.SET_IS_LOADING,
             payload: true
         });
         
@@ -133,8 +120,8 @@ const JournalPage = (props) => {
         if('err' in result_1) entryDataSuccessfullyUploaded = false;
         
         const successfulUpload = filesSuccessfullyUploaded && entryDataSuccessfullyUploaded;
-        journalDispatch({
-            actionType: types.SET_IS_LOADING,
+        modalDispatch({
+            actionType: modalTypes.SET_IS_LOADING,
             payload: false
         });
         if(successfulUpload){
@@ -144,8 +131,8 @@ const JournalPage = (props) => {
                 index: index
             });
         } 
-        journalDispatch({
-            actionType: types.SET_MODAL_STATUS,
+        modalDispatch({
+            actionType: modalTypes.SET_MODAL_STATUS,
             payload: {
                 show: true, 
                 which: MODALS_TYPES.onSubmit, 
@@ -309,6 +296,26 @@ const JournalPage = (props) => {
                     />
                 </Grid>
             }
+            <Grid 
+                columns={12} 
+                xs={11} md={9} 
+                rowSpacing={8} 
+                display="flex" 
+                justifyContent="center" 
+                alignItems="center" 
+                flexDirection={"column"}
+            >
+                <InputBox
+                    label={"memoir: "}
+                    onChange={() => {}}
+                    onBlur={() => {}}
+                    rows={"16"}
+                    index={index}
+                    dispatch={journalDispatch}
+                    dispatchAction={types.CHANGE_TEXT}
+                    value={journalPageData.text}
+                />
+            </Grid>
             {/* 
             <div className={"journalText"} >
                 <DatePicker

@@ -15,11 +15,13 @@ import homePageReducer,{ homePageInitialState, homePageTypes } from '../reducers
 import accountReducer,{ accountInitialState, accountTypes } from '../reducers/accountReducer';
 import actorReducer, { actorInitialState, actorTypes } from '../reducers/actorReducer';
 import notificationsReducer, {notificationsInitialState, notificationsTypes} from "../reducers/notificationsReducer";
+import modalReducer,{ modalInitialState, modalTypes } from '../reducers/modalReducer';
 
 export const AppContext = createContext({...DEFAULT_APP_CONTEXTS, submissionsMade: 0, setSubmissionsMade: () => {} });
 
 const App = () => {
     const [journalState, journalDispatch] = useReducer(journalReducer, initialState);
+    const [modalState, modalDispatch] = useReducer(modalReducer, modalInitialState);
     const [notificationsState, notificationsDispatch] = useReducer(notificationsReducer, notificationsInitialState);
     const [walletState, walletDispatch] = useReducer(walletReducer, walletInitialState);
     const [homePageState, homePageDispatch] =  useReducer(homePageReducer, homePageInitialState)
@@ -40,7 +42,8 @@ const App = () => {
         homePageDispatch,
         accountDispatch,
         actorDispatch,
-        notificationsDispatch
+        notificationsDispatch,
+        modalDispatch
     }
 
     const ReducerTypes={
@@ -49,7 +52,8 @@ const App = () => {
         homePageTypes,
         accountTypes,
         actorTypes,
-        notificationsTypes
+        notificationsTypes,
+        modalTypes
     }
 
     const ReducerStates = {
@@ -58,7 +62,8 @@ const App = () => {
         accountState,
         homePageState,
         actorState,
-        notificationsState
+        notificationsState,
+        modalState
     };
 
     // dispatch state from previous route to redux store if that state exists
@@ -95,7 +100,9 @@ const App = () => {
                 setSubmissionsMade,
                 actorDispatch,
                 notificationsState,
-                notificationsDispatch
+                notificationsDispatch,
+                modalState,
+                modalDispatch
             }}
         >
             {

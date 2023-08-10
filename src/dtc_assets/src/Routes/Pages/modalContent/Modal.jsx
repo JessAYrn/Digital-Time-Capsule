@@ -8,7 +8,6 @@ import { AppContext as GroupJournalContext} from '../../GroupJournal';
 import { MODALS_TYPES } from '../../../functionsAndConstants/Constants';
 import FileHasError from './ModalContentHasError';
 import ExitWithoutSubmit from './ModalContentExitWithoutSubmitModal';
-import Notifications from './ModalContentNotifications';
 import ModalContentOnSend from './ModalContentOnSend';
 import ModalContentSubmit from './ModalContentOnSubmit';
 import NotAuthorizedByOwner from "./NotAuthorizedByOwner";
@@ -39,37 +38,35 @@ export const Modal = (props) => {
 
     let AppContext = retrieveContext(contexts, context);
     
-    const { journalState, journalDispatch } = useContext(AppContext);
+    const { modalState, modalDispatch } = useContext(AppContext);
 
     const ChildComponent = useMemo(() => {
 
         let ChildComp;
-        if(journalState.modalStatus.which === MODALS_TYPES.fileHasError) {
+        if(modalState.modalStatus.which === MODALS_TYPES.fileHasError) {
             ChildComp = FileHasError;
-        } else if(journalState.modalStatus.which === MODALS_TYPES.exitWithoutSubmit) {
+        } else if(modalState.modalStatus.which === MODALS_TYPES.exitWithoutSubmit) {
             ChildComp = ExitWithoutSubmit;
-        } else if(journalState.modalStatus.which === MODALS_TYPES.onSend) {
+        } else if(modalState.modalStatus.which === MODALS_TYPES.onSend) {
             ChildComp = ModalContentOnSend;
-        } else if(journalState.modalStatus.which === MODALS_TYPES.onSubmit) {
+        } else if(modalState.modalStatus.which === MODALS_TYPES.onSubmit) {
             ChildComp = ModalContentSubmit;
-        } else if(journalState.modalStatus.which === MODALS_TYPES.notifications) {
-            ChildComp = Notifications;
-        } else if(journalState.modalStatus.which === MODALS_TYPES.notAuthorizedByOwner){
+        } else if(modalState.modalStatus.which === MODALS_TYPES.notAuthorizedByOwner){
             ChildComp = NotAuthorizedByOwner;
-        } else if(journalState.modalStatus.which === MODALS_TYPES.onRegisterNewOwner){
+        } else if(modalState.modalStatus.which === MODALS_TYPES.onRegisterNewOwner){
             ChildComp = RegistrationResponse
-        } else if(journalState.modalStatus.which === MODALS_TYPES.requestApprovalRepsonse){
+        } else if(modalState.modalStatus.which === MODALS_TYPES.requestApprovalRepsonse){
             ChildComp = RequestApprovalResponseModal;
-        } else if(journalState.modalStatus.which === MODALS_TYPES.dateSelectedOutOfRange){
+        } else if(modalState.modalStatus.which === MODALS_TYPES.dateSelectedOutOfRange){
             ChildComp = DateOutOfRange;
         }
 
         return ChildComp;
-    },[ journalState.modalStatus]);
+    },[ modalState.modalStatus]);
 
     return(
         <> 
-            { journalState.modalStatus.show ? 
+            { modalState.modalStatus.show ? 
             <div className={"modalContainer"}>
                 <div className="modalDiv" >
                     <div className={`modalTransparentDiv contentContainer`}>

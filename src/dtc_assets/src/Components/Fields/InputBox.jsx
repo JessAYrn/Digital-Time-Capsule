@@ -38,7 +38,8 @@ const InputBox = (props) => {
     const onChange_ = () => {
         dispatch({
             actionType: dispatchAction,
-            payload: inputRef.current.value
+            payload: inputRef.current.value,
+            index: index
         });
         if(onChange) onChange();
     }

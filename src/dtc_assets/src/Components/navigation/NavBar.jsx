@@ -49,7 +49,9 @@ export const NavBar = (props) => {
         homePageState,
         homePageDispatch,
         notificationsState,
-        notificationsDispatch
+        notificationsDispatch,
+        modalState,
+        modalDispatch
     } = useContext(AppContext);
 
     const [sideBar, setSideBar] = useState(false);
@@ -64,7 +66,8 @@ export const NavBar = (props) => {
         wallet: walletState,
         account: accountState,
         homePage: homePageState,
-        notifications: notificationsState
+        notifications: notificationsState,
+        modal: modalState
     };
 
     const changeRoute = (route, states) => {

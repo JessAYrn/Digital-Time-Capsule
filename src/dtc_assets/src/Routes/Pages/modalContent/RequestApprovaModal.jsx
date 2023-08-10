@@ -30,41 +30,34 @@ const RequestApprovalResponseModal = (props) => {
     let AppContext = retrieveContext(contexts, context);
 
     const {
-        journalState, 
         journalDispatch, 
-        homePageState, 
         homePageDispatch, 
-        accountState, 
         accountDispatch, 
-        walletState,
-        walletDispatch
+        walletDispatch,
+        modalState,
+        modalDispatch
     } = useContext(AppContext);
 
-    let state;
     let dispatch;
     let initialState;
     let action;
 
     if(context === UI_CONTEXTS.JOURNAL){
-        state = journalState;
         dispatch = journalDispatch;
         action = journalTypes.SET_ENTIRE_REDUX_STATE;
         initialState = journalInitialState;
     }
     if(context === UI_CONTEXTS.HOME_PAGE){
-        state = homePageState;
         dispatch = homePageDispatch;
         action = homePageTypes.SET_ENTIRE_DASHBOARD_REDUX_STATE;
         initialState = homePageInitialState;
     }
     if(context === UI_CONTEXTS.WALLET){
-        state = walletState;
         dispatch = walletDispatch;
         action = walletTypes.SET_ENTIRE_WALLET_REDUX_STATE;
         initialState = walletInitialState;
     }
     if(context === UI_CONTEXTS.ACCOUNT_PAGE){
-        state = accountState;
         dispatch = accountDispatch;
         action = accountTypes.SET_ENTIRE_ACCOUNT_REDUX_STATE;
         initialState = accountInitialState;
@@ -81,10 +74,10 @@ const RequestApprovalResponseModal = (props) => {
     });
 
     return (
-        state.isLoading ? 
+        modalState.isLoading ? 
         <LoadScreen/> :
         <div className="contentDiv__requestApprovalResponse">
-            { journalState.modalStatus.success ? 
+            { modalState.modalStatus.success ? 
                 <>
                     <h3 className='success'>
                         Request Sent. Log in again after you've received approval.

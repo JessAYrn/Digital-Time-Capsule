@@ -5,9 +5,9 @@ import { AppContext } from "../App";
 import './TreasuryPage.scss'
 
 const TreasuryPage = (props) => {
-  const { journalState, journalDispatch, homePageState} = useContext(AppContext);
+  const { homePageState, modalState, modalDispatch} = useContext(AppContext);
   return (
-   journalState?.modalStatus?.show ?
+    modalState?.modalStatus?.show ?
     <div >
         <Modal 
             context={UI_CONTEXTS.TREASURY}
@@ -15,7 +15,7 @@ const TreasuryPage = (props) => {
     </div>:
     <div>
     {
-      homePageState.isLoading ?
+      modalState.isLoading ?
       <LoadScreen/> :
       <div>
         <NavBar

@@ -14,6 +14,7 @@ import { walletTypes } from '../../../reducers/walletReducer';
 import { MODALS_TYPES } from '../../../functionsAndConstants/Constants';
 import ButtonField from '../../../Components/Fields/Button';
 import LoadScreen from '../LoadScreen';
+import { modalTypes } from '../../../reducers/modalReducer';
 
 const NotAuthorizedByOwner = (props) => {
     const { context } = props;
@@ -30,69 +31,38 @@ const NotAuthorizedByOwner = (props) => {
     let AppContext = retrieveContext(contexts, context);
 
     const {
-        journalState, 
-        journalDispatch, 
-        actorState, 
-        actorDispatch, 
-        homePageState, 
-        homePageDispatch,
-        accountState,
-        accountDispatch,
-        walletState,
-        walletDispatch
+        actorState,
+        modalState, 
+        modalDispatch
 
     } = useContext(AppContext);
 
-    let state;
-    let dispatch;
-    let action;
-
-    if(context === UI_CONTEXTS.JOURNAL){
-        dispatch = journalDispatch;
-        state = journalState;
-        action = journalTypes.SET_IS_LOADING;
-    };
-    if(context === UI_CONTEXTS.HOME_PAGE){
-        dispatch = homePageDispatch
-        state = homePageState
-        action = homePageTypes.SET_IS_LOADING
-    };
-    if(context === UI_CONTEXTS.WALLET){
-        dispatch = walletDispatch
-        state = walletState
-        action = walletTypes.SET_IS_LOADING
-    };
-    if(context === UI_CONTEXTS.ACCOUNT_PAGE){
-        dispatch = accountDispatch
-        state = accountState
-        action = accountTypes.SET_IS_LOADING
-    };
 
     const handleSubmitRequest = async () => {
-        dispatch({
-            actionType: action,
+        modalDispatch({
+            actionType: modalTypes.SET_IS_LOADING,
             payload: true
         });
         let result = await actorState.backendActor.requestApproval();
         if("ok" in result){
-            journalDispatch({
-                actionType: journalTypes.SET_MODAL_STATUS,
+            modalDispatch({
+                actionType: modalTypes.SET_MODAL_STATUS,
                 payload: { show: true, which: MODALS_TYPES.requestApprovalRepsonse, success: true}
             });
         } else {
-            journalDispatch({
-                actionType: journalTypes.SET_MODAL_STATUS,
+            modalDispatch({
+                actionType: modalTypes.SET_MODAL_STATUS,
                 payload: { show: true, which: MODALS_TYPES.requestApprovalRepsonse, success: false}
             });
         }
-        dispatch({
-            actionType: journalTypes.SET_IS_LOADING,
+        modalDispatch({
+            actionType: modalTypes.SET_IS_LOADING,
             payload: false
         });
     };
 
     return (
-        state.isLoading ? 
+        modalState.isLoading ? 
         <LoadScreen/> :
         <div className="contentDiv__notAuthorized">
             <ul>

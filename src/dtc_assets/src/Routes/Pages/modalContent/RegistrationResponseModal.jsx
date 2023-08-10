@@ -10,6 +10,7 @@ import './RegistrationResponseModal.scss';
 import { types } from "../../../reducers/journalReducer";
 import { MODALS_TYPES } from "../../../functionsAndConstants/Constants";
 import ButtonField from "../../../Components/Fields/Button";
+import { modalTypes } from "../../../reducers/modalReducer";
 
 const RegistrationResponse = (props) => {
     const {
@@ -26,18 +27,18 @@ const RegistrationResponse = (props) => {
     };
 
     let AppContext = retrieveContext(contexts, context);
-    const {journalState, journalDispatch} = useContext(AppContext);
+    const {modalState, modalDispatch} = useContext(AppContext);
 
     const onClick = () => {
-        journalDispatch({
-            actionType: types.SET_MODAL_STATUS,
+        modalDispatch({
+            actionType: modalTypes.SET_MODAL_STATUS,
             payload: {show: false, which: MODALS_TYPES.onSubmit}
     });
     }
 
     return(
         <div className="contentDiv__registrationResponse">
-            { journalState.modalStatus.success ? 
+            { modalState.modalStatus.success ? 
                 <>
                     <h3 className='success'>
                         Action successfully executed.

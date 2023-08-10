@@ -24,9 +24,8 @@ import { mapApiObjectToFrontEndJournalEntriesObject } from "../../mappers/journa
 
 const Journal = (props) => {
 
-    const { journalState, journalDispatch, actorState, actorDispatch} = useContext(AppContext);
+    const { journalState, journalDispatch, actorState, actorDispatch, modalState, modalDispatch} = useContext(AppContext);
     const [photosLoaded, setPhotosLoaded] = useState(false);
-    const [loadStatus, setLoadStatus] = useState(false);
     const [counter, setCounter] = useState(1);
 
     console.log(journalState);
@@ -53,7 +52,10 @@ const Journal = (props) => {
     },[journalState.bio.photos]);
 
     const sendData = async () => {
-        setLoadStatus(true);
+        journalDispatch({
+            actionType: types.SET_IS_LOADING,
+            payload: true
+        })
         const result = await actorState.backendActor.updateBio({
             dob: journalState.bio.dob,
             pob: journalState.bio.pob,
@@ -62,7 +64,10 @@ const Journal = (props) => {
             preface: journalState.bio.preface,
             photos: journalState.bio.photos
         });
-        setLoadStatus(false);
+        journalDispatch({
+            actionType: types.SET_IS_LOADING,
+            payload: false
+        })
         setCounter(1);
     };
 
@@ -104,9 +109,9 @@ const Journal = (props) => {
     }
 
     return(
-        journalState.modalStatus.show ?
+        modalState.modalStatus.show ?
         <Modal context={UI_CONTEXTS.JOURNAL} index={getIndexOfVisiblePage()}/> :
-        journalState.isLoading ? 
+        modalState.isLoading ? 
         <LoadScreen/> : 
         <Grid 
             container 
@@ -119,7 +124,7 @@ const Journal = (props) => {
             alignItems="center" 
             flexDirection={"column"}
         >
-            <NavBar context={UI_CONTEXTS.JOURNAL} isLoading={loadStatus}/>
+            <NavBar context={UI_CONTEXTS.JOURNAL} isLoading={journalState.isLoading}/>
             {(getIndexOfVisiblePage() >=0) ?
             <JournalPage index={getIndexOfVisiblePage()}/> :
             <>

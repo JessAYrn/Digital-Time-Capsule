@@ -5,10 +5,10 @@ import { AppContext } from "../App";
 import './GroupJournalPage.scss'
 
 const GroupJournalPage = (props) => {
-  const { journalState, journalDispatch, homePageState} = useContext(AppContext);
+  const { homePageState, modalState, modalDispatch} = useContext(AppContext);
 
   return (
-   journalState?.modalStatus?.show ?
+    modalState?.modalStatus?.show ?
     <div >
         <Modal 
             context={UI_CONTEXTS.GROUPJOURNAL}
@@ -16,7 +16,7 @@ const GroupJournalPage = (props) => {
     </div>:
     <div>
     {
-      homePageState.isLoading ?
+      modalState.isLoading ?
       <LoadScreen/> :
       <div>
         <NavBar

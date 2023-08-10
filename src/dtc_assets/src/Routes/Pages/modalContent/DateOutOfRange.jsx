@@ -6,7 +6,7 @@ import { AppContext as JournalContext} from '../../App';
 import { AppContext as WalletContext} from '../../Wallet';
 import { AppContext as TreasuryContext} from '../../Treasury';
 import { AppContext as GroupJournalContext} from '../../GroupJournal';
-import { types } from "../../../reducers/journalReducer";
+import { modalTypes } from "../../../reducers/modalReducer";
 import { MODALS_TYPES } from "../../../functionsAndConstants/Constants";
 import ButtonField from "../../../Components/Fields/Button";
 import "./DateOutOfRange.scss"
@@ -27,11 +27,11 @@ const DateOutOfRange = (props) => {
 
     let AppContext = retrieveContext(contexts, context);
 
-    const {journalState, journalDispatch} = useContext(AppContext);
+    const {modalState, modalDispatch} = useContext(AppContext);
 
     const onClick = () => {
-        journalDispatch({
-            actionType: types.SET_MODAL_STATUS,
+        modalDispatch({
+            actionType: modalTypes.SET_MODAL_STATUS,
             payload: {show: false, which: MODALS_TYPES.onSubmit}
         });
     }
@@ -40,7 +40,7 @@ const DateOutOfRange = (props) => {
         <div className="contentDiv__dateOutOfRange">
 
             <h3 className='h3Texts'>
-                { journalState.modalStatus.beyondMax ? 
+                { modalState.modalStatus.beyondMax ? 
                     'You may only select dates as late as the current date.' :
                     'The unlock date must be at least one month in the future.'
                 }

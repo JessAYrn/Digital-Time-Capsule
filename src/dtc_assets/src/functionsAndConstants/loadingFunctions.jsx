@@ -4,6 +4,7 @@ import { generateQrCode } from "./walletFunctions/GenerateQrCode";
 import { mapBackendCanisterDataToFrontEndObj } from "../mappers/dashboardMapperFunctions";
 import { getFileUrl_fromApi } from "../Components/Fields/fileManger/FileManagementTools";
 import { CreateUserJournal } from "../Routes/Pages/authentication/AuthenticationMethods";
+import { MODALS_TYPES } from "./Constants";
 
 
 export const loadAllDataIntoReduxStores = async (states, dispatchFunctions, types, stateHasBeenRecovered) => {
@@ -11,18 +12,22 @@ export const loadAllDataIntoReduxStores = async (states, dispatchFunctions, type
     if(stateHasBeenRecovered) return; 
 
     let {walletState, homePageState, journalState, actorState, accountState, notificationsState} = states;
-    let {journalDispatch, walletDispatch, homePageDispatch, accountDispatch, notificationsDispatch} = dispatchFunctions;
-    let {journalTypes, walletTypes, homePageTypes, accountTypes, notificationsTypes } = types;
+    let {journalDispatch, walletDispatch, homePageDispatch, accountDispatch, notificationsDispatch, modalDispatch} = dispatchFunctions;
+    let {journalTypes, walletTypes, homePageTypes, accountTypes, notificationsTypes, modalTypes } = types;
 
     // sets isLoading property to true for all reducers
-    setAllContexsIsLoading(dispatchFunctions, types, true);
+    modalDispatch({ actionType: modalTypes.SET_IS_LOADING, payload: true });
 
     let accountCreated;
     //checks to see if user has an account. If not, then it attemptes to make an account, if 
     //the account creation is unsuccessful, then it returns
     let hasAccount = await actorState.backendActor.hasAccount();
     if(!hasAccount) accountCreated = await CreateUserJournal(actorState, journalDispatch);
-    if(accountCreated && "err" in accountCreated) return;
+    if(accountCreated && "err" in accountCreated){
+        modalDispatch({ actionType: modalTypes.SET_MODAL_STATUS, payload: {which: MODALS_TYPES.notAuthorizedByOwner, show: true} })
+        modalDispatch({ actionType: modalTypes.SET_IS_LOADING, payload: false })
+        return;
+    }
 
     //calls the backend and loads the retrieved data into the appropriate redux stores.
     let promises = [];
@@ -30,21 +35,11 @@ export const loadAllDataIntoReduxStores = async (states, dispatchFunctions, type
     if(!homePageState.dataHasBeenLoaded) promises.push(loadCanisterData(actorState, homePageDispatch, homePageTypes));
     if(!journalState.dataHasBeenLoaded) promises.push(loadJournalData(actorState, journalDispatch, journalTypes));
     if(!accountState. dataHasBeenLoaded) promises.push(loadAccountData(actorState, accountDispatch, accountTypes));
-    if(!notificationsState.dataHasBeenLoaded) promises.push(loadNotificationsData(actorState, notificationsDispatch, notificationsTypes))
+    if(!notificationsState.dataHasBeenLoaded) promises.push(loadNotificationsData(actorState, notificationsDispatch, notificationsTypes));
     await Promise.all(promises);
 
     // sets isLoading property to false for all reducers
-    setAllContexsIsLoading(dispatchFunctions, types, false);
-};
-
-export const setAllContexsIsLoading = (dispatchFunctions, types, bool) => {
-    let {journalDispatch, walletDispatch, homePageDispatch, accountDispatch} = dispatchFunctions;
-    let {journalTypes, walletTypes, homePageTypes, accountTypes } = types;
-    journalDispatch( { actionType: journalTypes.SET_IS_LOADING, payload: bool } );
-    walletDispatch( { actionType: walletTypes.SET_IS_LOADING, payload: bool } );
-    homePageDispatch( { actionType: homePageTypes.SET_IS_LOADING, payload: bool } );
-    accountDispatch( { actionType: accountTypes.SET_IS_LOADING, payload: bool } );
-
+    modalDispatch({ actionType: modalTypes.SET_IS_LOADING, payload: false });
 };
 
 export const loadNotificationsData = async (actorState, notificationsDispatch, notificationsTypes) => {
@@ -176,7 +171,7 @@ export const recoverState = async ( location, dispatchMethods, types, connection
     // dispatch state from previous route to redux store if that state exists
     if(!location.state) return;
     setStateHasBeenRecovered(true);
-    const{journal,wallet,homePage, account, notifications}=location.state;
+    const{journal,wallet,homePage, account, notifications, modal}=location.state;
     if(dispatchMethods.journalDispatch){
         dispatchMethods.journalDispatch({
             actionType: types.journalTypes.SET_ENTIRE_REDUX_STATE,
@@ -209,6 +204,13 @@ export const recoverState = async ( location, dispatchMethods, types, connection
         dispatchMethods.notificationsDispatch({
             actionType: types.notificationsTypes.SET_ENTIRE_NOTIFICATIONS_REDUX_STATE,
             payload: notifications
+        })
+    }
+
+    if(dispatchMethods.modalDispatch){
+        dispatchMethods.modalDispatch({
+            actionType: types.modalTypes.SET_ENTIRE_MODAL_REDUX_STATE,
+            payload: modal
         })
     }
 

@@ -19,17 +19,20 @@ import { walletTypes } from '../../reducers/walletReducer';
 import { UI_CONTEXTS } from '../../functionsAndConstants/Contexts';
 import ButtonField from '../../Components/Fields/Button';
 import '../../SCSS/contentContainer.scss'
+import { modalTypes } from '../../reducers/modalReducer';
 
 
 const WalletPage = (props) => {
 
-    const { journalState, journalDispatch, walletState, walletDispatch, actorState, actorDispatch } = useContext(AppContext);
+    const { 
+        walletState, walletDispatch, actorState, actorDispatch, modalState, modalDispatch
+    } = useContext(AppContext);
     const [loadingTx, setIsLoadingTx] = useState(false);
     const [showReloadButton, setShowReloadButton] = useState(false);
 
     const openModal = () => {
-        journalDispatch({
-            actionType: types.SET_MODAL_STATUS,
+        modalDispatch({
+            actionType: modalTypes.SET_MODAL_STATUS,
             payload: {show: true, which: MODALS_TYPES.onSend}
         });
     };
@@ -45,7 +48,7 @@ const WalletPage = (props) => {
 
     return (
         <div className={"container"}>
-            {journalState.modalStatus.show ? 
+            {modalState.modalStatus.show ? 
             
                 <Modal 
                     context={UI_CONTEXTS.WALLET}
@@ -59,7 +62,7 @@ const WalletPage = (props) => {
                         notificationIcon={false}
                         context={UI_CONTEXTS.WALLET}
                     />
-                    {walletState.isLoading ?
+                    {modalState.isLoading ?
                         <LoadScreen/> :
                         <div className={"container__wallet"}>
                             <div className={'transparentDiv__wallet'}>

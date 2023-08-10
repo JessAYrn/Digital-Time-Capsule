@@ -10,7 +10,7 @@ import { retrieveContext } from '../../../functionsAndConstants/Contexts';
 import ButtonField from '../../../Components/Fields/Button';
 
 import "./ModalContentOnSubmit.scss";
-import { types } from '../../../reducers/journalReducer';
+import { modalTypes } from '../../../reducers/modalReducer';
 
 const ModalContentSubmit = (props) => {
 
@@ -29,18 +29,18 @@ const ModalContentSubmit = (props) => {
 
     let AppContext = retrieveContext(contexts, context);
 
-    const { journalState, journalDispatch } = useContext(AppContext);
+    const { modalState, modalDispatch } = useContext(AppContext);
     
     const onClick = () => {
-        journalDispatch({
-            actionType: types.SET_MODAL_STATUS,
+        modalDispatch({
+            actionType: modalTypes.SET_MODAL_STATUS,
             payload: {show: false, which: MODALS_TYPES.onSubmit}
         });
     };
 
     return(
         <div className={'onSubmitModalContentDiv'}>
-            { journalState.modalStatus.success ? 
+            { modalState.modalStatus.success ? 
                 <div className={"submitSucessful"}> 
                     <h1>
                         Submit Successful

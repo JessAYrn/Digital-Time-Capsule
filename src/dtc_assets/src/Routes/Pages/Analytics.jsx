@@ -24,6 +24,7 @@ import '../../SCSS/container.scss';
 import '../../SCSS/contentContainer.scss'
 import '../../SCSS/section.scss'
 import {homePageTypes} from '../../reducers/homePageReducer';
+import { modalTypes } from '../../reducers/modalReducer';
 import { inTrillions, round2Decimals, shortenHexString } from '../../functionsAndConstants/Utils';
 import { copyWalletAddressHelper } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
 import DataTable from '../../Components/Fields/Table';
@@ -32,7 +33,9 @@ import { Typography } from '@mui/material';
 
 
 const Analytics = () => {
-    const { journalState, journalDispatch, homePageDispatch, homePageState, actorDispatch, actorState} = useContext(AppContext);
+    const { 
+        homePageDispatch, homePageState, actorDispatch, actorState, modalState, modalDispatch
+    } = useContext(AppContext);
     const [requestsTableIsLoading, setRequestsTableIsLoading] = useState(false);
     const [usersTableIsLoading, setUsersTableIsLoading] = useState(false);
 
@@ -105,8 +108,8 @@ const Analytics = () => {
     };
 
     const toggleAcceptRequest = async () => {
-        homePageDispatch({
-            actionType: homePageTypes.SET_IS_LOADING,
+        modalDispatch({
+            actionType: modalTypes.SET_IS_LOADING,
             payload: true
         });
         let success = false;
@@ -118,19 +121,19 @@ const Analytics = () => {
                 payload: { ...homePageState.canisterData, acceptingRequests: !homePageState.canisterData.acceptingRequests }
             });
         }
-        journalDispatch({
-            actionType: types.SET_MODAL_STATUS,
+        modalDispatch({
+            actionType: modalTypes.SET_MODAL_STATUS,
             payload: {show: true, which: MODALS_TYPES.onRegisterNewOwner, success: success}
         });
-        homePageDispatch({
-            actionType: homePageTypes.SET_IS_LOADING,
+        modalDispatch({
+            actionType: modalTypes.SET_IS_LOADING,
             payload: false
         });
     };
 
     const toggleSupportMode = async () => {
-        homePageDispatch({
-            actionType: homePageTypes.SET_IS_LOADING,
+        modalDispatch({
+            actionType: modalTypes.SET_IS_LOADING,
             payload: true
         });
         let success = false;
@@ -142,39 +145,39 @@ const Analytics = () => {
                 payload: { ...homePageState.canisterData, supportMode: !homePageState.canisterData.supportMode }
             });
         }
-        journalDispatch({
-            actionType: types.SET_MODAL_STATUS,
+        modalDispatch({
+            actionType: modalTypes.SET_MODAL_STATUS,
             payload: {show: true, which: MODALS_TYPES.onRegisterNewOwner, success: success}
         });
 
-        homePageDispatch({
-            actionType: homePageTypes.SET_IS_LOADING,
+        modalDispatch({
+            actionType: modalTypes.SET_IS_LOADING,
             payload: false
         });
     }
 
     const handleRegistration = async () => {
-        homePageDispatch({
-            actionType: homePageTypes.SET_IS_LOADING,
+        modalDispatch({
+            actionType: modalTypes.SET_IS_LOADING,
             payload: true
         });
         let success;
         let result = await actorState.backendActor.registerOwner();
         if('err' in result) success = false;
         else success = true;
-        journalDispatch({
-            actionType: types.SET_MODAL_STATUS,
+        modalDispatch({
+            actionType: modalTypes.SET_MODAL_STATUS,
             payload: {show: true, which: MODALS_TYPES.onRegisterNewOwner, success: success}
         })
-        homePageDispatch({
-            actionType: homePageTypes.SET_IS_LOADING,
+        modalDispatch({
+            actionType: modalTypes.SET_IS_LOADING,
             payload: false
         });
     };
 
     const handleUpgrade = async () => {
-        homePageDispatch({
-            actionType: homePageTypes.SET_IS_LOADING,
+        modalDispatch({
+            actionType: modalTypes.SET_IS_LOADING,
             payload: true
         });
         let success = true;
@@ -185,19 +188,19 @@ const Analytics = () => {
             console.log("Error: ", e);
             success = false;
         };
-        journalDispatch({
-            actionType: types.SET_MODAL_STATUS,
+        modalDispatch({
+            actionType: modalTypes.SET_MODAL_STATUS,
             payload: {show: true, which: MODALS_TYPES.onRegisterNewOwner, success: success}
         })
-        homePageDispatch({
-            actionType: homePageTypes.SET_IS_LOADING,
+        modalDispatch({
+            actionType: modalTypes.SET_IS_LOADING,
             payload: false
         });
     };
 
     const toggleCyclesSaveMode = async () => {
-        homePageDispatch({
-            actionType: homePageTypes.SET_IS_LOADING,
+        modalDispatch({
+            actionType: modalTypes.SET_IS_LOADING,
             payload: true
         });
         let success = true;
@@ -213,20 +216,20 @@ const Analytics = () => {
             console.log("Error: ", e);
             success = false;
         };
-        journalDispatch({
-            actionType: types.SET_MODAL_STATUS,
+        modalDispatch({
+            actionType: modalTypes.SET_MODAL_STATUS,
             payload: {show: true, which: MODALS_TYPES.onRegisterNewOwner, success: success}
         })
-        homePageDispatch({
-            actionType: homePageTypes.SET_IS_LOADING,
+        modalDispatch({
+            actionType: modalTypes.SET_IS_LOADING,
             payload: false
         });
     };
-
+    console.log(modalState);
     return(
-        homePageState.isLoading ? 
+        modalState.isLoading ? 
         <LoadScreen/> :
-        journalState.modalStatus.show ?
+        modalState.modalStatus.show ?
         <Modal context={UI_CONTEXTS.HOME_PAGE} /> : 
         <Grid 
             container 
@@ -250,6 +253,7 @@ const Analytics = () => {
                     justifyContent="center" 
                     alignItems="center" 
                     flexDirection={"column"}
+                    marginTop={"60px"}
                     >
                         <Paper className='analytics paper'>
                             <DataField

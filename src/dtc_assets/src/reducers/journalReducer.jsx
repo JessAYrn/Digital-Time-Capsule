@@ -11,7 +11,6 @@ export const types = {
     SET_NOTIFICATIONS:"SET_NOTIFICATIONS",
     SET_BIO: "SET_BIO",
     SET_METADATA: "SET_METADATA",
-    SET_MODAL_STATUS: "SET_MODAL_STATUS",
     SET_DATA_HAS_BEEN_LOADED: "SET_DATA_HAS_BEEN_LOADED",
     SET_IS_AUTHENTICATED: "SET_IS_AUTHENTICATED",
     SET_IS_LOADING:"SET_IS_LOADING",
@@ -19,7 +18,7 @@ export const types = {
     CHANGE_DATE: "CHANGE_DATE",
     CHANGE_LOCATION: "CHANGE_LOCATION",
     CHANGE_CAPSULED: "CHANGE_CAPSULED",
-    CHANGE_ENTRY: "CHANGE_ENTRY",
+    CHANGE_TEXT: "CHANGE_TEXT",
     CHANGE_UNLOCK_TIME: "CHANGE_UNLOCK_TIME",
     ADD_JOURNAL_ENTRY_FILE: "ADD_JOURNAL_ENTRY_FILE",
     CHANGE_DOB: "CHANGE_DOB",
@@ -66,17 +65,8 @@ export const initialState = {
     },
     journal: [],
     notifications:[],
-    reloadStatuses: {
-        walletData: true,
-        journalData: true,
-        canisterData: true
-    },
     isAuthenticated: false,
     isLoading: false,
-    modalStatus: {
-        show: false, 
-        which: MODALS_TYPES.onSubmit
-    }
 };
 const defaultFileMetaData = {
     fileName: NULL_STRING_ALL_LOWERCASE,
@@ -117,11 +107,6 @@ const changeValue = (state = initialState, action) => {
         return {
             ...state
         }
-        case types.SET_MODAL_STATUS:
-            state.modalStatus = payload;
-            return {
-                ...state
-            }
         case types.SET_JOURNAL:
             state.journal = payload;
             return {
@@ -359,10 +344,10 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             } 
-        case types.CHANGE_ENTRY:
+        case types.CHANGE_TEXT:
             updatedJournalPage = {
                 ... state.journal[index],
-                entry: payload
+                text: payload
             }
             state.journal[index] = updatedJournalPage;
             return {

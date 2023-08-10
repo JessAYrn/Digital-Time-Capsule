@@ -13,11 +13,13 @@ import accountReducer , {accountTypes, accountInitialState} from '../reducers/ac
 import homePageReducer,{homePageInitialState,homePageTypes} from '../reducers/homePageReducer';
 import actorReducer, { actorInitialState, actorTypes } from '../reducers/actorReducer';
 import notificationsReducer, {notificationsInitialState, notificationsTypes} from "../reducers/notificationsReducer";
+import modalReducer, { modalTypes, modalInitialState } from '../reducers/modalReducer';
 
 export const AppContext = createContext(DEFAULT_APP_CONTEXTS);
 
 const HomePage = () => {
     const [journalState, journalDispatch] = useReducer(journalReducer, initialState);
+    const [modalState, modalDispatch] = useReducer(modalReducer, modalInitialState);
     const [notificationsState, notificationsDispatch] = useReducer(notificationsReducer, notificationsInitialState);
     const [walletState, walletDispatch] = useReducer(walletReducer, walletInitialState);
     const [accountState, accountDispatch] = useReducer(accountReducer, accountInitialState);
@@ -37,7 +39,8 @@ const HomePage = () => {
         accountDispatch,
         homePageDispatch,
         actorDispatch,
-        notificationsDispatch
+        notificationsDispatch,
+        modalDispatch
     }
 
     const ReducerTypes={
@@ -46,7 +49,8 @@ const HomePage = () => {
         accountTypes,
         homePageTypes,
         actorTypes,
-        notificationsTypes
+        notificationsTypes,
+        modalTypes
     }
 
     const ReducerStates = {
@@ -55,7 +59,8 @@ const HomePage = () => {
         accountState,
         homePageState,
         actorState,
-        notificationsState
+        notificationsState,
+        modalState
     };
 
     // dispatch state from previous route to redux store if that state exists
@@ -84,7 +89,9 @@ const HomePage = () => {
                 actorDispatch,
                 actorState,
                 notificationsState,
-                notificationsDispatch
+                notificationsDispatch,
+                modalState,
+                modalDispatch,
             }}
         >
 

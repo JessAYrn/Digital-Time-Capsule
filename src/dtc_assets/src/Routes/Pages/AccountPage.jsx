@@ -12,7 +12,9 @@ import  { accountTypes } from '../../reducers/accountReducer';
 
 const AccountSection = (props) => {
 
-    const { journalState, journalDispatch, accountDispatch, accountState, actorState } = useContext(AppContext);
+    const { 
+        accountDispatch, accountState, actorState, modalState, modalDispatch 
+    } = useContext(AppContext);
     const [pageChangesMade, setPageChangesMade] = useState(false); 
 
     const handleUpdate = async () => {
@@ -34,7 +36,7 @@ const AccountSection = (props) => {
     };
 
 return(
-    journalState.modalStatus.show ?
+    modalState.modalStatus.show ?
     <div className={"container__accountPage"}>
         <Modal 
             context={UI_CONTEXTS.ACCOUNT_PAGE}
@@ -50,7 +52,7 @@ return(
             context={UI_CONTEXTS.ACCOUNT_PAGE}
         />
         <div className='container__accountPage'>
-        {accountState.isLoading ?
+        {modalState.isLoading ?
             <LoadScreen/> :
             <div className={`logoDiv account`}>
                 <img className={'logoImg'}src="dtc-logo-black.png" alt="Logo"/>

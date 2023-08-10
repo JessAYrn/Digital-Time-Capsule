@@ -4,6 +4,7 @@ import { AppContext } from '../../App';
 import "./ModalContentExitWithoutSubmitModal.scss";
 import { types } from '../../../reducers/journalReducer';
 import ButtonField from '../../../Components/Fields/Button';
+import { modalTypes } from '../../../reducers/modalReducer';
 
 const ExitWithoutSubmit = (props) => {
 
@@ -13,7 +14,9 @@ const ExitWithoutSubmit = (props) => {
 
     const {
         journalState,
-        journalDispatch
+        journalDispatch,
+        modalState,
+        modalDispatch
     } = useContext(AppContext);
 
     const indexOfNewPage = journalState.journal.length - 1;
@@ -35,8 +38,8 @@ const ExitWithoutSubmit = (props) => {
         journalDispatch({
             actionType: types.REMOVE_UNSUBMITTED_PAGE
         });
-        journalDispatch({
-            actionType: types.SET_MODAL_STATUS,
+        modalDispatch({
+            actionType: modalTypes.SET_MODAL_STATUS,
             payload: {show: false, which: MODALS_TYPES.onSubmit}
         });
     };

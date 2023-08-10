@@ -4,16 +4,16 @@ import { AppContext } from '../../App';
 import { MODALS_TYPES } from '../../../functionsAndConstants/Constants';
 import { round2Decimals } from '../../../functionsAndConstants/Utils';
 import "./ModalContentHasError.scss";
-import { types } from '../../../reducers/journalReducer';
 import ButtonField from '../../../Components/Fields/Button';
+import { modalTypes } from '../../../reducers/modalReducer';
 const FileHasError = (props) => {
 
-    const { journalState, journalDispatch } = useContext(AppContext);
+    const { modalState, modalDispatch } = useContext(AppContext);
 
 
     const onClickOk = () => {
-        journalDispatch({
-            actionType: types.SET_MODAL_STATUS,
+        modalDispatch({
+            actionType: modalTypes.SET_MODAL_STATUS,
             payload: {show: false, which: MODALS_TYPES.onSubmit}
         });
     };
@@ -33,7 +33,7 @@ const FileHasError = (props) => {
                 </li>
                 <li>
                     <h6 className={'h6'}>
-                        Your file is {round2Decimals(journalState.modalStatus.duration)} seconds.
+                        Your file is {round2Decimals(modalState.modalStatus.duration)} seconds.
                     </h6>
                 </li>
                 <li>
