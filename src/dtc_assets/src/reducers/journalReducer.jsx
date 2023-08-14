@@ -356,7 +356,7 @@ const changeValue = (state = initialState, action) => {
         case types.CHANGE_UNLOCK_TIME:
             updatedJournalPage = {
                 ... state.journal[index],
-                unlockTime: payload
+                timeOfUnlock: payload
             }
             state.journal[index] = updatedJournalPage;
             return {

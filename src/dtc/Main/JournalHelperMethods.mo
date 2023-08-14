@@ -188,7 +188,7 @@ module{
         };
     };
 
-    public func deleteSubmittedFile(callerId: Principal, profilesMap: MainTypes.UserProfilesMap, fileId: Text) :
+    public func deleteFile(callerId: Principal, profilesMap: MainTypes.UserProfilesMap, fileId: Text) :
     async Result.Result<(), JournalTypes.Error> {
 
         let result = profilesMap.get(callerId);
@@ -196,52 +196,8 @@ module{
             case null{ return #err(#NotFound); };
             case(? v){
                 let journal: Journal.Journal = actor(Principal.toText(v.canisterId));
-                let result_ = await journal.deleteSubmittedFile(fileId);
+                let result_ = await journal.deleteFile(fileId);
                 return result_;
-            };
-        };
-    };
-
-    public func deleteUnsubmittedFile(callerId: Principal, profilesMap: MainTypes.UserProfilesMap, fileId: Text) :
-    async Result.Result<(), JournalTypes.Error> {
-
-        let result = profilesMap.get(callerId);
-        switch(result){
-            case null{ return #err(#NotFound); };
-            case(? v){
-                let journal: Journal.Journal = actor(Principal.toText(v.canisterId));
-                let result_ = await journal.deleteUnsubmittedFile(fileId);
-                return result_;
-            };
-        };
-    };
-
-    public func submitFiles(callerId: Principal, profilesMap: MainTypes.UserProfilesMap) : 
-    async Result.Result<(), JournalTypes.Error> {
-
-        let result = profilesMap.get(callerId);
-
-        switch(result){
-            case null{ return #err(#NotFound) };
-            case (? v){
-                let journal: Journal.Journal = actor(Principal.toText(v.canisterId));
-                let result = await journal.submitFiles();
-                return result;
-            };
-        };
-    };
-
-    public func clearUnsubmittedFiles(callerId: Principal, profilesMap: MainTypes.UserProfilesMap): 
-    async Result.Result<(), JournalTypes.Error>{
-
-        let result = profilesMap.get(callerId);
-
-        switch(result){
-            case null{ return #err(#NotFound) };
-            case (? v){
-                let journal: Journal.Journal = actor(Principal.toText(v.canisterId));
-                let result = journal.clearUnsubmittedFiles();
-                #ok(());
             };
         };
     };

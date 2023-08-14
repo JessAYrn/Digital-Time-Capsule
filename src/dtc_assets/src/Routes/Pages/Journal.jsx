@@ -27,8 +27,6 @@ const Journal = (props) => {
     const { journalState, journalDispatch, actorState, actorDispatch, modalState, modalDispatch} = useContext(AppContext);
     const [photosLoaded, setPhotosLoaded] = useState(false);
     const [counter, setCounter] = useState(1);
-
-    console.log(journalState);
     
     useEffect(async () => {
         if(photosLoaded) return;
@@ -95,7 +93,6 @@ const Journal = (props) => {
         let journalEntries = result.ok;
         journalEntries = mapApiObjectToFrontEndJournalEntriesObject(journalEntries);
         const entryKey = getHighestEntryKey(journalEntries);
-        console.log(entryKey);
         journalDispatch({ payload: journalEntries, actionType: types.SET_JOURNAL });
         openPage({entryKey: entryKey, locked: false});
     };

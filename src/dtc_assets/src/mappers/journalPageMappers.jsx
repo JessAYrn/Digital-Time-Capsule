@@ -1,4 +1,4 @@
-import { milisecondsToNanoSeconds } from "../functionsAndConstants/Utils";
+import { getDateAsStringMMDDYYY, milisecondsToNanoSeconds } from "../functionsAndConstants/Utils";
 import { nanoSecondsToMiliSeconds, getDateAsString, dateAisLaterThanOrSameAsDateB } from "../functionsAndConstants/Utils";
 import { TEST_DATA_FOR_NOTIFICATIONS } from "../testData/notificationsTestData";
 
@@ -35,7 +35,7 @@ export const journalPagesTableColumns = [
         editable: false,
     },
     {
-        field: 'unlockTime',
+        field: 'timeOfUnlock',
         headerName: 'Available',
         width: 200,
         editable: false,
@@ -47,14 +47,13 @@ export const mapRequestsForAccessToTableRows = (journalEntries) => {
         return {
             id: page.entryKey,
             entryKey: page.entryKey,
-            timeSubmitted: page.timeSubmited ? getDateAsString(page.timeSubmited) : null,
-            timeStarted: getDateAsString(page.timeStarted),
+            timeSubmitted: page.timeSubmited[0] ? getDateAsStringMMDDYYY(page.timeSubmite[0]) : null,
+            timeStarted: getDateAsStringMMDDYYY(page.timeStarted),
             location: page.location,
-            unlockTime: page.unlockTime ? getDateAsString(page.unlockTime) : null,
+            timeOfUnlock: page.timeOfUnlock[0] ? getDateAsStringMMDDYYY(page.timeOfUnlock[0]) : null,
             locked: page.locked
         }
     });
-    console.log(journalEntries_);
     return journalEntries_;
 }
 
@@ -71,8 +70,8 @@ export const mapApiObjectToFrontEndJournalEntriesObject = (journalEntries) => {
             ...backEndObj, 
             filesMetaData: filesMetaData, 
             entryKey: parseInt(entryKey),
-            timeOfUnlock: backEndObj.timeOfUnlock[0] ? nanoSecondsToMiliSeconds(parseInt(backEndObj.timeOfUnlock[0])) : null,
-            timeSubmited : backEndObj.timeSubmited[0] ? nanoSecondsToMiliSeconds(parseInt(backEndObj.timeSubmited[0])) : null,
+            timeOfUnlock: backEndObj.timeOfUnlock[0] ? [nanoSecondsToMiliSeconds(parseInt(backEndObj.timeOfUnlock[0]))] : [],
+            timeSubmited : backEndObj.timeSubmited[0] ? [nanoSecondsToMiliSeconds(parseInt(backEndObj.timeSubmited[0]))] : [],
             timeStarted : nanoSecondsToMiliSeconds(parseInt(backEndObj.timeStarted))
          };
     });

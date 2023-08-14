@@ -51,15 +51,6 @@ shared(msg) actor class Journal (principal : Principal) = this {
         Nat.equal,
         Hash.hash
     );
-
-    private stable var unsubmittedFilesArray : [(Text, JournalTypes.File)] = [];
-
-    private var unsubmittedFiles : JournalTypes.FileMap = HashMap.fromIter<Text, JournalTypes.File>(
-        Iter.fromArray(unsubmittedFilesArray),
-        Iter.size(Iter.fromArray(unsubmittedFilesArray)),
-        Text.equal,
-        Text.hash
-    );
     
     private stable var biography : JournalTypes.Bio = {
         name = "";
@@ -124,55 +115,15 @@ shared(msg) actor class Journal (principal : Principal) = this {
         #ok(journalAsArrayExport);
     };
 
-    public shared({caller}) func clearUnsubmittedFiles(): async Result.Result<(), JournalTypes.Error> {
-        if( Principal.toText(caller) != mainCanisterId_ ) { return #err(#NotAuthorized); };
-        let emptyArray : [(Text, JournalTypes.File)] = [];
-        unsubmittedFiles := HashMap.fromIter<Text, JournalTypes.File>(
-            Iter.fromArray(emptyArray),
-            Iter.size(Iter.fromArray(emptyArray)),
-            Text.equal,
-            Text.hash
-        );
-    
-        return #ok(());
-    };
-
-    public shared({caller}) func deleteSubmittedFile(fileId: Text): async Result.Result<(), JournalTypes.Error>{
+    public shared({caller}) func deleteFile(fileId: Text): async Result.Result<(), JournalTypes.Error>{
         if( Principal.toText(caller) != mainCanisterId_ ) { return #err(#NotAuthorized); };
         filesMap.delete(fileId);
         return #ok(());
     };
 
-    public shared({caller}) func deleteUnsubmittedFile(fileId: Text): async Result.Result<(), JournalTypes.Error> {
-        if( Principal.toText(caller) != mainCanisterId_ ) { return #err(#NotAuthorized); };
-        unsubmittedFiles.delete(fileId);
-        return #ok(());
-    };
-
-    public shared({caller}) func submitFiles() : async Result.Result<(), JournalTypes.Error> {
-        if( Principal.toText(caller) != mainCanisterId_ ) { return #err(#NotAuthorized); };
-        let filesArray_ = Iter.toArray(filesMap.entries());
-        let unsubmittedFilesArray_ = Iter.toArray(unsubmittedFiles.entries());
-        let updatedFiles = Array.append(filesArray_, unsubmittedFilesArray_);
-        let emptyArray : [(Text, JournalTypes.File)] = [];
-        filesMap := HashMap.fromIter<Text, JournalTypes.File>(
-            Iter.fromArray(updatedFiles),
-            Iter.size(Iter.fromArray(updatedFiles)),
-            Text.equal,
-            Text.hash
-        );
-        unsubmittedFiles := HashMap.fromIter<Text, JournalTypes.File>(
-            Iter.fromArray(emptyArray),
-            Iter.size(Iter.fromArray(emptyArray)),
-            Text.equal,
-            Text.hash
-        );
-        return #ok(());
-    };
-
     public shared({caller}) func uploadFileChunk(fileId: Text, chunkId : Nat, blobChunk : Blob) : async Result.Result<(Text), JournalTypes.Error> {
         if( Principal.toText(caller) != mainCanisterId_ ) { return #err(#NotAuthorized); };
-        let fileOption = unsubmittedFiles.get(fileId);
+        let fileOption = filesMap.get(fileId);
         let fileTrie = Option.get(fileOption, Trie.empty());
         let (newTrie, oldValue) = Trie.put(
             fileTrie,
@@ -180,7 +131,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
             Nat.equal,
             blobChunk
         );
-        unsubmittedFiles.put(fileId, newTrie);
+        filesMap.put(fileId, newTrie);
         return #ok(fileId); 
     };
 
@@ -403,15 +354,12 @@ shared(msg) actor class Journal (principal : Principal) = this {
         journalArray := Iter.toArray(journalMap.entries());
         filesArray := Iter.toArray(filesMap.entries());
         txHistoryArray := Iter.toArray(txHistoryMap.entries());
-        unsubmittedFilesArray := Iter.toArray(unsubmittedFiles.entries());
-
     };
 
     system func postupgrade() {
         journalArray := [];
         filesArray := [];
         txHistoryArray := [];
-        unsubmittedFilesArray := [];
     };
 
     private func mapJournalEntriesArrayToExport(journalAsArray: [JournalTypes.JournalEntryKeyValuePair]) : 
@@ -420,7 +368,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         let journalAsArrayExport = Array.map<JournalTypes.JournalEntryKeyValuePair, JournalTypes.JournalEntryExportKeyValuePair>(
             journalAsArray, func ((key, entry): JournalTypes.JournalEntryKeyValuePair) : JournalTypes.JournalEntryExportKeyValuePair{
                 let timeOfUnlock = Option.get(entry.timeOfUnlock, currentTime - 1);
-                let entryExport = { entry with locked = currentTime < timeOfUnlock; };
+                let entryExport = { entry with locked = entry.submitted and currentTime < timeOfUnlock; };
                 return (key, entryExport);
         });
         return journalAsArrayExport;

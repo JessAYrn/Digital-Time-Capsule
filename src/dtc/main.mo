@@ -124,23 +124,8 @@ shared actor class User() = this {
         return result;
     };
 
-    public shared({caller}) func deleteUnsubmittedFile(fileId: Text) : async Result.Result<(), JournalTypes.Error> {
-        let result = await JournalHelperMethods.deleteUnsubmittedFile(caller, userProfilesMap, fileId);
-        return result;
-    };
-
-    public shared({caller}) func deleteSubmittedFile(fileId: Text) : async Result.Result<(), JournalTypes.Error> {
-        let result = await JournalHelperMethods.deleteSubmittedFile(caller, userProfilesMap, fileId);
-        return result;
-    };
-
-    public shared({caller}) func submitFiles() : async Result.Result<(), JournalTypes.Error> {
-        let result = await JournalHelperMethods.submitFiles(caller, userProfilesMap);
-        return result;
-    };
-
-    public shared({caller}) func clearUnsubmittedFiles(): async Result.Result<(), JournalTypes.Error>{
-        let result = await JournalHelperMethods.clearUnsubmittedFiles(caller, userProfilesMap);
+    public shared({caller}) func deleteFile(fileId: Text) : async Result.Result<(), JournalTypes.Error> {
+        let result = await JournalHelperMethods.deleteFile(caller, userProfilesMap, fileId);
         return result;
     };
 

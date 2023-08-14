@@ -6,7 +6,7 @@ import  {AppContext} from "../App";
 import "./JournalPage.scss";
 import DatePickerField from "../../Components/Fields/DatePicker";
 import { MODALS_TYPES, monthInMilliSeconds, NULL_STRING_ALL_LOWERCASE} from "../../functionsAndConstants/Constants";
-import { scrollToBottom, scrollToTop } from "../../functionsAndConstants/Utils";
+import { milisecondsToNanoSeconds, scrollToBottom, scrollToTop } from "../../functionsAndConstants/Utils";
 import { loadJournalData } from "../../functionsAndConstants/loadingFunctions";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ButtonField from "../../Components/Fields/Button";
@@ -20,6 +20,7 @@ const JournalPage = (props) => {
 
     const [pageChangesMade, setPageChangesMade] = useState(false);  
     const [photosLoaded, setPhotosLoaded] = useState(false);
+    const [counter, setCounter] = useState(1);
     const [showUnlockTimeDatePicker, setShowUnlockTimeDatePicker] = useState(false);
     
     const { index } = props;
@@ -73,76 +74,61 @@ const JournalPage = (props) => {
 
     const onTextBoxChange = () => setCounter(counter + 1);
 
-    const sendData = async (entryKey, journalEntry, isDraft) => {
+    const sendData = async () => {
         journalDispatch({ actionType: types.SET_IS_LOADING, payload: true });
-        let unlockTimeInNanoseconds;
-        if(journalEntry.unlockTime) {
-            let unlockTimeInMilliseconds = getDateInMilliseconds(journalEntry.unlockTime);
-            unlockTimeInNanoseconds = milisecondsToNanoSeconds(unlockTimeInMilliseconds);
-        } else unlockTimeInNanoseconds = milisecondsToNanoSeconds(parseInt(Date.now()));
-
-        const entryAsApiObject = [{
-            entryTitle: journalEntry.title,
-            text: journalEntry.entry,
-            location: journalEntry.location,
-            date: journalEntry.date,
-            unlockTime: unlockTimeInNanoseconds,
-            emailOne: journalEntry.emailOne,
-            emailTwo: journalEntry.emailTwo,
-            emailThree: journalEntry.emailThree,
-            filesMetaData: journalEntry.filesMetaData,
-            draft: isDraft
-        }];
-
-        const entryKeyAsApiObject = (entryKey >= 0 && entryKey < journalSize - 1 ) ? [{entryKey: entryKey}] : [];
-        let result = await actorState.backendActor.updateJournalEntry( entryKeyAsApiObject, entryAsApiObject );
-        let userJournalData = result.ok;
-        loadJournalData({userJournalData}, journalDispatch, types);
-        journalDispatch({ actionType: types.SET_IS_LOADING, payload: false })
+        const entryKey = {entryKey: journalPageData.entryKey}
+        const entryAsApiObject = {
+            ...journalPageData,
+            timeOfUnlock: journalPageData.timeOfUnlock[0] ? [milisecondsToNanoSeconds(journalPageData.timeOfUnlock[0])] : [],
+            timeSubmited: journalPageData.timeSubmited[0] ? [milisecondsToNanoSeconds(journalPageData.timeSubmited[0])] : [],
+            timeStarted: milisecondsToNanoSeconds(journalPageData.timeStarted)
+        };
+        await actorState.backendActor.updateJournalEntry( entryKey, entryAsApiObject );
+        journalDispatch({ actionType: types.SET_IS_LOADING, payload: false });
         setCounter(1);
-        return result;
     };
 
-    const handleSubmit = useCallback(async () => {
-        modalDispatch({
-            actionType: modalTypes.SET_IS_LOADING,
-            payload: true
-        });
+    // const handleSubmit = useCallback(async () => {
+    //     modalDispatch({
+    //         actionType: modalTypes.SET_IS_LOADING,
+    //         payload: true
+    //     });
         
-        let files = journalPageData.filesMetaData.filter(fileData => fileData.fileName !== 'null' && !fileData.error);
-        journalPageData.filesMetaData = files;
-        let filesSuccessfullyUploaded = true;
-        let result = await actorState.backendActor.submitFiles();
-        if('err' in result) filesSuccessfullyUploaded = false;
+    //     let files = journalPageData.filesMetaData.filter(fileData => fileData.fileName !== 'null' && !fileData.error);
+    //     journalPageData.filesMetaData = files;
+    //     let filesSuccessfullyUploaded = true;
+    //     let result = await actorState.backendActor.submitFiles();
+    //     if('err' in result) filesSuccessfullyUploaded = false;
     
-        let result_1 = await mapAndSendEntryToApi(index, journalPageData, !filesSuccessfullyUploaded);
-        let entryDataSuccessfullyUploaded = true;
-        if('err' in result_1) entryDataSuccessfullyUploaded = false;
+    //     let result_1 = await mapAndSendEntryToApi(index, journalPageData, !filesSuccessfullyUploaded);
+    //     let entryDataSuccessfullyUploaded = true;
+    //     if('err' in result_1) entryDataSuccessfullyUploaded = false;
         
-        const successfulUpload = filesSuccessfullyUploaded && entryDataSuccessfullyUploaded;
-        modalDispatch({
-            actionType: modalTypes.SET_IS_LOADING,
-            payload: false
-        });
-        if(successfulUpload){
-            journalDispatch({
-                payload: false,
-                actionType: types.CHANGE_DRAFT,
-                index: index
-            });
-        } 
-        modalDispatch({
-            actionType: modalTypes.SET_MODAL_STATUS,
-            payload: {
-                show: true, 
-                which: MODALS_TYPES.onSubmit, 
-                success: successfulUpload
-            }
-        });
+    //     const successfulUpload = filesSuccessfullyUploaded && entryDataSuccessfullyUploaded;
+    //     modalDispatch({
+    //         actionType: modalTypes.SET_IS_LOADING,
+    //         payload: false
+    //     });
+    //     if(successfulUpload){
+    //         journalDispatch({
+    //             payload: false,
+    //             actionType: types.CHANGE_DRAFT,
+    //             index: index
+    //         });
+    //     } 
+    //     modalDispatch({
+    //         actionType: modalTypes.SET_MODAL_STATUS,
+    //         payload: {
+    //             show: true, 
+    //             which: MODALS_TYPES.onSubmit, 
+    //             success: successfulUpload
+    //         }
+    //     });
 
-    }, [journalPageData]);
+    // }, [journalPageData]);
 
-    const handleClosePage = (e) => {   
+    const handleClosePage = async (e) => {   
+        sendData();
         journalDispatch({
             actionType: types.CHANGE_PAGE_IS_OPEN,
             payload: false,
@@ -150,59 +136,61 @@ const JournalPage = (props) => {
         })
     };
 
-    const toggleLock = () => {
-        let showUnlockTimeDatePicker_ = !showUnlockTimeDatePicker;
-        if(!showUnlockTimeDatePicker_){
-            journalDispatch({
-                index: index,
-                actionType: types.CHANGE_UNLOCK_TIME,
-                payload: null
-            });
-        } else {
+    const toggleLock = async (bool) => {
+        if(bool){
             let currentTime = new Date();
             currentTime = currentTime.getTime();
             const oneMonthFromNow = currentTime + monthInMilliSeconds;
             journalDispatch({
                 index: index,
                 actionType: types.CHANGE_UNLOCK_TIME,
-                payload: oneMonthFromNow
+                payload: [oneMonthFromNow]
+            });
+        } else {
+            journalDispatch({
+                index: index,
+                actionType: types.CHANGE_UNLOCK_TIME,
+                payload: []
             });
         }
-        setShowUnlockTimeDatePicker(showUnlockTimeDatePicker_);
+        setShowUnlockTimeDatePicker(bool);
     };
+    console.log(journalPageData);
 
     const LockIcon_ = useMemo(() => {
         let currentTime = new Date();
         currentTime = currentTime.getTime();
-        if(!journalPageData.unlockTime || currentTime > journalPageData.unlockTime) return LockOpenIcon;
+        if(!journalPageData.timeOfUnlock[0] || currentTime > journalPageData.timeOfUnlock[0]) return LockOpenIcon;
         else return LockIcon;
-    },[journalPageData.unlockTime])
+    },[journalPageData.timeOfUnlock])
 
-    const onDatePickerChange_unlockTime = (e) => {
+    const onDatePickerChange_unlockTime = async (e) => {
         const date = new Date(e);
         const dateInMilliseconds = date.getTime();
         journalDispatch({
             index: index,
             actionType: types.CHANGE_UNLOCK_TIME,
-            payload: dateInMilliseconds
+            payload: [dateInMilliseconds]
         });
+        await sendData();
+
     }
 
 
-    const handleAddFile = async () => {
-        journalDispatch({
-            index: index,
-            actionType: types.ADD_JOURNAL_ENTRY_FILE
-        });
-    };
+    // const handleAddFile = async () => {
+    //     journalDispatch({
+    //         index: index,
+    //         actionType: types.ADD_JOURNAL_ENTRY_FILE
+    //     });
+    // };
 
-    let filesAreLoading = useMemo(() => {
-        let filesLoading = false;
-        journalPageData.filesMetaData.forEach(file => {
-            if(file.isLoading) filesLoading = file.isLoading;
-        });
-        return filesLoading;
-    }, [journalPageData.filesMetaData]);
+    // let filesAreLoading = useMemo(() => {
+    //     let filesLoading = false;
+    //     journalPageData.filesMetaData.forEach(file => {
+    //         if(file.isLoading) filesLoading = file.isLoading;
+    //     });
+    //     return filesLoading;
+    // }, [journalPageData.filesMetaData]);
 
     return ( 
         <>
@@ -236,7 +224,7 @@ const JournalPage = (props) => {
                 >
                     <ButtonField
                         disabled={journalPageData.submitted}
-                        onClick={toggleLock}
+                        onClick={async () => toggleLock(!showUnlockTimeDatePicker)}
                         Icon={LockIcon_}
                     />
                 </Grid>
@@ -258,7 +246,7 @@ const JournalPage = (props) => {
                 />
             </Grid>
             {
-                journalPageData.unlockTime && 
+                journalPageData.timeOfUnlock[0] && 
                 <Grid
                     columns={12} 
                     xs={11}
@@ -271,14 +259,14 @@ const JournalPage = (props) => {
                 >
                     <DatePickerField
                         disablePast={true}
-                        value={journalPageData.unlockTime}
+                        value={journalPageData.timeOfUnlock[0]}
                         label={"Unlock Date"}
                         onChange={onDatePickerChange_unlockTime}
                     />
                 </Grid>
             }
             {
-                journalPageData.timeSubmited && 
+                journalPageData.timeSubmited[0] && 
                 <Grid
                     columns={12} 
                     xs={11}
@@ -291,7 +279,7 @@ const JournalPage = (props) => {
                 >
                     <DatePickerField
                         disablePast={true}
-                        value={journalPageData.timeSubmited}
+                        value={journalPageData.timeSubmited[0]}
                         label={"Date Submitted"}
                     />
                 </Grid>
@@ -307,7 +295,7 @@ const JournalPage = (props) => {
             >
                 <InputBox
                     label={"memoir: "}
-                    onChange={() => {}}
+                    onChange={onTextBoxChange}
                     onBlur={() => {}}
                     rows={"16"}
                     index={index}
@@ -317,19 +305,6 @@ const JournalPage = (props) => {
                 />
             </Grid>
             {/* 
-            <div className={"journalText"} >
-                <DatePicker
-                    id={'entryDate'}
-                    label={"Date of Entry: "}
-                    rows={"1"}
-                    disabled={!journalPageData.draft}
-                    setChangesWereMade={setPageChangesMade}
-                    dispatch={journalDispatch}
-                    dispatchAction={types.CHANGE_DATE}
-                    index={index}
-                    value={journalPageData.date}
-                    max={thisDate}
-                />
                 <InputBox
                     label={"Location: "}
                     rows={"1"}
@@ -339,17 +314,6 @@ const JournalPage = (props) => {
                     dispatchAction={types.CHANGE_LOCATION}
                     index={index}
                     value={(journalPageData) ? journalPageData.location : ''}
-                />
-                <InputBox
-                    divClassName={"entry"}
-                    label={"Entry: "}
-                    rows={"30"}
-                    disabled={!journalPageData.draft}
-                    setChangesWereMade={setPageChangesMade}
-                    dispatch={journalDispatch}
-                    dispatchAction={types.CHANGE_ENTRY}
-                    index={index}
-                    value={(journalPageData) ? journalPageData.entry : ''}
                 />
             </div>
             {journalState.journal[index].filesMetaData.length > 0 &&
