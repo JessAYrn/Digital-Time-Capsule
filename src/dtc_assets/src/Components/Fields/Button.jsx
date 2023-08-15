@@ -15,11 +15,14 @@ const ButtonField = (props) => {
         elevation,
         active,
         id,
+        onChange,
+        ref,
         ariaControls,
         ariaHaspopup,
         ariaExpanded,
         color,
-        className
+        className,
+        upload
     } = props;
     
     let doNothing = () => {};
@@ -33,8 +36,11 @@ const ButtonField = (props) => {
     return (
             <Paper 
             elevation={elevation ? elevation : 24} 
-            className={`${transparentBackground ? "transparentBackground" : ""} ${className} buttonField`} >
+            className={`${transparentBackground ? "transparentBackground" : ""} ${className} buttonField`} 
+            >
                 <ButtonType 
+                    varient={upload ? 'contained' : null}
+                    component={upload ? "label" : null}
                     aria-controls={ariaControls}
                     aria-haspopup={ariaHaspopup}
                     aria-expanded={ariaExpanded}
@@ -49,6 +55,7 @@ const ButtonField = (props) => {
                 >
                     {text && !isLoading && <span style={{color:"white"}}>{text}</span>}
                     {!text && Icon && <Icon/>}
+                    {upload && <input type="file" hidden onChange={onChange} ref={ref}/>}
                 </ButtonType>
             </Paper> 
     );

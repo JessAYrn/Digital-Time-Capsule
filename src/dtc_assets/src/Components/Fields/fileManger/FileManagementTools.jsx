@@ -68,44 +68,37 @@ export const updateFileMetadataInStore = (props) => {
         index: index,
         fileIndex: fileIndex
     })
-    if(!!setChangesWereMade){
-        setChangesWereMade(true);
-    } 
+    if(!!setChangesWereMade) setChangesWereMade(true);
     return fileId;
 };
 
-export const displayFile = async (props) => {
-    const {
-        uploadedFile, setFileSrc, 
-        setFileType, dispatch, defaultFileSrc
-    } = props;
-    //check file extension for audio/video type
-    //this if statement will ultimately end up triggering the 
-    //canPlayThrough() function.
+export const getIsWithinProperFormat = async (uploadedFile) => {
     if(uploadedFile.name.match(/\.(avi|mp3|mp4|mpeg|ogg|webm|mov|MOV)$/i)){
         const result = await getDuration(uploadedFile);
         let duration = result.duration;
         URL.revokeObjectURL(result.url);
-        if(duration > MAX_DURATION_OF_VIDEO_IN_SECONDS || forbiddenFileTypes.includes(uploadedFile.type)){
-            setFileSrc(defaultFileSrc);
-            setFileType("image/png");
-            dispatch({
-                    actionType: types.SET_MODAL_STATUS,
-                    payload: {
-                        show: true, 
-                        which: MODALS_TYPES.fileHasError,
-                        duration: duration
-                    }
-            });
-            return null;
+        if(duration > MAX_DURATION_OF_VIDEO_IN_SECONDS) {
+            return {
+                isProperFormat: false, 
+                modalDispatchInput:{ 
+                    show: true, 
+                    which: MODALS_TYPES.exceedsMaxDuration,
+                    duration: duration 
+                }
+            };
         };
     };
-    //triggers useEffect which displays the video
-    setFileType(uploadedFile.type);
-    const fileURL = await getFileURL(uploadedFile);
-    return fileURL;
-};
-
+    if(forbiddenFileTypes.includes(uploadedFile.type)){
+        return {
+            isProperFormat: false, 
+            modalDispatchInput:{ 
+                show: true, 
+                which: MODALS_TYPES.unsupportedFileType
+            } 
+        }
+    }
+    return {isProperFormat: true};
+}
 export const mapAndSendFileToApi = async (props) => {
     const {actorState, fileId, uploadedFile} = props;
     const fileSize = uploadedFile.size;
@@ -127,6 +120,7 @@ export const mapAndSendFileToApi = async (props) => {
         chunk += 1;
     };
     const results = await Promise.all(promises); 
+    console.log(results);
 };
 
 export const getFileUrl_fromApi = async (

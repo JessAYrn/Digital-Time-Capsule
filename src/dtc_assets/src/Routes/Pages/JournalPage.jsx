@@ -5,7 +5,7 @@ import { modalTypes } from "../../reducers/modalReducer";
 import  {AppContext} from "../App";
 import "./JournalPage.scss";
 import DatePickerField from "../../Components/Fields/DatePicker";
-import { MODALS_TYPES, monthInMilliSeconds, NULL_STRING_ALL_LOWERCASE} from "../../functionsAndConstants/Constants";
+import { monthInMilliSeconds} from "../../functionsAndConstants/Constants";
 import { milisecondsToNanoSeconds, scrollToBottom, scrollToTop } from "../../functionsAndConstants/Utils";
 import { loadJournalData } from "../../functionsAndConstants/loadingFunctions";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';

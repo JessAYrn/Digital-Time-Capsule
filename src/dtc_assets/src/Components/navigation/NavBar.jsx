@@ -10,7 +10,6 @@ import { AppContext as GroupJournalContext} from '../../Routes/GroupJournal';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
 import MenuIcon from '@mui/icons-material/Menu';
 import { types } from '../../reducers/journalReducer';
-import { MODALS_TYPES } from '../../functionsAndConstants/Constants';
 import { ConnectButton, ConnectDialog, useConnect } from "@connect2ic/react";
 import { initialState } from '../../reducers/journalReducer';
 import "./NavBar.scss";

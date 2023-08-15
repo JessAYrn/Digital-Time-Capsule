@@ -2,12 +2,9 @@ import React, {useState, useEffect, useMemo} from "react";
 import FileUpload from "./FileUpload";
 import { UI_CONTEXTS } from "../../../functionsAndConstants/Contexts";
 import "./fileCarousel.scss";
-import * as RiIcons from 'react-icons/ri';
-import * as BiIcons from 'react-icons/bi';
-import * as MdIcons from 'react-icons/md';
+
 import ButtonField from "../Button";
-import { NULL_STRING_ALL_LOWERCASE } from "../../../functionsAndConstants/Constants";
-import { types } from "../../../reducers/journalReducer";
+import Grid from "@mui/material/Unstable_Grid2/Grid2";
 
 const FileCarousel = (props) => {
 
@@ -20,7 +17,6 @@ const FileCarousel = (props) => {
         actorState,
         dispatchActionToDeleteFile,
         setChangesWereMade,
-        classNameMod,
         editModeDefault,
         disabled,
         index,
@@ -121,34 +117,35 @@ const FileCarousel = (props) => {
     // let maxNumberOfFilesReached = filesMetaDataArray.length >= 4;
 
     return (
-        <div className={'photoCarouselContainer'}>
-            <div className={'photoCarouselDiv'} id={'photoCarouselDiv'}>
-                {filesMetaDataArray.map((fileMetaData, fileIndex) => {
-                    let forceDisplayDefaultFileSrc = (fileMetaData.fileName === NULL_STRING_ALL_LOWERCASE) ? true : false;
-                    return(
-                        <div className = {'fileContainer'}>
-                            <FileUpload
-                                label={`file_${fileIndex}`}
-                                elementId={`file_${fileIndex}`}
-                                disabled={ disabled}
-                                index={index}
-                                fileIndex={fileIndex}
-                                key={fileIndex}
-                                forceDisplayDefaultFileSrc={forceDisplayDefaultFileSrc}
-                                context={UI_CONTEXTS.JOURNAL}
-                                setChangesWereMade={setChangesWereMade}
-                                classNameMod={classNameMod}
-                                dispatch={journalDispatch}
-                                dispatchActionToChangeFileMetaData={dispatchActionToChangeFileMetaData}
-                                dispatchActionToChangeFileLoadStatus={dispatchActionToChangeFileLoadStatus}
-                                fileData={fileMetaData}
-                                videoHeight={videoHeight}
-                            />
-                        </div>
-                    )
-                })}
-            </div>
-        </div>
+        <Grid 
+            columns={12} 
+            xs={12}
+            overflow={{
+                overflowX: "auto",
+                overflowY: "hidden"
+            }}
+            display={"flex"}
+        >
+            {filesMetaDataArray.map((fileMetaData, fileIndex) => {
+                return(
+                    <FileUpload
+                        label={`file_${fileIndex}`}
+                        elementId={`file_${fileIndex}`}
+                        disabled={ disabled}
+                        index={index}
+                        fileIndex={fileIndex}
+                        key={fileIndex}
+                        context={UI_CONTEXTS.JOURNAL}
+                        setChangesWereMade={setChangesWereMade}
+                        dispatch={journalDispatch}
+                        dispatchActionToChangeFileMetaData={dispatchActionToChangeFileMetaData}
+                        dispatchActionToChangeFileLoadStatus={dispatchActionToChangeFileLoadStatus}
+                        fileData={fileMetaData}
+                        videoHeight={videoHeight}
+                    />
+                )
+            })}
+        </Grid>
     )
 };
 

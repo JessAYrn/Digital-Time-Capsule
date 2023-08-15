@@ -10,7 +10,7 @@ import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import LoadScreen from "./LoadScreen";
 import { Modal } from "./modalContent/Modal";
 import { NavBar } from "../../Components/navigation/NavBar";
-import { MODALS_TYPES, NULL_STRING_ALL_LOWERCASE } from "../../functionsAndConstants/Constants";
+import { NULL_STRING_ALL_LOWERCASE } from "../../functionsAndConstants/Constants";
 import { UI_CONTEXTS } from "../../functionsAndConstants/Contexts";
 import { dateAisLaterThanOrSameAsDateB, delay, getDateAsString, getHighestEntryKey } from "../../functionsAndConstants/Utils";
 import FileCarousel from "../../Components/Fields/fileManger/FileCarousel";

@@ -4,7 +4,7 @@ import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import { useTheme, ThemeProvider } from '@mui/material/styles';
 import EditIcon from '@mui/icons-material/Edit';
-import PublishIcon from '@mui/icons-material/Publish';
+import UploadIcon from '@mui/icons-material/Upload';
 import ButtonField from './Button';
 import "./InputBox.scss";
 
@@ -46,7 +46,7 @@ const InputBox = (props) => {
     const theme = useTheme();
 
     let EditIcon_;
-    if(editing) EditIcon_ = PublishIcon;
+    if(editing) EditIcon_ = UploadIcon;
     else if(!editing) EditIcon_ = EditIcon;
 
 

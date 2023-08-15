@@ -29,14 +29,16 @@ export const MEGABYTES = 1000000;
 
 export const MODALS_TYPES = {
     exitWithoutSubmit: 'exitWithoutSubmit',
-    fileHasError: 'fileHasError',
+    exceedsMaxDuration: 'exceedsMaxDuration',
     notifications: 'notifications',
     onSend:'onSend',
     onSubmit: 'onSubmit',
     notAuthorizedByOwner: "notAuthorizedByOwner",
     onRegisterNewOwner: "onRegisterNewOwner",
     requestApprovalRepsonse: "requestApprovalRepsonse",
-    dateSelectedOutOfRange: 'dateSelectedOutOfRange'
+    dateSelectedOutOfRange: 'dateSelectedOutOfRange',
+    quicktimeVideoDetected: 'quicktimeVideoDetected',
+    unsupportedFileType: 'unsupportedFileType'
 }
 
 export const MAX_NUMBER_OF_BYTES = 21000000;

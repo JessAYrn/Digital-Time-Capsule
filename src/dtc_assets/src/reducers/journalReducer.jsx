@@ -1,5 +1,4 @@
-import { JOURNAL_TABS, MODALS_TYPES, NULL_STRING_ALL_LOWERCASE, NULL_STRING_CAPITALIZED} from "../functionsAndConstants/Constants"
-import { getDateAsString } from "../functionsAndConstants/Utils";
+import { JOURNAL_TABS,} from "../functionsAndConstants/Constants"
 
 export const types = {
     SET_ENTIRE_REDUX_STATE: "SET_ENTIRE_REDUX_STATE",
@@ -69,13 +68,12 @@ export const initialState = {
     isLoading: false,
 };
 const defaultFileMetaData = {
-    fileName: NULL_STRING_ALL_LOWERCASE,
+    fileName: null,
     lastModified: 0,
-    fileType: NULL_STRING_ALL_LOWERCASE,
+    fileType: null,
     file: null,
     isLoading: false,
     error: false,
-    fileIsUnsubmitted: true
 };
 
 const changeValue = (state = initialState, action) => {

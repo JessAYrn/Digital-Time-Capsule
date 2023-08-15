@@ -6,7 +6,7 @@ import { round2Decimals } from '../../../functionsAndConstants/Utils';
 import "./ModalContentHasError.scss";
 import ButtonField from '../../../Components/Fields/Button';
 import { modalTypes } from '../../../reducers/modalReducer';
-const FileHasError = (props) => {
+const ExceedsMaxDuration = (props) => {
 
     const { modalState, modalDispatch } = useContext(AppContext);
 
@@ -19,7 +19,7 @@ const FileHasError = (props) => {
     };
 
     return(
-        <div className={'fileHasErrorCotentDiv'}>  
+        <div className={''}>  
             <ul className={'list'}>
                 <h1 className={'h1'}>
                     Error:
@@ -55,4 +55,4 @@ const FileHasError = (props) => {
 
 };
 
-export default FileHasError;
+export default ExceedsMaxDuration;

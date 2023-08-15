@@ -1,7 +1,4 @@
-import React, {useState, useRef} from 'react';
-import { MODALS_TYPES } from '../../functionsAndConstants/Constants';
-import { types } from '../../reducers/journalReducer';
-import { dateAisLaterThanOrSameAsDateB } from '../../functionsAndConstants/Utils';
+import React, {useState} from 'react';
 import dayjs from 'dayjs';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';

@@ -6,7 +6,7 @@ import { AppContext as WalletContext} from '../../Wallet';
 import { AppContext as TreasuryContext} from '../../Treasury';
 import { AppContext as GroupJournalContext} from '../../GroupJournal';
 import { MODALS_TYPES } from '../../../functionsAndConstants/Constants';
-import FileHasError from './ModalContentHasError';
+import ExceedsMaxDuration from './ModalContentHasError';
 import ExitWithoutSubmit from './ModalContentExitWithoutSubmitModal';
 import ModalContentOnSend from './ModalContentOnSend';
 import ModalContentSubmit from './ModalContentOnSubmit';
@@ -43,8 +43,8 @@ export const Modal = (props) => {
     const ChildComponent = useMemo(() => {
 
         let ChildComp;
-        if(modalState.modalStatus.which === MODALS_TYPES.fileHasError) {
-            ChildComp = FileHasError;
+        if(modalState.modalStatus.which === MODALS_TYPES.exceedsMaxDuration) {
+            ChildComp = ExceedsMaxDuration;
         } else if(modalState.modalStatus.which === MODALS_TYPES.exitWithoutSubmit) {
             ChildComp = ExitWithoutSubmit;
         } else if(modalState.modalStatus.which === MODALS_TYPES.onSend) {

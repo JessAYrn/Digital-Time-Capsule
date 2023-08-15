@@ -1,27 +1,27 @@
-import React, {useRef, useState, useEffect, useContext, useMemo} from 'react';
+import React, { useContext} from 'react';
 import "./FileUpload.scss";
-import { useEffect } from '../../../../../../dist/dtc_assets';
-import { deviceType } from '../../../functionsAndConstants/Utils';
-import { DEVICE_TYPES, NULL_STRING_ALL_LOWERCASE } from '../../../functionsAndConstants/Constants';
-import { mapAndSendFileToApi, displayFile, updateFileMetadataInStore } from './FileManagementTools';
+import { MODALS_TYPES } from '../../../functionsAndConstants/Constants';
+import { mapAndSendFileToApi, getIsWithinProperFormat, updateFileMetadataInStore, getFileURL } from './FileManagementTools';
+import { modalTypes } from '../../../reducers/modalReducer';
 import { AppContext as AccountContext} from '../../../Routes/Account';
 import { AppContext as HomePageContext} from '../../../Routes/HomePage';
 import { AppContext as JournalContext} from '../../../Routes/App';
 import { AppContext as WalletContext} from '../../../Routes/Wallet';
 import { AppContext as TreasuryContext} from '../../../Routes/Treasury';
 import { AppContext as GroupJournalContext} from '../../../Routes/GroupJournal';
+import UploadIcon from '@mui/icons-material/Upload';
 import { retrieveContext } from '../../../functionsAndConstants/Contexts';
+import { Card, CardMedia } from '@mui/material';
+import ButtonField from '../Button';
 
 const FileUpload = (props) => {
     const {
         index,
         elementId,
-        forceDisplayDefaultFileSrc,
         setChangesWereMade,
         fileIndex,
         context,
         disabled,
-        classNameMod,
         dispatchActionToChangeFileMetaData,
         dispatchActionToChangeFileLoadStatus,
         videoHeight,
@@ -29,14 +29,7 @@ const FileUpload = (props) => {
         dispatch,
         reduxState
     } = props;
-    let inputRef = useRef();
-
-    const defaultFileSrc = "dtc-logo-black.png";
-    const [fileSrc, setFileSrc]  = useState(defaultFileSrc);
-    const [fileType, setFileType] = useState("image/png");
-        
-    const typeOfDevice = deviceType();
-    
+            
     let contexts = {
         WalletContext,
         JournalContext,
@@ -49,16 +42,10 @@ const FileUpload = (props) => {
     let AppContext = retrieveContext(contexts, context);
 
     
-    const { actorState } = useContext(AppContext);
+    const { actorState, modalDispatch } = useContext(AppContext);
 
-    //Upon uploading a file, this function updates the file metadata from its default settings 
-    //to that of the file that was uploaded. 
-    useEffect(() => { if (fileData.file) setFileSrc(fileData.file); }, [fileData]);
-
-    //returns the fileId of a newly uploaded file, but only of the file fits the format requirements.
-
-    const handleUpload = async () => {
-        const uploadedFile = inputRef.current.files[0];
+    const handleUpload = async (e) => {
+        const uploadedFile = e.target.files[0];
         dispatch({ 
             actionType: dispatchActionToChangeFileLoadStatus,
             payload: true,
@@ -66,96 +53,67 @@ const FileUpload = (props) => {
             fileIndex: fileIndex 
         });
         let inputForDisplayFileFunction = {
-            uploadedFile, setFileSrc, setFileType, dispatch, 
+            uploadedFile, dispatch, modalDispatch, 
             dispatchActionToChangeFileMetaData, index, fileIndex,
-            setChangesWereMade, defaultFileSrc, actorState
+            setChangesWereMade, actorState
         }
-        let fileURL = await displayFile(inputForDisplayFileFunction);
-        inputForDisplayFileFunction = { ...inputForDisplayFileFunction, fileURL};
-        let fileId = updateFileMetadataInStore(inputForDisplayFileFunction);
-        inputForDisplayFileFunction = { ...inputForDisplayFileFunction, fileId};
-        if(fileId) await mapAndSendFileToApi(inputForDisplayFileFunction);
-
+        const formatStatus = await getIsWithinProperFormat(uploadedFile);
+        if(!formatStatus.isProperFormat){
+            modalDispatch({
+                actionType: modalTypes.SET_MODAL_STATUS,
+                payload: formatStatus.modalDispatchInput
+            });
+            return;
+        }
+        const fileURL = await getFileURL(uploadedFile);
+        let fileId = updateFileMetadataInStore({ ...inputForDisplayFileFunction, fileURL});
+        await mapAndSendFileToApi({ ...inputForDisplayFileFunction, fileId});
         dispatch({ 
             actionType: dispatchActionToChangeFileLoadStatus,
             payload: false,
             index: index,
             fileIndex: fileIndex 
         });
+        if(uploadedFile.type.includes("quicktime")){
+            modalDispatch({
+                actionType: modalTypes.SET_MODAL_STATUS,
+                payload: { show: true,  which: MODALS_TYPES.quicktimeVideoDetected }
+            });
+        }
     };
 
-    const fileSrcToDisplay = forceDisplayDefaultFileSrc ? defaultFileSrc : fileSrc;
-
     return(
-        <div className={`imageDivContainer ${classNameMod}`}>
-            <div className={`imageDiv ${classNameMod}`}>  
-                {
-                    fileData.isLoading ? 
-                        <>
-                            <img src="Loading.gif" alt="Loading Screen" />
-                        </> :
-                        <>
-                            { 
-                                (fileType.includes("image")) ? 
-                                    <img 
-                                        src={fileSrcToDisplay} 
-                                        id={elementId}
-                                        alt="image preview" 
-                                        className="imagePreview__image" 
-                                    /> :
-                                    (fileType.includes("quicktime") && (typeOfDevice !== DEVICE_TYPES.desktop)) ?
-                                    <video 
-                                        width="330" 
-                                        height={videoHeight} 
-                                        className="imagePreview__video" 
-                                        preload
-                                        id={elementId}
-                                        style={{borderRadius: 10 + 'px'}}
-                                        controls
-                                        muted
-                                        poster={'video-thumbnail.png'}
-                                        playsInline
-                                        src={fileSrcToDisplay}
-                                    ></video> :
-                                    <video 
-                                        width="330" 
-                                        height={videoHeight} 
-                                        style={{borderRadius: 10 + 'px'}}
-                                        className="imagePreview__video" 
-                                        preload="metadata"
-                                        id={elementId}
-                                        controls
-                                        muted
-                                        playsInline
-                                    >
-                                        <source src={fileSrcToDisplay} type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'/>
-                                        <source src={fileSrcToDisplay} type='video/ogg; codecs="theora, vorbis"'/>
-                                        <source src={fileSrcToDisplay} type='video/webm; codecs="vp8, vorbis"'/>
-                                        <source src={fileSrcToDisplay} type='video/mpeg'/>
-                                        Your browser does not support the video tag.
-                                    </video>  
-                            
-                            }
-                            {
-                                !fileSrcToDisplay && 
-                                <span className="imagePreview__default-display">
-                                    Image Preview
-                                </span>   
-                            } 
-                        </> 
-                }          
-            </div>
-            { !disabled && fileData.fileName === NULL_STRING_ALL_LOWERCASE &&
-                <input 
+        <Card 
+            className='cardComponent'
+        >
+            {fileData.file ?
+                <CardMedia
+                    component={
+                        fileData.isLoading ? 
+                        "img" : 
+                        fileData.fileType.includes("image") ? 
+                        "img" : 
+                        "video"
+                    }
+                    className='cardMediaComponent'
+                    autoPlay
+                    muted
+                    height={500}
+                    controls
+                    src={fileData.isLoading ? "../../../../assets/Loading.gif" : fileData.file}
+                /> :
+                <ButtonField 
+                    className={'FileUploaderButton'}
                     disabled={disabled}
-                    id={`uploadedImaged__${elementId}`} 
+                    id={elementId} 
+                    text={"Upload Photo / Video"}
                     type="file" 
-                    className={'imageInputButton'} 
-                    ref={inputRef} 
+                    upload={true}
+                    Icon={UploadIcon}
                     onChange={handleUpload}
                 /> 
             }
-        </div>
+        </Card>
     );
 }
 
