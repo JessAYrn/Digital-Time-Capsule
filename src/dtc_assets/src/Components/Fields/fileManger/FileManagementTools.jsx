@@ -129,8 +129,6 @@ export const getFileUrl_fromApi = async (
     ) => {
 
     let fileName = fileData.fileName;
-    if(fileName === 'null') return;
-
     let index_ = 0;
     let promises = [];
     let fileChunkCounteObj;

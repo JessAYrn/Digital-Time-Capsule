@@ -231,36 +231,37 @@ export const recoverState = async ( location, dispatchMethods, types, connection
     });
 };
 
-export const fileLoaderHelper =  async (
-    fileData, 
-    fileIndex,
-    pageIndex,
-    actorState, 
-    journalDispatch, 
-    actionTypeToChangeFileLoadStatus,
-    actionTypeToSetFile
-    ) => {
+export const fileLoaderHelper =  async (props) => {
+    const {
+        fileData, 
+        fileIndex,
+        index,
+        actorState, 
+        journalDispatch, 
+        dispatchActionToChangeFileLoadStatus,
+        dispatchActionToChangeFileMetaData
+    } = props
     journalDispatch({
-        actionType: actionTypeToChangeFileLoadStatus,
+        actionType: dispatchActionToChangeFileLoadStatus,
         payload: true,
         blockReload: true,
         fileIndex: fileIndex,
-        index: pageIndex
+        index: index
     });
     const dataURL = await getFileUrl_fromApi(actorState, fileData);
     journalDispatch({
-        actionType: actionTypeToSetFile,
-        payload: dataURL,
+        actionType: dispatchActionToChangeFileMetaData,
+        payload: { ...fileData, file: dataURL},
         blockReload: true,
         fileIndex: fileIndex,
-        index: pageIndex
+        index: index
     });
     journalDispatch({
-        actionType: actionTypeToChangeFileLoadStatus,
+        actionType: dispatchActionToChangeFileLoadStatus,
         payload: false,
         blockReload: true,
         fileIndex: fileIndex,
-        index: pageIndex
+        index: index
     });
     return dataURL;
 }

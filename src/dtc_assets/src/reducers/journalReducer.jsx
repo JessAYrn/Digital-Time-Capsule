@@ -67,7 +67,7 @@ export const initialState = {
     isAuthenticated: false,
     isLoading: false,
 };
-const defaultFileMetaData = {
+export const defaultFileMetaData = {
     fileName: null,
     lastModified: 0,
     fileType: null,
@@ -139,7 +139,6 @@ const changeValue = (state = initialState, action) => {
         }
         case types.SET_BIO:
             state.bio = payload;
-            while(state.bio.photos.length < 3) state.bio.photos.push(defaultFileMetaData);
             state.bio.photos
             return {
                 ...state
@@ -376,11 +375,7 @@ const changeValue = (state = initialState, action) => {
             }
         case types.REMOVE_COVER_PHOTO:
             updatedPhotos = state.bio.photos.filter((metaData, i) =>  i !== fileIndex);
-            if(!updatedPhotos.length) updatedPhotos.push(defaultFileMetaData);
-            state.bio = {
-                ...state.bio,
-                photos: [...updatedPhotos]
-            }
+            state.bio.photos =  updatedPhotos
             return {
                 ...state
             }

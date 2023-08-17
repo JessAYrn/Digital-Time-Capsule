@@ -10,57 +10,37 @@ import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import LoadScreen from "./LoadScreen";
 import { Modal } from "./modalContent/Modal";
 import { NavBar } from "../../Components/navigation/NavBar";
-import { NULL_STRING_ALL_LOWERCASE } from "../../functionsAndConstants/Constants";
 import { UI_CONTEXTS } from "../../functionsAndConstants/Contexts";
-import { dateAisLaterThanOrSameAsDateB, delay, getDateAsString, getHighestEntryKey } from "../../functionsAndConstants/Utils";
+import { getHighestEntryKey } from "../../functionsAndConstants/Utils";
+import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 import FileCarousel from "../../Components/Fields/fileManger/FileCarousel";
-import { fileLoaderHelper } from "../../functionsAndConstants/loadingFunctions";
 import DataTable from "../../Components/Fields/Table";
 import "../../SCSS/scrollable.scss";
 import "../../SCSS/contentContainer.scss";
 import { journalPagesTableColumns, mapRequestsForAccessToTableRows } from "../../mappers/journalPageMappers";
 import { mapApiObjectToFrontEndJournalEntriesObject } from "../../mappers/journalPageMappers";
 
+const count = 30
+
 
 const Journal = (props) => {
 
     const { journalState, journalDispatch, actorState, actorDispatch, modalState, modalDispatch} = useContext(AppContext);
-    const [photosLoaded, setPhotosLoaded] = useState(false);
     const [counter, setCounter] = useState(1);
-    
-    useEffect(async () => {
-        if(photosLoaded) return;
-        const promises = [];
-
-        journalState.bio.photos.forEach((fileData, fileIndex) => {
-            if(fileData.fileName === NULL_STRING_ALL_LOWERCASE) return;
-            if(fileData.file) return;
-            promises.push(fileLoaderHelper(
-                fileData, 
-                fileIndex,
-                null,
-                actorState,
-                journalDispatch,
-                types.CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE,
-                types.SET_FILE_JOURNAL_COVER_PAGE
-            ));
-        });
-        if(promises.length) setPhotosLoaded(true);
-        const result = await Promise.all(promises);
-    },[journalState.bio.photos]);
 
     const sendData = async () => {
         journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: true
         })
+        const photos = journalState.bio.photos.filter(file => !!file.fileName);
         const result = await actorState.backendActor.updateBio({
             dob: journalState.bio.dob,
             pob: journalState.bio.pob,
             name: journalState.bio.name,
             dedications: journalState.bio.dedications,
             preface: journalState.bio.preface,
-            photos: journalState.bio.photos
+            photos: photos
         });
         journalDispatch({
             actionType: types.SET_IS_LOADING,
@@ -69,10 +49,12 @@ const Journal = (props) => {
         setCounter(1);
     };
 
-    useEffect(() => {if(counter % 30 === 0) sendData()},[counter]);
+    useEffect(() => {if(counter % count === 0) sendData()},[counter]);
 
 
     const onTextBoxChange = () => setCounter(counter + 1);
+
+    const triggerSendDataFunctionAfterReduxStateUpdate = () => {setCounter(count)};
 
     const openPage = async (props) => {
         const {entryKey, locked} = props;
@@ -85,6 +67,8 @@ const Journal = (props) => {
             });
         }
     };
+
+    const addFile = () => journalDispatch({ actionType: types.ADD_COVER_PHOTO });
 
     const createJournalPage = async (e, key, locked) => {
         //Ensures that there are no unsubmitted entries left over from a previous post
@@ -99,6 +83,7 @@ const Journal = (props) => {
 
     const speedDialActions = [
         {name: "New Jorunal Entry", icon: NoteAddIcon , onClick: createJournalPage},
+        {name: "New Cover Photo", icon: AddAPhotoIcon, onClick: addFile}
     ]
 
     const getIndexOfVisiblePage = () => {
@@ -178,14 +163,15 @@ const Journal = (props) => {
                     flexDirection={"column"}
                 >
                 <FileCarousel
-                    videoHeight = {'330'}
+                    editable={true}
+                    onChange={triggerSendDataFunctionAfterReduxStateUpdate}
                     filesMetaDataArray={journalState.bio.photos}
                     journalState={journalState}
                     actorState={actorState}
                     actorDispatch={actorDispatch}
                     journalDispatch={journalDispatch}
                     dispatchActionToAddFile={types.ADD_COVER_PHOTO}
-                    dispatchActionToDeleteFile={types.REMOVE_COVER_PHOTO}
+                    dispatchActionToRemoveFile={types.REMOVE_COVER_PHOTO}
                     classNameMod={'coverPhoto'}
                     dispatchActionToChangeFileMetaData={types.CHANGE_FILE_METADATA_JOURNAL_COVER_PAGE}
                     dispatchActionToChangeFileLoadStatus={types.CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE}

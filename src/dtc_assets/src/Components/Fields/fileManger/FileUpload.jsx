@@ -9,10 +9,12 @@ import { AppContext as JournalContext} from '../../../Routes/App';
 import { AppContext as WalletContext} from '../../../Routes/Wallet';
 import { AppContext as TreasuryContext} from '../../../Routes/Treasury';
 import { AppContext as GroupJournalContext} from '../../../Routes/GroupJournal';
-import UploadIcon from '@mui/icons-material/Upload';
+import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { retrieveContext } from '../../../functionsAndConstants/Contexts';
 import { Card, CardMedia } from '@mui/material';
 import ButtonField from '../Button';
+import Grid from '@mui/material/Unstable_Grid2/Grid2';
 
 const FileUpload = (props) => {
     const {
@@ -24,9 +26,11 @@ const FileUpload = (props) => {
         disabled,
         dispatchActionToChangeFileMetaData,
         dispatchActionToChangeFileLoadStatus,
-        videoHeight,
+        dispatchActionToRemoveFile,
         fileData,
         dispatch,
+        displayDeleteButton,
+        onChange,
         reduxState
     } = props;
             
@@ -43,6 +47,18 @@ const FileUpload = (props) => {
 
     
     const { actorState, modalDispatch } = useContext(AppContext);
+
+    const deleteFile = async () => {
+        dispatch({
+            actionType: dispatchActionToRemoveFile,
+            fileIndex: fileIndex,
+            index: index
+        });
+        if(fileData.fileName){
+            const result = await actorState.backendActor.deleteFile(fileData.fileName);
+        }
+        onChange();
+    };
 
     const handleUpload = async (e) => {
         const uploadedFile = e.target.files[0];
@@ -80,36 +96,50 @@ const FileUpload = (props) => {
                 payload: { show: true,  which: MODALS_TYPES.quicktimeVideoDetected }
             });
         }
+        onChange();
     };
 
     return(
         <Card 
             className='cardComponent'
         >
-            {fileData.file ?
-                <CardMedia
-                    component={
-                        fileData.isLoading ? 
-                        "img" : 
-                        fileData.fileType.includes("image") ? 
-                        "img" : 
-                        "video"
+            {fileData.file || fileData.isLoading ?
+                <>
+                    {
+                        displayDeleteButton && !fileData.isLoading &&
+                            <Grid className={'deleteFileButtonDiv'}>
+                                <ButtonField 
+                                    className={'DeleteFileButton'}
+                                    id={elementId} 
+                                    Icon={DeleteIcon}
+                                    active={true}
+                                    onClick={deleteFile}
+                                /> 
+                            </Grid>
                     }
-                    className='cardMediaComponent'
-                    autoPlay
-                    muted
-                    height={500}
-                    controls
-                    src={fileData.isLoading ? "../../../../assets/Loading.gif" : fileData.file}
-                /> :
+                    <CardMedia
+                        component={
+                            fileData.isLoading ? 
+                            "img" : 
+                            fileData.fileType.includes("image") ? 
+                            "img" : 
+                            "video"
+                        }
+                        className='cardMediaComponent'
+                        autoPlay
+                        muted
+                        height={500}
+                        controls
+                        src={fileData.isLoading ? "../../../../assets/Loading.gif" : fileData.file}
+                    /> 
+                </>:
                 <ButtonField 
                     className={'FileUploaderButton'}
                     disabled={disabled}
                     id={elementId} 
                     text={"Upload Photo / Video"}
-                    type="file" 
                     upload={true}
-                    Icon={UploadIcon}
+                    Icon={AddAPhotoIcon}
                     onChange={handleUpload}
                 /> 
             }
