@@ -54,7 +54,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
     
     private stable var biography : JournalTypes.Bio = {
         name = "";
-        dob = 0;
+        dob = null;
         pob = "";
         dedications = "";
         preface = "";

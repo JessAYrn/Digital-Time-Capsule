@@ -9,7 +9,7 @@ module {
 
     public type Bio = {
         name : Text;
-        dob: Int;
+        dob: ?Int;
         pob: Text;
         dedications: Text;
         preface: Text;
@@ -107,7 +107,7 @@ module {
 
     public let DEFAULT_BIO: Bio = {
         name = "";
-        dob = 0;
+        dob = null;
         pob = "";
         dedications = "";
         preface = "";

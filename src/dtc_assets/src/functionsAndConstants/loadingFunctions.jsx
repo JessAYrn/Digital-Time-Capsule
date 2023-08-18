@@ -78,7 +78,7 @@ export const loadJournalData = async (actorState, journalDispatch, types) => {
     journal = journal.ok;
     let { userJournalData } = journal;
     let [journalEntries, journalBio] = userJournalData;
-    journalBio = {...journalBio, dob: nanoSecondsToMiliSeconds(parseInt(journalBio.dob))}
+    journalBio = {...journalBio, dob: journalBio.dob[0] ? [nanoSecondsToMiliSeconds(parseInt(journalBio.dob[0]))] : []}
     journalEntries = mapApiObjectToFrontEndJournalEntriesObject(journalEntries);
     journalDispatch({
         payload: journalBio,

@@ -21,7 +21,9 @@ const DatePickerField = (props) => {
         value,
         editable,
         minDate,
-        maxDate
+        maxDate,
+        md,
+        xs
         // dispatchAction //the action that is to take place in order to dispatch the field change to the redux store
     } = props;
 
@@ -71,7 +73,7 @@ const DatePickerField = (props) => {
     // }
 
     return(
-        <Grid xs={12} md={4} display={"flex"} flexDirection={"column"} justifyContent={"center"} alignItems={"center"}>
+        <Grid xs={xs ? xs : 12} md={md ? md :4} display={"flex"} flexDirection={"column"} justifyContent={"center"} alignItems={"center"}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DatePicker className='datePicker'
                     value={dayjs(value)}

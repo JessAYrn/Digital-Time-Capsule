@@ -28,7 +28,6 @@ const Journal = (props) => {
 
     const { journalState, journalDispatch, actorState, actorDispatch, modalState, modalDispatch} = useContext(AppContext);
     const [counter, setCounter] = useState(1);
-    const [photosLength, setPhotosLength] = useState(0);
 
     const sendData = async () => {
         journalDispatch({
@@ -37,7 +36,7 @@ const Journal = (props) => {
         })
         const photos = journalState.bio.photos.filter(file => !!file.fileName);
         const result = await actorState.backendActor.updateBio({
-            dob: milisecondsToNanoSeconds(journalState.bio.dob),
+            dob: journalState.bio.dob[0] ? [milisecondsToNanoSeconds(journalState.bio.dob[0])] : [],
             pob: journalState.bio.pob,
             name: journalState.bio.name,
             dedications: journalState.bio.dedications,
@@ -61,7 +60,7 @@ const Journal = (props) => {
         const dateInMilliseconds = date.getTime();
         journalDispatch({
             actionType: types.CHANGE_DOB,
-            payload: dateInMilliseconds
+            payload: [dateInMilliseconds]
         });
         await sendData();
     }
@@ -148,11 +147,16 @@ const Journal = (props) => {
                         dispatchAction={types.CHANGE_NAME}
                         value={journalState.bio.name}
                     />
-                    <DatePickerField
-                        value={journalState.bio.dob}
-                        label={"Date Of Birth"}
-                        onChange={onDatePickerChange}
-                    />
+                    <Grid xs={12} display={"flex"} justifyContent={"left"} alignItems={"center"}>
+                        <DatePickerField
+                            value={journalState.bio.dob[0]}
+                            label={"Date Of Birth"}
+                            onChange={onDatePickerChange}
+                            editable={true}
+                            md={11}
+                            xs={11}
+                        />
+                    </Grid>
                     <InputBox
                         label={"Place of Birth: "}
                         rows={"1"}

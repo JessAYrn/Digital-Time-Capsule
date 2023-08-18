@@ -55,7 +55,7 @@ export const initialState = {
     isLoggingIn: false,
     bio: {
         name: '',
-        dob: 0,
+        dob: [],
         pob: '',
         dedications: '',
         preface:'',
