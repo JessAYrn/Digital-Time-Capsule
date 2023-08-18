@@ -54,9 +54,7 @@ const FileUpload = (props) => {
             fileIndex: fileIndex,
             index: index
         });
-        if(fileData.fileName){
-            const result = await actorState.backendActor.deleteFile(fileData.fileName);
-        }
+        if(fileData.fileName) actorState.backendActor.deleteFile(fileData.fileName);
         onChange();
     };
 
@@ -101,7 +99,7 @@ const FileUpload = (props) => {
 
     return(
         <Card 
-            className='cardComponent'
+            className={`cardComponent ${elementId}`}
         >
             {fileData.file || fileData.isLoading ?
                 <>

@@ -55,7 +55,7 @@ export const initialState = {
     isLoggingIn: false,
     bio: {
         name: '',
-        dob: '',
+        dob: 0,
         pob: '',
         dedications: '',
         preface:'',
@@ -139,7 +139,6 @@ const changeValue = (state = initialState, action) => {
         }
         case types.SET_BIO:
             state.bio = payload;
-            state.bio.photos
             return {
                 ...state
             }

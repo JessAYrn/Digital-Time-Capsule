@@ -12,18 +12,17 @@ export const SpeedDialPositions = {
 };
 
 const SpeedDialField = (props) => {
-    const { actions, position  } = props;
-
-    let sx = { position: 'absolute', bottom: 16, right: 16 };
-    if(position === SpeedDialPositions.bottomLeft) sx = { position: 'absolute', bottom: 16, left: 16 };
-    else if(position === SpeedDialPositions.topRight) sx = { position: 'absolute', top: 16, right: 16 };
-    else if(position === SpeedDialPositions.topLeft) sx = { position: 'absolute', top: 16, left: 16 };
+    const { actions  } = props;
 
     return (
-        <Box sx={{ height: 320, transform: 'translateZ(0px)', flexGrow: 1 }}>
+        <Box sx={{ transform: 'translateZ(0px)', flexGrow: 1, position: "fixed", bottom: 10, right: 10, zIndex: 10 }}>
             <SpeedDial
+                sx={{
+                    "& .css-1ervdh7-MuiButtonBase-root-MuiFab-root-MuiSpeedDial-fab" : {
+                        backgroundColor: "#343434"
+                    }
+                }}
                 ariaLabel="SpeedDial basic example"
-                sx={sx}
                 icon={<SpeedDialIcon />}
             >
                 {actions.map((action) => {

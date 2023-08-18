@@ -122,7 +122,7 @@ const LoginPage = (props) => {
     return(
         <Grid container columns={12} xs={12} rowSpacing={8} display="flex" justifyContent="center" alignItems="center">
             <Grid xs={11} md={9} display="flex" justifyContent="center" alignItems="center">
-                <img className={`logoImg`}src="../../../assets/P2.svg" alt="Logo"/>
+                <img className={`img`}src="../../../assets/P2.svg" alt="Logo"/>
             </Grid>
             <Grid container xs={11} md={9}>
                 <Grid xs display="flex" justifyContent="center" alignItems="center">

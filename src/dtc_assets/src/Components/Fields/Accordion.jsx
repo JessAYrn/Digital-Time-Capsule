@@ -28,7 +28,7 @@ const AccordionField = (props_) => {
                     </div>
                     <AccordionDetails>
                         {text && <TextComponent>{text}</TextComponent>}
-                        {image && <img src={image}/>}
+                        {image && <img src={image} className='accordianImage'/>}
                         {CustomComponent && <CustomComponent {...props}/>}
                     </AccordionDetails>
                 </Accordion>

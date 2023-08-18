@@ -161,10 +161,19 @@ export const scrollToTop = () => {
   });
 }
 
-export const scrollToBottom = (distanceFromBottom = 0) => {
+export const scrollTo_X =  (distanceFromLeft = 0) => {
+  console.log(window.scrollY);
   window.scrollTo({
-    top: document.body.scrollHeight - distanceFromBottom,
-    left: 0,
+    top: window.scrollY,
+    left: distanceFromLeft,
+    behavior: 'smooth'
+  });
+}
+
+export const scrollTo_Y =  (distanceFromTop = 0) => {
+  window.scrollTo({
+    top: distanceFromTop,
+    left: window.scrollX,
     behavior: 'smooth'
   });
 }

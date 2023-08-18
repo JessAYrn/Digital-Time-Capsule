@@ -1,5 +1,5 @@
 import { mapApiObjectToFrontEndJournalEntriesObject } from "../mappers/journalPageMappers";
-import { delay, managerActor, backendActor, toHexString } from "./Utils";
+import { delay, managerActor, backendActor, toHexString, nanoSecondsToMiliSeconds } from "./Utils";
 import { generateQrCode } from "./walletFunctions/GenerateQrCode";
 import { mapBackendCanisterDataToFrontEndObj } from "../mappers/dashboardMapperFunctions";
 import { getFileUrl_fromApi } from "../Components/Fields/fileManger/FileManagementTools";
@@ -78,6 +78,7 @@ export const loadJournalData = async (actorState, journalDispatch, types) => {
     journal = journal.ok;
     let { userJournalData } = journal;
     let [journalEntries, journalBio] = userJournalData;
+    journalBio = {...journalBio, dob: nanoSecondsToMiliSeconds(parseInt(journalBio.dob))}
     journalEntries = mapApiObjectToFrontEndJournalEntriesObject(journalEntries);
     journalDispatch({
         payload: journalBio,

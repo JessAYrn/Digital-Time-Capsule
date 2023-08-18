@@ -160,6 +160,7 @@ const FileCarousel = (props) => {
                 </Grid>
             }
             <Grid 
+                className={'fileUploaderWrapperGrid'}
                 columns={12} 
                 xs={12}
                 overflow={{

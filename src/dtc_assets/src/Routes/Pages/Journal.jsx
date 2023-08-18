@@ -11,10 +11,11 @@ import LoadScreen from "./LoadScreen";
 import { Modal } from "./modalContent/Modal";
 import { NavBar } from "../../Components/navigation/NavBar";
 import { UI_CONTEXTS } from "../../functionsAndConstants/Contexts";
-import { getHighestEntryKey } from "../../functionsAndConstants/Utils";
+import { getHighestEntryKey, milisecondsToNanoSeconds, scrollTo_X, scrollTo_X } from "../../functionsAndConstants/Utils";
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
-import FileCarousel from "../../Components/Fields/fileManger/FileCarousel";
+import FileCarousel, { scrollRight } from "../../Components/Fields/fileManger/FileCarousel";
 import DataTable from "../../Components/Fields/Table";
+import DatePickerField from "../../Components/Fields/DatePicker";
 import "../../SCSS/scrollable.scss";
 import "../../SCSS/contentContainer.scss";
 import { journalPagesTableColumns, mapRequestsForAccessToTableRows } from "../../mappers/journalPageMappers";
@@ -27,6 +28,7 @@ const Journal = (props) => {
 
     const { journalState, journalDispatch, actorState, actorDispatch, modalState, modalDispatch} = useContext(AppContext);
     const [counter, setCounter] = useState(1);
+    const [photosLength, setPhotosLength] = useState(0);
 
     const sendData = async () => {
         journalDispatch({
@@ -35,7 +37,7 @@ const Journal = (props) => {
         })
         const photos = journalState.bio.photos.filter(file => !!file.fileName);
         const result = await actorState.backendActor.updateBio({
-            dob: journalState.bio.dob,
+            dob: milisecondsToNanoSeconds(journalState.bio.dob),
             pob: journalState.bio.pob,
             name: journalState.bio.name,
             dedications: journalState.bio.dedications,
@@ -54,6 +56,16 @@ const Journal = (props) => {
 
     const onTextBoxChange = () => setCounter(counter + 1);
 
+    const onDatePickerChange = async (e) => {
+        const date = new Date(e);
+        const dateInMilliseconds = date.getTime();
+        journalDispatch({
+            actionType: types.CHANGE_DOB,
+            payload: dateInMilliseconds
+        });
+        await sendData();
+    }
+
     const triggerSendDataFunctionAfterReduxStateUpdate = () => {setCounter(count)};
 
     const openPage = async (props) => {
@@ -68,9 +80,13 @@ const Journal = (props) => {
         }
     };
 
-    const addFile = () => journalDispatch({ actionType: types.ADD_COVER_PHOTO });
+    const addFile = () => {
+        journalDispatch({ actionType: types.ADD_COVER_PHOTO });
+        const element = document.querySelector(".fileUploaderWrapperGrid");
+        element?.scrollIntoView({behavior: "smooth"});
+    };
 
-    const createJournalPage = async (e, key, locked) => {
+    const createJournalPage = async () => {
         //Ensures that there are no unsubmitted entries left over from a previous post
         const result = await actorState.backendActor.createJournalEntry();
         
@@ -111,6 +127,7 @@ const Journal = (props) => {
             <JournalPage index={getIndexOfVisiblePage()}/> :
             <>
                 <Grid 
+                    className={"firstWritingSectionWrapperGrid"}
                     columns={12} 
                     xs={11} 
                     md={9} 
@@ -131,15 +148,10 @@ const Journal = (props) => {
                         dispatchAction={types.CHANGE_NAME}
                         value={journalState.bio.name}
                     />
-                    <InputBox
-                        label={"Date of Birth: "}
-                        rows={"1"}
-                        editable={true}
-                        onChange={onTextBoxChange}
-                        onBlur={sendData}
-                        dispatch={journalDispatch}
-                        dispatchAction={types.CHANGE_DOB}
+                    <DatePickerField
                         value={journalState.bio.dob}
+                        label={"Date Of Birth"}
+                        onChange={onDatePickerChange}
                     />
                     <InputBox
                         label={"Place of Birth: "}
@@ -153,6 +165,7 @@ const Journal = (props) => {
                     />
                 </Grid>
                 <Grid 
+                    className={"fileCarouselWrapperGrid"}
                     columns={12} 
                     xs={12} 
                     md={9} 
@@ -178,6 +191,7 @@ const Journal = (props) => {
                 />
                 </Grid>
                 <Grid 
+                    className={"secondWritingSectionWrapperGrid"}
                     columns={12} 
                     xs={11} md={9} 
                     rowSpacing={8} 
@@ -208,6 +222,7 @@ const Journal = (props) => {
                     />
                 </Grid>
                 <Grid 
+                    className={'DataTableWrapperGrid'}
                     columns={12} 
                     xs={11} md={9} 
                     rowSpacing={8} 
@@ -223,24 +238,10 @@ const Journal = (props) => {
                         rows={mapRequestsForAccessToTableRows(journalState.journal)}
                     />
                 </Grid>
-                {/* {
-                    pageChangesMade &&
-                    <ButtonField
-                        text={'Submit'}
-                        className={'submitButtonDiv'}
-                        onClick={handleSubmit}
-                    />
-                } */}
                 <SpeedDialField
                     actions={speedDialActions}
                     position={SpeedDialPositions}
                 />
-                {/* <ButtonField
-                    Icon={AiIcons.AiFillFileAdd}
-                    iconSize={25}
-                    className={'addPageDiv'}
-                    onClick={addJournalPage}
-                /> */}
             </>}  
         </Grid>
     );

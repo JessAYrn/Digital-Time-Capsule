@@ -6,7 +6,7 @@ import  {AppContext} from "../App";
 import "./JournalPage.scss";
 import DatePickerField from "../../Components/Fields/DatePicker";
 import { monthInMilliSeconds} from "../../functionsAndConstants/Constants";
-import { milisecondsToNanoSeconds, scrollToBottom, scrollToTop } from "../../functionsAndConstants/Utils";
+import { milisecondsToNanoSeconds, scrollToTop } from "../../functionsAndConstants/Utils";
 import { loadJournalData } from "../../functionsAndConstants/loadingFunctions";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ButtonField from "../../Components/Fields/Button";
@@ -40,29 +40,6 @@ const JournalPage = (props) => {
         return journalState.journal[index];
     }, [journalState.journal[index]]);
 
-    // useEffect(async () => {
-    //     if(photosLoaded) return;
-    //     const promises = [];
-    //     journalPageData.filesMetaData.forEach((fileData, fileIndex) => {
-    //         if(fileData.fileName === NULL_STRING_ALL_LOWERCASE) return;
-    //         if(fileData.file) return;
-    //         promises.push(fileLoaderHelper(
-    //             fileData, 
-    //             fileIndex,
-    //             index,
-    //             actorState,
-    //             journalDispatch,
-    //             types.CHANGE_FILE_LOAD_STATUS,
-    //             types.SET_FILE
-    //         ));
-    //     });
-    //     if(promises.length) setPhotosLoaded(true);
-    //     const result = await Promise.all(promises);
-    // },[journalPageData.filesMetaData]);
-
-    useEffect(() => {
-        scrollToBottom();
-    }, [journalPageData.filesMetaData.length]);
 
     useEffect(() => { scrollToTop(); },[]);
     
