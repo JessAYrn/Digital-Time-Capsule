@@ -12,10 +12,18 @@ export const SpeedDialPositions = {
 };
 
 const SpeedDialField = (props) => {
-    const { actions  } = props;
+    const { actions, position  } = props;    
 
     return (
-        <Box sx={{ transform: 'translateZ(0px)', flexGrow: 1, position: "fixed", bottom: 10, right: 10, zIndex: 10 }}>
+        <Box sx={{ 
+            transform: 'translateZ(0px)', 
+            flexGrow: 1, 
+            position: "fixed", 
+            bottom: 10, 
+            [position]: 10, 
+            zIndex: 10 
+            }}
+        >
             <SpeedDial
                 sx={{
                     "& .css-1ervdh7-MuiButtonBase-root-MuiFab-root-MuiSpeedDial-fab" : {

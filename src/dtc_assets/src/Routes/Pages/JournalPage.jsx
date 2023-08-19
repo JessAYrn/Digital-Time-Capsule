@@ -1,25 +1,26 @@
-import React, {useState, useContext, useMemo, useCallback, useEffect} from "react";
+import React, {useState, useContext, useMemo, useEffect} from "react";
 import InputBox from "../../Components/Fields/InputBox";
 import {types} from "../../reducers/journalReducer";
-import { modalTypes } from "../../reducers/modalReducer";
 import  {AppContext} from "../App";
 import "./JournalPage.scss";
 import DatePickerField from "../../Components/Fields/DatePicker";
 import { monthInMilliSeconds} from "../../functionsAndConstants/Constants";
+import { modalTypes } from "../../reducers/modalReducer";
 import { milisecondsToNanoSeconds, scrollToTop } from "../../functionsAndConstants/Utils";
-import { loadJournalData } from "../../functionsAndConstants/loadingFunctions";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ButtonField from "../../Components/Fields/Button";
 import FileCarousel from "../../Components/Fields/fileManger/FileCarousel";
-import { fileLoaderHelper } from "../../functionsAndConstants/loadingFunctions";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import LockIcon from '@mui/icons-material/Lock';
+import SpeedDialField from "../../Components/Fields/SpeedDialField";
+import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
+import DoneIcon from '@mui/icons-material/Done';
+import { mapApiObjectToFrontEndJournalEntriesObject } from "../../mappers/journalPageMappers";
+
+const count = 30;
 
 const JournalPage = (props) => {
-
-    const [pageChangesMade, setPageChangesMade] = useState(false);  
-    const [photosLoaded, setPhotosLoaded] = useState(false);
     const [counter, setCounter] = useState(1);
     const [showUnlockTimeDatePicker, setShowUnlockTimeDatePicker] = useState(false);
     
@@ -34,8 +35,6 @@ const JournalPage = (props) => {
         modalDispatch
     } = useContext(AppContext);
 
-    let journalSize = journalState.journal.length;
-
     const journalPageData = useMemo(() => {
         return journalState.journal[index];
     }, [journalState.journal[index]]);
@@ -46,7 +45,9 @@ const JournalPage = (props) => {
     //marks this page as read so that it no longer shows in the notifications section
     // if(journalPageData.entryKey) actorState.backendActor.markJournalEntryAsRead({entryKey: journalPageData.entryKey});
 
-    useEffect(() => {if(counter % 30 === 0) sendData()},[counter]);
+    useEffect(() => {if(counter % count === 0) sendData()},[counter]);
+
+    const triggerSendDataFunctionAfterReduxStateUpdate = () => setCounter(count);
 
 
     const onTextBoxChange = () => setCounter(counter + 1);
@@ -54,58 +55,21 @@ const JournalPage = (props) => {
     const sendData = async () => {
         journalDispatch({ actionType: types.SET_IS_LOADING, payload: true });
         const entryKey = {entryKey: journalPageData.entryKey}
+        const filesMetaData = journalPageData.filesMetaData.filter(fileMetaData => !!fileMetaData.fileName)
         const entryAsApiObject = {
             ...journalPageData,
             timeOfUnlock: journalPageData.timeOfUnlock[0] ? [milisecondsToNanoSeconds(journalPageData.timeOfUnlock[0])] : [],
             timeSubmited: journalPageData.timeSubmited[0] ? [milisecondsToNanoSeconds(journalPageData.timeSubmited[0])] : [],
-            timeStarted: milisecondsToNanoSeconds(journalPageData.timeStarted)
+            timeStarted: milisecondsToNanoSeconds(journalPageData.timeStarted),
+            filesMetaData: filesMetaData
         };
         await actorState.backendActor.updateJournalEntry( entryKey, entryAsApiObject );
         journalDispatch({ actionType: types.SET_IS_LOADING, payload: false });
         setCounter(1);
     };
 
-    // const handleSubmit = useCallback(async () => {
-    //     modalDispatch({
-    //         actionType: modalTypes.SET_IS_LOADING,
-    //         payload: true
-    //     });
-        
-    //     let files = journalPageData.filesMetaData.filter(fileData => fileData.fileName !== 'null' && !fileData.error);
-    //     journalPageData.filesMetaData = files;
-    //     let filesSuccessfullyUploaded = true;
-    //     let result = await actorState.backendActor.submitFiles();
-    //     if('err' in result) filesSuccessfullyUploaded = false;
-    
-    //     let result_1 = await mapAndSendEntryToApi(index, journalPageData, !filesSuccessfullyUploaded);
-    //     let entryDataSuccessfullyUploaded = true;
-    //     if('err' in result_1) entryDataSuccessfullyUploaded = false;
-        
-    //     const successfulUpload = filesSuccessfullyUploaded && entryDataSuccessfullyUploaded;
-    //     modalDispatch({
-    //         actionType: modalTypes.SET_IS_LOADING,
-    //         payload: false
-    //     });
-    //     if(successfulUpload){
-    //         journalDispatch({
-    //             payload: false,
-    //             actionType: types.CHANGE_DRAFT,
-    //             index: index
-    //         });
-    //     } 
-    //     modalDispatch({
-    //         actionType: modalTypes.SET_MODAL_STATUS,
-    //         payload: {
-    //             show: true, 
-    //             which: MODALS_TYPES.onSubmit, 
-    //             success: successfulUpload
-    //         }
-    //     });
-
-    // }, [journalPageData]);
-
     const handleClosePage = async (e) => {   
-        sendData();
+        if (!journalPageData.submitted) sendData();
         journalDispatch({
             actionType: types.CHANGE_PAGE_IS_OPEN,
             payload: false,
@@ -132,7 +96,6 @@ const JournalPage = (props) => {
         }
         setShowUnlockTimeDatePicker(bool);
     };
-    console.log(journalPageData);
 
     const LockIcon_ = useMemo(() => {
         let currentTime = new Date();
@@ -150,24 +113,30 @@ const JournalPage = (props) => {
             payload: [dateInMilliseconds]
         });
         await sendData();
-
     }
 
+    const handleAddFile = async () => {
+        journalDispatch({ index: index, actionType: types.ADD_JOURNAL_ENTRY_FILE });
+        const element = document.querySelector(".fileUploaderWrapperGrid");
+        element?.scrollIntoView({behavior: "smooth"});
+    };
 
-    // const handleAddFile = async () => {
-    //     journalDispatch({
-    //         index: index,
-    //         actionType: types.ADD_JOURNAL_ENTRY_FILE
-    //     });
-    // };
+    const submit = async () => {
+        modalDispatch({ actionType: modalTypes.SET_IS_LOADING, payload: true })
+        const entryKey = {entryKey: journalPageData.entryKey}
+        await sendData();
+        let result = await actorState.backendActor.submitJournalEntry(entryKey);
+        let journalEntries = result.ok;
+        journalEntries = mapApiObjectToFrontEndJournalEntriesObject(journalEntries);
+        journalDispatch({ payload: journalEntries, actionType: types.SET_JOURNAL });
+        journalDispatch({ actionType: types.CHANGE_PAGE_IS_OPEN, payload: false, index: index });
+        modalDispatch({ actionType: modalTypes.SET_IS_LOADING, payload: false });
+    }
 
-    // let filesAreLoading = useMemo(() => {
-    //     let filesLoading = false;
-    //     journalPageData.filesMetaData.forEach(file => {
-    //         if(file.isLoading) filesLoading = file.isLoading;
-    //     });
-    //     return filesLoading;
-    // }, [journalPageData.filesMetaData]);
+    const speedDialActions = [ 
+        {name: "Add Photo/Video", icon: AddAPhotoIcon, onClick: handleAddFile},
+        {name: "Submit Entry", icon: DoneIcon, onClick: submit}
+    ];
 
     return ( 
         <>
@@ -258,6 +227,7 @@ const JournalPage = (props) => {
                         disablePast={true}
                         value={journalPageData.timeSubmited[0]}
                         label={"Date Submitted"}
+                        disabled={true}
                     />
                 </Grid>
             }
@@ -271,9 +241,35 @@ const JournalPage = (props) => {
                 flexDirection={"column"}
             >
                 <InputBox
-                    label={"memoir: "}
+                    label={"Title: "}
+                    placeHolder={"Give this journal entry a title you'll remember! :-)"}
                     onChange={onTextBoxChange}
-                    onBlur={() => {}}
+                    onBlur={sendData}
+                    disabled={journalPageData.submitted}
+                    rows={"1"}
+                    index={index}
+                    dispatch={journalDispatch}
+                    dispatchAction={types.CHANGE_ENTRY_TITLE}
+                    value={journalPageData.title}
+                />
+                <InputBox
+                    label={"Location: "}
+                    placeHolder={"Where are you creating this entry from?"}
+                    onChange={onTextBoxChange}
+                    onBlur={sendData}
+                    rows={"1"}
+                    disabled={journalPageData.submitted}
+                    index={index}
+                    dispatch={journalDispatch}
+                    dispatchAction={types.CHANGE_LOCATION}
+                    value={journalPageData.location}
+                />
+                <InputBox
+                    label={"Memoir: "}
+                    placeHolder={"What's on your mind? "}
+                    onChange={onTextBoxChange}
+                    onBlur={sendData}
+                    disabled={journalPageData.submitted}
                     rows={"16"}
                     index={index}
                     dispatch={journalDispatch}
@@ -281,59 +277,30 @@ const JournalPage = (props) => {
                     value={journalPageData.text}
                 />
             </Grid>
-            {/* 
-                <InputBox
-                    label={"Location: "}
-                    rows={"1"}
-                    disabled={!journalPageData.draft}
-                    setChangesWereMade={setPageChangesMade}
-                    dispatch={journalDispatch}
-                    dispatchAction={types.CHANGE_LOCATION}
+            <Grid 
+                className={"fileCarouselWrapperGrid"}
+                columns={12} 
+                xs={12} 
+                md={9} 
+                rowSpacing={8} 
+                display="flex" 
+                justifyContent="center" 
+                alignItems="center" 
+                flexDirection={"column"}
+            >
+                <FileCarousel
+                    onChange={triggerSendDataFunctionAfterReduxStateUpdate}
+                    filesMetaDataArray={journalPageData.filesMetaData}
+                    actorState={actorState}
                     index={index}
-                    value={(journalPageData) ? journalPageData.location : ''}
+                    dispatch={journalDispatch}
+                    dispatchActionToAddFile={types.ADD_JOURNAL_ENTRY_FILE}
+                    dispatchActionToRemoveFile={types.REMOVE_JOURNAL_ENTRY_FILE}
+                    dispatchActionToChangeFileMetaData={types.CHANGE_FILE_METADATA}
+                    dispatchActionToChangeFileLoadStatus={types.CHANGE_FILE_LOAD_STATUS}
                 />
-            </div>
-            {journalState.journal[index].filesMetaData.length > 0 &&
-                <div className='photosSection'>
-                    <FileCarousel
-                        videoHeight = {'330'}
-                        filesMetaDataArray={journalState.journal[index].filesMetaData}
-                        journalState={journalState}
-                        actorState={actorState}
-                        actorDispatch={actorDispatch}
-                        setChangesWereMade={setPageChangesMade}
-                        editModeDefault={true}
-                        disabled={!journalPageData.draft}
-                        journalDispatch={journalDispatch}
-                        index={index}
-                        dispatchActionToAddFile={types.ADD_JOURNAL_ENTRY_FILE}
-                        dispatchActionToDeleteFile={types.REMOVE_JOURNAL_ENTRY_FILE}
-                        classNameMod={'coverPhoto'}
-                        dispatchActionToChangeFileMetaData={types.CHANGE_FILE_METADATA}
-                        dispatchActionToChangeFileLoadStatus={types.CHANGE_FILE_LOAD_STATUS}
-                        withoutButtons={true}
-                    />
-                </div>    
-            }
-            {
-                journalPageData.draft &&
-                <ButtonField
-                    Icon={BiIcons.BiImageAdd}
-                    iconSize={25}
-                    className={'addFileDiv'}
-                    onClick={handleAddFile}
-                    withBox={true}
-                />
-            }
-            {
-                journalPageData.draft && !filesAreLoading && pageChangesMade &&
-                <ButtonField
-                    text={'Submit'}
-                    className={'submitButtonDiv'}
-                    onClick={handleSubmit}
-                    withBox={true}
-                />
-            } */}
+            </Grid>
+            {!journalPageData.submitted && <SpeedDialField actions={speedDialActions} position={"right"}/>}
         </>
     )
 };

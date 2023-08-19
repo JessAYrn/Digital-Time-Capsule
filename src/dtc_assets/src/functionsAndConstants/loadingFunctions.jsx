@@ -238,11 +238,11 @@ export const fileLoaderHelper =  async (props) => {
         fileIndex,
         index,
         actorState, 
-        journalDispatch, 
+        dispatch, 
         dispatchActionToChangeFileLoadStatus,
         dispatchActionToChangeFileMetaData
     } = props
-    journalDispatch({
+    dispatch({
         actionType: dispatchActionToChangeFileLoadStatus,
         payload: true,
         blockReload: true,
@@ -250,14 +250,14 @@ export const fileLoaderHelper =  async (props) => {
         index: index
     });
     const dataURL = await getFileUrl_fromApi(actorState, fileData);
-    journalDispatch({
+    dispatch({
         actionType: dispatchActionToChangeFileMetaData,
         payload: { ...fileData, file: dataURL},
         blockReload: true,
         fileIndex: fileIndex,
         index: index
     });
-    journalDispatch({
+    dispatch({
         actionType: dispatchActionToChangeFileLoadStatus,
         payload: false,
         blockReload: true,

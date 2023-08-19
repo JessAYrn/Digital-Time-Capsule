@@ -1,7 +1,7 @@
 import React, { useContext} from 'react';
 import "./FileUpload.scss";
 import { MODALS_TYPES } from '../../../functionsAndConstants/Constants';
-import { mapAndSendFileToApi, getIsWithinProperFormat, updateFileMetadataInStore, getFileURL } from './FileManagementTools';
+import { mapAndSendFileToApi, getIsWithinProperFormat, updateFileMetadataInStore, getFileURL, createFileId } from './FileManagementTools';
 import { modalTypes } from '../../../reducers/modalReducer';
 import { AppContext as AccountContext} from '../../../Routes/Account';
 import { AppContext as HomePageContext} from '../../../Routes/HomePage';
@@ -30,8 +30,7 @@ const FileUpload = (props) => {
         fileData,
         dispatch,
         displayDeleteButton,
-        onChange,
-        reduxState
+        onChange
     } = props;
             
     let contexts = {
@@ -80,8 +79,11 @@ const FileUpload = (props) => {
             return;
         }
         const fileURL = await getFileURL(uploadedFile);
-        let fileId = updateFileMetadataInStore({ ...inputForDisplayFileFunction, fileURL});
-        await mapAndSendFileToApi({ ...inputForDisplayFileFunction, fileId});
+        const fileId = createFileId(uploadedFile);
+        const result = await mapAndSendFileToApi({ ...inputForDisplayFileFunction, fileId});
+        //check results to make sure all files were uploaded properly. if not, delete the files from the backend
+        // and display the error screen. If so, call the updateFileMetadataInStore() function.
+        updateFileMetadataInStore({ ...inputForDisplayFileFunction, fileURL, fileId});
         dispatch({ 
             actionType: dispatchActionToChangeFileLoadStatus,
             payload: false,

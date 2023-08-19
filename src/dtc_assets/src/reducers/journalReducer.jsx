@@ -245,7 +245,6 @@ const changeValue = (state = initialState, action) => {
         case types.ADD_JOURNAL_ENTRY_FILE:
             updatedFilesMetaDataArry = [...state.journal[index].filesMetaData];
             updatedFilesMetaDataArry.push(defaultFileMetaData);
-            while(updatedFilesMetaDataArry.length < 3) updatedFilesMetaDataArry.push(defaultFileMetaData);
             state.journal[index].filesMetaData = updatedFilesMetaDataArry;
             return {
                 ...state

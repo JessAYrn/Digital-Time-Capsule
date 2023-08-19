@@ -14,20 +14,16 @@ const FileCarousel = (props) => {
 
     const {
         filesMetaDataArray,
-        journalDispatch,
-        actorDispatch,
+        dispatch,
         onChange,
-        journalState,
         actorState,
         setChangesWereMade,
-        editModeDefault,
         disabled,
         index,
         editable,
         dispatchActionToChangeFileMetaData,
         dispatchActionToChangeFileLoadStatus,
         dispatchActionToRemoveFile,
-        withoutButtons
     } = props;
 
     const [editing, setEditing] = useState(false);
@@ -43,7 +39,7 @@ const FileCarousel = (props) => {
                 fileIndex,
                 index,
                 actorState,
-                journalDispatch,
+                dispatch,
                 dispatchActionToChangeFileLoadStatus,
                 dispatchActionToChangeFileMetaData
             }));
@@ -58,91 +54,9 @@ const FileCarousel = (props) => {
     if(editing) EditIcon_ = UploadIcon;
     else if(!editing) EditIcon_ = EditIcon; 
 
-    // const toggleEditMode = async () => {
-    //     let updatedEditMode = !editMode
-    //     setEditMode(updatedEditMode);
-    //     if(!updatedEditMode){
-    //         journalDispatch({
-    //             actionType: types.SET_IS_LOADING,
-    //             payload: true
-    //         });
-    //         let photos = journalState.bio.photos.filter((metaData, i) =>  metaData.fileName !== NULL_STRING_ALL_LOWERCASE);
-    //         photos = photos.map(metaData => {
-    //             return {
-    //                 fileName: metaData.fileName,
-    //                 lastModified: metaData.lastModified,
-    //                 fileType: metaData.fileType,
-    //             };
-    //         });
-    //         let result = await actorState.backendActor.updatePhotos(photos);
-    //         result = result.ok;
-    //         journalDispatch({
-    //             actionType: types.SET_BIO,
-    //             payload: result
-    //         });
-    //         result = await actorState.backendActor.submitFiles();
-    //         journalDispatch({
-    //             actionType: types.SET_IS_LOADING,
-    //             payload: false
-    //         });
-    //     } else {
-    //         let result = await actorState.backendActor.clearUnsubmittedFiles();
-    //     }
-    // };
-
     const onChange_editButton = () => {
         setEditing(!editing);
     }
-
-    // const deleteFile = async (fileIndex, fileMetaData) => {
-    //     let fileIsUnsubmitted = fileMetaData.fileIsUnsubmitted;
-    //     let fileName = fileMetaData.fileName;
-    //     journalDispatch({
-    //         actionType: dispatchActionToDeleteFile,
-    //         index: index,
-    //         fileIndex: fileIndex
-    //     });
-    //     if(fileIsUnsubmitted){
-    //         let result = await actorState.backendActor.deleteUnsubmittedFile(fileName);
-    //     } else {
-    //         journalDispatch({
-    //             actionType: types.SET_IS_LOADING,
-    //             payload: true
-    //         });
-    //         let result = await actorState.backendActor.deleteSubmittedFile(fileName);
-    //         if("ok" in result) result = await actorState.backendActor.updateBio({
-    //             dob: journalState.bio.dob,
-    //             pob: journalState.bio.pob,
-    //             name: journalState.bio.name,
-    //             dedications: journalState.bio.dedications,
-    //             preface: journalState.bio.preface,
-    //             photos: journalState.bio.photos
-    //         });
-    //         journalDispatch({
-    //             actionType: types.SET_BIO,
-    //             payload: result.ok
-    //         });
-    //         journalDispatch({
-    //             actionType: types.SET_IS_LOADING,
-    //             payload: false
-    //         });
-    //     };
-    // };
-
-    // let hasUnsubmittedFiles = useMemo(() => {
-    //     let unsubmittedFile = false;
-    //     filesMetaDataArray.forEach(file => {
-    //         if(file.fileIsUnsubmitted) unsubmittedFile = true;
-    //     });
-    //     return unsubmittedFile;
-    // },[filesMetaDataArray])
-
-    // useEffect(() => {
-    //     let carouselDiv = document.getElementById('photoCarouselDiv');
-    //     carouselDiv.scrollLeft = carouselDiv.scrollWidth;
-    // },[filesMetaDataArray]);
-    // let lastFileIsPopulated = filesMetaDataArray[filesMetaDataArray.length-1].fileName !== NULL_STRING_ALL_LOWERCASE;
-    // let maxNumberOfFilesReached = filesMetaDataArray.length >= 4;
 
     return (
         <Grid xs={12} display={"flex"} flexDirection={"column"}>
@@ -182,7 +96,7 @@ const FileCarousel = (props) => {
                             key={fileIndex}
                             context={UI_CONTEXTS.JOURNAL}
                             setChangesWereMade={setChangesWereMade}
-                            dispatch={journalDispatch}
+                            dispatch={dispatch}
                             dispatchActionToChangeFileMetaData={dispatchActionToChangeFileMetaData}
                             dispatchActionToChangeFileLoadStatus={dispatchActionToChangeFileLoadStatus}
                             fileData={fileMetaData}

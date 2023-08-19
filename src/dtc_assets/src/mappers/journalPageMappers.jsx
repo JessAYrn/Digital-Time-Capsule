@@ -47,7 +47,7 @@ export const mapRequestsForAccessToTableRows = (journalEntries) => {
         return {
             id: page.entryKey,
             entryKey: page.entryKey,
-            timeSubmitted: page.timeSubmited[0] ? getDateAsStringMMDDYYY(page.timeSubmite[0]) : null,
+            timeSubmitted: page.timeSubmited[0] ? getDateAsStringMMDDYYY(page.timeSubmited[0]) : null,
             timeStarted: getDateAsStringMMDDYYY(page.timeStarted),
             location: page.location,
             timeOfUnlock: page.timeOfUnlock[0] ? getDateAsStringMMDDYYY(page.timeOfUnlock[0]) : null,

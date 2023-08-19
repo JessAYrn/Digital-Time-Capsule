@@ -16,6 +16,7 @@ const InputBox = (props) => {
     const {
         label,
         maxLength,
+        placeHolder,
         rows,
         disabled,
         editable,
@@ -48,7 +49,6 @@ const InputBox = (props) => {
     let EditIcon_;
     if(editing) EditIcon_ = UploadIcon;
     else if(!editing) EditIcon_ = EditIcon;
-
 
     return(
         <ThemeProvider theme={theme}>
@@ -92,6 +92,7 @@ const InputBox = (props) => {
                         width={"100%"}
                         inputRef={inputRef}
                         color='custom'
+                        placeholder={placeHolder}
                         value={value}
                         disabled={(editable && !editing) || disabled}
                         onChange={onChange_}

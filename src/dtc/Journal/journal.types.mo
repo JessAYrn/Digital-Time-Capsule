@@ -61,9 +61,9 @@ module {
     public type JournalEntryExportKeyValuePair = (Nat, JournalEntryExport);
 
     public let JournalEntryDefault = {
-        title = " ";
-        text =  " ";
-        location = " ";
+        title = "";
+        text =  "";
+        location = "";
         timeStarted =  0;
         timeSubmited = null;
         timeOfUnlock = null;

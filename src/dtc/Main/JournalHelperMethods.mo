@@ -172,6 +172,22 @@ module{
         };
     };
 
+    public func submitJournalEntry(
+        callerId: Principal, 
+        profilesMap: MainTypes.UserProfilesMap, 
+        entryKey : JournalTypes.EntryKey, 
+    ) : async Result.Result<[JournalTypes.JournalEntryExportKeyValuePair], JournalTypes.Error> {
+        let result = profilesMap.get(callerId);
+        switch(result){
+            case null{ #err(#NotAuthorized); };
+            case(?result){
+                let journal: Journal.Journal = actor(Principal.toText(result.canisterId));
+                let result_ = await journal.submitEntry(entryKey.entryKey);
+                return result_;
+            };
+        };
+    };
+
     public func deleteJournalEntry(
         callerId: Principal, 
         profilesMap: MainTypes.UserProfilesMap, 

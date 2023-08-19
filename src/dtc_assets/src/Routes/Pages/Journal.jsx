@@ -4,7 +4,7 @@ import {types} from "../../reducers/journalReducer";
 import "./Journal.scss";
 import { AppContext } from "../App";
 import InputBox from "../../Components/Fields/InputBox";
-import SpeedDialField, { SpeedDialPositions } from '../../Components/Fields/SpeedDialField'
+import SpeedDialField from '../../Components/Fields/SpeedDialField'
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import LoadScreen from "./LoadScreen";
@@ -186,7 +186,7 @@ const Journal = (props) => {
                     journalState={journalState}
                     actorState={actorState}
                     actorDispatch={actorDispatch}
-                    journalDispatch={journalDispatch}
+                    dispatch={journalDispatch}
                     dispatchActionToAddFile={types.ADD_COVER_PHOTO}
                     dispatchActionToRemoveFile={types.REMOVE_COVER_PHOTO}
                     classNameMod={'coverPhoto'}
@@ -242,10 +242,7 @@ const Journal = (props) => {
                         rows={mapRequestsForAccessToTableRows(journalState.journal)}
                     />
                 </Grid>
-                <SpeedDialField
-                    actions={speedDialActions}
-                    position={SpeedDialPositions}
-                />
+                <SpeedDialField actions={speedDialActions} position={"right"}/>
             </>}  
         </Grid>
     );

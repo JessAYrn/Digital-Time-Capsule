@@ -119,6 +119,11 @@ shared actor class User() = this {
         return result;
     };
 
+    public shared({ caller }) func submitJournalEntry(entryKey: JournalTypes.EntryKey) : async Result.Result<[JournalTypes.JournalEntryExportKeyValuePair], JournalTypes.Error> {
+        let result = await JournalHelperMethods.submitJournalEntry(caller, userProfilesMap, entryKey);
+        return result;
+    };
+
     public shared({ caller }) func deleteJournalEntry(entryKey: JournalTypes.EntryKey) : async Result.Result<(), JournalTypes.Error> {
         let result = await JournalHelperMethods.deleteJournalEntry(caller, userProfilesMap, entryKey);
         return result;

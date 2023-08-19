@@ -51,12 +51,16 @@ export const getDuration = async (file) => {
     });
 }
 
+export const createFileId = (uploadedFile) => {
+    let fileId = `${uploadedFile.name}-${Date.now()}`
+    return fileId
+}
+
 export const updateFileMetadataInStore = (props) => {
     const { 
         dispatch, dispatchActionToChangeFileMetaData, index, fileIndex, 
-        setChangesWereMade, uploadedFile, fileURL,
+        setChangesWereMade, uploadedFile, fileURL, fileId
     } = props
-    let fileId = `${uploadedFile.name}-${Date.now()}`;
     dispatch({
         payload: {
             fileName: fileId,
@@ -69,7 +73,6 @@ export const updateFileMetadataInStore = (props) => {
         fileIndex: fileIndex
     })
     if(!!setChangesWereMade) setChangesWereMade(true);
-    return fileId;
 };
 
 export const getIsWithinProperFormat = async (uploadedFile) => {
@@ -120,7 +123,7 @@ export const mapAndSendFileToApi = async (props) => {
         chunk += 1;
     };
     const results = await Promise.all(promises); 
-    console.log(results);
+    return results
 };
 
 export const getFileUrl_fromApi = async (

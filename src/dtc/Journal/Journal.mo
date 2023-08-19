@@ -264,6 +264,22 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     };
 
+    public shared({caller}) func submitEntry(key: Nat) : 
+    async Result.Result<[JournalTypes.JournalEntryExportKeyValuePair], JournalTypes.Error> {
+        if( Principal.toText(caller) != mainCanisterId_) { return #err(#NotAuthorized); };
+        let entry = journalMap.get(key);
+        switch(entry){
+            case null{ #err(#NotFound) ;};
+            case(? v){
+                let updatedEntry = { v with submitted = true; timeSubmited = ?Time.now()};
+                journalMap.put(key,updatedEntry);
+                let journalAsArray = Iter.toArray(journalMap.entries());
+                let journalAsArrayExport = mapJournalEntriesArrayToExport(journalAsArray);
+                #ok(journalAsArrayExport);
+            }
+        }
+    } ;
+
     public shared({caller}) func deleteJournalEntry(key: Nat) : 
     async Result.Result<(),JournalTypes.Error> {
         if( Principal.toText(caller) != mainCanisterId_) { return #err(#NotAuthorized); };
