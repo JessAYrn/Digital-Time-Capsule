@@ -2,21 +2,14 @@ import { JOURNAL_TABS,} from "../functionsAndConstants/Constants"
 
 export const types = {
     SET_ENTIRE_REDUX_STATE: "SET_ENTIRE_REDUX_STATE",
-    SET_AUTHENTICATE_FUNCTION_CALL_COUNT: "SET_AUTHENTICATE_FUNCTION_CALL_COUNT",
-    SET_CREATE_ACTOR_FUNCTION_CALL_COUNT: "SET_CREATE_ACTOR_FUNCTION_CALL_COUNT",
-    SET_IS_LOGGING_IN: "SET_IS_LOGGING_IN",
     SET_JOURNAL: "SET_JOURNAL",
     SET_JOURNAL_TAB:"SET_JOURNAL_TAB",
     SET_NOTIFICATIONS:"SET_NOTIFICATIONS",
     SET_BIO: "SET_BIO",
-    SET_METADATA: "SET_METADATA",
     SET_DATA_HAS_BEEN_LOADED: "SET_DATA_HAS_BEEN_LOADED",
     SET_IS_AUTHENTICATED: "SET_IS_AUTHENTICATED",
     SET_IS_LOADING:"SET_IS_LOADING",
-    CHANGE_DRAFT: "CHANGE_DRAFT",
-    CHANGE_DATE: "CHANGE_DATE",
     CHANGE_LOCATION: "CHANGE_LOCATION",
-    CHANGE_CAPSULED: "CHANGE_CAPSULED",
     CHANGE_TEXT: "CHANGE_TEXT",
     CHANGE_UNLOCK_TIME: "CHANGE_UNLOCK_TIME",
     ADD_JOURNAL_ENTRY_FILE: "ADD_JOURNAL_ENTRY_FILE",
@@ -28,31 +21,19 @@ export const types = {
     ADD_COVER_PHOTO: "ADD_COVER_PHOTO",
     REMOVE_COVER_PHOTO: "REMOVE_COVER_PHOTO",
     CHANGE_ENTRY_TITLE: "CHANGE_ENTRY_TITLE",
-    CHANGE_RECIPIENT_EMAIL_ONE: "CHANGE_RECIPIENT_EMAIL_ONE",
-    CHANGE_RECIPIENT_EMAIL_TWO: "CHANGE_RECIPIENT_EMAIL_TWO",
-    CHANGE_RECIPIENT_EMAIL_THREE: "CHANGE_RECIPIENT_EMAIL_THREE",
-    CHANGE_PAGE_IS_DISABLED_STATUS: "CHANGE_PAGE_IS_DISABLED_STATUS",
     CHANGE_FILE_METADATA: "CHANGE_FILE_METADATA",
-    SET_FILE: "SET_FILE",
     CHANGE_FILE_METADATA_JOURNAL_COVER_PAGE: "CHANGE_FILE_METADATA_JOURNAL_COVER_PAGE",
-    SET_FILE_JOURNAL_COVER_PAGE: "CHANGE_FILE_JOURNAL_COVER_PAGE",
-    CHANGE_FILE_ERROR_STATUS: "CHANGE_FILE_ERROR_STATUS",
     CHANGE_FILE_LOAD_STATUS: "CHANGE_FILE_LOAD_STATUS",
     CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE: "CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE",
     CHANGE_PAGE_IS_OPEN: "CHANGE_PAGE_IS_OPEN",
-    REMOVE_UNSUBMITTED_PAGE: "REMOVE_UNSUBMITTED_PAGE",
     REMOVE_JOURNAL_ENTRY_FILE: "REMOVE_JOURNAL_ENTRY_FILE",
 }
 
 
 
 export const initialState = {
-    authenticateFunctionCallCount: 0,
-    createActorFunctionCallCount: 0,
     dataHasBeenLoaded: undefined,
-    journalCount: 0,
-    journalPageTab:JOURNAL_TABS.diaryTab,
-    isLoggingIn: false,
+    journalPageTab: JOURNAL_TABS.diaryTab,
     bio: {
         name: '',
         dob: [],
@@ -90,28 +71,8 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
-        case types.SET_AUTHENTICATE_FUNCTION_CALL_COUNT:
-        state.authenticateFunctionCallCount = payload;
-        return {
-            ...state
-        }
-        case types.SET_CREATE_ACTOR_FUNCTION_CALL_COUNT:
-        state.createActorFunctionCallCount = payload;
-        return {
-            ...state
-        }
-        case types.SET_IS_LOGGING_IN:
-        state.isLoggingIn = payload;
-        return {
-            ...state
-        }
         case types.SET_JOURNAL:
             state.journal = payload;
-            return {
-                ...state
-            }
-        case types.REMOVE_UNSUBMITTED_PAGE:
-            state.journal.pop();
             return {
                 ...state
             }
@@ -142,40 +103,8 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
-        case types.SET_METADATA:
-        state.metaData = payload;
-        return {
-            ...state
-        }
         case types.SET_DATA_HAS_BEEN_LOADED:
         state.dataHasBeenLoaded = payload
-        return {
-            ...state
-        }
-        case types.CHANGE_DATE:
-            updatedJournalPage = {
-                ... state.journal[index],
-                date: payload
-            }
-            state.journal[index] = updatedJournalPage;
-            return {
-                ...state
-            }
-        case types.CHANGE_PAGE_IS_DISABLED_STATUS:
-        updatedJournalPage = {
-            ... state.journal[index],
-            isDisabled: payload
-        }
-        state.journal[index] = updatedJournalPage;
-        return {
-            ...state
-        }
-        case types.CHANGE_DRAFT:
-        updatedJournalPage = {
-            ... state.journal[index],
-            draft: payload
-        }
-        state.journal[index] = updatedJournalPage;
         return {
             ...state
         }
@@ -197,46 +126,10 @@ const changeValue = (state = initialState, action) => {
         return {
             ...state
         }
-        case types.CHANGE_RECIPIENT_EMAIL_ONE:
-            updatedJournalPage = {
-                ... state.journal[index],
-                emailOne: payload
-            }
-            state.journal[index] = updatedJournalPage;
-            return {
-                ...state
-            }
-        case types.CHANGE_RECIPIENT_EMAIL_TWO:
-            updatedJournalPage = {
-                ... state.journal[index],
-                emailTwo: payload
-            }
-            state.journal[index] = updatedJournalPage;
-            return {
-                ...state
-            }
-        case types.CHANGE_RECIPIENT_EMAIL_THREE:
-            updatedJournalPage = {
-                ... state.journal[index],
-                emailThree: payload
-            }
-            state.journal[index] = updatedJournalPage;
-            return {
-                ...state
-            }
         case types.CHANGE_LOCATION:
             updatedJournalPage = {
                 ... state.journal[index],
                 location: payload
-            }
-            state.journal[index] = updatedJournalPage;
-            return {
-                ...state
-            }
-        case types.CHANGE_CAPSULED:
-            updatedJournalPage = {
-                ... state.journal[index],
-                capsuled: payload
             }
             state.journal[index] = updatedJournalPage;
             return {
@@ -270,17 +163,6 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
-        case types.SET_FILE:
-            updatedFileMetaData = {
-                ...state.journal[index].filesMetaData[fileIndex],
-                file: payload
-            };
-            updatedFilesMetaDataArry =  blockReload ? state.journal[index].filesMetaData : [...state.journal[index].filesMetaData];
-            updatedFilesMetaDataArry[fileIndex] = updatedFileMetaData;
-            state.journal[index].filesMetaData = updatedFilesMetaDataArry;
-            return {
-                ...state
-            }
         case types.CHANGE_FILE_METADATA_JOURNAL_COVER_PAGE:
             updatedFileMetaData = {
                 ...state.bio.photos[fileIndex],
@@ -292,28 +174,6 @@ const changeValue = (state = initialState, action) => {
             updatedFilesMetaDataArry = [...state.bio.photos];
             updatedFilesMetaDataArry[fileIndex] = updatedFileMetaData;
             state.bio.photos = updatedFilesMetaDataArry;
-            return {
-                ...state
-            }
-        case types.SET_FILE_JOURNAL_COVER_PAGE:
-            updatedFileMetaData = {
-                ...state.bio.photos[fileIndex],
-                file: payload
-            };
-            updatedFilesMetaDataArry = blockReload ? state.bio.photos : [...state.bio.photos];
-            updatedFilesMetaDataArry[fileIndex] = updatedFileMetaData;
-            state.bio.photos = updatedFilesMetaDataArry;
-            return {
-                ...state
-            }
-        case types.CHANGE_FILE_ERROR_STATUS:
-            updatedFileMetaData = {
-                ...state.journal[index].filesMetaData[fileIndex],
-                error: payload,
-            };
-            updatedFilesMetaDataArry = [...state.journal[index].filesMetaData];
-            updatedFilesMetaDataArry[fileIndex] = updatedFileMetaData;
-            state.journal[index].filesMetaData = updatedFilesMetaDataArry;
             return {
                 ...state
             }

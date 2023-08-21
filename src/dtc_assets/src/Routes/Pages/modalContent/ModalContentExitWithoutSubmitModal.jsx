@@ -35,13 +35,7 @@ const ExitWithoutSubmit = (props) => {
     };
 
     const onClickExit = () => {
-        journalDispatch({
-            actionType: types.REMOVE_UNSUBMITTED_PAGE
-        });
-        modalDispatch({
-            actionType: modalTypes.SET_MODAL_STATUS,
-            payload: {show: false, which: MODALS_TYPES.onSubmit}
-        });
+
     };
 
     return(

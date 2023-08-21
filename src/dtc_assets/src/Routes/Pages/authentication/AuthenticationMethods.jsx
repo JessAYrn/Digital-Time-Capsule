@@ -1,20 +1,6 @@
 import { modalTypes } from "../../../reducers/modalReducer";
 import { MODALS_TYPES } from "../../../functionsAndConstants/Constants";
 
-export const TriggerAuththenticateClientFunction = (journalState, dispatch, types) => {
-    dispatch({
-        actionType: types.SET_AUTHENTICATE_FUNCTION_CALL_COUNT,
-        payload: journalState.authenticateFunctionCallCount + 1
-    });
-};
-
-export const TriggerCreateActorFunction = (journalState, dispatch, types) => {
-    dispatch({
-        actionType: types.SET_CREATE_ACTOR_FUNCTION_CALL_COUNT,
-        payload: journalState.createActorFunctionCallCount + 1
-    });
-}
-
 export const CreateUserJournal = async (actorState, dispatch) => {
     try{
         let registrationResult = await actorState.backendActor.registerOwner();

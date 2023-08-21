@@ -87,7 +87,7 @@ const FileCarousel = (props) => {
                     return(
                         <FileUpload
                             dispatchActionToRemoveFile={dispatchActionToRemoveFile}
-                            displayDeleteButton={editing && !disabled}
+                            displayDeleteButton={(editing || !editable) && !disabled}
                             label={`file_${fileIndex}`}
                             elementId={`file_${fileIndex}`}
                             index={index}

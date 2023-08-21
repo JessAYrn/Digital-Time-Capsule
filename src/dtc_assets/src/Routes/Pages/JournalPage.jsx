@@ -289,6 +289,7 @@ const JournalPage = (props) => {
                 flexDirection={"column"}
             >
                 <FileCarousel
+                    disabled={journalPageData.submitted}
                     onChange={triggerSendDataFunctionAfterReduxStateUpdate}
                     filesMetaDataArray={journalPageData.filesMetaData}
                     actorState={actorState}
