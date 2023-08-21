@@ -80,16 +80,30 @@ const FileUpload = (props) => {
         }
         const fileURL = await getFileURL(uploadedFile);
         const fileId = createFileId(uploadedFile);
-        const result = await mapAndSendFileToApi({ ...inputForDisplayFileFunction, fileId});
-        //check results to make sure all files were uploaded properly. if not, delete the files from the backend
-        // and display the error screen. If so, call the updateFileMetadataInStore() function.
-        updateFileMetadataInStore({ ...inputForDisplayFileFunction, fileURL, fileId});
+        const responses = await mapAndSendFileToApi({ ...inputForDisplayFileFunction, fileId});
+        let hasError = false;
+        for(const response of responses) if( "err" in response) hasError = true;
+
         dispatch({ 
             actionType: dispatchActionToChangeFileLoadStatus,
             payload: false,
             index: index,
             fileIndex: fileIndex 
         });
+
+        if(hasError) {
+            actorState.backendActor.deleteFile(fileId);
+            modalDispatch({
+                actionType: modalTypes.SET_MODAL_STATUS, 
+                payload: {
+                    show: true, 
+                    which: MODALS_TYPES.error,
+                    message: "File Upload Unsuccessful"
+                }
+            });
+            return;
+        }
+        updateFileMetadataInStore({ ...inputForDisplayFileFunction, fileURL, fileId});
         if(uploadedFile.type.includes("quicktime")){
             modalDispatch({
                 actionType: modalTypes.SET_MODAL_STATUS,

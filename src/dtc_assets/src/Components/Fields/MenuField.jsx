@@ -9,6 +9,7 @@ const MenuField = (props) => {
         isLoading,
         menuItemProps,
         xs,
+        md,
         display,
         justifyContent,
         alignItems,
@@ -28,7 +29,7 @@ const MenuField = (props) => {
     };
 
     return(
-        <Grid xs={xs} display={display} justifyContent={justifyContent} alignItems={alignItems} padding={0} sx={sx}>
+        <Grid xs={xs} md={md} display={display} justifyContent={justifyContent} alignItems={alignItems} padding={0} sx={sx}>
             <ButtonField
                 isLoading={isLoading}
                 transparentBackground={true}

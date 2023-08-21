@@ -38,7 +38,8 @@ export const MODALS_TYPES = {
     requestApprovalRepsonse: "requestApprovalRepsonse",
     dateSelectedOutOfRange: 'dateSelectedOutOfRange',
     quicktimeVideoDetected: 'quicktimeVideoDetected',
-    unsupportedFileType: 'unsupportedFileType'
+    unsupportedFileType: 'unsupportedFileType',
+    error: 'error'
 }
 
 export const MAX_NUMBER_OF_BYTES = 21000000;

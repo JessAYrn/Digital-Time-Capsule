@@ -20,6 +20,7 @@ import "../../SCSS/scrollable.scss";
 import "../../SCSS/contentContainer.scss";
 import { journalPagesTableColumns, mapRequestsForAccessToTableRows } from "../../mappers/journalPageMappers";
 import { mapApiObjectToFrontEndJournalEntriesObject } from "../../mappers/journalPageMappers";
+import { modalTypes } from "../../reducers/modalReducer";
 
 const count = 30
 
@@ -86,7 +87,7 @@ const Journal = (props) => {
     };
 
     const createJournalPage = async () => {
-        //Ensures that there are no unsubmitted entries left over from a previous post
+        modalDispatch({ actionType: modalTypes.SET_IS_LOADING, payload: true });
         const result = await actorState.backendActor.createJournalEntry();
         
         let journalEntries = result.ok;
@@ -94,6 +95,7 @@ const Journal = (props) => {
         const entryKey = getHighestEntryKey(journalEntries);
         journalDispatch({ payload: journalEntries, actionType: types.SET_JOURNAL });
         openPage({entryKey: entryKey, locked: false});
+        modalDispatch({ actionType: modalTypes.SET_IS_LOADING, payload: false });
     };
 
     const speedDialActions = [

@@ -13,10 +13,10 @@ import { types } from '../../reducers/journalReducer';
 import { ConnectButton, ConnectDialog, useConnect } from "@connect2ic/react";
 import { initialState } from '../../reducers/journalReducer';
 import "./NavBar.scss";
-import Dropdown from '../Fields/Dropdown';
+import SdStorageIcon from '@mui/icons-material/SdStorage';
 import { walletTypes } from '../../reducers/walletReducer';
 import { retrieveContext } from '../../functionsAndConstants/Contexts';
-import ButtonField from '../Fields/Button';
+import CellTowerIcon from '@mui/icons-material/CellTower';
 import MenuField from "../Fields/MenuField";
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
@@ -93,29 +93,18 @@ export const NavBar = (props) => {
         }
     });
 
-    const walletTabOptions = [
-        {text: WALLET_TABS.icpTab,icon: null}, 
-        {text: WALLET_TABS.ethTab,icon: null}, 
-        {text: WALLET_TABS.btcTab,icon: null},
-        {text: WALLET_TABS.ckBtcTab,icon: null}
-    ];
-
-    const changeHandler_walletTab = (option) => {
+    const changeHandler_walletTab = (tab) => {
         walletDispatch({
             actionType: walletTypes.SET_WALLET_TABS,
-            payload: option.text
+            payload: tab
         });
     };
 
-    const journalTabOptions=[
-        {text: JOURNAL_TABS.diaryTab,icon:null},
-        {text: JOURNAL_TABS.notesTab,icon:null},
-    ]
 
-    const changeHandler_journalTab=(option)=>{
+    const changeHandler_journalTab=(tab)=>{
         journalDispatch({
             actionType:types.SET_JOURNAL_TAB,
-            payload:option.text
+            payload: tab
         })
     }
     const {pathname} = useLocation();
@@ -129,6 +118,18 @@ export const NavBar = (props) => {
         { text: "Dashboard", onClick: () => changeRoute(NAV_LINKS.dashboard, reduxStates) },
         { text: "Community", onClick: () => changeRoute(NAV_LINKS.groupJournal, reduxStates) },
         { text: "Account", onClick: () => changeRoute(NAV_LINKS.account, reduxStates) }
+    ];
+
+    const journalTabMenuItemProps=[
+        { text: JOURNAL_TABS.diaryTab, onClick: () => changeHandler_journalTab(JOURNAL_TABS.diaryTab) },
+        { text: JOURNAL_TABS.notesTab, onClick: () => changeHandler_journalTab(JOURNAL_TABS.notesTab) }
+    ]
+
+    const walletTabMenuItemProps = [
+        { text: WALLET_TABS.icpTab, onClick: () => changeHandler_walletTab(WALLET_TABS.icpTab) }, 
+        { text: WALLET_TABS.ethTab, onClick: () => changeHandler_walletTab(WALLET_TABS.ethTab) }, 
+        { text: WALLET_TABS.btcTab, onClick: () => changeHandler_walletTab(WALLET_TABS.btcTab) },
+        { text: WALLET_TABS.ckBtcTab, onClick: () => changeHandler_walletTab(WALLET_TABS.ckBtcTab) }
     ];
 
     const notificationsMenuItemProps = notificationsState.notifications.map(({key, text}) => {
@@ -147,7 +148,7 @@ export const NavBar = (props) => {
             zIndex={10}>
             <MenuField
                 MenuIcon={MenuIcon}
-                xs={6}
+                xs={8}
                 display={"flex"}
                 alignItems={"center"}
                 justifyContent={"left"}
@@ -156,9 +157,39 @@ export const NavBar = (props) => {
                 color={"custom"}
                 menuItemProps={mainMenuItemProps}
             />
+            <Grid xs={4} columns={12} display={"flex"} justifyContent={"right"} alignItems={"center"} padding={0}> 
+            {pathname === NAV_LINKS.journal &&
+                <MenuField
+                    MenuIcon={SdStorageIcon}
+                    xs={6}
+                    md={3}
+                    display={"flex"}
+                    disabled={isLoading}
+                    alignItems={"center"}
+                    justifyContent={"right"}
+                    active={true}
+                    color={"custom"}
+                    menuItemProps={journalTabMenuItemProps}
+                />
+            }
+            {pathname === NAV_LINKS.wallet &&
+                <MenuField
+                    MenuIcon={CellTowerIcon}
+                    xs={6}
+                    md={3}
+                    display={"flex"}
+                    alignItems={"center"}
+                    justifyContent={"right"}
+                    active={true}
+                    isLoading={isLoading}
+                    color={"custom"}
+                    menuItemProps={notificationsMenuItemProps}
+                />
+            }
             <MenuField
                 MenuIcon={NotificationIcon}
                 xs={6}
+                md={3}
                 display={"flex"}
                 alignItems={"center"}
                 justifyContent={"right"}
@@ -167,30 +198,18 @@ export const NavBar = (props) => {
                 color={"custom"}
                 menuItemProps={notificationsMenuItemProps}
             />
-
+            </Grid>
         </Grid>
     );
 
     // return(
     //     <div className={'linkDiv_Journal'}>
     //         <div className={'navbar'}> 
-    //             <div className='menuIcon'>
-    //                 <IconContext.Provider value={{ color: 'white', size: 25}}>
-    //                     { sideBar ? 
-    //                         <ImIcons.ImCross onClick={showSideBar}/> : 
-    //                         <FaIcons.FaBars onClick={showSideBar}/>
-    //                     }
-    //                 </IconContext.Provider> 
-    //             </div>
                 
                 
                 
                 
     //             <div className={'leftNav'}>
-    //             {pathname === NAV_LINKS.journal? <Dropdown
-    //             options={journalTabOptions}
-    //             changeHandler={changeHandler_journalTab}
-    //             />:''}
                 
     //             {pathname === NAV_LINKS.wallet? 
     //                 <Dropdown 
