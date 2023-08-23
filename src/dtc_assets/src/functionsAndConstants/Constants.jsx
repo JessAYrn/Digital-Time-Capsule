@@ -30,13 +30,11 @@ export const MEGABYTES = 1000000;
 export const MODALS_TYPES = {
     exitWithoutSubmit: 'exitWithoutSubmit',
     exceedsMaxDuration: 'exceedsMaxDuration',
-    notifications: 'notifications',
     onSend:'onSend',
     onSubmit: 'onSubmit',
     notAuthorizedByOwner: "notAuthorizedByOwner",
     onRegisterNewOwner: "onRegisterNewOwner",
     requestApprovalRepsonse: "requestApprovalRepsonse",
-    dateSelectedOutOfRange: 'dateSelectedOutOfRange',
     quicktimeVideoDetected: 'quicktimeVideoDetected',
     unsupportedFileType: 'unsupportedFileType',
     error: 'error'
@@ -103,9 +101,7 @@ export const DEFAULT_APP_CONTEXTS={
     actorState:{},
     actorDispatch:()=>{},
     notificationsState:{},
-    notificationsDispatch: () => {},
-    modalState:{},
-    modalDispatch: () => {}
+    notificationsDispatch: () => {}
 }
 export const MASTER_COPY_FRONTEND_CANISTER_ID = "fkkq7-siaaa-aaaap-qaaya-cai";
 

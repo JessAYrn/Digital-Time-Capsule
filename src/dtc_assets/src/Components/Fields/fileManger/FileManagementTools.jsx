@@ -1,4 +1,6 @@
 import { fileToBlob, flattenUint8array } from "../../../functionsAndConstants/Utils";
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+
 import { 
     CHUNK_SIZE, MAX_DURATION_OF_VIDEO_IN_SECONDS, forbiddenFileTypes, MODALS_TYPES 
 } from "../../../functionsAndConstants/Constants";
@@ -83,10 +85,10 @@ export const getIsWithinProperFormat = async (uploadedFile) => {
         if(duration > MAX_DURATION_OF_VIDEO_IN_SECONDS) {
             return {
                 isProperFormat: false, 
-                modalDispatchInput:{ 
-                    show: true, 
-                    which: MODALS_TYPES.exceedsMaxDuration,
-                    duration: duration 
+                modalInput:{ 
+                    bigText: "Video Too Long.",
+                    smallText: `Only videos up to ${MAX_DURATION_OF_VIDEO_IN_SECONDS} seconds may be uploaded`,
+                    Icon: ErrorOutlineIcon
                 }
             };
         };
@@ -94,9 +96,10 @@ export const getIsWithinProperFormat = async (uploadedFile) => {
     if(forbiddenFileTypes.includes(uploadedFile.type)){
         return {
             isProperFormat: false, 
-            modalDispatchInput:{ 
-                show: true, 
-                which: MODALS_TYPES.unsupportedFileType
+            modalInput:{ 
+                bigText: "Unsupported File Type.",
+                smallText: "The File Type you selected cannot be uploaded here.",
+                Icon: ErrorOutlineIcon
             } 
         }
     }

@@ -57,8 +57,6 @@ export const Modal = (props) => {
             ChildComp = RegistrationResponse
         } else if(modalState.modalStatus.which === MODALS_TYPES.requestApprovalRepsonse){
             ChildComp = RequestApprovalResponseModal;
-        } else if(modalState.modalStatus.which === MODALS_TYPES.dateSelectedOutOfRange){
-            ChildComp = DateOutOfRange;
         }
 
         return ChildComp;

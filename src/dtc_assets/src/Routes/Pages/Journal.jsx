@@ -20,15 +20,17 @@ import "../../SCSS/scrollable.scss";
 import "../../SCSS/contentContainer.scss";
 import { journalPagesTableColumns, mapRequestsForAccessToTableRows } from "../../mappers/journalPageMappers";
 import { mapApiObjectToFrontEndJournalEntriesObject } from "../../mappers/journalPageMappers";
-import { modalTypes } from "../../reducers/modalReducer";
+import ModalComponent from "../../Components/modal/Modal";
 
 const count = 30
 
 
 const Journal = (props) => {
 
-    const { journalState, journalDispatch, actorState, actorDispatch, modalState, modalDispatch} = useContext(AppContext);
+    const { journalState, journalDispatch, actorState, actorDispatch, modalDispatch} = useContext(AppContext);
     const [counter, setCounter] = useState(1);
+    const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [modalIsLoading, setModalIsLoading] = useState(false);
 
     const sendData = async () => {
         journalDispatch({
@@ -87,7 +89,8 @@ const Journal = (props) => {
     };
 
     const createJournalPage = async () => {
-        modalDispatch({ actionType: modalTypes.SET_IS_LOADING, payload: true });
+        setModalIsLoading(true);
+        setModalIsOpen(true);
         const result = await actorState.backendActor.createJournalEntry();
         
         let journalEntries = result.ok;
@@ -95,7 +98,8 @@ const Journal = (props) => {
         const entryKey = getHighestEntryKey(journalEntries);
         journalDispatch({ payload: journalEntries, actionType: types.SET_JOURNAL });
         openPage({entryKey: entryKey, locked: false});
-        modalDispatch({ actionType: modalTypes.SET_IS_LOADING, payload: false });
+        setModalIsOpen(false);
+        setModalIsLoading(false)
     };
 
     const speedDialActions = [
@@ -108,10 +112,7 @@ const Journal = (props) => {
     }
 
     return(
-        modalState.modalStatus.show ?
-        <Modal context={UI_CONTEXTS.JOURNAL} index={getIndexOfVisiblePage()}/> :
-        modalState.isLoading ? 
-        <LoadScreen/> : 
+        <>
         <Grid 
             container 
             className={'container_journal'} 
@@ -247,6 +248,8 @@ const Journal = (props) => {
                 <SpeedDialField actions={speedDialActions} position={"right"}/>
             </>}  
         </Grid>
+        <ModalComponent open={modalIsOpen} isLoading={modalIsLoading} />
+        </>
     );
 
 }

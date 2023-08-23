@@ -24,7 +24,6 @@ const DatePickerField = (props) => {
         maxDate,
         md,
         xs
-        // dispatchAction //the action that is to take place in order to dispatch the field change to the redux store
     } = props;
 
     const onChange_editButton = () => {
@@ -34,43 +33,6 @@ const DatePickerField = (props) => {
     let EditIcon_;
     if(editing) EditIcon_ = PublishIcon;
     else if(!editing) EditIcon_ = EditIcon;
-
-    // const onChnage = () => {
-    //     if(setChangesWereMade){
-    //         setChangesWereMade(true);
-    //     }
-    //     let dateSelected = inputRef.current.value;
-    //     if(min){
-    //         let selectedDateIsAfterMin = dateAisLaterThanOrSameAsDateB(dateSelected, min);
-    //         if(!selectedDateIsAfterMin){
-    //             let dateElement = document.getElementById(id);
-    //             dateElement.value = min;
-    //             dateSelected = min;
-    //             dispatch({
-    //                 payload: { show: true, which: MODALS_TYPES.dateSelectedOutOfRange, beyondMax: false},
-    //                 actionType: types.SET_MODAL_STATUS
-    //             });
-    //         }
-
-    //     } else if(max){
-    //         let selectedDateIsBeforeMax = dateAisLaterThanOrSameAsDateB(max, dateSelected);
-    //         if(!selectedDateIsBeforeMax){
-    //             let dateElement = document.getElementById(id);
-    //             dateElement.value = max;
-    //             dateSelected = max;
-    //             dispatch({
-    //                 payload: { show: true, which: MODALS_TYPES.dateSelectedOutOfRange, beyondMax: true},
-    //                 actionType: types.SET_MODAL_STATUS
-    //             });
-    //         }
-    //     }
-    //     dispatch({
-    //         payload: dateSelected,
-    //         actionType: dispatchAction,
-    //         index: index
-    //     });
-
-    // }
 
     return(
         <Grid xs={xs ? xs : 12} md={md ? md :4} display={"flex"} flexDirection={"column"} justifyContent={"center"} alignItems={"center"}>

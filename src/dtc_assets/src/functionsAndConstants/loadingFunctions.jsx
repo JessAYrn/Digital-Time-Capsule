@@ -4,6 +4,7 @@ import { generateQrCode } from "./walletFunctions/GenerateQrCode";
 import { mapBackendCanisterDataToFrontEndObj } from "../mappers/dashboardMapperFunctions";
 import { getFileUrl_fromApi } from "../Components/Fields/fileManger/FileManagementTools";
 import { CreateUserJournal } from "../Routes/Pages/authentication/AuthenticationMethods";
+import DoNotDisturbOnIcon from '@mui/icons-material/DoNotDisturbOn';
 import { MODALS_TYPES } from "./Constants";
 
 
@@ -14,19 +15,18 @@ export const loadAllDataIntoReduxStores = async (states, dispatchFunctions, type
     let {walletState, homePageState, journalState, actorState, accountState, notificationsState} = states;
     let {journalDispatch, walletDispatch, homePageDispatch, accountDispatch, notificationsDispatch, modalDispatch} = dispatchFunctions;
     let {journalTypes, walletTypes, homePageTypes, accountTypes, notificationsTypes, modalTypes } = types;
-
-    // sets isLoading property to true for all reducers
-    modalDispatch({ actionType: modalTypes.SET_IS_LOADING, payload: true });
-
     let accountCreated;
     //checks to see if user has an account. If not, then it attemptes to make an account, if 
     //the account creation is unsuccessful, then it returns
     let hasAccount = await actorState.backendActor.hasAccount();
     if(!hasAccount) accountCreated = await CreateUserJournal(actorState, journalDispatch);
     if(accountCreated && "err" in accountCreated){
-        modalDispatch({ actionType: modalTypes.SET_MODAL_STATUS, payload: {which: MODALS_TYPES.notAuthorizedByOwner, show: true} })
-        modalDispatch({ actionType: modalTypes.SET_IS_LOADING, payload: false })
-        return;
+        return {
+            openModal: true, 
+            bigText: "Not Authorized To Enter", 
+            Icon: DoNotDisturbOnIcon,
+            smallText: "If you are the owner of this application, attempting to log in for the first time, you must log in using the wallet that owns the Utility NFT that corresponds to this server."
+        }
     }
 
     //calls the backend and loads the retrieved data into the appropriate redux stores.
@@ -38,8 +38,7 @@ export const loadAllDataIntoReduxStores = async (states, dispatchFunctions, type
     if(!notificationsState.dataHasBeenLoaded) promises.push(loadNotificationsData(actorState, notificationsDispatch, notificationsTypes));
     await Promise.all(promises);
 
-    // sets isLoading property to false for all reducers
-    modalDispatch({ actionType: modalTypes.SET_IS_LOADING, payload: false });
+    return {}
 };
 
 export const loadNotificationsData = async (actorState, notificationsDispatch, notificationsTypes) => {
@@ -172,7 +171,7 @@ export const recoverState = async ( location, dispatchMethods, types, connection
     // dispatch state from previous route to redux store if that state exists
     if(!location.state) return;
     setStateHasBeenRecovered(true);
-    const{journal,wallet,homePage, account, notifications, modal}=location.state;
+    const{journal,wallet,homePage, account, notifications}=location.state;
     if(dispatchMethods.journalDispatch){
         dispatchMethods.journalDispatch({
             actionType: types.journalTypes.SET_ENTIRE_REDUX_STATE,
@@ -205,13 +204,6 @@ export const recoverState = async ( location, dispatchMethods, types, connection
         dispatchMethods.notificationsDispatch({
             actionType: types.notificationsTypes.SET_ENTIRE_NOTIFICATIONS_REDUX_STATE,
             payload: notifications
-        })
-    }
-
-    if(dispatchMethods.modalDispatch){
-        dispatchMethods.modalDispatch({
-            actionType: types.modalTypes.SET_ENTIRE_MODAL_REDUX_STATE,
-            payload: modal
         })
     }
 

@@ -1,4 +1,4 @@
-import React, {useState, useContext, useMemo, useEffect} from "react";
+import React, {useState, useContext, useMemo, useEffect, Component} from "react";
 import InputBox from "../../Components/Fields/InputBox";
 import {types} from "../../reducers/journalReducer";
 import  {AppContext} from "../App";
@@ -8,6 +8,7 @@ import { monthInMilliSeconds} from "../../functionsAndConstants/Constants";
 import { modalTypes } from "../../reducers/modalReducer";
 import { milisecondsToNanoSeconds, scrollToTop } from "../../functionsAndConstants/Utils";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import PublishIcon from '@mui/icons-material/Publish';
 import ButtonField from "../../Components/Fields/Button";
 import FileCarousel from "../../Components/Fields/fileManger/FileCarousel";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
@@ -16,13 +17,18 @@ import LockIcon from '@mui/icons-material/Lock';
 import SpeedDialField from "../../Components/Fields/SpeedDialField";
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 import DoneIcon from '@mui/icons-material/Done';
+import CloseIcon from '@mui/icons-material/Close';
 import { mapApiObjectToFrontEndJournalEntriesObject } from "../../mappers/journalPageMappers";
+import ModalComponent from "../../Components/modal/Modal";
+
 
 const count = 30;
 
 const JournalPage = (props) => {
     const [counter, setCounter] = useState(1);
     const [showUnlockTimeDatePicker, setShowUnlockTimeDatePicker] = useState(false);
+    const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [isLoadingModal, setIsLoadingModal ] = useState(false);
     
     const { index } = props;
 
@@ -30,9 +36,7 @@ const JournalPage = (props) => {
         journalState,
         journalDispatch,
         actorState,
-        actorDispatch,
-        modalState,
-        modalDispatch
+        actorDispatch
     } = useContext(AppContext);
 
     const journalPageData = useMemo(() => {
@@ -122,7 +126,7 @@ const JournalPage = (props) => {
     };
 
     const submit = async () => {
-        modalDispatch({ actionType: modalTypes.SET_IS_LOADING, payload: true })
+        setIsLoadingModal(true);
         const entryKey = {entryKey: journalPageData.entryKey}
         await sendData();
         let result = await actorState.backendActor.submitJournalEntry(entryKey);
@@ -130,13 +134,35 @@ const JournalPage = (props) => {
         journalEntries = mapApiObjectToFrontEndJournalEntriesObject(journalEntries);
         journalDispatch({ payload: journalEntries, actionType: types.SET_JOURNAL });
         journalDispatch({ actionType: types.CHANGE_PAGE_IS_OPEN, payload: false, index: index });
-        modalDispatch({ actionType: modalTypes.SET_IS_LOADING, payload: false });
+        setIsLoadingModal(false);
+        setModalIsOpen(false);
     }
 
     const speedDialActions = [ 
         {name: "Add Photo/Video", icon: AddAPhotoIcon, onClick: handleAddFile},
-        {name: "Submit Entry", icon: DoneIcon, onClick: submit}
+        {name: "Submit Entry", icon: DoneIcon, onClick: () => setModalIsOpen(true)}
     ];
+
+    const modalButtons = [
+        {
+            Component: ButtonField,
+            props: {
+                active: true,
+                text: "Yes",
+                Icon: DoneIcon,
+                onClick: submit
+            }
+        },
+        {
+            Component: ButtonField,
+            props: {
+                active: true,
+                text: "No",
+                Icon: CloseIcon,
+                onClick: () => setModalIsOpen(false)
+            }
+        }
+    ]
 
     return ( 
         <>
@@ -169,7 +195,6 @@ const JournalPage = (props) => {
                     alignItems="center" 
                 >
                     <ButtonField
-                        disabled={journalPageData.submitted}
                         onClick={async () => toggleLock(!showUnlockTimeDatePicker)}
                         Icon={LockIcon_}
                     />
@@ -302,6 +327,14 @@ const JournalPage = (props) => {
                 />
             </Grid>
             {!journalPageData.submitted && <SpeedDialField actions={speedDialActions} position={"right"}/>}
+            <ModalComponent 
+                Icon={PublishIcon}
+                open={modalIsOpen} 
+                isLoading={isLoadingModal} 
+                handleClose={() => setModalIsOpen(false)}
+                bigText={"Submit Entry?"}
+                components={modalButtons}
+            />
         </>
     )
 };

@@ -15,13 +15,12 @@ import homePageReducer,{ homePageInitialState, homePageTypes } from '../reducers
 import accountReducer,{ accountInitialState, accountTypes } from '../reducers/accountReducer';
 import actorReducer, { actorInitialState, actorTypes } from '../reducers/actorReducer';
 import notificationsReducer, {notificationsInitialState, notificationsTypes} from "../reducers/notificationsReducer";
-import modalReducer,{ modalInitialState, modalTypes } from '../reducers/modalReducer';
+import ModalComponent from '../Components/modal/Modal';
 
 export const AppContext = createContext({...DEFAULT_APP_CONTEXTS, submissionsMade: 0, setSubmissionsMade: () => {} });
 
 const App = () => {
     const [journalState, journalDispatch] = useReducer(journalReducer, initialState);
-    const [modalState, modalDispatch] = useReducer(modalReducer, modalInitialState);
     const [notificationsState, notificationsDispatch] = useReducer(notificationsReducer, notificationsInitialState);
     const [walletState, walletDispatch] = useReducer(walletReducer, walletInitialState);
     const [homePageState, homePageDispatch] =  useReducer(homePageReducer, homePageInitialState)
@@ -30,6 +29,9 @@ const App = () => {
     const [stateHasBeenRecovered, setStateHasBeenRecovered] = useState(false);
 
     const [submissionsMade, setSubmissionsMade] = useState(0);
+    const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [isLoadingModal, setIsLoadingModal] = useState(false);
+    const [modalProps, setModalProps] = useState({});
 
     const connectionResult = useConnect({ onConnect: () => {}, onDisconnect: () => {} });
 
@@ -42,8 +44,7 @@ const App = () => {
         homePageDispatch,
         accountDispatch,
         actorDispatch,
-        notificationsDispatch,
-        modalDispatch
+        notificationsDispatch
     }
 
     const ReducerTypes={
@@ -52,8 +53,7 @@ const App = () => {
         homePageTypes,
         accountTypes,
         actorTypes,
-        notificationsTypes,
-        modalTypes
+        notificationsTypes
     }
 
     const ReducerStates = {
@@ -62,8 +62,7 @@ const App = () => {
         accountState,
         homePageState,
         actorState,
-        notificationsState,
-        modalState
+        notificationsState
     };
 
     // dispatch state from previous route to redux store if that state exists
@@ -75,7 +74,12 @@ const App = () => {
 
     useEffect(async () => {
         if(!actorState.backendActor) return;
-        await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes, stateHasBeenRecovered);
+        setIsLoadingModal(true);
+        setModalIsOpen(true);
+        const response = await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes, stateHasBeenRecovered);
+        setModalIsOpen(response.openModal);
+        setModalProps(response)
+        setIsLoadingModal(false);
     },[actorState.backendActor]);
 
     let TabComponent = useMemo(()=>{
@@ -100,9 +104,7 @@ const App = () => {
                 setSubmissionsMade,
                 actorDispatch,
                 notificationsState,
-                notificationsDispatch,
-                modalState,
-                modalDispatch
+                notificationsDispatch
             }}
         >
             {
@@ -112,6 +114,11 @@ const App = () => {
                         context={UI_CONTEXTS.JOURNAL}
                     /> 
             }
+            <ModalComponent 
+                {...modalProps}
+                open={modalIsOpen} 
+                isLoading={isLoadingModal} 
+            />
         </AppContext.Provider>
     )
 }

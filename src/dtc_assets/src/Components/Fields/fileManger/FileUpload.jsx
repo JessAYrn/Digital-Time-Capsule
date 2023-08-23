@@ -1,4 +1,4 @@
-import React, { useContext} from 'react';
+import React, { useContext, useState} from 'react';
 import "./FileUpload.scss";
 import { MODALS_TYPES } from '../../../functionsAndConstants/Constants';
 import { mapAndSendFileToApi, getIsWithinProperFormat, updateFileMetadataInStore, getFileURL, createFileId } from './FileManagementTools';
@@ -15,6 +15,11 @@ import { retrieveContext } from '../../../functionsAndConstants/Contexts';
 import { Card, CardMedia } from '@mui/material';
 import ButtonField from '../Button';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
+import ModalComponent from '../../modal/Modal';
+import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import WarningIcon from '@mui/icons-material/Warning';
+
 
 const FileUpload = (props) => {
     const {
@@ -45,7 +50,9 @@ const FileUpload = (props) => {
     let AppContext = retrieveContext(contexts, context);
 
     
-    const { actorState, modalDispatch } = useContext(AppContext);
+    const { actorState } = useContext(AppContext);
+    const [modalProps, setModalProps] = useState({});
+    const [modalIsOpen, setModalIsOpen] = useState(false);
 
     const deleteFile = async () => {
         dispatch({
@@ -66,15 +73,19 @@ const FileUpload = (props) => {
             fileIndex: fileIndex 
         });
         let inputForDisplayFileFunction = {
-            uploadedFile, dispatch, modalDispatch, 
+            uploadedFile, dispatch, 
             dispatchActionToChangeFileMetaData, index, fileIndex,
             setChangesWereMade, actorState
         }
         const formatStatus = await getIsWithinProperFormat(uploadedFile);
         if(!formatStatus.isProperFormat){
-            modalDispatch({
-                actionType: modalTypes.SET_MODAL_STATUS,
-                payload: formatStatus.modalDispatchInput
+            setModalProps({...formatStatus.modalInput})
+            setModalIsOpen(true);
+            dispatch({ 
+                actionType: dispatchActionToChangeFileLoadStatus,
+                payload: false,
+                index: index,
+                fileIndex: fileIndex 
             });
             return;
         }
@@ -93,71 +104,86 @@ const FileUpload = (props) => {
 
         if(hasError) {
             actorState.backendActor.deleteFile(fileId);
-            modalDispatch({
-                actionType: modalTypes.SET_MODAL_STATUS, 
-                payload: {
-                    show: true, 
-                    which: MODALS_TYPES.error,
-                    message: "File Upload Unsuccessful"
-                }
-            });
+            setModalProps({ 
+                bigText: "File Upload Unsuccessful.",
+                Icon: ErrorOutlineIcon
+            })
+            setModalIsOpen(true);
             return;
         }
         updateFileMetadataInStore({ ...inputForDisplayFileFunction, fileURL, fileId});
         if(uploadedFile.type.includes("quicktime")){
-            modalDispatch({
-                actionType: modalTypes.SET_MODAL_STATUS,
-                payload: { show: true,  which: MODALS_TYPES.quicktimeVideoDetected }
-            });
+            setModalProps({ 
+                bigText: "QuickTime Video Detected",
+                smallText: "QuickTime Videos are only visible using the Safari Browser.",
+                Icon: WarningIcon
+            })
+            setModalIsOpen(true);
         }
         onChange();
     };
 
     return(
-        <Card 
-            className={`cardComponent ${elementId}`}
-        >
-            {fileData.file || fileData.isLoading ?
-                <>
-                    {
-                        displayDeleteButton && !fileData.isLoading &&
-                            <Grid className={'deleteFileButtonDiv'}>
-                                <ButtonField 
-                                    className={'DeleteFileButton'}
-                                    id={elementId} 
-                                    Icon={DeleteIcon}
-                                    active={true}
-                                    onClick={deleteFile}
-                                /> 
-                            </Grid>
-                    }
-                    <CardMedia
-                        component={
-                            fileData.isLoading ? 
-                            "img" : 
-                            fileData.fileType.includes("image") ? 
-                            "img" : 
-                            "video"
+        <>
+            <Card 
+                className={`cardComponent ${elementId}`}
+            >
+                {fileData.file || fileData.isLoading ?
+                    <>
+                        {
+                            displayDeleteButton && !fileData.isLoading &&
+                                <Grid className={'deleteFileButtonDiv'}>
+                                    <ButtonField 
+                                        className={'DeleteFileButton'}
+                                        id={elementId} 
+                                        Icon={DeleteIcon}
+                                        active={true}
+                                        onClick={deleteFile}
+                                    /> 
+                                </Grid>
                         }
-                        className='cardMediaComponent'
-                        autoPlay
-                        muted
-                        height={500}
-                        controls
-                        src={fileData.isLoading ? "../../../../assets/Loading.gif" : fileData.file}
+                        <CardMedia
+                            component={
+                                fileData.isLoading ? 
+                                "img" : 
+                                fileData.fileType.includes("image") ? 
+                                "img" : 
+                                "video"
+                            }
+                            className='cardMediaComponent'
+                            autoPlay
+                            muted
+                            height={500}
+                            controls
+                            src={fileData.isLoading ? "../../../../assets/Loading.gif" : fileData.file}
+                        /> 
+                    </>:
+                    <ButtonField 
+                        className={'FileUploaderButton'}
+                        disabled={disabled}
+                        id={elementId} 
+                        text={"Upload Photo / Video"}
+                        upload={true}
+                        Icon={AddAPhotoIcon}
+                        onChange={handleUpload}
                     /> 
-                </>:
-                <ButtonField 
-                    className={'FileUploaderButton'}
-                    disabled={disabled}
-                    id={elementId} 
-                    text={"Upload Photo / Video"}
-                    upload={true}
-                    Icon={AddAPhotoIcon}
-                    onChange={handleUpload}
-                /> 
-            }
-        </Card>
+                }
+            </Card>
+            <ModalComponent 
+                {...modalProps}
+                open={modalIsOpen} 
+                handleClose={() => setModalIsOpen(false)} 
+                components={[{
+                    Component: ButtonField, 
+                    props: {
+                        active: true,
+                        text: "OK",
+                        Icon: ThumbUpAltIcon,
+                        onClick: () => setModalIsOpen(false)
+                    }
+                }]}
+            />
+        </>
     );
 }
 
