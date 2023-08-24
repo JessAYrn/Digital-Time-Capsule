@@ -3,7 +3,7 @@ import { AppContext } from '../Wallet';
 import { NavBar } from '../../Components/navigation/NavBar';
 import './WalletPage.scss';
 import { shortenHexString } from '../../functionsAndConstants/Utils';
-import { e8sInOneICP, MODALS_TYPES } from '../../functionsAndConstants/Constants';
+import { e8sInOneICP } from '../../functionsAndConstants/Constants';
 import {  RenderQrCode } from '../../functionsAndConstants/walletFunctions/GenerateQrCode';
 import { copyWalletAddressHelper } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
 import { Transaction } from '../../functionsAndConstants/walletFunctions/Transaction';
@@ -18,7 +18,6 @@ import { walletTypes } from '../../reducers/walletReducer';
 import { UI_CONTEXTS } from '../../functionsAndConstants/Contexts';
 import ButtonField from '../../Components/Fields/Button';
 import '../../SCSS/contentContainer.scss'
-import { modalTypes } from '../../reducers/modalReducer';
 
 
 const WalletPage = (props) => {

@@ -5,7 +5,6 @@ import  {AppContext} from "../App";
 import "./JournalPage.scss";
 import DatePickerField from "../../Components/Fields/DatePicker";
 import { monthInMilliSeconds} from "../../functionsAndConstants/Constants";
-import { modalTypes } from "../../reducers/modalReducer";
 import { milisecondsToNanoSeconds, scrollToTop } from "../../functionsAndConstants/Utils";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PublishIcon from '@mui/icons-material/Publish';

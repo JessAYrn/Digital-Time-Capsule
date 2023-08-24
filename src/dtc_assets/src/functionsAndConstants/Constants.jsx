@@ -28,11 +28,8 @@ export const DEVICE_TYPES = {
 export const MEGABYTES = 1000000;
 
 export const MODALS_TYPES = {
-    exitWithoutSubmit: 'exitWithoutSubmit',
-    exceedsMaxDuration: 'exceedsMaxDuration',
     onSend:'onSend',
     onSubmit: 'onSubmit',
-    notAuthorizedByOwner: "notAuthorizedByOwner",
     onRegisterNewOwner: "onRegisterNewOwner",
     requestApprovalRepsonse: "requestApprovalRepsonse",
     quicktimeVideoDetected: 'quicktimeVideoDetected',

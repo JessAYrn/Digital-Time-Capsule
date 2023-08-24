@@ -2,7 +2,7 @@ import { fileToBlob, flattenUint8array } from "../../../functionsAndConstants/Ut
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 
 import { 
-    CHUNK_SIZE, MAX_DURATION_OF_VIDEO_IN_SECONDS, forbiddenFileTypes, MODALS_TYPES 
+    CHUNK_SIZE, MAX_DURATION_OF_VIDEO_IN_SECONDS, forbiddenFileTypes 
 } from "../../../functionsAndConstants/Constants";
 import { types } from "../../../reducers/journalReducer";
 // import actorReducer, { actorInitialState, actorTypes } from "../../../reducers/actorReducer";

@@ -5,7 +5,6 @@ import homePageReducer from './homePageReducer';
 import actorReducer from './actorReducer';
 import accountReducer from './accountReducer';
 import notificationsReducer from './notificationsReducer';
-import modalReducer from './modalReducer';
 
 const rootReducer = combineReducers({
     journal: journalReducer,
@@ -13,8 +12,7 @@ const rootReducer = combineReducers({
     actor: actorReducer,
     account: accountReducer,
     homePage: homePageReducer,
-    notifications: notificationsReducer,
-    modal: modalReducer
+    notifications: notificationsReducer
 });
 
 

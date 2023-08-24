@@ -15,12 +15,12 @@ export const loadAllDataIntoReduxStores = async (states, dispatchFunctions, type
     let {walletState, homePageState, journalState, actorState, accountState, notificationsState} = states;
     let {journalDispatch, walletDispatch, homePageDispatch, accountDispatch, notificationsDispatch} = dispatchFunctions;
     let {journalTypes, walletTypes, homePageTypes, accountTypes, notificationsTypes } = types;
-    let accountCreated;
+    let accountCreationAttemptResults;
     //checks to see if user has an account. If not, then it attemptes to make an account, if 
     //the account creation is unsuccessful, then it returns
     let hasAccount = await actorState.backendActor.hasAccount();
-    if(!hasAccount) accountCreated = await CreateUserJournal(actorState, journalDispatch);
-    if(accountCreated && "err" in accountCreated){
+    if(!hasAccount) accountCreationAttemptResults = await CreateUserJournal(actorState);
+    if(accountCreationAttemptResults && "err" in accountCreationAttemptResults){
         return {
             openModal: true, 
             bigText: "Not Authorized To Enter", 

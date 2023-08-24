@@ -1,8 +1,6 @@
 import React, { useContext, useState} from 'react';
 import "./FileUpload.scss";
-import { MODALS_TYPES } from '../../../functionsAndConstants/Constants';
 import { mapAndSendFileToApi, getIsWithinProperFormat, updateFileMetadataInStore, getFileURL, createFileId } from './FileManagementTools';
-import { modalTypes } from '../../../reducers/modalReducer';
 import { AppContext as AccountContext} from '../../../Routes/Account';
 import { AppContext as HomePageContext} from '../../../Routes/HomePage';
 import { AppContext as JournalContext} from '../../../Routes/App';

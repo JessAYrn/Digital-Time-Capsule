@@ -4,7 +4,6 @@ import { NavBar } from '../../Components/navigation/NavBar';
 import { UI_CONTEXTS } from '../../functionsAndConstants/Contexts';
 import "./Analytics.scss"
 import DataField from '../../Components/Fields/DataField';
-import { MODALS_TYPES } from '../../functionsAndConstants/Constants';
 import Switch from '../../Components/Fields/Switch';
 import { CANISTER_DATA_FIELDS } from '../../functionsAndConstants/Constants';
 import CheckIcon from '@mui/icons-material/Check';
@@ -23,7 +22,6 @@ import '../../SCSS/container.scss';
 import '../../SCSS/contentContainer.scss'
 import '../../SCSS/section.scss'
 import {homePageTypes} from '../../reducers/homePageReducer';
-import { modalTypes } from '../../reducers/modalReducer';
 import { inTrillions, round2Decimals, shortenHexString } from '../../functionsAndConstants/Utils';
 import { copyWalletAddressHelper } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
 import DataTable from '../../Components/Fields/Table';
@@ -408,7 +406,6 @@ const Analytics = () => {
                                     onClick={handleRegistration}
                                     Icon={HowToRegIcon}
                                     active={homePageState.canisterData.isOwner}
-                                    disabled={!homePageState.canisterData.isOwner}
                                 />
                             </Grid>
                         </Grid>
