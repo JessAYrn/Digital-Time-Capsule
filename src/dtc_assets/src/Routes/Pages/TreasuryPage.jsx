@@ -5,33 +5,14 @@ import { AppContext } from "../App";
 import './TreasuryPage.scss'
 
 const TreasuryPage = (props) => {
-  const { homePageState, modalState, modalDispatch} = useContext(AppContext);
+  const { homePageState } = useContext(AppContext);
   return (
-    modalState?.modalStatus?.show ?
-    <div >
-        <Modal 
-            context={UI_CONTEXTS.TREASURY}
-        />
-    </div>:
     <div>
-    {
-      modalState.isLoading ?
-      <LoadScreen/> :
-      <div>
-        <NavBar
-          walletLink={false}
-          journalLink={true}
-          accountLink={true}
-          dashboardLink={true}
-          notificationIcon={false}
-          context={UI_CONTEXTS.TREASURY}
-        />
-        <div className='treasuryPage_container'>
-          coming soon
-        </div>
-      </div> 
-    }
-    </div>
+      <NavBar context={UI_CONTEXTS.TREASURY} />
+      <div className='treasuryPage_container'>
+        coming soon
+      </div>
+    </div> 
     
   );
 };

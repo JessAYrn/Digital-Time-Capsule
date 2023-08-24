@@ -12,19 +12,22 @@ import homePageReducer, { homePageInitialState,homePageTypes } from '../reducers
 import accountReducer, { accountInitialState,accountTypes } from '../reducers/accountReducer';
 import actorReducer, { actorInitialState,actorTypes } from '../reducers/actorReducer';
 import notificationsReducer, {notificationsInitialState, notificationsTypes} from "../reducers/notificationsReducer";
-import modalReducer, { modalTypes, modalInitialState } from '../reducers/modalReducer';
+import ModalComponent from '../Components/modal/Modal';
 
 export const AppContext = createContext(DEFAULT_APP_CONTEXTS);
 
 const GroupJournal = () => {
     const [journalState, journalDispatch] = useReducer(journalReducer, initialState);
-    const [modalState, modalDispatch] = useReducer(modalReducer, modalInitialState);
     const [notificationsState, notificationsDispatch] = useReducer(notificationsReducer, notificationsInitialState);
     const [walletState, walletDispatch] = useReducer(walletReducer, walletInitialState);
     const [homePageState, homePageDispatch] =  useReducer(homePageReducer, homePageInitialState)
     const [accountState, accountDispatch] =  useReducer(accountReducer, accountInitialState)
     const [actorState, actorDispatch] = useReducer(actorReducer, actorInitialState);
+    
     const [stateHasBeenRecovered, setStateHasBeenRecovered] = useState(false);
+    const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [isLoadingModal, setIsLoadingModal] = useState(false);
+    const [modalProps, setModalProps] = useState({});
 
     const ReducerDispatches={
         walletDispatch,
@@ -32,8 +35,7 @@ const GroupJournal = () => {
         accountDispatch,
         actorDispatch,
         homePageDispatch,
-        notificationsDispatch,
-        modalDispatch
+        notificationsDispatch
     }
 
     const ReducerTypes={
@@ -42,8 +44,7 @@ const GroupJournal = () => {
         accountTypes,
         actorTypes,
         homePageTypes,
-        notificationsTypes,
-        modalTypes
+        notificationsTypes
     }
 
     const ReducerStates = {
@@ -52,8 +53,7 @@ const GroupJournal = () => {
         accountState,
         homePageState,
         actorState,
-        notificationsState,
-        modalState
+        notificationsState
     };
     
     window.onbeforeunload = window.history.replaceState(null, '');
@@ -70,7 +70,12 @@ const GroupJournal = () => {
     
     useEffect( async () => {
         if(!actorState.backendActor) return;
-        await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes, stateHasBeenRecovered);
+        setIsLoadingModal(true);
+        setModalIsOpen(true);
+        const response = await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes, stateHasBeenRecovered);
+        setModalIsOpen(response?.openModal);
+        setModalProps(response)
+        setIsLoadingModal(false);    
     }, [actorState.backendActor]);
   return (
     <AppContext.Provider
@@ -86,9 +91,7 @@ const GroupJournal = () => {
         actorReducer,
         actorState,
         notificationsState,
-        notificationsDispatch,
-        modalState,
-        modalDispatch
+        notificationsDispatch
     }}
     >
         {           
@@ -98,6 +101,11 @@ const GroupJournal = () => {
                         context={UI_CONTEXTS.GROUPJOURNAL}
                 /> 
         }
+        <ModalComponent 
+            {...modalProps}
+            open={modalIsOpen} 
+            isLoading={isLoadingModal} 
+        />        
 
     </AppContext.Provider>
   )

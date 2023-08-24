@@ -12,19 +12,22 @@ import walletReducer,{ walletInitialState, walletTypes } from '../reducers/walle
 import actorReducer, { actorInitialState, actorTypes } from '../reducers/actorReducer';
 import homePageReducer,{ homePageInitialState, homePageTypes } from '../reducers/homePageReducer';
 import notificationsReducer, {notificationsInitialState, notificationsTypes} from "../reducers/notificationsReducer";
-import modalReducer,{ modalTypes, modalInitialState } from '../reducers/modalReducer';
+import ModalComponent from '../Components/modal/Modal';
 
 export const AppContext = createContext(DEFAULT_APP_CONTEXTS);
 
 const Treasury = () => {
     const [journalState, journalDispatch] = useReducer(journalReducer, initialState);
-    const [modalState, modalDispatch] = useReducer(modalReducer, modalInitialState);
     const [notificationsState, notificationsDispatch] = useReducer(notificationsReducer, notificationsInitialState);
     const [accountState, accountDispatch] = useReducer(accountReducer, accountInitialState);
     const [walletState, walletDispatch]=useReducer(walletReducer,walletInitialState);
     const [actorState, actorDispatch]= useReducer(actorReducer, actorInitialState);
     const [homePageState, homePageDispatch]= useReducer(homePageReducer, homePageInitialState);
+    
     const [stateHasBeenRecovered, setStateHasBeenRecovered] = useState(false);
+    const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [isLoadingModal, setIsLoadingModal] = useState(false);
+    const [modalProps, setModalProps] = useState({});
 
     window.onbeforeunload = window.history.replaceState(null, '');
     
@@ -36,8 +39,7 @@ const Treasury = () => {
         accountDispatch,
         actorDispatch,
         homePageDispatch,
-        notificationsDispatch,
-        modalDispatch
+        notificationsDispatch
     }
 
     const ReducerTypes={
@@ -46,8 +48,7 @@ const Treasury = () => {
         accountTypes,
         actorTypes,
         homePageTypes,
-        notificationsTypes,
-        modalTypes
+        notificationsTypes
     }
 
     const ReducerStates = {
@@ -56,8 +57,7 @@ const Treasury = () => {
         accountState,
         homePageState,
         actorState,
-        notificationsState,
-        modalState
+        notificationsState
     };
     
     //gets state from previous route
@@ -67,7 +67,12 @@ const Treasury = () => {
     
     useEffect( async () => {
         if(!actorState.backendActor) return;
-        await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes, stateHasBeenRecovered);
+        setIsLoadingModal(true);
+        setModalIsOpen(true);
+        const response = await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes, stateHasBeenRecovered);
+        setModalIsOpen(response?.openModal);
+        setModalProps(response)
+        setIsLoadingModal(false);
     }, [actorState.backendActor]);
   return (
     <AppContext.Provider
@@ -83,9 +88,7 @@ const Treasury = () => {
         actorDispatch,
         actorState,
         notificationsState,
-        notificationsDispatch,
-        modalState,
-        modalDispatch
+        notificationsDispatch
     }}
     >
         {           
@@ -96,7 +99,11 @@ const Treasury = () => {
                         context={UI_CONTEXTS.TREASURY}
                 /> 
         }
-
+        <ModalComponent 
+            {...modalProps}
+            open={modalIsOpen} 
+            isLoading={isLoadingModal} 
+        />
     </AppContext.Provider>
   )
 }

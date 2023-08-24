@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import Box from '@mui/material/Box';
 import Modal from '@mui/material/Modal';
 import "./Modal.scss";
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
+import { ConnectButton, ConnectDialog, useConnect} from "@connect2ic/react";
 
 const style = {
   position: 'absolute',
@@ -17,12 +18,30 @@ const style = {
 };
 
 const ModalComponent = (props_) => {
-    const {open, handleClose, bigText, smallText, Icon, components, isLoading, imageSrc} = props_
+    const {
+      open, 
+      handleClose, 
+      bigText, 
+      smallText, 
+      Icon, 
+      components, 
+      isLoading, 
+      imageSrc, 
+      displayConnectButton
+    } = props_
+
+    let isOpen = useMemo(() => {return open}, [open]);
+    
+    useConnect({ onConnect: () => {}, onDisconnect: () => {
+      isOpen = false;
+        document.location.reload();
+      }
+  });
   
     const src = isLoading ? "../../../assets/Loading.gif" : imageSrc;
   return (
       <Modal
-        open={open}
+        open={isOpen}
         onClose={isLoading ? () => {} : handleClose}
         aria-labelledby="parent-modal-title"
         aria-describedby="parent-modal-description"
@@ -40,6 +59,13 @@ const ModalComponent = (props_) => {
                     return <Component {...props} className={"modalChildCompoent"}/>
                 })}
                 </Grid>
+            }
+            {
+              displayConnectButton && 
+              <>
+                <ConnectButton/>
+                <ConnectDialog />
+              </>
             }
         </Box>
       </Modal>

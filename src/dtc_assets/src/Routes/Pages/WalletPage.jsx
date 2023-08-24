@@ -1,7 +1,6 @@
 import React, {useCallback, useContext, useEffect, useState} from 'react';
 import { AppContext } from '../Wallet';
 import { NavBar } from '../../Components/navigation/NavBar';
-import { Modal } from './modalContent/Modal';
 import './WalletPage.scss';
 import { shortenHexString } from '../../functionsAndConstants/Utils';
 import { e8sInOneICP, MODALS_TYPES } from '../../functionsAndConstants/Constants';
@@ -25,16 +24,13 @@ import { modalTypes } from '../../reducers/modalReducer';
 const WalletPage = (props) => {
 
     const { 
-        walletState, walletDispatch, actorState, actorDispatch, modalState, modalDispatch
+        walletState, walletDispatch, actorState, actorDispatch
     } = useContext(AppContext);
     const [loadingTx, setIsLoadingTx] = useState(false);
     const [showReloadButton, setShowReloadButton] = useState(false);
 
     const openModal = () => {
-        modalDispatch({
-            actionType: modalTypes.SET_MODAL_STATUS,
-            payload: {show: true, which: MODALS_TYPES.onSend}
-        });
+
     };
 
     const loadTxs = async () => {
@@ -48,96 +44,80 @@ const WalletPage = (props) => {
 
     return (
         <div className={"container"}>
-            {modalState.modalStatus.show ? 
-            
-                <Modal 
-                    context={UI_CONTEXTS.WALLET}
-                /> :
-                <>
-                    <NavBar
-                        walletLink={false}
-                        journalLink={true}
-                        accountLink={true}
-                        dashboardLink={true}
-                        notificationIcon={false}
-                        context={UI_CONTEXTS.WALLET}
-                    />
-                    {modalState.isLoading ?
-                        <LoadScreen/> :
-                        <div className={"container__wallet"}>
-                            <div className={'transparentDiv__wallet'}>
-                                <div className={`infoDiv_wallet contentContainer `} >
-                                    <RenderQrCode
-                                        imgUrl={walletState.walletData.qrCodeImgUrl}
-                                    />  
-                                    <div className={'textsDiv'}>
-                                        <div className="balanceDiv">
-                                            Wallet Balance: {walletState.walletData.balance /  e8sInOneICP} ICP
-                                        </div>
-                                        <div className={'walletInfoDiv'}>
-                                            <div className='walletAddressDiv'>
-                                                <p className='firstPTag'>
-                                                    Wallet Address:  
-                                                </p>
-                                                <p className='secondPTag'>
-                                                    {shortenHexString(walletState.walletData.address)} 
-                                                </p> 
-                                                <ButtonField
-                                                    Icon={FaIcons.FaCopy}
-                                                    iconSize={17.5}
-                                                    onClick={copyWalletAddress}
-                                                    withBox={false}
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                { loadingTx ? 
-                                    <div className={`loadGifContainer contentContainer `}>
-                                        <div className='loadGifDiv'>
-                                            <img src="Loading.gif" alt="Loading Screen" />
-                                        </div>
-                                    </div> :
-                                    !walletState.walletData.txHistory.data.length ? 
-                                        !showReloadButton && 
-                                        <ButtonField
-                                            text={'Load Transaction History'}
-                                            className={'loadTxHistory active'}
-                                            onClick={loadTxs}
-                                            withBox={true}
-                                        /> :
-                                        walletState.walletData.txHistory.data.map((tx) => {
-                                            return(
-                                                    <Transaction
-                                                        class_={`contentContainer `}
-                                                        balanceDelta={tx[1].balanceDelta}
-                                                        increase={tx[1].increase}
-                                                        recipient={tx[1].recipient[0]}
-                                                        timeStamp={tx[1].timeStamp[0]}
-                                                        source={tx[1].source[0]}
-                                                    />
-                                            );
-                                        })
-                                }              
+            <NavBar context={UI_CONTEXTS.WALLET}/>
+            <div className={"container__wallet"}>
+                <div className={'transparentDiv__wallet'}>
+                    <div className={`infoDiv_wallet contentContainer `} >
+                        <RenderQrCode
+                            imgUrl={walletState.walletData.qrCodeImgUrl}
+                        />  
+                        <div className={'textsDiv'}>
+                            <div className="balanceDiv">
+                                Wallet Balance: {walletState.walletData.balance /  e8sInOneICP} ICP
                             </div>
-                            {(showReloadButton || walletState.walletData.txHistory.data.length > 0) && 
-                                <ButtonField
-                                    Icon={AiIcons.AiOutlineReload}
-                                    className={'reloadTxData'}
-                                    iconSize={25}
-                                    onClick={loadTxs}
-                                    withBox={true}
-                                />}
+                            <div className={'walletInfoDiv'}>
+                                <div className='walletAddressDiv'>
+                                    <p className='firstPTag'>
+                                        Wallet Address:  
+                                    </p>
+                                    <p className='secondPTag'>
+                                        {shortenHexString(walletState.walletData.address)} 
+                                    </p> 
+                                    <ButtonField
+                                        Icon={FaIcons.FaCopy}
+                                        iconSize={17.5}
+                                        onClick={copyWalletAddress}
+                                        withBox={false}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    { loadingTx ? 
+                        <div className={`loadGifContainer contentContainer `}>
+                            <div className='loadGifDiv'>
+                                <img src="Loading.gif" alt="Loading Screen" />
+                            </div>
+                        </div> :
+                        !walletState.walletData.txHistory.data.length ? 
+                            !showReloadButton && 
                             <ButtonField
-                                Icon={GrIcons.GrSend}
-                                className={'sendTxDiv'}
-                                iconSize={25}
-                                onClick={openModal}
+                                text={'Load Transaction History'}
+                                className={'loadTxHistory active'}
+                                onClick={loadTxs}
                                 withBox={true}
-                            />
-                        </div>}
-                </>
-            }
+                            /> :
+                            walletState.walletData.txHistory.data.map((tx) => {
+                                return(
+                                        <Transaction
+                                            class_={`contentContainer `}
+                                            balanceDelta={tx[1].balanceDelta}
+                                            increase={tx[1].increase}
+                                            recipient={tx[1].recipient[0]}
+                                            timeStamp={tx[1].timeStamp[0]}
+                                            source={tx[1].source[0]}
+                                        />
+                                );
+                            })
+                    }              
+                </div>
+                {(showReloadButton || walletState.walletData.txHistory.data.length > 0) && 
+                    <ButtonField
+                        Icon={AiIcons.AiOutlineReload}
+                        className={'reloadTxData'}
+                        iconSize={25}
+                        onClick={loadTxs}
+                        withBox={true}
+                    />}
+                <ButtonField
+                    Icon={GrIcons.GrSend}
+                    className={'sendTxDiv'}
+                    iconSize={25}
+                    onClick={openModal}
+                    withBox={true}
+                />
+            </div>
+            
         </div>
         
     );

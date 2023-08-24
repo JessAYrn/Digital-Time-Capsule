@@ -7,13 +7,11 @@ import InputBox from "../../Components/Fields/InputBox";
 import SpeedDialField from '../../Components/Fields/SpeedDialField'
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
-import LoadScreen from "./LoadScreen";
-import { Modal } from "./modalContent/Modal";
 import { NavBar } from "../../Components/navigation/NavBar";
 import { UI_CONTEXTS } from "../../functionsAndConstants/Contexts";
-import { getHighestEntryKey, milisecondsToNanoSeconds, scrollTo_X, scrollTo_X } from "../../functionsAndConstants/Utils";
+import { getHighestEntryKey, milisecondsToNanoSeconds } from "../../functionsAndConstants/Utils";
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
-import FileCarousel, { scrollRight } from "../../Components/Fields/fileManger/FileCarousel";
+import FileCarousel from "../../Components/Fields/fileManger/FileCarousel";
 import DataTable from "../../Components/Fields/Table";
 import DatePickerField from "../../Components/Fields/DatePicker";
 import "../../SCSS/scrollable.scss";
@@ -27,7 +25,7 @@ const count = 30
 
 const Journal = (props) => {
 
-    const { journalState, journalDispatch, actorState, actorDispatch, modalDispatch} = useContext(AppContext);
+    const { journalState, journalDispatch, actorState, actorDispatch} = useContext(AppContext);
     const [counter, setCounter] = useState(1);
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [modalIsLoading, setModalIsLoading] = useState(false);

@@ -12,20 +12,23 @@ import walletReducer,{ walletInitialState, walletTypes } from '../reducers/walle
 import homePageReducer, { homePageInitialState, homePageTypes } from '../reducers/homePageReducer';
 import actorReducer, { actorInitialState,actorTypes } from "../reducers/actorReducer";
 import notificationsReducer, {notificationsInitialState, notificationsTypes} from "../reducers/notificationsReducer";
-import modalReducer, {modalInitialState, modalTypes} from "../reducers/modalReducer";
+import ModalComponent from '../Components/modal/Modal';
 
 export const AppContext = createContext(DEFAULT_APP_CONTEXTS);
 
 const AccountPage = () => {
 
     const [journalState, journalDispatch] = useReducer(journalReducer, initialState);
-    const [modalState, modalDispatch] = useReducer(modalReducer, modalInitialState);
     const [notificationsState, notificationsDispatch] = useReducer(notificationsReducer, notificationsInitialState);
     const [accountState, accountDispatch] = useReducer(accountReducer, accountInitialState);
     const [walletState, walletDispatch]=useReducer(walletReducer,walletInitialState);
     const [homePageState, homePageDispatch]=useReducer(homePageReducer,homePageInitialState);
     const [actorState, actorDispatch] = useReducer(actorReducer, actorInitialState);
     const [stateHasBeenRecovered, setStateHasBeenRecovered] = useState(false);
+
+    const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [isLoadingModal, setIsLoadingModal] = useState(false);
+    const [modalProps, setModalProps] = useState({});
 
     //clears useLocation().state upon page refresh so that when the user refreshes the page,
     //changes made to this route aren't overrided by the useLocation().state of the previous route.
@@ -39,8 +42,7 @@ const AccountPage = () => {
         accountDispatch,
         homePageDispatch,
         actorDispatch,
-        notificationsDispatch,
-        modalDispatch
+        notificationsDispatch
     }
 
     const ReducerTypes={
@@ -49,8 +51,7 @@ const AccountPage = () => {
         accountTypes,
         homePageTypes,
         actorTypes,
-        notificationsTypes,
-        modalTypes
+        notificationsTypes
     }
 
     const ReducerStates = {
@@ -59,8 +60,7 @@ const AccountPage = () => {
         accountState,
         homePageState,
         actorState,
-        notificationsState,
-        modalState
+        notificationsState
     };
 
     // gets state from previous route
@@ -71,7 +71,12 @@ const AccountPage = () => {
 
     useEffect(async () => {
         if(!actorState.backendActor) return;
-        await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes, stateHasBeenRecovered);
+        setIsLoadingModal(true);
+        setModalIsOpen(true);
+        const response = await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes, stateHasBeenRecovered);
+        setModalIsOpen(response?.openModal);
+        setModalProps(response)
+        setIsLoadingModal(false);
     },[actorState.backendActor]);
 
     return (
@@ -88,9 +93,7 @@ const AccountPage = () => {
                 actorState,
                 actorDispatch,
                 notificationsState,
-                notificationsDispatch,
-                modalState,
-                modalDispatch
+                notificationsDispatch
             }}
         >
             {
@@ -100,6 +103,11 @@ const AccountPage = () => {
                         context={UI_CONTEXTS.ACCOUNT_PAGE}
                     /> 
             }
+            <ModalComponent 
+                {...modalProps}
+                open={modalIsOpen} 
+                isLoading={isLoadingModal} 
+            />        
         </AppContext.Provider>
     )
 

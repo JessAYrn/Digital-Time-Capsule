@@ -5,7 +5,7 @@ import { mapBackendCanisterDataToFrontEndObj } from "../mappers/dashboardMapperF
 import { getFileUrl_fromApi } from "../Components/Fields/fileManger/FileManagementTools";
 import { CreateUserJournal } from "../Routes/Pages/authentication/AuthenticationMethods";
 import DoNotDisturbOnIcon from '@mui/icons-material/DoNotDisturbOn';
-import { MODALS_TYPES } from "./Constants";
+import ButtonField from "../Components/Fields/Button";
 
 
 export const loadAllDataIntoReduxStores = async (states, dispatchFunctions, types, stateHasBeenRecovered) => {
@@ -13,8 +13,8 @@ export const loadAllDataIntoReduxStores = async (states, dispatchFunctions, type
     if(stateHasBeenRecovered) return; 
 
     let {walletState, homePageState, journalState, actorState, accountState, notificationsState} = states;
-    let {journalDispatch, walletDispatch, homePageDispatch, accountDispatch, notificationsDispatch, modalDispatch} = dispatchFunctions;
-    let {journalTypes, walletTypes, homePageTypes, accountTypes, notificationsTypes, modalTypes } = types;
+    let {journalDispatch, walletDispatch, homePageDispatch, accountDispatch, notificationsDispatch} = dispatchFunctions;
+    let {journalTypes, walletTypes, homePageTypes, accountTypes, notificationsTypes } = types;
     let accountCreated;
     //checks to see if user has an account. If not, then it attemptes to make an account, if 
     //the account creation is unsuccessful, then it returns
@@ -25,7 +25,19 @@ export const loadAllDataIntoReduxStores = async (states, dispatchFunctions, type
             openModal: true, 
             bigText: "Not Authorized To Enter", 
             Icon: DoNotDisturbOnIcon,
-            smallText: "If you are the owner of this application, attempting to log in for the first time, you must log in using the wallet that owns the Utility NFT that corresponds to this server."
+            displayConnectButton: true,
+            smallText: "If you are the owner of this application, attempting to log in for the first time, you must log in using the wallet that owns the Utility NFT that corresponds to this server.",
+            components: [{
+                Component: ButtonField,
+                props: {
+                    active: true,
+                    text: "Request Access",
+                    onClick: () => {
+                        actorState.backendActor.requestApproval();
+                        alert("Your request for access has been sent.");
+                    }
+                }
+            }]
         }
     }
 

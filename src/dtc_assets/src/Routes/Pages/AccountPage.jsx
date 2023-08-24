@@ -5,15 +5,15 @@ import "./SubscriptionPage.scss";
 import { AppContext } from '../Account';
 import { NavBar } from '../../Components/navigation/NavBar';
 import { UI_CONTEXTS } from '../../functionsAndConstants/Contexts';
-import LoadScreen from './LoadScreen';
-import { Modal } from './modalContent/Modal';
 import  { accountTypes } from '../../reducers/accountReducer';
 
 
 const AccountSection = (props) => {
 
     const { 
-        accountDispatch, accountState, actorState, modalState, modalDispatch 
+        accountDispatch, 
+        accountState, 
+        actorState 
     } = useContext(AppContext);
     const [pageChangesMade, setPageChangesMade] = useState(false); 
 
@@ -36,12 +36,6 @@ const AccountSection = (props) => {
     };
 
 return(
-    modalState.modalStatus.show ?
-    <div className={"container__accountPage"}>
-        <Modal 
-            context={UI_CONTEXTS.ACCOUNT_PAGE}
-        />
-    </div> : 
     <>
         <NavBar
             walletLink={true}
@@ -52,8 +46,6 @@ return(
             context={UI_CONTEXTS.ACCOUNT_PAGE}
         />
         <div className='container__accountPage'>
-        {modalState.isLoading ?
-            <LoadScreen/> :
             <div className={`logoDiv account`}>
                 <img className={'logoImg'}src="dtc-logo-black.png" alt="Logo"/>
                 <div className={`subscriptionSection `}>
@@ -76,14 +68,8 @@ return(
                         value={accountState.metaData.userName}
                     />
                 </div> 
-            </div>}
-            {
-                pageChangesMade &&
-                <div className={"submitButtonDiv"} onClick={handleUpdate}>
-                        Submit 
-                </div>
-            }
-    </div>
+            </div>
+        </div>
     </>
 )
 

@@ -5,21 +5,11 @@ import { AppContext } from "../App";
 import './GroupJournalPage.scss'
 
 const GroupJournalPage = (props) => {
-  const { homePageState, modalState, modalDispatch} = useContext(AppContext);
+  const { homePageState} = useContext(AppContext);
 
   return (
-    modalState?.modalStatus?.show ?
-    <div >
-        <Modal 
-            context={UI_CONTEXTS.GROUPJOURNAL}
-        />
-    </div>:
     <div>
-    {
-      modalState.isLoading ?
-      <LoadScreen/> :
-      <div>
-        <NavBar
+      <NavBar
         walletLink={false}
         journalLink={true}
         accountLink={true}
@@ -30,10 +20,7 @@ const GroupJournalPage = (props) => {
       <div className='GroupJournalPage_container'>
         coming soon
       </div>
-      </div> 
-    }
-    </div>
-    
+    </div> 
   );
 };
 

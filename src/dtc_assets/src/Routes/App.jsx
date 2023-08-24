@@ -77,7 +77,7 @@ const App = () => {
         setIsLoadingModal(true);
         setModalIsOpen(true);
         const response = await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes, stateHasBeenRecovered);
-        setModalIsOpen(response.openModal);
+        setModalIsOpen(response?.openModal);
         setModalProps(response)
         setIsLoadingModal(false);
     },[actorState.backendActor]);
