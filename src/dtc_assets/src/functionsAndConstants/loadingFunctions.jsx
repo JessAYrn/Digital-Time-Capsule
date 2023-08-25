@@ -108,7 +108,6 @@ export const loadJournalData = async (actorState, journalDispatch, types) => {
 export const loadWalletData = async (actorState, walletDispatch, types ) => {
 
     let walletDataFromApi = await actorState.backendActor.readWalletData();
-
     const address = toHexString(new Uint8Array( [...walletDataFromApi.ok.address]));
     const walletData = { 
         balance : parseInt(walletDataFromApi.ok.balance.e8s), 
@@ -128,14 +127,25 @@ export const loadWalletData = async (actorState, walletDispatch, types ) => {
         actionType: types.SET_DATA_HAS_BEEN_LOADED,
         payload: true,
     });
+    await loadTxHistory(actorState, walletDispatch, types);
 };
 
 export const loadTxHistory = async (actorState, walletDispatch, types) => {
-    if(!actorState.backendActor) throw 'No actor defined';
     const tx = await actorState.backendActor.readTransaction();
-    const transactionHistory = tx.ok.sort(function(a,b){
-        const mapKeyOfA = parseInt(a[0]);
-        const mapKeyOfB = parseInt(b[0]);
+    let transactionHistory = tx.ok.map(([mapKey, tx_]) => {
+        const newKey = parseInt(mapKey);
+        const newTx = {
+            ...tx_,
+            recipient: toHexString(new Uint8Array( [...tx_.recipient])),
+            source: toHexString(new Uint8Array( [...tx_.source])),
+            balanceDelta: parseInt(tx_.balanceDelta),
+            timeStamp: parseInt(tx_.timeStamp)
+        };
+        return [newKey, newTx]
+    });
+    transactionHistory = transactionHistory.sort(function(a,b){
+        const mapKeyOfA = a[0];
+        const mapKeyOfB = b[0];
         if (mapKeyOfA > mapKeyOfB) return -1; 
         else return 1;
     });
@@ -143,7 +153,6 @@ export const loadTxHistory = async (actorState, walletDispatch, types) => {
         actionType: types.SET_TX_HISTORY_DATA,
         payload: transactionHistory
     });
-    return {transactionHistory, tx};
 };
 
 export const loadCanisterData = async (actorState, dispatch, types) => {

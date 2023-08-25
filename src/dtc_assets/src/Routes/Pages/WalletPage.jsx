@@ -5,19 +5,18 @@ import './WalletPage.scss';
 import { shortenHexString } from '../../functionsAndConstants/Utils';
 import { e8sInOneICP } from '../../functionsAndConstants/Constants';
 import {  RenderQrCode } from '../../functionsAndConstants/walletFunctions/GenerateQrCode';
-import { copyWalletAddressHelper } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
+import { copyText } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
 import { Transaction } from '../../functionsAndConstants/walletFunctions/Transaction';
 import { loadTxHistory } from '../../functionsAndConstants/loadingFunctions';
-import * as GrIcons from 'react-icons/gr';
-import * as FaIcons from 'react-icons/fa';
-import * as AiIcons from 'react-icons/ai'
 import { testTx } from '../../testData/Transactions';
-import LoadScreen from './LoadScreen';
-import { types } from '../../reducers/journalReducer';
 import { walletTypes } from '../../reducers/walletReducer';
 import { UI_CONTEXTS } from '../../functionsAndConstants/Contexts';
 import ButtonField from '../../Components/Fields/Button';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import '../../SCSS/contentContainer.scss'
+import Grid from '@mui/material/Unstable_Grid2/Grid2';
+import { Paper, Typography } from '@mui/material';
+import DataField from '../../Components/Fields/DataField';
 
 
 const WalletPage = (props) => {
@@ -25,6 +24,7 @@ const WalletPage = (props) => {
     const { 
         walletState, walletDispatch, actorState, actorDispatch
     } = useContext(AppContext);
+
     const [loadingTx, setIsLoadingTx] = useState(false);
     const [showReloadButton, setShowReloadButton] = useState(false);
 
@@ -39,85 +39,79 @@ const WalletPage = (props) => {
         setIsLoadingTx(false);
     };
 
-    const copyWalletAddress = useCallback(() => copyWalletAddressHelper(walletState.walletData.address), [walletState]);
-
+    console.log(walletState)
     return (
-        <div className={"container"}>
+        <Grid 
+            container 
+            className={'container_journal'} 
+            columns={12} 
+            xs={12} 
+            rowSpacing={8} 
+            display="flex" 
+            justifyContent="center" 
+            alignItems="center" 
+            flexDirection={"column"}
+        >
             <NavBar context={UI_CONTEXTS.WALLET}/>
-            <div className={"container__wallet"}>
-                <div className={'transparentDiv__wallet'}>
-                    <div className={`infoDiv_wallet contentContainer `} >
-                        <RenderQrCode
-                            imgUrl={walletState.walletData.qrCodeImgUrl}
-                        />  
-                        <div className={'textsDiv'}>
-                            <div className="balanceDiv">
-                                Wallet Balance: {walletState.walletData.balance /  e8sInOneICP} ICP
-                            </div>
-                            <div className={'walletInfoDiv'}>
-                                <div className='walletAddressDiv'>
-                                    <p className='firstPTag'>
-                                        Wallet Address:  
-                                    </p>
-                                    <p className='secondPTag'>
-                                        {shortenHexString(walletState.walletData.address)} 
-                                    </p> 
-                                    <ButtonField
-                                        Icon={FaIcons.FaCopy}
-                                        iconSize={17.5}
-                                        onClick={copyWalletAddress}
-                                        withBox={false}
+            <Grid 
+                columns={12} 
+                xs={11} 
+                md={9} 
+                rowSpacing={0} 
+                display="flex" 
+                justifyContent="center" 
+                alignItems="center" 
+                flexDirection={"column"} 
+                marginTop={"80px"}
+            >
+                <Paper elevation={24} className={'walletDataPaperComponent'}>
+                    <RenderQrCode imgUrl={walletState.walletData.qrCodeImgUrl}/> 
+                    <DataField
+                        className={'walletPageDataField'}
+                        label={'Balance: '}
+                        text={`${walletState.walletData.balance /  e8sInOneICP} ICP`}
+                        isLoading={!walletState.dataHasBeenLoaded}
+                        disabled={true}
+                    />
+                    <DataField
+                        className={'walletPageDataField'}
+                        label={'Address: '}
+                        text={`${shortenHexString(walletState.walletData.address)}`}
+                        isLoading={!walletState.dataHasBeenLoaded}
+                        onClick={() => copyText( walletState.walletData.address )}
+                        buttonIcon={ContentCopyIcon}
+                    />
+                </Paper> 
+            </Grid>
+            {/* {walletState.walletData.txHistory.data.map((tx) => {
+                            return(
+                                    <Transaction
+                                        class_={`contentContainer `}
+                                        balanceDelta={tx[1].balanceDelta}
+                                        increase={tx[1].increase}
+                                        recipient={tx[1].recipient[0]}
+                                        timeStamp={tx[1].timeStamp[0]}
+                                        source={tx[1].source[0]}
                                     />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    { loadingTx ? 
-                        <div className={`loadGifContainer contentContainer `}>
-                            <div className='loadGifDiv'>
-                                <img src="Loading.gif" alt="Loading Screen" />
-                            </div>
-                        </div> :
-                        !walletState.walletData.txHistory.data.length ? 
-                            !showReloadButton && 
-                            <ButtonField
-                                text={'Load Transaction History'}
-                                className={'loadTxHistory active'}
-                                onClick={loadTxs}
-                                withBox={true}
-                            /> :
-                            walletState.walletData.txHistory.data.map((tx) => {
-                                return(
-                                        <Transaction
-                                            class_={`contentContainer `}
-                                            balanceDelta={tx[1].balanceDelta}
-                                            increase={tx[1].increase}
-                                            recipient={tx[1].recipient[0]}
-                                            timeStamp={tx[1].timeStamp[0]}
-                                            source={tx[1].source[0]}
-                                        />
-                                );
-                            })
-                    }              
-                </div>
-                {(showReloadButton || walletState.walletData.txHistory.data.length > 0) && 
-                    <ButtonField
-                        Icon={AiIcons.AiOutlineReload}
-                        className={'reloadTxData'}
-                        iconSize={25}
-                        onClick={loadTxs}
-                        withBox={true}
-                    />}
+                            );
+                        })} */}
+            {/* {(showReloadButton || walletState.walletData.txHistory.data.length > 0) && 
                 <ButtonField
-                    Icon={GrIcons.GrSend}
-                    className={'sendTxDiv'}
+                    Icon={AiIcons.AiOutlineReload}
+                    className={'reloadTxData'}
                     iconSize={25}
-                    onClick={openModal}
+                    onClick={loadTxs}
                     withBox={true}
-                />
-            </div>
+                />}
+            <ButtonField
+                Icon={GrIcons.GrSend}
+                className={'sendTxDiv'}
+                iconSize={25}
+                onClick={openModal}
+                withBox={true}
+            /> */}
+        </Grid>
             
-        </div>
         
     );
 } 

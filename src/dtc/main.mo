@@ -335,6 +335,11 @@ shared actor class User() = this {
         appMetaData := updatedMetaData;
     };
 
+    // public func getTipOfChainData() : async (Nat64, Nat64){
+    //     let tip =  await TxHelperMethods.tipOfChainDetails();
+    //     return (tip, startIndexForBlockChainQuery);
+    // };
+
     let {recurringTimer} = Timer;
 
     // let daily = recurringTimer(#seconds (24 * 60 * 60), heartBeat_unshared);

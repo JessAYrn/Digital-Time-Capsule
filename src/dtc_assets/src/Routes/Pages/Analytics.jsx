@@ -23,7 +23,7 @@ import '../../SCSS/contentContainer.scss'
 import '../../SCSS/section.scss'
 import {homePageTypes} from '../../reducers/homePageReducer';
 import { inTrillions, round2Decimals, shortenHexString } from '../../functionsAndConstants/Utils';
-import { copyWalletAddressHelper } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
+import { copyText } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
 import DataTable from '../../Components/Fields/Table';
 import { mapRequestsForAccessToTableRows, mapUsersProfileDataToTableRows, requestsForAccessTableColumns, usersTableColumns } from '../../mappers/dashboardMapperFunctions';
 import { Typography } from '@mui/material';
@@ -246,7 +246,7 @@ const Analytics = () => {
                             isPrincipal={true}
                             buttonIcon={ContentCopyIcon}
                             onClick={
-                                () => copyWalletAddressHelper(
+                                () => copyText(
                                     homePageState.canisterData[CANISTER_DATA_FIELDS.frontEndPrincipal]
                                 )
                             }
@@ -257,7 +257,7 @@ const Analytics = () => {
                             isPrincipal={true}
                             buttonIcon={ContentCopyIcon}
                             onClick={
-                                () => copyWalletAddressHelper(
+                                () => copyText(
                                     homePageState.canisterData[CANISTER_DATA_FIELDS.backEndPrincipal]
                                 )
                             }
@@ -286,7 +286,7 @@ const Analytics = () => {
                             isPrincipal={true}
                             buttonIcon={ContentCopyIcon}
                             onClick={
-                                () => copyWalletAddressHelper(
+                                () => copyText(
                                     homePageState.canisterData[CANISTER_DATA_FIELDS.nftOwner]
                                 )
                             }

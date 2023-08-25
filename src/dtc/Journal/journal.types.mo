@@ -78,9 +78,9 @@ module {
     public type Transaction = {
         balanceDelta: Nat64;
         increase: Bool;
-        recipient: ?Account.AccountIdentifier;
-        timeStamp: ?Nat64;
-        source: ?Account.AccountIdentifier;
+        recipient: Account.AccountIdentifier;
+        timeStamp: Nat64;
+        source: Account.AccountIdentifier;
     };
 
     public type TxHistoryMap = HashMap.HashMap<Nat, Transaction>;
