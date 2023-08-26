@@ -192,10 +192,10 @@ const LoginPage = (props) => {
             </Grid>
             <Grid xs={11} md={9} display="flex" justifyContent="center" alignItems="center">
                 <AccordionField>
-                    <div title={accordionContent[0].title} TitleComponent={Typography} TextComponent={Typography} image={accordionContent[0].image}></div>
-                    <div title={accordionContent[1].title} TitleComponent={Typography} TextComponent={Typography} image={accordionContent[1].image}></div>
-                    <div title={accordionContent[2].title} TitleComponent={Typography} TextComponent={Typography} image={accordionContent[2].image}></div>
-                    <div title={accordionContent[3].title} TitleComponent={Typography} TextComponent={Typography} image={accordionContent[3].image}></div>
+                    <div title={accordionContent[0].title} image={accordionContent[0].image}></div>
+                    <div title={accordionContent[1].title} image={accordionContent[1].image}></div>
+                    <div title={accordionContent[2].title} image={accordionContent[2].image}></div>
+                    <div title={accordionContent[3].title} image={accordionContent[3].image}></div>
                 </AccordionField>
             </Grid>
         </Grid>

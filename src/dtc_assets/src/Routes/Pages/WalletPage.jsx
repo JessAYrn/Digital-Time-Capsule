@@ -6,17 +6,22 @@ import { shortenHexString } from '../../functionsAndConstants/Utils';
 import { e8sInOneICP } from '../../functionsAndConstants/Constants';
 import {  RenderQrCode } from '../../functionsAndConstants/walletFunctions/GenerateQrCode';
 import { copyText } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
-import { Transaction } from '../../functionsAndConstants/walletFunctions/Transaction';
 import { loadTxHistory } from '../../functionsAndConstants/loadingFunctions';
 import { testTx } from '../../testData/Transactions';
 import { walletTypes } from '../../reducers/walletReducer';
 import { UI_CONTEXTS } from '../../functionsAndConstants/Contexts';
-import ButtonField from '../../Components/Fields/Button';
+import { nanoSecondsToMiliSeconds } from '../../functionsAndConstants/Utils';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import SendIcon from '@mui/icons-material/Send';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import '../../SCSS/contentContainer.scss'
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
-import { Paper, Typography } from '@mui/material';
+import Paper  from '@mui/material/Paper';
 import DataField from '../../Components/Fields/DataField';
+import AccordionField from '../../Components/Fields/Accordion';
+import SpeedDialField from '../../Components/Fields/SpeedDialField';
+import ModalComponent from '../../Components/modal/Modal';
+import SendCryptoModal from '../../Components/modal/SendCryptoModal';
 
 
 const WalletPage = (props) => {
@@ -27,17 +32,40 @@ const WalletPage = (props) => {
 
     const [loadingTx, setIsLoadingTx] = useState(false);
     const [showReloadButton, setShowReloadButton] = useState(false);
+    const [recipientAddress, setRecipientAddress] = useState("");
+    const [amountToSend, setAmountToSend] = useState(0);
+    const [modalIsOpen, setModalIsOpen] = useState(false)
+    const [modalProps, setModalProps] = useState({});
 
-    const openModal = () => {
-
+    const onSend = () => {
+        setModalProps({
+            components: [{
+                Component: SendCryptoModal,
+                props: {
+                    onChangeRecipientAddress: setRecipientAddress,
+                    onChangeAmount: setAmountToSend,
+                    onClickSend: () => {},
+                    onClickCancel: () => {},
+                    onClickScanQrCode: () => {}
+                }
+            }]
+        });
+        setModalIsOpen(true);
     };
 
-    const loadTxs = async () => {
-        setIsLoadingTx(true);
-        setShowReloadButton(true);
-        let result = await loadTxHistory(actorState, walletDispatch, walletTypes);
-        setIsLoadingTx(false);
-    };
+    console.log(amountToSend, recipientAddress);
+
+    // const loadTxs = async () => {
+    //     setIsLoadingTx(true);
+    //     setShowReloadButton(true);
+    //     let result = await loadTxHistory(actorState, walletDispatch, walletTypes);
+    //     setIsLoadingTx(false);
+    // };
+
+    const speedDialActions = [
+        {name: "Refresh", icon: RefreshIcon, onClick: () => {}},
+        {name: "New Transaction", icon: SendIcon , onClick: onSend}
+    ]
 
     console.log(walletState)
     return (
@@ -56,7 +84,7 @@ const WalletPage = (props) => {
             <Grid 
                 columns={12} 
                 xs={11} 
-                md={9} 
+                md={5} 
                 rowSpacing={0} 
                 display="flex" 
                 justifyContent="center" 
@@ -83,33 +111,34 @@ const WalletPage = (props) => {
                     />
                 </Paper> 
             </Grid>
-            {/* {walletState.walletData.txHistory.data.map((tx) => {
-                            return(
-                                    <Transaction
-                                        class_={`contentContainer `}
-                                        balanceDelta={tx[1].balanceDelta}
-                                        increase={tx[1].increase}
-                                        recipient={tx[1].recipient[0]}
-                                        timeStamp={tx[1].timeStamp[0]}
-                                        source={tx[1].source[0]}
-                                    />
-                            );
-                        })} */}
-            {/* {(showReloadButton || walletState.walletData.txHistory.data.length > 0) && 
-                <ButtonField
-                    Icon={AiIcons.AiOutlineReload}
-                    className={'reloadTxData'}
-                    iconSize={25}
-                    onClick={loadTxs}
-                    withBox={true}
-                />}
-            <ButtonField
-                Icon={GrIcons.GrSend}
-                className={'sendTxDiv'}
-                iconSize={25}
-                onClick={openModal}
-                withBox={true}
-            /> */}
+            <Grid 
+                columns={12} 
+                xs={11} 
+                md={5} 
+                rowSpacing={0} 
+                display="flex" 
+                justifyContent="center" 
+                alignItems="center" 
+            >
+                {walletState.walletData.txHistory.data.length && 
+                <AccordionField>
+                    {walletState.walletData.txHistory.data.map(([mapKey, tx]) => {
+                        const {balanceDelta, increase, recipient, timeStamp, source} = tx;
+                        const date = new Date(nanoSecondsToMiliSeconds(parseInt(timeStamp))).toString()
+                        const title = `${increase ? "+":"-"} ${balanceDelta / e8sInOneICP} ICP // ${date} `;
+                        const text_1 = `source: ${shortenHexString(source)} ICP`;
+                        const text_2 = `Recipient: ${shortenHexString(recipient)} ICP`;
+                        return (<div title={title} texts={[text_1, text_2]}></div>)
+                    })}
+                </AccordionField>}
+
+            </Grid>
+            <SpeedDialField actions={speedDialActions} position={"right"}/>
+            <ModalComponent
+                open={modalIsOpen}
+                handleClose={() => setModalIsOpen(false)}
+                {...modalProps}
+            />
         </Grid>
             
         

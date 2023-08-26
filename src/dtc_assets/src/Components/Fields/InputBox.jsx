@@ -37,12 +37,12 @@ const InputBox = (props) => {
 
 
     const onChange_ = () => {
-        dispatch({
+        if(dispatch) dispatch({
             actionType: dispatchAction,
             payload: inputRef.current.value,
             index: index
         });
-        if(onChange) onChange();
+        if(onChange) onChange(inputRef.current.value);
     }
     const theme = useTheme();
 

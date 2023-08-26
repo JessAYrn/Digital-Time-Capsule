@@ -5,6 +5,8 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import './Accordion.scss';
 import { useMemo } from 'react';
+import { Typography } from '@mui/material';
+import Grid from '@mui/material/Unstable_Grid2/Grid2';
 
 const AccordionField = (props_) => {
     const {children} = props_;
@@ -14,7 +16,7 @@ const AccordionField = (props_) => {
     <div className='accordianField_containter'>
         {elements.map((child) => {
             const props = child.props;
-            const {title, TitleComponent,  text, TextComponent, image, CustomComponent } = props;
+            const {title, texts, image, CustomComponent } = props;
             return (
                 <Accordion className='accordianField'>
                     <div className='title '>
@@ -23,11 +25,21 @@ const AccordionField = (props_) => {
                             aria-controls="panel1a-content"
                             id="panel1a-header"
                         >
-                            {title && <TitleComponent color={'white'}>{title}</TitleComponent>}
+                            {title && <Typography color={'white'}>{title}</Typography>}
                         </AccordionSummary>
                     </div>
                     <AccordionDetails>
-                        {text && <TextComponent>{text}</TextComponent>}
+                        {texts && 
+                            <Grid display={'flex'} justifyContent={'center'} alignItems={'center'} flexDirection={'column'}>
+                                {texts.map((text) => {
+                                    return (
+                                        <Grid display={"flex"} justifyContent={"left"} alignItems={"center"} paddingBottom={0}>
+                                            <Typography>{text}</Typography>
+                                        </Grid>
+                                    )
+                                })}
+                            </Grid>
+                        }
                         {image && <img src={image} className='accordianImage'/>}
                         {CustomComponent && <CustomComponent {...props}/>}
                     </AccordionDetails>

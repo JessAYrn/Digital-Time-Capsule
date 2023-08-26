@@ -1,13 +1,12 @@
 import React from 'react';
 import { QrReader } from 'react-qr-reader';
-import ButtonField from '../../Components/Fields/Button';
+import ButtonField from '../Fields/Button';
 
 export const QrReaderContent = (props) => {
 
     const {
         setRecipientAddress,
-        setShowQrReader,
-        showQrReader
+        setShowQrReader
     } = props;
 
     return(
@@ -18,7 +17,7 @@ export const QrReaderContent = (props) => {
                 onResult={(result, error) => {
                     if (!!result) {
                         setRecipientAddress(result?.text);
-                        setShowQrReader(!showQrReader)
+                        setShowQrReader(false)
                     }
 
                     if (!!error) {
@@ -31,8 +30,7 @@ export const QrReaderContent = (props) => {
             <ButtonField
                 text={'Cancel'}
                 className={'qrCancelButtonDiv'}
-                onClick={() => setShowQrReader(!showQrReader)}
-                withBox={true}
+                onClick={() => setShowQrReader(false)}
             />
         </>
     )

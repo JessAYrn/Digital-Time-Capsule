@@ -312,8 +312,6 @@ const Analytics = () => {
                         <AccordionField>
                         <div 
                             title={"Principals Requesting Access"} 
-                            TitleComponent={Typography} 
-                            TextComponent={Typography}
                             iconSize={"medium"}
                             onClick_button_1={onGrantAccess}
                             onClick_button_2={onDenyAccess}
@@ -331,8 +329,6 @@ const Analytics = () => {
                         ></div>
                         <div 
                             title={"DAO Participants"} 
-                            TitleComponent={Typography} 
-                            TextComponent={Typography}
                             iconSize={"medium"}
                             onClick_button_1={subsidize}
                             onClick_button_2={Unsubsidize}
