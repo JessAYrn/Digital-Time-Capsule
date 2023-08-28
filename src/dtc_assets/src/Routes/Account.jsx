@@ -5,7 +5,7 @@ import AccountSection from './Pages/AccountPage';
 import { useLocation } from 'react-router-dom';
 import LoginPage from './Pages/authentication/LoginPage';
 import { UI_CONTEXTS } from '../functionsAndConstants/Contexts';
-import { recoverState, loadAllDataIntoReduxStores  } from '../functionsAndConstants/loadingFunctions';
+import { recoverState, loadAllDataIntoReduxStores, allStatesLoaded  } from '../functionsAndConstants/loadingFunctions';
 import { useConnect } from '@connect2ic/react';
 import { DEFAULT_APP_CONTEXTS } from '../functionsAndConstants/Constants';
 import walletReducer,{ walletInitialState, walletTypes } from '../reducers/walletReducer';
@@ -80,8 +80,22 @@ const AccountPage = () => {
     },[actorState.backendActor]);
 
     const displayComponent = useMemo(() => {
-        return journalState.isAuthenticated && accountState.dataHasBeenLoaded
-    },[journalState.isAuthenticated, accountState.dataHasBeenLoaded])
+        return journalState.isAuthenticated && allStatesLoaded({
+            journalState,
+            notificationsState,
+            walletState,
+            accountState,
+            homePageState
+        });
+    },[
+        journalState.isAuthenticated, 
+        accountState.dataHasBeenLoaded,
+        journalState.dataHasBeenLoaded,
+        walletState.dataHasBeenLoaded,
+        homePageState.dataHasBeenLoaded,
+        notificationsState.dataHasBeenLoaded,
+        actorState.dataHasBeenLoaded
+    ])
 
     return (
         <AppContext.Provider 

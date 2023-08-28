@@ -127,7 +127,7 @@ export const loadWalletData = async (actorState, walletDispatch, types ) => {
         actionType: types.SET_DATA_HAS_BEEN_LOADED,
         payload: true,
     });
-    await loadTxHistory(actorState, walletDispatch, types);
+    loadTxHistory(actorState, walletDispatch, types);
 };
 
 export const loadTxHistory = async (actorState, walletDispatch, types) => {
@@ -278,4 +278,11 @@ export const fileLoaderHelper =  async (props) => {
         index: index
     });
     return dataURL;
+}
+
+export const allStatesLoaded = (reduxStates) => {
+    for (const state in reduxStates) {
+        if(!reduxStates[state].dataHasBeenLoaded) return false;
+    }
+    return true;
 }

@@ -3,7 +3,7 @@ import journalReducer, { types, initialState } from '../reducers/journalReducer'
 import { useLocation } from 'react-router-dom';
 import LoginPage from './Pages/authentication/LoginPage';
 import { UI_CONTEXTS } from '../functionsAndConstants/Contexts';
-import { loadAllDataIntoReduxStores, recoverState  } from '../functionsAndConstants/loadingFunctions';
+import { loadAllDataIntoReduxStores, recoverState, allStatesLoaded  } from '../functionsAndConstants/loadingFunctions';
 import { useConnect } from '@connect2ic/react';
 import TreasuryPage from './Pages/TreasuryPage'
 import { DEFAULT_APP_CONTEXTS } from '../functionsAndConstants/Constants';
@@ -76,9 +76,22 @@ const Treasury = () => {
     }, [actorState.backendActor]);
 
     const displayComponent = useMemo(() => {
-        //will have to replace homePageState.dataHasBeenLoaded with treasuryState.dataHasBeenLoaded
-        return journalState.isAuthenticated && homePageState.dataHasBeenLoaded
-    },[journalState.isAuthenticated, homePageState.dataHasBeenLoaded])
+        return journalState.isAuthenticated && allStatesLoaded({
+            journalState,
+            notificationsState,
+            walletState,
+            accountState,
+            homePageState
+        });
+    },[
+        journalState.isAuthenticated, 
+        accountState.dataHasBeenLoaded,
+        journalState.dataHasBeenLoaded,
+        walletState.dataHasBeenLoaded,
+        homePageState.dataHasBeenLoaded,
+        notificationsState.dataHasBeenLoaded,
+        actorState.dataHasBeenLoaded
+    ])
 
 
   return (

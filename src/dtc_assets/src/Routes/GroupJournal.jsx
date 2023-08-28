@@ -3,7 +3,7 @@ import journalReducer, { types, initialState } from '../reducers/journalReducer'
 import { useLocation } from 'react-router-dom';
 import LoginPage from './Pages/authentication/LoginPage';
 import { UI_CONTEXTS } from '../functionsAndConstants/Contexts';
-import { recoverState, loadAllDataIntoReduxStores  } from '../functionsAndConstants/loadingFunctions';
+import { recoverState, loadAllDataIntoReduxStores, allStatesLoaded } from '../functionsAndConstants/loadingFunctions';
 import { useConnect } from '@connect2ic/react';
 import GroupJournalPage from './Pages/GroupJournalPage';
 import { DEFAULT_APP_CONTEXTS } from '../functionsAndConstants/Constants';
@@ -79,9 +79,22 @@ const GroupJournal = () => {
     }, [actorState.backendActor]);
 
     const displayComponent = useMemo(() => {
-        //will have to replace homePageState.dataHasBeenLoaded with groupJournalState.dataHasBeenLoaded
-        return journalState.isAuthenticated && homePageState.dataHasBeenLoaded
-    },[journalState.isAuthenticated, homePageState.dataHasBeenLoaded])
+        return journalState.isAuthenticated && allStatesLoaded({
+            journalState,
+            notificationsState,
+            walletState,
+            accountState,
+            homePageState
+        });
+    },[
+        journalState.isAuthenticated, 
+        accountState.dataHasBeenLoaded,
+        journalState.dataHasBeenLoaded,
+        walletState.dataHasBeenLoaded,
+        homePageState.dataHasBeenLoaded,
+        notificationsState.dataHasBeenLoaded,
+        actorState.dataHasBeenLoaded
+    ])
 
   return (
     <AppContext.Provider

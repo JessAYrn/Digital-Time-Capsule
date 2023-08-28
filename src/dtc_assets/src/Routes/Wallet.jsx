@@ -6,7 +6,7 @@ import walletReducer ,{walletInitialState, walletTypes} from '../reducers/wallet
 import { UI_CONTEXTS } from '../functionsAndConstants/Contexts';
 import WalletPage from './Pages/WalletPage';
 import { testTx } from '../testData/Transactions';
-import { recoverState, loadAllDataIntoReduxStores } from '../functionsAndConstants/loadingFunctions';
+import { recoverState, loadAllDataIntoReduxStores, allStatesLoaded } from '../functionsAndConstants/loadingFunctions';
 import { useConnect } from '@connect2ic/react';
 import CkBtcPage from './Pages/CkBtcPage';
 import EthPage from './Pages/EthPage';
@@ -84,8 +84,22 @@ const WalletApp = () => {
     },[walletState.walletPageTab]);
 
     const displayComponent = useMemo(() => {
-        return journalState.isAuthenticated && walletState.dataHasBeenLoaded
-    },[journalState.isAuthenticated, walletState.dataHasBeenLoaded])
+        return journalState.isAuthenticated && allStatesLoaded({
+            journalState,
+            notificationsState,
+            walletState,
+            accountState,
+            homePageState
+        });
+    },[
+        journalState.isAuthenticated, 
+        accountState.dataHasBeenLoaded,
+        journalState.dataHasBeenLoaded,
+        walletState.dataHasBeenLoaded,
+        homePageState.dataHasBeenLoaded,
+        notificationsState.dataHasBeenLoaded,
+        actorState.dataHasBeenLoaded
+    ])
 
 
     //Loading Time Capsule Data

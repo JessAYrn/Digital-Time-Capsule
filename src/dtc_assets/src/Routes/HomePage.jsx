@@ -5,7 +5,7 @@ import LoginPage from './Pages/authentication/LoginPage';
 import { UI_CONTEXTS } from '../functionsAndConstants/Contexts';
 import Analytics from './Pages/Analytics';
 import "./HomePage.scss";
-import { loadAllDataIntoReduxStores, recoverState } from '../functionsAndConstants/loadingFunctions';
+import { loadAllDataIntoReduxStores, recoverState, allStatesLoaded } from '../functionsAndConstants/loadingFunctions';
 import { useConnect } from '@connect2ic/react';
 import { DEFAULT_APP_CONTEXTS } from '../functionsAndConstants/Constants';
 import walletReducer,{walletTypes, walletInitialState} from '../reducers/walletReducer'
@@ -81,8 +81,22 @@ const HomePage = () => {
     }, [actorState.backendActor]);
 
     const displayComponent = useMemo(() => {
-        return journalState.isAuthenticated && homePageState.dataHasBeenLoaded
-    },[journalState.isAuthenticated, homePageState.dataHasBeenLoaded])
+        return journalState.isAuthenticated && allStatesLoaded({
+            journalState,
+            notificationsState,
+            walletState,
+            accountState,
+            homePageState
+        });
+    },[
+        journalState.isAuthenticated, 
+        accountState.dataHasBeenLoaded,
+        journalState.dataHasBeenLoaded,
+        walletState.dataHasBeenLoaded,
+        homePageState.dataHasBeenLoaded,
+        notificationsState.dataHasBeenLoaded,
+        actorState.dataHasBeenLoaded
+    ])
 
     return (
         <AppContext.Provider 
