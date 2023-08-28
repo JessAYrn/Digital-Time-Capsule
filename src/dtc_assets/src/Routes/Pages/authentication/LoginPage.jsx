@@ -19,20 +19,31 @@ import "@connect2ic/core/style.css"
 import ButtonField from "../../../Components/Fields/Button";
 import DataField from "../../../Components/Fields/DataField";
 import { types } from "../../../reducers/journalReducer";
-import { backendActor, inTrillions, managerActor, round2Decimals } from "../../../functionsAndConstants/Utils";
+import { backendActor, isLocalHost, inTrillions, managerActor, round2Decimals } from "../../../functionsAndConstants/Utils";
 import '../../../SCSS/contentContainer.scss'
 import AccordionField from "../../../Components/Fields/Accordion";
 import { actorTypes } from "../../../reducers/actorReducer";
 import Grid from '@mui/material/Unstable_Grid2';
-import { Typography } from "@mui/material";
 
+const isLocal = isLocalHost();
 
-export const accordionContent=[
-
-    {title:"1.) Navigate to your Personal DAO's unique URL and press the share button circled below ", image:'assets/dtcscreengrab2.png'},
-    {title:"2.) Select the 'Add to Home Screen' button", image:'assets/dtcscreengrab3.png'},
-    {title:"3.) Enter a title and then press the 'add' button", image:'assets/dtcscreengrab4.png'},
-    {title:"4.) Your Personal DAO app will then be installed and visible on yoru Home Screen", image:'assets/dtcscreengrab1.png'},
+export const accordionContent=[    
+    {
+        title:"1.) Navigate to your Personal DAO's unique URL and press the share button circled below ", 
+        image: `${isLocal ? "assets/" : ""}dtcscreengrab2.png`
+    },
+    {  
+        title:"2.) Select the 'Add to Home Screen' button", 
+        image:`${isLocal ? "assets/" : ""}dtcscreengrab3.png`
+    },
+    {
+        title:"3.) Enter a title and then press the 'add' button", 
+        image: `${isLocal ? "assets/" : ""}dtcscreengrab4.png`
+    },
+    {
+        title:"4.) Your Personal DAO app will then be installed and visible on yoru Home Screen", 
+        image:`${isLocal ? "assets/" : ""}dtcscreengrab1.png`
+    },
 
 ];
 
@@ -122,7 +133,11 @@ const LoginPage = (props) => {
     return(
         <Grid container columns={12} xs={12} rowSpacing={8} display="flex" justifyContent="center" alignItems="center">
             <Grid xs={11} md={9} display="flex" justifyContent="center" alignItems="center">
-                <img className={`img`}src="../../../assets/P2.svg" alt="Logo"/>
+                <img 
+                    className={`img`}
+                    src={`${isLocal ? "../../../assets/" : ""}P2.svg`}
+                    alt="Logo"
+                />
             </Grid>
             <Grid container xs={11} md={9}>
                 <Grid xs display="flex" justifyContent="center" alignItems="center">

@@ -4,6 +4,8 @@ import Modal from '@mui/material/Modal';
 import "./Modal.scss";
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
 import { ConnectButton, ConnectDialog, useConnect} from "@connect2ic/react";
+import ButtonField from '../Fields/Button';
+import PendingIcon from '@mui/icons-material/Pending';
 
 const style = {
   position: 'absolute',
@@ -38,7 +40,6 @@ const ModalComponent = (props_) => {
       }
   });
   
-    const src = isLoading ? "../../../assets/Loading.gif" : imageSrc;
   return (
       <Modal
         open={isOpen}
@@ -50,7 +51,16 @@ const ModalComponent = (props_) => {
           {bigText && !isLoading && <h2 id="parent-modal-title">{bigText}</h2>}
           {Icon && !isLoading &&  <Icon style={{height: "75px", width:"75px" }}/>}
           {smallText && !isLoading && <p id="parent-modal-description">{smallText}</p>}
-          {imageSrc || isLoading && <img className='modalImg' src={src} alt='Wrong src'/>}
+          {imageSrc || !isLoading && <img className='modalImg' src={imageSrc} alt='Wrong src'/>}
+          {isLoading && 
+          <ButtonField 
+            transparentBackground={true}
+            isLoading={true}
+            onClick={() => {}}
+            Icon={PendingIcon}
+            iconSize={'large'}
+            disabled={true}
+          />}
           {
             components && !isLoading &&
             <Grid display={"flex"} justifyContent={"center"} alignItems={"center"}>

@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useMemo} from "react";
+import React, {useState, useEffect} from "react";
 import FileUpload from "./FileUpload";
 import { UI_CONTEXTS } from "../../../functionsAndConstants/Contexts";
 import EditIcon from '@mui/icons-material/Edit';
@@ -6,7 +6,6 @@ import UploadIcon from '@mui/icons-material/Upload';
 import "./fileCarousel.scss";
 import { fileLoaderHelper } from "../../../functionsAndConstants/loadingFunctions";
 import ButtonField from "../Button";
-import { NULL_STRING_ALL_LOWERCASE } from "../../../functionsAndConstants/Constants";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import { defaultFileMetaData } from "../../../reducers/journalReducer";
 

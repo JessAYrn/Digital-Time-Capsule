@@ -1,4 +1,4 @@
-import React, {useReducer, createContext, useEffect, useState} from 'react';
+import React, {useReducer, createContext, useEffect, useState, useMemo} from 'react';
 import journalReducer, { types, initialState } from '../reducers/journalReducer';
 import { useLocation } from 'react-router-dom';
 import LoginPage from './Pages/authentication/LoginPage';
@@ -77,6 +77,12 @@ const GroupJournal = () => {
         setModalProps(response)
         setIsLoadingModal(false);    
     }, [actorState.backendActor]);
+
+    const displayComponent = useMemo(() => {
+        //will have to replace homePageState.dataHasBeenLoaded with groupJournalState.dataHasBeenLoaded
+        return journalState.isAuthenticated && homePageState.dataHasBeenLoaded
+    },[journalState.isAuthenticated, homePageState.dataHasBeenLoaded])
+
   return (
     <AppContext.Provider
     value={{
@@ -95,7 +101,7 @@ const GroupJournal = () => {
     }}
     >
         {           
-                journalState.isAuthenticated ? 
+                displayComponent ? 
                 <GroupJournalPage/> : 
                 <LoginPage
                         context={UI_CONTEXTS.GROUPJOURNAL}

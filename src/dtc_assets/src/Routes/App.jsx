@@ -17,7 +17,7 @@ import actorReducer, { actorInitialState, actorTypes } from '../reducers/actorRe
 import notificationsReducer, {notificationsInitialState, notificationsTypes} from "../reducers/notificationsReducer";
 import ModalComponent from '../Components/modal/Modal';
 
-export const AppContext = createContext({...DEFAULT_APP_CONTEXTS, submissionsMade: 0, setSubmissionsMade: () => {} });
+export const AppContext = createContext({...DEFAULT_APP_CONTEXTS});
 
 const App = () => {
     const [journalState, journalDispatch] = useReducer(journalReducer, initialState);
@@ -28,7 +28,6 @@ const App = () => {
     const [actorState, actorDispatch] = useReducer(actorReducer, actorInitialState);
     const [stateHasBeenRecovered, setStateHasBeenRecovered] = useState(false);
 
-    const [submissionsMade, setSubmissionsMade] = useState(0);
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [isLoadingModal, setIsLoadingModal] = useState(false);
     const [modalProps, setModalProps] = useState({});
@@ -82,6 +81,10 @@ const App = () => {
         setIsLoadingModal(false);
     },[actorState.backendActor]);
 
+    const displayComponent = useMemo(() => {
+        return journalState.isAuthenticated && journalState.dataHasBeenLoaded
+    },[journalState.isAuthenticated, journalState.dataHasBeenLoaded])
+
     let TabComponent = useMemo(()=>{
         if(journalState.journalPageTab===JOURNAL_TABS.diaryTab) return Journal;
         else return Notes;
@@ -100,15 +103,13 @@ const App = () => {
                 homePageState,
                 actorReducer,
                 actorState,
-                submissionsMade,
-                setSubmissionsMade,
                 actorDispatch,
                 notificationsState,
                 notificationsDispatch
             }}
         >
             {
-                journalState.isAuthenticated ? 
+                displayComponent ? 
                     <TabComponent/> : 
                     <LoginPage
                         context={UI_CONTEXTS.JOURNAL}

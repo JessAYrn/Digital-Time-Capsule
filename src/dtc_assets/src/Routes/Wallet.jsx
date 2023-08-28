@@ -83,6 +83,10 @@ const WalletApp = () => {
         else if(walletState.walletPageTab===WALLET_TABS.ckBtcTab) return CkBtcPage;
     },[walletState.walletPageTab]);
 
+    const displayComponent = useMemo(() => {
+        return journalState.isAuthenticated && walletState.dataHasBeenLoaded
+    },[journalState.isAuthenticated, walletState.dataHasBeenLoaded])
+
 
     //Loading Time Capsule Data
     useEffect(async () => {
@@ -113,7 +117,7 @@ const WalletApp = () => {
                 }}
             >
                 {
-                    journalState.isAuthenticated ?
+                    displayComponent ?
                         <WalletTabComponent/> : 
                         <LoginPage
                             context={UI_CONTEXTS.WALLET}

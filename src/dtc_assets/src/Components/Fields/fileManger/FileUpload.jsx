@@ -126,39 +126,34 @@ const FileUpload = (props) => {
             <Card 
                 className={`cardComponent ${elementId}`}
             >
-                {fileData.file || fileData.isLoading ?
+                {
+                    displayDeleteButton && !fileData.isLoading &&
+                    <Grid className={'deleteFileButtonDiv'}>
+                        <ButtonField 
+                            className={'DeleteFileButton'}
+                            id={elementId} 
+                            Icon={DeleteIcon}
+                            active={true}
+                            onClick={deleteFile}
+                        /> 
+                    </Grid>
+                }
+                {fileData.file ?
                     <>
-                        {
-                            displayDeleteButton && !fileData.isLoading &&
-                                <Grid className={'deleteFileButtonDiv'}>
-                                    <ButtonField 
-                                        className={'DeleteFileButton'}
-                                        id={elementId} 
-                                        Icon={DeleteIcon}
-                                        active={true}
-                                        onClick={deleteFile}
-                                    /> 
-                                </Grid>
-                        }
                         <CardMedia
-                            component={
-                                fileData.isLoading ? 
-                                "img" : 
-                                fileData.fileType.includes("image") ? 
-                                "img" : 
-                                "video"
-                            }
+                            component={ fileData.fileType.includes("image") ? "img" : "video" }
                             className='cardMediaComponent'
                             autoPlay
                             muted
                             height={500}
                             controls
-                            src={fileData.isLoading ? "../../../../assets/Loading.gif" : fileData.file}
+                            src={ fileData.file}
                         /> 
                     </>:
                     <ButtonField 
                         className={'FileUploaderButton'}
                         disabled={disabled}
+                        isLoading={fileData.isLoading}
                         id={elementId} 
                         text={"Upload Photo / Video"}
                         upload={true}

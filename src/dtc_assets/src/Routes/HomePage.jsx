@@ -1,4 +1,4 @@
-import React, { createContext, useReducer, useEffect, useState} from 'react';
+import React, { createContext, useReducer, useEffect, useState, useMemo} from 'react';
 import { useLocation } from 'react-router-dom';
 import journalReducer, {initialState, types} from "../reducers/journalReducer";
 import LoginPage from './Pages/authentication/LoginPage';
@@ -80,6 +80,10 @@ const HomePage = () => {
         setIsLoadingModal(false);    
     }, [actorState.backendActor]);
 
+    const displayComponent = useMemo(() => {
+        return journalState.isAuthenticated && homePageState.dataHasBeenLoaded
+    },[journalState.isAuthenticated, homePageState.dataHasBeenLoaded])
+
     return (
         <AppContext.Provider 
             value={{
@@ -99,7 +103,7 @@ const HomePage = () => {
         >
 
             {           
-                journalState.isAuthenticated ? 
+                displayComponent ? 
                     <Analytics/> : 
                     <LoginPage
                         context={UI_CONTEXTS.HOME_PAGE}

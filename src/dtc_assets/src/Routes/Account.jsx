@@ -1,4 +1,4 @@
-import React, {useReducer, createContext, useEffect, useState} from 'react';
+import React, {useReducer, createContext, useEffect, useState, useMemo} from 'react';
 import journalReducer, { types, initialState } from '../reducers/journalReducer';
 import accountReducer , {accountTypes, accountInitialState} from '../reducers/accountReducer';
 import AccountSection from './Pages/AccountPage';
@@ -79,6 +79,10 @@ const AccountPage = () => {
         setIsLoadingModal(false);
     },[actorState.backendActor]);
 
+    const displayComponent = useMemo(() => {
+        return journalState.isAuthenticated && accountState.dataHasBeenLoaded
+    },[journalState.isAuthenticated, accountState.dataHasBeenLoaded])
+
     return (
         <AppContext.Provider 
             value={{
@@ -97,7 +101,7 @@ const AccountPage = () => {
             }}
         >
             {
-                journalState.isAuthenticated ? 
+                displayComponent ? 
                     <AccountSection/> : 
                     <LoginPage
                         context={UI_CONTEXTS.ACCOUNT_PAGE}

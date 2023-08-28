@@ -226,6 +226,12 @@ export const getCurrentURL = () => {
   return window.location.href
 };
 
+export const isLocalHost = () => {
+  const url = getCurrentURL();
+  if(url.includes("localhost")) return true;
+  else false;
+}
+
 export const extractCanisterIdFromURL = (URL) => {
   if(process.env.NODE_ENV === "development") return MASTER_COPY_FRONTEND_CANISTER_ID;
   let canisterId = "";

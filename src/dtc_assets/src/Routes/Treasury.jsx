@@ -1,4 +1,4 @@
-import React, {useReducer, createContext, useEffect, useState} from 'react';
+import React, {useReducer, createContext, useEffect, useState, useMemo} from 'react';
 import journalReducer, { types, initialState } from '../reducers/journalReducer';
 import { useLocation } from 'react-router-dom';
 import LoginPage from './Pages/authentication/LoginPage';
@@ -74,6 +74,13 @@ const Treasury = () => {
         setModalProps(response)
         setIsLoadingModal(false);
     }, [actorState.backendActor]);
+
+    const displayComponent = useMemo(() => {
+        //will have to replace homePageState.dataHasBeenLoaded with treasuryState.dataHasBeenLoaded
+        return journalState.isAuthenticated && homePageState.dataHasBeenLoaded
+    },[journalState.isAuthenticated, homePageState.dataHasBeenLoaded])
+
+
   return (
     <AppContext.Provider
     value={{
@@ -92,12 +99,9 @@ const Treasury = () => {
     }}
     >
         {           
-                journalState.isAuthenticated ? 
-                <TreasuryPage/>    
-                : 
-                <LoginPage
-                        context={UI_CONTEXTS.TREASURY}
-                /> 
+                displayComponent ? 
+                <TreasuryPage/> : 
+                <LoginPage context={UI_CONTEXTS.TREASURY}/> 
         }
         <ModalComponent 
             {...modalProps}
