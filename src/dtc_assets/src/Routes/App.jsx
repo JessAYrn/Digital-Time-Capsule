@@ -7,25 +7,30 @@ import { UI_CONTEXTS } from '../functionsAndConstants/Contexts';
 import walletReducer, { walletTypes,walletInitialState } from '../reducers/walletReducer';
 import journalReducer, {initialState, types} from '../reducers/journalReducer';
 import { TEST_DATA_FOR_NOTIFICATIONS } from '../testData/notificationsTestData';
-import { loadAllDataIntoReduxStores, recoverState} from '../functionsAndConstants/loadingFunctions';
+import { loadAllDataIntoReduxStores, recoverState, allStatesLoaded} from '../functionsAndConstants/loadingFunctions';
 import { useConnect } from "@connect2ic/react";
 import Notes from './Pages/Notes';
 import { DEFAULT_APP_CONTEXTS, JOURNAL_TABS } from '../functionsAndConstants/Constants';
 import homePageReducer,{ homePageInitialState, homePageTypes } from '../reducers/homePageReducer';
 import accountReducer,{ accountInitialState, accountTypes } from '../reducers/accountReducer';
 import actorReducer, { actorInitialState, actorTypes } from '../reducers/actorReducer';
+import notificationsReducer, {notificationsInitialState, notificationsTypes} from "../reducers/notificationsReducer";
+import ModalComponent from '../Components/modal/Modal';
 
-export const AppContext = createContext({...DEFAULT_APP_CONTEXTS, submissionsMade: 0, setSubmissionsMade: () => {} });
+export const AppContext = createContext({...DEFAULT_APP_CONTEXTS});
 
 const App = () => {
     const [journalState, journalDispatch] = useReducer(journalReducer, initialState);
+    const [notificationsState, notificationsDispatch] = useReducer(notificationsReducer, notificationsInitialState);
     const [walletState, walletDispatch] = useReducer(walletReducer, walletInitialState);
     const [homePageState, homePageDispatch] =  useReducer(homePageReducer, homePageInitialState)
     const [accountState, accountDispatch] =  useReducer(accountReducer, accountInitialState)
     const [actorState, actorDispatch] = useReducer(actorReducer, actorInitialState);
     const [stateHasBeenRecovered, setStateHasBeenRecovered] = useState(false);
 
-    const [submissionsMade, setSubmissionsMade] = useState(0);
+    const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [isLoadingModal, setIsLoadingModal] = useState(false);
+    const [modalProps, setModalProps] = useState({});
 
     const connectionResult = useConnect({ onConnect: () => {}, onDisconnect: () => {} });
 
@@ -37,7 +42,8 @@ const App = () => {
         walletDispatch,
         homePageDispatch,
         accountDispatch,
-        actorDispatch
+        actorDispatch,
+        notificationsDispatch
     }
 
     const ReducerTypes={
@@ -45,7 +51,8 @@ const App = () => {
         walletTypes,
         homePageTypes,
         accountTypes,
-        actorTypes
+        actorTypes,
+        notificationsTypes
     }
 
     const ReducerStates = {
@@ -53,7 +60,8 @@ const App = () => {
         walletState,
         accountState,
         homePageState,
-        actorState
+        actorState,
+        notificationsState
     };
 
     // dispatch state from previous route to redux store if that state exists
@@ -65,8 +73,31 @@ const App = () => {
 
     useEffect(async () => {
         if(!actorState.backendActor) return;
-        await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes, stateHasBeenRecovered);
+        setIsLoadingModal(true);
+        setModalIsOpen(true);
+        const response = await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes, stateHasBeenRecovered);
+        setModalIsOpen(response?.openModal);
+        setModalProps(response)
+        setIsLoadingModal(false);
     },[actorState.backendActor]);
+
+    const displayComponent = useMemo(() => {
+        return journalState.isAuthenticated && allStatesLoaded({
+            journalState,
+            notificationsState,
+            walletState,
+            accountState,
+            homePageState
+        });
+    },[
+        journalState.isAuthenticated, 
+        accountState.dataHasBeenLoaded,
+        journalState.dataHasBeenLoaded,
+        walletState.dataHasBeenLoaded,
+        homePageState.dataHasBeenLoaded,
+        notificationsState.dataHasBeenLoaded,
+        actorState.dataHasBeenLoaded
+    ])
 
     let TabComponent = useMemo(()=>{
         if(journalState.journalPageTab===JOURNAL_TABS.diaryTab) return Journal;
@@ -86,18 +117,23 @@ const App = () => {
                 homePageState,
                 actorReducer,
                 actorState,
-                submissionsMade,
-                setSubmissionsMade,
-                actorDispatch
+                actorDispatch,
+                notificationsState,
+                notificationsDispatch
             }}
         >
             {
-                journalState.isAuthenticated ? 
+                displayComponent ? 
                     <TabComponent/> : 
                     <LoginPage
                         context={UI_CONTEXTS.JOURNAL}
                     /> 
             }
+            <ModalComponent 
+                {...modalProps}
+                open={modalIsOpen} 
+                isLoading={isLoadingModal} 
+            />
         </AppContext.Provider>
     )
 }

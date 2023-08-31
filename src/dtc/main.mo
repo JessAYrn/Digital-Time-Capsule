@@ -47,7 +47,7 @@ shared actor class User() = this {
     
     public shared({ caller }) func create () : async Result.Result<MainTypes.AmountAccepted, JournalTypes.Error> {
         let amountAccepted = await MainMethods.create(caller, userProfilesMap, appMetaData);
-        let updatedAppMetaData = await CanisterManagementMethods.removeFromRequestsList(caller, appMetaData);
+        let updatedAppMetaData = await CanisterManagementMethods.removeFromRequestsList([Principal.toText(caller)], appMetaData);
         switch(amountAccepted){
             case(#ok(amount)){ appMetaData := updatedAppMetaData; return #ok(amount); };
             case(#err(e)){ return #err(e); };
@@ -81,11 +81,6 @@ shared actor class User() = this {
         return result;
     };
 
-    public shared({ caller }) func readEntry(entryKey: JournalTypes.EntryKey) : async Result.Result<JournalTypes.JournalEntry, JournalTypes.Error> {
-        let result = await JournalHelperMethods.readEntry(caller, userProfilesMap, entryKey);
-        return result;
-    };
-
     public shared({ caller }) func readEntryFileChunk(fileId: Text, chunkId: Nat) : async Result.Result<(Blob),JournalTypes.Error>{
         let result = await JournalHelperMethods.readEntryFileChunk(caller, userProfilesMap, fileId, chunkId);
         return result;
@@ -107,29 +102,35 @@ shared actor class User() = this {
         return result;
     };
 
-    public shared({caller}) func updateJournalEntry(entryKey : ?JournalTypes.EntryKey, entry : ?JournalTypes.JournalEntryInput) : 
-    async Result.Result<([(Nat,JournalTypes.JournalEntry)], JournalTypes.Bio), JournalTypes.Error> {
-        let result = await JournalHelperMethods.updateJournalEntry(caller, userProfilesMap, entryKey, entry);
+    public shared({caller}) func createJournalEntry() : 
+    async Result.Result<([JournalTypes.JournalEntryExportKeyValuePair]), JournalTypes.Error> {
+        let result = await JournalHelperMethods.createJournalEntry(caller, userProfilesMap);
         return result;
     };
 
-    public shared({caller}) func deleteUnsubmittedFile(fileId: Text) : async Result.Result<(), JournalTypes.Error> {
-        let result = await JournalHelperMethods.deleteUnsubmittedFile(caller, userProfilesMap, fileId);
+    public shared({ caller }) func markJournalEntryAsRead(entryKey: JournalTypes.EntryKey) : async Result.Result<(), JournalTypes.Error> {
+        let result = await JournalHelperMethods.markJournalEntryAsRead(caller, userProfilesMap, entryKey);
         return result;
     };
 
-    public shared({caller}) func deleteSubmittedFile(fileId: Text) : async Result.Result<(), JournalTypes.Error> {
-        let result = await JournalHelperMethods.deleteSubmittedFile(caller, userProfilesMap, fileId);
+    public shared({caller}) func updateJournalEntry(entryKey : JournalTypes.EntryKey, entry : JournalTypes.JournalEntry) : 
+    async Result.Result<([JournalTypes.JournalEntryExportKeyValuePair]), JournalTypes.Error> {
+        let result = await JournalHelperMethods.updateJournalEntry(caller, userProfilesMap, entry, entryKey);
         return result;
     };
 
-    public shared({caller}) func submitFiles() : async Result.Result<(), JournalTypes.Error> {
-        let result = await JournalHelperMethods.submitFiles(caller, userProfilesMap);
+    public shared({ caller }) func submitJournalEntry(entryKey: JournalTypes.EntryKey) : async Result.Result<[JournalTypes.JournalEntryExportKeyValuePair], JournalTypes.Error> {
+        let result = await JournalHelperMethods.submitJournalEntry(caller, userProfilesMap, entryKey);
         return result;
     };
 
-    public shared({caller}) func clearUnsubmittedFiles(): async Result.Result<(), JournalTypes.Error>{
-        let result = await JournalHelperMethods.clearUnsubmittedFiles(caller, userProfilesMap);
+    public shared({ caller }) func deleteJournalEntry(entryKey: JournalTypes.EntryKey) : async Result.Result<(), JournalTypes.Error> {
+        let result = await JournalHelperMethods.deleteJournalEntry(caller, userProfilesMap, entryKey);
+        return result;
+    };
+
+    public shared({caller}) func deleteFile(fileId: Text) : async Result.Result<(), JournalTypes.Error> {
+        let result = await JournalHelperMethods.deleteFile(caller, userProfilesMap, fileId);
         return result;
     };
 
@@ -175,38 +176,31 @@ shared actor class User() = this {
         return result;
     };
 
-    public shared({caller}) func grantAccess(principal : Text) : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error> {
+    public shared({caller}) func grantAccess(principals : [Text]) : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error> {
         let callerIdAsText = Principal.toText(caller);
         if(callerIdAsText != appMetaData.nftOwner){ return #err(#NotAuthorized); };
-        let principalAsBlob = Principal.fromText(principal);
-        let updatedAppMetaData = await CanisterManagementMethods.grantAccess(principalAsBlob, appMetaData);
+        let updatedAppMetaData = await CanisterManagementMethods.grantAccess(principals, appMetaData);
         switch(updatedAppMetaData){
             case(#ok(metaData)){ appMetaData := metaData; return #ok(metaData.requestsForAccess); };
             case(#err(e)){ return #err(e); };
         };
     };
 
-    public shared({caller}) func updateApprovalStatus(principal: Text, newApprovalStatus: Bool) : 
+    public shared({caller}) func updateApprovalStatus(principals: [Text], newApprovalStatus: Bool) : 
     async Result.Result<(MainTypes.ProfilesMetaData), JournalTypes.Error>{
         let callerIdAsText = Principal.toText(caller);
         if(callerIdAsText != appMetaData.nftOwner){ return #err(#NotAuthorized); };
-        let result = await CanisterManagementMethods.updateApprovalStatus(Principal.fromText(principal), userProfilesMap, newApprovalStatus);
-        switch(result){
-            case(#ok(_)){
-                let profilesApprovalStatuses = CanisterManagementMethods.getProfilesMetaData(userProfilesMap);
-                return #ok(profilesApprovalStatuses);
-            };
-            case(#err(e)){ return #err(e); }
-        };
+        CanisterManagementMethods.updateApprovalStatus(principals, userProfilesMap, newApprovalStatus);
+        let profilesApprovalStatuses = CanisterManagementMethods.getProfilesMetaData(userProfilesMap);
+        return #ok(profilesApprovalStatuses);
     };
 
-    public shared({caller}) func removeFromRequestsList(principal: Text) : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error> {
+    public shared({caller}) func removeFromRequestsList(principals: [Text]) : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error> {
         let callerIdAsText = Principal.toText(caller);
         if(callerIdAsText != appMetaData.nftOwner){ return #err(#NotAuthorized); };
-        let principalAsBlob = Principal.fromText(principal);
-        let updatedAppMetaDataList = await CanisterManagementMethods.removeFromRequestsList(principalAsBlob, appMetaData);
+        let updatedAppMetaDataList = await CanisterManagementMethods.removeFromRequestsList(principals, appMetaData);
         appMetaData := updatedAppMetaDataList;
-        return #ok(appMetaData.requestsForAccess);
+        return #ok(updatedAppMetaDataList.requestsForAccess);
     };
 
     public shared({caller}) func configureApp(frontEndPrincipal : Text, nftId: Int ) : async Result.Result<(), JournalTypes.Error> {
@@ -340,6 +334,11 @@ shared actor class User() = this {
         let updatedMetaData = await CanisterManagementMethods.heartBeat(cyclesBalance_backend, appMetaData, userProfilesMap);
         appMetaData := updatedMetaData;
     };
+
+    // public func getTipOfChainData() : async (Nat64, Nat64){
+    //     let tip =  await TxHelperMethods.tipOfChainDetails();
+    //     return (tip, startIndexForBlockChainQuery);
+    // };
 
     let {recurringTimer} = Timer;
 

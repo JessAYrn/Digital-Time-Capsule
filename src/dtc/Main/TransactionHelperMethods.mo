@@ -59,6 +59,7 @@ module{
         let getBlocksArgs = { start = startIndexForBlockChainQuery; length = LedgerCandid.maxBlockQueryLength; };
         let {blocks} = await ledger.query_blocks(getBlocksArgs);
         let numberOfBlocks = Iter.size(Iter.fromArray(blocks));
+        if(numberOfBlocks == 0){ return newStartIndexForNextQuery; };
         var index = 0;
         while(index < numberOfBlocks){
             let {transaction} = blocks[index];
@@ -84,16 +85,16 @@ module{
                                         let tx_from : JournalTypes.Transaction = {
                                             balanceDelta = amount.e8s + fee.e8s;
                                             increase = false;
-                                            recipient = ?to;
-                                            timeStamp = ?timeOfCreation;
-                                            source = ?from;
+                                            recipient = to;
+                                            timeStamp = timeOfCreation;
+                                            source = from;
                                         };
                                         let tx_to : JournalTypes.Transaction = {
                                             balanceDelta = amount.e8s;
                                             increase = true;
-                                            recipient = ?to;
-                                            timeStamp = ?timeOfCreation;
-                                            source = ?from;
+                                            recipient = to;
+                                            timeStamp = timeOfCreation;
+                                            source = from;
                                         };
                                         if( Blob.equal(existingUAID, from) and Blob.equal(existingUAID, to)){
                                             ignore userJournal.updateTxHistory(timeOfCreation,tx_from);

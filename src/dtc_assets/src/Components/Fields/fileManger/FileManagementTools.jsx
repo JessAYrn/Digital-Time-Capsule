@@ -1,6 +1,8 @@
 import { fileToBlob, flattenUint8array } from "../../../functionsAndConstants/Utils";
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+
 import { 
-    CHUNK_SIZE, MAX_DURATION_OF_VIDEO_IN_SECONDS, forbiddenFileTypes, MODALS_TYPES 
+    CHUNK_SIZE, MAX_DURATION_OF_VIDEO_IN_SECONDS, forbiddenFileTypes 
 } from "../../../functionsAndConstants/Constants";
 import { types } from "../../../reducers/journalReducer";
 // import actorReducer, { actorInitialState, actorTypes } from "../../../reducers/actorReducer";
@@ -14,18 +16,6 @@ export const retrieveChunk = async (actorState, fileName, chunkIndex) => {
     return chunk
 }; 
 
-export const getFileURL = async (file) => {
-    return new Promise((res, rej) => {
-        var reader = new FileReader();  
-        reader.onload = function(e) { 
-            var myDataUrl = e.target.result;
-            res(myDataUrl);
-            // do something with the URL in the DOM,
-            // then save it to local storage
-        };  
-        reader.readAsDataURL(file);
-    });
-};
 
 export const uploadChunk = async (actorState, fileId, chunkId, fileChunk) => {    
     const fileChunkAsBlob = await fileToBlob(fileChunk);
@@ -51,12 +41,16 @@ export const getDuration = async (file) => {
     });
 }
 
+export const createFileId = (uploadedFile) => {
+    let fileId = `${uploadedFile.name}-${Date.now()}`
+    return fileId
+}
+
 export const updateFileMetadataInStore = (props) => {
     const { 
         dispatch, dispatchActionToChangeFileMetaData, index, fileIndex, 
-        setChangesWereMade, uploadedFile, fileURL,
+        setChangesWereMade, uploadedFile, fileURL, fileId
     } = props
-    let fileId = `${uploadedFile.name}-${Date.now()}`;
     dispatch({
         payload: {
             fileName: fileId,
@@ -68,44 +62,37 @@ export const updateFileMetadataInStore = (props) => {
         index: index,
         fileIndex: fileIndex
     })
-    if(!!setChangesWereMade){
-        setChangesWereMade(true);
-    } 
-    return fileId;
+    if(!!setChangesWereMade) setChangesWereMade(true);
 };
 
-export const displayFile = async (props) => {
-    const {
-        uploadedFile, setFileSrc, 
-        setFileType, dispatch, defaultFileSrc
-    } = props;
-    //check file extension for audio/video type
-    //this if statement will ultimately end up triggering the 
-    //canPlayThrough() function.
+export const getIsWithinProperFormat = async (uploadedFile) => {
     if(uploadedFile.name.match(/\.(avi|mp3|mp4|mpeg|ogg|webm|mov|MOV)$/i)){
         const result = await getDuration(uploadedFile);
         let duration = result.duration;
         URL.revokeObjectURL(result.url);
-        if(duration > MAX_DURATION_OF_VIDEO_IN_SECONDS || forbiddenFileTypes.includes(uploadedFile.type)){
-            setFileSrc(defaultFileSrc);
-            setFileType("image/png");
-            dispatch({
-                    actionType: types.SET_MODAL_STATUS,
-                    payload: {
-                        show: true, 
-                        which: MODALS_TYPES.fileHasError,
-                        duration: duration
-                    }
-            });
-            return null;
+        if(duration > MAX_DURATION_OF_VIDEO_IN_SECONDS) {
+            return {
+                isProperFormat: false, 
+                modalInput:{ 
+                    bigText: "Video Too Long.",
+                    smallText: `Only videos up to ${MAX_DURATION_OF_VIDEO_IN_SECONDS} seconds may be uploaded`,
+                    Icon: ErrorOutlineIcon
+                }
+            };
         };
     };
-    //triggers useEffect which displays the video
-    setFileType(uploadedFile.type);
-    const fileURL = await getFileURL(uploadedFile);
-    return fileURL;
-};
-
+    if(forbiddenFileTypes.includes(uploadedFile.type)){
+        return {
+            isProperFormat: false, 
+            modalInput:{ 
+                bigText: "Unsupported File Type.",
+                smallText: "The File Type you selected cannot be uploaded here.",
+                Icon: ErrorOutlineIcon
+            } 
+        }
+    }
+    return {isProperFormat: true};
+}
 export const mapAndSendFileToApi = async (props) => {
     const {actorState, fileId, uploadedFile} = props;
     const fileSize = uploadedFile.size;
@@ -127,6 +114,7 @@ export const mapAndSendFileToApi = async (props) => {
         chunk += 1;
     };
     const results = await Promise.all(promises); 
+    return results
 };
 
 export const getFileUrl_fromApi = async (
@@ -135,8 +123,6 @@ export const getFileUrl_fromApi = async (
     ) => {
 
     let fileName = fileData.fileName;
-    if(fileName === 'null') return;
-
     let index_ = 0;
     let promises = [];
     let fileChunkCounteObj;
@@ -160,7 +146,7 @@ export const getFileUrl_fromApi = async (
                 type: metaData_.fileType 
             }
         );
-        const fileAsFile = new File(
+        let fileAsFile = new File(
             [fileBlob],
             fileName, 
             {
@@ -168,7 +154,7 @@ export const getFileUrl_fromApi = async (
                 lastModified: parseInt(metaData_.lastModified)
             } 
         );
-        fileURL = await getFileURL(fileAsFile);
+        fileURL = URL.createObjectURL(fileAsFile);
     };
     return fileURL;
 };

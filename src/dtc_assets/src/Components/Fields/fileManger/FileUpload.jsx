@@ -1,42 +1,44 @@
-import React, {useRef, useState, useEffect, useContext, useMemo} from 'react';
+import React, { useContext, useEffect, useState} from 'react';
 import "./FileUpload.scss";
-import { useEffect } from '../../../../../../dist/dtc_assets';
-import { deviceType } from '../../../functionsAndConstants/Utils';
-import { DEVICE_TYPES, NULL_STRING_ALL_LOWERCASE } from '../../../functionsAndConstants/Constants';
-import { mapAndSendFileToApi, displayFile, updateFileMetadataInStore } from './FileManagementTools';
+import { mapAndSendFileToApi, getIsWithinProperFormat, updateFileMetadataInStore, createFileId } from './FileManagementTools';
 import { AppContext as AccountContext} from '../../../Routes/Account';
 import { AppContext as HomePageContext} from '../../../Routes/HomePage';
 import { AppContext as JournalContext} from '../../../Routes/App';
 import { AppContext as WalletContext} from '../../../Routes/Wallet';
 import { AppContext as TreasuryContext} from '../../../Routes/Treasury';
 import { AppContext as GroupJournalContext} from '../../../Routes/GroupJournal';
+import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { retrieveContext } from '../../../functionsAndConstants/Contexts';
+import { Card, CardMedia } from '@mui/material';
+import ButtonField from '../Button';
+import Grid from '@mui/material/Unstable_Grid2/Grid2';
+import ModalComponent from '../../modal/Modal';
+import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import WarningIcon from '@mui/icons-material/Warning';
+import { fileLoaderHelper } from '../../../functionsAndConstants/loadingFunctions';
+
 
 const FileUpload = (props) => {
+
     const {
         index,
         elementId,
-        forceDisplayDefaultFileSrc,
         setChangesWereMade,
         fileIndex,
         context,
         disabled,
-        classNameMod,
         dispatchActionToChangeFileMetaData,
         dispatchActionToChangeFileLoadStatus,
-        videoHeight,
+        dispatchActionToRemoveFile,
         fileData,
         dispatch,
-        reduxState
+        displayDeleteButton,
+        onChange,
+        revokeDataURL
     } = props;
-    let inputRef = useRef();
-
-    const defaultFileSrc = "dtc-logo-black.png";
-    const [fileSrc, setFileSrc]  = useState(defaultFileSrc);
-    const [fileType, setFileType] = useState("image/png");
-        
-    const typeOfDevice = deviceType();
-    
+            
     let contexts = {
         WalletContext,
         JournalContext,
@@ -48,17 +50,45 @@ const FileUpload = (props) => {
 
     let AppContext = retrieveContext(contexts, context);
 
-    
     const { actorState } = useContext(AppContext);
+    const [modalProps, setModalProps] = useState({});
+    const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [errorWhenDisplaying, setErrorWhenDisplaying] = useState(null);
 
-    //Upon uploading a file, this function updates the file metadata from its default settings 
-    //to that of the file that was uploaded. 
-    useEffect(() => { if (fileData.file) setFileSrc(fileData.file); }, [fileData]);
+    useEffect(async () => {
+        if(errorWhenDisplaying || (fileData.fileName && !fileData.file)){
+            await fileLoaderHelper({
+                fileData,
+                index,
+                fileIndex,
+                actorState, 
+                dispatch, 
+                dispatchActionToChangeFileLoadStatus,
+                dispatchActionToChangeFileMetaData
+            });
+            setErrorWhenDisplaying(null);
+        }
+    }, [errorWhenDisplaying, fileData.fileName]);
 
-    //returns the fileId of a newly uploaded file, but only of the file fits the format requirements.
+    const deleteFile = async () => {
+        dispatch({
+            actionType: dispatchActionToRemoveFile,
+            fileIndex: fileIndex,
+            index: index
+        });
+        if(fileData.fileName) actorState.backendActor.deleteFile(fileData.fileName);
+        onChange();
+    };
 
-    const handleUpload = async () => {
-        const uploadedFile = inputRef.current.files[0];
+    const handleUpload = async (e) => {
+        dispatch({
+            actionType: dispatchActionToChangeFileLoadStatus,
+            payload: true,
+            fileIndex: fileIndex,
+            index: index
+        });
+
+        const uploadedFile = e.target.files[0];
         dispatch({ 
             actionType: dispatchActionToChangeFileLoadStatus,
             payload: true,
@@ -66,15 +96,27 @@ const FileUpload = (props) => {
             fileIndex: fileIndex 
         });
         let inputForDisplayFileFunction = {
-            uploadedFile, setFileSrc, setFileType, dispatch, 
+            uploadedFile, dispatch, 
             dispatchActionToChangeFileMetaData, index, fileIndex,
-            setChangesWereMade, defaultFileSrc, actorState
+            setChangesWereMade, actorState
         }
-        let fileURL = await displayFile(inputForDisplayFileFunction);
-        inputForDisplayFileFunction = { ...inputForDisplayFileFunction, fileURL};
-        let fileId = updateFileMetadataInStore(inputForDisplayFileFunction);
-        inputForDisplayFileFunction = { ...inputForDisplayFileFunction, fileId};
-        if(fileId) await mapAndSendFileToApi(inputForDisplayFileFunction);
+        const formatStatus = await getIsWithinProperFormat(uploadedFile);
+        if(!formatStatus.isProperFormat){
+            setModalProps({...formatStatus.modalInput})
+            setModalIsOpen(true);
+            dispatch({
+                actionType: dispatchActionToChangeFileLoadStatus,
+                payload: false,
+                fileIndex: fileIndex,
+                index: index
+            });
+            return;
+        }
+        const fileURL = URL.createObjectURL(uploadedFile);
+        const fileId = createFileId(uploadedFile);
+        const responses = await mapAndSendFileToApi({ ...inputForDisplayFileFunction, fileId});
+        let hasError = false;
+        for(const response of responses) if( "err" in response) hasError = true;
 
         dispatch({ 
             actionType: dispatchActionToChangeFileLoadStatus,
@@ -82,80 +124,97 @@ const FileUpload = (props) => {
             index: index,
             fileIndex: fileIndex 
         });
+
+        if(hasError) {
+            actorState.backendActor.deleteFile(fileId);
+            setModalProps({ 
+                bigText: "File Upload Unsuccessful.",
+                Icon: ErrorOutlineIcon
+            })
+            setModalIsOpen(true);
+            dispatch({
+                actionType: dispatchActionToChangeFileLoadStatus,
+                payload: false,
+                fileIndex: fileIndex,
+                index: index
+            });
+            return;
+        }
+        updateFileMetadataInStore({ ...inputForDisplayFileFunction, fileURL, fileId});
+        if(uploadedFile.type.includes("quicktime")){
+            setModalProps({ 
+                bigText: "QuickTime Video Detected",
+                smallText: "QuickTime Videos are only visible using the Safari Browser.",
+                Icon: WarningIcon
+            })
+            setModalIsOpen(true);
+        }
+        onChange();
     };
 
-    const fileSrcToDisplay = forceDisplayDefaultFileSrc ? defaultFileSrc : fileSrc;
-
+    const onLoad = () => {
+        if(revokeDataURL){ 
+            setErrorWhenDisplaying(false);
+            URL.revokeObjectURL(fileData.file);
+        }
+    }
+    
     return(
-        <div className={`imageDivContainer ${classNameMod}`}>
-            <div className={`imageDiv ${classNameMod}`}>  
+        <>
+            <Card 
+                className={`cardComponent ${elementId}`}
+            >
                 {
-                    fileData.isLoading ? 
-                        <>
-                            <img src="Loading.gif" alt="Loading Screen" />
-                        </> :
-                        <>
-                            { 
-                                (fileType.includes("image")) ? 
-                                    <img 
-                                        src={fileSrcToDisplay} 
-                                        id={elementId}
-                                        alt="image preview" 
-                                        className="imagePreview__image" 
-                                    /> :
-                                    (fileType.includes("quicktime") && (typeOfDevice !== DEVICE_TYPES.desktop)) ?
-                                    <video 
-                                        width="330" 
-                                        height={videoHeight} 
-                                        className="imagePreview__video" 
-                                        preload
-                                        id={elementId}
-                                        style={{borderRadius: 10 + 'px'}}
-                                        controls
-                                        muted
-                                        poster={'video-thumbnail.png'}
-                                        playsInline
-                                        src={fileSrcToDisplay}
-                                    ></video> :
-                                    <video 
-                                        width="330" 
-                                        height={videoHeight} 
-                                        style={{borderRadius: 10 + 'px'}}
-                                        className="imagePreview__video" 
-                                        preload="metadata"
-                                        id={elementId}
-                                        controls
-                                        muted
-                                        playsInline
-                                    >
-                                        <source src={fileSrcToDisplay} type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'/>
-                                        <source src={fileSrcToDisplay} type='video/ogg; codecs="theora, vorbis"'/>
-                                        <source src={fileSrcToDisplay} type='video/webm; codecs="vp8, vorbis"'/>
-                                        <source src={fileSrcToDisplay} type='video/mpeg'/>
-                                        Your browser does not support the video tag.
-                                    </video>  
-                            
-                            }
-                            {
-                                !fileSrcToDisplay && 
-                                <span className="imagePreview__default-display">
-                                    Image Preview
-                                </span>   
-                            } 
-                        </> 
-                }          
-            </div>
-            { !disabled && fileData.fileName === NULL_STRING_ALL_LOWERCASE &&
-                <input 
-                    disabled={disabled}
-                    id={`uploadedImaged__${elementId}`} 
-                    type="file" 
-                    className={'imageInputButton'} 
-                    ref={inputRef} 
-                    onChange={handleUpload}
-                /> 
-            }
-        </div>
+                    displayDeleteButton && !fileData.isLoading &&
+                    <Grid className={'deleteFileButtonDiv'}>
+                        <ButtonField 
+                            className={'DeleteFileButton'}
+                            id={elementId} 
+                            Icon={DeleteIcon}
+                            active={true}
+                            onClick={deleteFile}
+                        /> 
+                    </Grid>
+                }
+                {fileData.file && !fileData.isLoading && !errorWhenDisplaying ?
+                    <CardMedia
+                        component={ fileData.fileType.includes("image") ? "img" : "video" }
+                        className='cardMediaComponent'
+                        id={`${elementId}_imgTag`}
+                        muted
+                        onLoad={onLoad}
+                        onError={() => setErrorWhenDisplaying(true)}
+                        height={500}
+                        controls
+                        src={fileData.file}
+                    /> :
+                    <ButtonField 
+                        className={'FileUploaderButton'}
+                        disabled={disabled}
+                        isLoading={fileData.isLoading || errorWhenDisplaying}
+                        id={elementId} 
+                        text={"Upload Photo / Video"}
+                        upload={true}
+                        Icon={AddAPhotoIcon}
+                        onChange={handleUpload}
+                    /> 
+                }
+            </Card>
+            <ModalComponent 
+                {...modalProps}
+                open={modalIsOpen} 
+                handleClose={() => setModalIsOpen(false)} 
+                components={[{
+                    Component: ButtonField, 
+                    props: {
+                        active: true,
+                        text: "OK",
+                        Icon: ThumbUpAltIcon,
+                        onClick: () => setModalIsOpen(false)
+                    }
+                }]}
+            />
+        </>
     );
 }
 

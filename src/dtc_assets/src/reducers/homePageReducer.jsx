@@ -29,12 +29,12 @@ export const homePageInitialState={
         nftId: NULL_STRING_CAPITALIZED,
         supportMode: false,
         acceptingRequests: false,
-        requestsForApproval: []
-    },
+        requestsForAccess: []
+    }
 }
 
 const changeValue=(state=homePageInitialState, action)=>{
-    const{actionType,payload,index, fileIndex, blockReload}=action;
+    const{actionType,payload}=action;
 
 
     switch(actionType){

@@ -1,28 +1,45 @@
 import { mapApiObjectToFrontEndJournalEntriesObject } from "../mappers/journalPageMappers";
-import { delay, managerActor, backendActor, toHexString } from "./Utils";
+import { delay, managerActor, backendActor, toHexString, nanoSecondsToMiliSeconds } from "./Utils";
 import { generateQrCode } from "./walletFunctions/GenerateQrCode";
 import { mapBackendCanisterDataToFrontEndObj } from "../mappers/dashboardMapperFunctions";
 import { getFileUrl_fromApi } from "../Components/Fields/fileManger/FileManagementTools";
 import { CreateUserJournal } from "../Routes/Pages/authentication/AuthenticationMethods";
+import DoNotDisturbOnIcon from '@mui/icons-material/DoNotDisturbOn';
+import ButtonField from "../Components/Fields/Button";
 
 
 export const loadAllDataIntoReduxStores = async (states, dispatchFunctions, types, stateHasBeenRecovered) => {
     //doesn't reload data if the data has already been recovered
     if(stateHasBeenRecovered) return; 
 
-    let {walletState, homePageState, journalState, actorState, accountState} = states;
-    let {journalDispatch, walletDispatch, homePageDispatch, accountDispatch} = dispatchFunctions;
-    let {journalTypes, walletTypes, homePageTypes, accountTypes } = types;
-
-    // sets isLoading property to true for all reducers
-    setAllContexsIsLoading(dispatchFunctions, types, true);
-
-    let accountCreated;
+    let {walletState, homePageState, journalState, actorState, accountState, notificationsState} = states;
+    let {journalDispatch, walletDispatch, homePageDispatch, accountDispatch, notificationsDispatch} = dispatchFunctions;
+    let {journalTypes, walletTypes, homePageTypes, accountTypes, notificationsTypes } = types;
+    let accountCreationAttemptResults;
     //checks to see if user has an account. If not, then it attemptes to make an account, if 
     //the account creation is unsuccessful, then it returns
     let hasAccount = await actorState.backendActor.hasAccount();
-    if(!hasAccount) accountCreated = await CreateUserJournal(actorState, journalDispatch);
-    if(accountCreated && "err" in accountCreated) return;
+    if(!hasAccount) accountCreationAttemptResults = await CreateUserJournal(actorState);
+    if(accountCreationAttemptResults && "err" in accountCreationAttemptResults){
+        return {
+            openModal: true, 
+            bigText: "Not Authorized To Enter", 
+            Icon: DoNotDisturbOnIcon,
+            displayConnectButton: true,
+            smallText: "If you are the owner of this application, attempting to log in for the first time, you must log in using the wallet that owns the Utility NFT that corresponds to this server.",
+            components: [{
+                Component: ButtonField,
+                props: {
+                    active: true,
+                    text: "Request Access",
+                    onClick: () => {
+                        actorState.backendActor.requestApproval();
+                        alert("Your request for access has been sent.");
+                    }
+                }
+            }]
+        }
+    }
 
     //calls the backend and loads the retrieved data into the appropriate redux stores.
     let promises = [];
@@ -30,19 +47,22 @@ export const loadAllDataIntoReduxStores = async (states, dispatchFunctions, type
     if(!homePageState.dataHasBeenLoaded) promises.push(loadCanisterData(actorState, homePageDispatch, homePageTypes));
     if(!journalState.dataHasBeenLoaded) promises.push(loadJournalData(actorState, journalDispatch, journalTypes));
     if(!accountState. dataHasBeenLoaded) promises.push(loadAccountData(actorState, accountDispatch, accountTypes));
+    if(!notificationsState.dataHasBeenLoaded) promises.push(loadNotificationsData(actorState, notificationsDispatch, notificationsTypes));
     await Promise.all(promises);
 
-    // sets isLoading property to false for all reducers
-    setAllContexsIsLoading(dispatchFunctions, types, false);
+    return {}
 };
 
-export const setAllContexsIsLoading = (dispatchFunctions, types, bool) => {
-    let {journalDispatch, walletDispatch, homePageDispatch, accountDispatch} = dispatchFunctions;
-    let {journalTypes, walletTypes, homePageTypes, accountTypes } = types;
-    journalDispatch( { actionType: journalTypes.SET_IS_LOADING, payload: bool } );
-    walletDispatch( { actionType: walletTypes.SET_IS_LOADING, payload: bool } );
-    homePageDispatch( { actionType: homePageTypes.SET_IS_LOADING, payload: bool } );
-    accountDispatch( { actionType: accountTypes.SET_IS_LOADING, payload: bool } );
+export const loadNotificationsData = async (actorState, notificationsDispatch, notificationsTypes) => {
+    let notificationsData = await actorState.backendActor.getNotifications();
+    notificationsDispatch({
+        actionType: notificationsTypes.SET_NOTIFICATIONS,
+        payload: notificationsData
+    });
+    notificationsDispatch({
+        actionType: notificationsTypes.SET_DATA_HAS_BEEN_LOADED,
+        payload: true
+    });
 };
 
 export const loadAccountData = async (actorState, accountDispatch, accountTypes) => {
@@ -67,16 +87,17 @@ export const loadAccountData = async (actorState, accountDispatch, accountTypes)
 export const loadJournalData = async (actorState, journalDispatch, types) => {
     let journal = await actorState.backendActor.readJournal();
     journal = journal.ok;
-    let { userJournalData, notifications } = journal;
+    let { userJournalData } = journal;
     let [journalEntries, journalBio] = userJournalData;
-    journalEntries = mapApiObjectToFrontEndJournalEntriesObject(journalEntries);
-    
-    if(notifications){
-        journalDispatch({
-            actionType: types.SET_NOTIFICATIONS,
-            payload: notifications
-        });
+    const filesMetaData = journalBio.photos.map(fileData => {
+        return { ...fileData, lastModified : parseInt(fileData.lastModified), isLoading: true };
+    });
+    journalBio = {
+        ...journalBio, 
+        dob: journalBio.dob[0] ? [nanoSecondsToMiliSeconds(parseInt(journalBio.dob[0]))] : [],
+        photos: filesMetaData
     };
+    journalEntries = mapApiObjectToFrontEndJournalEntriesObject(journalEntries);
     journalDispatch({
         payload: journalBio,
         actionType: types.SET_BIO
@@ -94,7 +115,6 @@ export const loadJournalData = async (actorState, journalDispatch, types) => {
 export const loadWalletData = async (actorState, walletDispatch, types ) => {
 
     let walletDataFromApi = await actorState.backendActor.readWalletData();
-
     const address = toHexString(new Uint8Array( [...walletDataFromApi.ok.address]));
     const walletData = { 
         balance : parseInt(walletDataFromApi.ok.balance.e8s), 
@@ -114,14 +134,25 @@ export const loadWalletData = async (actorState, walletDispatch, types ) => {
         actionType: types.SET_DATA_HAS_BEEN_LOADED,
         payload: true,
     });
+    loadTxHistory(actorState, walletDispatch, types);
 };
 
 export const loadTxHistory = async (actorState, walletDispatch, types) => {
-    if(!actorState.backendActor) throw 'No actor defined';
     const tx = await actorState.backendActor.readTransaction();
-    const transactionHistory = tx.ok.sort(function(a,b){
-        const mapKeyOfA = parseInt(a[0]);
-        const mapKeyOfB = parseInt(b[0]);
+    let transactionHistory = tx.ok.map(([mapKey, tx_]) => {
+        const newKey = parseInt(mapKey);
+        const newTx = {
+            ...tx_,
+            recipient: toHexString(new Uint8Array( [...tx_.recipient])),
+            source: toHexString(new Uint8Array( [...tx_.source])),
+            balanceDelta: parseInt(tx_.balanceDelta),
+            timeStamp: parseInt(tx_.timeStamp)
+        };
+        return [newKey, newTx]
+    });
+    transactionHistory = transactionHistory.sort(function(a,b){
+        const mapKeyOfA = a[0];
+        const mapKeyOfB = b[0];
         if (mapKeyOfA > mapKeyOfB) return -1; 
         else return 1;
     });
@@ -129,7 +160,6 @@ export const loadTxHistory = async (actorState, walletDispatch, types) => {
         actionType: types.SET_TX_HISTORY_DATA,
         payload: transactionHistory
     });
-    return {transactionHistory, tx};
 };
 
 export const loadCanisterData = async (actorState, dispatch, types) => {
@@ -169,7 +199,7 @@ export const recoverState = async ( location, dispatchMethods, types, connection
     // dispatch state from previous route to redux store if that state exists
     if(!location.state) return;
     setStateHasBeenRecovered(true);
-    const{journal,wallet,homePage, account}=location.state;
+    const{journal,wallet,homePage, account, notifications}=location.state;
     if(dispatchMethods.journalDispatch){
         dispatchMethods.journalDispatch({
             actionType: types.journalTypes.SET_ENTIRE_REDUX_STATE,
@@ -198,6 +228,13 @@ export const recoverState = async ( location, dispatchMethods, types, connection
         })
     }
 
+    if(dispatchMethods.notificationsDispatch){
+        dispatchMethods.notificationsDispatch({
+            actionType: types.notificationsTypes.SET_ENTIRE_NOTIFICATIONS_REDUX_STATE,
+            payload: notifications
+        })
+    }
+
     //wipe previous location state to prevent infinite loop
     location.state = null;
     const promises = [
@@ -215,36 +252,41 @@ export const recoverState = async ( location, dispatchMethods, types, connection
     });
 };
 
-export const fileLoaderHelper =  async (
-    fileData, 
-    fileIndex,
-    pageIndex,
-    actorState, 
-    journalDispatch, 
-    actionTypeToChangeFileLoadStatus,
-    actionTypeToSetFile
-    ) => {
-    journalDispatch({
-        actionType: actionTypeToChangeFileLoadStatus,
+export const fileLoaderHelper = async (props) => {
+    const {
+        fileData, 
+        fileIndex,
+        index,
+        actorState, 
+        dispatch, 
+        dispatchActionToChangeFileLoadStatus,
+        dispatchActionToChangeFileMetaData
+    } = props;
+    dispatch({
+        actionType: dispatchActionToChangeFileLoadStatus,
         payload: true,
-        blockReload: true,
         fileIndex: fileIndex,
-        index: pageIndex
+        index: index
     });
     const dataURL = await getFileUrl_fromApi(actorState, fileData);
-    journalDispatch({
-        actionType: actionTypeToSetFile,
-        payload: dataURL,
-        blockReload: true,
+    dispatch({
+        actionType: dispatchActionToChangeFileMetaData,
+        payload: { ...fileData, file: dataURL },
         fileIndex: fileIndex,
-        index: pageIndex
+        index: index
     });
-    journalDispatch({
-        actionType: actionTypeToChangeFileLoadStatus,
+    dispatch({
+        actionType: dispatchActionToChangeFileLoadStatus,
         payload: false,
-        blockReload: true,
         fileIndex: fileIndex,
-        index: pageIndex
+        index: index
     });
     return dataURL;
+}
+
+export const allStatesLoaded = (reduxStates) => {
+    for (const state in reduxStates) {
+        if(!reduxStates[state].dataHasBeenLoaded) return false;
+    }
+    return true;
 }

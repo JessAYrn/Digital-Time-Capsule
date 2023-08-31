@@ -21,47 +21,47 @@ export const accountInitialState={
 const changeValue = (state =accountInitialState, action) => {
     const {actionType, payload } = action;
 
-switch(actionType){
-    case accountTypes.SET_ENTIRE_ACCOUNT_REDUX_STATE:
-    state = payload;
-    return {
-        ...state
-    }
-    case accountTypes.SET_DATA_HAS_BEEN_LOADED:
-    state.dataHasBeenLoaded = payload
-    return {
-        ...state
-    }
-    case accountTypes.CHANGE_EMAIL:
-    state.metaData = {
-        ...state.metaData,
-        email: [payload]
-    }
-    return{
-        ...state
-    }
-    case accountTypes.SET_METADATA:
-    state.metaData = payload;
-    return{
-        ...state
-    }
-    case accountTypes.SET_IS_LOADING:
-    state.isLoading = payload;
-    return {
-        ...state
-    }
-    case accountTypes.CHANGE_USERNAME:
-            state.metaData = {
-                ...state.metaData,
-                userName: [payload]
-            }
-            return{
-                ...state
-            }
-    default:
-    return {
-        ...state
-    }
+    switch(actionType){
+        case accountTypes.SET_ENTIRE_ACCOUNT_REDUX_STATE:
+        state = payload;
+        return {
+            ...state
+        }
+        case accountTypes.SET_DATA_HAS_BEEN_LOADED:
+        state.dataHasBeenLoaded = payload
+        return {
+            ...state
+        }
+        case accountTypes.CHANGE_EMAIL:
+        state.metaData = {
+            ...state.metaData,
+            email: [payload]
+        }
+        return{
+            ...state
+        }
+        case accountTypes.SET_METADATA:
+        state.metaData = payload;
+        return{
+            ...state
+        }
+        case accountTypes.SET_IS_LOADING:
+        state.isLoading = payload;
+        return {
+            ...state
+        }
+        case accountTypes.CHANGE_USERNAME:
+                state.metaData = {
+                    ...state.metaData,
+                    userName: [payload]
+                }
+                return{
+                    ...state
+                }
+        default:
+        return {
+            ...state
+        }
     }
     
 }

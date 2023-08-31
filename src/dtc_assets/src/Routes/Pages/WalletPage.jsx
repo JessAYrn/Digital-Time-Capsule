@@ -1,141 +1,146 @@
 import React, {useCallback, useContext, useEffect, useState} from 'react';
 import { AppContext } from '../Wallet';
 import { NavBar } from '../../Components/navigation/NavBar';
-import { Modal } from './modalContent/Modal';
 import './WalletPage.scss';
 import { shortenHexString } from '../../functionsAndConstants/Utils';
-import { e8sInOneICP, MODALS_TYPES } from '../../functionsAndConstants/Constants';
+import { e8sInOneICP } from '../../functionsAndConstants/Constants';
 import {  RenderQrCode } from '../../functionsAndConstants/walletFunctions/GenerateQrCode';
-import { copyWalletAddressHelper } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
-import { Transaction } from '../../functionsAndConstants/walletFunctions/Transaction';
+import { copyText } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
 import { loadTxHistory } from '../../functionsAndConstants/loadingFunctions';
-import * as GrIcons from 'react-icons/gr';
-import * as FaIcons from 'react-icons/fa';
-import * as AiIcons from 'react-icons/ai'
 import { testTx } from '../../testData/Transactions';
-import LoadScreen from './LoadScreen';
-import { types } from '../../reducers/journalReducer';
 import { walletTypes } from '../../reducers/walletReducer';
 import { UI_CONTEXTS } from '../../functionsAndConstants/Contexts';
-import ButtonField from '../../Components/Fields/Button';
+import { nanoSecondsToMiliSeconds } from '../../functionsAndConstants/Utils';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import SendIcon from '@mui/icons-material/Send';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import '../../SCSS/contentContainer.scss'
+import Grid from '@mui/material/Unstable_Grid2/Grid2';
+import Paper  from '@mui/material/Paper';
+import DataField from '../../Components/Fields/DataField';
+import AccordionField from '../../Components/Fields/Accordion';
+import SpeedDialField from '../../Components/Fields/SpeedDialField';
+import ModalComponent from '../../Components/modal/Modal';
+import SendCryptoModal from '../../Components/modal/SendCryptoModal';
 
 
 const WalletPage = (props) => {
 
-    const { journalState, journalDispatch, walletState, walletDispatch, actorState, actorDispatch } = useContext(AppContext);
+    const { 
+        walletState, walletDispatch, actorState, actorDispatch
+    } = useContext(AppContext);
+
     const [loadingTx, setIsLoadingTx] = useState(false);
     const [showReloadButton, setShowReloadButton] = useState(false);
+    const [recipientAddress, setRecipientAddress] = useState("");
+    const [amountToSend, setAmountToSend] = useState(0);
+    const [modalIsOpen, setModalIsOpen] = useState(false)
+    const [modalProps, setModalProps] = useState({});
 
-    const openModal = () => {
-        journalDispatch({
-            actionType: types.SET_MODAL_STATUS,
-            payload: {show: true, which: MODALS_TYPES.onSend}
+    const onSend = () => {
+        setModalProps({
+            components: [{
+                Component: SendCryptoModal,
+                props: {
+                    onChangeRecipientAddress: setRecipientAddress,
+                    onChangeAmount: setAmountToSend,
+                    onClickSend: () => {},
+                    onClickCancel: () => {},
+                    onClickScanQrCode: () => {}
+                }
+            }]
         });
+        setModalIsOpen(true);
     };
 
-    const loadTxs = async () => {
-        setIsLoadingTx(true);
-        setShowReloadButton(true);
-        let result = await loadTxHistory(actorState, walletDispatch, walletTypes);
-        setIsLoadingTx(false);
-    };
+    console.log(amountToSend, recipientAddress);
 
-    const copyWalletAddress = useCallback(() => copyWalletAddressHelper(walletState.walletData.address), [walletState]);
+    // const loadTxs = async () => {
+    //     setIsLoadingTx(true);
+    //     setShowReloadButton(true);
+    //     let result = await loadTxHistory(actorState, walletDispatch, walletTypes);
+    //     setIsLoadingTx(false);
+    // };
 
+    const speedDialActions = [
+        {name: "Refresh", icon: RefreshIcon, onClick: () => {}},
+        {name: "New Transaction", icon: SendIcon , onClick: onSend}
+    ]
+
+    console.log(walletState)
     return (
-        <div className={"container"}>
-            {journalState.modalStatus.show ? 
-            
-                <Modal 
-                    context={UI_CONTEXTS.WALLET}
-                /> :
-                <>
-                    <NavBar
-                        walletLink={false}
-                        journalLink={true}
-                        accountLink={true}
-                        dashboardLink={true}
-                        notificationIcon={false}
-                        context={UI_CONTEXTS.WALLET}
+        <Grid 
+            container 
+            className={'container_journal'} 
+            columns={12} 
+            xs={12} 
+            rowSpacing={8} 
+            display="flex" 
+            justifyContent="center" 
+            alignItems="center" 
+            flexDirection={"column"}
+        >
+            <NavBar context={UI_CONTEXTS.WALLET}/>
+            <Grid 
+                columns={12} 
+                xs={11} 
+                md={5} 
+                rowSpacing={0} 
+                display="flex" 
+                justifyContent="center" 
+                alignItems="center" 
+                flexDirection={"column"} 
+                marginTop={"80px"}
+            >
+                <Paper elevation={24} className={'walletDataPaperComponent'}>
+                    <RenderQrCode imgUrl={walletState.walletData.qrCodeImgUrl}/> 
+                    <DataField
+                        className={'walletPageDataField'}
+                        label={'Balance: '}
+                        text={`${walletState.walletData.balance /  e8sInOneICP} ICP`}
+                        isLoading={!walletState.dataHasBeenLoaded}
+                        disabled={true}
                     />
-                    {walletState.isLoading ?
-                        <LoadScreen/> :
-                        <div className={"container__wallet"}>
-                            <div className={'transparentDiv__wallet'}>
-                                <div className={`infoDiv_wallet contentContainer `} >
-                                    <RenderQrCode
-                                        imgUrl={walletState.walletData.qrCodeImgUrl}
-                                    />  
-                                    <div className={'textsDiv'}>
-                                        <div className="balanceDiv">
-                                            Wallet Balance: {walletState.walletData.balance /  e8sInOneICP} ICP
-                                        </div>
-                                        <div className={'walletInfoDiv'}>
-                                            <div className='walletAddressDiv'>
-                                                <p className='firstPTag'>
-                                                    Wallet Address:  
-                                                </p>
-                                                <p className='secondPTag'>
-                                                    {shortenHexString(walletState.walletData.address)} 
-                                                </p> 
-                                                <ButtonField
-                                                    Icon={FaIcons.FaCopy}
-                                                    iconSize={17.5}
-                                                    onClick={copyWalletAddress}
-                                                    withBox={false}
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                { loadingTx ? 
-                                    <div className={`loadGifContainer contentContainer `}>
-                                        <div className='loadGifDiv'>
-                                            <img src="Loading.gif" alt="Loading Screen" />
-                                        </div>
-                                    </div> :
-                                    !walletState.walletData.txHistory.data.length ? 
-                                        !showReloadButton && 
-                                        <ButtonField
-                                            text={'Load Transaction History'}
-                                            className={'loadTxHistory active'}
-                                            onClick={loadTxs}
-                                            withBox={true}
-                                        /> :
-                                        walletState.walletData.txHistory.data.map((tx) => {
-                                            return(
-                                                    <Transaction
-                                                        class_={`contentContainer `}
-                                                        balanceDelta={tx[1].balanceDelta}
-                                                        increase={tx[1].increase}
-                                                        recipient={tx[1].recipient[0]}
-                                                        timeStamp={tx[1].timeStamp[0]}
-                                                        source={tx[1].source[0]}
-                                                    />
-                                            );
-                                        })
-                                }              
-                            </div>
-                            {(showReloadButton || walletState.walletData.txHistory.data.length > 0) && 
-                                <ButtonField
-                                    Icon={AiIcons.AiOutlineReload}
-                                    className={'reloadTxData'}
-                                    iconSize={25}
-                                    onClick={loadTxs}
-                                    withBox={true}
-                                />}
-                            <ButtonField
-                                Icon={GrIcons.GrSend}
-                                className={'sendTxDiv'}
-                                iconSize={25}
-                                onClick={openModal}
-                                withBox={true}
-                            />
-                        </div>}
-                </>
-            }
-        </div>
+                    <DataField
+                        className={'walletPageDataField'}
+                        label={'Address: '}
+                        text={`${shortenHexString(walletState.walletData.address)}`}
+                        isLoading={!walletState.dataHasBeenLoaded}
+                        onClick={() => copyText( walletState.walletData.address )}
+                        buttonIcon={ContentCopyIcon}
+                    />
+                </Paper> 
+            </Grid>
+            <Grid 
+                columns={12} 
+                xs={11} 
+                md={5} 
+                rowSpacing={0} 
+                display="flex" 
+                justifyContent="center" 
+                alignItems="center" 
+            >
+                {walletState.walletData.txHistory.data.length && 
+                <AccordionField>
+                    {walletState.walletData.txHistory.data.map(([mapKey, tx]) => {
+                        const {balanceDelta, increase, recipient, timeStamp, source} = tx;
+                        const date = new Date(nanoSecondsToMiliSeconds(parseInt(timeStamp))).toString()
+                        const title = `${increase ? "+":"-"} ${balanceDelta / e8sInOneICP} ICP // ${date} `;
+                        const text_1 = `source: ${shortenHexString(source)} ICP`;
+                        const text_2 = `Recipient: ${shortenHexString(recipient)} ICP`;
+                        return (<div title={title} texts={[text_1, text_2]}></div>)
+                    })}
+                </AccordionField>}
+
+            </Grid>
+            <SpeedDialField actions={speedDialActions} position={"right"}/>
+            <ModalComponent
+                open={modalIsOpen}
+                handleClose={() => setModalIsOpen(false)}
+                {...modalProps}
+            />
+        </Grid>
+            
         
     );
 } 

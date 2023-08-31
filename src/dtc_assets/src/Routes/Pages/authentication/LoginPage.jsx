@@ -7,9 +7,10 @@ import { AppContext as WalletContext} from '../../Wallet';
 import { AppContext as TreasuryContext} from '../../Treasury';
 import { AppContext as GroupJournalContext} from '../../GroupJournal';
 import { UI_CONTEXTS, retrieveContext } from "../../../functionsAndConstants/Contexts";
-import * as IoiosIcons from 'react-icons/io';
-import * as AiIcons from 'react-icons/ai';
-import * as RiIcons from 'react-icons/ri';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import ArticleIcon from '@mui/icons-material/Article';
+import AccountBoxIcon from '@mui/icons-material/AccountBox';
+import DashboardIcon from '@mui/icons-material/Dashboard';
 import { NAV_LINKS } from "../../../functionsAndConstants/Constants";
 import "./LoginPage.scss";
 import "../../../SCSS/Animation.scss";
@@ -18,19 +19,33 @@ import "@connect2ic/core/style.css"
 import ButtonField from "../../../Components/Fields/Button";
 import DataField from "../../../Components/Fields/DataField";
 import { types } from "../../../reducers/journalReducer";
-import { backendActor, managerActor } from "../../../functionsAndConstants/Utils";
+import { backendActor, isLocalHost, inTrillions, managerActor, round2Decimals } from "../../../functionsAndConstants/Utils";
 import '../../../SCSS/contentContainer.scss'
-import Accordion from "../../../Components/Fields/Accordion";
+import AccordionField from "../../../Components/Fields/Accordion";
 import { actorTypes } from "../../../reducers/actorReducer";
+import Grid from '@mui/material/Unstable_Grid2';
 
-const AccordionContent=[
+const isLocal = isLocalHost();
 
-    {text:"1.) Navigate to your Personal DAO's unique URL and press the share button circled below ", image:'assets/dtcscreengrab2.png'},
-    {text:"2.) Select the 'Add to Home Screen' button", image:'assets/dtcscreengrab3.png'},
-    {text:"3.) Enter a title and then press the 'add' button", image:'assets/dtcscreengrab4.png'},
-    {text:"4.) Your Personal DAO app will then be installed and visible on yoru Home Screen", image:'assets/dtcscreengrab1.png'},
+export const accordionContent=[    
+    {
+        title:"1.) Navigate to your Personal DAO's unique URL and press the share button circled below ", 
+        image: `${isLocal ? "assets/" : ""}dtcscreengrab2.png`
+    },
+    {  
+        title:"2.) Select the 'Add to Home Screen' button", 
+        image:`${isLocal ? "assets/" : ""}dtcscreengrab3.png`
+    },
+    {
+        title:"3.) Enter a title and then press the 'add' button", 
+        image: `${isLocal ? "assets/" : ""}dtcscreengrab4.png`
+    },
+    {
+        title:"4.) Your Personal DAO app will then be installed and visible on yoru Home Screen", 
+        image:`${isLocal ? "assets/" : ""}dtcscreengrab1.png`
+    },
 
-]
+];
 
 const LoginPage = (props) => {
 
@@ -116,77 +131,90 @@ const LoginPage = (props) => {
     }, [connectionResult.isConnected]);
 
     return(
-        <div className={"container_loginPage"}>
-            <div className={'containerInner_loginPage'}>
-                <div className={`contentContainer login`}>
-                    <div className={`contentDiv__loginContent `}>
-                        <div className={`logoDiv login`}>
-                            <img className={`logoImg`}src="dtc-logo-black.png" alt="Logo"/>
-                        </div>
-                        <div className={'row'}>
-                            <ButtonField
-                                Icon={IoiosIcons.IoIosWallet}
-                                iconSize={25}
-                                iconColor={'#917153'}
-                                className={`walletIconDiv loginPage ${(context === UI_CONTEXTS.WALLET) ? 'active' : ''}`}
-                                onClick={() => changeRoute(NAV_LINKS.wallet, reduxStates)}
-                                withBox={true}
-                            />
-                            <ButtonField
-                                Icon={IoiosIcons.IoIosJournal}
-                                iconSize={25}
-                                iconColor={'#917153'}
-                                className={`journalIconDiv loginPage ${(context === UI_CONTEXTS.JOURNAL) ? 'active' : ''}`}
-                                onClick={() => changeRoute(NAV_LINKS.journal, reduxStates)}
-                                withBox={true}
-                            />
-                        </div>
-                        <div className={'row'}>
-                            <ButtonField
-                                Icon={AiIcons.AiFillDashboard}
-                                iconSize={25}
-                                iconColor={'#917153'}
-                                className={`dashboardIconDiv loginPage ${(context === UI_CONTEXTS.HOME_PAGE) ? 'active' : ''}`}
-                                onClick={() => changeRoute(NAV_LINKS.dashboard, reduxStates)}
-                                withBox={true}
-                            />
-                            <ButtonField
-                                Icon={RiIcons.RiAccountPinCircleFill}
-                                iconSize={25}
-                                iconColor={'#917153'}
-                                className={`accountIconDiv loginPage ${(context === UI_CONTEXTS.ACCOUNT_PAGE) ? 'active' : ''}`}
-                                onClick={() => changeRoute(NAV_LINKS.account, reduxStates)}
-                                withBox={true}
-                            />
-                        </div>
-                        <ConnectButton/>
-                        <ConnectDialog />
-                        <DataField
-                            label={'Front-end Canister Balance: '}
-                            className={'loginPage'}
-                            isCycles={true}
-                            text={isLoading ? 'Loading...' : frontendCanisterBalance}
-                        />
-                        <DataField
-                            label={'Back-end Canister Balance: '}
-                            className={'loginPage'}
-                            isCycles={true}
-                            text={isLoading ? 'Loading...' : backendCanisterBalance}
-                        />
-
-                        <Accordion
-                        title='Install App'
-                        content={AccordionContent}
-                        />
-                    </div>
-                </div>
-            </div>
-            <div className={"container_2"}>
-                <h4 id={'title'} className={"scrollForMore"}> Scroll Down For More Info</h4>
-            </div>
-        </div>
+        <Grid container columns={12} xs={12} rowSpacing={8} display="flex" justifyContent="center" alignItems="center">
+            <Grid xs={11} md={9} display="flex" justifyContent="center" alignItems="center">
+                <img 
+                    className={`img`}
+                    src={`${isLocal ? "../../../assets/" : ""}P2.svg`}
+                    alt="Logo"
+                />
+            </Grid>
+            <Grid container xs={11} md={9}>
+                <Grid xs display="flex" justifyContent="center" alignItems="center">
+                    <ButtonField
+                        active={context === UI_CONTEXTS.WALLET}
+                        Icon={AccountBalanceWalletIcon}
+                        iconSize={'large'}
+                        iconColor={'#917153'}
+                        onClick={() => changeRoute(NAV_LINKS.wallet, reduxStates)}
+                        withBox={true}
+                    />
+                </Grid>
+                <Grid xs display="flex" justifyContent="center" alignItems="center">
+                    <ButtonField
+                        Icon={ArticleIcon}
+                        active={context === UI_CONTEXTS.JOURNAL}
+                        iconSize={'large'}
+                        iconColor={'#917153'}
+                        onClick={() => changeRoute(NAV_LINKS.journal, reduxStates)}
+                        withBox={true}
+                    />
+                </Grid>
+            </Grid>
+            <Grid container xs={11} md={9}>
+                <Grid xs display="flex" justifyContent="center" alignItems="center">
+                    <ButtonField
+                        active={context === UI_CONTEXTS.HOME_PAGE}
+                        Icon={DashboardIcon}
+                        iconSize={'large'}
+                        iconColor={'#917153'}
+                        onClick={() => changeRoute(NAV_LINKS.dashboard, reduxStates)}
+                        withBox={true}
+                    />
+                </Grid>
+                <Grid xs display="flex" justifyContent="center" alignItems="center">
+                    <ButtonField
+                        active={context === UI_CONTEXTS.ACCOUNT_PAGE}
+                        Icon={AccountBoxIcon}
+                        iconSize={'large'}
+                        iconColor={'#917153'}
+                        onClick={() => changeRoute(NAV_LINKS.account, reduxStates)}
+                        withBox={true}
+                    />
+                </Grid>
+            </Grid>
+            <Grid xs={11} md={9} display="flex" justifyContent="center" alignItems="center">
+                <ConnectButton/>
+                <ConnectDialog />
+            </Grid>
+            <Grid xs={11} md={9} display="flex" justifyContent="center" alignItems="center">
+                <DataField
+                    label={'Front-end Canister Balance: '}
+                    className={'loginPage'}
+                    text={`${round2Decimals(inTrillions(frontendCanisterBalance))} T`}
+                    isLoading={isLoading}
+                    disabled={true}
+                />
+            </Grid>
+            <Grid xs={11} md={9} display="flex" justifyContent="center" alignItems="center">
+                <DataField
+                    label={'Back-end Canister Balance: '}
+                    className={'loginPage'}
+                    text={`${round2Decimals(inTrillions(backendCanisterBalance))} T`}
+                    isLoading={isLoading}
+                    disabled={true}
+                />
+            </Grid>
+            <Grid xs={11} md={9} display="flex" justifyContent="center" alignItems="center">
+                <AccordionField>
+                    <div title={accordionContent[0].title} image={accordionContent[0].image}></div>
+                    <div title={accordionContent[1].title} image={accordionContent[1].image}></div>
+                    <div title={accordionContent[2].title} image={accordionContent[2].image}></div>
+                    <div title={accordionContent[3].title} image={accordionContent[3].image}></div>
+                </AccordionField>
+            </Grid>
+        </Grid>
     );
-
 }
 
 export default LoginPage; 

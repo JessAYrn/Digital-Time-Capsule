@@ -1,4 +1,4 @@
-export const copyWalletAddressHelper = (address) => {
+export const copyText = (address) => {
     const addressTextArea = document.createElement("input");
 
     document.body.appendChild(addressTextArea);

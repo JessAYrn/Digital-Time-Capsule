@@ -1,111 +1,80 @@
-import { milisecondsToNanoSeconds } from "../functionsAndConstants/Utils";
-import { file1FileIndex, file2FileIndex } from "../functionsAndConstants/Constants";
+import { getDateAsStringMMDDYYY, milisecondsToNanoSeconds } from "../functionsAndConstants/Utils";
 import { nanoSecondsToMiliSeconds, getDateAsString, dateAisLaterThanOrSameAsDateB } from "../functionsAndConstants/Utils";
 import { TEST_DATA_FOR_NOTIFICATIONS } from "../testData/notificationsTestData";
 
+export const journalPagesTableColumns = [
+    { 
+        field: 'entryKey', 
+        headerName: 'Key', 
+        width: 90,
+        editable: false
+    },
+    { 
+        field: 'timeStarted', 
+        headerName: 'Date Created', 
+        width: 200,
+        editable: false
+    },
+    { 
+        field: 'timeSubmitted', 
+        headerName: 'Date Completed', 
+        width: 200,
+        editable: false
+    },
+    {
+      field: 'location',
+      headerName: 'Location',
+      width: 200,
+      editable: false,
+    },
+    {
+        field: 'locked',
+        headerName: 'Locked',
+        width: 200,
+        type: 'boolean',
+        editable: false,
+    },
+    {
+        field: 'timeOfUnlock',
+        headerName: 'Available',
+        width: 200,
+        editable: false,
+    }
+];
 
-export const mapAndSendJournalPageRequestToApi = async (key, pageData, files, actor) => {
-
-    const [currentChunkIndex, setCurrentChunkIndex] = useState(0);
-
-    let blob1;
-    let blob2;
-
-    await files.file1.arrayBuffer().then((arrayBuffer) => {
-        blob1 = new Blob([...new Uint8Array(arrayBuffer)], {type: files.file1.type });
+export const mapRequestsForAccessToTableRows = (journalEntries) => {
+    const journalEntries_ = journalEntries.map((page) => {
+        return {
+            id: page.entryKey,
+            entryKey: page.entryKey,
+            timeSubmitted: page.timeSubmited[0] ? getDateAsStringMMDDYYY(page.timeSubmited[0]) : null,
+            timeStarted: getDateAsStringMMDDYYY(page.timeStarted),
+            location: page.location,
+            timeOfUnlock: page.timeOfUnlock[0] ? getDateAsStringMMDDYYY(page.timeOfUnlock[0]) : null,
+            locked: page.locked
+        }
     });
+    return journalEntries_;
+}
 
-    await files.file2.arrayBuffer().then((arrayBuffer) => {
-        blob2 = new Blob([...new Uint8Array(arrayBuffer)], {type: files.file2.type });
-    });
-
-
-
-    const journalEntry = {
-        date: pageData.date,
-        text: pageData.entry,
-        lockTime: pageData.lockTime * 2.592 * 10**15,
-        timeTillUnlock: pageData.lockTime * 2.592 * 10**15,
-        location: pageData.location,
-        entryTitle: "test"
-    };
-
-    
-    const entry = (journalEntry, {file1: blob1, file2: blob2});
-    const entryKey = (key) ? {entryKey: key}: [];
-    await actor.updateJournal(entryKey, entry);
-
-};
 
 export const mapApiObjectToFrontEndJournalEntriesObject = (journalEntries) => {
     let journalEntriesForFrontend = journalEntries.map((arrayWithKeyAndPage) => {
         const backEndObj = arrayWithKeyAndPage[1];
         const entryKey  = arrayWithKeyAndPage[0];
         const filesMetaData = backEndObj.filesMetaData.map(fileData => {
-            return {
-                ...fileData,
-                lastModified : parseInt(fileData.lastModified)
-            };
+            return { ...fileData, lastModified : parseInt(fileData.lastModified), isLoading: true };
         });
-
-        let unlockTimeInNanoseconds = parseInt(backEndObj.unlockTime);
-        let unlockTimeInMilliseconds = nanoSecondsToMiliSeconds(unlockTimeInNanoseconds);
-        let unlockDate = getDateAsString(unlockTimeInMilliseconds);        
-        let submitDate = backEndObj.date;
-        let capsuled = false;
-        if(dateAisLaterThanOrSameAsDateB(unlockDate, submitDate) && submitDate !== unlockDate) capsuled = true;
-        return {
-            date: backEndObj.date,
-            title: backEndObj.entryTitle,
-            location: backEndObj.location,
-            capsuled: capsuled,
-            unlockTime: unlockDate,
-            entry: backEndObj.text,
-            emailOne: backEndObj.emailOne,
-            emailTwo: backEndObj.emailTwo,
-            emailThree: backEndObj.emailThree,
-            sent : backEndObj.sent,
-            read : backEndObj.read,
-            draft: backEndObj.draft,
-            filesMetaData: filesMetaData,
-            isOpen: false,
-            entryKey: parseInt(entryKey)
-        };
-    });
-    //sorting the entries by date of submission.
-    journalEntriesForFrontend = journalEntriesForFrontend.sort(function(a,b){
-        const dateForAArray = a.date.split('-');
-        const yearForA = parseInt(dateForAArray[0]);
-        const monthForA = parseInt(dateForAArray[1]);
-        const dayForA = parseInt(dateForAArray[2]);
-
-        const dateForBArray = b.date.split('-'); 
-        const yearForB = parseInt(dateForBArray[0]);
-        const monthForB = parseInt(dateForBArray[1]);
-        const dayForB = parseInt(dateForBArray[2]);
-
-        if(yearForA > yearForB){
-            return 1;
-        } else if(yearForA < yearForB){
-            return -1;
-        } else {
-            if(monthForA > monthForB){
-                return 1;
-            } else if(monthForA < monthForB){
-                return -1;
-            } else {
-                if(dayForA > dayForB){
-                    return 1;
-                } else if(dayForA < dayForB){
-                    return -1;
-                } else {
-                    return 0;
-                }
-            }
-        }
+        
+        return { 
+            ...backEndObj, 
+            filesMetaData: filesMetaData, 
+            entryKey: parseInt(entryKey),
+            timeOfUnlock: backEndObj.timeOfUnlock[0] ? [nanoSecondsToMiliSeconds(parseInt(backEndObj.timeOfUnlock[0]))] : [],
+            timeSubmited : backEndObj.timeSubmited[0] ? [nanoSecondsToMiliSeconds(parseInt(backEndObj.timeSubmited[0]))] : [],
+            timeStarted : nanoSecondsToMiliSeconds(parseInt(backEndObj.timeStarted))
+         };
     });
 
-    return journalEntriesForFrontend  ;
-
-
-}
+    return journalEntriesForFrontend;
+};

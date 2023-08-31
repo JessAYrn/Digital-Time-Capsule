@@ -4,81 +4,74 @@ import {types} from "../../reducers/journalReducer";
 import "./Journal.scss";
 import { AppContext } from "../App";
 import InputBox from "../../Components/Fields/InputBox";
-import * as AiIcons from 'react-icons/ai';
-import ButtonField from "../../Components/Fields/Button";
-import LoadScreen from "./LoadScreen";
-import { Modal } from "./modalContent/Modal";
+import SpeedDialField from '../../Components/Fields/SpeedDialField'
+import NoteAddIcon from '@mui/icons-material/NoteAdd';
+import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import { NavBar } from "../../Components/navigation/NavBar";
-import { MODALS_TYPES, NULL_STRING_ALL_LOWERCASE } from "../../functionsAndConstants/Constants";
 import { UI_CONTEXTS } from "../../functionsAndConstants/Contexts";
-import { dateAisLaterThanOrSameAsDateB, getDateAsString } from "../../functionsAndConstants/Utils";
+import { getHighestEntryKey, milisecondsToNanoSeconds } from "../../functionsAndConstants/Utils";
+import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 import FileCarousel from "../../Components/Fields/fileManger/FileCarousel";
-import { fileLoaderHelper } from "../../functionsAndConstants/loadingFunctions";
+import DataTable from "../../Components/Fields/Table";
+import DatePickerField from "../../Components/Fields/DatePicker";
 import "../../SCSS/scrollable.scss";
 import "../../SCSS/contentContainer.scss";
+import { journalPagesTableColumns, mapRequestsForAccessToTableRows } from "../../mappers/journalPageMappers";
+import { mapApiObjectToFrontEndJournalEntriesObject } from "../../mappers/journalPageMappers";
+import ModalComponent from "../../Components/modal/Modal";
+
+const count = 30
+
 
 const Journal = (props) => {
 
     const { journalState, journalDispatch, actorState, actorDispatch} = useContext(AppContext);
-    const [photosLoaded, setPhotosLoaded] = useState(false);
-    const [pageChangesMade, setPageChangesMade] = useState(false); 
-    
-    useEffect(async () => {
-        if(photosLoaded) return;
-        const promises = [];
+    const [counter, setCounter] = useState(1);
+    const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [modalIsLoading, setModalIsLoading] = useState(false);
 
-        journalState.bio.photos.forEach((fileData, fileIndex) => {
-            if(fileData.fileName === NULL_STRING_ALL_LOWERCASE) return;
-            if(fileData.file) return;
-            promises.push(fileLoaderHelper(
-                fileData, 
-                fileIndex,
-                null,
-                actorState,
-                journalDispatch,
-                types.CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE,
-                types.SET_FILE_JOURNAL_COVER_PAGE
-            ));
-        });
-        if(promises.length) setPhotosLoaded(true);
-        const result = await Promise.all(promises);
-    },[journalState.bio.photos]);
-
-
-    const handleSubmit = async () => {
-        setPageChangesMade(false);
+    const sendData = async () => {
         journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: true
-        });
+        })
+        const photos = journalState.bio.photos.filter(file => file && !!file.fileName);
         const result = await actorState.backendActor.updateBio({
-            dob: journalState.bio.dob,
+            dob: journalState.bio.dob[0] ? [milisecondsToNanoSeconds(journalState.bio.dob[0])] : [],
             pob: journalState.bio.pob,
             name: journalState.bio.name,
             dedications: journalState.bio.dedications,
             preface: journalState.bio.preface,
-            photos: journalState.bio.photos
+            photos: photos
         });
         journalDispatch({
             actionType: types.SET_IS_LOADING,
             payload: false
-        });
-        
-        if("ok" in result){
-            journalDispatch({
-                actionType: types.SET_MODAL_STATUS,
-                payload: {show:true, which: MODALS_TYPES.onSubmit, success: true}
-            });
-        } else {
-            journalDispatch({
-                actionType: types.SET_MODAL_STATUS,
-                payload: {show:true, which: MODALS_TYPES.onSubmit, success: false}
-            });
-        }
+        })
+        setCounter(1);
     };
 
-    const openPage = async (e, index, unlocked) => {
-        if(unlocked){
+    useEffect(() => {if(counter % count === 0) sendData()},[counter]);
+
+
+    const onTextBoxChange = () => setCounter(counter + 1);
+
+    const onDatePickerChange = async (e) => {
+        const date = new Date(e);
+        const dateInMilliseconds = date.getTime();
+        journalDispatch({
+            actionType: types.CHANGE_DOB,
+            payload: [dateInMilliseconds]
+        });
+        await sendData();
+    }
+
+    const triggerSendDataFunctionAfterReduxStateUpdate = () => {setCounter(count)};
+
+    const openPage = async (props) => {
+        const {entryKey, locked} = props;
+        const index = journalState.journal.findIndex((page) => page.entryKey === entryKey);
+        if(!locked){
             journalDispatch({
                 actionType: types.CHANGE_PAGE_IS_OPEN,
                 payload: true,
@@ -87,183 +80,174 @@ const Journal = (props) => {
         }
     };
 
-    const addJournalPage = () => {
-        //Ensures that there are no unsubmitted entries left over from a previous post
-        actorState.backendActor.clearUnsubmittedFiles();
-        journalDispatch({
-            actionType: types.ADD_JOURNAL_PAGE
-        });
-    }
-
-    const displayJournalTable = () => {
-
-        return( 
-            <>
-                <div 
-                    className={'tableDivContainer contentContainer'}
-                >
-                    <div className={'tableDiv journal'}>
-                        <table className={"tableHeader "}>
-                            <tbody>
-                                <tr className={"tableRow "}>
-                                    <th className={"tableCell "}>DATE</th>
-                                    <th className={"tableCell "}>LOCATION</th>
-                                    <th className={"tableCell "}>AVAILABLE</th>
-                                    <th className={"tableCell "}></th>
-
-                                </tr>
-                            </tbody>
-                        </table>
-                        <div className='scrollable '>
-                            <table className={"table"}>
-                                <tbody>
-                                    { journalState.journal.map((page, index) => {
-                                        let today = getDateAsString();
-                                        const unlocked = dateAisLaterThanOrSameAsDateB(today, page.unlockTime);
-                                        const openButton = (unlocked) ? 'Open' : 'Locked';
-                                        return(
-                                            <tr className={"tableRow "+index} key={index}>
-                                                <td className={"tableCell "+index}>{page.date}</td>
-                                                <td className={"tableCell "+index}>{page.location}</td>
-                                                <td className={"tableCell "+index}>{page.unlockTime}  </td>
-                                                <td className={"tableCell "+index}> <button className={'openButton'} onClick={(e) => openPage(e, index, unlocked)}> {openButton} </button> </td>
-                                            </tr>  
-                                        );
-                                    }) }
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </>
-        );
+    const addFile = () => {
+        journalDispatch({ actionType: types.ADD_COVER_PHOTO });
+        const element = document.querySelector(".fileUploaderWrapperGrid");
+        element?.scrollIntoView({behavior: "smooth"});
     };
+
+    const createJournalPage = async () => {
+        setModalIsLoading(true);
+        setModalIsOpen(true);
+        const result = await actorState.backendActor.createJournalEntry();
+        
+        let journalEntries = result.ok;
+        journalEntries = mapApiObjectToFrontEndJournalEntriesObject(journalEntries);
+        const entryKey = getHighestEntryKey(journalEntries);
+        journalDispatch({ payload: journalEntries, actionType: types.SET_JOURNAL });
+        openPage({entryKey: entryKey, locked: false});
+        setModalIsOpen(false);
+        setModalIsLoading(false)
+    };
+
+    const speedDialActions = [
+        {name: "New Jorunal Entry", icon: NoteAddIcon , onClick: createJournalPage},
+        {name: "New Cover Photo", icon: AddAPhotoIcon, onClick: addFile}
+    ]
 
     const getIndexOfVisiblePage = () => {
         return journalState.journal.findIndex(page => page.isOpen === true);
     }
 
     return(
-        journalState.modalStatus.show ?
-        <div className={"container journal"}>
-            <Modal 
-                context={UI_CONTEXTS.JOURNAL}
-                index={getIndexOfVisiblePage()}
-            />
-        </div> : 
-        <React.Fragment>
+        <>
+        <Grid 
+            container 
+            className={'container_journal'} 
+            columns={12} 
+            xs={12} 
+            rowSpacing={8} 
+            display="flex" 
+            justifyContent="center" 
+            alignItems="center" 
+            flexDirection={"column"}
+        >
+            <NavBar context={UI_CONTEXTS.JOURNAL} isLoading={journalState.isLoading}/>
+            {(getIndexOfVisiblePage() >=0) ?
+            <JournalPage index={getIndexOfVisiblePage()}/> :
             <>
-                { (getIndexOfVisiblePage() < 0) ? 
-                    <div className={"container journal"}>
-                        <NavBar
-                            walletLink={true}
-                            journalLink={false}
-                            accountLink={true}
-                            dashboardLink={true}
-                            notificationIcon={true}
-                            unreadNotifications={journalState.notifications}
-                            context={UI_CONTEXTS.JOURNAL}
+                <Grid 
+                    className={"firstWritingSectionWrapperGrid"}
+                    columns={12} 
+                    xs={11} 
+                    md={9} 
+                    rowSpacing={0} 
+                    display="flex" 
+                    justifyContent="center" 
+                    alignItems="center" 
+                    flexDirection={"column"} 
+                    marginTop={"20px"}
+                >
+                    <InputBox
+                        label={"This Journal Belongs To: "}
+                        rows={"1"}
+                        editable={true}
+                        dispatch={journalDispatch}
+                        onChange={onTextBoxChange}
+                        onBlur={sendData}
+                        dispatchAction={types.CHANGE_NAME}
+                        value={journalState.bio.name}
+                    />
+                    <Grid xs={12} display={"flex"} justifyContent={"left"} alignItems={"center"}>
+                        <DatePickerField
+                            value={journalState.bio.dob[0]}
+                            label={"Date Of Birth"}
+                            onChange={onDatePickerChange}
+                            editable={true}
+                            md={11}
+                            xs={11}
                         />
-                        {journalState.isLoading ? 
-                        <LoadScreen/> : 
-                        <div className={"container__Journal"}>
-                            <div className={'biography'}>
-                                <div className={"contentContainer "}>
-                                    <InputBox
-                                        label={"This Journal Belongs To: "}
-                                        setChangesWereMade={setPageChangesMade}
-                                        rows={"1"}
-                                        dispatch={journalDispatch}
-                                        dispatchAction={types.CHANGE_NAME}
-                                        value={journalState.bio.name}
-                                    />
-                                </div>
-                                <div className={"contentContainer "}>
-                                    <InputBox
-                                        label={"Date of Birth: "}
-                                        setChangesWereMade={setPageChangesMade}
-                                        rows={"1"}
-                                        dispatch={journalDispatch}
-                                        dispatchAction={types.CHANGE_DOB}
-                                        value={journalState.bio.dob}
-                                    />
-                                </div>
-                                <div className={"contentContainer "}>
-                                    <InputBox
-                                        label={"Place of Birth: "}
-                                        setChangesWereMade={setPageChangesMade}
-                                        rows={"1"}
-                                        dispatch={journalDispatch}
-                                        dispatchAction={types.CHANGE_POB}
-                                        value={journalState.bio.pob}
-                                    />
-                                </div>
-                                <div 
-                                    className={'coverPhotoDiv contentContainer'}
-                                >
-                                    <FileCarousel
-                                        videoHeight = {'330'}
-                                        filesMetaDataArray={journalState.bio.photos}
-                                        journalState={journalState}
-                                        actorState={actorState}
-                                        actorDispatch={actorDispatch}
-                                        setChangesWereMade={setPageChangesMade}
-                                        journalDispatch={journalDispatch}
-                                        dispatchActionToAddFile={types.ADD_COVER_PHOTO}
-                                        dispatchActionToDeleteFile={types.REMOVE_COVER_PHOTO}
-                                        classNameMod={'coverPhoto'}
-                                        dispatchActionToChangeFileMetaData={types.CHANGE_FILE_METADATA_JOURNAL_COVER_PAGE}
-                                        dispatchActionToChangeFileLoadStatus={types.CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE}
-                                    />
-                                </div>
-                                <div className={"contentContainer "}>
-                                    <InputBox
-                                        divClassName={'dedications'}
-                                        setChangesWereMade={setPageChangesMade}
-                                        label={"Dedications: "}
-                                        rows={"8"}
-                                        dispatch={journalDispatch}
-                                        dispatchAction={types.CHANGE_DEDICATIONS}
-                                        value={journalState.bio.dedications}
-                                    />
-                                </div>
-                                <div className={"contentContainer "}>
-                                    <InputBox
-                                        divClassName={'preface'}
-                                        setChangesWereMade={setPageChangesMade}
-                                        label={"Preface: "}
-                                        rows={"29"}
-                                        dispatch={journalDispatch}
-                                        dispatchAction={types.CHANGE_PREFACE}
-                                        value={journalState.bio.preface}
-                                    />
-                                </div>
-                                {displayJournalTable()}
-                            </div>
-                            {
-                                pageChangesMade &&
-                                <ButtonField
-                                    text={'Submit'}
-                                    className={'submitButtonDiv'}
-                                    onClick={handleSubmit}
-                                    withBox={true}
-                                />
-                            }
-                            <ButtonField
-                                Icon={AiIcons.AiFillFileAdd}
-                                iconSize={25}
-                                className={'addPageDiv'}
-                                onClick={addJournalPage}
-                                withBox={true}
-                            />
-                        </div> }
-                    </div> : 
-                    <JournalPage
-                        index={getIndexOfVisiblePage()}
-                    /> 
-                }
-            </>
-        </React.Fragment> 
+                    </Grid>
+                    <InputBox
+                        label={"Place of Birth: "}
+                        rows={"1"}
+                        editable={true}
+                        onChange={onTextBoxChange}
+                        onBlur={sendData}
+                        dispatch={journalDispatch}
+                        dispatchAction={types.CHANGE_POB}
+                        value={journalState.bio.pob}
+                    />
+                </Grid>
+                <Grid 
+                    className={"fileCarouselWrapperGrid"}
+                    columns={12} 
+                    xs={12} 
+                    md={9} 
+                    rowSpacing={8} 
+                    display="flex" 
+                    justifyContent="center" 
+                    alignItems="center" 
+                    flexDirection={"column"}
+                >
+                <FileCarousel
+                    editable={true}
+                    revokeDataURL={false}
+                    onChange={triggerSendDataFunctionAfterReduxStateUpdate}
+                    filesMetaDataArray={journalState.bio.photos}
+                    journalState={journalState}
+                    actorDispatch={actorDispatch}
+                    dispatch={journalDispatch}
+                    dispatchActionToAddFile={types.ADD_COVER_PHOTO}
+                    dispatchActionToRemoveFile={types.MARK_COVER_PHOTO_AS_DELETED}
+                    classNameMod={'coverPhoto'}
+                    dispatchActionToChangeFileMetaData={types.CHANGE_FILE_METADATA_JOURNAL_COVER_PAGE}
+                    dispatchActionToChangeFileLoadStatus={types.CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE}
+                />
+                </Grid>
+                <Grid 
+                    className={"secondWritingSectionWrapperGrid"}
+                    columns={12} 
+                    xs={11} md={9} 
+                    rowSpacing={8} 
+                    display="flex" 
+                    justifyContent="center" 
+                    alignItems="center" 
+                    flexDirection={"column"}
+                >
+                    <InputBox
+                        label={"Dedications: "}
+                        editable={true}
+                        onChange={onTextBoxChange}
+                        onBlur={sendData}
+                        rows={"8"}
+                        dispatch={journalDispatch}
+                        dispatchAction={types.CHANGE_DEDICATIONS}
+                        value={journalState.bio.dedications}
+                    />
+                    <InputBox
+                        label={"Preface: "}
+                        editable={true}
+                        onChange={onTextBoxChange}
+                        onBlur={sendData}
+                        rows={"16"}
+                        dispatch={journalDispatch}
+                        dispatchAction={types.CHANGE_PREFACE}
+                        value={journalState.bio.preface}
+                    />
+                </Grid>
+                <Grid 
+                    className={'DataTableWrapperGrid'}
+                    columns={12} 
+                    xs={11} md={9} 
+                    rowSpacing={8} 
+                    display="flex" 
+                    justifyContent="center" 
+                    alignItems="center" 
+                    flexDirection={"column"}
+                >
+                    <DataTable
+                        onRowClick={openPage}
+                        transparent={true}
+                        columns={journalPagesTableColumns}
+                        rows={mapRequestsForAccessToTableRows(journalState.journal)}
+                    />
+                </Grid>
+                <SpeedDialField actions={speedDialActions} position={"right"}/>
+            </>}  
+        </Grid>
+        <ModalComponent open={modalIsOpen} isLoading={modalIsLoading} />
+        </>
     );
 
 }
