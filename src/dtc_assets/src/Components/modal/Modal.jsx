@@ -51,7 +51,7 @@ const ModalComponent = (props_) => {
           {bigText && !isLoading && <h2 id="parent-modal-title">{bigText}</h2>}
           {Icon && !isLoading &&  <Icon style={{height: "75px", width:"75px" }}/>}
           {smallText && !isLoading && <p id="parent-modal-description">{smallText}</p>}
-          {imageSrc || !isLoading && <img className='modalImg' src={imageSrc} alt='Wrong src'/>}
+          {imageSrc && !isLoading && <img className='modalImg' src={imageSrc} alt='Wrong src'/>}
           {isLoading && 
           <ButtonField 
             transparentBackground={true}

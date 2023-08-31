@@ -35,7 +35,7 @@ const Journal = (props) => {
             actionType: types.SET_IS_LOADING,
             payload: true
         })
-        const photos = journalState.bio.photos.filter(file => !!file.fileName);
+        const photos = journalState.bio.photos.filter(file => file && !!file.fileName);
         const result = await actorState.backendActor.updateBio({
             dob: journalState.bio.dob[0] ? [milisecondsToNanoSeconds(journalState.bio.dob[0])] : [],
             pob: journalState.bio.pob,
@@ -182,14 +182,14 @@ const Journal = (props) => {
                 >
                 <FileCarousel
                     editable={true}
+                    revokeDataURL={false}
                     onChange={triggerSendDataFunctionAfterReduxStateUpdate}
                     filesMetaDataArray={journalState.bio.photos}
                     journalState={journalState}
-                    actorState={actorState}
                     actorDispatch={actorDispatch}
                     dispatch={journalDispatch}
                     dispatchActionToAddFile={types.ADD_COVER_PHOTO}
-                    dispatchActionToRemoveFile={types.REMOVE_COVER_PHOTO}
+                    dispatchActionToRemoveFile={types.MARK_COVER_PHOTO_AS_DELETED}
                     classNameMod={'coverPhoto'}
                     dispatchActionToChangeFileMetaData={types.CHANGE_FILE_METADATA_JOURNAL_COVER_PAGE}
                     dispatchActionToChangeFileLoadStatus={types.CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE}

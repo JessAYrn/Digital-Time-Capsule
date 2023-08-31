@@ -1,6 +1,6 @@
-import React, { useContext, useState} from 'react';
+import React, { useContext, useEffect, useState} from 'react';
 import "./FileUpload.scss";
-import { mapAndSendFileToApi, getIsWithinProperFormat, updateFileMetadataInStore, getFileURL, createFileId } from './FileManagementTools';
+import { mapAndSendFileToApi, getIsWithinProperFormat, updateFileMetadataInStore, createFileId } from './FileManagementTools';
 import { AppContext as AccountContext} from '../../../Routes/Account';
 import { AppContext as HomePageContext} from '../../../Routes/HomePage';
 import { AppContext as JournalContext} from '../../../Routes/App';
@@ -17,9 +17,11 @@ import ModalComponent from '../../modal/Modal';
 import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import WarningIcon from '@mui/icons-material/Warning';
+import { fileLoaderHelper } from '../../../functionsAndConstants/loadingFunctions';
 
 
 const FileUpload = (props) => {
+
     const {
         index,
         elementId,
@@ -33,7 +35,8 @@ const FileUpload = (props) => {
         fileData,
         dispatch,
         displayDeleteButton,
-        onChange
+        onChange,
+        revokeDataURL
     } = props;
             
     let contexts = {
@@ -47,10 +50,25 @@ const FileUpload = (props) => {
 
     let AppContext = retrieveContext(contexts, context);
 
-    
     const { actorState } = useContext(AppContext);
     const [modalProps, setModalProps] = useState({});
     const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [errorWhenDisplaying, setErrorWhenDisplaying] = useState(null);
+
+    useEffect(async () => {
+        if(errorWhenDisplaying || (fileData.fileName && !fileData.file)){
+            await fileLoaderHelper({
+                fileData,
+                index,
+                fileIndex,
+                actorState, 
+                dispatch, 
+                dispatchActionToChangeFileLoadStatus,
+                dispatchActionToChangeFileMetaData
+            });
+            setErrorWhenDisplaying(null);
+        }
+    }, [errorWhenDisplaying, fileData.fileName]);
 
     const deleteFile = async () => {
         dispatch({
@@ -63,6 +81,13 @@ const FileUpload = (props) => {
     };
 
     const handleUpload = async (e) => {
+        dispatch({
+            actionType: dispatchActionToChangeFileLoadStatus,
+            payload: true,
+            fileIndex: fileIndex,
+            index: index
+        });
+
         const uploadedFile = e.target.files[0];
         dispatch({ 
             actionType: dispatchActionToChangeFileLoadStatus,
@@ -79,15 +104,15 @@ const FileUpload = (props) => {
         if(!formatStatus.isProperFormat){
             setModalProps({...formatStatus.modalInput})
             setModalIsOpen(true);
-            dispatch({ 
+            dispatch({
                 actionType: dispatchActionToChangeFileLoadStatus,
                 payload: false,
-                index: index,
-                fileIndex: fileIndex 
+                fileIndex: fileIndex,
+                index: index
             });
             return;
         }
-        const fileURL = await getFileURL(uploadedFile);
+        const fileURL = URL.createObjectURL(uploadedFile);
         const fileId = createFileId(uploadedFile);
         const responses = await mapAndSendFileToApi({ ...inputForDisplayFileFunction, fileId});
         let hasError = false;
@@ -107,6 +132,12 @@ const FileUpload = (props) => {
                 Icon: ErrorOutlineIcon
             })
             setModalIsOpen(true);
+            dispatch({
+                actionType: dispatchActionToChangeFileLoadStatus,
+                payload: false,
+                fileIndex: fileIndex,
+                index: index
+            });
             return;
         }
         updateFileMetadataInStore({ ...inputForDisplayFileFunction, fileURL, fileId});
@@ -121,6 +152,13 @@ const FileUpload = (props) => {
         onChange();
     };
 
+    const onLoad = () => {
+        if(revokeDataURL){ 
+            setErrorWhenDisplaying(false);
+            URL.revokeObjectURL(fileData.file);
+        }
+    }
+    
     return(
         <>
             <Card 
@@ -138,22 +176,22 @@ const FileUpload = (props) => {
                         /> 
                     </Grid>
                 }
-                {fileData.file ?
-                    <>
-                        <CardMedia
-                            component={ fileData.fileType.includes("image") ? "img" : "video" }
-                            className='cardMediaComponent'
-                            autoPlay
-                            muted
-                            height={500}
-                            controls
-                            src={ fileData.file}
-                        /> 
-                    </>:
+                {fileData.file && !fileData.isLoading && !errorWhenDisplaying ?
+                    <CardMedia
+                        component={ fileData.fileType.includes("image") ? "img" : "video" }
+                        className='cardMediaComponent'
+                        id={`${elementId}_imgTag`}
+                        muted
+                        onLoad={onLoad}
+                        onError={() => setErrorWhenDisplaying(true)}
+                        height={500}
+                        controls
+                        src={fileData.file}
+                    /> :
                     <ButtonField 
                         className={'FileUploaderButton'}
                         disabled={disabled}
-                        isLoading={fileData.isLoading}
+                        isLoading={fileData.isLoading || errorWhenDisplaying}
                         id={elementId} 
                         text={"Upload Photo / Video"}
                         upload={true}

@@ -19,14 +19,14 @@ export const types = {
     CHANGE_DEDICATIONS: "CHANGE_DEDICATIONS",
     CHANGE_NAME: "CHANGE_NAME",
     ADD_COVER_PHOTO: "ADD_COVER_PHOTO",
-    REMOVE_COVER_PHOTO: "REMOVE_COVER_PHOTO",
+    MARK_COVER_PHOTO_AS_DELETED: "MARK_COVER_PHOTO_AS_DELETED",
     CHANGE_ENTRY_TITLE: "CHANGE_ENTRY_TITLE",
     CHANGE_FILE_METADATA: "CHANGE_FILE_METADATA",
     CHANGE_FILE_METADATA_JOURNAL_COVER_PAGE: "CHANGE_FILE_METADATA_JOURNAL_COVER_PAGE",
     CHANGE_FILE_LOAD_STATUS: "CHANGE_FILE_LOAD_STATUS",
     CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE: "CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE",
     CHANGE_PAGE_IS_OPEN: "CHANGE_PAGE_IS_OPEN",
-    REMOVE_JOURNAL_ENTRY_FILE: "REMOVE_JOURNAL_ENTRY_FILE",
+    MARK_JOURNAL_ENTRY_AS_DELETED: "MARK_JOURNAL_ENTRY_AS_DELETED",
 }
 
 
@@ -59,7 +59,7 @@ export const defaultFileMetaData = {
 
 const changeValue = (state = initialState, action) => {
 
-    const {actionType, payload, index, fileIndex, blockReload } = action;
+    const {actionType, payload, index, fileIndex } = action;
     let updatedFileMetaData;
     let updatedJournalPage;
     let updatedFilesMetaDataArry;
@@ -142,9 +142,11 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
-        case types.REMOVE_JOURNAL_ENTRY_FILE:
-            updatedFilesMetaDataArry = [...state.journal[index].filesMetaData];
-            updatedFilesMetaDataArry.pop();
+        case types.MARK_JOURNAL_ENTRY_AS_DELETED:
+            updatedFilesMetaDataArry = state.journal[index].filesMetaData.map((metaData, i) => {
+                if(i === fileIndex) return null;
+                return metaData;
+            });
             state.journal[index].filesMetaData = updatedFilesMetaDataArry;
             return {
                 ...state
@@ -182,18 +184,15 @@ const changeValue = (state = initialState, action) => {
                 ...state.journal[index].filesMetaData[fileIndex],
                 isLoading: payload,
             };
-            updatedFilesMetaDataArry = blockReload ? state.journal[index].filesMetaData : [...state.journal[index].filesMetaData];
+            updatedFilesMetaDataArry = [...state.journal[index].filesMetaData];
             updatedFilesMetaDataArry[fileIndex] = updatedFileMetaData;
             state.journal[index].filesMetaData = updatedFilesMetaDataArry;
             return {
                 ...state
             }
         case types.CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE:
-            updatedFileMetaData = {
-                ...state.bio.photos[fileIndex],
-                isLoading: payload,
-            };
-            updatedFilesMetaDataArry = blockReload ? state.bio.photos : [...state.bio.photos];
+            updatedFileMetaData = { ...state.bio.photos[fileIndex], isLoading: payload };
+            updatedFilesMetaDataArry = [...state.bio.photos];
             updatedFilesMetaDataArry[fileIndex] = updatedFileMetaData;
             state.bio.photos = updatedFilesMetaDataArry;
             return {
@@ -231,8 +230,11 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
-        case types.REMOVE_COVER_PHOTO:
-            updatedPhotos = state.bio.photos.filter((metaData, i) =>  i !== fileIndex);
+        case types.MARK_COVER_PHOTO_AS_DELETED:
+            updatedPhotos = state.bio.photos.map((metaData, i) =>  {
+                if(i === fileIndex) return null;
+                return metaData
+            });
             state.bio.photos =  updatedPhotos
             return {
                 ...state

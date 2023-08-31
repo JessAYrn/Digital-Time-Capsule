@@ -89,7 +89,14 @@ export const loadJournalData = async (actorState, journalDispatch, types) => {
     journal = journal.ok;
     let { userJournalData } = journal;
     let [journalEntries, journalBio] = userJournalData;
-    journalBio = {...journalBio, dob: journalBio.dob[0] ? [nanoSecondsToMiliSeconds(parseInt(journalBio.dob[0]))] : []}
+    const filesMetaData = journalBio.photos.map(fileData => {
+        return { ...fileData, lastModified : parseInt(fileData.lastModified), isLoading: true };
+    });
+    journalBio = {
+        ...journalBio, 
+        dob: journalBio.dob[0] ? [nanoSecondsToMiliSeconds(parseInt(journalBio.dob[0]))] : [],
+        photos: filesMetaData
+    };
     journalEntries = mapApiObjectToFrontEndJournalEntriesObject(journalEntries);
     journalDispatch({
         payload: journalBio,
@@ -245,7 +252,7 @@ export const recoverState = async ( location, dispatchMethods, types, connection
     });
 };
 
-export const fileLoaderHelper =  async (props) => {
+export const fileLoaderHelper = async (props) => {
     const {
         fileData, 
         fileIndex,
@@ -254,26 +261,23 @@ export const fileLoaderHelper =  async (props) => {
         dispatch, 
         dispatchActionToChangeFileLoadStatus,
         dispatchActionToChangeFileMetaData
-    } = props
+    } = props;
     dispatch({
         actionType: dispatchActionToChangeFileLoadStatus,
         payload: true,
-        blockReload: true,
         fileIndex: fileIndex,
         index: index
     });
     const dataURL = await getFileUrl_fromApi(actorState, fileData);
     dispatch({
         actionType: dispatchActionToChangeFileMetaData,
-        payload: { ...fileData, file: dataURL},
-        blockReload: true,
+        payload: { ...fileData, file: dataURL },
         fileIndex: fileIndex,
         index: index
     });
     dispatch({
         actionType: dispatchActionToChangeFileLoadStatus,
         payload: false,
-        blockReload: true,
         fileIndex: fileIndex,
         index: index
     });

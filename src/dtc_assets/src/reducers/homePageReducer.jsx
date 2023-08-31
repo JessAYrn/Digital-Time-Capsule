@@ -34,7 +34,7 @@ export const homePageInitialState={
 }
 
 const changeValue=(state=homePageInitialState, action)=>{
-    const{actionType,payload,index, fileIndex, blockReload}=action;
+    const{actionType,payload}=action;
 
 
     switch(actionType){

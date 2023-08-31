@@ -63,7 +63,7 @@ export const mapApiObjectToFrontEndJournalEntriesObject = (journalEntries) => {
         const backEndObj = arrayWithKeyAndPage[1];
         const entryKey  = arrayWithKeyAndPage[0];
         const filesMetaData = backEndObj.filesMetaData.map(fileData => {
-            return { ...fileData, lastModified : parseInt(fileData.lastModified) };
+            return { ...fileData, lastModified : parseInt(fileData.lastModified), isLoading: true };
         });
         
         return { 

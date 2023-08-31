@@ -316,11 +316,11 @@ const JournalPage = (props) => {
                     disabled={journalPageData.submitted}
                     onChange={triggerSendDataFunctionAfterReduxStateUpdate}
                     filesMetaDataArray={journalPageData.filesMetaData}
-                    actorState={actorState}
+                    revokeDataURL={true}
                     index={index}
                     dispatch={journalDispatch}
                     dispatchActionToAddFile={types.ADD_JOURNAL_ENTRY_FILE}
-                    dispatchActionToRemoveFile={types.REMOVE_JOURNAL_ENTRY_FILE}
+                    dispatchActionToRemoveFile={types.MARK_JOURNAL_ENTRY_AS_DELETED}
                     dispatchActionToChangeFileMetaData={types.CHANGE_FILE_METADATA}
                     dispatchActionToChangeFileLoadStatus={types.CHANGE_FILE_LOAD_STATUS}
                 />

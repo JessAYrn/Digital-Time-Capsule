@@ -16,18 +16,6 @@ export const retrieveChunk = async (actorState, fileName, chunkIndex) => {
     return chunk
 }; 
 
-export const getFileURL = async (file) => {
-    return new Promise((res, rej) => {
-        var reader = new FileReader();  
-        reader.onload = function(e) { 
-            var myDataUrl = e.target.result;
-            res(myDataUrl);
-            // do something with the URL in the DOM,
-            // then save it to local storage
-        };  
-        reader.readAsDataURL(file);
-    });
-};
 
 export const uploadChunk = async (actorState, fileId, chunkId, fileChunk) => {    
     const fileChunkAsBlob = await fileToBlob(fileChunk);
@@ -158,7 +146,7 @@ export const getFileUrl_fromApi = async (
                 type: metaData_.fileType 
             }
         );
-        const fileAsFile = new File(
+        let fileAsFile = new File(
             [fileBlob],
             fileName, 
             {
@@ -166,7 +154,7 @@ export const getFileUrl_fromApi = async (
                 lastModified: parseInt(metaData_.lastModified)
             } 
         );
-        fileURL = await getFileURL(fileAsFile);
+        fileURL = URL.createObjectURL(fileAsFile);
     };
     return fileURL;
 };
