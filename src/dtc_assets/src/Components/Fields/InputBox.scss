@@ -1,55 +1,31 @@
-.inputBox{
-    width: 100%;
-    opacity: 0.98;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 15px;
-    .label-element-div_input{
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        border-radius: 10px;
-        background-color: #202A44;
-        .label.disabled{
-            width: 93%;
-            font-family: 'Courier New', monospace;
-            font-size: .80rem;
-            color: white
-        }
-        .label.enabled{
-            width: 93%;
-            font-family: 'Courier New', monospace;
-            font-size: .95rem;
-            color: white
-        }
-    }
-    .input-element-div{
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        .enabled{
-            font-family: 'Courier New', monospace;
-            outline: 0;
-            border-width: 0 0 1px;
-            border-radius: 10px;
-            border-color: rgb(0, 0, 0);
-            background-color: white;
-            opacity: 1;
-            box-shadow: 0 5px 16px rgb(0 0 0 / 50%);
-            width: 97%;
-        }
-        
-        .disabled{
-            font-family: 'Courier New', monospace;
-            outline: 0;
-            opacity: 1;
-            border-width: 0 0 1px;
-            border-radius: 10px;
-            background-color: white;
-            box-shadow: 0 5px 16px rgb(0 0 0 / 50%);
-            width: 95%;
-        }
-    }
+.textField{
+    background-color: rgba(0, 0, 0, 0.5);
+}
+.css-vyyqu3-MuiFormLabel-root-MuiInputLabel-root{
+    color: #F7931A !important;
+}
+.css-8ok1qu-MuiInputBase-root-MuiFilledInput-root:before{
+    border-bottom: 1px solid #F7931A !important;
+}
+.css-8ok1qu-MuiInputBase-root-MuiFilledInput-root:after{
+    // border-bottom: 1px solid white !important;
+    color: white !important;
+}
+.css-e8k5fl-MuiFormLabel-root-MuiInputLabel-root{
+    color: white !important;
+}
+.css-8ok1qu-MuiInputBase-root-MuiFilledInput-root{
+    // border-bottom: 1px solid white !important;
+    color: white !important;
+}
+.MuiTextField-root{
+    width: 100% !important
+}
+.css-7209ej-MuiInputBase-input-MuiFilledInput-input.Mui-disabled{
+    -webkit-text-fill-color: white !important;
+}
+.buttonField.inputBox{
+    position: relative;
+    top: 30px;
+    z-index: 5;
 }

@@ -1,67 +1,43 @@
-import React, {useCallback} from "react";
-import { inTrillions, round2Decimals, shortenHexString } from "../../functionsAndConstants/Utils";
-import { copyWalletAddressHelper } from "../../functionsAndConstants/walletFunctions/CopyWalletAddress";
-import * as FaIcons from 'react-icons/fa';
+import React from "react";
 import ButtonField from "./Button";
+import Grid from '@mui/material/Unstable_Grid2';
+import  Paper  from '@mui/material/Paper';
 import "./DataField.scss";
-import '../../SCSS/section.scss'
+import { Typography } from "@mui/material";
 
 const DataField = (props) => {
     const {
         text,
         label,
-        onClick_0,
-        onClick_1,
-        buttonIcon_0,
-        buttonIcon_1,
-        className,
-        isCycles,
-        isPrincipal,
-        vertical
+        onClick,
+        isLoading,
+        buttonIcon,
+        disabled
     } = props;
     
-    let text_;
-    if(isCycles) text_ = round2Decimals(inTrillions(text));
-    else if(isPrincipal) text_ = shortenHexString(text);
-    else text_ = text;
-
-    const copyPrincipal = () => copyWalletAddressHelper(text);
 
     return(
-        <div className={`canisterDataDiv ${className ? className : ' '} ${vertical ? 'vertical' : ' '}`}>
-            {buttonIcon_0 &&
-            <ButtonField
-                Icon={buttonIcon_0}
-                iconSize={25}
-                className={'section'}
-                onClick={onClick_0}
-            />}
-            {label && <div className={'section'}>
-                <h5 className={'lebelH5'}>
-                    {label} 
-                </h5>
-            </div>}
-            <div className={'section'}>
-                <h5 className={'h5DataField'}>
-                    {(text_) ? text_ : 'Loading...'} {(isCycles && text_) ? "T" : ''} 
-                </h5>
-                {isPrincipal && 
-                    <ButtonField
-                        Icon={FaIcons.FaCopy}
-                        iconSize={17.5}
-                        onClick={copyPrincipal}
-                        withBox={false}
-                    />
-                }
-            </div>
-            {buttonIcon_1 &&
-            <ButtonField
-                Icon={buttonIcon_1}
-                iconSize={25}
-                className={'section'}
-                onClick={onClick_1}
-            />}
-        </div>
+        <Grid columns={12} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} rowSpacing={0} className={'outter-grid'}> 
+            <Paper className={` dataField`} color={'secondary'}>
+                <Grid container columns={12} display="flex" justifyContent="center" alignItems="center">
+                    <Grid xs={6} display="flex" justifyContent="center" alignItems="center">
+                        <Typography style={{width: "100%", display:"flex", justifyContent:"left", alignItems:"center"}}>{label}</Typography>
+                    </Grid>
+                    <Grid xs={6} display="flex" justifyContent="right" alignItems="center">
+                        <ButtonField
+                            transparentBackground={true}
+                            elevation={0}
+                            isLoading={isLoading}
+                            text={text}
+                            onClick={onClick}
+                            Icon={buttonIcon}
+                            iconSize={'small'}
+                            disabled={disabled}
+                        />
+                    </Grid>
+                </Grid>
+            </Paper>
+        </Grid>
     )
 };
 

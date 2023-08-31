@@ -15,7 +15,8 @@ export const RenderQrCode = (props) => {
         imgUrl
     } = props;
     return(
-        <div className={'imgDiv'}>
+        imgUrl &&
+        <div className={'imgDiv'} style={{margin: "25px"}}>
             <img className='img' src={imgUrl} alt='Wallet QR Code'/>
         </div>
     )

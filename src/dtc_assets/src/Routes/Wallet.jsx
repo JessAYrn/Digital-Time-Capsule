@@ -6,7 +6,7 @@ import walletReducer ,{walletInitialState, walletTypes} from '../reducers/wallet
 import { UI_CONTEXTS } from '../functionsAndConstants/Contexts';
 import WalletPage from './Pages/WalletPage';
 import { testTx } from '../testData/Transactions';
-import { recoverState, loadAllDataIntoReduxStores } from '../functionsAndConstants/loadingFunctions';
+import { recoverState, loadAllDataIntoReduxStores, allStatesLoaded } from '../functionsAndConstants/loadingFunctions';
 import { useConnect } from '@connect2ic/react';
 import CkBtcPage from './Pages/CkBtcPage';
 import EthPage from './Pages/EthPage';
@@ -15,24 +15,32 @@ import { DEFAULT_APP_CONTEXTS, WALLET_TABS } from '../functionsAndConstants/Cons
 import accountReducer , {accountTypes, accountInitialState} from '../reducers/accountReducer';
 import homePageReducer,{ homePageInitialState, homePageTypes } from '../reducers/homePageReducer';
 import actorReducer , { actorInitialState, actorTypes } from '../reducers/actorReducer';
+import notificationsReducer, {notificationsInitialState, notificationsTypes} from "../reducers/notificationsReducer";
+import ModalComponent from '../Components/modal/Modal';
 
 export const AppContext = createContext(DEFAULT_APP_CONTEXTS);
 
 const WalletApp = () => {
 
     const [journalState, journalDispatch] = useReducer(journalReducer, initialState);
+    const [notificationsState, notificationsDispatch] = useReducer(notificationsReducer, notificationsInitialState);
     const [walletState, walletDispatch] = useReducer(walletReducer, walletInitialState);
     const [accountState, accountDispatch] = useReducer(accountReducer, accountInitialState);
     const [homePageState, homePageDispatch] = useReducer(homePageReducer, homePageInitialState);
     const [actorState, actorDispatch] = useReducer(actorReducer, actorInitialState);
+    
     const [stateHasBeenRecovered, setStateHasBeenRecovered] = useState(false);
+    const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [isLoadingModal, setIsLoadingModal] = useState(false);
+    const [modalProps, setModalProps] = useState({});
 
     const ReducerDispatches = {
         walletDispatch,
         journalDispatch,
         accountDispatch,
         homePageDispatch,
-        actorDispatch
+        actorDispatch,
+        notificationsDispatch
     }
 
     const ReducerTypes = {
@@ -40,7 +48,8 @@ const WalletApp = () => {
         walletTypes,
         accountTypes,
         homePageTypes,
-        actorTypes
+        actorTypes,
+        notificationsTypes
     }
 
     const ReducerStates = {
@@ -48,7 +57,8 @@ const WalletApp = () => {
         walletState,
         accountState,
         homePageState,
-        actorState
+        actorState,
+        notificationsState
     };
 
     const connectionResult = useConnect({ onConnect: () => {}, onDisconnect: () => {} });
@@ -73,11 +83,34 @@ const WalletApp = () => {
         else if(walletState.walletPageTab===WALLET_TABS.ckBtcTab) return CkBtcPage;
     },[walletState.walletPageTab]);
 
+    const displayComponent = useMemo(() => {
+        return journalState.isAuthenticated && allStatesLoaded({
+            journalState,
+            notificationsState,
+            walletState,
+            accountState,
+            homePageState
+        });
+    },[
+        journalState.isAuthenticated, 
+        accountState.dataHasBeenLoaded,
+        journalState.dataHasBeenLoaded,
+        walletState.dataHasBeenLoaded,
+        homePageState.dataHasBeenLoaded,
+        notificationsState.dataHasBeenLoaded,
+        actorState.dataHasBeenLoaded
+    ])
+
 
     //Loading Time Capsule Data
     useEffect(async () => {
         if(!actorState.backendActor) return; 
-        await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes, stateHasBeenRecovered);
+        setIsLoadingModal(true);
+        setModalIsOpen(true);
+        const response = await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes, stateHasBeenRecovered);
+        setModalIsOpen(response?.openModal);
+        setModalProps(response)
+        setIsLoadingModal(false);
     },[actorState.backendActor]);
     
     return(
@@ -92,16 +125,23 @@ const WalletApp = () => {
                     homePageDispatch,
                     homePageState,
                     actorDispatch,
-                    actorState
+                    actorState,
+                    notificationsState,
+                    notificationsDispatch
                 }}
             >
                 {
-                    journalState.isAuthenticated ?
+                    displayComponent ?
                         <WalletTabComponent/> : 
                         <LoginPage
                             context={UI_CONTEXTS.WALLET}
                         /> 
                 }
+                <ModalComponent 
+                    {...modalProps}
+                    open={modalIsOpen} 
+                    isLoading={isLoadingModal} 
+                />
             </AppContext.Provider>
     );
 

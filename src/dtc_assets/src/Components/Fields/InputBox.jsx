@@ -1,78 +1,110 @@
 import React, {useState, useRef} from 'react';
+import Grid from '@mui/material/Unstable_Grid2/Grid2';
+import Box from '@mui/material/Box';
+import TextField from '@mui/material/TextField';
+import { useTheme, ThemeProvider } from '@mui/material/styles';
+import EditIcon from '@mui/icons-material/Edit';
+import UploadIcon from '@mui/icons-material/Upload';
+import ButtonField from './Button';
 import "./InputBox.scss";
 
 
 const InputBox = (props) => {
     const inputRef = useRef();
-    const [disabledOrEnabled,setDisabledOrEnabled] = useState("disabled");
+    const [editing, setEditing] = useState(false);
+
     const {
         label,
         maxLength,
+        placeHolder,
         rows,
-        columns,
         disabled,
-        divClassName,
+        editable,
         dispatchAction,
         dispatch,
         index,
-        setChangesWereMade,
+        onBlur,
+        onChange,
         value,
-        onBlur_,
         setParentState
         // dispatchAction //the action that is to take place in order to dispatch the field change to the redux store
     } = props;
 
-    const [textValue, setTextValue] = useState(value);
-
-    const onBlur = () => {
-        if(dispatch){
-            dispatch({
-                payload: inputRef.current.value,
-                actionType: dispatchAction,
-                index: index
-            });
-        } else {
-            setParentState(inputRef.current.value);
-        }
-        setDisabledOrEnabled("disabled");
-        if(onBlur_) onBlur_();
-    };
-    const onFocus = () => {
-        setDisabledOrEnabled("enabled");
-    };
-
-    const onChnage = () => {
-        if(setChangesWereMade){
-            setChangesWereMade(true);
-        }
-        setTextValue(inputRef.current.value);
-        
+    const onChange_editButton = () => {
+        setEditing(!editing);
     }
 
-    return(
-        <div className={'inputBox'}>
-            <div className={'label-element-div_input '}>
-                <label className={"label "+disabledOrEnabled} htmlFor='Label'> {label}  &nbsp; </label>
-            </div>
-            <div className={`input-element-div ${(divClassName) ? divClassName : " "}`}>
-            <textarea
-                rows={rows}
-                cols={columns}
-                maxLength={maxLength}
-                className={disabledOrEnabled}
-                value={textValue}
-                type="text" 
-                alt={label} 
-                ref={inputRef} 
-                disabled={disabled} 
-                onFocus={onFocus}
-                onBlur={onBlur}
-                onChange={onChnage}
-            />
-            </div>
-        </div>
 
-        
+
+    const onChange_ = () => {
+        if(dispatch) dispatch({
+            actionType: dispatchAction,
+            payload: inputRef.current.value,
+            index: index
+        });
+        if(onChange) onChange(inputRef.current.value);
+    }
+    const theme = useTheme();
+
+    let EditIcon_;
+    if(editing) EditIcon_ = UploadIcon;
+    else if(!editing) EditIcon_ = EditIcon;
+
+    return(
+        <ThemeProvider theme={theme}>
+            <Grid 
+                columns={12} 
+                xs={12} 
+                display="flex" 
+                justifyContent="center" 
+                alignItems="center" 
+                flexDirection={"column"}
+                className="textField"
+                marginTop={"25px"}
+                marginBottom={"25px"}
+                paddingTop={0}
+                paddingBottom={0}
+                borderRadius={"60px"}
+            >
+                <Box
+                    width={"100%"}
+                    columns={12} 
+                    xs={12} 
+                    onBlur={onBlur}
+                    component="form"
+                    noValidate
+                    autoComplete="on"
+                >
+                    {
+                        editable && 
+                        <ButtonField
+                            className={"inputBox"}
+                            transparentBackground={true}
+                            elevation={0}
+                            onClick={onChange_editButton}
+                            Icon={EditIcon_}
+                            iconSize={'small'}
+                        />
+                    }
+                    <TextField
+                        columns={12} 
+                        xs={12} 
+                        width={"100%"}
+                        inputRef={inputRef}
+                        color='custom'
+                        placeholder={placeHolder}
+                        value={value}
+                        disabled={(editable && !editing) || disabled}
+                        onChange={onChange_}
+                        id="filled-multiline-flexible"
+                        label={label}
+                        multiline
+                        maxRows={rows ? rows : 100}
+                        variant="filled"
+                    />
+                </Box>
+            </Grid>
+        </ThemeProvider>
     )
 }; 
 

@@ -28,15 +28,13 @@ export const DEVICE_TYPES = {
 export const MEGABYTES = 1000000;
 
 export const MODALS_TYPES = {
-    exitWithoutSubmit: 'exitWithoutSubmit',
-    fileHasError: 'fileHasError',
-    notifications: 'notifications',
     onSend:'onSend',
     onSubmit: 'onSubmit',
-    notAuthorizedByOwner: "notAuthorizedByOwner",
     onRegisterNewOwner: "onRegisterNewOwner",
     requestApprovalRepsonse: "requestApprovalRepsonse",
-    dateSelectedOutOfRange: 'dateSelectedOutOfRange'
+    quicktimeVideoDetected: 'quicktimeVideoDetected',
+    unsupportedFileType: 'unsupportedFileType',
+    error: 'error'
 }
 
 export const MAX_NUMBER_OF_BYTES = 21000000;
@@ -56,10 +54,10 @@ export const CANISTER_DATA_FIELDS = {
     currentCyclesBalance_backend: "currentCyclesBalance_backend",
     currentCyclesBalance_frontend: "currentCyclesBalance_frontend",
     nftId: "nftId",
-    requestsForApproval: "requestsForApproval",
+    RequestsForAccess: "RequestsForAccess",
     users: "users",
     journalCount: "journalCount"
-}
+};
 
 export const PAGES = {
     JOURNAL_COVER: "JOURNAL_COVER",
@@ -98,10 +96,19 @@ export const DEFAULT_APP_CONTEXTS={
     homePageDispatch:()=>{},
     homePageState:{},
     actorState:{},
-    actorDispatch:()=>{}
+    actorDispatch:()=>{},
+    notificationsState:{},
+    notificationsDispatch: () => {}
 }
 export const MASTER_COPY_FRONTEND_CANISTER_ID = "fkkq7-siaaa-aaaap-qaaya-cai";
 
 export const forbiddenFileTypes = [
     'application/pdf'
 ];
+
+export const BUTTON_TYPES = {
+    iconWithText: 'iconWithText',
+    icon: 'icon',
+    text: 'text',
+    loading: 'loading'
+}

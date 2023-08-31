@@ -108,9 +108,9 @@ export const getDateInMilliseconds = (date) => {
   let time = hour+":"+minute+':'+seconds;
 
   date = month + ' ' + day + ', ' + year + ' ' + time + ' UTC+00:00';
-  let unlockDate = new Date(date);
-  let unlockTime = parseInt(unlockDate.getTime());
-  return unlockTime;
+  date = new Date(date);
+  time = parseInt(date.getTime());
+  return time;
 }
 
 export const getDateAsString = (dateInMilliseconds = null) => {
@@ -121,6 +121,17 @@ export const getDateAsString = (dateInMilliseconds = null) => {
   let day = date.getDate();
   if(day < 10) day = `0${day}`;
   date = year + '-' + month + '-' + day; 
+  return date;
+}
+
+export const getDateAsStringMMDDYYY = (dateInMilliseconds = null) => {
+  let date = dateInMilliseconds ? new Date(dateInMilliseconds) : new Date();
+  let year = date.getFullYear();
+  let month = date.getMonth() + 1;
+  if(month < 10) month = `0${month}`;
+  let day = date.getDate();
+  if(day < 10) day = `0${day}`;
+  date = month + '/'+ day + '/' + year; 
   return date;
 }
 
@@ -150,10 +161,19 @@ export const scrollToTop = () => {
   });
 }
 
-export const scrollToBottom = (distanceFromBottom = 0) => {
+export const scrollTo_X =  (distanceFromLeft = 0) => {
+  console.log(window.scrollY);
   window.scrollTo({
-    top: document.body.scrollHeight - distanceFromBottom,
-    left: 0,
+    top: window.scrollY,
+    left: distanceFromLeft,
+    behavior: 'smooth'
+  });
+}
+
+export const scrollTo_Y =  (distanceFromTop = 0) => {
+  window.scrollTo({
+    top: distanceFromTop,
+    left: window.scrollX,
     behavior: 'smooth'
   });
 }
@@ -206,6 +226,12 @@ export const getCurrentURL = () => {
   return window.location.href
 };
 
+export const isLocalHost = () => {
+  const url = getCurrentURL();
+  if(url.includes("localhost")) return true;
+  else false;
+}
+
 export const extractCanisterIdFromURL = (URL) => {
   if(process.env.NODE_ENV === "development") return MASTER_COPY_FRONTEND_CANISTER_ID;
   let canisterId = "";
@@ -222,5 +248,19 @@ export const allPropertiesInObjectAreDefined = (obj) => {
     if (value === undefined) return false;
   };
   return true;
+};
+
+export const objectsAreEqual = (obj1, obj2) => {
+  let equal = JSON.stringify(obj1) === JSON.stringify(obj2);
+  return equal;
 }
+
+export const getHighestEntryKey = (entries) => {
+    let max = 0;
+    for(let i = 0; i < entries.length; i++){
+      const {entryKey} = entries[i];
+      if(entryKey > max) max = entryKey;
+    };
+    return max;
+};
 

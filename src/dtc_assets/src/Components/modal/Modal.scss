@@ -1,0 +1,19 @@
+.modalImg{
+    max-height: 300px;
+    max-width: 300px
+}
+.modalBox{
+    background-color: rgba(52,52,52, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    color: #F7931A;
+    .modalChildCompoent{
+        margin: 60px;
+    }
+}
+
+.transparent.modalBox{
+    background-color: transparent
+}

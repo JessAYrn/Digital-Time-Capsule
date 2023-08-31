@@ -93,7 +93,7 @@ module{
 
     };
 
-    public func grantAccess( principal: Principal, appMetaData: MainTypes.AppMetaData) : 
+    public func grantAccess( principals: [Text], appMetaData: MainTypes.AppMetaData) : 
     async Result.Result<(MainTypes.AppMetaData), JournalTypes.Error> {
         let {
             requestsForAccess; defaultControllers; supportMode; cyclesSaveMode;
@@ -101,49 +101,53 @@ module{
             lastRecordedBackEndCyclesBalance; backEndPrincipal; frontEndPrincipal; managerCanisterPrincipal;
         } = appMetaData;
 
-        let principalAsText = Principal.toText(principal);
-        let requestsForAccessSize = Iter.size(Iter.fromArray(requestsForAccess));
-        let ArrayBuffer = Buffer.Buffer<(Text, MainTypes.Approved)>(1);
         var index = 0;
-        var requestPresent = false;
-        while(index < requestsForAccessSize){
-            let (thisPrincipalAsText, approved) = requestsForAccess[index];
-            if(thisPrincipalAsText == principalAsText){
-                ArrayBuffer.add((thisPrincipalAsText, true));
-                requestPresent := true;
-            } else { ArrayBuffer.add((thisPrincipalAsText, approved)); };
+        let principalsArraySize = principals.size();
+        let requestsHashMap : HashMap.HashMap<Text, Bool> = HashMap.fromIter<Text, Bool>(
+            Iter.fromArray(requestsForAccess), 
+            Iter.size(Iter.fromArray(requestsForAccess)), 
+            Text.equal,
+            Text.hash
+        );
+
+        while(index < principalsArraySize){
+            let principal = principals[index];
+            requestsHashMap.put(principal, true);
             index += 1;
         };
-        if(requestPresent == false){ ArrayBuffer.add((principalAsText, true)); };
+        let newRequestsArray = Iter.toArray(requestsHashMap.entries());
         let updatedAppMetaData: MainTypes.AppMetaData = {
-            requestsForAccess = ArrayBuffer.toArray(); defaultControllers; supportMode;
+            requestsForAccess = newRequestsArray; defaultControllers; supportMode;
             cyclesSaveMode; lastRecordedTime; acceptingRequests; nftId; nftOwner; backEndCyclesBurnRatePerDay;
             lastRecordedBackEndCyclesBalance; backEndPrincipal; frontEndPrincipal; managerCanisterPrincipal;
         }; 
         return #ok(updatedAppMetaData);
     };
 
-    public func updateApprovalStatus( principal: Principal, profilesMap: MainTypes.UserProfilesMap, newApprovalStatuse: Bool) : 
-    async Result.Result<(), JournalTypes.Error>{
+    public func updateApprovalStatus( principals: [Text], profilesMap: MainTypes.UserProfilesMap, newApprovalStatuse: Bool) : (){
 
-        let userProfile = profilesMap.get(principal);
-        switch(userProfile){
-            case null{ return #err(#NotFound); };
-            case(?profile){
-                let updatedProfile : MainTypes.UserProfile = {
-                    canisterId = profile.canisterId;
-                    email = profile.email;
-                    userName = profile.userName;
-                    userPrincipal = profile.userPrincipal;
-                    accountId = profile.accountId;
-                    approved = ?newApprovalStatuse;
-                    treasuryMember = profile.treasuryMember;
-                    treasuryContribution = profile.treasuryContribution;
-                    monthsSpentAsTreasuryMember = profile.monthsSpentAsTreasuryMember;
+        var index = 0;
+        while(index < principals.size()){
+            let principal = Principal.fromText(principals[index]);
+            let userProfile = profilesMap.get(principal);
+            switch(userProfile){
+                case null{};
+                case(?profile){
+                    let updatedProfile : MainTypes.UserProfile = {
+                        canisterId = profile.canisterId;
+                        email = profile.email;
+                        userName = profile.userName;
+                        userPrincipal = profile.userPrincipal;
+                        accountId = profile.accountId;
+                        approved = ?newApprovalStatuse;
+                        treasuryMember = profile.treasuryMember;
+                        treasuryContribution = profile.treasuryContribution;
+                        monthsSpentAsTreasuryMember = profile.monthsSpentAsTreasuryMember;
+                    };
+                    profilesMap.put(principal, updatedProfile);
                 };
-                profilesMap.put(principal, updatedProfile);
-                return #ok();
             };
+            index += 1;
         };
     };
 
@@ -173,27 +177,34 @@ module{
         return #ok(updatedAppMetaData);
     };
 
-    public func removeFromRequestsList( principal: Principal, appMetaData: MainTypes.AppMetaData) : 
+    public func removeFromRequestsList( principals: [Text], appMetaData: MainTypes.AppMetaData) : 
     async MainTypes.AppMetaData {
         let {
             requestsForAccess; defaultControllers; supportMode; cyclesSaveMode;
             lastRecordedTime; acceptingRequests; nftId; nftOwner; backEndCyclesBurnRatePerDay;
             lastRecordedBackEndCyclesBalance; backEndPrincipal; frontEndPrincipal; managerCanisterPrincipal;
         } = appMetaData;
-        let principalAsText = Principal.toText(principal);
-        let requestsForAccessSize = Iter.size(Iter.fromArray(requestsForAccess));
-        let ArrayBuffer = Buffer.Buffer<(Text, MainTypes.Approved)>(1);
+        
         var index = 0;
-        while(index < requestsForAccessSize){
-            let (thisPrincipalAsText, approved) = requestsForAccess[index];
-            if(thisPrincipalAsText != principalAsText){ ArrayBuffer.add((principalAsText, approved)); };
+        let principalsArraySize = principals.size();
+        let requestsHashMap : HashMap.HashMap<Text, Bool> = HashMap.fromIter<Text, Bool>(
+            Iter.fromArray(requestsForAccess), 
+            Iter.size(Iter.fromArray(requestsForAccess)), 
+            Text.equal,
+            Text.hash
+        );
+
+        while(index < principalsArraySize){
+            let principal = principals[index];
+            requestsHashMap.delete(principal);
             index += 1;
         };
-        let updatedAppMetaData : MainTypes.AppMetaData = {
-            requestsForAccess = ArrayBuffer.toArray(); defaultControllers; supportMode;
+        let newRequestsArray = Iter.toArray(requestsHashMap.entries());
+        let updatedAppMetaData: MainTypes.AppMetaData = {
+            requestsForAccess = newRequestsArray; defaultControllers; supportMode;
             cyclesSaveMode; lastRecordedTime; acceptingRequests; nftId; nftOwner; backEndCyclesBurnRatePerDay;
             lastRecordedBackEndCyclesBalance; backEndPrincipal; frontEndPrincipal; managerCanisterPrincipal;
-        };
+        }; 
         return updatedAppMetaData;
     };
 
@@ -286,6 +297,7 @@ module{
                     supportMode = appMetaData.supportMode;
                     cyclesSaveMode = appMetaData.cyclesSaveMode;
                     releaseVersion = currentVersion;
+                    requestsForAccess = appMetaData.requestsForAccess;
                 };
                 return #ok(canisterDataPackagedForExport);
             }
@@ -572,7 +584,7 @@ module{
         let isOwner = await verifyOwnership(caller, metaData);
         if(not isOwner){ return #err(#NotAuthorized);};
         let metaData_withOwner = updateOwner(caller, metaData);
-        let updatedAppMetaData = await grantAccess( caller, metaData_withOwner );
+        let updatedAppMetaData = await grantAccess( [Principal.toText(caller)], metaData_withOwner );
         switch(updatedAppMetaData){
             case(#ok(appMetaData)){ #ok((appMetaData))};
             case(#err(e)){ return #err(e) };
