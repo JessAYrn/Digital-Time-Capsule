@@ -16,14 +16,16 @@ module{
         backend_without_timer: WasmData;
         journal: WasmData;
         manager: WasmData;
+        treasury: WasmData;
     };
 
-    public let wasmTypes : { backend: Text; frontend: Text; manager: Text; journal: Text; backend_without_timer: Text } = { 
+    public let wasmTypes  = { 
         backend = "BACKEND"; 
         frontend = "FRONTEND"; 
         manager = "MANAGER"; 
         journal = "JOURNAL"; 
         backend_without_timer = "BACKEND_WITHOUT_TIMER";
+        treasury = "TREASURY";
     };
 
     public type Error = {

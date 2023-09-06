@@ -282,6 +282,7 @@ shared actor class User() = this {
         await CanisterManagementMethods.installCode_managerCanister(daoMetaData);
         let result_0 = await managerCanister.installCode_frontendCanister(daoMetaData);
         let result_1 = await managerCanister.installCode_journalCanisters(Iter.toArray(userProfilesMap.entries()));
+        let result_2 = await managerCanister.installCode_treasuryCanister(daoMetaData);
         await managerCanister.allowUpdatesToBackendCanister();
         return daoMetaData;
     };

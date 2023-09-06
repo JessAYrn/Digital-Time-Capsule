@@ -30,6 +30,14 @@ module{
         await installCode_(null, wasmModule, backEndPrincipalBlob);
     };
 
+    public func installCodeTreasuryWasm( daoMetaData: MainTypes.DaoMetaData, wasmModule: Blob): async (){
+        let {treasuryCanisterPrincipal; backEndPrincipal;} = daoMetaData;
+        let treasuryCanisterBlob = Principal.fromText(treasuryCanisterPrincipal);
+        let backEndPrincipalBlob = Principal.fromText(backEndPrincipal);
+        await installCode_(?backEndPrincipalBlob, wasmModule, treasuryCanisterBlob);
+    };
+
+
     public func installFrontendWasm( daoMetaData: MainTypes.DaoMetaData, wasmModule: Blob): async (){
         let {frontEndPrincipal} = daoMetaData;
         let frontEndPrincipalBlob = Principal.fromText(frontEndPrincipal);

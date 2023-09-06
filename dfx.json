@@ -8,6 +8,10 @@
       "main": "src/dtc/Journal/Journal.mo",
       "type": "motoko"
     },
+    "treasury": {
+      "main": "src/dtc/Treasury/Treasury.mo",
+      "type": "motoko"
+    },
     "manager": {
       "main": "src/dtc/Manager/Manager.mo",
       "type": "motoko"

@@ -8,6 +8,9 @@
     "manager": {
       "ic": "22xax-4iaaa-aaaap-qbaiq-cai"
     },
+    "treasury": {
+      "ic": "tv6ut-giaaa-aaaap-qbnvq-cai"
+    },
     "default": {
       "ic": "bs4fi-aaaaa-aaaap-qaabq-cai"
     }

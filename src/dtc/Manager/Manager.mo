@@ -57,6 +57,7 @@ shared(msg) actor class Manager (principal : Principal) = this {
         backend_without_timer = dummyWasmData;
         journal = dummyWasmData;
         manager = dummyWasmData;
+        treasury = dummyWasmData;
     };
 
     private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
@@ -104,6 +105,13 @@ shared(msg) actor class Manager (principal : Principal) = this {
         let {wasmModule} = moduleToUse;
         await CanisterManagementMethods.installCodeBackendWasm(mainCanisterId, wasmModule);
         permitUpdateToBackend := false;
+    };
+
+    public shared({caller}) func installCode_treasuryCanister(canisterData: MainTypes.DaoMetaData): async () {
+        if(Principal.toText(caller) != mainCanisterId) { throw Error.reject("Unauthorized access."); };
+        let {treasury;} = release;
+        let {wasmModule;} = treasury;
+        await CanisterManagementMethods.installCodeTreasuryWasm(canisterData, wasmModule);
     };
 
     public shared({caller}) func installCode_journalCanisters( profilesArray: MainTypes.UserProfilesArray ): async (){
@@ -208,19 +216,21 @@ shared(msg) actor class Manager (principal : Principal) = this {
 
     private func updateModules(nextVersionToUpgradeTo: Nat ): async () {
         let wasmStore: WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
-        let { backend; frontend; manager; journal; backend_without_timer; } = WasmStore.wasmTypes;
+        let { backend; frontend; manager; journal; backend_without_timer; treasury; } = WasmStore.wasmTypes;
         let backendWasm = await wasmStore.getModule(nextVersionToUpgradeTo, backend);
         let backendWithoutTimer = await wasmStore.getModule(nextVersionToUpgradeTo, backend_without_timer);
         let frontendWasm = await wasmStore.getModule(nextVersionToUpgradeTo, frontend);
         let managerWasm = await wasmStore.getModule(nextVersionToUpgradeTo, manager);
         let journalWasm = await wasmStore.getModule(nextVersionToUpgradeTo, journal);
+        let treasuryWasm = await wasmStore.getModule(nextVersionToUpgradeTo, treasury);
         release := {
-            assets = release.assets;
+            release with 
             frontend = frontendWasm;
             backend = backendWasm;
             backend_without_timer = backendWithoutTimer;
             journal = journalWasm;
             manager = managerWasm;
+            treasury = treasuryWasm;
         };
     };
 
@@ -259,14 +269,7 @@ shared(msg) actor class Manager (principal : Principal) = this {
             index += 1;
         };
 
-        release := {
-            assets = AssetBuffer.toArray();
-            frontend = release.frontend;
-            backend = release.backend;
-            backend_without_timer = release.backend_without_timer;
-            journal = release.journal;
-            manager = release.manager;
-        };
+        release := { release with assets = AssetBuffer.toArray(); };
     };
 
     // Return the cycles received up to the capacity allowed
