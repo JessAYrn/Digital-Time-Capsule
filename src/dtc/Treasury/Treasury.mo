@@ -8,6 +8,8 @@ import Text "mo:base/Text";
 import TreasuryTypes "treasury.types";
 import HashMap "mo:base/HashMap";
 import Iter "mo:base/Iter";
+import Cycles "mo:base/ExperimentalCycles";
+import Nat64 "mo:base/Nat64";
 
 shared(msg) actor class Treasury (principal : Principal) = this {
 
@@ -21,6 +23,8 @@ shared(msg) actor class Treasury (principal : Principal) = this {
         Principal.equal,
         Principal.hash
     );
+
+    private var capacity = 1000000000000;
 
     private let ledger : Ledger.Interface  = actor(Ledger.CANISTER_ID);
 
@@ -41,6 +45,18 @@ shared(msg) actor class Treasury (principal : Principal) = this {
             and Principal.toText(caller) != ownerCanisterId
         ) { throw Error.reject("Unauthorized access."); };
         await ledger.account_balance({ account = userAccountId() })
+    };
+
+    // Return the cycles received up to the capacity allowed
+    public func wallet_receive() : async { accepted: Nat64 } {
+        let amount = Cycles.available();
+        let limit : Nat = capacity - Cycles.balance();
+        let accepted = 
+            if (amount <= limit) amount
+            else limit;
+        let deposit = Cycles.accept(accepted);
+        assert (deposit == accepted);
+        { accepted = Nat64.fromNat(accepted) };
     };
 
     system func preupgrade() {

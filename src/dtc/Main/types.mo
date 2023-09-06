@@ -66,6 +66,7 @@ module{
 
     public type CanisterDataExport = {
         journalCount: Nat;
+        treasuryCanisterPrincipal: Text;
         managerCanisterPrincipal: Text;
         frontEndPrincipal: Text;
         backEndPrincipal: Text;
@@ -102,6 +103,23 @@ module{
         defaultControllers: [Principal];
     };
 
+    public type DaoMetaData = {
+        managerCanisterPrincipal: Text; 
+        treasuryCanisterPrincipal: Text;
+        frontEndPrincipal: Text;
+        backEndPrincipal: Text;
+        lastRecordedBackEndCyclesBalance: Nat;
+        backEndCyclesBurnRatePerDay: Nat;
+        nftOwner: Text;
+        nftId: Int;
+        acceptingRequests: Bool;
+        lastRecordedTime: Int;
+        cyclesSaveMode: Bool;
+        supportMode: Bool;
+        requestsForAccess: RequestsForAccess;
+        defaultControllers: [Principal];
+    };
+
     public type Approved = Bool;
 
     public type RequestsForAccess = [(Text, Approved)];
@@ -118,6 +136,23 @@ module{
 
     public let DEFAULT_APP_METADATA: AppMetaData = {
         managerCanisterPrincipal = "Null";
+        frontEndPrincipal = "Null";
+        backEndPrincipal = "Null";
+        lastRecordedBackEndCyclesBalance = 0;
+        backEndCyclesBurnRatePerDay = 0;
+        nftOwner = "Null";
+        nftId = -1;
+        acceptingRequests = true;
+        lastRecordedTime = 0;
+        cyclesSaveMode = false;
+        supportMode = false;
+        requestsForAccess = [];
+        defaultControllers = [];
+    };
+
+    public let DEFAULT_DAO_METADATA: DaoMetaData = {
+        managerCanisterPrincipal = "Null";
+        treasuryCanisterPrincipal = "Null";
         frontEndPrincipal = "Null";
         backEndPrincipal = "Null";
         lastRecordedBackEndCyclesBalance = 0;

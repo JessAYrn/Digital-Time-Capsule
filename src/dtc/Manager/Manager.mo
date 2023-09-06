@@ -37,8 +37,6 @@ shared(msg) actor class Manager (principal : Principal) = this {
 
     private var capacity = 1000000000000;
 
-    private var balance = Cycles.balance();
-
     private let oneICP : Nat64 = 100_000_000;
 
     private let dummyPrincipal : Principal = Principal.fromText("2vxsx-fae");
@@ -65,12 +63,13 @@ shared(msg) actor class Manager (principal : Principal) = this {
 
     public shared({caller}) func wallet_balance() : async Nat {
         if( Principal.toText(caller) != mainCanisterId ) { throw Error.reject("Unauthorized access."); };
-        return balance
+        return Cycles.balance()
     };
 
     public shared({caller}) func initializeReleaseVersion (): async () {
         if( Principal.toText(caller) != mainCanisterId) { throw Error.reject("Unauthorized access."); };
         let wasmStoreCanister : WasmStore.Interface = actor (WasmStore.wasmStoreCanisterId);
+        /// replace getLatestReleaseNumber() with getLastestStableRelease()
         let mostRecentReleaseVersion: Nat = await wasmStoreCanister.getLatestReleaseNumber();
         version := mostRecentReleaseVersion;
     };
@@ -97,11 +96,11 @@ shared(msg) actor class Manager (principal : Principal) = this {
         permitUpdateToBackend := true;
     };
 
-    public shared({caller}) func installCode_backendCanister(canisterData: MainTypes.AppMetaData): async () {
+    public shared({caller}) func installCode_backendCanister(cyclesSaveMode: Bool): async () {
         if(not permitUpdateToBackend) { throw Error.reject("Unauthorized access."); };
         let {backend; backend_without_timer} = release;
         var moduleToUse = backend;
-        if(canisterData.cyclesSaveMode) moduleToUse := backend_without_timer;
+        if(cyclesSaveMode) moduleToUse := backend_without_timer;
         let {wasmModule} = moduleToUse;
         await CanisterManagementMethods.installCodeBackendWasm(mainCanisterId, wasmModule);
         permitUpdateToBackend := false;
@@ -114,7 +113,7 @@ shared(msg) actor class Manager (principal : Principal) = this {
         await CanisterManagementMethods.installCodeJournalWasms(wasmModule, profilesArray);
     };
 
-    public shared({caller}) func installCode_frontendCanister(canisterData: MainTypes.AppMetaData): 
+    public shared({caller}) func installCode_frontendCanister(canisterData: MainTypes.DaoMetaData): 
     async ([AssetCanister.BatchOperationKind]){
         if(Principal.toText(caller) != mainCanisterId) { throw Error.reject("Unauthorized access."); };
         let {frontend} = release;
@@ -273,13 +272,12 @@ shared(msg) actor class Manager (principal : Principal) = this {
     // Return the cycles received up to the capacity allowed
     public func wallet_receive() : async { accepted: Nat64 } {
         let amount = Cycles.available();
-        let limit : Nat = capacity - balance;
+        let limit : Nat = capacity - Cycles.balance();
         let accepted = 
             if (amount <= limit) amount
             else limit;
         let deposit = Cycles.accept(accepted);
         assert (deposit == accepted);
-        balance += accepted;
         { accepted = Nat64.fromNat(accepted) };
     };
 

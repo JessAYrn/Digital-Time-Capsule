@@ -58,7 +58,7 @@ module{
         };
     };
 
-    public func notifyOfNewStableRelease(canisterData: MainTypes.AppMetaData): 
+    public func notifyOfNewStableRelease(canisterData: MainTypes.DaoMetaData): 
     async [NotificationTypes.Notification] {
         let managerCanister : Manager.Manager = actor(canisterData.managerCanisterPrincipal);
         let wasmStore: WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);

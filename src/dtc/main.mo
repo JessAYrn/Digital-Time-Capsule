@@ -29,6 +29,8 @@ shared actor class User() = this {
 
     private stable var appMetaData : MainTypes.AppMetaData = MainTypes.DEFAULT_APP_METADATA;
 
+    private stable var daoMetaData : MainTypes.DaoMetaData = MainTypes.DEFAULT_DAO_METADATA;
+
     private stable var userProfilesArray : [(Principal, MainTypes.UserProfile)] = [];
 
     private var userProfilesMap : MainTypes.UserProfilesMap = HashMap.fromIter<Principal, MainTypes.UserProfile>(
@@ -46,10 +48,10 @@ shared actor class User() = this {
     };
     
     public shared({ caller }) func create () : async Result.Result<MainTypes.AmountAccepted, JournalTypes.Error> {
-        let amountAccepted = await MainMethods.create(caller, userProfilesMap, appMetaData);
-        let updatedAppMetaData = await CanisterManagementMethods.removeFromRequestsList([Principal.toText(caller)], appMetaData);
+        let amountAccepted = await MainMethods.create(caller, userProfilesMap, daoMetaData);
+        let updatedDaoMetaData = await CanisterManagementMethods.removeFromRequestsList([Principal.toText(caller)], daoMetaData);
         switch(amountAccepted){
-            case(#ok(amount)){ appMetaData := updatedAppMetaData; return #ok(amount); };
+            case(#ok(amount)){ daoMetaData := updatedDaoMetaData; return #ok(amount); };
             case(#err(e)){ return #err(e); };
         };
     };
@@ -172,16 +174,16 @@ shared actor class User() = this {
 
     public shared(msg) func getPrincipalsList() : async [Principal] {
         let callerId = msg.caller;
-        let result = await CanisterManagementMethods.getPrincipalsList(callerId, userProfilesMap, appMetaData);
+        let result = await CanisterManagementMethods.getPrincipalsList(callerId, userProfilesMap, daoMetaData);
         return result;
     };
 
     public shared({caller}) func grantAccess(principals : [Text]) : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error> {
         let callerIdAsText = Principal.toText(caller);
-        if(callerIdAsText != appMetaData.nftOwner){ return #err(#NotAuthorized); };
-        let updatedAppMetaData = await CanisterManagementMethods.grantAccess(principals, appMetaData);
-        switch(updatedAppMetaData){
-            case(#ok(metaData)){ appMetaData := metaData; return #ok(metaData.requestsForAccess); };
+        if(callerIdAsText != daoMetaData.nftOwner){ return #err(#NotAuthorized); };
+        let updatedDaoMetaData = await CanisterManagementMethods.grantAccess(principals, daoMetaData);
+        switch(updatedDaoMetaData){
+            case(#ok(metaData)){ daoMetaData := metaData; return #ok(metaData.requestsForAccess); };
             case(#err(e)){ return #err(e); };
         };
     };
@@ -189,7 +191,7 @@ shared actor class User() = this {
     public shared({caller}) func updateApprovalStatus(principals: [Text], newApprovalStatus: Bool) : 
     async Result.Result<(MainTypes.ProfilesMetaData), JournalTypes.Error>{
         let callerIdAsText = Principal.toText(caller);
-        if(callerIdAsText != appMetaData.nftOwner){ return #err(#NotAuthorized); };
+        if(callerIdAsText != daoMetaData.nftOwner){ return #err(#NotAuthorized); };
         CanisterManagementMethods.updateApprovalStatus(principals, userProfilesMap, newApprovalStatus);
         let profilesApprovalStatuses = CanisterManagementMethods.getProfilesMetaData(userProfilesMap);
         return #ok(profilesApprovalStatuses);
@@ -197,94 +199,98 @@ shared actor class User() = this {
 
     public shared({caller}) func removeFromRequestsList(principals: [Text]) : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error> {
         let callerIdAsText = Principal.toText(caller);
-        if(callerIdAsText != appMetaData.nftOwner){ return #err(#NotAuthorized); };
-        let updatedAppMetaDataList = await CanisterManagementMethods.removeFromRequestsList(principals, appMetaData);
-        appMetaData := updatedAppMetaDataList;
-        return #ok(updatedAppMetaDataList.requestsForAccess);
+        if(callerIdAsText != daoMetaData.nftOwner){ return #err(#NotAuthorized); };
+        let updatedDaoMetaDataList = await CanisterManagementMethods.removeFromRequestsList(principals, daoMetaData);
+        daoMetaData := updatedDaoMetaDataList;
+        return #ok(updatedDaoMetaDataList.requestsForAccess);
     };
 
     public shared({caller}) func configureApp(frontEndPrincipal : Text, nftId: Int ) : async Result.Result<(), JournalTypes.Error> {
-        if(appMetaData.frontEndPrincipal == "Null" or appMetaData.nftId == -1 or appMetaData.managerCanisterPrincipal == "Null"){
-            let backEndPrincipalAsPrincipal = Principal.fromActor(this);
-            let backEndPrincipal = Principal.toText(backEndPrincipalAsPrincipal);
-            let updatedMetaData = await CanisterManagementMethods.configureApp( backEndPrincipal, frontEndPrincipal, nftId, appMetaData);
-            appMetaData := updatedMetaData;
+        if(
+            daoMetaData.frontEndPrincipal == "Null" or 
+            daoMetaData.nftId == -1 or 
+            daoMetaData.managerCanisterPrincipal == "Null" or 
+            daoMetaData.treasuryCanisterPrincipal == "Null"
+        ){
+            let backEndPrincipal = Principal.toText(Principal.fromActor(this));
+            let updatedMetaData = await CanisterManagementMethods.configureApp( backEndPrincipal, frontEndPrincipal, nftId, daoMetaData);
+            daoMetaData := updatedMetaData;
             #ok(());
         } else { return #err(#NotAuthorized); };
     };
 
     public shared({caller}) func authorizePrinicpalToViewAssets(prinicpal: Principal): async () {
-        assert(Principal.toText(caller) == appMetaData.nftOwner);
-        let frontEndPrincipal = Principal.fromText(appMetaData.frontEndPrincipal);
+        assert(Principal.toText(caller) == daoMetaData.nftOwner);
+        let frontEndPrincipal = Principal.fromText(daoMetaData.frontEndPrincipal);
         let result = await CanisterManagementMethods.authorizePrinicpalToViewAssets(prinicpal, frontEndPrincipal);
     };
 
     public shared(msg) func getAssetCanisterAuthorizedPrincipals() : async [Principal] {
-        let assetCanister: AssetCanister.Interface = actor(appMetaData.frontEndPrincipal);
+        let assetCanister: AssetCanister.Interface = actor(daoMetaData.frontEndPrincipal);
         let result = await assetCanister.list_authorized();
     };
 
-    public shared({caller}) func toggleAcceptRequest() : async  Result.Result<(MainTypes.AppMetaData), JournalTypes.Error>{
-        let result = CanisterManagementMethods.toggleAcceptRequest(caller, appMetaData);
+    public shared({caller}) func toggleAcceptRequest() : async  Result.Result<(MainTypes.DaoMetaData), JournalTypes.Error>{
+        let result = CanisterManagementMethods.toggleAcceptRequest(caller, daoMetaData);
         switch(result){
             case(#err(e)){ return #err(e); };
-            case(#ok(updatedMetaData)){ appMetaData := updatedMetaData; return #ok(updatedMetaData);}
+            case(#ok(updatedMetaData)){ daoMetaData := updatedMetaData; return #ok(updatedMetaData);}
         };
     };
 
-    public shared({caller}) func toggleCyclesSaveMode() : async MainTypes.AppMetaData{
-        let updatedMetaData = await CanisterManagementMethods.toggleCyclesSaveMode(caller, appMetaData);
-        let managerCanister: Manager.Manager = actor(appMetaData.managerCanisterPrincipal);
+    public shared({caller}) func toggleCyclesSaveMode() : async MainTypes.DaoMetaData{
+        let updatedMetaData = await CanisterManagementMethods.toggleCyclesSaveMode(caller, daoMetaData);
+        let managerCanister: Manager.Manager = actor(daoMetaData.managerCanisterPrincipal);
         await managerCanister.allowUpdatesToBackendCanister();
-        appMetaData := updatedMetaData;
+        daoMetaData := updatedMetaData;
         return updatedMetaData;
     };
 
     public shared({caller}) func getRequestingPrincipals() : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error>{
         let callerIdAsText = Principal.toText(caller);
-        if(callerIdAsText != appMetaData.nftOwner){ return #err(#NotAuthorized); } 
-        else { return #ok(appMetaData.requestsForAccess) };
+        if(callerIdAsText != daoMetaData.nftOwner){ return #err(#NotAuthorized); } 
+        else { return #ok(daoMetaData.requestsForAccess) };
     };
 
     public shared({caller}) func requestApproval() : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error>{
-        let result = CanisterManagementMethods.requestApproval(caller, appMetaData);
+        let result = CanisterManagementMethods.requestApproval(caller, daoMetaData);
         switch(result){
             case (#err(e)){ return #err(e)};
-            case (#ok(updatedAppMetaData)){ 
-                appMetaData := updatedAppMetaData;
-                return #ok(updatedAppMetaData.requestsForAccess)
+            case (#ok(updatedDaoMetaData)){ 
+                daoMetaData := updatedDaoMetaData;
+                return #ok(updatedDaoMetaData.requestsForAccess)
             };
         };
     };
 
     public shared(msg) func getCanisterCyclesBalances() : async MainTypes.CanisterCyclesBalances{
         let cyclesBalance_backend = Cycles.balance();
-        let balances = await CanisterManagementMethods.getCanisterCyclesBalances(cyclesBalance_backend, appMetaData);
+        let balances = await CanisterManagementMethods.getCanisterCyclesBalances(cyclesBalance_backend, daoMetaData);
         return balances;
     };
 
     public shared({caller}) func getCanisterData() : async Result.Result<(MainTypes.CanisterDataExport), JournalTypes.Error> {
         let cyclesBalance_backend = Cycles.balance();
-        let appMetaDataPackagedForExport = await CanisterManagementMethods.getCanisterData(caller, appMetaData, cyclesBalance_backend, userProfilesMap);
-        return appMetaDataPackagedForExport;
+        let daoMetaDataPackagedForExport = await CanisterManagementMethods.getCanisterData(caller, daoMetaData, cyclesBalance_backend, userProfilesMap);
+        return daoMetaDataPackagedForExport;
     };
 
-    public shared({ caller }) func upgradeApp_exceptForBackendCanister(): async MainTypes.AppMetaData{
-        if(Principal.toText(caller) != appMetaData.nftOwner){ throw Error.reject("Unauthorized Access"); };
-        let managerCanister: Manager.Manager = actor(appMetaData.managerCanisterPrincipal);
+    public shared({ caller }) func upgradeApp_exceptForBackendCanister(): async MainTypes.DaoMetaData{
+        if(Principal.toText(caller) != daoMetaData.nftOwner){ throw Error.reject("Unauthorized Access"); };
+        let managerCanister: Manager.Manager = actor(daoMetaData.managerCanisterPrincipal);
         await managerCanister.loadNextRelease();
-        await CanisterManagementMethods.installCode_managerCanister(appMetaData);
-        let result_0 = await managerCanister.installCode_frontendCanister(appMetaData);
+        await CanisterManagementMethods.installCode_managerCanister(daoMetaData);
+        let result_0 = await managerCanister.installCode_frontendCanister(daoMetaData);
         let result_1 = await managerCanister.installCode_journalCanisters(Iter.toArray(userProfilesMap.entries()));
         await managerCanister.allowUpdatesToBackendCanister();
-        return appMetaData;
+        return daoMetaData;
     };
 
     public func getCanisterCongtrollers(canisterPrincipal: Principal) : async ([Text]) {
         let canisterStatus = await MainTypes.self.canister_status({ canister_id = canisterPrincipal });
         let settings = canisterStatus.settings;
         let controllersOption = settings.controllers;
-        var controllers = Option.get(controllersOption, appMetaData.defaultControllers);
+        var controllers = Option.get(controllersOption, daoMetaData.defaultControllers);
         let ArrayBuffer = Buffer.Buffer<(Text)>(1);
         let controllersIter = Iter.fromArray(controllers);
         Iter.iterate<Principal>(controllersIter, func (x: Principal, index: Nat){
@@ -296,23 +302,23 @@ shared actor class User() = this {
     };
 
     public shared({caller}) func toggleSupportMode() : async Result.Result<(),JournalTypes.Error>{
-        let result = await CanisterManagementMethods.toggleSupportMode(caller, appMetaData);
+        let result = await CanisterManagementMethods.toggleSupportMode(caller, daoMetaData);
         switch(result){
-            case (#ok(metaData)){ appMetaData := metaData; return #ok();};
+            case (#ok(metaData)){ daoMetaData := metaData; return #ok();};
             case (#err(e)){ return #err(e)};
         }
     };
 
     public shared({ caller }) func registerOwner() : async  Result.Result<(), JournalTypes.Error>{
-        let result = await CanisterManagementMethods.registerOwner(caller, appMetaData);
+        let result = await CanisterManagementMethods.registerOwner(caller, daoMetaData);
         switch(result){
-            case(#ok(metaData)){ appMetaData := metaData; return #ok(());};
+            case(#ok(metaData)){ daoMetaData := metaData; return #ok(());};
             case(#err(e)){ return #err(e)};
         };
     };
 
     public shared({ caller }) func getNotifications(): async NotificationsTypes.Notifications{
-        let notifications = await NotificationProtocolMethods.notifyOfNewStableRelease(appMetaData);
+        let notifications = await NotificationProtocolMethods.notifyOfNewStableRelease(daoMetaData);
         let notifications_ = await NotificationProtocolMethods.appendNotificationsFromJournal(caller, userProfilesMap, notifications);
         return notifications_;
     };
@@ -324,15 +330,15 @@ shared actor class User() = this {
     public shared({caller}) func heartBeat(): async (){
         let cyclesBalance_backend = Cycles.balance();
         ignore NotificationProtocolMethods.updateUserCanisterNotifications(userProfilesMap);
-        let updatedMetaData = await CanisterManagementMethods.heartBeat(cyclesBalance_backend, appMetaData, userProfilesMap);
-        appMetaData := updatedMetaData;
+        let updatedMetaData = await CanisterManagementMethods.heartBeat(cyclesBalance_backend, daoMetaData, userProfilesMap);
+        daoMetaData := updatedMetaData;
     };  
 
     private func heartBeat_unshared(): async () {
         let cyclesBalance_backend = Cycles.balance();
         ignore NotificationProtocolMethods.updateUserCanisterNotifications(userProfilesMap);
-        let updatedMetaData = await CanisterManagementMethods.heartBeat(cyclesBalance_backend, appMetaData, userProfilesMap);
-        appMetaData := updatedMetaData;
+        let updatedMetaData = await CanisterManagementMethods.heartBeat(cyclesBalance_backend, daoMetaData, userProfilesMap);
+        daoMetaData := updatedMetaData;
     };
 
     // public func getTipOfChainData() : async (Nat64, Nat64){
@@ -346,7 +352,9 @@ shared actor class User() = this {
 
     // let everyFiveSeconds = recurringTimer(#seconds (5), updateUsersTxHistory);
 
-    system func preupgrade() { userProfilesArray := Iter.toArray(userProfilesMap.entries()); };
+    system func preupgrade() { 
+        userProfilesArray := Iter.toArray(userProfilesMap.entries()); 
+    };
 
     system func postupgrade() { userProfilesArray:= []; };
 

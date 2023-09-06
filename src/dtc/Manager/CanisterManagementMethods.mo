@@ -30,8 +30,8 @@ module{
         await installCode_(null, wasmModule, backEndPrincipalBlob);
     };
 
-    public func installFrontendWasm( appMetaData: MainTypes.AppMetaData, wasmModule: Blob): async (){
-        let {frontEndPrincipal} = appMetaData;
+    public func installFrontendWasm( daoMetaData: MainTypes.DaoMetaData, wasmModule: Blob): async (){
+        let {frontEndPrincipal} = daoMetaData;
         let frontEndPrincipalBlob = Principal.fromText(frontEndPrincipal);
         await installCode_(null, wasmModule, frontEndPrincipalBlob);
     };

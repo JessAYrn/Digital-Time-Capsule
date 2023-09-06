@@ -25,14 +25,14 @@ module{
     public func create (
         callerId: Principal, 
         profilesMap: MainTypes.UserProfilesMap, 
-        appMetaData: MainTypes.AppMetaData
+        daoMetaData: MainTypes.DaoMetaData
     ) : async Result.Result<MainTypes.AmountAccepted, JournalTypes.Error> {
 
         if(Principal.toText(callerId) == "2vxsx-fae"){ return #err(#NotAuthorized);};
 
         let callerIdAsText = Principal.toText(callerId);
         let requestForAccess = Array.find(
-            appMetaData.requestsForAccess, func (x: (Text, MainTypes.Approved)) : Bool {
+            daoMetaData.requestsForAccess, func (x: (Text, MainTypes.Approved)) : Bool {
                 let (principalAsText, approved) = x;
                 if(principalAsText == callerIdAsText and approved){ return true;}
                 else { false };
@@ -51,10 +51,10 @@ module{
                 Cycles.add(1_000_000_000_000);
                 let newUserJournal = await Journal.Journal(callerId);
                 let amountAccepted = await newUserJournal.wallet_receive();
-                ignore CanisterManagementMethods.addController(
-                    appMetaData.managerCanisterPrincipal,
+                ignore CanisterManagementMethods.addControllers(
+                    [daoMetaData.managerCanisterPrincipal],
                     Principal.fromActor(newUserJournal),
-                    appMetaData.defaultControllers
+                    daoMetaData.defaultControllers
                 );
                 let settingMainCanister = await newUserJournal.setMainCanisterPrincipalId();
                 let userAccountId = await newUserJournal.canisterAccount();

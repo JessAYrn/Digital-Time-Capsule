@@ -173,7 +173,7 @@ const Analytics = () => {
         setModalIsOpen(true);
         try{
             const canisterData = await actorState.backendActor.upgradeApp_exceptForBackendCanister();
-            await actorState.managerActor.installCode_backendCanister(canisterData);
+            await actorState.managerActor.installCode_backendCanister(canisterData.cyclesSaveMode);
             setModalProps({
                 bigText: "Upgrade Complete",
                 smallText: "Refresh page in order to have the changes take effect",
@@ -196,7 +196,7 @@ const Analytics = () => {
         setModalIsOpen(true);
         try{
             let canisterData = await actorState.backendActor.toggleCyclesSaveMode();
-            await actorState.managerActor.installCode_backendCanister(canisterData);
+            await actorState.managerActor.installCode_backendCanister(canisterData.cyclesSaveMode);
             homePageDispatch({
                 actionType: homePageTypes.SET_CANISTER_DATA,
                 payload: { ...homePageState.canisterData, cyclesSaveMode: !homePageState.canisterData.cyclesSaveMode }
