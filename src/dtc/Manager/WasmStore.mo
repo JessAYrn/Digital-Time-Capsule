@@ -44,6 +44,7 @@ module{
         getNextStableRelease: query (Nat) -> async Nat;
         getModule: (Nat, Text) -> async WasmData;
         getAssetMetaDataWithoutChunksData: (Nat, AssetCanister.Key) -> async AssetCanister.AssetArgs;
+        getLastestStableRelease: query () -> async Nat;
         getAssetChunk: (Nat, Text, Nat) -> async (AssetCanister.ChunkId, AssetCanister.ChunkData);
     };
 };
