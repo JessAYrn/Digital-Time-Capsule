@@ -41,10 +41,10 @@ module{
         getAssetKeys: query (Nat) -> async [AssetCanister.Key];
         getLatestReleaseNumber: query () -> async Nat;
         getNextRequiredRelease: query (Nat) -> async Nat;
-        getNextStableRelease: query (Nat) -> async Nat;
+        getNextAppropriateRelease: query ({number: Nat; isStable: Bool;}) -> async {number: Nat; isStable: Bool;};
         getModule: (Nat, Text) -> async WasmData;
         getAssetMetaDataWithoutChunksData: (Nat, AssetCanister.Key) -> async AssetCanister.AssetArgs;
-        getLastestStableRelease: query () -> async Nat;
+        getLastestStableRelease: query () -> async {number: Nat; isStable: Bool;};
         getAssetChunk: (Nat, Text, Nat) -> async (AssetCanister.ChunkId, AssetCanister.ChunkData);
     };
 };

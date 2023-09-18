@@ -19,7 +19,7 @@ import "@connect2ic/core/style.css"
 import ButtonField from "../../../Components/Fields/Button";
 import DataField from "../../../Components/Fields/DataField";
 import { types } from "../../../reducers/journalReducer";
-import { backendActor, isLocalHost, inTrillions, managerActor, round2Decimals } from "../../../functionsAndConstants/Utils";
+import { backendActor, isLocalHost, inTrillions, round2Decimals } from "../../../functionsAndConstants/Utils";
 import '../../../SCSS/contentContainer.scss'
 import AccordionField from "../../../Components/Fields/Accordion";
 import { actorTypes } from "../../../reducers/actorReducer";
@@ -109,19 +109,11 @@ const LoginPage = (props) => {
 
     useEffect(async () => {
         if(connectionResult.activeProvider){
-            const promises = [
-                backendActor(connectionResult.activeProvider),
-                managerActor(connectionResult.activeProvider)
-            ];
-            const [backendActor_, managerActor_] = await Promise.all(promises);
+            const backendActor_  = await backendActor(connectionResult.activeProvider);
             actorDispatch({
                 actionType: actorTypes.SET_BACKEND_ACTOR,
                 payload: backendActor_
-            });
-            actorDispatch({
-                actionType: actorTypes.SET_MANAGER_ACTOR,
-                payload: managerActor_
-            });
+            })
         }
         setIsLoading(true);
         journalDispatch({

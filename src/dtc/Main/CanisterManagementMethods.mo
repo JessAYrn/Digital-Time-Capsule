@@ -253,7 +253,7 @@ module{
                     currentCyclesBalance_manager = currentCyclesBalance_manager;
                     profilesMetaData = profilesApprovalStatus;
                     isOwner = isOwner;
-                    releaseVersion = currentVersion;
+                    releaseVersion = currentVersion.number;
                 };
                 return #ok(canisterDataPackagedForExport);
             }
@@ -329,7 +329,7 @@ module{
         let managerActor : Manager.Manager = actor(managerCanisterPrincipal);
         let wasmStoreCanister : WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
         let currentReleaseVersion = await managerActor.getCurrentReleaseVersion();
-        let {wasmModule} = await wasmStoreCanister.getModule(currentReleaseVersion, WasmStore.wasmTypes.manager);
+        let {wasmModule} = await wasmStoreCanister.getModule(currentReleaseVersion.number, WasmStore.wasmTypes.manager);
         let arg = Principal.fromText(backEndPrincipal);
         let managerPrincipal = Principal.fromText(managerCanisterPrincipal);
         await installCode_(arg, wasmModule, managerPrincipal);

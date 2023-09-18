@@ -63,9 +63,9 @@ module{
         let managerCanister : Manager.Manager = actor(canisterData.managerCanisterPrincipal);
         let wasmStore: WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
         let currentReleaseVersion = await managerCanister.getCurrentReleaseVersion();
-        let nextStableVersion = await wasmStore.getNextStableRelease(currentReleaseVersion);
-        if(nextStableVersion > currentReleaseVersion){
-            let text = Text.concat("New Stable Version Availabe: Version #", Nat.toText(nextStableVersion));
+        let nextStableVersion = await wasmStore.getNextAppropriateRelease(currentReleaseVersion);
+        if(nextStableVersion.number > currentReleaseVersion.number){
+            let text = Text.concat("New Stable Version Availabe: Version #", Nat.toText(nextStableVersion.number));
             let key = null;
             return [{text; key;}];
         };

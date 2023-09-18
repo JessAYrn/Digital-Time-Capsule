@@ -12,6 +12,7 @@ import Text "mo:base/Text";
 import Cycles "mo:base/ExperimentalCycles";
 import Nat64 "mo:base/Nat64";
 import Time "mo:base/Time";
+import Timer "mo:base/Timer";
 import Iter "mo:base/Iter";
 import Buffer "mo:base/Buffer";
 import Int "mo:base/Int";
@@ -31,7 +32,9 @@ shared(msg) actor class Manager (principal : Principal) = this {
 
     private let ic : IC.Self = actor "aaaaa-aa";
 
-    private stable var version : Nat = 0;
+    private stable var currentVersion : {number: Nat; isStable: Bool} = {number = 0; isStable = true;};
+
+    private stable var previousStableVersion : {number: Nat; isStable: Bool} = currentVersion;
 
     private stable var mainCanisterId : Text = Principal.toText(principal); 
 
@@ -69,20 +72,18 @@ shared(msg) actor class Manager (principal : Principal) = this {
 
     public shared({caller}) func loadNextRelease(): async () {
         if( Principal.toText(caller) != mainCanisterId) { throw Error.reject("Unauthorized access.");};
-        try{
-            let wasmStore: WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
-            var nextStableReleaseIndex = await wasmStore.getNextStableRelease(version);
-            if(version == 0) nextStableReleaseIndex := await wasmStore.getLastestStableRelease();
-            let updatedRelease_1 = await CanisterManagementMethods.loadModules(nextStableReleaseIndex,release);
-            let updatedRelease_2 = await CanisterManagementMethods.loadAssets(nextStableReleaseIndex,updatedRelease_1);
-            release := updatedRelease_2;
-            version := nextStableReleaseIndex;
-        } catch(e){};
+        if(currentVersion.isStable) previousStableVersion := currentVersion;
+        let wasmStore: WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
+        var nextAppropriateRelease = await wasmStore.getNextAppropriateRelease(currentVersion);
+        if(currentVersion.number == 0) nextAppropriateRelease := await wasmStore.getLastestStableRelease();
+        let updatedRelease_1 = await loadModules(nextAppropriateRelease.number);
+        let updatedRelease_2 = await loadAssets(nextAppropriateRelease.number);
+        currentVersion := nextAppropriateRelease;
     };
 
-    public shared({caller}) func getCurrentReleaseVersion(): async Nat {
+    public shared({caller}) func getCurrentReleaseVersion(): async {number: Nat; isStable: Bool} {
         if( Principal.toText(caller) != mainCanisterId) { throw Error.reject("Unauthorized access."); };
-        return version;
+        return currentVersion;
     };
 
     public shared({caller}) func allowUpdatesToBackendCanister(): async (){
@@ -90,12 +91,15 @@ shared(msg) actor class Manager (principal : Principal) = this {
         permitUpdateToBackend := true;
     };
 
-    public shared({caller}) func installCode_backendCanister(cyclesSaveMode: Bool): async () {
+    public shared({caller}) func scheduleBackendCanisterToBeUpdated(): async (){
         if(not permitUpdateToBackend) { throw Error.reject("Unauthorized access."); };
+        let {setTimer} = Timer;
+        let timerId = setTimer(#seconds(1), installCode_backendCanister)
+    };
+
+    private func installCode_backendCanister(): async () {
         let {backend; backend_without_timer} = release;
-        var moduleToUse = backend;
-        if(cyclesSaveMode) moduleToUse := backend_without_timer;
-        let {wasmModule} = moduleToUse;
+        let {wasmModule} = backend;
         await CanisterManagementMethods.installCodeBackendWasm(mainCanisterId, wasmModule);
         permitUpdateToBackend := false;
     };
@@ -121,6 +125,64 @@ shared(msg) actor class Manager (principal : Principal) = this {
         await CanisterManagementMethods.installFrontendWasm(canisterData, wasmModule);
         let operations = await CanisterManagementMethods.uploadAssetsToFrontEndCanister(canisterData, release);
         return operations;
+    };
+
+    private func loadModules(nextVersionToUpgradeTo: Nat) : async (){
+        let wasmStore: WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
+        let { backend; frontend; manager; journal; backend_without_timer; treasury; } = WasmStore.wasmTypes;
+        let backendWasm = await wasmStore.getModule(nextVersionToUpgradeTo, backend);
+        let backendWithoutTimer = await wasmStore.getModule(nextVersionToUpgradeTo, backend_without_timer);
+        let frontendWasm = await wasmStore.getModule(nextVersionToUpgradeTo, frontend);
+        let managerWasm = await wasmStore.getModule(nextVersionToUpgradeTo, manager);
+        let journalWasm = await wasmStore.getModule(nextVersionToUpgradeTo, journal);
+        let treasuryWasm = await wasmStore.getModule(nextVersionToUpgradeTo, treasury);
+        release := {
+            release with 
+            frontend = frontendWasm;
+            backend = backendWasm;
+            backend_without_timer = backendWithoutTimer;
+            journal = journalWasm;
+            manager = managerWasm;
+            treasury = treasuryWasm;
+        };
+    };
+
+    private func loadAssets(nextVersionToUpgradeTo: Nat): async () {
+        let wasmStore: WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
+        let keys = await wasmStore.getAssetKeys(nextVersionToUpgradeTo);
+        let length = keys.size();
+        var index = 0;
+        let AssetBuffer = Buffer.Buffer<(AssetCanister.Key, AssetCanister.AssetArgs)>(1);
+        while(index < length){
+            let key = keys[index];
+            let assetMetaData = await wasmStore.getAssetMetaDataWithoutChunksData(nextVersionToUpgradeTo, key);
+            let {content_type; max_age; headers; enable_aliasing; allow_raw_access;} = assetMetaData;
+            let ChunksBuffer = Buffer.Buffer<(AssetCanister.ChunkId, AssetCanister.ChunkData)>(1);
+            var continue_ = true;
+            var chunkIndex = 0;
+            while(continue_){
+                try{
+                    let (chunkId, chunkData) = await wasmStore.getAssetChunk(nextVersionToUpgradeTo, key, chunkIndex);
+                    ChunksBuffer.add((chunkId, chunkData));
+                    chunkIndex += 1;
+                } catch(e){ continue_ := false; };
+            };
+
+            let chunks = ChunksBuffer.toArray();
+
+            let asset: AssetCanister.AssetArgs = {
+                content_type;
+                max_age;
+                headers; 
+                enable_aliasing;
+                allow_raw_access;
+                chunks;
+            };
+            AssetBuffer.add(key, asset);
+            index += 1;
+        };
+
+        release := { release with assets = AssetBuffer.toArray(); };
     };
 
     // Return the cycles received up to the capacity allowed

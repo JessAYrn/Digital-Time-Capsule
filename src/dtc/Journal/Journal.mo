@@ -22,6 +22,7 @@ import JournalTypes "journal.types";
 import HashMap "mo:base/HashMap";
 import MainTypes "../Main/types";
 import NotificationsTypes "../Main/types.notifications";
+import IC "../IC/ic.types";
 
 shared(msg) actor class Journal (principal : Principal) = this {
 
@@ -61,6 +62,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
         photos = [];
     };
 
+    private stable var dataUsageInBytes = 0;
+
     private stable var notifications : NotificationsTypes.Notifications = [];
 
     private stable var mainCanisterId_ : Text = "null"; 
@@ -80,6 +83,8 @@ shared(msg) actor class Journal (principal : Principal) = this {
     private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
 
     private let oneICP : Nat64 = 100_000_000;
+
+    private let ic : IC.Self = actor "aaaaa-aa";
 
     public shared({caller}) func wallet_balance() : async Nat {
         if( Principal.toText(caller) != mainCanisterId_ ) { throw Error.reject("Unauthorized access."); };
@@ -102,27 +107,32 @@ shared(msg) actor class Journal (principal : Principal) = this {
     public shared({caller}) func setMainCanisterPrincipalId() : async Result.Result<(),JournalTypes.Error> {
         if(mainCanisterId_ != "null"){ return #err(#NotAuthorized); };
         mainCanisterId_ := Principal.toText(caller);
+        ignore updateDataUsageInMegaBytes();
         return #ok(());
     };
 
     public shared({caller}) func createEntry() : 
     async Result.Result<([JournalTypes.JournalEntryExportKeyValuePair]), JournalTypes.Error> {
         if( Principal.toText(caller) != mainCanisterId_ ) { return #err(#NotAuthorized); };
+        if( not isStorageSpaceAvailable()) return #err(#NoRemainingStorage);
         journalMap.put(journalEntryIndex, { JournalTypes.JournalEntryDefault with timeStarted = Time.now(); });
         journalEntryIndex += 1;
         let journalAsArray = Iter.toArray(journalMap.entries());
         let journalAsArrayExport = mapJournalEntriesArrayToExport(journalAsArray);
+        ignore updateDataUsageInMegaBytes();
         #ok(journalAsArrayExport);
     };
 
     public shared({caller}) func deleteFile(fileId: Text): async Result.Result<(), JournalTypes.Error>{
         if( Principal.toText(caller) != mainCanisterId_ ) { return #err(#NotAuthorized); };
         filesMap.delete(fileId);
+        ignore updateDataUsageInMegaBytes();
         return #ok(());
     };
 
     public shared({caller}) func uploadFileChunk(fileId: Text, chunkId : Nat, blobChunk : Blob) : async Result.Result<(Text), JournalTypes.Error> {
         if( Principal.toText(caller) != mainCanisterId_ ) { return #err(#NotAuthorized); };
+        if( not isStorageSpaceAvailable()) return #err(#NoRemainingStorage);
         let fileOption = filesMap.get(fileId);
         let fileTrie = Option.get(fileOption, Trie.empty());
         let (newTrie, oldValue) = Trie.put(
@@ -132,6 +142,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
             blobChunk
         );
         filesMap.put(fileId, newTrie);
+        ignore updateDataUsageInMegaBytes();
         return #ok(fileId); 
     };
 
@@ -163,6 +174,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
             };
         });
         notifications := notificationsBuffer.toArray();
+        ignore updateDataUsageInMegaBytes();
     };
 
     public query({caller}) func getNotifications(): async NotificationsTypes.Notifications{
@@ -173,6 +185,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
     public shared({caller}) func clearNotifications(): async (){
         if( Principal.toText(caller) != mainCanisterId_) { throw Error.reject("Unauthorized access."); };
         notifications := [];
+        ignore updateDataUsageInMegaBytes();
     };
 
     public shared({caller}) func markJournalEntryAsRead(key : Nat): 
@@ -182,10 +195,9 @@ shared(msg) actor class Journal (principal : Principal) = this {
         switch(entry){
             case null{ #err(#NotFound); };
             case(? entryValue){
-                let updatedEntryValue : JournalTypes.JournalEntryExport = { 
-                    entryValue with notified = true; read = true; locked = false;
-                };
+                let updatedEntryValue : JournalTypes.JournalEntry = { entryValue with notified = true; read = true; };
                 journalMap.put(key,updatedEntryValue);
+                ignore updateDataUsageInMegaBytes();
                 #ok(());
             };
         }
@@ -227,6 +239,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
     public shared({caller}) func updateBio(bio: JournalTypes.Bio) : async Result.Result<(JournalTypes.Bio), JournalTypes.Error>{
         if( Principal.toText(caller) != mainCanisterId_) { return #err(#NotAuthorized); };
         biography := bio;
+        ignore updateDataUsageInMegaBytes();
         #ok(biography);
     };
 
@@ -241,6 +254,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
             photos = photos;
         };
         biography := updatedBiography;
+        ignore updateDataUsageInMegaBytes();
         #ok(biography);
     };
 
@@ -258,6 +272,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
                 journalMap.put(key,completeEntry);
                 let journalAsArray = Iter.toArray(journalMap.entries());
                 let journalAsArrayExport = mapJournalEntriesArrayToExport(journalAsArray);
+                ignore updateDataUsageInMegaBytes();
                 #ok(journalAsArrayExport);
             }
         }
@@ -275,6 +290,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
                 journalMap.put(key,updatedEntry);
                 let journalAsArray = Iter.toArray(journalMap.entries());
                 let journalAsArrayExport = mapJournalEntriesArrayToExport(journalAsArray);
+                ignore updateDataUsageInMegaBytes();
                 #ok(journalAsArrayExport);
             }
         }
@@ -291,6 +307,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
                 let updatedJournal = journalMap.delete(key);
                 let journalAsArray = Iter.toArray(journalMap.entries());
                 let journalAsArrayExport = mapJournalEntriesArrayToExport(journalAsArray);
+                ignore updateDataUsageInMegaBytes();
                 #ok(());
             };
         };
@@ -304,6 +321,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
             case null{ #err(#NotFound); };
             case (? v){
                 filesMap.delete(fileId);
+                ignore updateDataUsageInMegaBytes();
                 #ok(());
             };
         };
@@ -345,6 +363,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
     public shared({caller}) func updateTxHistory(timeStamp: Nat64, tx : JournalTypes.Transaction) : async () {
         if( Principal.toText(caller) != mainCanisterId_) { throw Error.reject("Unauthorized access."); };
         txHistoryMap.put(Nat64.toNat(timeStamp), tx);
+        ignore updateDataUsageInMegaBytes();
     };
 
     private func userAccountId() : Account.AccountIdentifier {
@@ -388,6 +407,16 @@ shared(msg) actor class Journal (principal : Principal) = this {
                 return (key, entryExport);
         });
         return journalAsArrayExport;
+    };
+
+    private func updateDataUsageInMegaBytes(): async (){
+        let {memory_size} = await ic.canister_status({canister_id = Principal.fromActor(this)});
+        dataUsageInBytes := memory_size;
+    };
+
+    private func isStorageSpaceAvailable(): Bool{
+        let threshold : Int = 2 * JournalTypes.ONE_GIGA_BYTE - 2 * JournalTypes.ONE_MEGA_BYTE;
+        return dataUsageInBytes < threshold;
     };
    
     private  func key(x: Principal) : Trie.Key<Principal> {

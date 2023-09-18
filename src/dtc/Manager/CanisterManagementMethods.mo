@@ -15,64 +15,6 @@ module{
     
     private let ic : IC.Self = actor "aaaaa-aa";
 
-    public func loadModules(nextVersionToUpgradeTo: Nat, release: WasmStore.Release) : async WasmStore.Release{
-        let wasmStore: WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
-        let { backend; frontend; manager; journal; backend_without_timer; treasury; } = WasmStore.wasmTypes;
-        let backendWasm = await wasmStore.getModule(nextVersionToUpgradeTo, backend);
-        let backendWithoutTimer = await wasmStore.getModule(nextVersionToUpgradeTo, backend_without_timer);
-        let frontendWasm = await wasmStore.getModule(nextVersionToUpgradeTo, frontend);
-        let managerWasm = await wasmStore.getModule(nextVersionToUpgradeTo, manager);
-        let journalWasm = await wasmStore.getModule(nextVersionToUpgradeTo, journal);
-        let treasuryWasm = await wasmStore.getModule(nextVersionToUpgradeTo, treasury);
-        return {
-            release with 
-            frontend = frontendWasm;
-            backend = backendWasm;
-            backend_without_timer = backendWithoutTimer;
-            journal = journalWasm;
-            manager = managerWasm;
-            treasury = treasuryWasm;
-        };
-    };
-
-    public func loadAssets(nextVersionToUpgradeTo: Nat, release: WasmStore.Release): async WasmStore.Release {
-        let wasmStore: WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
-        let keys = await wasmStore.getAssetKeys(nextVersionToUpgradeTo);
-        let length = keys.size();
-        var index = 0;
-        let AssetBuffer = Buffer.Buffer<(AssetCanister.Key, AssetCanister.AssetArgs)>(1);
-        while(index < length){
-            let key = keys[index];
-            let assetMetaData = await wasmStore.getAssetMetaDataWithoutChunksData(nextVersionToUpgradeTo, key);
-            let {content_type; max_age; headers; enable_aliasing; allow_raw_access;} = assetMetaData;
-            let ChunksBuffer = Buffer.Buffer<(AssetCanister.ChunkId, AssetCanister.ChunkData)>(1);
-            var continue_ = true;
-            var chunkIndex = 0;
-            while(continue_){
-                try{
-                    let (chunkId, chunkData) = await wasmStore.getAssetChunk(nextVersionToUpgradeTo, key, chunkIndex);
-                    ChunksBuffer.add((chunkId, chunkData));
-                    chunkIndex += 1;
-                } catch(e){ continue_ := false; };
-            };
-
-            let chunks = ChunksBuffer.toArray();
-
-            let asset: AssetCanister.AssetArgs = {
-                content_type;
-                max_age;
-                headers; 
-                enable_aliasing;
-                allow_raw_access;
-                chunks;
-            };
-            AssetBuffer.add(key, asset);
-            index += 1;
-        };
-
-        return{ release with assets = AssetBuffer.toArray(); };
-    };
-
     public func installCodeJournalWasms( wasmModule: Blob, profilesArray : MainTypes.UserProfilesArray): 
     async () {
         let profilesSize = profilesArray.size();

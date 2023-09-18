@@ -1,5 +1,5 @@
 import { mapApiObjectToFrontEndJournalEntriesObject } from "../mappers/journalPageMappers";
-import { delay, managerActor, backendActor, toHexString, nanoSecondsToMiliSeconds } from "./Utils";
+import { delay, backendActor, toHexString, nanoSecondsToMiliSeconds } from "./Utils";
 import { generateQrCode } from "./walletFunctions/GenerateQrCode";
 import { mapBackendCanisterDataToFrontEndObj } from "../mappers/dashboardMapperFunctions";
 import { getFileUrl_fromApi } from "../Components/Fields/fileManger/FileManagementTools";
@@ -237,19 +237,11 @@ export const recoverState = async ( location, dispatchMethods, types, connection
 
     //wipe previous location state to prevent infinite loop
     location.state = null;
-    const promises = [
-        backendActor(connectionResult.activeProvider),
-        managerActor(connectionResult.activeProvider)
-    ];
-    const [backendActor_, managerActor_] = await Promise.all(promises);
+    const backendActor_ = await backendActor(connectionResult.activeProvider);
     dispatchMethods.actorDispatch({
         actionType: types.actorTypes.SET_BACKEND_ACTOR,
         payload: backendActor_
-    });
-    dispatchMethods.actorDispatch({
-        actionType: types.actorTypes.SET_MANAGER_ACTOR,
-        payload: managerActor_
-    });
+    })
 };
 
 export const fileLoaderHelper = async (props) => {

@@ -96,6 +96,7 @@ module {
         #WalletBalanceTooLow;
         #ZeroAddress;
         #NotAcceptingRequests;
+        #NoRemainingStorage;
     };
 
     public type ReadJournalResult = {
@@ -121,5 +122,8 @@ module {
     public let TX_FEE : Nat64 = 10_000;
 
     public let MAX_CYCLES_CAPACITY : Nat = 1_000_000_000_000;
-    
+
+    public let ONE_MEGA_BYTE : Nat = 1_000_000;
+
+    public let ONE_GIGA_BYTE : Nat = 1_000_000_000;    
 }

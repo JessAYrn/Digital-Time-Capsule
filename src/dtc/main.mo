@@ -27,11 +27,15 @@ import Timer "mo:base/Timer";
 
 shared actor class User() = this {
 
-    private stable var appMetaData : MainTypes.AppMetaData = MainTypes.DEFAULT_APP_METADATA;
-
     private stable var daoMetaData : MainTypes.DaoMetaData = MainTypes.DEFAULT_DAO_METADATA;
 
     private stable var userProfilesArray : [(Principal, MainTypes.UserProfile)] = [];
+
+    private stable var everyFiveSecondsTimerId: {id: Nat; active: Bool} = {id = 0; active = false;};
+
+    private stable var dailyTimerId: {id: Nat; active: Bool;} = {id = 0; active = false;};
+
+    private stable var backendCanisterUpdateScheduled: Bool = false;
 
     private var userProfilesMap : MainTypes.UserProfilesMap = HashMap.fromIter<Principal, MainTypes.UserProfile>(
         Iter.fromArray(userProfilesArray), 
@@ -240,8 +244,8 @@ shared actor class User() = this {
 
     public shared({caller}) func toggleCyclesSaveMode() : async MainTypes.DaoMetaData{
         let updatedMetaData = await CanisterManagementMethods.toggleCyclesSaveMode(caller, daoMetaData);
-        let managerCanister: Manager.Manager = actor(daoMetaData.managerCanisterPrincipal);
-        await managerCanister.allowUpdatesToBackendCanister();
+        if(updatedMetaData.cyclesSaveMode) deactivateTimers()
+        else activateTimers();
         daoMetaData := updatedMetaData;
         return updatedMetaData;
     };
@@ -279,11 +283,16 @@ shared actor class User() = this {
         if(Principal.toText(caller) != daoMetaData.nftOwner){ throw Error.reject("Unauthorized Access"); };
         let managerCanister: Manager.Manager = actor(daoMetaData.managerCanisterPrincipal);
         await managerCanister.loadNextRelease();
-        await CanisterManagementMethods.installCode_managerCanister(daoMetaData);
-        let result_0 = await managerCanister.installCode_frontendCanister(daoMetaData);
-        let result_1 = await managerCanister.installCode_journalCanisters(Iter.toArray(userProfilesMap.entries()));
-        let result_2 = await managerCanister.installCode_treasuryCanister(daoMetaData);
-        await managerCanister.allowUpdatesToBackendCanister();
+        try{
+            await CanisterManagementMethods.installCode_managerCanister(daoMetaData);
+            let result_0 = await managerCanister.installCode_frontendCanister(daoMetaData);
+            let result_1 = await managerCanister.installCode_journalCanisters(Iter.toArray(userProfilesMap.entries()));
+            let result_2 = await managerCanister.installCode_treasuryCanister(daoMetaData);
+            ignore managerCanister.scheduleBackendCanisterToBeUpdated();
+            backendCanisterUpdateScheduled := true;
+        } catch (e) {
+            //revert all canisters to previous stable canister versions
+        };
         return daoMetaData;
     };
 
@@ -342,22 +351,29 @@ shared actor class User() = this {
         daoMetaData := updatedMetaData;
     };
 
-    // public func getTipOfChainData() : async (Nat64, Nat64){
-    //     let tip =  await TxHelperMethods.tipOfChainDetails();
-    //     return (tip, startIndexForBlockChainQuery);
-    // };
-
-    let {recurringTimer} = Timer;
-
-    // let daily = recurringTimer(#seconds (24 * 60 * 60), heartBeat_unshared);
-
-    // let everyFiveSeconds = recurringTimer(#seconds (5), updateUsersTxHistory);
-
-    system func preupgrade() { 
-        userProfilesArray := Iter.toArray(userProfilesMap.entries()); 
+    private func revertAppToPreviousStableVersion(): async () {
+        
     };
 
-    system func postupgrade() { userProfilesArray:= []; };
+    let {recurringTimer; cancelTimer} = Timer;
+
+    private func activateTimers() : () {
+        let timerId_daily = recurringTimer(#seconds (24 * 60 * 60), heartBeat_unshared);
+        let timerId_everyFiveSeconds = recurringTimer(#seconds (5), updateUsersTxHistory);
+        everyFiveSecondsTimerId := {id = timerId_everyFiveSeconds; active = true};
+        dailyTimerId := {id = timerId_daily; active = true;};
+    };
+
+    private func deactivateTimers() : () {
+        cancelTimer(everyFiveSecondsTimerId.id);
+        cancelTimer(dailyTimerId.id);
+        dailyTimerId := {dailyTimerId with active = false};
+        everyFiveSecondsTimerId := { everyFiveSecondsTimerId with active = false };
+    };
+    
+    system func preupgrade() { userProfilesArray := Iter.toArray(userProfilesMap.entries()); };
+
+    system func postupgrade() { userProfilesArray:= []; backendCanisterUpdateScheduled:= false; };
 
     private  func key(x: Principal) : Trie.Key<Principal> { return {key = x; hash = Principal.hash(x)}; };
 
