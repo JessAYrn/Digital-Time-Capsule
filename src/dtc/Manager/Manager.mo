@@ -57,7 +57,6 @@ shared(msg) actor class Manager (principal : Principal) = this {
         assets = [];
         frontend = dummyWasmData;
         backend = dummyWasmData;
-        backend_without_timer = dummyWasmData;
         journal = dummyWasmData;
         manager = dummyWasmData;
         treasury = dummyWasmData;
@@ -98,7 +97,7 @@ shared(msg) actor class Manager (principal : Principal) = this {
     };
 
     private func installCode_backendCanister(): async () {
-        let {backend; backend_without_timer} = release;
+        let {backend} = release;
         let {wasmModule} = backend;
         await CanisterManagementMethods.installCodeBackendWasm(mainCanisterId, wasmModule);
         permitUpdateToBackend := false;
@@ -129,9 +128,8 @@ shared(msg) actor class Manager (principal : Principal) = this {
 
     private func loadModules(nextVersionToUpgradeTo: Nat) : async (){
         let wasmStore: WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
-        let { backend; frontend; manager; journal; backend_without_timer; treasury; } = WasmStore.wasmTypes;
+        let { backend; frontend; manager; journal; treasury; } = WasmStore.wasmTypes;
         let backendWasm = await wasmStore.getModule(nextVersionToUpgradeTo, backend);
-        let backendWithoutTimer = await wasmStore.getModule(nextVersionToUpgradeTo, backend_without_timer);
         let frontendWasm = await wasmStore.getModule(nextVersionToUpgradeTo, frontend);
         let managerWasm = await wasmStore.getModule(nextVersionToUpgradeTo, manager);
         let journalWasm = await wasmStore.getModule(nextVersionToUpgradeTo, journal);
@@ -140,7 +138,6 @@ shared(msg) actor class Manager (principal : Principal) = this {
             release with 
             frontend = frontendWasm;
             backend = backendWasm;
-            backend_without_timer = backendWithoutTimer;
             journal = journalWasm;
             manager = managerWasm;
             treasury = treasuryWasm;

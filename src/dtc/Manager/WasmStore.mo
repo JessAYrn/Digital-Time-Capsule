@@ -13,7 +13,6 @@ module{
         assets: AssetCanister.Assets;
         frontend: WasmData;
         backend: WasmData;
-        backend_without_timer: WasmData;
         journal: WasmData;
         manager: WasmData;
         treasury: WasmData;
@@ -24,7 +23,6 @@ module{
         frontend = "FRONTEND"; 
         manager = "MANAGER"; 
         journal = "JOURNAL"; 
-        backend_without_timer = "BACKEND_WITHOUT_TIMER";
         treasury = "TREASURY";
     };
 
