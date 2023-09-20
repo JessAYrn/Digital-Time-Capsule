@@ -46,8 +46,6 @@ shared(msg) actor class Manager (principal : Principal) = this {
 
     private let dummyBlob = Principal.toBlob(dummyPrincipal);
 
-    private stable var permitUpdateToBackend = false;
-
     private let dummyWasmData : WasmStore.WasmData = {
         dev = dummyPrincipal;
         wasmModule = dummyBlob;
@@ -69,15 +67,24 @@ shared(msg) actor class Manager (principal : Principal) = this {
         return Cycles.balance()
     };
 
-    public shared({caller}) func loadNextRelease(): async () {
+    public shared({caller}) func loadRelease(): async () {
         if( Principal.toText(caller) != mainCanisterId) { throw Error.reject("Unauthorized access.");};
-        if(currentVersion.isStable) previousStableVersion := currentVersion;
         let wasmStore: WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
         var nextAppropriateRelease = await wasmStore.getNextAppropriateRelease(currentVersion);
         if(currentVersion.number == 0) nextAppropriateRelease := await wasmStore.getLastestStableRelease();
-        let updatedRelease_1 = await loadModules(nextAppropriateRelease.number);
-        let updatedRelease_2 = await loadAssets(nextAppropriateRelease.number);
-        currentVersion := nextAppropriateRelease;
+        await loadModules(nextAppropriateRelease.number);
+        await loadAssets(nextAppropriateRelease.number);
+        if(nextAppropriateRelease.number > currentVersion.number and currentVersion.isStable){
+            previousStableVersion := currentVersion;
+            currentVersion := nextAppropriateRelease;
+        };
+    };
+
+    public shared({caller}) func loadPreviousRelease(): async () {
+        if( Principal.toText(caller) != mainCanisterId) { throw Error.reject("Unauthorized access.");};
+        await loadModules(previousStableVersion.number);
+        await loadAssets(previousStableVersion.number);
+        currentVersion := previousStableVersion;
     };
 
     public shared({caller}) func getCurrentReleaseVersion(): async {number: Nat; isStable: Bool} {
@@ -85,22 +92,24 @@ shared(msg) actor class Manager (principal : Principal) = this {
         return currentVersion;
     };
 
-    public shared({caller}) func allowUpdatesToBackendCanister(): async (){
+    public shared({caller}) func scheduleBackendCanisterToBeUpdated(): async (){
         if( Principal.toText(caller) != mainCanisterId) { throw Error.reject("Unauthorized access."); };
-        permitUpdateToBackend := true;
+        let {setTimer} = Timer;
+        let timerId = setTimer(#nanoseconds(1), installCode_backendCanister)
     };
 
-    public shared({caller}) func scheduleBackendCanisterToBeUpdated(): async (){
-        if(not permitUpdateToBackend) { throw Error.reject("Unauthorized access."); };
-        let {setTimer} = Timer;
-        let timerId = setTimer(#seconds(1), installCode_backendCanister)
-    };
 
     private func installCode_backendCanister(): async () {
         let {backend} = release;
         let {wasmModule} = backend;
-        await CanisterManagementMethods.installCodeBackendWasm(mainCanisterId, wasmModule);
-        permitUpdateToBackend := false;
+        try{ await CanisterManagementMethods.installCodeBackendWasm(mainCanisterId, wasmModule); } 
+        catch (e) {
+            await loadPreviousRelease();
+            let backendCanister : MainTypes.Interface = actor(mainCanisterId);
+            await CanisterManagementMethods.installCodeBackendWasm(mainCanisterId, wasmModule);
+            ignore backendCanister.scheduleCanistersToBeUpdatedExceptBackend();
+            throw Error.reject("Upgrade Failed, no code changes have been implemented.");
+        };
     };
 
     public shared({caller}) func installCode_treasuryCanister(canisterData: MainTypes.DaoMetaData): async () {

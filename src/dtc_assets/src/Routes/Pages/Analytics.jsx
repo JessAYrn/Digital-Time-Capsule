@@ -172,7 +172,7 @@ const Analytics = () => {
         setIsLoadingModal(true);
         setModalIsOpen(true);
         try{
-            const canisterData = await actorState.backendActor.upgradeApp_exceptForBackendCanister();
+            await actorState.backendActor.upgradeApp();
             setModalProps({
                 bigText: "Upgrade Complete",
                 smallText: "Refresh page in order to have the changes take effect",

@@ -167,4 +167,8 @@ module{
         defaultControllers = [];
     };
 
+    public type Interface = actor {
+        scheduleCanistersToBeUpdatedExceptBackend: () -> async ();
+    };
+
 }

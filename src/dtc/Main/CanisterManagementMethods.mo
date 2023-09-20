@@ -191,7 +191,7 @@ module{
             Cycles.add(1_000_000_000_000);
             let managerCanister = await Manager.Manager(Principal.fromText(backEndPrincipal));
             let amountAccepted_manager = await managerCanister.wallet_receive();
-            await managerCanister.loadNextRelease();
+            await managerCanister.loadRelease();
             managerCanisterPrincipal := Principal.toText(Principal.fromActor(managerCanister));
         };
 

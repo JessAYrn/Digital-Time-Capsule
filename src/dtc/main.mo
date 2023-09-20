@@ -35,8 +35,6 @@ shared actor class User() = this {
 
     private stable var dailyTimerId: {id: Nat; active: Bool;} = {id = 0; active = false;};
 
-    private stable var backendCanisterUpdateScheduled: Bool = false;
-
     private var userProfilesMap : MainTypes.UserProfilesMap = HashMap.fromIter<Principal, MainTypes.UserProfile>(
         Iter.fromArray(userProfilesArray), 
         Iter.size(Iter.fromArray(userProfilesArray)), 
@@ -279,21 +277,31 @@ shared actor class User() = this {
         return daoMetaDataPackagedForExport;
     };
 
-    public shared({ caller }) func upgradeApp_exceptForBackendCanister(): async MainTypes.DaoMetaData{
+    public shared({ caller }) func upgradeApp(): async (){
         if(Principal.toText(caller) != daoMetaData.nftOwner){ throw Error.reject("Unauthorized Access"); };
         let managerCanister: Manager.Manager = actor(daoMetaData.managerCanisterPrincipal);
-        await managerCanister.loadNextRelease();
-        try{
-            await CanisterManagementMethods.installCode_managerCanister(daoMetaData);
-            let result_0 = await managerCanister.installCode_frontendCanister(daoMetaData);
-            let result_1 = await managerCanister.installCode_journalCanisters(Iter.toArray(userProfilesMap.entries()));
-            let result_2 = await managerCanister.installCode_treasuryCanister(daoMetaData);
-            ignore managerCanister.scheduleBackendCanisterToBeUpdated();
-            backendCanisterUpdateScheduled := true;
-        } catch (e) {
-            //revert all canisters to previous stable canister versions
+        await managerCanister.loadRelease();
+        try { await updatedCanistersExceptBackend(); } 
+        catch (e) {
+            await managerCanister.loadPreviousRelease();  
+            await updatedCanistersExceptBackend();
+            throw Error.reject("Upgrade Failed, no code changes have been implemented.")
         };
-        return daoMetaData;
+        ignore managerCanister.scheduleBackendCanisterToBeUpdated();
+    };
+
+    private func updatedCanistersExceptBackend(): async (){
+        let managerCanister: Manager.Manager = actor(daoMetaData.managerCanisterPrincipal);
+        await CanisterManagementMethods.installCode_managerCanister(daoMetaData);
+        let result_0 = await managerCanister.installCode_frontendCanister(daoMetaData);
+        let result_1 = await managerCanister.installCode_journalCanisters(Iter.toArray(userProfilesMap.entries()));
+        let result_2 = await managerCanister.installCode_treasuryCanister(daoMetaData);
+    };
+
+    public shared({caller}) func scheduleCanistersToBeUpdatedExceptBackend(): async () {
+        if( Principal.toText(caller) != daoMetaData.managerCanisterPrincipal) { throw Error.reject("Unauthorized access."); };
+        let {setTimer} = Timer;
+        let timerId = setTimer(#nanoseconds(1), updatedCanistersExceptBackend);
     };
 
     public func getCanisterCongtrollers(canisterPrincipal: Principal) : async ([Text]) {
@@ -373,7 +381,7 @@ shared actor class User() = this {
     
     system func preupgrade() { userProfilesArray := Iter.toArray(userProfilesMap.entries()); };
 
-    system func postupgrade() { userProfilesArray:= []; backendCanisterUpdateScheduled:= false; };
+    system func postupgrade() { userProfilesArray:= []; };
 
     private  func key(x: Principal) : Trie.Key<Principal> { return {key = x; hash = Principal.hash(x)}; };
 
