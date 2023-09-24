@@ -81,7 +81,10 @@ shared(msg) actor class Manager (principal : Principal) = this {
     };
 
     public shared({caller}) func loadPreviousRelease(): async () {
-        if( Principal.toText(caller) != mainCanisterId) { throw Error.reject("Unauthorized access.");};
+        if( 
+            Principal.toText(caller) != mainCanisterId and 
+            Principal.toText(caller) != Principal.toText(Principal.fromActor(this))
+        ){ throw Error.reject("Unauthorized access.");};
         await loadModules(previousStableVersion.number);
         await loadAssets(previousStableVersion.number);
         currentVersion := previousStableVersion;
@@ -95,7 +98,7 @@ shared(msg) actor class Manager (principal : Principal) = this {
     public shared({caller}) func scheduleBackendCanisterToBeUpdated(): async (){
         if( Principal.toText(caller) != mainCanisterId) { throw Error.reject("Unauthorized access."); };
         let {setTimer} = Timer;
-        let timerId = setTimer(#nanoseconds(1), installCode_backendCanister)
+        let timerId = setTimer(#nanoseconds(1), installCode_backendCanister);
     };
 
 
@@ -108,7 +111,6 @@ shared(msg) actor class Manager (principal : Principal) = this {
             let backendCanister : MainTypes.Interface = actor(mainCanisterId);
             await CanisterManagementMethods.installCodeBackendWasm(mainCanisterId, wasmModule);
             ignore backendCanister.scheduleCanistersToBeUpdatedExceptBackend();
-            throw Error.reject("Upgrade Failed, no code changes have been implemented.");
         };
     };
 
