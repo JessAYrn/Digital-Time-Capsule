@@ -24,12 +24,21 @@ import NotificationProtocolMethods "Main/NotificationProtocolMethods";
 import NotificationsTypes "Main/types.notifications";
 import IC "IC/ic.types";
 import Timer "mo:base/Timer";
+import Nat "mo:base/Nat";
+import Time "mo:base/Time";
+import GovernanceHelperMethods "Main/GovernanceHelperMethods";
+import Treasury "Treasury/Treasury";
+import TreasuryTypes "Treasury/treasury.types";
 
 shared actor class User() = this {
 
     private stable var daoMetaData : MainTypes.DaoMetaData = MainTypes.DEFAULT_DAO_METADATA;
 
     private stable var userProfilesArray : [(Principal, MainTypes.UserProfile)] = [];
+
+    private stable var proposalIndex: Nat = 0;
+
+    private stable var proposalsArray: MainTypes.Proposals = [];
 
     private stable var everyFiveSecondsTimerId: {id: Nat; active: Bool} = {id = 0; active = false;};
 
@@ -40,6 +49,13 @@ shared actor class User() = this {
         Iter.size(Iter.fromArray(userProfilesArray)), 
         Principal.equal,
         Principal.hash
+    );
+
+    private var proposalsMap : MainTypes.ProposalsMap = HashMap.fromIter<Nat, MainTypes.Proposal>(
+        Iter.fromArray(proposalsArray), 
+        Iter.size(Iter.fromArray(proposalsArray)), 
+        Nat.equal,
+        Hash.hash
     );
 
     private stable var startIndexForBlockChainQuery : Nat64 = 3_512_868;
@@ -241,11 +257,18 @@ shared actor class User() = this {
     };
 
     public shared({caller}) func toggleCyclesSaveMode() : async MainTypes.DaoMetaData{
-        let updatedMetaData = await CanisterManagementMethods.toggleCyclesSaveMode(caller, daoMetaData);
+        let updatedMetaData = { daoMetaData with cyclesSaveMode = not daoMetaData.cyclesSaveMode; };
         if(updatedMetaData.cyclesSaveMode) deactivateTimers()
         else activateTimers();
         daoMetaData := updatedMetaData;
         return updatedMetaData;
+    };
+
+    private func toggleCyclesSaveMode_() : (){
+        let updatedMetaData = { daoMetaData with cyclesSaveMode = not daoMetaData.cyclesSaveMode; };
+        if(updatedMetaData.cyclesSaveMode) deactivateTimers()
+        else activateTimers();
+        daoMetaData := updatedMetaData;
     };
 
     public shared({caller}) func getRequestingPrincipals() : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error>{
@@ -281,16 +304,28 @@ shared actor class User() = this {
         if(Principal.toText(caller) != daoMetaData.nftOwner){ throw Error.reject("Unauthorized Access"); };
         let managerCanister: Manager.Manager = actor(daoMetaData.managerCanisterPrincipal);
         await managerCanister.loadRelease();
-        try { await updatedCanistersExceptBackend(); } 
+        try { await updateCanistersExceptBackend(); } 
         catch (e) {
             await managerCanister.loadPreviousRelease();  
-            await updatedCanistersExceptBackend();
+            await updateCanistersExceptBackend();
             throw Error.reject("Upgrade Failed, no code changes have been implemented.")
         };
         ignore managerCanister.scheduleBackendCanisterToBeUpdated();
     };
 
-    private func updatedCanistersExceptBackend(): async (){
+    private func upgradeApp_(): async (){
+        let managerCanister: Manager.Manager = actor(daoMetaData.managerCanisterPrincipal);
+        await managerCanister.loadRelease();
+        try { await updateCanistersExceptBackend(); } 
+        catch (e) {
+            await managerCanister.loadPreviousRelease();  
+            await updateCanistersExceptBackend();
+            throw Error.reject("Upgrade Failed, no code changes have been implemented.")
+        };
+        ignore managerCanister.scheduleBackendCanisterToBeUpdated();
+    };
+
+    private func updateCanistersExceptBackend(): async (){
         let managerCanister: Manager.Manager = actor(daoMetaData.managerCanisterPrincipal);
         await CanisterManagementMethods.installCode_managerCanister(daoMetaData);
         let result_0 = await managerCanister.installCode_frontendCanister(daoMetaData);
@@ -301,7 +336,7 @@ shared actor class User() = this {
     public shared({caller}) func scheduleCanistersToBeUpdatedExceptBackend(): async () {
         if( Principal.toText(caller) != daoMetaData.managerCanisterPrincipal) { throw Error.reject("Unauthorized access."); };
         let {setTimer} = Timer;
-        let timerId = setTimer(#nanoseconds(1), updatedCanistersExceptBackend);
+        let timerId = setTimer(#nanoseconds(1), updateCanistersExceptBackend);
     };
 
     public func getCanisterCongtrollers(canisterPrincipal: Principal) : async ([Text]) {
@@ -359,11 +394,90 @@ shared actor class User() = this {
         daoMetaData := updatedMetaData;
     };
 
-    private func revertAppToPreviousStableVersion(): async () {
-        
+    let {recurringTimer; cancelTimer; setTimer} = Timer;
+
+    public shared({caller}) func createProposal({action: MainTypes.ProposalActions; }): async Result.Result<(),MainTypes.Error>{
+        let callerProfile = userProfilesMap.get(caller);
+        if(callerProfile == null) return #err(#NotAuthorizedToCreateProposals);
+        let votes = [(caller, {adopt = true})];
+        let proposer = caller;
+        let timeInitiated = Time.now();
+        let timeExecuted = null;
+        proposalsMap.put(proposalIndex, {votes; action; proposer; timeInitiated; timeExecuted});
+        let timerId = setTimer(#seconds(24 * 60 * 60 * 3), finalizeProposalVotingPeriod);
+        proposalIndex += 1;
+        return #ok(());
     };
 
-    let {recurringTimer; cancelTimer} = Timer;
+    public shared({caller}) func voteOnProposal({proposalIndex: Nat; adopt: Bool;}): async Result.Result<(), MainTypes.Error> {
+        let treasuryCanister : Treasury.Treasury = actor(daoMetaData.treasuryCanisterPrincipal);
+        let hasSufficientContributions = await treasuryCanister.userHasSufficientContributions(caller);
+        if(not hasSufficientContributions) return #err(#NotAuthorizedToVoteOnThisProposal);
+        let proposal = proposalsMap.get(proposalIndex);
+        if(proposal == null) return #err(#PorposalHasExpired);
+        let ?{votes} = proposal;
+        let votesMap = HashMap.fromIter<Principal, MainTypes.Vote>(
+            Iter.fromArray(votes), 
+            Iter.size(Iter.fromArray(votes)), 
+            Principal.equal,
+            Principal.hash
+        );
+        let previousVote = votesMap.get(caller);
+        switch(previousVote){
+            case null {votesMap.put(caller, {adopt}); return #ok(())};
+            case (?previousVote_){ return #err(#VoteHasAlreadyBeenSubmitted)};
+        };
+    };
+
+
+    private func finalizeProposalVotingPeriod() : async () {
+        let proposalsIter = proposalsMap.entries();
+        var oldestPendingProposalId = proposalIndex;
+        Iter.iterate<(Nat, MainTypes.Proposal)>(proposalsIter, func(x : (Nat, MainTypes.Proposal), index : Nat){
+            let (proposalId, proposal) = x;
+            if(proposalId < oldestPendingProposalId) oldestPendingProposalId := proposalId;
+        });
+        let proposalOptional = proposalsMap.get(oldestPendingProposalId);
+        switch(proposalOptional){
+            case null {};
+            case (?proposal){
+                let treasuryCanister: Treasury.Treasury = actor(daoMetaData.treasuryCanisterPrincipal);
+                let treasuryContributionsArray = await treasuryCanister.getTreasuryContributionsArray();
+                let {yay; nay; total } = await GovernanceHelperMethods.tallyVotes({treasuryContributionsArray; proposal});
+                if( yay > nay) ignore executeProposal(proposal.action);
+            };
+        };
+    };
+
+    private func executeProposal(action: MainTypes.ProposalActions) : async () {
+        switch(action){
+            case (#DepositIcpToTreasury){
+                //call function to deposit ICP to treasury from user's wallet
+            };
+            case (#DepositIcpToNeuron){
+                //call function to deposit ICP to treasury's neuron from user's wallet
+            };
+            //still need to delete the public upgradeApp method once the frontend has been updated
+            case (#UpgradeApp){ ignore upgradeApp_(); };
+            case(#DissolveIcpNeuron){
+                //call function to dissolve the Treasuries Neuron
+            };
+            case(#FollowIcpNeuron){
+                //call function to follow ICP neuron
+            };
+            case(#SpawnIcpNeuron){
+                //call function to spawn ICP neuron
+            };
+            case(#DispurseIcpNeuron){
+                //call function to dispurse ICP neuron
+            };
+            //still need to delete the public toggleCyclesSaveMode method once the frontend has been updated
+            case(#ToggleCyclesSaverMode){ toggleCyclesSaveMode_(); };
+            case(#PurchaseCycles){
+                //call function to purchase more cycles
+            };
+        };
+    };
 
     private func activateTimers() : () {
         let timerId_daily = recurringTimer(#seconds (24 * 60 * 60), heartBeat_unshared);
@@ -379,9 +493,12 @@ shared actor class User() = this {
         everyFiveSecondsTimerId := { everyFiveSecondsTimerId with active = false };
     };
     
-    system func preupgrade() { userProfilesArray := Iter.toArray(userProfilesMap.entries()); };
+    system func preupgrade() { 
+        userProfilesArray := Iter.toArray(userProfilesMap.entries()); 
+        proposalsArray := Iter.toArray(proposalsMap.entries())
+    };
 
-    system func postupgrade() { userProfilesArray:= []; };
+    system func postupgrade() { userProfilesArray:= []; proposalsArray := []};
 
     private  func key(x: Principal) : Trie.Key<Principal> { return {key = x; hash = Principal.hash(x)}; };
 

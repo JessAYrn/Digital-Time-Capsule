@@ -317,13 +317,6 @@ module{
         return #ok(updatedMetaData);
     };
 
-    public func toggleCyclesSaveMode(callerId: Principal, daoMetaData: MainTypes.DaoMetaData) : async MainTypes.DaoMetaData{
-        let callerIdAsText = Principal.toText(callerId);
-        if(callerIdAsText != daoMetaData.nftOwner) { throw Error.reject("Unauthorized access. Caller is not the owner.") };
-        let updatedMetaData = { daoMetaData with cyclesSaveMode = not daoMetaData.cyclesSaveMode; };
-        return updatedMetaData;
-    };
-
     public func installCode_managerCanister( canisterData: MainTypes.DaoMetaData ): async (){
         let {managerCanisterPrincipal; backEndPrincipal} = canisterData;
         let managerActor : Manager.Manager = actor(managerCanisterPrincipal);

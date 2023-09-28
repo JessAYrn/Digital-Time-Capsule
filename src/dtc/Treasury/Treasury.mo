@@ -10,14 +10,21 @@ import HashMap "mo:base/HashMap";
 import Iter "mo:base/Iter";
 import Cycles "mo:base/ExperimentalCycles";
 import Nat64 "mo:base/Nat64";
+import GovernanceHelperMethods "../Main/GovernanceHelperMethods";
+import NnsCyclesMinting "../Ledger/NnsCyclesMinting";
 
 shared(msg) actor class Treasury (principal : Principal) = this {
 
     private stable let ownerCanisterId : Text = Principal.toText(principal);
 
-    private stable var contributorsArray : TreasuryTypes.ContributorsArray = [];
+    private stable var contributorsArray : TreasuryTypes.TreasuryContributorsArray = [];
 
-    private var contributorsMap : TreasuryTypes.ContributorsMap = HashMap.fromIter<Principal, TreasuryTypes.Contributions>(
+    private stable var minimalRequiredVotingPower : Nat64 = 10;
+
+    private stable var stakingMultiplier : Nat64 = 2;
+
+    private var contributorsMap : TreasuryTypes.TreasuryContributorsMap = 
+    HashMap.fromIter<Principal, TreasuryTypes.TreasuryContributions>(
         Iter.fromArray(contributorsArray), 
         Iter.size(Iter.fromArray(contributorsArray)), 
         Principal.equal,
@@ -27,6 +34,26 @@ shared(msg) actor class Treasury (principal : Principal) = this {
     private var capacity = 1000000000000;
 
     private let ledger : Ledger.Interface  = actor(Ledger.CANISTER_ID);
+
+    public query({caller}) func getTreasuryContributionsArray(): async TreasuryTypes.TreasuryContributorsArray {
+        return Iter.toArray(contributorsMap.entries());
+    };
+
+    public shared({caller}) func userHasSufficientContributions(userPrincipal: Principal): async Bool {
+        if( Principal.toText(caller) != ownerCanisterId) { throw Error.reject("Unauthorized access."); };
+        let userContributions = contributorsMap.get(userPrincipal);
+        switch(userContributions){
+            case null { return false};
+            case (?contributions){
+                let cyclesMintingCanister: NnsCyclesMinting.Interface = actor(NnsCyclesMinting.NnsCyclesMintingCanisterID);
+                let {data} = await cyclesMintingCanister.get_icp_xdr_conversion_rate();
+                let {xdr_permyriad_per_icp} = data;
+                let votingPower = GovernanceHelperMethods.computeVotingPower({contributions; xdr_permyriad_per_icp; });
+                if(votingPower < minimalRequiredVotingPower) return false;
+                return true;
+            };
+        };
+    };  
 
     private func userAccountId() : Account.AccountIdentifier {
         let canisterId =  Principal.fromActor(this);

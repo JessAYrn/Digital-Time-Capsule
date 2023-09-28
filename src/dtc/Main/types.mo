@@ -31,6 +31,13 @@ module{
         principal: Text;
     };
 
+    public type Error = {
+        #NotAuthorizedToCreateProposals;
+        #NotAuthorizedToVoteOnThisProposal;
+        #VoteHasAlreadyBeenSubmitted;
+        #PorposalHasExpired;
+    };
+
     public type UserProfile = {
         canisterId : Principal;
         email: ? Text;
@@ -133,6 +140,32 @@ module{
     public type UserProfilesMap = HashMap.HashMap<Principal, UserProfile>;
 
     public type UserProfilesArray = [(Principal, UserProfile)];
+
+    public type Proposals = [(Nat,Proposal)];
+
+    public type ProposalsMap = HashMap.HashMap<Nat, Proposal>;
+
+    public type Proposal = {
+        votes: [(Principal, Vote)];
+        action: ProposalActions;
+        proposer: Principal;
+        timeInitiated: Int;
+        timeExecuted: ?Int;
+    };
+
+    public type ProposalActions = {
+        #DepositIcpToTreasury;
+        #DepositIcpToNeuron;
+        #UpgradeApp;
+        #DissolveIcpNeuron;
+        #FollowIcpNeuron;
+        #SpawnIcpNeuron;
+        #DispurseIcpNeuron;
+        #ToggleCyclesSaverMode;
+        #PurchaseCycles;
+    };
+
+    public type Vote = { adopt: Bool };
 
     public let DEFAULT_APP_METADATA: AppMetaData = {
         managerCanisterPrincipal = "Null";
