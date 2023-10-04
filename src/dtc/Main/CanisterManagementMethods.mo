@@ -41,46 +41,28 @@ module{
 
     private let nanosecondsInAMinute: Float = 60000000000;
 
-    public func authorizePrinicpalToViewAssets(principal: Principal, frontendCanisterPrincipal: Principal) : async () {
-        let assetCanister : AssetCanister.Interface = actor(Principal.toText(frontendCanisterPrincipal));
-        let result = await assetCanister.authorize(principal);
+    public func authorizePrinicpalToViewAssets(principal: Text, frontendCanisterPrincipal: Text) : async () {
+        let assetCanister : AssetCanister.Interface = actor(frontendCanisterPrincipal);
+        let result = await assetCanister.authorize(Principal.fromText(principal));
     };
 
-    public func getPrincipalsList( callerId : Principal, profilesMap : MainTypes.UserProfilesMap, canisterData: MainTypes.DaoMetaData): 
+    public func getPrincipalsList( profilesMap : MainTypes.UserProfilesMap): 
     async [Principal] {
-
-        let callerIdAsText = Principal.toText(callerId);
-            
-        if (callerIdAsText == canisterData.nftOwner) {
-
-            var index = 0;
-            let numberOfProfiles = profilesMap.size();
-            let profilesIter = profilesMap.entries();
-            let profilesArray = Iter.toArray(profilesIter);
-            let ArrayBuffer = Buffer.Buffer<(Principal)>(1);
-
-            while(index < numberOfProfiles){
-                let userProfile = profilesArray[index];
-                let userPrincipal = userProfile.0;
-                ArrayBuffer.add(userPrincipal);
-                index += 1;
-            };
-
-            return ArrayBuffer.toArray();
-
-        } else { throw Error.reject("Unauthorized access. Caller is not the owner."); }
-        
+        var index = 0;
+        let numberOfProfiles = profilesMap.size();
+        let profilesIter = profilesMap.entries();
+        let profilesArray = Iter.toArray(profilesIter);
+        let ArrayBuffer = Buffer.Buffer<(Principal)>(1);
+        while(index < numberOfProfiles){
+            let (userPrincipal, profile) = profilesArray[index];
+            ArrayBuffer.add(userPrincipal);
+            index += 1;
+        };
+        return ArrayBuffer.toArray();
     };
 
-    public func updateOwner(ownerPrincipal: Principal, metaData: MainTypes.DaoMetaData) : MainTypes.DaoMetaData {
-        let callerIdAsText = Principal.toText(ownerPrincipal);
-        let newCanisterData = { metaData with nftOwner = callerIdAsText;};
-        return newCanisterData;
-
-    };
-
-    public func grantAccess( principals: [Text], daoMetaData: MainTypes.DaoMetaData) : 
-    async Result.Result<(MainTypes.DaoMetaData), JournalTypes.Error> {
+    public func grantAccess( principals: [Text], daoMetaData: MainTypes.DaoMetaData_V2) : 
+    async Result.Result<(MainTypes.DaoMetaData_V2), JournalTypes.Error> {
         let { requestsForAccess; } = daoMetaData;
 
         var index = 0;
@@ -98,7 +80,7 @@ module{
             index += 1;
         };
         let newRequestsArray = Iter.toArray(requestsHashMap.entries());
-        let updatedDaoMetaData: MainTypes.DaoMetaData = { daoMetaData with requestsForAccess = newRequestsArray; }; 
+        let updatedDaoMetaData: MainTypes.DaoMetaData_V2 = { daoMetaData with requestsForAccess = newRequestsArray; }; 
         return #ok(updatedDaoMetaData);
     };
 
@@ -129,8 +111,8 @@ module{
         };
     };
 
-    public func requestApproval (caller: Principal, daoMetaData:  MainTypes.DaoMetaData) : 
-    Result.Result<MainTypes.DaoMetaData, JournalTypes.Error>{
+    public func requestApproval (caller: Principal, daoMetaData:  MainTypes.DaoMetaData_V2) : 
+    Result.Result<MainTypes.DaoMetaData_V2, JournalTypes.Error>{
         if(daoMetaData.acceptingRequests == false){ return #err(#NotAcceptingRequests); };
         let{ requestsForAccess; } = daoMetaData;
         let callerIdAsText = Principal.toText(caller);
@@ -144,12 +126,12 @@ module{
 
         requestsHashMap.put(callerIdAsText, false);
         let newRequestsArray = Iter.toArray(requestsHashMap.entries());
-        let updatedDaoMetaData : MainTypes.DaoMetaData = { daoMetaData with requestsForAccess = newRequestsArray;};
+        let updatedDaoMetaData : MainTypes.DaoMetaData_V2 = { daoMetaData with requestsForAccess = newRequestsArray;};
         return #ok(updatedDaoMetaData);
     };
 
-    public func removeFromRequestsList( principals: [Text], daoMetaData: MainTypes.DaoMetaData) : 
-    async MainTypes.DaoMetaData {
+    public func removeFromRequestsList( principals: [Text], daoMetaData: MainTypes.DaoMetaData_V2) : 
+    async MainTypes.DaoMetaData_V2 {
         let { requestsForAccess; } = daoMetaData;
         
         var index = 0;
@@ -167,7 +149,7 @@ module{
             index += 1;
         };
         let newRequestsArray = Iter.toArray(requestsHashMap.entries());
-        let updatedDaoMetaData: MainTypes.DaoMetaData = { daoMetaData with requestsForAccess = newRequestsArray; }; 
+        let updatedDaoMetaData: MainTypes.DaoMetaData_V2 = { daoMetaData with requestsForAccess = newRequestsArray; }; 
         return updatedDaoMetaData;
     };
 
@@ -182,8 +164,23 @@ module{
         return updatedDefualtControllersArray;
     };
 
-    public func configureApp( backEndPrincipal : Text, frontEndPrincipal : Text, nftId : Int,   metaData : MainTypes.DaoMetaData) 
-    : async (MainTypes.DaoMetaData) {
+    public func canConfigureApp(daoMetaData: MainTypes.DaoMetaData_V2) : Bool {
+        if(
+            daoMetaData.frontEndPrincipal == "Null" or 
+            daoMetaData.managerCanisterPrincipal == "Null" or 
+            daoMetaData.treasuryCanisterPrincipal == "Null" or
+            daoMetaData.admin.size() == 0
+        ) return true;
+        return false;
+    };
+
+    public func configureApp( 
+        backEndPrincipal : Text, 
+        frontEndPrincipal : Text, 
+        adminPrincipal : Text,
+        metaData : MainTypes.DaoMetaData_V2) 
+    : async (MainTypes.DaoMetaData_V2) {
+
         var managerCanisterPrincipal = metaData.managerCanisterPrincipal;
         var treasuryCanisterPrincipal = metaData.treasuryCanisterPrincipal;
         //initializing manager canister
@@ -206,28 +203,32 @@ module{
         let updatedDefaultControllers_0 = addDefualtController([] , Principal.fromText(backEndPrincipal));
         let updatedDefaultControllers_1 = addDefualtController(updatedDefaultControllers_0 ,Principal.fromText(managerCanisterPrincipal));
 
+        let result = await authorizePrinicpalToViewAssets(backEndPrincipal, frontEndPrincipal);
+        let admin = [(adminPrincipal, {percentage = 100})];
+
         let updatedMetaData = {
             metaData with
-            managerCanisterPrincipal = managerCanisterPrincipal;
-            treasuryCanisterPrincipal = treasuryCanisterPrincipal;
-            frontEndPrincipal = frontEndPrincipal;
-            backEndPrincipal = backEndPrincipal;
-            nftId = nftId;
+            admin;
+            managerCanisterPrincipal;
+            treasuryCanisterPrincipal;
+            frontEndPrincipal;
+            backEndPrincipal;
             defaultControllers = updatedDefaultControllers_1;
         };
 
         return (updatedMetaData);
     };
 
-    public func getCanisterCyclesBalances(backendCyclesBalance: Nat, canisterData: MainTypes.DaoMetaData) 
+    public func getCanisterCyclesBalances(backendCyclesBalance: Nat, canisterData: MainTypes.DaoMetaData_V2) 
     : async  MainTypes.CanisterCyclesBalances {
 
         let frontendCyclesBalance = await getCyclesBalance(Principal.fromText(canisterData.frontEndPrincipal));
         return {frontendCyclesBalance = frontendCyclesBalance; backendCyclesBalance = backendCyclesBalance}
     };
 
-    public func getCanisterData(callerId: Principal, 
-        daoMetaData: MainTypes.DaoMetaData, 
+    public func getCanisterData(
+        callerId: Principal, 
+        daoMetaData: MainTypes.DaoMetaData_V2, 
         cyclesBalance_backend: Nat, 
         profilesMap : MainTypes.UserProfilesMap
     ) : async Result.Result<(MainTypes.CanisterDataExport), JournalTypes.Error> {
@@ -243,7 +244,7 @@ module{
                 let managerPrincipal = Principal.fromText(daoMetaData.managerCanisterPrincipal);
                 let cyclesBalance_frontend = await getCyclesBalance(frontendPrincipal);
                 let currentCyclesBalance_manager = await getCyclesBalance(managerPrincipal);
-                let isOwner = Principal.toText(callerId) == daoMetaData.nftOwner;
+                let isAdmin = getIsAdmin(callerId, daoMetaData);
                 let currentVersion = await managerCanister.getCurrentReleaseVersion();
                 let canisterDataPackagedForExport = {
                     daoMetaData with 
@@ -252,7 +253,7 @@ module{
                     currentCyclesBalance_backend = cyclesBalance_backend;
                     currentCyclesBalance_manager = currentCyclesBalance_manager;
                     profilesMetaData = profilesApprovalStatus;
-                    isOwner = isOwner;
+                    isAdmin;
                     releaseVersion = currentVersion.number;
                 };
                 return #ok(canisterDataPackagedForExport);
@@ -260,7 +261,7 @@ module{
         }
     };
 
-    private func refillCanisterCycles(daoMetaData: MainTypes.DaoMetaData, profilesMap : MainTypes.UserProfilesMap) : async () {
+    private func refillCanisterCycles(daoMetaData: MainTypes.DaoMetaData_V2, profilesMap : MainTypes.UserProfilesMap) : async () {
         let numberOfProfiles = profilesMap.size();
         let profilesIter = profilesMap.entries();
         let profilesArray = Iter.toArray(profilesIter);
@@ -292,8 +293,8 @@ module{
         };
     };
 
-    public func heartBeat(currentCylcesBalance: Nat, daoMetaData : MainTypes.DaoMetaData, profilesMap: MainTypes.UserProfilesMap): 
-    async MainTypes.DaoMetaData{
+    public func heartBeat(currentCylcesBalance: Nat, daoMetaData : MainTypes.DaoMetaData_V2, profilesMap: MainTypes.UserProfilesMap): 
+    async MainTypes.DaoMetaData_V2{
         ignore refillCanisterCycles(daoMetaData, profilesMap);
         let timeLapsed : Float = Float.fromInt(Time.now() - daoMetaData.lastRecordedTime);
         let timeLapsedInDays : Float = timeLapsed / nanosecondsInADay;
@@ -309,15 +310,7 @@ module{
         return updatedCanisterData;
     };
 
-    public func toggleAcceptRequest(callerId: Principal, daoMetaData: MainTypes.DaoMetaData) : 
-    Result.Result<(MainTypes.DaoMetaData), JournalTypes.Error>{
-        let callerIdAsText = Principal.toText(callerId);
-        if(callerIdAsText != daoMetaData.nftOwner){ return #err(#NotAuthorized);};
-        let updatedMetaData = { daoMetaData with acceptingRequests = not daoMetaData.acceptingRequests; };
-        return #ok(updatedMetaData);
-    };
-
-    public func installCode_managerCanister( canisterData: MainTypes.DaoMetaData ): async (){
+    public func installCode_managerCanister( canisterData: MainTypes.DaoMetaData_V2 ): async (){
         let {managerCanisterPrincipal; backEndPrincipal} = canisterData;
         let managerActor : Manager.Manager = actor(managerCanisterPrincipal);
         let wasmStoreCanister : WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
@@ -406,12 +399,13 @@ module{
         let result = await ic.update_settings({ canister_id = canisterPrincipal; settings = updatedSettings; });
     };
 
-    public func toggleSupportMode( caller: Principal, daoMetaData: MainTypes.DaoMetaData) : 
-    async Result.Result<(MainTypes.DaoMetaData),JournalTypes.Error>{
-        let callerIdAsText = Principal.toText(caller);
-        let { supportMode; nftOwner; backEndPrincipal; defaultControllers; managerCanisterPrincipal; frontEndPrincipal; treasuryCanisterPrincipal} = daoMetaData;
+    public func toggleSupportMode( caller: Principal, daoMetaData: MainTypes.DaoMetaData_V2) : 
+    async MainTypes.DaoMetaData_V2{
+
+        let { 
+            supportMode; backEndPrincipal; defaultControllers; managerCanisterPrincipal; frontEndPrincipal; treasuryCanisterPrincipal
+        } = daoMetaData;
         let supportMode_updated = not supportMode;
-        if(callerIdAsText != nftOwner){ return #err(#NotAuthorized) };
         if(supportMode_updated){
             let techSupportPrincipals = [ Support.TechSupportPrincipal1, Support.TechSupportPrincipal2 ];
             let result1 = ignore addControllers( techSupportPrincipals, Principal.fromText(backEndPrincipal), defaultControllers );
@@ -428,47 +422,76 @@ module{
             let result3 = ignore setToDefualtControllerSettings( Principal.fromText(treasuryCanisterPrincipal), defaultControllers );
             let result4 = ignore setToDefualtControllerSettings( Principal.fromText(frontEndPrincipal), defaultControllers );
         };
-        let updatedDaoMetaData: MainTypes.DaoMetaData = { daoMetaData with supportMode = supportMode_updated; };
-        return #ok(updatedDaoMetaData);
+        let updatedDaoMetaData: MainTypes.DaoMetaData_V2 = { daoMetaData with supportMode = supportMode_updated; };
+        return updatedDaoMetaData;
     };
 
-    public func verifyOwnership( principal: Principal, daoMetaData: MainTypes.DaoMetaData ): async Bool {
-        let accountIdBlob = Account.accountIdentifier(principal, Account.defaultSubaccount());
-        let accountIdArray = Blob.toArray(accountIdBlob);
-        let accountIdText = Hex.encode(accountIdArray);
-        let tokens_ext_result = await nftCollection.tokens_ext(accountIdText);
-        switch(tokens_ext_result){
-            case(#ok(tokensOwned)){
-                var index = 0;
-                let tokensOwnedIter = Iter.fromArray(tokensOwned);
-                let numberOfTokensOwned = Iter.size(tokensOwnedIter);
-                while(index < numberOfTokensOwned){
-                    let tokenData = tokensOwned[index];
-                    let tokenIndex = tokenData.0;
-                    var tokenIndexAsNat = Nat32.toNat(tokenIndex);
-                    tokenIndexAsNat := tokenIndexAsNat + 1;
-                    if(tokenIndexAsNat == daoMetaData.nftId){
-                        return true;
-                    };
-                    index += 1;
-                };
-                return false;
-            };
-            case(#err(e)){ return false; };
-        };  
+    public func getAdminMap(daoMetaData: MainTypes.DaoMetaData_V2) : HashMap.HashMap<Text, MainTypes.AdminData>{
+        let adminList = HashMap.fromIter<Text, MainTypes.AdminData>(
+            Iter.fromArray(daoMetaData.admin), 
+            Iter.size(Iter.fromArray(daoMetaData.admin)), 
+            Text.equal,
+            Text.hash
+        );
+        return adminList;
     };
 
-    public func registerOwner(caller: Principal, metaData: MainTypes.DaoMetaData ): 
-    async Result.Result<(MainTypes.DaoMetaData), JournalTypes.Error> {
-        let isOwner = await verifyOwnership(caller, metaData);
-        if(not isOwner){ return #err(#NotAuthorized);};
-        let metaData_withOwner = updateOwner(caller, metaData);
-        let updatedDaoMetaData = await grantAccess( [Principal.toText(caller)], metaData_withOwner );
-        switch(updatedDaoMetaData){
-            case(#ok(daoMetaData)){ #ok((daoMetaData))};
-            case(#err(e)){ return #err(e) };
-        };
+    public func addAdmin(principal: Principal, daoMetaData: MainTypes.DaoMetaData_V2) : MainTypes.DaoMetaData_V2 {
+        let {admin} = daoMetaData;
+        let adminHashMap = HashMap.fromIter<Text, MainTypes.AdminData>(
+            Iter.fromArray(admin), 
+            Iter.size(Iter.fromArray(admin)), 
+            Text.equal,
+            Text.hash
+        );
+        adminHashMap.put(Principal.toText(principal), {percentage = 0});
+        return {daoMetaData with admin = Iter.toArray(adminHashMap.entries())};
     };
+
+    public func removeAdmin(principal: Principal, daoMetaData: MainTypes.DaoMetaData_V2) : MainTypes.DaoMetaData_V2 {
+        let {admin} = daoMetaData;
+        let adminHashMap = HashMap.fromIter<Text, MainTypes.AdminData>(
+            Iter.fromArray(admin), 
+            Iter.size(Iter.fromArray(admin)), 
+            Text.equal,
+            Text.hash
+        );
+        adminHashMap.delete(Principal.toText(principal));
+        return {daoMetaData with admin = Iter.toArray(adminHashMap.entries())};
+    };
+
+    public func getIsAdmin(princiapl: Principal, daoMetaData: MainTypes.DaoMetaData_V2) : Bool {
+        let adminMap = getAdminMap(daoMetaData);
+        let adminData = adminMap.get(Principal.toText(princiapl));
+        if(adminData == null){ return false; };
+        return true;
+    };
+
+    // public func verifyOwnership( principal: Principal, daoMetaData: MainTypes.DaoMetaData ): async Bool {
+    //     let accountIdBlob = Account.accountIdentifier(principal, Account.defaultSubaccount());
+    //     let accountIdArray = Blob.toArray(accountIdBlob);
+    //     let accountIdText = Hex.encode(accountIdArray);
+    //     let tokens_ext_result = await nftCollection.tokens_ext(accountIdText);
+    //     switch(tokens_ext_result){
+    //         case(#ok(tokensOwned)){
+    //             var index = 0;
+    //             let tokensOwnedIter = Iter.fromArray(tokensOwned);
+    //             let numberOfTokensOwned = Iter.size(tokensOwnedIter);
+    //             while(index < numberOfTokensOwned){
+    //                 let tokenData = tokensOwned[index];
+    //                 let tokenIndex = tokenData.0;
+    //                 var tokenIndexAsNat = Nat32.toNat(tokenIndex);
+    //                 tokenIndexAsNat := tokenIndexAsNat + 1;
+    //                 if(tokenIndexAsNat == daoMetaData.nftId){
+    //                     return true;
+    //                 };
+    //                 index += 1;
+    //             };
+    //             return false;
+    //         };
+    //         case(#err(e)){ return false; };
+    //     };  
+    // };
 
     private  func key(x: Principal) : Trie.Key<Principal> {
         return {key = x; hash = Principal.hash(x)};

@@ -71,6 +71,8 @@ module{
 
     public type ProfilesMetaData = [ProfileMetaData];
 
+    public type AdminData = {percentage : Nat};
+
     public type CanisterDataExport = {
         journalCount: Nat;
         treasuryCanisterPrincipal: Text;
@@ -79,12 +81,11 @@ module{
         backEndPrincipal: Text;
         lastRecordedBackEndCyclesBalance: Nat;
         backEndCyclesBurnRatePerDay: Nat;
-        nftOwner: Text;
-        nftId: Int;
+        admin: [(Text, AdminData)];
         acceptingRequests: Bool;
         lastRecordedTime: Int;
         profilesMetaData: ProfilesMetaData;
-        isOwner: Bool;
+        isAdmin: Bool;
         currentCyclesBalance_backend: Nat;
         currentCyclesBalance_frontend: Nat;
         currentCyclesBalance_manager: Nat;
@@ -94,8 +95,9 @@ module{
         requestsForAccess: RequestsForAccess;
     };
 
-    public type AppMetaData = {
+    public type DaoMetaData = {
         managerCanisterPrincipal: Text; 
+        treasuryCanisterPrincipal: Text;
         frontEndPrincipal: Text;
         backEndPrincipal: Text;
         lastRecordedBackEndCyclesBalance: Nat;
@@ -110,15 +112,14 @@ module{
         defaultControllers: [Principal];
     };
 
-    public type DaoMetaData = {
+    public type DaoMetaData_V2 = {
         managerCanisterPrincipal: Text; 
         treasuryCanisterPrincipal: Text;
         frontEndPrincipal: Text;
         backEndPrincipal: Text;
         lastRecordedBackEndCyclesBalance: Nat;
         backEndCyclesBurnRatePerDay: Nat;
-        nftOwner: Text;
-        nftId: Int;
+        admin: [(Text, AdminData)];
         acceptingRequests: Bool;
         lastRecordedTime: Int;
         cyclesSaveMode: Bool;
@@ -145,15 +146,22 @@ module{
 
     public type ProposalsMap = HashMap.HashMap<Nat, Proposal>;
 
+    public type ProposalPayload = {
+        principal : Principal
+    };
+
     public type Proposal = {
         votes: [(Principal, Vote)];
         action: ProposalActions;
+        payload: ?ProposalPayload;
         proposer: Principal;
         timeInitiated: Int;
         timeExecuted: ?Int;
     };
 
     public type ProposalActions = {
+        #AddAdmin;
+        #RemoveAdmin;
         #DepositIcpToTreasury;
         #DepositIcpToNeuron;
         #UpgradeApp;
@@ -167,31 +175,15 @@ module{
 
     public type Vote = { adopt: Bool };
 
-    public let DEFAULT_APP_METADATA: AppMetaData = {
-        managerCanisterPrincipal = "Null";
-        frontEndPrincipal = "Null";
-        backEndPrincipal = "Null";
-        lastRecordedBackEndCyclesBalance = 0;
-        backEndCyclesBurnRatePerDay = 0;
-        nftOwner = "Null";
-        nftId = -1;
-        acceptingRequests = true;
-        lastRecordedTime = 0;
-        cyclesSaveMode = false;
-        supportMode = false;
-        requestsForAccess = [];
-        defaultControllers = [];
-    };
 
-    public let DEFAULT_DAO_METADATA: DaoMetaData = {
+    public let DEFAULT_DAO_METADATA_V2: DaoMetaData_V2 = {
         managerCanisterPrincipal = "Null";
         treasuryCanisterPrincipal = "Null";
         frontEndPrincipal = "Null";
         backEndPrincipal = "Null";
         lastRecordedBackEndCyclesBalance = 0;
         backEndCyclesBurnRatePerDay = 0;
-        nftOwner = "Null";
-        nftId = -1;
+        admin = [];
         acceptingRequests = true;
         lastRecordedTime = 0;
         cyclesSaveMode = false;

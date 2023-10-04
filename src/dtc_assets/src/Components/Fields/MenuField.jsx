@@ -16,6 +16,7 @@ const MenuField = (props) => {
         sx,
         disabled,
         MenuIcon,
+        label,
         color
     } = props;
 
@@ -40,6 +41,7 @@ const MenuField = (props) => {
                 ariaExpanded={open ? 'true' : undefined}
                 onClick={handleClick}
                 Icon={MenuIcon}
+                text={label}
                 color={color}
             />
             <Menu

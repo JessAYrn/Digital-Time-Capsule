@@ -25,23 +25,29 @@ module{
     public func create (
         callerId: Principal, 
         profilesMap: MainTypes.UserProfilesMap, 
-        daoMetaData: MainTypes.DaoMetaData
+        daoMetaData: MainTypes.DaoMetaData_V2
     ) : async Result.Result<MainTypes.AmountAccepted, JournalTypes.Error> {
 
         if(Principal.toText(callerId) == "2vxsx-fae"){ return #err(#NotAuthorized);};
 
         let callerIdAsText = Principal.toText(callerId);
-        let requestForAccess = Array.find(
-            daoMetaData.requestsForAccess, func (x: (Text, MainTypes.Approved)) : Bool {
-                let (principalAsText, approved) = x;
-                if(principalAsText == callerIdAsText and approved){ return true;}
-                else { false };
-            }
+        let requestForAccessMap = HashMap.fromIter<Text, MainTypes.Approved>(
+            Iter.fromArray(daoMetaData.requestsForAccess), 
+            Iter.size(Iter.fromArray(daoMetaData.requestsForAccess)), 
+            Text.equal,
+            Text.hash
         );
-        if(Option.isNull(requestForAccess)) { return #err(#NotAuthorized);};
-
-        let ?(principal, isApproved) = requestForAccess;
-        if(not isApproved){ return #err(#NotAuthorized);};
+        let adminMap = HashMap.fromIter<Text, MainTypes.AdminData>(
+            Iter.fromArray(daoMetaData.admin), 
+            Iter.size(Iter.fromArray(daoMetaData.admin)), 
+            Text.equal,
+            Text.hash
+        );
+        
+        let adminData = adminMap.get(callerIdAsText);
+        let requestForAccessOption = requestForAccessMap.get(callerIdAsText);
+        let requestForAccess = Option.get(requestForAccessOption, false);
+        if(adminData == null and requestForAccess == false) { return #err(#NotAuthorized);};
 
         let existing = profilesMap.get(callerId);
 

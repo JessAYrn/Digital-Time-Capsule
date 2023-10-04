@@ -31,7 +31,7 @@ module{
         await installCode_(null, wasmModule, backEndPrincipalBlob);
     };
 
-    public func installCodeTreasuryWasm( daoMetaData: MainTypes.DaoMetaData, wasmModule: Blob): async (){
+    public func installCodeTreasuryWasm( daoMetaData: MainTypes.DaoMetaData_V2, wasmModule: Blob): async (){
         let {treasuryCanisterPrincipal; backEndPrincipal;} = daoMetaData;
         let treasuryCanisterBlob = Principal.fromText(treasuryCanisterPrincipal);
         let backEndPrincipalBlob = Principal.fromText(backEndPrincipal);
@@ -39,13 +39,13 @@ module{
     };
 
 
-    public func installFrontendWasm( daoMetaData: MainTypes.DaoMetaData, wasmModule: Blob): async (){
+    public func installFrontendWasm( daoMetaData: MainTypes.DaoMetaData_V2, wasmModule: Blob): async (){
         let {frontEndPrincipal} = daoMetaData;
         let frontEndPrincipalBlob = Principal.fromText(frontEndPrincipal);
         await installCode_(null, wasmModule, frontEndPrincipalBlob);
     };
 
-    public func uploadAssetsToFrontEndCanister(canisterData: MainTypes.DaoMetaData, release: WasmStore.Release) : 
+    public func uploadAssetsToFrontEndCanister(canisterData: MainTypes.DaoMetaData_V2, release: WasmStore.Release) : 
     async ([AssetCanister.BatchOperationKind]) {
         let {frontEndPrincipal} = canisterData;
         let frontendCanister: AssetCanister.Interface = actor(frontEndPrincipal);

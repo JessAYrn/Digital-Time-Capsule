@@ -3,7 +3,6 @@ import { delay, backendActor, toHexString, nanoSecondsToMiliSeconds } from "./Ut
 import { generateQrCode } from "./walletFunctions/GenerateQrCode";
 import { mapBackendCanisterDataToFrontEndObj } from "../mappers/dashboardMapperFunctions";
 import { getFileUrl_fromApi } from "../Components/Fields/fileManger/FileManagementTools";
-import { CreateUserJournal } from "../Routes/Pages/authentication/AuthenticationMethods";
 import DoNotDisturbOnIcon from '@mui/icons-material/DoNotDisturbOn';
 import ButtonField from "../Components/Fields/Button";
 
@@ -19,7 +18,7 @@ export const loadAllDataIntoReduxStores = async (states, dispatchFunctions, type
     //checks to see if user has an account. If not, then it attemptes to make an account, if 
     //the account creation is unsuccessful, then it returns
     let hasAccount = await actorState.backendActor.hasAccount();
-    if(!hasAccount) accountCreationAttemptResults = await CreateUserJournal(actorState);
+    if(!hasAccount) accountCreationAttemptResults = await actorState.backendActor.create();
     if(accountCreationAttemptResults && "err" in accountCreationAttemptResults){
         return {
             openModal: true, 

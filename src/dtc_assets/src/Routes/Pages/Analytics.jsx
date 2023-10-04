@@ -9,9 +9,9 @@ import { CANISTER_DATA_FIELDS } from '../../functionsAndConstants/Constants';
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
 import Paper from '@mui/material/Paper';
-import HowToRegIcon from '@mui/icons-material/HowToReg';
 import UpgradeIcon from '@mui/icons-material/Upgrade';
 import CloseIcon from '@mui/icons-material/Close';
+import HowToVoteIcon from '@mui/icons-material/HowToVote';
 import ButtonField from '../../Components/Fields/Button';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import Grid from '@mui/material/Unstable_Grid2';
@@ -26,9 +26,10 @@ import { inTrillions, round2Decimals, shortenHexString } from '../../functionsAn
 import { copyText } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
 import DataTable from '../../Components/Fields/Table';
 import { mapRequestsForAccessToTableRows, mapUsersProfileDataToTableRows, requestsForAccessTableColumns, usersTableColumns } from '../../mappers/dashboardMapperFunctions';
-import { Typography } from '@mui/material';
 import ModalComponent from '../../Components/modal/Modal';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import SpeedDialField from '../../Components/Fields/SpeedDialField';
+import CreateProposalForm from '../../Components/proposals/CreateProposalForm';
 
 const Analytics = () => {
     const { 
@@ -50,6 +51,13 @@ const Analytics = () => {
             Icon: CloseIcon,
             onClick: () => setModalIsOpen(false)
         }}
+    ];
+
+    const modalForm_createProposal = [
+        {
+            Component: CreateProposalForm,
+            props: null
+        }
     ];
 
     const onGrantAccess = async (args) => {
@@ -144,28 +152,6 @@ const Analytics = () => {
             actionType: homePageTypes.SET_CANISTER_DATA,
             payload: { ...homePageState.canisterData, supportMode: !homePageState.canisterData.supportMode }
         });
-    }
-
-    const handleRegistration = async () => {
-        setIsLoadingModal(true);
-        setModalIsOpen(true);
-        let modalProps = {
-            bigText: "Action Failed", 
-            smallText: "Only the owner of the Founder's NFT may perform this action.",
-            Icon: ErrorOutlineIcon,
-            components: modalButton_close
-        };
-        let result = await actorState.backendActor.registerOwner();
-        if('ok' in result) {
-            modalProps = {
-                bigText: "Action Executed Successfully", 
-                smallText: "You are now registered as the Founder of this DAO.",
-                Icon: CheckCircleOutlineIcon,
-                components: modalButton_close
-            };
-        }
-        setModalProps({...modalProps});
-        setIsLoadingModal(false);
     };
 
     const handleUpgrade = async () => {
@@ -202,6 +188,18 @@ const Analytics = () => {
         setIsLoadingModal(false);
     };
 
+    const openProposalForm = () => {
+        setModalIsOpen(true);
+        setModalProps({
+            components: modalForm_createProposal,
+            handleClose: () => setModalIsOpen(false)
+        });
+    };
+
+    const speedDialActions = [
+        {name: "Create Proposal", icon: HowToVoteIcon , onClick: openProposalForm}
+    ]
+
     return(
         <Grid 
             container 
@@ -236,7 +234,6 @@ const Analytics = () => {
                         <DataField
                             label={'Frontend Canister Principal:'}
                             text={`${shortenHexString(homePageState.canisterData[CANISTER_DATA_FIELDS.frontEndPrincipal])}`}
-                            isPrincipal={true}
                             buttonIcon={ContentCopyIcon}
                             onClick={
                                 () => copyText(
@@ -247,7 +244,6 @@ const Analytics = () => {
                         <DataField
                             label={'Backend Canister Principal:'}
                             text={`${shortenHexString(homePageState.canisterData[CANISTER_DATA_FIELDS.backEndPrincipal])}`}
-                            isPrincipal={true}
                             buttonIcon={ContentCopyIcon}
                             onClick={
                                 () => copyText(
@@ -273,22 +269,6 @@ const Analytics = () => {
                             isCycles={true}
                             disabled={true}
                         />
-                        <DataField
-                            label={'Canister Owner:'}
-                            text={`${shortenHexString(homePageState.canisterData[CANISTER_DATA_FIELDS.nftOwner])}`}
-                            isPrincipal={true}
-                            buttonIcon={ContentCopyIcon}
-                            onClick={
-                                () => copyText(
-                                    homePageState.canisterData[CANISTER_DATA_FIELDS.nftOwner]
-                                )
-                            }
-                        />
-                        <DataField
-                            label={'NFT ID:'}
-                            text={homePageState.canisterData[CANISTER_DATA_FIELDS.nftId]}
-                            disabled={true}
-                        />
                     </Paper>
                 </Grid>
                 <Grid 
@@ -312,7 +292,7 @@ const Analytics = () => {
                             text_2={'Deny'}
                             transparent={true}
                             checkboxSelection={true}
-                            disabled={!homePageState.canisterData.isOwner}
+                            disabled={!homePageState.canisterData.isAdmin}
                             isLoading={requestsTableIsLoading}
                             columns={requestsForAccessTableColumns}
                             rows={homePageState.canisterData.requestsForAccess}
@@ -329,7 +309,7 @@ const Analytics = () => {
                             text_2={'Unsubsidize'}
                             transparent={true}
                             checkboxSelection={true}
-                            disabled={!homePageState.canisterData.isOwner}
+                            disabled={!homePageState.canisterData.isAdmin}
                             isLoading={usersTableIsLoading}
                             columns={usersTableColumns}
                             rows={homePageState.canisterData.profilesMetaData}
@@ -357,21 +337,21 @@ const Analytics = () => {
                     >
                         <Switch
                             labelLeft={"Activate Support Mode: "}
-                            disabled={!homePageState.canisterData.isOwner}
+                            disabled={!homePageState.canisterData.isAdmin}
                             checked={homePageState.canisterData.supportMode}
                             onClick={toggleSupportMode}
                         />
                         <Switch
                             checked={homePageState.canisterData.acceptingRequests}
                             onClick={toggleAcceptRequest}
-                            disabled={!homePageState.canisterData.isOwner}
+                            disabled={!homePageState.canisterData.isAdmin}
                             labelLeft={"Receive Requests:  "}
                         />
                         <Switch
                             checked={homePageState.canisterData.cyclesSaveMode}
                             onClick={toggleCyclesSaveMode}
                             labelLeft={'Cycles Saver Mode: '}
-                            disabled={!homePageState.canisterData.isOwner}
+                            disabled={!homePageState.canisterData.isAdmin}
                         />
                     </Grid>
                     <Grid
@@ -382,22 +362,6 @@ const Analytics = () => {
                         justifyContent="center" 
                         alignItems="center" 
                     >
-                        <Grid columns={12} 
-                            xs={6} 
-                            width={"100%"} 
-                            display={"flex"} 
-                            justifyContent={"left"} 
-                            alignItems={"center"}
-                        >
-                            <Grid xs={6} width={"110px"}>
-                                <ButtonField
-                                    text={'Manage'}
-                                    onClick={handleRegistration}
-                                    Icon={HowToRegIcon}
-                                    active={homePageState.canisterData.isOwner}
-                                />
-                            </Grid>
-                        </Grid>
                         <Grid 
                             columns={12} 
                             xs={6} 
@@ -409,15 +373,16 @@ const Analytics = () => {
                             <Grid xs={6} width={"110px"}>
                                 <ButtonField
                                     Icon={UpgradeIcon}
-                                    active={homePageState.canisterData.isOwner}
+                                    active={homePageState.canisterData.isAdmin}
                                     text={'Upgrade'}
                                     onClick={handleUpgrade}
-                                    disabled={!homePageState.canisterData.isOwner}
+                                    disabled={!homePageState.canisterData.isAdmin}
                                 />
                             </Grid>
                         </Grid>
                     </Grid>
                 </Grid>
+                <SpeedDialField actions={speedDialActions} position={"right"}/>
             </>
             <ModalComponent 
                 {...modalProps}

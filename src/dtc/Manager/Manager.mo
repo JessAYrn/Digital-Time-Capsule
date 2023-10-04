@@ -114,7 +114,7 @@ shared(msg) actor class Manager (principal : Principal) = this {
         };
     };
 
-    public shared({caller}) func installCode_treasuryCanister(canisterData: MainTypes.DaoMetaData): async () {
+    public shared({caller}) func installCode_treasuryCanister(canisterData: MainTypes.DaoMetaData_V2): async () {
         if(Principal.toText(caller) != mainCanisterId) { throw Error.reject("Unauthorized access."); };
         let {treasury;} = release;
         let {wasmModule;} = treasury;
@@ -128,7 +128,7 @@ shared(msg) actor class Manager (principal : Principal) = this {
         await CanisterManagementMethods.installCodeJournalWasms(wasmModule, profilesArray);
     };
 
-    public shared({caller}) func installCode_frontendCanister(canisterData: MainTypes.DaoMetaData): 
+    public shared({caller}) func installCode_frontendCanister(canisterData: MainTypes.DaoMetaData_V2): 
     async ([AssetCanister.BatchOperationKind]){
         if(Principal.toText(caller) != mainCanisterId) { throw Error.reject("Unauthorized access."); };
         let {frontend} = release; let {wasmModule} = frontend;

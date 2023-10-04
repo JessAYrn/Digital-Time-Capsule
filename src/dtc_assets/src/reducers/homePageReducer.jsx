@@ -24,9 +24,7 @@ export const homePageInitialState={
         lastRecordedBackEndCyclesBalance: 1,
         currentCyclesBalance_backend: 1,
         currentCyclesBalance_frontend: 1,
-        nftOwner: NULL_STRING_CAPITALIZED,
-        isOwner: false,
-        nftId: NULL_STRING_CAPITALIZED,
+        isAdmin: false,
         supportMode: false,
         acceptingRequests: false,
         requestsForAccess: []

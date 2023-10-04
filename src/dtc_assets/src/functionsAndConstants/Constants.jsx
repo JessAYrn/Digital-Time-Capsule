@@ -50,10 +50,8 @@ export const CANISTER_DATA_FIELDS = {
     backEndPrincipal: "backEndPrincipal",
     backEndCyclesBurnRatePerDay: "backEndCyclesBurnRatePerDay",
     lastRecordedBackEndCyclesBalance: "lastRecordedBackEndCyclesBalance",
-    nftOwner: "nftOwner",
     currentCyclesBalance_backend: "currentCyclesBalance_backend",
     currentCyclesBalance_frontend: "currentCyclesBalance_frontend",
-    nftId: "nftId",
     RequestsForAccess: "RequestsForAccess",
     users: "users",
     journalCount: "journalCount"
