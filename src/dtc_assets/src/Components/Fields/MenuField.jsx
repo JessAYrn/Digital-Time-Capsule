@@ -53,7 +53,10 @@ const MenuField = (props) => {
                 'aria-labelledby': 'basic-button',
                 }}
             >
-                { menuItemProps.map( ({onClick, text}) => { return( <MenuItem onClick={onClick}> {text} </MenuItem> ) } ) }
+                { menuItemProps.map( 
+                    ({onClick, text}) => { 
+                    return( <MenuItem onClick={ (e) => { onClick(e); handleClose(e); }}> {text} </MenuItem> )
+                })}
             </Menu>
         </Grid>
     )

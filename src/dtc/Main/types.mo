@@ -147,13 +147,14 @@ module{
     public type ProposalsMap = HashMap.HashMap<Nat, Proposal>;
 
     public type ProposalPayload = {
-        principal : Principal
+        principal : ?Text;
+        amount : ?Nat64;
     };
 
     public type Proposal = {
         votes: [(Principal, Vote)];
         action: ProposalActions;
-        payload: ?ProposalPayload;
+        payload: ProposalPayload;
         proposer: Principal;
         timeInitiated: Int;
         timeExecuted: ?Int;

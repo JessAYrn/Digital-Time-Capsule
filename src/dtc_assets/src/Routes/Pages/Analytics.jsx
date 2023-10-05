@@ -56,7 +56,7 @@ const Analytics = () => {
     const modalForm_createProposal = [
         {
             Component: CreateProposalForm,
-            props: null
+            props: {context: UI_CONTEXTS.HOME_PAGE}
         }
     ];
 

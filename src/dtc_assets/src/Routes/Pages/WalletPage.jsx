@@ -67,7 +67,6 @@ const WalletPage = (props) => {
         {name: "New Transaction", icon: SendIcon , onClick: onSend}
     ]
 
-    console.log(walletState)
     return (
         <Grid 
             container 

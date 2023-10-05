@@ -367,7 +367,7 @@ shared actor class User() = this {
 
     let {recurringTimer; cancelTimer; setTimer} = Timer;
 
-    public shared({caller}) func createProposal({action: MainTypes.ProposalActions; payload: ?MainTypes.ProposalPayload }): 
+    public shared({caller}) func createProposal({action: MainTypes.ProposalActions; payload: MainTypes.ProposalPayload }): 
     async Result.Result<(),MainTypes.Error>{
         let callerProfile = userProfilesMap.get(caller);
         if(callerProfile == null) return #err(#NotAuthorizedToCreateProposals);
@@ -425,18 +425,18 @@ shared actor class User() = this {
         let {action; payload} = proposal;
         switch(action){
             case(#AddAdmin){
-                switch(payload){
+                switch(payload.principal){
                     case null { return };
-                    case(? payload_){
-                        let updatedDaoMetaData = CanisterManagementMethods.addAdmin(payload_.principal, daoMetaData_v2);
+                    case(? principal){
+                        let updatedDaoMetaData = CanisterManagementMethods.addAdmin(Principal.fromText(principal), daoMetaData_v2);
                         daoMetaData_v2 := updatedDaoMetaData;
                     };
                 };            };
             case(#RemoveAdmin){
-                switch(payload){
+                switch(payload.principal){
                     case null { return };
-                    case(? payload_){
-                        let updatedDaoMetaData = CanisterManagementMethods.removeAdmin(payload_.principal, daoMetaData_v2);
+                    case(? principal){
+                        let updatedDaoMetaData = CanisterManagementMethods.removeAdmin(Principal.fromText(principal), daoMetaData_v2);
                         daoMetaData_v2 := updatedDaoMetaData;
                     };
                 };
