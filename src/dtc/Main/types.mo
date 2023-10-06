@@ -82,6 +82,7 @@ module{
         lastRecordedBackEndCyclesBalance: Nat;
         backEndCyclesBurnRatePerDay: Nat;
         admin: [(Text, AdminData)];
+        proposals: Proposals;
         acceptingRequests: Bool;
         lastRecordedTime: Int;
         profilesMetaData: ProfilesMetaData;
@@ -150,12 +151,19 @@ module{
         principal : ?Text;
         amount : ?Nat64;
     };
+    
+    public type VotingResults = {
+        yay: Nat64;
+        nay: Nat64;
+        total: Nat64;
+    };
 
     public type Proposal = {
-        votes: [(Principal, Vote)];
+        votes: [(Text, Vote)];
+        voteTally: ?VotingResults;
         action: ProposalActions;
         payload: ProposalPayload;
-        proposer: Principal;
+        proposer: Text;
         timeInitiated: Int;
         timeExecuted: ?Int;
     };

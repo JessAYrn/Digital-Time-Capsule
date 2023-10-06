@@ -10,7 +10,7 @@ module{
         btc: Nat64;
     };
 
-    public type TreasuryContributorsArray = [(Principal, TreasuryContributions)];
+    public type TreasuryContributorsArray = [(Text, TreasuryContributions)];
 
-    public type TreasuryContributorsMap = HashMap.HashMap<Principal, TreasuryContributions>;
+    public type TreasuryContributorsMap = HashMap.HashMap<Text, TreasuryContributions>;
 }

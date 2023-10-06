@@ -14,6 +14,11 @@ const Proposal = (props) => {
         votes
     } = props;
 
+    let payload_;
+    let payloadLabel;
+    if(payload.principal[0]) {payload_ = payload.principal[0]; payloadLabel = "Principal: ";}
+    else if(payload.amount[0]) {payload_ = payload.amount[0]; payloadLabel = "Amount: ";}
+
     return(
         <Grid 
             columns={12}
@@ -28,6 +33,12 @@ const Proposal = (props) => {
                 label={'Action: '}
                 text={`${action}`}
             />
+            { payload_ && 
+                <DataField
+                    label={`${payloadLabel}`}
+                    text={`${action}`}
+                />
+            }
             <DataField
                 label={'Author: '}
                 text={`${proposer}`}

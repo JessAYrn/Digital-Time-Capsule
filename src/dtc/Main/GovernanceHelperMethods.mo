@@ -3,17 +3,16 @@ import MainTypes "types";
 import HashMap "mo:base/HashMap";
 import Iter "mo:base/Iter";
 import Principal "mo:base/Principal";
+import Text "mo:base/Text";
+import Array "mo:base/Array";
+import Time "mo:base/Time";
 import NnsCyclesMinting "../Ledger/NnsCyclesMinting";
 
-module{
 
-    public type VotingResults = {
-        yay: Nat64;
-        nay: Nat64;
-        total: Nat64;
-    };
+module{    
 
-    
+
+    private let nanosecondsInADay = 86_400_000_000_000;
 
     public func computeVotingPower({ contributions: TreasuryTypes.TreasuryContributions; xdr_permyriad_per_icp: Nat64}): 
     Nat64 {
@@ -23,20 +22,19 @@ module{
         return votingPower;
     };
 
-    public func tallyVotes({treasuryContributionsArray : TreasuryTypes.TreasuryContributorsArray; proposal: MainTypes.Proposal}) : 
-    async VotingResults {
+    public func tallyVotes({
+        treasuryContributionsArray : TreasuryTypes.TreasuryContributorsArray; 
+        proposal: MainTypes.Proposal;
+        xdr_permyriad_per_icp: Nat64
+    }) :  MainTypes.VotingResults {
         var yay: Nat64 = 0;
         var nay: Nat64 = 0;
-        let proposalVotesHashMap = HashMap.fromIter<Principal, MainTypes.Vote>(
+        let proposalVotesHashMap = HashMap.fromIter<Text, MainTypes.Vote>(
             Iter.fromArray(proposal.votes), 
             Iter.size(Iter.fromArray(proposal.votes)), 
-            Principal.equal,
-            Principal.hash
+            Text.equal,
+            Text.hash
         );
-
-        let cyclesMintingCanister: NnsCyclesMinting.Interface = actor(NnsCyclesMinting.NnsCyclesMintingCanisterID);
-        let {data} = await cyclesMintingCanister.get_icp_xdr_conversion_rate();
-        let {xdr_permyriad_per_icp} = data;
 
         let arrayLength = treasuryContributionsArray.size();
         var index = 0;
@@ -52,5 +50,23 @@ module{
         };
         let total = yay + nay;
         return {yay; nay; total};
+    };
+
+    public func tallyAllProposalVotes({
+        treasuryContributionsArray : TreasuryTypes.TreasuryContributorsArray; 
+        proposals: MainTypes.Proposals;
+        xdr_permyriad_per_icp: Nat64
+    }) : MainTypes.Proposals{
+        let updatedProposals = Array.map<(Nat,MainTypes.Proposal), (Nat,MainTypes.Proposal)>(
+            proposals: MainTypes.Proposals, 
+            func (proposalInfo: (Nat, MainTypes.Proposal)): (Nat,MainTypes.Proposal) {
+                let (proposalIndex, proposal) = proposalInfo;
+                let {timeInitiated} = proposal;
+                if(Time.now() - timeInitiated > nanosecondsInADay * 3) return (proposalIndex, proposal);
+                let voteTally =  tallyVotes({treasuryContributionsArray; xdr_permyriad_per_icp; proposal});
+                let updatedProposal = {proposal with voteTally = ?voteTally};
+                return (proposalIndex, updatedProposal);
+        });
+        return updatedProposals;
     };
 }

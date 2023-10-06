@@ -7,7 +7,7 @@ import { AppContext as GroupJournalContext } from "../../Routes/GroupJournal";
 import { AppContext as AccountContext } from "../../Routes/Account";
 import { AppContext as JournalContext } from "../../Routes/App";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
-import { PAYLOAD_DATA_TYPES, PROPOSAL_ACTIONS } from "./constants";
+import { PAYLOAD_DATA_TYPES, PROPOSAL_ACTIONS } from "./utils";
 import { retrieveContext } from "../../functionsAndConstants/Contexts";
 import InputBox from "../Fields/InputBox";
 import { Typography } from "@mui/material";

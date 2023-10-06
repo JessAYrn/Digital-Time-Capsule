@@ -24,6 +24,7 @@ export const homePageInitialState={
         lastRecordedBackEndCyclesBalance: 1,
         currentCyclesBalance_backend: 1,
         currentCyclesBalance_frontend: 1,
+        proposals: [],
         isAdmin: false,
         supportMode: false,
         acceptingRequests: false,

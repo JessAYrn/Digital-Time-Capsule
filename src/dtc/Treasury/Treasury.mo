@@ -24,11 +24,11 @@ shared(msg) actor class Treasury (principal : Principal) = this {
     private stable var stakingMultiplier : Nat64 = 2;
 
     private var contributorsMap : TreasuryTypes.TreasuryContributorsMap = 
-    HashMap.fromIter<Principal, TreasuryTypes.TreasuryContributions>(
+    HashMap.fromIter<Text, TreasuryTypes.TreasuryContributions>(
         Iter.fromArray(contributorsArray), 
         Iter.size(Iter.fromArray(contributorsArray)), 
-        Principal.equal,
-        Principal.hash
+        Text.equal,
+        Text.hash
     );
 
     private var capacity = 1000000000000;
@@ -41,7 +41,7 @@ shared(msg) actor class Treasury (principal : Principal) = this {
 
     public shared({caller}) func userHasSufficientContributions(userPrincipal: Principal): async Bool {
         if( Principal.toText(caller) != ownerCanisterId) { throw Error.reject("Unauthorized access."); };
-        let userContributions = contributorsMap.get(userPrincipal);
+        let userContributions = contributorsMap.get(Principal.toText(userPrincipal));
         switch(userContributions){
             case null { return false};
             case (?contributions){

@@ -30,6 +30,9 @@ import Time "mo:base/Time";
 import Float "mo:base/Float";
 import Int "mo:base/Int";
 import Treasury "../Treasury/Treasury";
+import GovernanceHelperMethods "GovernanceHelperMethods";
+import TreasuryTypes "../Treasury/treasury.types";
+import NnsCyclesMinting "../Ledger/NnsCyclesMinting";
 
 module{
 
@@ -230,7 +233,8 @@ module{
         callerId: Principal, 
         daoMetaData: MainTypes.DaoMetaData_V2, 
         cyclesBalance_backend: Nat, 
-        profilesMap : MainTypes.UserProfilesMap
+        profilesMap : MainTypes.UserProfilesMap,
+        proposals : MainTypes.Proposals
     ) : async Result.Result<(MainTypes.CanisterDataExport), JournalTypes.Error> {
 
         let profile = profilesMap.get(callerId);
@@ -238,6 +242,11 @@ module{
         switch(profile){
             case null{ return #err(#NotAuthorized); };
             case ( ? existingProfile){
+                let cyclesMintingCanister: NnsCyclesMinting.Interface = actor(NnsCyclesMinting.NnsCyclesMintingCanisterID);
+                let {data} = await cyclesMintingCanister.get_icp_xdr_conversion_rate();
+                let {xdr_permyriad_per_icp} = data;
+                let treasuryCanister: Treasury.Treasury = actor(daoMetaData.treasuryCanisterPrincipal);
+                let treasuryContributionsArray = await treasuryCanister.getTreasuryContributionsArray();
                 let managerCanister : Manager.Manager = actor(daoMetaData.managerCanisterPrincipal);
                 let profilesApprovalStatus = getProfilesMetaData(profilesMap);
                 let frontendPrincipal = Principal.fromText(daoMetaData.frontEndPrincipal);
@@ -248,6 +257,7 @@ module{
                 let currentVersion = await managerCanister.getCurrentReleaseVersion();
                 let canisterDataPackagedForExport = {
                     daoMetaData with 
+                    proposals = GovernanceHelperMethods.tallyAllProposalVotes({proposals;treasuryContributionsArray;xdr_permyriad_per_icp});
                     journalCount = profilesMap.size();
                     currentCyclesBalance_frontend = cyclesBalance_frontend;
                     currentCyclesBalance_backend = cyclesBalance_backend;

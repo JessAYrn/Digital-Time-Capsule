@@ -29,6 +29,7 @@ import Time "mo:base/Time";
 import GovernanceHelperMethods "Main/GovernanceHelperMethods";
 import Treasury "Treasury/Treasury";
 import TreasuryTypes "Treasury/treasury.types";
+import NnsCyclesMinting "Ledger/NnsCyclesMinting";
 
 shared actor class User() = this {
 
@@ -273,7 +274,8 @@ shared actor class User() = this {
 
     public shared({caller}) func getCanisterData() : async Result.Result<(MainTypes.CanisterDataExport), JournalTypes.Error> {
         let cyclesBalance_backend = Cycles.balance();
-        let daoMetaDataPackagedForExport = await CanisterManagementMethods.getCanisterData(caller, daoMetaData_v2, cyclesBalance_backend, userProfilesMap);
+        let proposalsArray = Iter.toArray(proposalsMap.entries());
+        let daoMetaDataPackagedForExport = await CanisterManagementMethods.getCanisterData(caller, daoMetaData_v2, cyclesBalance_backend, userProfilesMap, proposalsArray);
         return daoMetaDataPackagedForExport;
     };
 
@@ -371,11 +373,12 @@ shared actor class User() = this {
     async Result.Result<(),MainTypes.Error>{
         let callerProfile = userProfilesMap.get(caller);
         if(callerProfile == null) return #err(#NotAuthorizedToCreateProposals);
-        let votes = [(caller, {adopt = true})];
-        let proposer = caller;
+        let proposer = Principal.toText(caller);
+        let votes = [(proposer, {adopt = true})];
         let timeInitiated = Time.now();
         let timeExecuted = null;
-        proposalsMap.put(proposalIndex, {votes; action; proposer; timeInitiated; timeExecuted; payload; });
+        let voteTally = null;
+        proposalsMap.put(proposalIndex, {votes; action; proposer; timeInitiated; timeExecuted; payload; voteTally;});
         let timerId = setTimer(#seconds(24 * 60 * 60 * 3), finalizeProposalVotingPeriod);
         proposalIndex += 1;
         return #ok(());
@@ -388,15 +391,15 @@ shared actor class User() = this {
         let proposal = proposalsMap.get(proposalIndex);
         if(proposal == null) return #err(#PorposalHasExpired);
         let ?{votes} = proposal;
-        let votesMap = HashMap.fromIter<Principal, MainTypes.Vote>(
+        let votesMap = HashMap.fromIter<Text, MainTypes.Vote>(
             Iter.fromArray(votes), 
             Iter.size(Iter.fromArray(votes)), 
-            Principal.equal,
-            Principal.hash
+            Text.equal,
+            Text.hash
         );
-        let previousVote = votesMap.get(caller);
+        let previousVote = votesMap.get(Principal.toText(caller));
         switch(previousVote){
-            case null {votesMap.put(caller, {adopt}); return #ok(())};
+            case null {votesMap.put(Principal.toText(caller), {adopt}); return #ok(())};
             case (?previousVote_){ return #err(#VoteHasAlreadyBeenSubmitted)};
         };
     };
@@ -415,8 +418,18 @@ shared actor class User() = this {
             case (?proposal){
                 let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
                 let treasuryContributionsArray = await treasuryCanister.getTreasuryContributionsArray();
-                let {yay; nay; total } = await GovernanceHelperMethods.tallyVotes({treasuryContributionsArray; proposal});
-                if( yay > nay) ignore executeProposal(proposal);
+                let cyclesMintingCanister: NnsCyclesMinting.Interface = actor(NnsCyclesMinting.NnsCyclesMintingCanisterID);
+                let {data} = await cyclesMintingCanister.get_icp_xdr_conversion_rate();
+                let {xdr_permyriad_per_icp} = data;
+                let votingResults = GovernanceHelperMethods.tallyVotes({treasuryContributionsArray; proposal; xdr_permyriad_per_icp});
+                let {yay; nay; total } = votingResults;
+                var timeExecuted: ?Int = null;
+                if( yay > nay) {
+                    ignore executeProposal(proposal);
+                    timeExecuted := ?Time.now();
+                };
+                let updatedProposal = {proposal with voteTally = ?votingResults; timeExecuted;};
+                proposalsMap.put(oldestPendingProposalId, updatedProposal);
             };
         };
     };
