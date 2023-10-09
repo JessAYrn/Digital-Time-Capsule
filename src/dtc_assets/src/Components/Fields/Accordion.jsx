@@ -11,11 +11,10 @@ import Grid from '@mui/material/Unstable_Grid2/Grid2';
 const AccordionField = (props_) => {
     const {children} = props_;
     const elements = useMemo(() => { return children.length ? children : [children]}, [props_.children]);
-    
   return (
     <div className='accordianField_containter'>
         {elements.map((child) => {
-            const props = child.props;
+            const {props} = child;
             const {title, texts, image, CustomComponent } = props;
             return (
                 <Accordion className='accordianField'>

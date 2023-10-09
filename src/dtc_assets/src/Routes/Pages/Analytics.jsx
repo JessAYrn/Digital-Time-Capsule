@@ -30,13 +30,12 @@ import ModalComponent from '../../Components/modal/Modal';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import SpeedDialField from '../../Components/Fields/SpeedDialField';
 import CreateProposalForm from '../../Components/proposals/CreateProposalForm';
+import Proposal from '../../Components/proposals/Proposal';
 
 const Analytics = () => {
     const { 
         homePageDispatch, homePageState, actorDispatch, actorState
     } = useContext(AppContext);
-
-    console.log(homePageState);
 
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [isLoadingModal, setIsLoadingModal] = useState(false);
@@ -283,6 +282,29 @@ const Analytics = () => {
                     alignItems="center" 
                     flexDirection={"column"}
                 >
+                    <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
+                        <AccordionField>
+                            {homePageState?.canisterData?.proposals?.map(([proposalId, proposal]) => {
+                                let id = parseInt(proposalId);
+                                let {action, payload, proposer, timeExecuted, timeInitiated, voteTally, votes} = proposal;
+                                return (
+                                    <div 
+                                        context={UI_CONTEXTS.HOME_PAGE}
+                                        title={`Propsoal #${parseInt(proposalId)}`}
+                                        proposalId={id}
+                                        proposer={proposer}
+                                        payload={payload}
+                                        action={action}
+                                        timeInitiated={timeInitiated}
+                                        timeExecuted={timeExecuted}
+                                        votes={votes}
+                                        voteTally={voteTally}
+                                        CustomComponent={Proposal}
+                                    />
+                                )
+                            })}
+                        </AccordionField>
+                    </Grid>
                     <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
                         <AccordionField>
                         <div 
