@@ -37,6 +37,8 @@ const Analytics = () => {
         homePageDispatch, homePageState, actorDispatch, actorState
     } = useContext(AppContext);
 
+    console.log(homePageState);
+
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [isLoadingModal, setIsLoadingModal] = useState(false);
     const [modalProps, setModalProps] = useState({});
@@ -57,7 +59,7 @@ const Analytics = () => {
     const modalForm_createProposal = [
         {
             Component: CreateProposalForm,
-            props: {context: UI_CONTEXTS.HOME_PAGE}
+            props: {context: UI_CONTEXTS.HOME_PAGE, setModalIsOpen, setModalProps, setIsLoadingModal}
         }
     ];
 
@@ -282,6 +284,7 @@ const Analytics = () => {
                     alignItems="center" 
                     flexDirection={"column"}
                 >
+                    {homePageState?.canisterData?.proposals.length > 0 && 
                     <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
                         <AccordionField>
                             {homePageState?.canisterData?.proposals?.map(([proposalId, proposal]) => {
@@ -290,7 +293,7 @@ const Analytics = () => {
                                 return (
                                     <div 
                                         context={UI_CONTEXTS.HOME_PAGE}
-                                        title={`Propsoal #${parseInt(proposalId)}`}
+                                        title={`Propsoal #${id}`}
                                         proposalId={id}
                                         proposer={proposer}
                                         payload={payload}
@@ -304,7 +307,7 @@ const Analytics = () => {
                                 )
                             })}
                         </AccordionField>
-                    </Grid>
+                    </Grid>}
                     <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
                         <AccordionField>
                         <div 

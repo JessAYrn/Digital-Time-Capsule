@@ -74,10 +74,8 @@ shared(msg) actor class Manager (principal : Principal) = this {
         if(currentVersion.number == 0) nextAppropriateRelease := await wasmStore.getLastestStableRelease();
         await loadModules(nextAppropriateRelease.number);
         await loadAssets(nextAppropriateRelease.number);
-        if(nextAppropriateRelease.number > currentVersion.number and currentVersion.isStable){
-            previousStableVersion := currentVersion;
-            currentVersion := nextAppropriateRelease;
-        };
+        if(nextAppropriateRelease.number > currentVersion.number and currentVersion.isStable) previousStableVersion := currentVersion;
+        currentVersion := nextAppropriateRelease;
     };
 
     public shared({caller}) func loadPreviousRelease(): async () {

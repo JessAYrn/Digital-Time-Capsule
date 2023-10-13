@@ -10,6 +10,8 @@ import HashMap "mo:base/HashMap";
 import Iter "mo:base/Iter";
 import Cycles "mo:base/ExperimentalCycles";
 import Nat64 "mo:base/Nat64";
+import Float "mo:base/Float";
+import Int64 "mo:base/Int64";
 import GovernanceHelperMethods "../Main/GovernanceHelperMethods";
 import NnsCyclesMinting "../Ledger/NnsCyclesMinting";
 
@@ -19,7 +21,7 @@ shared(msg) actor class Treasury (principal : Principal) = this {
 
     private stable var contributorsArray : TreasuryTypes.TreasuryContributorsArray = [];
 
-    private stable var minimalRequiredVotingPower : Nat64 = 10;
+    private stable var minimalRequiredVotingPower : Nat64 = 0;
 
     private stable var stakingMultiplier : Nat64 = 2;
 
@@ -49,7 +51,7 @@ shared(msg) actor class Treasury (principal : Principal) = this {
                 let {data} = await cyclesMintingCanister.get_icp_xdr_conversion_rate();
                 let {xdr_permyriad_per_icp} = data;
                 let votingPower = GovernanceHelperMethods.computeVotingPower({contributions; xdr_permyriad_per_icp; });
-                if(votingPower < minimalRequiredVotingPower) return false;
+                if(votingPower < Float.fromInt64(Int64.fromNat64(minimalRequiredVotingPower))) return false;
                 return true;
             };
         };

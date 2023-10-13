@@ -257,7 +257,7 @@ module{
                 let currentVersion = await managerCanister.getCurrentReleaseVersion();
                 let canisterDataPackagedForExport = {
                     daoMetaData with 
-                    proposals = GovernanceHelperMethods.tallyAllProposalVotes({proposals;treasuryContributionsArray;xdr_permyriad_per_icp});
+                    proposals = GovernanceHelperMethods.tallyAllProposalVotes({proposals; treasuryContributionsArray; xdr_permyriad_per_icp});
                     journalCount = profilesMap.size();
                     currentCyclesBalance_frontend = cyclesBalance_frontend;
                     currentCyclesBalance_backend = cyclesBalance_backend;

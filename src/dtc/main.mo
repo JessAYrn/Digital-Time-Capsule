@@ -26,6 +26,7 @@ import IC "IC/ic.types";
 import Timer "mo:base/Timer";
 import Nat "mo:base/Nat";
 import Time "mo:base/Time";
+import Float "mo:base/Float";
 import GovernanceHelperMethods "Main/GovernanceHelperMethods";
 import Treasury "Treasury/Treasury";
 import TreasuryTypes "Treasury/treasury.types";
@@ -370,18 +371,26 @@ shared actor class User() = this {
     let {recurringTimer; cancelTimer; setTimer} = Timer;
 
     public shared({caller}) func createProposal({action: MainTypes.ProposalActions; payload: MainTypes.ProposalPayload }): 
-    async Result.Result<(),MainTypes.Error>{
+    async Result.Result<(MainTypes.Proposals),MainTypes.Error>{
         let callerProfile = userProfilesMap.get(caller);
         if(callerProfile == null) return #err(#NotAuthorizedToCreateProposals);
-        let proposer = Principal.toText(caller);
-        let votes = [(proposer, {adopt = true})];
-        let timeInitiated = Time.now();
-        let timeExecuted = null;
-        let voteTally = null;
-        proposalsMap.put(proposalIndex, {votes; action; proposer; timeInitiated; timeExecuted; payload; voteTally;});
+        let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
+        let hasSufficientContributions = await treasuryCanister.userHasSufficientContributions(caller);
+        if(not hasSufficientContributions) return #err(#NotAuthorizedToCreateProposals);
+        let treasuryContributionsArray = await treasuryCanister.getTreasuryContributionsArray();
+        let cyclesMintingCanister: NnsCyclesMinting.Interface = actor(NnsCyclesMinting.NnsCyclesMintingCanisterID);
+        let {data} = await cyclesMintingCanister.get_icp_xdr_conversion_rate();
+        let {xdr_permyriad_per_icp} = data;
+        let proposer = Principal.toText(caller); let votes = [(proposer, {adopt = true})];
+        let timeInitiated = Time.now(); let timeExecuted = null;
+        var voteTally = {yay = Float.fromInt(0); nay = Float.fromInt(0); total = Float.fromInt(0);};
+        let proposal = {votes; action; proposer; timeInitiated; timeExecuted; payload; voteTally;};
+        let votingResults = GovernanceHelperMethods.tallyVotes({treasuryContributionsArray; proposal; xdr_permyriad_per_icp;});
+        proposalsMap.put(proposalIndex, {proposal with voteTally = votingResults} );
         let timerId = setTimer(#seconds(24 * 60 * 60 * 3), finalizeProposalVotingPeriod);
         proposalIndex += 1;
-        return #ok(());
+        let updatedProposalsArray = Iter.toArray(proposalsMap.entries());
+        return #ok(updatedProposalsArray);
     };
 
     public shared({caller}) func voteOnProposal({proposalIndex: Nat; adopt: Bool;}): async Result.Result<(), MainTypes.Error> {
@@ -391,12 +400,7 @@ shared actor class User() = this {
         let proposal = proposalsMap.get(proposalIndex);
         if(proposal == null) return #err(#PorposalHasExpired);
         let ?{votes} = proposal;
-        let votesMap = HashMap.fromIter<Text, MainTypes.Vote>(
-            Iter.fromArray(votes), 
-            Iter.size(Iter.fromArray(votes)), 
-            Text.equal,
-            Text.hash
-        );
+        let votesMap = HashMap.fromIter<Text, MainTypes.Vote>( Iter.fromArray(votes), Iter.size(Iter.fromArray(votes)), Text.equal, Text.hash );
         let previousVote = votesMap.get(Principal.toText(caller));
         switch(previousVote){
             case null {votesMap.put(Principal.toText(caller), {adopt}); return #ok(())};
@@ -428,8 +432,8 @@ shared actor class User() = this {
                     ignore executeProposal(proposal);
                     timeExecuted := ?Time.now();
                 };
-                let updatedProposal = {proposal with voteTally = ?votingResults; timeExecuted;};
-                proposalsMap.put(oldestPendingProposalId, updatedProposal);
+                // let updatedProposal = {proposal with voteTally = votingResults; timeExecuted;};
+                proposalsMap.delete(oldestPendingProposalId);
             };
         };
     };

@@ -19,7 +19,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
 const CreateProposalForm = (props) => {
     const {
-        context
+        context, setModalIsOpen, setModalProps, setIsLoadingModal
     } = props;
 
     let contexts = {
@@ -67,11 +67,14 @@ const CreateProposalForm = (props) => {
     };
 
     const onSubmitProposal = async () => {
+        setIsLoadingModal(true);
         let principal = payloadDataType === PAYLOAD_DATA_TYPES.text ? [proposalPayload] : [];
         let amount = payloadDataType === PAYLOAD_DATA_TYPES.nat64 ? [parseInt(proposalPayload)] : [];
         let payload = {principal, amount};
         let action = {[proposalAction]: null};
-        let result = await actorState.backendActor.createProposal({action, payload });
+        let result = await actorState.backendActor.createProposal({ action, payload });
+        if("err" in result){};
+        setIsLoadingModal(false);
         console.log(result);
     };
 

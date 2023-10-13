@@ -153,14 +153,14 @@ module{
     };
     
     public type VotingResults = {
-        yay: Nat64;
-        nay: Nat64;
-        total: Nat64;
+        yay: Float;
+        nay: Float;
+        total: Float;
     };
 
     public type Proposal = {
         votes: [(Text, Vote)];
-        voteTally: ?VotingResults;
+        voteTally: VotingResults;
         action: ProposalActions;
         payload: ProposalPayload;
         proposer: Text;

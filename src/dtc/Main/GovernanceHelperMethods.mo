@@ -6,6 +6,9 @@ import Principal "mo:base/Principal";
 import Text "mo:base/Text";
 import Array "mo:base/Array";
 import Time "mo:base/Time";
+import Float "mo:base/Float";
+import Nat64 "mo:base/Nat64";
+import Int64 "mo:base/Int64";
 import NnsCyclesMinting "../Ledger/NnsCyclesMinting";
 
 
@@ -13,12 +16,13 @@ module{
 
 
     private let nanosecondsInADay = 86_400_000_000_000;
+    
+    type XDRs = Float;
 
-    public func computeVotingPower({ contributions: TreasuryTypes.TreasuryContributions; xdr_permyriad_per_icp: Nat64}): 
-    Nat64 {
+    public func computeVotingPower({ contributions: TreasuryTypes.TreasuryContributions; xdr_permyriad_per_icp: Nat64}): XDRs {
         let {icp} = contributions;
         //will need to add more conversion methods later as more tokens are made available.
-        var votingPower = icp * xdr_permyriad_per_icp;
+        var votingPower = Float.fromInt(Nat64.toNat(icp * xdr_permyriad_per_icp )) / Float.fromInt(Nat64.toNat(1_000_000_000_000));
         return votingPower;
     };
 
@@ -27,8 +31,8 @@ module{
         proposal: MainTypes.Proposal;
         xdr_permyriad_per_icp: Nat64
     }) :  MainTypes.VotingResults {
-        var yay: Nat64 = 0;
-        var nay: Nat64 = 0;
+        var yay: Float = 0;
+        var nay: Float = 0;
         let proposalVotesHashMap = HashMap.fromIter<Text, MainTypes.Vote>(
             Iter.fromArray(proposal.votes), 
             Iter.size(Iter.fromArray(proposal.votes)), 
@@ -64,7 +68,7 @@ module{
                 let {timeInitiated} = proposal;
                 if(Time.now() - timeInitiated > nanosecondsInADay * 3) return (proposalIndex, proposal);
                 let voteTally =  tallyVotes({treasuryContributionsArray; xdr_permyriad_per_icp; proposal});
-                let updatedProposal = {proposal with voteTally = ?voteTally};
+                let updatedProposal = {proposal with voteTally = voteTally};
                 return (proposalIndex, updatedProposal);
         });
         return updatedProposals;

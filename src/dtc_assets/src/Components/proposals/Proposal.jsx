@@ -58,8 +58,7 @@ const Proposal = (props) => {
     if(payload.principal[0]) {payload_ = shortenHexString(payload.principal[0]); payloadLabel = "Principal"; payloadButtonIcon = ContentCopyIcon}
     else if(payload.amount[0]) {payload_ = payload.amount[0]; payloadLabel = "Amount";}
 
-    let {yay, nay, total} = voteTally[0];
-    console.log(voteTally);
+    let {yay, nay, total} = voteTally;
 
     const getModalButtonsComponents = (bool) => {
         return [
