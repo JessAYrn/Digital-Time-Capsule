@@ -12,6 +12,8 @@ import { retrieveContext } from "../../functionsAndConstants/Contexts";
 import InputBox from "../Fields/InputBox";
 import { Typography } from "@mui/material";
 import ButtonField from "../Fields/Button";
+import CloseIcon from '@mui/icons-material/Close';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import DoneIcon from '@mui/icons-material/Done';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
@@ -66,6 +68,16 @@ const CreateProposalForm = (props) => {
         setProposalPayload(payload_)
     };
 
+    const modalButton_close = [
+        {Component: ButtonField,
+        props: {
+            active: true,
+            text: "Close",
+            Icon: CloseIcon,
+            onClick: () => setModalIsOpen(false)
+        }}
+    ];
+
     const onSubmitProposal = async () => {
         setIsLoadingModal(true);
         let principal = payloadDataType === PAYLOAD_DATA_TYPES.text ? [proposalPayload] : [];
@@ -73,9 +85,17 @@ const CreateProposalForm = (props) => {
         let payload = {principal, amount};
         let action = {[proposalAction]: null};
         let result = await actorState.backendActor.createProposal({ action, payload });
-        if("err" in result){};
+        if("err" in result){
+            let errorMessagArray = Object.keys(result.err);
+            let errorMessage = errorMessagArray[0];
+            setModalProps({
+                bigText: `Error: ${errorMessage}`,
+                smallText: "You must make a contribution to the treasury before being able to create proposals",
+                Icon: ErrorOutlineIcon,
+                components: modalButton_close
+            });
+        } else setModalIsOpen(false);
         setIsLoadingModal(false);
-        console.log(result);
     };
 
 

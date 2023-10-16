@@ -37,8 +37,6 @@ const Analytics = () => {
         homePageDispatch, homePageState, actorDispatch, actorState
     } = useContext(AppContext);
 
-    console.log(homePageState);
-
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [isLoadingModal, setIsLoadingModal] = useState(false);
     const [modalProps, setModalProps] = useState({});
