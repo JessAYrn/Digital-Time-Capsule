@@ -8,6 +8,7 @@ export const homePageTypes={
     SET_CANISTER_DATA: "SET_CANISTER_DATA",
     SET_DATA_HAS_BEEN_LOADED: "SET_DATA_HAS_BEEN_LOADED",
     SET_IS_LOADING:"SET_IS_LOADING",
+    SET_PROPOSALS_DATA: "SET_PROPOSALS_DATA"
 
 }
 
@@ -47,6 +48,11 @@ const changeValue=(state=homePageInitialState, action)=>{
                 return {
                 ...state
             }
+        case homePageTypes.SET_PROPOSALS_DATA:
+            state.canisterData.proposals = payload;
+            return {
+            ...state
+        }
         case homePageTypes.SET_IS_LOADING:
             state.isLoading = payload;
             return {

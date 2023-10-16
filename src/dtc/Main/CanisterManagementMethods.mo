@@ -234,11 +234,11 @@ module{
         daoMetaData: MainTypes.DaoMetaData_V2, 
         cyclesBalance_backend: Nat, 
         profilesMap : MainTypes.UserProfilesMap,
-        proposals : MainTypes.Proposals
+        proposals : MainTypes.ProposalsMap
     ) : async Result.Result<(MainTypes.CanisterDataExport), JournalTypes.Error> {
 
         let profile = profilesMap.get(callerId);
-
+        
         switch(profile){
             case null{ return #err(#NotAuthorized); };
             case ( ? existingProfile){

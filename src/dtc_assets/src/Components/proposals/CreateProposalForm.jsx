@@ -8,6 +8,7 @@ import { AppContext as AccountContext } from "../../Routes/Account";
 import { AppContext as JournalContext } from "../../Routes/App";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import { PAYLOAD_DATA_TYPES, PROPOSAL_ACTIONS } from "./utils";
+import { homePageTypes } from "../../reducers/homePageReducer";
 import { retrieveContext } from "../../functionsAndConstants/Contexts";
 import InputBox from "../Fields/InputBox";
 import { Typography } from "@mui/material";
@@ -36,7 +37,7 @@ const CreateProposalForm = (props) => {
     let AppContext = retrieveContext(contexts, context);
 
 
-    const {  actorState } = useContext(AppContext);
+    const {  actorState, homePageDispatch } = useContext(AppContext);
 
     const [proposalAction, setProposalAction] = useState(null);
     const [proposalPayload, setProposalPayload] = useState(null);
@@ -94,7 +95,14 @@ const CreateProposalForm = (props) => {
                 Icon: ErrorOutlineIcon,
                 components: modalButton_close
             });
-        } else setModalIsOpen(false);
+        } else{
+            let updatedProposals = result.ok;
+            homePageDispatch({
+                actionType: homePageTypes.SET_PROPOSALS_DATA,
+                payload: updatedProposals
+            });
+            setModalIsOpen(false);
+        }
         setIsLoadingModal(false);
     };
 

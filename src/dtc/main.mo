@@ -275,8 +275,7 @@ shared actor class User() = this {
 
     public shared({caller}) func getCanisterData() : async Result.Result<(MainTypes.CanisterDataExport), JournalTypes.Error> {
         let cyclesBalance_backend = Cycles.balance();
-        let proposalsArray = Iter.toArray(proposalsMap.entries());
-        let daoMetaDataPackagedForExport = await CanisterManagementMethods.getCanisterData(caller, daoMetaData_v2, cyclesBalance_backend, userProfilesMap, proposalsArray);
+        let daoMetaDataPackagedForExport = await CanisterManagementMethods.getCanisterData(caller, daoMetaData_v2, cyclesBalance_backend, userProfilesMap, proposalsMap);
         return daoMetaDataPackagedForExport;
     };
 
@@ -375,8 +374,9 @@ shared actor class User() = this {
         let callerProfile = userProfilesMap.get(caller);
         if(callerProfile == null) return #err(#NotAuthorizedToCreateProposals);
         let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
+        let treasuryContributionRequired = GovernanceHelperMethods.getDoesProposalRequireTreasuryContribution(action);
         let hasSufficientContributions = await treasuryCanister.userHasSufficientContributions(caller);
-        if(not hasSufficientContributions) return #err(#NotAuthorizedToCreateProposals);
+        if(not hasSufficientContributions and treasuryContributionRequired) return #err(#NotAuthorizedToCreateProposals);
         let treasuryContributionsArray = await treasuryCanister.getTreasuryContributionsArray();
         let cyclesMintingCanister: NnsCyclesMinting.Interface = actor(NnsCyclesMinting.NnsCyclesMintingCanisterID);
         let {data} = await cyclesMintingCanister.get_icp_xdr_conversion_rate();
@@ -393,17 +393,30 @@ shared actor class User() = this {
         return #ok(updatedProposalsArray);
     };
 
-    public shared({caller}) func voteOnProposal({proposalIndex: Nat; adopt: Bool;}): async Result.Result<(), MainTypes.Error> {
+    public shared({caller}) func voteOnProposal({proposalIndex: Nat; adopt: Bool;}): 
+    async Result.Result<(MainTypes.Proposal), MainTypes.Error> {
         let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
         let hasSufficientContributions = await treasuryCanister.userHasSufficientContributions(caller);
         if(not hasSufficientContributions) return #err(#NotAuthorizedToVoteOnThisProposal);
-        let proposal = proposalsMap.get(proposalIndex);
-        if(proposal == null) return #err(#PorposalHasExpired);
-        let ?{votes} = proposal;
+        let proposal_ = proposalsMap.get(proposalIndex);
+        if(proposal_ == null) return #err(#PorposalHasExpired);
+        let ?proposal = proposal_;
+        let {votes} = proposal;
         let votesMap = HashMap.fromIter<Text, MainTypes.Vote>( Iter.fromArray(votes), Iter.size(Iter.fromArray(votes)), Text.equal, Text.hash );
         let previousVote = votesMap.get(Principal.toText(caller));
         switch(previousVote){
-            case null {votesMap.put(Principal.toText(caller), {adopt}); return #ok(())};
+            case null {
+                let treasuryContributionsArray = await treasuryCanister.getTreasuryContributionsArray();
+                votesMap.put(Principal.toText(caller), {adopt});
+                var updatedProposal = {proposal with votes = Iter.toArray(votesMap.entries()); };
+                let cyclesMintingCanister: NnsCyclesMinting.Interface = actor(NnsCyclesMinting.NnsCyclesMintingCanisterID);
+                let {data} = await cyclesMintingCanister.get_icp_xdr_conversion_rate();
+                let {xdr_permyriad_per_icp} = data;
+                let voteTally = GovernanceHelperMethods.tallyVotes({treasuryContributionsArray; proposal = updatedProposal; xdr_permyriad_per_icp});
+                updatedProposal := {updatedProposal with voteTally};
+                proposalsMap.put(proposalIndex, updatedProposal);
+                return #ok(updatedProposal);
+            };
             case (?previousVote_){ return #err(#VoteHasAlreadyBeenSubmitted)};
         };
     };

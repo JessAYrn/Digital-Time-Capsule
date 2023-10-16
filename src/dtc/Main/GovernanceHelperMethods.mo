@@ -58,19 +58,33 @@ module{
 
     public func tallyAllProposalVotes({
         treasuryContributionsArray : TreasuryTypes.TreasuryContributorsArray; 
-        proposals: MainTypes.Proposals;
+        proposals: MainTypes.ProposalsMap;
         xdr_permyriad_per_icp: Nat64
     }) : MainTypes.Proposals{
-        let updatedProposals = Array.map<(Nat,MainTypes.Proposal), (Nat,MainTypes.Proposal)>(
-            proposals: MainTypes.Proposals, 
-            func (proposalInfo: (Nat, MainTypes.Proposal)): (Nat,MainTypes.Proposal) {
-                let (proposalIndex, proposal) = proposalInfo;
-                let {timeInitiated} = proposal;
-                if(Time.now() - timeInitiated > nanosecondsInADay * 3) return (proposalIndex, proposal);
-                let voteTally =  tallyVotes({treasuryContributionsArray; xdr_permyriad_per_icp; proposal});
-                let updatedProposal = {proposal with voteTally = voteTally};
-                return (proposalIndex, updatedProposal);
+
+        Iter.iterate<(Nat,MainTypes.Proposal)>(
+            proposals.entries(), 
+            func((key, proposal) : (Nat,MainTypes.Proposal), _index) {
+            let voteTally =  tallyVotes({treasuryContributionsArray; xdr_permyriad_per_icp; proposal});
+            let updatedProposal = {proposal with voteTally = voteTally};
+            proposals.put(key, updatedProposal);
         });
-        return updatedProposals;
+        return Iter.toArray(proposals.entries());
+    };
+
+    public func getDoesProposalRequireTreasuryContribution(action: MainTypes.ProposalActions): Bool {
+        switch(action){
+            case(#AddAdmin){ return true };
+            case(#RemoveAdmin){ return true };
+            case(#DissolveIcpNeuron){ return true };
+            case(#FollowIcpNeuron){ return true };
+            case(#SpawnIcpNeuron){ return true };
+            case(#DispurseIcpNeuron){ return true };
+            case(#ToggleCyclesSaverMode){ return true };
+            case(#PurchaseCycles){ return true };
+            case(#UpgradeApp){ return true };
+            case(#DepositIcpToTreasury){ return false };
+            case(#DepositIcpToNeuron){ return false };
+        }
     };
 }
