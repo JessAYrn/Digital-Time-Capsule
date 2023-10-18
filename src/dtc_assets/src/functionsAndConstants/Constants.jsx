@@ -96,7 +96,9 @@ export const DEFAULT_APP_CONTEXTS={
     actorState:{},
     actorDispatch:()=>{},
     notificationsState:{},
-    notificationsDispatch: () => {}
+    notificationsDispatch: () => {},
+    treasuryState:{},
+    treasuryDispatch: () => {}
 }
 export const MASTER_COPY_FRONTEND_CANISTER_ID = "fkkq7-siaaa-aaaap-qaaya-cai";
 

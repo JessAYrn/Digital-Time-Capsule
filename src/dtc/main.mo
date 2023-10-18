@@ -27,10 +27,12 @@ import Timer "mo:base/Timer";
 import Nat "mo:base/Nat";
 import Time "mo:base/Time";
 import Float "mo:base/Float";
+import Blob "mo:base/Blob";
 import GovernanceHelperMethods "Main/GovernanceHelperMethods";
 import Treasury "Treasury/Treasury";
 import TreasuryTypes "Treasury/treasury.types";
 import NnsCyclesMinting "Ledger/NnsCyclesMinting";
+import TreasuryHelperMethods "Main/TreasuryHelperMethods";
 
 shared actor class User() = this {
 
@@ -279,6 +281,17 @@ shared actor class User() = this {
         return daoMetaDataPackagedForExport;
     };
 
+    public shared({caller}) func getTreasuryData() : async Result.Result<TreasuryTypes.TreasuryDataExport, MainTypes.Error> {
+        let userProfile = userProfilesMap.get(caller);
+        if(userProfile == null) return #err(#NotAuthorizedToAccessData);
+        let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
+        let contributions = await treasuryCanister.getTreasuryContributionsArray();
+        let balance_icp = await treasuryCanister.canisterBalance();
+        let accountId_icp_blob = await treasuryCanister.canisterAccount();
+        let accountId_icp = Blob.toArray(accountId_icp_blob);
+        return #ok({ contributions; balance_icp; accountId_icp; });
+    };
+
     public shared({ caller }) func upgradeApp(): async (){
         let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v2);
         if(not isAdmin){ throw Error.reject("Unauthorized Access"); };
@@ -452,7 +465,8 @@ shared actor class User() = this {
     };
 
     private func executeProposal(proposal: MainTypes.Proposal) : async () {
-        let {action; payload} = proposal;
+        let {action; payload; proposer;} = proposal;
+        let {amount; principal} = payload;
         switch(action){
             case(#AddAdmin){
                 switch(payload.principal){
@@ -472,7 +486,18 @@ shared actor class User() = this {
                 };
             };
             case (#DepositIcpToTreasury){
-                //call function to deposit ICP to treasury from user's wallet
+                switch(amount){
+                    case null {};
+                    case(?amount_){
+                        await TreasuryHelperMethods.depositAssetToTreasury({
+                            depositorPrincipal = proposer;
+                            treasuryCanisterPrincipal = daoMetaData_v2.treasuryCanisterPrincipal;
+                            amount = amount_;
+                            currency = #Icp;
+                            profilesMap = userProfilesMap;
+                        })
+                    }
+                }
             };
             case (#DepositIcpToNeuron){
                 //call function to deposit ICP to treasury's neuron from user's wallet

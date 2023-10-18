@@ -1,11 +1,11 @@
 import { NavBar } from "../../Components/navigation/NavBar";
 import React, { useContext } from 'react';
 import { UI_CONTEXTS } from "../../functionsAndConstants/Contexts";
-import { AppContext } from "../App";
+import { AppContext } from "../Treasury";
 import './TreasuryPage.scss'
 
 const TreasuryPage = (props) => {
-  const { homePageState } = useContext(AppContext);
+  const { treasuryState } = useContext(AppContext);
   return (
     <div>
       <NavBar context={UI_CONTEXTS.TREASURY} />

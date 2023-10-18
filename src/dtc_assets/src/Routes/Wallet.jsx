@@ -16,6 +16,7 @@ import accountReducer , {accountTypes, accountInitialState} from '../reducers/ac
 import homePageReducer,{ homePageInitialState, homePageTypes } from '../reducers/homePageReducer';
 import actorReducer , { actorInitialState, actorTypes } from '../reducers/actorReducer';
 import notificationsReducer, {notificationsInitialState, notificationsTypes} from "../reducers/notificationsReducer";
+import treasuryReducer, {treasuryPageInitialState, treasuryTypes} from "../reducers/treasuryReducer";
 import ModalComponent from '../Components/modal/Modal';
 
 export const AppContext = createContext(DEFAULT_APP_CONTEXTS);
@@ -23,6 +24,7 @@ export const AppContext = createContext(DEFAULT_APP_CONTEXTS);
 const WalletApp = () => {
 
     const [journalState, journalDispatch] = useReducer(journalReducer, initialState);
+    const [treasuryState, treasuryDispatch] = useReducer(treasuryReducer, treasuryPageInitialState);
     const [notificationsState, notificationsDispatch] = useReducer(notificationsReducer, notificationsInitialState);
     const [walletState, walletDispatch] = useReducer(walletReducer, walletInitialState);
     const [accountState, accountDispatch] = useReducer(accountReducer, accountInitialState);
@@ -40,7 +42,8 @@ const WalletApp = () => {
         accountDispatch,
         homePageDispatch,
         actorDispatch,
-        notificationsDispatch
+        notificationsDispatch,
+        treasuryDispatch
     }
 
     const ReducerTypes = {
@@ -49,7 +52,8 @@ const WalletApp = () => {
         accountTypes,
         homePageTypes,
         actorTypes,
-        notificationsTypes
+        notificationsTypes,
+        treasuryTypes
     }
 
     const ReducerStates = {
@@ -58,7 +62,8 @@ const WalletApp = () => {
         accountState,
         homePageState,
         actorState,
-        notificationsState
+        notificationsState,
+        treasuryState
     };
 
     const connectionResult = useConnect({ onConnect: () => {}, onDisconnect: () => {} });
@@ -88,6 +93,7 @@ const WalletApp = () => {
             journalState,
             notificationsState,
             walletState,
+            treasuryState,
             accountState,
             homePageState
         });
@@ -95,6 +101,7 @@ const WalletApp = () => {
         journalState.isAuthenticated, 
         accountState.dataHasBeenLoaded,
         journalState.dataHasBeenLoaded,
+        treasuryState.dataHasBeenLoaded,
         walletState.dataHasBeenLoaded,
         homePageState.dataHasBeenLoaded,
         notificationsState.dataHasBeenLoaded,
@@ -127,7 +134,9 @@ const WalletApp = () => {
                     actorDispatch,
                     actorState,
                     notificationsState,
-                    notificationsDispatch
+                    notificationsDispatch,
+                    treasuryState,
+                    treasuryDispatch
                 }}
             >
                 {

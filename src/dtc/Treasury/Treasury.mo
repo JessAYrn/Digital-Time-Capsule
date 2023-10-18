@@ -12,8 +12,10 @@ import Cycles "mo:base/ExperimentalCycles";
 import Nat64 "mo:base/Nat64";
 import Float "mo:base/Float";
 import Int64 "mo:base/Int64";
+import Result "mo:base/Result";
 import GovernanceHelperMethods "../Main/GovernanceHelperMethods";
 import NnsCyclesMinting "../Ledger/NnsCyclesMinting";
+import MainTypes "../Main/types";
 
 shared(msg) actor class Treasury (principal : Principal) = this {
 
@@ -38,6 +40,7 @@ shared(msg) actor class Treasury (principal : Principal) = this {
     private let ledger : Ledger.Interface  = actor(Ledger.CANISTER_ID);
 
     public query({caller}) func getTreasuryContributionsArray(): async TreasuryTypes.TreasuryContributorsArray {
+        if( Principal.toText(caller) != ownerCanisterId) { throw Error.reject("Unauthorized access."); };
         return Iter.toArray(contributorsMap.entries());
     };
 
@@ -56,6 +59,40 @@ shared(msg) actor class Treasury (principal : Principal) = this {
             };
         };
     };  
+
+    public shared({caller}) func updateUserTreasruyContributions({
+        userPrincipal: Text; 
+        increase: Bool; 
+        currency : TreasuryTypes.SupportedCurrencies;
+        amount: Nat64
+    }) : async Result.Result<TreasuryTypes.TreasuryContributorsArray,TreasuryTypes.Error> {
+        if( Principal.toText(caller) != ownerCanisterId) { throw Error.reject("Unauthorized access."); };
+        let contributions = contributorsMap.get(userPrincipal);
+        var updatedContributions = {icp: Nat64 = 0; icp_staked: Nat64  = 0; eth: Nat64  = 0; btc: Nat64  = 0;};
+        var currencyAmount : Nat64 = 0;
+        switch(contributions){
+            case null { if(increase == false) return #err(#InsufficientFunds)};
+            case(?contributions_){ var updatedContributions = contributions_ };
+        };
+        switch(currency) {
+            case(#Icp){ currencyAmount := updatedContributions.icp; };
+            case(#Icp_staked){ currencyAmount := updatedContributions.icp_staked; };
+            case(#Eth){ currencyAmount := updatedContributions.eth; };
+            case(#Btc){ currencyAmount := updatedContributions.btc; };
+        };
+        if(not increase and currencyAmount < amount) return #err(#InsufficientFunds);
+        if(not increase) currencyAmount -= amount;
+        if(increase) currencyAmount += amount;
+        switch(currency) {
+            case(#Icp){ updatedContributions := {updatedContributions with icp = currencyAmount; };};
+            case(#Icp_staked){ updatedContributions := {updatedContributions with icp_staked = currencyAmount; };};
+            case(#Eth){ updatedContributions := {updatedContributions with eth = currencyAmount; };};
+            case(#Btc){ updatedContributions := {updatedContributions with btc = currencyAmount; };};
+        };
+
+        contributorsMap.put(userPrincipal, updatedContributions);
+        return #ok(Iter.toArray(contributorsMap.entries()));
+    };
 
     private func userAccountId() : Account.AccountIdentifier {
         let canisterId =  Principal.fromActor(this);

@@ -15,12 +15,14 @@ import homePageReducer,{ homePageInitialState, homePageTypes } from '../reducers
 import accountReducer,{ accountInitialState, accountTypes } from '../reducers/accountReducer';
 import actorReducer, { actorInitialState, actorTypes } from '../reducers/actorReducer';
 import notificationsReducer, {notificationsInitialState, notificationsTypes} from "../reducers/notificationsReducer";
+import treasuryReducer, {treasuryPageInitialState, treasuryTypes} from "../reducers/treasuryReducer";
 import ModalComponent from '../Components/modal/Modal';
 
 export const AppContext = createContext({...DEFAULT_APP_CONTEXTS});
 
 const App = () => {
     const [journalState, journalDispatch] = useReducer(journalReducer, initialState);
+    const [treasuryState, treasuryDispatch] = useReducer(treasuryReducer, treasuryPageInitialState);
     const [notificationsState, notificationsDispatch] = useReducer(notificationsReducer, notificationsInitialState);
     const [walletState, walletDispatch] = useReducer(walletReducer, walletInitialState);
     const [homePageState, homePageDispatch] =  useReducer(homePageReducer, homePageInitialState)
@@ -43,7 +45,8 @@ const App = () => {
         homePageDispatch,
         accountDispatch,
         actorDispatch,
-        notificationsDispatch
+        notificationsDispatch,
+        treasuryDispatch
     }
 
     const ReducerTypes={
@@ -52,7 +55,8 @@ const App = () => {
         homePageTypes,
         accountTypes,
         actorTypes,
-        notificationsTypes
+        notificationsTypes,
+        treasuryTypes
     }
 
     const ReducerStates = {
@@ -61,7 +65,8 @@ const App = () => {
         accountState,
         homePageState,
         actorState,
-        notificationsState
+        notificationsState,
+        treasuryState
     };
 
     // dispatch state from previous route to redux store if that state exists
@@ -84,6 +89,7 @@ const App = () => {
     const displayComponent = useMemo(() => {
         return journalState.isAuthenticated && allStatesLoaded({
             journalState,
+            treasuryState,
             notificationsState,
             walletState,
             accountState,
@@ -93,6 +99,7 @@ const App = () => {
         journalState.isAuthenticated, 
         accountState.dataHasBeenLoaded,
         journalState.dataHasBeenLoaded,
+        treasuryState.dataHasBeenLoaded,
         walletState.dataHasBeenLoaded,
         homePageState.dataHasBeenLoaded,
         notificationsState.dataHasBeenLoaded,
@@ -119,7 +126,9 @@ const App = () => {
                 actorState,
                 actorDispatch,
                 notificationsState,
-                notificationsDispatch
+                notificationsDispatch,
+                treasuryState,
+                treasuryDispatch
             }}
         >
             {

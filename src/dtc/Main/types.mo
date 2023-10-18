@@ -36,6 +36,9 @@ module{
         #NotAuthorizedToVoteOnThisProposal;
         #VoteHasAlreadyBeenSubmitted;
         #PorposalHasExpired;
+        #NotAuthorizedToAccessData;
+        #NoProfileFound;
+        #InsufficientFunds;
     };
 
     public type UserProfile = {
