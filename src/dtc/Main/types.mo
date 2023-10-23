@@ -35,6 +35,7 @@ module{
         #NotAuthorizedToCreateProposals;
         #NotAuthorizedToVoteOnThisProposal;
         #VoteHasAlreadyBeenSubmitted;
+        #NotAuthorized;
         #PorposalHasExpired;
         #NotAuthorizedToAccessData;
         #NoProfileFound;

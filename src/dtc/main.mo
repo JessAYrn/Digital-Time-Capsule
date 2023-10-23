@@ -366,6 +366,20 @@ shared actor class User() = this {
         await NotificationProtocolMethods.clearJournalNotifications(caller, userProfilesMap);
     };
 
+    public shared({ caller }) func depositToTreasury({ amount: Nat64; currency: TreasuryTypes.SupportedCurrencies; }):
+    async Result.Result<Ledger.ICP, MainTypes.Error>{
+        let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v2);
+        if(not isAdmin) return #err(#NotAuthorized);
+        let updatedBalance = await TreasuryHelperMethods.depositAssetToTreasury({
+            depositorPrincipal = Principal.toText(caller);
+            treasuryCanisterPrincipal = daoMetaData_v2.treasuryCanisterPrincipal;
+            amount;
+            currency;
+            profilesMap = userProfilesMap;
+        });
+        return updatedBalance;
+    };
+
     public shared({caller}) func heartBeat(): async (){
         let cyclesBalance_backend = Cycles.balance();
         ignore NotificationProtocolMethods.updateUserCanisterNotifications(userProfilesMap);
@@ -489,7 +503,7 @@ shared actor class User() = this {
                 switch(amount){
                     case null {};
                     case(?amount_){
-                        await TreasuryHelperMethods.depositAssetToTreasury({
+                        let newBalance = await TreasuryHelperMethods.depositAssetToTreasury({
                             depositorPrincipal = proposer;
                             treasuryCanisterPrincipal = daoMetaData_v2.treasuryCanisterPrincipal;
                             amount = amount_;
