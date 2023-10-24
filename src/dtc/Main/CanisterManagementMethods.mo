@@ -320,7 +320,7 @@ module{
         return updatedCanisterData;
     };
 
-    public func installCode_managerCanister( canisterData: MainTypes.DaoMetaData_V2 ): async (){
+    public func installCode_managerCanister( canisterData: {managerCanisterPrincipal: Text; backEndPrincipal: Text} ): async (){
         let {managerCanisterPrincipal; backEndPrincipal} = canisterData;
         let managerActor : Manager.Manager = actor(managerCanisterPrincipal);
         let wasmStoreCanister : WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);

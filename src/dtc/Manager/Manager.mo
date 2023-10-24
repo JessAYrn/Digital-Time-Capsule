@@ -112,21 +112,22 @@ shared(msg) actor class Manager (principal : Principal) = this {
         };
     };
 
-    public shared({caller}) func installCode_treasuryCanister(canisterData: MainTypes.DaoMetaData_V2): async () {
+    public shared({caller}) func installCode_treasuryCanister(canisterData: {treasuryCanisterPrincipal: Text; backEndPrincipal: Text;}): 
+    async () {
         if(Principal.toText(caller) != mainCanisterId) { throw Error.reject("Unauthorized access."); };
         let {treasury;} = release;
         let {wasmModule;} = treasury;
         await CanisterManagementMethods.installCodeTreasuryWasm(canisterData, wasmModule);
     };
 
-    public shared({caller}) func installCode_journalCanisters( profilesArray: MainTypes.UserProfilesArray ): async (){
+    public shared({caller}) func installCode_journalCanisters( profilesArray: [(Principal, {canisterId: Principal})] ): async (){
         if(Principal.toText(caller) != mainCanisterId) { throw Error.reject("Unauthorized access."); };
         let {journal} = release;
         let {wasmModule} = journal;
         await CanisterManagementMethods.installCodeJournalWasms(wasmModule, profilesArray);
     };
 
-    public shared({caller}) func installCode_frontendCanister(canisterData: MainTypes.DaoMetaData_V2): 
+    public shared({caller}) func installCode_frontendCanister(canisterData: {frontEndPrincipal: Text}): 
     async ([AssetCanister.BatchOperationKind]){
         if(Principal.toText(caller) != mainCanisterId) { throw Error.reject("Unauthorized access."); };
         let {frontend} = release; let {wasmModule} = frontend;
