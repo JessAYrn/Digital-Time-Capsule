@@ -17,12 +17,76 @@ export const fromHexString = (hex) => {
     return bytes;
 };
 
+export const isADigit = (char) => {
+  let num = parseInt(char);
+  if( num === 0) return true;
+  if( num === 1) return true;
+  if( num === 2) return true;
+  if( num === 3) return true;
+  if( num === 4) return true;
+  if( num === 5) return true;
+  if( num === 6) return true;
+  if( num === 7) return true;
+  if( num === 8) return true;
+  if( num === 9) return true;
+  return false;
+};
+
+export const isWithin8DecimalPlaces = (number) => {
+  let str = number.toString();
+  let decimalPlace = 0;
+  let decimalFound = false;
+  for(let i = 0; i < str.length(); i++){
+    let char = str[i];
+    if(decimalFound)decimalPlace++;
+    if(char === ".") decimalFound = true;
+  };
+  if(decimalPlace <= 8) return true;
+  return false;
+}
+
+export const isANumber = (number) => {
+  let str = number.toString();
+  let numberOfDecimals = 0;
+    for(let i = 0; i < str.length; i++){
+      let char = str[i];
+      if(char === ".")numberOfDecimals++;
+      else if(!isADigit(char)) return false;
+    };
+    if(numberOfDecimals > 1) return false;
+    return true;
+};
+
+export const isALowerCaseLetter = (char) => {
+  let letters = [ "a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"];
+  if(letters.includes(char)) return true;
+  return false;
+};
+
+export const isAHexidecimal = (char) => {
+  let charAsString = char.toString();
+  const chars = ["0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f"];
+  return chars.includes(charAsString.toLowerCase());
+}
+
+export const isAnInteger = (number) => {
+  let concatenation = parseInt(number);
+  if(concatenation === number) return true;
+  return false;
+}
+
+export const isANaturalNumber = (number) => {
+  let isInteger = isAnInteger(number)
+  if(isInteger && number > 0) return true;
+  return false;
+};
+
 export const toE8s = (number) => {
-  return number * e8sInOneICP
+  return parseInt(parseFloat(number) * e8sInOneICP);
 }
 
 export const fromE8s = (number) => {
-  return number / e8sInOneICP
+  return parseInt(number / e8sInOneICP);
 }
 
 export const shortenHexString = (hexString) => {
@@ -161,7 +225,6 @@ export const scrollToTop = () => {
 }
 
 export const scrollTo_X =  (distanceFromLeft = 0) => {
-  console.log(window.scrollY);
   window.scrollTo({
     top: window.scrollY,
     left: distanceFromLeft,
@@ -247,4 +310,27 @@ export const getHighestEntryKey = (entries) => {
     };
     return max;
 };
+
+export const principalHasProperFormat = (principal) => {
+  if(principal.length !== 27 && principal.length !== 63) return false;
+  for(let i = 0; i < principal.length; i++){
+      const char = principal[i];
+      const isADigit_ = isADigit(char);
+      const isALowerCaseLetter_ = isALowerCaseLetter(char);
+      const isADash = char === '-';
+      if(i % 6 === 5 && !isADash) return false;
+      if(i % 6 !== 5 && !isADigit_ && !isALowerCaseLetter_) return false;
+  };
+  return true;
+};
+
+export const icpWalletAddressHasProperFormat = (address) => {
+  if(address.length !== 64) return false;
+  for(let i = 0; i < address.length; i++){
+    let char = address[i];
+    if(!isAHexidecimal(char)) return false;
+  };
+  return true;
+};
+
 

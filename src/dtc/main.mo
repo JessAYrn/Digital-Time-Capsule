@@ -1,6 +1,5 @@
 import Error "mo:base/Error";
 import Nat64 "mo:base/Nat64";
-import Trie "mo:base/Trie";
 import HashMap "mo:base/HashMap";
 import Hash "mo:base/Hash";
 import Result "mo:base/Result";
@@ -88,89 +87,68 @@ shared actor class User() = this {
 
     public shared({ caller }) func delete() : async Result.Result<(), JournalTypes.Error> {
         let result = await MainMethods.delete(caller, userProfilesMap);
-        switch(result){
-            case(#ok(_)){ #ok(()); };
-            case(#err(e)){ #err(e); };
-        };
+        switch(result){ case(#ok(_)){ #ok(()); }; case(#err(e)){ #err(e); }; };
     };
     
-    public shared({ caller }) func readJournal () : 
-    async Result.Result<(MainTypes.JournalData), JournalTypes.Error> {
+    public shared({ caller }) func readJournal () : async Result.Result<(MainTypes.JournalData), JournalTypes.Error> {
         let result = await JournalHelperMethods.readJournal(caller, userProfilesMap);
-        return result; 
     };
 
     public shared({ caller }) func readWalletData() : async Result.Result<({ balance : Ledger.ICP; address: [Nat8]; } ), JournalTypes.Error> {
         let result = await JournalHelperMethods.readWalletData(caller, userProfilesMap);
-        return result;
     };
 
     public shared({ caller }) func readEntryFileChunk(fileId: Text, chunkId: Nat) : async Result.Result<(Blob),JournalTypes.Error>{
         let result = await JournalHelperMethods.readEntryFileChunk(caller, userProfilesMap, fileId, chunkId);
-        return result;
     };
 
     public shared({ caller }) func readEntryFileSize(fileId: Text) : async Result.Result<(Nat),JournalTypes.Error>{
         let result = await JournalHelperMethods.readEntryFileSize(caller, userProfilesMap, fileId);
-        return result;
     };
 
     public shared({ caller }) func updateBio(bio: JournalTypes.Bio) : async Result.Result<(JournalTypes.Bio), JournalTypes.Error> {
         let result = await JournalHelperMethods.updateBio(caller, userProfilesMap, bio);
-        return result;
     };
 
-    public shared({caller}) func updatePhotos(photos: [JournalTypes.FileMetaData]) : 
-    async Result.Result<(JournalTypes.Bio), JournalTypes.Error> {
+    public shared({caller}) func updatePhotos(photos: [JournalTypes.FileMetaData]): async Result.Result<(JournalTypes.Bio), JournalTypes.Error> {
         let result = await JournalHelperMethods.updatePhotos(caller, userProfilesMap, photos);
-        return result;
     };
 
-    public shared({caller}) func createJournalEntry() : 
-    async Result.Result<([JournalTypes.JournalEntryExportKeyValuePair]), JournalTypes.Error> {
+    public shared({caller}) func createJournalEntry(): async Result.Result<([JournalTypes.JournalEntryExportKeyValuePair]), JournalTypes.Error> {
         let result = await JournalHelperMethods.createJournalEntry(caller, userProfilesMap);
-        return result;
     };
 
     public shared({ caller }) func markJournalEntryAsRead(entryKey: JournalTypes.EntryKey) : async Result.Result<(), JournalTypes.Error> {
         let result = await JournalHelperMethods.markJournalEntryAsRead(caller, userProfilesMap, entryKey);
-        return result;
     };
 
     public shared({caller}) func updateJournalEntry(entryKey : JournalTypes.EntryKey, entry : JournalTypes.JournalEntry) : 
     async Result.Result<([JournalTypes.JournalEntryExportKeyValuePair]), JournalTypes.Error> {
         let result = await JournalHelperMethods.updateJournalEntry(caller, userProfilesMap, entry, entryKey);
-        return result;
     };
 
     public shared({ caller }) func submitJournalEntry(entryKey: JournalTypes.EntryKey) : async Result.Result<[JournalTypes.JournalEntryExportKeyValuePair], JournalTypes.Error> {
         let result = await JournalHelperMethods.submitJournalEntry(caller, userProfilesMap, entryKey);
-        return result;
     };
 
     public shared({ caller }) func deleteJournalEntry(entryKey: JournalTypes.EntryKey) : async Result.Result<(), JournalTypes.Error> {
         let result = await JournalHelperMethods.deleteJournalEntry(caller, userProfilesMap, entryKey);
-        return result;
     };
 
     public shared({caller}) func deleteFile(fileId: Text) : async Result.Result<(), JournalTypes.Error> {
         let result = await JournalHelperMethods.deleteFile(caller, userProfilesMap, fileId);
-        return result;
     };
 
     public shared({caller}) func uploadJournalEntryFile(fileId: Text, chunkId: Nat, blobChunk: Blob): async Result.Result<(Text), JournalTypes.Error>{
         let result = await JournalHelperMethods.uploadJournalEntryFile(caller, userProfilesMap, fileId, chunkId, blobChunk);
-        return result;
     };
     
     public shared({caller}) func transferICP(amount: Nat64, canisterAccountId: Account.AccountIdentifier) : async Result.Result<(), JournalTypes.Error> {
         let result = await TxHelperMethods.transferICP(caller, userProfilesMap, amount, canisterAccountId);
-        return result;
     };
 
     public shared({caller}) func readTransaction() : async Result.Result<[(Nat, JournalTypes.Transaction)], JournalTypes.Error> {
         let result = await TxHelperMethods.readTransaction(caller, userProfilesMap);
-        return result;
     };
 
     private func updateUsersTxHistory() : async () {
@@ -355,11 +333,9 @@ shared actor class User() = this {
         return #ok(());
     };
 
-
     public shared({ caller }) func getNotifications(): async NotificationsTypes.Notifications{
         let notifications = await NotificationProtocolMethods.notifyOfNewStableRelease(daoMetaData_v2);
         let notifications_ = await NotificationProtocolMethods.appendNotificationsFromJournal(caller, userProfilesMap, notifications);
-        return notifications_;
     };
 
     public shared({ caller }) func clearJournalNotifications(): async (){
@@ -558,10 +534,4 @@ shared actor class User() = this {
     };
 
     system func postupgrade() { userProfilesArray:= []; proposalsArray := []};
-
-    private  func key(x: Principal) : Trie.Key<Principal> { return {key = x; hash = Principal.hash(x)}; };
-
-    private func natKey(x: Nat) : Trie.Key<Nat> { return {key = x; hash = Hash.hash(x)} };
-
-    private func textKey(x: Text) : Trie.Key<Text> { return {key = x; hash = Text.hash(x)} };
 }

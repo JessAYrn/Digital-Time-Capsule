@@ -8,6 +8,7 @@ import { AppContext as AccountContext } from "../../Routes/Account";
 import { AppContext as JournalContext } from "../../Routes/App";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import { PAYLOAD_DATA_TYPES, PROPOSAL_ACTIONS } from "./utils";
+import { isANumber, principalHasProperFormat, toE8s  } from "../../functionsAndConstants/Utils";
 import { homePageTypes } from "../../reducers/homePageReducer";
 import { retrieveContext } from "../../functionsAndConstants/Contexts";
 import InputBox from "../Fields/InputBox";
@@ -43,6 +44,7 @@ const CreateProposalForm = (props) => {
     const [proposalPayload, setProposalPayload] = useState(null);
     const [payloadRequired, setPayloadRequired] = useState(false);
     const [payloadDataType, setPayloadDataType] = useState(null);
+    const [hasError_1, setHasError_1] = useState(false);
 
     
     const onMenuItemClick = (proposalAction, payloadRequired, dataType) => {
@@ -66,7 +68,9 @@ const CreateProposalForm = (props) => {
     ];
 
     const onChange_payload = (payload_) => {
-        setProposalPayload(payload_)
+        setProposalPayload(payload_);
+        if(payloadDataType === PAYLOAD_DATA_TYPES.text) setHasError_1(!principalHasProperFormat(payload_));
+        if(payloadDataType === PAYLOAD_DATA_TYPES.nat64) setHasError_1(!isANumber(payload_));
     };
 
     const modalButton_close = [
@@ -82,7 +86,7 @@ const CreateProposalForm = (props) => {
     const onSubmitProposal = async () => {
         setIsLoadingModal(true);
         let principal = payloadDataType === PAYLOAD_DATA_TYPES.text ? [proposalPayload] : [];
-        let amount = payloadDataType === PAYLOAD_DATA_TYPES.nat64 ? [parseInt(proposalPayload)] : [];
+        let amount = payloadDataType === PAYLOAD_DATA_TYPES.nat64 ? [toE8s(proposalPayload)] : [];
         let payload = {principal, amount};
         let action = {[proposalAction]: null};
         let result = await actorState.backendActor.createProposal({ action, payload });
@@ -132,12 +136,13 @@ const CreateProposalForm = (props) => {
             <Typography varient={"h3"}> {proposalAction} </Typography>
             { payloadRequired &&
                 <InputBox
+                    hasError={hasError_1}
                     label={"Payload "}
                     rows={"1"}
                     onChange={onChange_payload}
                 />
             }
-            { proposalAction && (!payloadRequired || (payloadRequired && proposalPayload)) &&
+            { proposalAction && (!payloadRequired || (payloadRequired && proposalPayload)) && !hasError_1 &&
                 <ButtonField
                     Icon={DoneIcon}
                     active={true}

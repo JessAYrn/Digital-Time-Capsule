@@ -7,6 +7,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { PROPOSAL_ACTIONS } from "../proposals/utils";
 import DoneIcon from '@mui/icons-material/Done';
 import ButtonField from "../Fields/Button";
+import { isANumber, toE8s } from "../../functionsAndConstants/Utils";
 
 const DepositToTreasuryModal = (props) => {
     const {
@@ -20,6 +21,7 @@ const DepositToTreasuryModal = (props) => {
 
     const [amount, setAmount] = useState(null);
     const [action, setAction] = useState(null);
+    const [hasError, setHasError] = useState(true);
 
     const onMenuItemClick = (proposalAction) => {
         setAction(proposalAction);
@@ -35,11 +37,15 @@ const DepositToTreasuryModal = (props) => {
         let currency;
         if(action === PROPOSAL_ACTIONS.DepositIcpToNeuron) currency = {Icp_staked: null};
         else if(action === PROPOSAL_ACTIONS.DepositIcpToTreasury) currency = {Icp: null};
-        let result = await actorState.backendActor.depositToTreasury({amount: parseInt(amount), currency});
-        console.log(result);
+        let result = await actorState.backendActor.depositToTreasury({amount: toE8s(amount), currency});
         setIsLoadingModal(false);
         setModalProps({});
         setModalIsOpen(false);
+    };
+
+    const onAmountChange = (value) => {
+        setHasError(!isANumber(value));
+        setAmount(value);
     };
 
     return (
@@ -67,11 +73,12 @@ const DepositToTreasuryModal = (props) => {
                 <InputBox
                 label={"Amount To Deposit: "}
                 rows={"1"}
-                onChange={(value) => {setAmount(value)}}
+                hasError={hasError}
+                onChange={onAmountChange}
                 value={amount}
                 />
             }
-            {amount && 
+            {amount && !hasError &&
                 <ButtonField
                 Icon={DoneIcon}
                 active={true}

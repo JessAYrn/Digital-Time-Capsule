@@ -26,15 +26,12 @@ const InputBox = (props) => {
         onBlur,
         onChange,
         value,
-        setParentState
-        // dispatchAction //the action that is to take place in order to dispatch the field change to the redux store
+        hasError
     } = props;
 
     const onChange_editButton = () => {
         setEditing(!editing);
-    }
-
-
+    };
 
     const onChange_ = () => {
         if(dispatch) dispatch({
@@ -89,6 +86,7 @@ const InputBox = (props) => {
                     <TextField
                         columns={12} 
                         xs={12} 
+                        error={hasError}
                         width={"100%"}
                         inputRef={inputRef}
                         color='custom'

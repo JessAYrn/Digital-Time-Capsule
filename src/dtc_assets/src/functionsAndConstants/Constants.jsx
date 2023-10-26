@@ -111,4 +111,13 @@ export const BUTTON_TYPES = {
     icon: 'icon',
     text: 'text',
     loading: 'loading'
-}
+};
+
+export const INPUT_BOX_TYPES = {
+    principal: "PRINCIPAL",
+    text: "TEXT",
+    integer: "INT",
+    float: "FLOAT",
+    nat: "NAT",
+    icpWalletAddress: "ICP_WALLET_ADDRESS"
+};
