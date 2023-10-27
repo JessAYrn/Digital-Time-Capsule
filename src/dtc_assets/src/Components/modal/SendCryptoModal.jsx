@@ -3,6 +3,7 @@ import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import InputBox from "../Fields/InputBox";
 import { icpWalletAddressHasProperFormat, isANumber  } from "../../functionsAndConstants/Utils";
 import ButtonField from "../Fields/Button";
+import { INPUT_BOX_FORMATS } from "../../functionsAndConstants/Constants";
 
 const SendCrypto = (props) => {
     
@@ -39,6 +40,7 @@ const SendCrypto = (props) => {
                 label={"Recipient: "}
                 rows={"1"}
                 onChange={onChangeRecipientAddress}
+                value={recipientAddress}
             />
             <InputBox
                 hasError={hasError_2}
@@ -46,6 +48,7 @@ const SendCrypto = (props) => {
                 rows={"1"}
                 onChange={onChangeAmount}
                 value={numberInput}
+                format={INPUT_BOX_FORMATS.numberFormat}
             />
         </Grid>
     )

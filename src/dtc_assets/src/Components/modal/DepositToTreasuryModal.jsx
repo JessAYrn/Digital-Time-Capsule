@@ -8,6 +8,7 @@ import { PROPOSAL_ACTIONS } from "../proposals/utils";
 import DoneIcon from '@mui/icons-material/Done';
 import ButtonField from "../Fields/Button";
 import { isANumber, toE8s } from "../../functionsAndConstants/Utils";
+import { INPUT_BOX_FORMATS } from "../../functionsAndConstants/Constants";
 
 const DepositToTreasuryModal = (props) => {
     const {
@@ -76,6 +77,7 @@ const DepositToTreasuryModal = (props) => {
                 hasError={hasError}
                 onChange={onAmountChange}
                 value={amount}
+                format={INPUT_BOX_FORMATS.numberFormat}
                 />
             }
             {amount && !hasError &&

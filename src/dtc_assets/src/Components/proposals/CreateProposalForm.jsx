@@ -18,6 +18,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import DoneIcon from '@mui/icons-material/Done';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import { INPUT_BOX_FORMATS } from "../../functionsAndConstants/Constants";
 
 
 
@@ -140,6 +141,8 @@ const CreateProposalForm = (props) => {
                     label={"Payload "}
                     rows={"1"}
                     onChange={onChange_payload}
+                    value={proposalPayload}
+                    format={payloadDataType === PAYLOAD_DATA_TYPES.nat64 ? INPUT_BOX_FORMATS.numberFormat : INPUT_BOX_FORMATS.noFormat}
                 />
             }
             { proposalAction && (!payloadRequired || (payloadRequired && proposalPayload)) && !hasError_1 &&
