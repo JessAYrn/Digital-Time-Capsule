@@ -15,7 +15,9 @@ import ButtonField from "../../Components/Fields/Button";
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import CreateProposalForm from "../../Components/proposals/CreateProposalForm";
 import DepositToTreasuryModal from "../../Components/modal/DepositToTreasuryModal";
+import Graph from "../../Components/Fields/Chart";
 import './TreasuryPage.scss'
+import { CHART_TYPES } from "../../functionsAndConstants/Constants";
 
 const TreasuryPage = (props) => {
   const { treasuryState, homePageState, actorState } = useContext(AppContext);
@@ -87,14 +89,15 @@ const TreasuryPage = (props) => {
         flexDirection={"column"}
         marginTop={"60px"}
       >
+        <Graph type={CHART_TYPES.line}/>
         <Paper className='treasury paper'>
         <DataField
-          label={'Balance: '}
+          label={'Balance($ICP): '}
           text={treasuryState.treasuryData.balance_icp}
           disabled={true}
         />
         <DataField
-          label={'Treasury Account ID:'}
+          label={'Treasury Account ID($ICP):'}
           text={`${shortenHexString(treasuryState.treasuryData.accountId_icp)}`}
           buttonIcon={ContentCopyIcon}
           onClick={ () => copyText(treasuryState.treasuryData.accountId_icp)}

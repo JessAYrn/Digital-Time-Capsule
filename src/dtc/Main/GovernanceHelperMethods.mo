@@ -19,10 +19,10 @@ module{
     
     type XDRs = Float;
 
-    public func computeVotingPower({ contributions: TreasuryTypes.TreasuryContributions; xdr_permyriad_per_icp: Nat64}): XDRs {
-        let {icp} = contributions;
+    public func computeTotalXdrs({ balances: TreasuryTypes.Balances; xdr_permyriad_per_icp: Nat64}): XDRs {
+        let {icp} = balances;
         //will need to add more conversion methods later as more tokens are made available.
-        var votingPower = Float.fromInt(Nat64.toNat(icp * xdr_permyriad_per_icp )) / Float.fromInt(Nat64.toNat(1_000_000_000_000));
+        var votingPower = Float.fromInt(Nat64.toNat(icp.e8s * xdr_permyriad_per_icp )) / Float.fromInt(Nat64.toNat(1_000_000_000_000));
         return votingPower;
     };
 
@@ -43,8 +43,8 @@ module{
         let arrayLength = treasuryContributionsArray.size();
         var index = 0;
         while(index < arrayLength){
-            let (principal, contributions) = treasuryContributionsArray[index];
-            let votingPower = computeVotingPower({ contributions; xdr_permyriad_per_icp});
+            let (principal, balances) = treasuryContributionsArray[index];
+            let votingPower = computeTotalXdrs({ balances; xdr_permyriad_per_icp});
             let vote = proposalVotesHashMap.get(principal);
             switch(vote){
                 case null {};

@@ -23,6 +23,9 @@ import HashMap "mo:base/HashMap";
 import MainTypes "../Main/types";
 import NotificationsTypes "../Main/types.notifications";
 import IC "../IC/ic.types";
+import AnalyticsTypes "../Analytics/types";
+import GovernanceHelperMethods "../Main/GovernanceHelperMethods";
+import NnsCyclesMinting "../Ledger/NnsCyclesMinting";
 
 shared(msg) actor class Journal (principal : Principal) = this {
 
@@ -51,6 +54,15 @@ shared(msg) actor class Journal (principal : Principal) = this {
         Iter.size(Iter.fromArray(txHistoryArray)), 
         Nat.equal,
         Hash.hash
+    );
+
+    private stable var balancesArray : AnalyticsTypes.BalancesArray = [];
+
+    private var balancesMap : AnalyticsTypes.BalancesMap = HashMap.fromIter<Text, AnalyticsTypes.Balances>(
+        Iter.fromArray(balancesArray), 
+        Iter.size(Iter.fromArray(balancesArray)), 
+        Text.equal,
+        Text.hash
     );
     
     private stable var biography : JournalTypes.Bio = {
@@ -327,6 +339,26 @@ shared(msg) actor class Journal (principal : Principal) = this {
         };
     };
 
+    public shared({caller}) func saveCurrentbalances() : async () {
+        if( Principal.toText(caller) != mainCanisterId_) { throw Error.reject("Unauthorized access."); };
+        let icp = await canisterBalance();
+        //will need to retreive the proper balances of the other currencies once they've been integrated
+        let icp_staked = {e8s: Nat64 = 0};
+        let btc = {e8s: Nat64 = 0};
+        let eth = {e8s: Nat64 = 0};
+        let balances = {icp; icp_staked; btc; eth;};
+        let cyclesMintingCanister: NnsCyclesMinting.Interface = actor(NnsCyclesMinting.NnsCyclesMintingCanisterID);
+        let {data} = await cyclesMintingCanister.get_icp_xdr_conversion_rate();
+        let {xdr_permyriad_per_icp} = data;
+        let xdrs = GovernanceHelperMethods.computeTotalXdrs({balances; xdr_permyriad_per_icp});
+        balancesMap.put(Int.toText(Time.now()), {balances with xdrs});
+    };
+
+    public query({caller}) func readBalancesHistory() : async AnalyticsTypes.BalancesArray{
+        if( Principal.toText(caller) != mainCanisterId_) { throw Error.reject("Unauthorized access."); };
+        return Iter.toArray(balancesMap.entries());
+    };
+
     public shared({caller}) func transferICP(amount: Nat64, recipientAccountId: Account.AccountIdentifier) : async Bool {
         if( Principal.toText(caller) != mainCanisterId_) { throw Error.reject("Unauthorized access."); };
         let res = await ledger.transfer({
@@ -385,18 +417,6 @@ shared(msg) actor class Journal (principal : Principal) = this {
         await ledger.account_balance({ account = userAccountId() })
     };
 
-    system func preupgrade() {
-        journalArray := Iter.toArray(journalMap.entries());
-        filesArray := Iter.toArray(filesMap.entries());
-        txHistoryArray := Iter.toArray(txHistoryMap.entries());
-    };
-
-    system func postupgrade() {
-        journalArray := [];
-        filesArray := [];
-        txHistoryArray := [];
-    };
-
     private func mapJournalEntriesArrayToExport(journalAsArray: [JournalTypes.JournalEntryKeyValuePair]) : 
     [JournalTypes.JournalEntryExportKeyValuePair] {
         let currentTime = Time.now();
@@ -418,17 +438,23 @@ shared(msg) actor class Journal (principal : Principal) = this {
         let threshold : Int = 2 * JournalTypes.ONE_GIGA_BYTE - 2 * JournalTypes.ONE_MEGA_BYTE;
         return dataUsageInBytes < threshold;
     };
-   
-    private  func key(x: Principal) : Trie.Key<Principal> {
-        return {key = x; hash = Principal.hash(x)}
-    };
 
     private func natKey(x: Nat) : Trie.Key<Nat> {
         return {key = x; hash = Hash.hash(x)}
     };
 
-    private func textKey(x: Text) : Trie.Key<Text> {
-        return {key = x; hash = Text.hash(x)}
+    system func preupgrade() {
+        journalArray := Iter.toArray(journalMap.entries());
+        filesArray := Iter.toArray(filesMap.entries());
+        txHistoryArray := Iter.toArray(txHistoryMap.entries());
+        balancesArray := Iter.toArray(balancesMap.entries());
+    };
+
+    system func postupgrade() {
+        journalArray := [];
+        filesArray := [];
+        txHistoryArray := [];
+        balancesArray := [];
     };
 
 }

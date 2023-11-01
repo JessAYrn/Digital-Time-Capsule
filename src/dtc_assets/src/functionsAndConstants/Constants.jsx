@@ -117,3 +117,25 @@ export const INPUT_BOX_FORMATS = {
     numberFormat : "numberFormat",
     noFormat : "noFormat"
 };
+
+export const CHART_TYPES = {
+    line: "LINE",
+    bar: "BAR",
+    pie: "PIE"
+}; 
+
+export const GRAPH_TIME_FRAMES = {
+    day: "day",
+    week: "week",
+    month: "month",
+    year: "year",
+    allTime: "allTime"
+}
+
+export const GRAP_DISPLAY_CURRENCIES = {
+    icp: "ICP",
+    btc: "BTC",
+    eth: "ETH",
+    all: "ALL"
+
+}

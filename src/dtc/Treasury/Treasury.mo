@@ -13,9 +13,12 @@ import Nat64 "mo:base/Nat64";
 import Float "mo:base/Float";
 import Int64 "mo:base/Int64";
 import Result "mo:base/Result";
+import Int "mo:base/Int";
+import Time "mo:base/Time";
 import GovernanceHelperMethods "../Main/GovernanceHelperMethods";
 import NnsCyclesMinting "../Ledger/NnsCyclesMinting";
 import MainTypes "../Main/types";
+import AnalyticsTypes "../Analytics/types";
 
 shared(msg) actor class Treasury (principal : Principal) = this {
 
@@ -28,9 +31,18 @@ shared(msg) actor class Treasury (principal : Principal) = this {
     private stable var stakingMultiplier : Nat64 = 2;
 
     private var contributorsMap : TreasuryTypes.TreasuryContributorsMap = 
-    HashMap.fromIter<Text, TreasuryTypes.TreasuryContributions>(
+    HashMap.fromIter<Text, TreasuryTypes.Balances>(
         Iter.fromArray(contributorsArray), 
         Iter.size(Iter.fromArray(contributorsArray)), 
+        Text.equal,
+        Text.hash
+    );
+
+    private stable var balancesArray : AnalyticsTypes.BalancesArray = [];
+
+    private var balancesMap : AnalyticsTypes.BalancesMap = HashMap.fromIter<Text, AnalyticsTypes.Balances>(
+        Iter.fromArray(balancesArray), 
+        Iter.size(Iter.fromArray(balancesArray)), 
         Text.equal,
         Text.hash
     );
@@ -49,11 +61,11 @@ shared(msg) actor class Treasury (principal : Principal) = this {
         let userContributions = contributorsMap.get(Principal.toText(userPrincipal));
         switch(userContributions){
             case null { return false};
-            case (?contributions){
+            case (?balances){
                 let cyclesMintingCanister: NnsCyclesMinting.Interface = actor(NnsCyclesMinting.NnsCyclesMintingCanisterID);
                 let {data} = await cyclesMintingCanister.get_icp_xdr_conversion_rate();
                 let {xdr_permyriad_per_icp} = data;
-                let votingPower = GovernanceHelperMethods.computeVotingPower({contributions; xdr_permyriad_per_icp; });
+                let votingPower = GovernanceHelperMethods.computeTotalXdrs({balances; xdr_permyriad_per_icp; });
                 if(votingPower < Float.fromInt64(Int64.fromNat64(minimalRequiredVotingPower))) return false;
                 return true;
             };
@@ -68,30 +80,50 @@ shared(msg) actor class Treasury (principal : Principal) = this {
     }) : async Result.Result<TreasuryTypes.TreasuryContributorsArray,TreasuryTypes.Error> {
         if( Principal.toText(caller) != ownerCanisterId) { throw Error.reject("Unauthorized access."); };
         let contributions = contributorsMap.get(userPrincipal);
-        var updatedContributions = {icp: Nat64 = 0; icp_staked: Nat64  = 0; eth: Nat64  = 0; btc: Nat64  = 0;};
+        var updatedContributions = {icp = {e8s: Nat64 = 0}; icp_staked = {e8s: Nat64  = 0}; eth = {e8s: Nat64  = 0}; btc = {e8s: Nat64  = 0};};
         var currencyAmount : Nat64 = 0;
         switch(contributions){
             case null { if(increase == false) return #err(#InsufficientFunds)};
             case(?contributions_){ var updatedContributions = contributions_ };
         };
         switch(currency) {
-            case(#Icp){ currencyAmount := updatedContributions.icp; };
-            case(#Icp_staked){ currencyAmount := updatedContributions.icp_staked; };
-            case(#Eth){ currencyAmount := updatedContributions.eth; };
-            case(#Btc){ currencyAmount := updatedContributions.btc; };
+            case(#Icp){ currencyAmount := updatedContributions.icp.e8s; };
+            case(#Icp_staked){ currencyAmount := updatedContributions.icp_staked.e8s; };
+            case(#Eth){ currencyAmount := updatedContributions.eth.e8s; };
+            case(#Btc){ currencyAmount := updatedContributions.btc.e8s; };
         };
         if(not increase and currencyAmount < amount) return #err(#InsufficientFunds);
         if(not increase) currencyAmount -= amount;
         if(increase) currencyAmount += amount;
         switch(currency) {
-            case(#Icp){ updatedContributions := {updatedContributions with icp = currencyAmount; };};
-            case(#Icp_staked){ updatedContributions := {updatedContributions with icp_staked = currencyAmount; };};
-            case(#Eth){ updatedContributions := {updatedContributions with eth = currencyAmount; };};
-            case(#Btc){ updatedContributions := {updatedContributions with btc = currencyAmount; };};
+            case(#Icp){ updatedContributions := {updatedContributions with icp = {e8s = currencyAmount}}};
+            case(#Icp_staked){ updatedContributions := {updatedContributions with icp_staked = {e8s = currencyAmount}}};
+            case(#Eth){ updatedContributions := {updatedContributions with eth = {e8s = currencyAmount}}};
+            case(#Btc){ updatedContributions := {updatedContributions with btc = {e8s = currencyAmount}}};
         };
 
         contributorsMap.put(userPrincipal, updatedContributions);
         return #ok(Iter.toArray(contributorsMap.entries()));
+    };
+
+    public shared({caller}) func saveCurrentbalances() : async () {
+        if( Principal.toText(caller) != ownerCanisterId) { throw Error.reject("Unauthorized access."); };
+        let icp = await canisterBalance();
+        //will need to retreive the proper balances of the other currencies once they've been integrated
+        let icp_staked = {e8s: Nat64 = 0};
+        let btc = {e8s: Nat64 = 0};
+        let eth = {e8s: Nat64 = 0};
+        let balances = {icp; icp_staked; btc; eth;};
+        let cyclesMintingCanister: NnsCyclesMinting.Interface = actor(NnsCyclesMinting.NnsCyclesMintingCanisterID);
+        let {data} = await cyclesMintingCanister.get_icp_xdr_conversion_rate();
+        let {xdr_permyriad_per_icp} = data;
+        let xdrs = GovernanceHelperMethods.computeTotalXdrs({balances; xdr_permyriad_per_icp});
+        balancesMap.put(Int.toText(Time.now()), {balances with xdrs});
+    };
+
+    public query({caller}) func readBalancesHistory() : async AnalyticsTypes.BalancesArray{
+        if( Principal.toText(caller) != ownerCanisterId) { throw Error.reject("Unauthorized access."); };
+        return Iter.toArray(balancesMap.entries());
     };
 
     private func userAccountId() : Account.AccountIdentifier {

@@ -3,11 +3,11 @@ import Principal "mo:base/Principal";
 
 
 module{
-    public type TreasuryContributions = {
-        icp: Nat64;
-        icp_staked: Nat64;
-        eth: Nat64;
-        btc: Nat64;
+    public type Balances = {
+        icp: {e8s : Nat64};
+        icp_staked: {e8s: Nat64};
+        eth: {e8s: Nat64};
+        btc: {e8s: Nat64};
     };
 
     public type SupportedCurrencies = {
@@ -27,7 +27,7 @@ module{
         accountId_icp: [Nat8];
     };
 
-    public type TreasuryContributorsArray = [(Text, TreasuryContributions)];
+    public type TreasuryContributorsArray = [(Text, Balances)];
 
-    public type TreasuryContributorsMap = HashMap.HashMap<Text, TreasuryContributions>;
+    public type TreasuryContributorsMap = HashMap.HashMap<Text, Balances>;
 }
