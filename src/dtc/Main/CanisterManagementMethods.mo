@@ -6,7 +6,7 @@ import Account "../Ledger/Account";
 import JournalTypes "../Journal/journal.types";
 import Principal "mo:base/Principal";
 import Cycles "mo:base/ExperimentalCycles";
-import MainTypes "../Main/types";
+import MainTypes "../Types/Main/types";
 import Journal "../Journal/Journal";
 import Ledger "../Ledger/Ledger";
 import Blob "mo:base/Blob";

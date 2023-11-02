@@ -1,4 +1,4 @@
-import MainTypes "../Main/types";
+import MainTypes "../Types/Main/types";
 import AssetCanister "../AssetCanister/AssetCanister";
 import Buffer "mo:base/Buffer";
 import HashMap "mo:base/HashMap";

@@ -20,7 +20,7 @@ import Bool "mo:base/Bool";
 import Option "mo:base/Option";
 import JournalTypes "journal.types";
 import HashMap "mo:base/HashMap";
-import MainTypes "../Main/types";
+import MainTypes "../Types/Main/types";
 import NotificationsTypes "../Main/types.notifications";
 import IC "../IC/ic.types";
 import AnalyticsTypes "../Analytics/types";

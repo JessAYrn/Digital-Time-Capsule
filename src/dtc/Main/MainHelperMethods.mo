@@ -1,5 +1,4 @@
 import Trie "mo:base/Trie";
-import Types "types";
 import Iter "mo:base/Iter";
 import Buffer "mo:base/Buffer";
 import Option "mo:base/Option";
@@ -9,7 +8,7 @@ import Account "../Ledger/Account";
 import JournalTypes "../Journal/journal.types";
 import Principal "mo:base/Principal";
 import Cycles "mo:base/ExperimentalCycles";
-import MainTypes "types";
+import MainTypes "../Types/Main/types";
 import Array "mo:base/Array";
 import Journal "../Journal/Journal";
 import CanisterManagementMethods "../Main/CanisterManagementMethods";
@@ -131,7 +130,7 @@ module{
                 let numberOfProfiles = profilesMap.size();
                 let profilesIter = profilesMap.entries();
                 let profilesArray = Iter.toArray(profilesIter);
-                let ArrayBuffer = Buffer.Buffer<(Principal,Types.UserProfile)>(1);
+                let ArrayBuffer = Buffer.Buffer<(Principal,MainTypes.UserProfile)>(1);
 
                 while(index < numberOfProfiles){
                     let userProfile = profilesArray[index];

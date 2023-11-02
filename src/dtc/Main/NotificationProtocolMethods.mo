@@ -1,4 +1,4 @@
-import MainTypes "types";
+import MainTypes "../Types/Main/types";
 import Manager "../Manager/Manager";
 import WasmStore "../Manager/WasmStore";
 import Buffer "mo:base/Buffer";

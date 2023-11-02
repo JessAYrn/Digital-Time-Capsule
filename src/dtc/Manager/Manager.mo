@@ -23,7 +23,7 @@ import IC "../IC/ic.types";
 import AssetCanister "../AssetCanister/AssetCanister";
 import WasmStore "WasmStore";
 import HashMap "mo:base/HashMap";
-import MainTypes "../Main/types";
+import MainTypes "../Types/Main/types";
 import CanisterManagementMethods "CanisterManagementMethods";
 import AssetManagementFunctions "../AssetCanister/AssetManagementFunctions";
 import JournalTypes "../Journal/journal.types";

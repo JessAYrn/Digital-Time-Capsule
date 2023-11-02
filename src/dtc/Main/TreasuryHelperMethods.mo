@@ -1,6 +1,6 @@
 import Result "mo:base/Result";
 import Principal "mo:base/Principal";
-import MainTypes "types";
+import MainTypes "../Types/Main/types";
 import Journal "../Journal/Journal";
 import Treasury "../Treasury";
 import TreasuryTypes "../Types/Treasury/types";

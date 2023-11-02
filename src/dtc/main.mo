@@ -14,7 +14,7 @@ import Account "Ledger/Account";
 import JournalTypes "Journal/journal.types";
 import MainMethods "Main/MainHelperMethods";
 import JournalHelperMethods "Main/JournalHelperMethods";
-import MainTypes "Main/types";
+import MainTypes "Types/Main/types";
 import TxHelperMethods "Main/TransactionHelperMethods";
 import CanisterManagementMethods "Main/CanisterManagementMethods";
 import Manager "Manager/Manager";

@@ -17,7 +17,7 @@ import Int "mo:base/Int";
 import Time "mo:base/Time";
 import GovernanceHelperMethods "Main/GovernanceHelperMethods";
 import NnsCyclesMinting "Ledger/NnsCyclesMinting";
-import MainTypes "Main/types";
+import MainTypes "Types/Main/types";
 import AnalyticsTypes "Analytics/types";
 
 shared(msg) actor class Treasury (principal : Principal) = this {

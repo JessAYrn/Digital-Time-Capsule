@@ -1,7 +1,7 @@
 import Result "mo:base/Result";
 import Option "mo:base/Option";
 import AssetCanister "AssetCanister";
-import MainTypes "../Main/types";
+import MainTypes "../Types/Main/types";
 import Buffer "mo:base/Buffer";
 import HashMap "mo:base/HashMap";
 import Iter "mo:base/Iter";
