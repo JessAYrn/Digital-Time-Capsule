@@ -2,7 +2,7 @@ import Account "../../Ledger/Account";
 import Trie "mo:base/Trie";
 import Principal "mo:base/Principal";
 import HashMap "mo:base/HashMap";
-import JournalTypes "../../Journal/journal.types";
+import JournalTypes "../Journal/types";
 import NotificationTypes "../Notifications/types";
 import IC "../../IC/ic.types";
 import Ledger "../../Ledger/Ledger";

@@ -11,7 +11,7 @@ import Text "mo:base/Text";
 import Option "mo:base/Option";
 import Ledger "Ledger/Ledger";
 import Account "Ledger/Account";
-import JournalTypes "Journal/journal.types";
+import JournalTypes "Types/Journal/types";
 import MainMethods "Main/MainHelperMethods";
 import JournalHelperMethods "Main/JournalHelperMethods";
 import MainTypes "Types/Main/types";

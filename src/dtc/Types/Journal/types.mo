@@ -1,7 +1,7 @@
-import Account "../Ledger/Account";
+import Account "../../Ledger/Account";
 import Trie "mo:base/Trie";
 import HashMap "mo:base/HashMap";
-import NotificationsTypes "../Types/Notifications/types";
+import NotificationsTypes "../Notifications/types";
 module {
     public type EntryKey = {
         entryKey: Nat;

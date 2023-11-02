@@ -3,7 +3,7 @@ import Iter "mo:base/Iter";
 import Buffer "mo:base/Buffer";
 import Result "mo:base/Result";
 import Account "../Ledger/Account";
-import JournalTypes "../Journal/journal.types";
+import JournalTypes "../Types/Journal/types";
 import Principal "mo:base/Principal";
 import Cycles "mo:base/ExperimentalCycles";
 import MainTypes "../Types/Main/types";

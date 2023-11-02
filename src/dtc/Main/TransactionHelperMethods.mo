@@ -3,7 +3,7 @@ import Account "../Ledger/Account";
 import Result "mo:base/Result";
 import Trie "mo:base/Trie";
 import Principal "mo:base/Principal";
-import JournalTypes "../Journal/journal.types";
+import JournalTypes "../Types/Journal/types";
 import Ledger "../Ledger/Ledger";
 import LedgerCandid "../Ledger/LedgerCandid";
 import Iter "mo:base/Iter";

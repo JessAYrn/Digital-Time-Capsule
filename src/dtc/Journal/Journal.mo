@@ -18,7 +18,7 @@ import Int "mo:base/Int";
 import Account "../Ledger/Account";
 import Bool "mo:base/Bool";
 import Option "mo:base/Option";
-import JournalTypes "journal.types";
+import JournalTypes "../Types/Journal/types";
 import HashMap "mo:base/HashMap";
 import MainTypes "../Types/Main/types";
 import NotificationsTypes "../Types/Notifications/types";

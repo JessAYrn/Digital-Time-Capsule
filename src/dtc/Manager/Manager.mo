@@ -26,7 +26,7 @@ import HashMap "mo:base/HashMap";
 import MainTypes "../Types/Main/types";
 import CanisterManagementMethods "CanisterManagementMethods";
 import AssetManagementFunctions "../AssetCanister/AssetManagementFunctions";
-import JournalTypes "../Journal/journal.types";
+import JournalTypes "../Types/Journal/types";
 
 shared(msg) actor class Manager (principal : Principal) = this {
 
