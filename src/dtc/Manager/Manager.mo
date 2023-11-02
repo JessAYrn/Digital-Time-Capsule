@@ -21,7 +21,7 @@ import Bool "mo:base/Bool";
 import Option "mo:base/Option";
 import IC "../IC/ic.types";
 import AssetCanister "../AssetCanister/AssetCanister";
-import WasmStore "WasmStore";
+import WasmStore "../Types/WasmStore/types";
 import HashMap "mo:base/HashMap";
 import MainTypes "../Types/Main/types";
 import CanisterManagementMethods "CanisterManagementMethods";

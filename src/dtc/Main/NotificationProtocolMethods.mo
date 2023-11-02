@@ -1,6 +1,6 @@
 import MainTypes "../Types/Main/types";
 import Manager "../Manager/Manager";
-import WasmStore "../Manager/WasmStore";
+import WasmStore "../Types/WasmStore/types";
 import Buffer "mo:base/Buffer";
 import Nat "mo:base/Nat";
 import Text "mo:base/Text";

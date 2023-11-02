@@ -9,7 +9,7 @@ import Principal "mo:base/Principal";
 import IC "../IC/ic.types";
 import Error "mo:base/Error";
 import Journal "../Journal/Journal";
-import WasmStore "WasmStore";
+import WasmStore "../Types/WasmStore/types";
 
 module{
     

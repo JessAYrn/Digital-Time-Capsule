@@ -21,7 +21,7 @@ import Manager "../Manager/Manager";
 import AssetCanister "../AssetCanister/AssetCanister";
 import HashMap "mo:base/HashMap";
 import AssetManagementFunctions "../AssetCanister/AssetManagementFunctions";
-import WasmStore "../Manager/WasmStore";
+import WasmStore "../Types/WasmStore/types";
 import Hex "../Ledger/Hex";
 import NftCollection "../Types/NftCollection/types";
 import Nat32 "mo:base/Nat32";

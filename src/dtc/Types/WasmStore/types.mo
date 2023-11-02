@@ -1,4 +1,4 @@
-import AssetCanister "../AssetCanister/AssetCanister";
+import AssetCanister "../../AssetCanister/AssetCanister";
 import Result "mo:base/Result";
 
 
