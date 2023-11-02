@@ -17,7 +17,7 @@ import JournalHelperMethods "Main/JournalHelperMethods";
 import MainTypes "Types/Main/types";
 import TxHelperMethods "Main/TransactionHelperMethods";
 import CanisterManagementMethods "Main/CanisterManagementMethods";
-import Manager "Manager/Manager";
+import Manager "Manager";
 import AssetCanister "Types/AssetCanister/types";
 import NotificationProtocolMethods "Main/NotificationProtocolMethods";
 import NotificationsTypes "Types/Notifications/types";

@@ -14,7 +14,7 @@ import Journal "../Journal/Journal";
 import CanisterManagementMethods "../Main/CanisterManagementMethods";
 import HashMap "mo:base/HashMap";
 import AssetCanister "../Types/AssetCanister/types";
-import Manager "../Manager/Manager";
+import Manager "../Manager";
 import IC "../IC/ic.types";
 
 module{

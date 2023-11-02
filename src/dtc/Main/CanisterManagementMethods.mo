@@ -17,7 +17,7 @@ import Nat "mo:base/Nat";
 import Option "mo:base/Option";
 import Error "mo:base/Error";
 import IC "../IC/ic.types";
-import Manager "../Manager/Manager";
+import Manager "../Manager";
 import AssetCanister "../Types/AssetCanister/types";
 import HashMap "mo:base/HashMap";
 import AssetManagementFunctions "../AssetCanister/AssetManagementFunctions";

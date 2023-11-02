@@ -1,5 +1,5 @@
-import Ledger "../Ledger/Ledger";
-import LedgerCandid "../Ledger/LedgerCandid";
+import Ledger "Ledger/Ledger";
+import LedgerCandid "Ledger/LedgerCandid";
 import Debug "mo:base/Debug";
 import Error "mo:base/Error";
 import Trie "mo:base/Trie";
@@ -16,17 +16,17 @@ import Timer "mo:base/Timer";
 import Iter "mo:base/Iter";
 import Buffer "mo:base/Buffer";
 import Int "mo:base/Int";
-import Account "../Ledger/Account";
+import Account "Ledger/Account";
 import Bool "mo:base/Bool";
 import Option "mo:base/Option";
-import IC "../IC/ic.types";
-import AssetCanister "../Types/AssetCanister/types";
-import WasmStore "../Types/WasmStore/types";
+import IC "IC/ic.types";
+import AssetCanister "Types/AssetCanister/types";
+import WasmStore "Types/WasmStore/types";
 import HashMap "mo:base/HashMap";
-import MainTypes "../Types/Main/types";
-import CanisterManagementMethods "CanisterManagementMethods";
-import AssetManagementFunctions "../AssetCanister/AssetManagementFunctions";
-import JournalTypes "../Types/Journal/types";
+import MainTypes "Types/Main/types";
+import CanisterManagementMethods "/Manager/CanisterManagementMethods";
+import AssetManagementFunctions "AssetCanister/AssetManagementFunctions";
+import JournalTypes "Types/Journal/types";
 
 shared(msg) actor class Manager (principal : Principal) = this {
 

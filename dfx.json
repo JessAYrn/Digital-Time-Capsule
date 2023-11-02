@@ -13,7 +13,7 @@
       "type": "motoko"
     },
     "manager": {
-      "main": "src/dtc/Manager/Manager.mo",
+      "main": "src/dtc/Manager.mo",
       "type": "motoko"
     },
     "ledger": {
