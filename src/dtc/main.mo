@@ -32,6 +32,7 @@ import Treasury "Treasury/Treasury";
 import TreasuryTypes "Treasury/treasury.types";
 import NnsCyclesMinting "Ledger/NnsCyclesMinting";
 import TreasuryHelperMethods "Main/TreasuryHelperMethods";
+import AnalyticsHelperMethods "Analytics/AnalyticsHelperMethods";
 
 shared actor class User() = this {
 
@@ -366,6 +367,7 @@ shared actor class User() = this {
     private func heartBeat_unshared(): async () {
         let cyclesBalance_backend = Cycles.balance();
         ignore NotificationProtocolMethods.updateUserCanisterNotifications(userProfilesMap);
+        ignore AnalyticsHelperMethods.saveCurrentBalances(userProfilesMap, daoMetaData_v2);
         let updatedMetaData = await CanisterManagementMethods.heartBeat(cyclesBalance_backend, daoMetaData_v2, userProfilesMap);
         daoMetaData_v2 := updatedMetaData;
     };

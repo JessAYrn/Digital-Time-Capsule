@@ -106,7 +106,7 @@ shared(msg) actor class Treasury (principal : Principal) = this {
         return #ok(Iter.toArray(contributorsMap.entries()));
     };
 
-    public shared({caller}) func saveCurrentbalances() : async () {
+    public shared({caller}) func saveCurrentBalances() : async () {
         if( Principal.toText(caller) != ownerCanisterId) { throw Error.reject("Unauthorized access."); };
         let icp = await canisterBalance();
         //will need to retreive the proper balances of the other currencies once they've been integrated
