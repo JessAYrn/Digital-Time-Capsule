@@ -24,7 +24,7 @@ import AssetCanister "Types/AssetCanister/types";
 import WasmStore "Types/WasmStore/types";
 import HashMap "mo:base/HashMap";
 import MainTypes "Types/Main/types";
-import CanisterManagementMethods "/Manager/CanisterManagementMethods";
+import CanisterManagementMethods "/Modules/Manager/CanisterManagementMethods";
 import AssetManagementFunctions "AssetCanister/AssetManagementFunctions";
 import JournalTypes "Types/Journal/types";
 

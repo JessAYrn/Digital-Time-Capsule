@@ -1,15 +1,15 @@
-import MainTypes "../Types/Main/types";
-import AssetCanister "../Types/AssetCanister/types";
+import MainTypes "../../Types/Main/types";
+import AssetCanister "../../Types/AssetCanister/types";
 import Buffer "mo:base/Buffer";
 import HashMap "mo:base/HashMap";
 import Iter "mo:base/Iter";
-import AssetManagementFunctions "../AssetCanister/AssetManagementFunctions";
+import AssetManagementFunctions "../../AssetCanister/AssetManagementFunctions";
 import Text "mo:base/Text";
 import Principal "mo:base/Principal";
-import IC "../IC/ic.types";
+import IC "../../IC/ic.types";
 import Error "mo:base/Error";
-import Journal "../Journal";
-import WasmStore "../Types/WasmStore/types";
+import Journal "../../Journal";
+import WasmStore "../../Types/WasmStore/types";
 
 module{
     
