@@ -4,7 +4,7 @@ import Principal "mo:base/Principal";
 import HashMap "mo:base/HashMap";
 import JournalTypes "../Journal/types";
 import NotificationTypes "../Notifications/types";
-import IC "../../IC/ic.types";
+import IC "../IC/types";
 import Ledger "../../Ledger/Ledger";
 
 

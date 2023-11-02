@@ -19,7 +19,7 @@ import Int "mo:base/Int";
 import Account "Ledger/Account";
 import Bool "mo:base/Bool";
 import Option "mo:base/Option";
-import IC "IC/ic.types";
+import IC "Types/IC/types";
 import AssetCanister "Types/AssetCanister/types";
 import WasmStore "Types/WasmStore/types";
 import HashMap "mo:base/HashMap";

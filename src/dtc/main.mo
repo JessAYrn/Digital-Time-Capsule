@@ -21,7 +21,7 @@ import Manager "Manager";
 import AssetCanister "Types/AssetCanister/types";
 import NotificationProtocolMethods "Main/NotificationProtocolMethods";
 import NotificationsTypes "Types/Notifications/types";
-import IC "IC/ic.types";
+import IC "Types/IC/types";
 import Timer "mo:base/Timer";
 import Nat "mo:base/Nat";
 import Time "mo:base/Time";

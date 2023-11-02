@@ -6,7 +6,7 @@ import Iter "mo:base/Iter";
 import AssetManagementFunctions "../../AssetCanister/AssetManagementFunctions";
 import Text "mo:base/Text";
 import Principal "mo:base/Principal";
-import IC "../../IC/ic.types";
+import IC "../../Types/IC/types";
 import Error "mo:base/Error";
 import Journal "../../Journal";
 import WasmStore "../../Types/WasmStore/types";

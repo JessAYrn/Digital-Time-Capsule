@@ -22,7 +22,7 @@ import JournalTypes "Types/Journal/types";
 import HashMap "mo:base/HashMap";
 import MainTypes "Types/Main/types";
 import NotificationsTypes "Types/Notifications/types";
-import IC "IC/ic.types";
+import IC "Types/IC/types";
 import AnalyticsTypes "Types/Analytics/types";
 import GovernanceHelperMethods "Main/GovernanceHelperMethods";
 import NnsCyclesMinting "Ledger/NnsCyclesMinting";
