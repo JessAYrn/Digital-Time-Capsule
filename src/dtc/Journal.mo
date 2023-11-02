@@ -24,7 +24,7 @@ import MainTypes "Types/Main/types";
 import NotificationsTypes "Types/Notifications/types";
 import IC "Types/IC/types";
 import AnalyticsTypes "Types/Analytics/types";
-import GovernanceHelperMethods "Main/GovernanceHelperMethods";
+import GovernanceHelperMethods "Modules/Main/GovernanceHelperMethods";
 import NnsCyclesMinting "Ledger/NnsCyclesMinting";
 
 shared(msg) actor class Journal (principal : Principal) = this {

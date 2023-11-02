@@ -1,15 +1,15 @@
-import MainTypes "../Types/Main/types";
-import Manager "../Manager";
-import WasmStore "../Types/WasmStore/types";
+import MainTypes "../../Types/Main/types";
+import Manager "../../Manager";
+import WasmStore "../../Types/WasmStore/types";
 import Buffer "mo:base/Buffer";
 import Nat "mo:base/Nat";
 import Text "mo:base/Text";
 import Error "mo:base/Error";
-import Journal "../Journal";
+import Journal "../../Journal";
 import Principal "mo:base/Principal";
 import Array "mo:base/Array";
 import Iter "mo:base/Iter";
-import NotificationTypes "../Types/Notifications/types";
+import NotificationTypes "../../Types/Notifications/types";
 
 module{
 

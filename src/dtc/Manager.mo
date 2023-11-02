@@ -25,7 +25,7 @@ import WasmStore "Types/WasmStore/types";
 import HashMap "mo:base/HashMap";
 import MainTypes "Types/Main/types";
 import CanisterManagementMethods "/Modules/Manager/CanisterManagementMethods";
-import AssetManagementFunctions "AssetCanister/AssetManagementFunctions";
+import AssetManagementFunctions "Modules/AssetCanister/AssetManagementFunctions";
 import JournalTypes "Types/Journal/types";
 
 shared(msg) actor class Manager (principal : Principal) = this {

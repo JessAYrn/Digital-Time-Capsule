@@ -3,7 +3,7 @@ import AssetCanister "../../Types/AssetCanister/types";
 import Buffer "mo:base/Buffer";
 import HashMap "mo:base/HashMap";
 import Iter "mo:base/Iter";
-import AssetManagementFunctions "../../AssetCanister/AssetManagementFunctions";
+import AssetManagementFunctions "../../Modules/AssetCanister/AssetManagementFunctions";
 import Text "mo:base/Text";
 import Principal "mo:base/Principal";
 import IC "../../Types/IC/types";

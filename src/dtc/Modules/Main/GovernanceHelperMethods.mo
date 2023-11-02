@@ -1,5 +1,5 @@
-import TreasuryTypes "../Types/Treasury/types";
-import MainTypes "../Types/Main/types";
+import TreasuryTypes "../../Types/Treasury/types";
+import MainTypes "../../Types/Main/types";
 import HashMap "mo:base/HashMap";
 import Iter "mo:base/Iter";
 import Principal "mo:base/Principal";
@@ -9,7 +9,7 @@ import Time "mo:base/Time";
 import Float "mo:base/Float";
 import Nat64 "mo:base/Nat64";
 import Int64 "mo:base/Int64";
-import NnsCyclesMinting "../Ledger/NnsCyclesMinting";
+import NnsCyclesMinting "../../Ledger/NnsCyclesMinting";
 
 
 module{    

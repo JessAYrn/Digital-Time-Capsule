@@ -1,14 +1,14 @@
-import MainTypes "../Types/Main/types";
-import Account "../Ledger/Account";
+import MainTypes "../../Types/Main/types";
+import Account "../../Ledger/Account";
 import Result "mo:base/Result";
 import Trie "mo:base/Trie";
 import Principal "mo:base/Principal";
-import JournalTypes "../Types/Journal/types";
-import Ledger "../Ledger/Ledger";
-import LedgerCandid "../Ledger/LedgerCandid";
+import JournalTypes "../../Types/Journal/types";
+import Ledger "../../Ledger/Ledger";
+import LedgerCandid "../../Ledger/LedgerCandid";
 import Iter "mo:base/Iter";
 import Blob "mo:base/Blob";
-import Journal "../Journal";
+import Journal "../../Journal";
 import Nat64 "mo:base/Nat64";
 import Error "mo:base/Error";
 

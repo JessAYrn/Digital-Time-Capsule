@@ -2,15 +2,15 @@ import Trie "mo:base/Trie";
 import Iter "mo:base/Iter";
 import Buffer "mo:base/Buffer";
 import Result "mo:base/Result";
-import Account "../Ledger/Account";
-import JournalTypes "../Types/Journal/types";
+import Account "../../Ledger/Account";
+import JournalTypes "../../Types/Journal/types";
 import Principal "mo:base/Principal";
 import Cycles "mo:base/ExperimentalCycles";
-import MainTypes "../Types/Main/types";
-import Journal "../Journal";
-import Ledger "../Ledger/Ledger";
+import MainTypes "../../Types/Main/types";
+import Journal "../../Journal";
+import Ledger "../../Ledger/Ledger";
 import Blob "mo:base/Blob";
-import NotificationTypes "../Types/Main/types";
+import NotificationTypes "../../Types/Main/types";
 
 
 module{

@@ -4,18 +4,18 @@ import Buffer "mo:base/Buffer";
 import Option "mo:base/Option";
 import Text "mo:base/Text";
 import Result "mo:base/Result";
-import Account "../Ledger/Account";
-import JournalTypes "../Types/Journal/types";
+import Account "../../Ledger/Account";
+import JournalTypes "../../Types/Journal/types";
 import Principal "mo:base/Principal";
 import Cycles "mo:base/ExperimentalCycles";
-import MainTypes "../Types/Main/types";
+import MainTypes "../../Types/Main/types";
 import Array "mo:base/Array";
-import Journal "../Journal";
+import Journal "../../Journal";
 import CanisterManagementMethods "../Main/CanisterManagementMethods";
 import HashMap "mo:base/HashMap";
-import AssetCanister "../Types/AssetCanister/types";
-import Manager "../Manager";
-import IC "../Types/IC/types";
+import AssetCanister "../../Types/AssetCanister/types";
+import Manager "../../Manager";
+import IC "../../Types/IC/types";
 
 module{
 

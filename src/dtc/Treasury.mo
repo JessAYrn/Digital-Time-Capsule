@@ -15,7 +15,7 @@ import Int64 "mo:base/Int64";
 import Result "mo:base/Result";
 import Int "mo:base/Int";
 import Time "mo:base/Time";
-import GovernanceHelperMethods "Main/GovernanceHelperMethods";
+import GovernanceHelperMethods "Modules/Main/GovernanceHelperMethods";
 import NnsCyclesMinting "Ledger/NnsCyclesMinting";
 import MainTypes "Types/Main/types";
 import AnalyticsTypes "Types/Analytics/types";
