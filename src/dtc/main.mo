@@ -18,7 +18,7 @@ import MainTypes "Types/Main/types";
 import TxHelperMethods "Main/TransactionHelperMethods";
 import CanisterManagementMethods "Main/CanisterManagementMethods";
 import Manager "Manager/Manager";
-import AssetCanister "AssetCanister/AssetCanister";
+import AssetCanister "Types/AssetCanister/types";
 import NotificationProtocolMethods "Main/NotificationProtocolMethods";
 import NotificationsTypes "Types/Notifications/types";
 import IC "IC/ic.types";

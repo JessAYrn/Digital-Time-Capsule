@@ -1,24 +1,11 @@
 import Result "mo:base/Result";
 import Option "mo:base/Option";
-import AssetCanister "AssetCanister";
+import AssetCanister "../Types/AssetCanister/types";
 import MainTypes "../Types/Main/types";
 import Buffer "mo:base/Buffer";
 import HashMap "mo:base/HashMap";
 import Iter "mo:base/Iter";
 module{
-
-    public type Error ={
-        #NotFound;
-        #AlreadyExists;
-        #NotAuthorized;
-        #NoInputGiven;
-        #InsufficientFunds;
-        #TxFailed;
-        #UserNameTaken;
-        #WalletBalanceTooLow;
-        #ZeroAddress;
-        #NotAcceptingRequests;
-    };
 
     public func getDeleteAssetBatchOperation(key: AssetCanister.Key) : async AssetCanister.BatchOperationKind{
         return #DeleteAsset({key : AssetCanister.Key});
@@ -73,7 +60,7 @@ module{
     };
 
     public func getAssetMetaDataFromListArray(inputKey: AssetCanister.Key, list: [AssetCanister.ListResultObject]): 
-    async Result.Result<(AssetCanister. ListResultObject),Error >{
+    async Result.Result<(AssetCanister. ListResultObject),AssetCanister.Error >{
         var result: ? AssetCanister.ListResultObject = null;
         var index = 0;
         let listSize = list.size();

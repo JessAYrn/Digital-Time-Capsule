@@ -1,5 +1,5 @@
 import MainTypes "../Types/Main/types";
-import AssetCanister "../AssetCanister/AssetCanister";
+import AssetCanister "../Types/AssetCanister/types";
 import Buffer "mo:base/Buffer";
 import HashMap "mo:base/HashMap";
 import Iter "mo:base/Iter";

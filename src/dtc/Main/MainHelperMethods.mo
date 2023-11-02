@@ -13,7 +13,7 @@ import Array "mo:base/Array";
 import Journal "../Journal/Journal";
 import CanisterManagementMethods "../Main/CanisterManagementMethods";
 import HashMap "mo:base/HashMap";
-import AssetCanister "../AssetCanister/AssetCanister";
+import AssetCanister "../Types/AssetCanister/types";
 import Manager "../Manager/Manager";
 import IC "../IC/ic.types";
 

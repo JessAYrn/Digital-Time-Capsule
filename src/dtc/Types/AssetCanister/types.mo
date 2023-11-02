@@ -9,6 +9,19 @@ module {
 
     public type ChunkData = (Content_encoding, Sha256, Chunk);
 
+    public type Error ={
+        #NotFound;
+        #AlreadyExists;
+        #NotAuthorized;
+        #NoInputGiven;
+        #InsufficientFunds;
+        #TxFailed;
+        #UserNameTaken;
+        #WalletBalanceTooLow;
+        #ZeroAddress;
+        #NotAcceptingRequests;
+    };
+
 
     public type ListResultObject = {
         content_type : Text;
