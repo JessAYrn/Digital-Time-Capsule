@@ -2,8 +2,8 @@ import Result "mo:base/Result";
 import Principal "mo:base/Principal";
 import MainTypes "types";
 import Journal "../Journal/Journal";
-import Treasury "../Treasury/Treasury";
-import TreasuryTypes "../Treasury/treasury.types";
+import Treasury "../Treasury";
+import TreasuryTypes "../Types/Treasury/types";
 import Ledger "../Ledger/Ledger";
 
 module{    

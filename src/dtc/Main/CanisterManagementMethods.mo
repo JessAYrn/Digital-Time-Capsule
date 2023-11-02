@@ -29,9 +29,9 @@ import Support "../SupportCanisterIds/SupportCanisterIds";
 import Time "mo:base/Time";
 import Float "mo:base/Float";
 import Int "mo:base/Int";
-import Treasury "../Treasury/Treasury";
+import Treasury "../Treasury";
 import GovernanceHelperMethods "GovernanceHelperMethods";
-import TreasuryTypes "../Treasury/treasury.types";
+import TreasuryTypes "../Types/Treasury/types";
 import NnsCyclesMinting "../Ledger/NnsCyclesMinting";
 
 module{

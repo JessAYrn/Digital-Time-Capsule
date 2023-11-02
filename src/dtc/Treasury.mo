@@ -1,11 +1,11 @@
-import Account "../Ledger/Account";
-import Ledger "../Ledger/Ledger";
+import Account "Ledger/Account";
+import Ledger "Ledger/Ledger";
 import Trie "mo:base/Trie";
 import Principal "mo:base/Principal";
 import Error "mo:base/Error";
 import Hash "mo:base/Hash";
 import Text "mo:base/Text";
-import TreasuryTypes "treasury.types";
+import TreasuryTypes "Types/Treasury/types";
 import HashMap "mo:base/HashMap";
 import Iter "mo:base/Iter";
 import Cycles "mo:base/ExperimentalCycles";
@@ -15,10 +15,10 @@ import Int64 "mo:base/Int64";
 import Result "mo:base/Result";
 import Int "mo:base/Int";
 import Time "mo:base/Time";
-import GovernanceHelperMethods "../Main/GovernanceHelperMethods";
-import NnsCyclesMinting "../Ledger/NnsCyclesMinting";
-import MainTypes "../Main/types";
-import AnalyticsTypes "../Analytics/types";
+import GovernanceHelperMethods "Main/GovernanceHelperMethods";
+import NnsCyclesMinting "Ledger/NnsCyclesMinting";
+import MainTypes "Main/types";
+import AnalyticsTypes "Analytics/types";
 
 shared(msg) actor class Treasury (principal : Principal) = this {
 
