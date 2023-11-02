@@ -9,7 +9,7 @@ import Journal "../Journal/Journal";
 import Principal "mo:base/Principal";
 import Array "mo:base/Array";
 import Iter "mo:base/Iter";
-import NotificationTypes "types.notifications";
+import NotificationTypes "../Types/Notifications/types";
 
 module{
 

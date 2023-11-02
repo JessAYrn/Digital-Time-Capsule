@@ -21,7 +21,7 @@ import Option "mo:base/Option";
 import JournalTypes "journal.types";
 import HashMap "mo:base/HashMap";
 import MainTypes "../Types/Main/types";
-import NotificationsTypes "../Main/types.notifications";
+import NotificationsTypes "../Types/Notifications/types";
 import IC "../IC/ic.types";
 import AnalyticsTypes "../Analytics/types";
 import GovernanceHelperMethods "../Main/GovernanceHelperMethods";

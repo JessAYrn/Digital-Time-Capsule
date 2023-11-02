@@ -20,7 +20,7 @@ import CanisterManagementMethods "Main/CanisterManagementMethods";
 import Manager "Manager/Manager";
 import AssetCanister "AssetCanister/AssetCanister";
 import NotificationProtocolMethods "Main/NotificationProtocolMethods";
-import NotificationsTypes "Main/types.notifications";
+import NotificationsTypes "Types/Notifications/types";
 import IC "IC/ic.types";
 import Timer "mo:base/Timer";
 import Nat "mo:base/Nat";

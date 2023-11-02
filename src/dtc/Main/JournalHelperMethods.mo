@@ -10,7 +10,7 @@ import MainTypes "../Types/Main/types";
 import Journal "../Journal/Journal";
 import Ledger "../Ledger/Ledger";
 import Blob "mo:base/Blob";
-import NotificationTypes "../Main/types.notifications";
+import NotificationTypes "../Types/Main/types";
 
 
 module{
