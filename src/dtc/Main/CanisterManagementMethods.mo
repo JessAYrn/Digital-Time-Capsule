@@ -23,7 +23,7 @@ import HashMap "mo:base/HashMap";
 import AssetManagementFunctions "../AssetCanister/AssetManagementFunctions";
 import WasmStore "../Manager/WasmStore";
 import Hex "../Ledger/Hex";
-import NftCollection "../NftCollection/NftCollection";
+import NftCollection "../Types/NftCollection/types";
 import Nat32 "mo:base/Nat32";
 import Support "../SupportCanisterIds/SupportCanisterIds";
 import Time "mo:base/Time";
