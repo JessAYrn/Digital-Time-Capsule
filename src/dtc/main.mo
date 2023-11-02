@@ -32,7 +32,7 @@ import Treasury "Treasury";
 import TreasuryTypes "Types/Treasury/types";
 import NnsCyclesMinting "Ledger/NnsCyclesMinting";
 import TreasuryHelperMethods "Modules/Main/TreasuryHelperMethods";
-import AnalyticsHelperMethods "Analytics/AnalyticsHelperMethods";
+import AnalyticsHelperMethods "Modules/Analytics/AnalyticsHelperMethods";
 
 shared actor class User() = this {
 
