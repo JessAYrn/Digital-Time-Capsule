@@ -7,7 +7,7 @@ import JournalTypes "../Types/Journal/types";
 import Principal "mo:base/Principal";
 import Cycles "mo:base/ExperimentalCycles";
 import MainTypes "../Types/Main/types";
-import Journal "../Journal/Journal";
+import Journal "../Journal";
 import Ledger "../Ledger/Ledger";
 import Blob "mo:base/Blob";
 import Text "mo:base/Text";

@@ -1,5 +1,5 @@
-import Ledger "../Ledger/Ledger";
-import LedgerCandid "../Ledger/LedgerCandid";
+import Ledger "Ledger/Ledger";
+import LedgerCandid "Ledger/LedgerCandid";
 import Debug "mo:base/Debug";
 import Error "mo:base/Error";
 import Trie "mo:base/Trie";
@@ -15,17 +15,17 @@ import Time "mo:base/Time";
 import Iter "mo:base/Iter";
 import Buffer "mo:base/Buffer";
 import Int "mo:base/Int";
-import Account "../Ledger/Account";
+import Account "Ledger/Account";
 import Bool "mo:base/Bool";
 import Option "mo:base/Option";
-import JournalTypes "../Types/Journal/types";
+import JournalTypes "Types/Journal/types";
 import HashMap "mo:base/HashMap";
-import MainTypes "../Types/Main/types";
-import NotificationsTypes "../Types/Notifications/types";
-import IC "../IC/ic.types";
-import AnalyticsTypes "../Types/Analytics/types";
-import GovernanceHelperMethods "../Main/GovernanceHelperMethods";
-import NnsCyclesMinting "../Ledger/NnsCyclesMinting";
+import MainTypes "Types/Main/types";
+import NotificationsTypes "Types/Notifications/types";
+import IC "IC/ic.types";
+import AnalyticsTypes "Types/Analytics/types";
+import GovernanceHelperMethods "Main/GovernanceHelperMethods";
+import NnsCyclesMinting "Ledger/NnsCyclesMinting";
 
 shared(msg) actor class Journal (principal : Principal) = this {
 

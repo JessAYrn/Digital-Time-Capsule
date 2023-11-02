@@ -5,7 +5,7 @@
       "type": "motoko"
     },
     "journal": {
-      "main": "src/dtc/Journal/Journal.mo",
+      "main": "src/dtc/Journal.mo",
       "type": "motoko"
     },
     "treasury": {

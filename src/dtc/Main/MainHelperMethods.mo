@@ -10,7 +10,7 @@ import Principal "mo:base/Principal";
 import Cycles "mo:base/ExperimentalCycles";
 import MainTypes "../Types/Main/types";
 import Array "mo:base/Array";
-import Journal "../Journal/Journal";
+import Journal "../Journal";
 import CanisterManagementMethods "../Main/CanisterManagementMethods";
 import HashMap "mo:base/HashMap";
 import AssetCanister "../Types/AssetCanister/types";

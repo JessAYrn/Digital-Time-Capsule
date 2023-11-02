@@ -5,7 +5,7 @@ import Buffer "mo:base/Buffer";
 import Nat "mo:base/Nat";
 import Text "mo:base/Text";
 import Error "mo:base/Error";
-import Journal "../Journal/Journal";
+import Journal "../Journal";
 import Principal "mo:base/Principal";
 import Array "mo:base/Array";
 import Iter "mo:base/Iter";
