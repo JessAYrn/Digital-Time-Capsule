@@ -178,7 +178,9 @@ export const loadCanisterData = async (actorState, dispatch, types) => {
 }
 
 export const loadTreasuryData = async (actorState, dispatch, types) => {
-    let treasuryData = await actorState.backendActor.getTreasuryData();
+    let promises = [actorState.backendActor.getTreasuryData(), actorState.backendActor.retrieveTreasuryBalances()];
+    let [treasuryData, treasuryBalances] = await Promise.all(promises);
+    console.log(treasuryData, treasuryBalances);
     treasuryData = treasuryData.ok;
     treasuryData = mapBackendTreasuryDataToFrontEndObj(treasuryData);
     dispatch({

@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import {Line, Bar, Pie} from "react-chartjs-2";
 import { Chart, registerables } from 'chart.js';
-import { CHART_TYPES, GRAPH_TIME_FRAMES, GRAP_DISPLAY_CURRENCIES } from "../../functionsAndConstants/Constants";
+import { CHART_TYPES, GRAPH_TIME_FRAMES, GRAPH_DISPLAY_CURRENCIES } from "../../functionsAndConstants/Constants";
 import { Paper } from "@mui/material";
 import "./Chart.scss";
 import MenuField from "./MenuField";
@@ -16,35 +16,26 @@ const Graph = (props) => {
         // inputData
     } = props
 
-    const [timeFrame, setTimeFrame] = useState(GRAPH_TIME_FRAMES.day);
+    const [timeFrame, setTimeFrame] = useState(GRAPH_TIME_FRAMES.week);
     
 
     const inputData = {
-        day: {
-            labels: [0,1,2,3,4,5,6,7,8,9,10,11],
-            datasets : [
-                {
-                    label: GRAP_DISPLAY_CURRENCIES.icp,
-                    data: [10,20,30,50,10,20,30,50,10,20,30,50],
-                    backgroundColor: ["green"]
-                },
-                {
-                    label: GRAP_DISPLAY_CURRENCIES.all,
-                    data: [10,20,30,40],
-                    backgroundColor: ["red"]
-                }
-            ]
-        },
         week: {
-            labels: [0,7,14,21],
+            labels: [
+                1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31
+            ],
             datasets : [
                 {
-                    label: GRAP_DISPLAY_CURRENCIES.icp,
-                    data: [13,28,34,59],
-                    backgroundColor: ["green"]
+                    label: GRAPH_DISPLAY_CURRENCIES.icp,
+                    data: [
+                        13,28,34,59, 63, 69, 67, 72, 80, 78, 99, 102, 105, 129, 134, 135, 135, 135, 135, 136, 140, 144, 149, 150, 150, 151, 155, 156, 157, 158, 15900, 16000 
+                    ],
+                    fill: false,
+                    radius: 2,
+                    boarderWidth: 0.5
                 },
                 {
-                    label: GRAP_DISPLAY_CURRENCIES.all,
+                    label: GRAPH_DISPLAY_CURRENCIES.all,
                     data: [14,26,34,42],
                     backgroundColor: ["red"]
                 }
@@ -54,12 +45,12 @@ const Graph = (props) => {
             labels: [0,30,60,90],
             datasets : [
                 {
-                    label: GRAP_DISPLAY_CURRENCIES.icp,
+                    label: GRAPH_DISPLAY_CURRENCIES.icp,
                     data: [30,20,10,80],
                     backgroundColor: ["green"]
                 },
                 {
-                    label: GRAP_DISPLAY_CURRENCIES.all,
+                    label: GRAPH_DISPLAY_CURRENCIES.all,
                     data: [40,40,30,80],
                     backgroundColor: ["red"]
                 }
@@ -69,12 +60,12 @@ const Graph = (props) => {
             labels: [0,365,730,1095],
             datasets : [
                 {
-                    label: GRAP_DISPLAY_CURRENCIES.icp,
+                    label: GRAPH_DISPLAY_CURRENCIES.icp,
                     data: [104,205,303,5022],
                     backgroundColor: ["green"]
                 },
                 {
-                    label: GRAP_DISPLAY_CURRENCIES.all,
+                    label: GRAPH_DISPLAY_CURRENCIES.all,
                     data: [10,20,30,40],
                     backgroundColor: ["red"]
                 }
@@ -84,12 +75,12 @@ const Graph = (props) => {
             labels: [0,500,1000,1500],
             datasets : [
                 {
-                    label: GRAP_DISPLAY_CURRENCIES.icp,
+                    label: GRAPH_DISPLAY_CURRENCIES.icp,
                     data: [102,2022,30222,5022],
                     backgroundColor: ["green"]
                 },
                 {
-                    label: GRAP_DISPLAY_CURRENCIES.all,
+                    label: GRAPH_DISPLAY_CURRENCIES.all,
                     data: [10,20,30,40],
                     backgroundColor: ["red"]
                 }

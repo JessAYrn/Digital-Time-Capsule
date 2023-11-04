@@ -33,6 +33,7 @@ import TreasuryTypes "Types/Treasury/types";
 import NnsCyclesMinting "Ledger/NnsCyclesMinting";
 import TreasuryHelperMethods "Modules/Main/TreasuryHelperMethods";
 import AnalyticsHelperMethods "Modules/Analytics/AnalyticsHelperMethods";
+import AnalyticsTypes "Types/Analytics/types";
 
 shared actor class User() = this {
 
@@ -355,6 +356,14 @@ shared actor class User() = this {
             profilesMap = userProfilesMap;
         });
         return updatedBalance;
+    };
+    
+    public shared({ caller }) func retrieveUserBalances(): async AnalyticsTypes.BalancesArray {
+        let balances = await AnalyticsHelperMethods.retrieveUserBalances(caller, userProfilesMap);
+    };
+
+    public shared({ caller }) func retrieveTreasuryBalances() : async AnalyticsTypes.BalancesArray {
+        let balances = await AnalyticsHelperMethods.retrieveTreasuryBalances(daoMetaData_v2);
     };
 
     public shared({caller}) func heartBeat(): async (){

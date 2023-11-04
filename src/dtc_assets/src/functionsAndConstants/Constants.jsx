@@ -125,14 +125,13 @@ export const CHART_TYPES = {
 }; 
 
 export const GRAPH_TIME_FRAMES = {
-    day: "day",
     week: "week",
     month: "month",
     year: "year",
     allTime: "allTime"
 }
 
-export const GRAP_DISPLAY_CURRENCIES = {
+export const GRAPH_DISPLAY_CURRENCIES = {
     icp: "ICP",
     btc: "BTC",
     eth: "ETH",
