@@ -86,7 +86,7 @@ export const toE8s = (number) => {
 }
 
 export const fromE8s = (number) => {
-  return parseInt(number / e8sInOneICP);
+  return parseFloat(number / e8sInOneICP);
 }
 
 export const shortenHexString = (hexString) => {

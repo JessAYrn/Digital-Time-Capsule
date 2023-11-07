@@ -5,7 +5,7 @@ import { AppContext } from "../Treasury";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import { Paper } from "@mui/material";
 import { copyText } from "../../functionsAndConstants/walletFunctions/CopyWalletAddress";
-import { shortenHexString } from "../../functionsAndConstants/Utils";
+import { fromE8s, shortenHexString } from "../../functionsAndConstants/Utils";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DataField from "../../Components/Fields/DataField";
 import SpeedDialField from "../../Components/Fields/SpeedDialField";
@@ -89,11 +89,11 @@ const TreasuryPage = (props) => {
         flexDirection={"column"}
         marginTop={"60px"}
       >
-        <Graph type={CHART_TYPES.line}/>
+        <Graph type={CHART_TYPES.line} inputData={treasuryState.balancesData}/>
         <Paper className='treasury paper'>
         <DataField
           label={'Balance($ICP): '}
-          text={treasuryState.treasuryData.balance_icp}
+          text={fromE8s(treasuryState.treasuryData.balance_icp)}
           disabled={true}
         />
         <DataField

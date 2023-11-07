@@ -1,8 +1,11 @@
+import { dummyDateSets } from "../mappers/analyticsMappers";
+
 export const treasuryTypes={
     SET_ENTIRE_TREASURY_REDUX_STATE:'SET_ENTIRE_TREASURY_REDUX_STATE',
     SET_TREASURY_DATA: "SET_TREASURY_DATA",
     SET_DATA_HAS_BEEN_LOADED: "SET_DATA_HAS_BEEN_LOADED",
     SET_IS_LOADING:"SET_IS_LOADING",
+    SET_TREASURY_BALANCES_DATA: "SET_TREASURY_BALANCES_DATA"
 
 }
 
@@ -13,7 +16,8 @@ export const treasuryPageInitialState={
         contributions: [],
         balance_icp: 0,
         accountId_icp: "" 
-    }
+    },
+    balancesData: dummyDateSets
 }
 
 const changeValue=(state=treasuryPageInitialState, action)=>{
@@ -22,6 +26,11 @@ const changeValue=(state=treasuryPageInitialState, action)=>{
     switch(actionType){
         case treasuryTypes.SET_ENTIRE_TREASURY_REDUX_STATE:
             state = payload;
+            return {
+                ...state
+            }
+        case treasuryTypes.SET_TREASURY_BALANCES_DATA:
+            state.balancesData = payload;
             return {
                 ...state
             }

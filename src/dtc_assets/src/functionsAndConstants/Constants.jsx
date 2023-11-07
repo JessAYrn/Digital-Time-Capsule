@@ -133,8 +133,9 @@ export const GRAPH_TIME_FRAMES = {
 
 export const GRAPH_DISPLAY_CURRENCIES = {
     icp: "ICP",
+    icp_staked: "ICP_STAKED",
     btc: "BTC",
     eth: "ETH",
-    all: "ALL"
+    xdrs: "XDRS"
 
 }

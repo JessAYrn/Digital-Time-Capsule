@@ -6,6 +6,7 @@ import { mapBackendTreasuryDataToFrontEndObj } from "../mappers/treasuryPageMapp
 import { getFileUrl_fromApi } from "../Components/Fields/fileManger/FileManagementTools";
 import DoNotDisturbOnIcon from '@mui/icons-material/DoNotDisturbOn';
 import ButtonField from "../Components/Fields/Button";
+import mapBalancesDataFromApiToFrontend from "../mappers/analyticsMappers";
 
 
 export const loadAllDataIntoReduxStores = async (states, dispatchFunctions, types, stateHasBeenRecovered) => {
@@ -180,12 +181,16 @@ export const loadCanisterData = async (actorState, dispatch, types) => {
 export const loadTreasuryData = async (actorState, dispatch, types) => {
     let promises = [actorState.backendActor.getTreasuryData(), actorState.backendActor.retrieveTreasuryBalances()];
     let [treasuryData, treasuryBalances] = await Promise.all(promises);
-    console.log(treasuryData, treasuryBalances);
+    treasuryBalances = mapBalancesDataFromApiToFrontend(treasuryBalances)
     treasuryData = treasuryData.ok;
     treasuryData = mapBackendTreasuryDataToFrontEndObj(treasuryData);
     dispatch({
         actionType: types.SET_TREASURY_DATA,
         payload: treasuryData
+    });
+    dispatch({
+        actionType: types.SET_TREASURY_BALANCES_DATA,
+        payload: treasuryBalances
     });
     dispatch({
         actionType: types.SET_DATA_HAS_BEEN_LOADED,
