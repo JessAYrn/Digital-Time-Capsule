@@ -38,7 +38,7 @@ const DepositToTreasuryModal = (props) => {
         let currency;
         if(action === PROPOSAL_ACTIONS.DepositIcpToNeuron) currency = {Icp_staked: null};
         else if(action === PROPOSAL_ACTIONS.DepositIcpToTreasury) currency = {Icp: null};
-        let result = await actorState.backendActor.depositToTreasury({amount: toE8s(amount), currency});
+        let result = await actorState.backendActor.depositToTreasury(toE8s(amount), currency);
         setIsLoadingModal(false);
         setModalProps({});
         setModalIsOpen(false);

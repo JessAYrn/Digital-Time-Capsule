@@ -76,9 +76,7 @@ const Proposal = (props) => {
                 Icon: CheckIcon,
                 onClick: async () => {
                     setIsLoading(true);
-                    console.log(bool);
-                    let result = await actorState.backendActor.voteOnProposal({proposalIndex: proposalId, adopt: bool});
-                    console.log(result);
+                    let result = await actorState.backendActor.voteOnProposal(proposalId, bool);
                     setIsLoading(false);
                     setModalIsOpen(false);
                 }

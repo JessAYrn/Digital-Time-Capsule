@@ -344,7 +344,7 @@ shared actor class User() = this {
         await NotificationProtocolMethods.clearJournalNotifications(caller, userProfilesMap);
     };
 
-    public shared({ caller }) func depositToTreasury({ amount: Nat64; currency: TreasuryTypes.SupportedCurrencies; }):
+    public shared({ caller }) func depositToTreasury(amount: Nat64, currency: TreasuryTypes.SupportedCurrencies):
     async Result.Result<Ledger.ICP, MainTypes.Error>{
         let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v2);
         if(not isAdmin) return #err(#NotAuthorized);
@@ -383,7 +383,7 @@ shared actor class User() = this {
 
     let {recurringTimer; cancelTimer; setTimer} = Timer;
 
-    public shared({caller}) func createProposal({action: MainTypes.ProposalActions; payload: MainTypes.ProposalPayload }): 
+    public shared({caller}) func createProposal(action: MainTypes.ProposalActions, payload: MainTypes.ProposalPayload): 
     async Result.Result<(MainTypes.Proposals),MainTypes.Error>{
         let callerProfile = userProfilesMap.get(caller);
         if(callerProfile == null) return #err(#NotAuthorizedToCreateProposals);
@@ -407,7 +407,7 @@ shared actor class User() = this {
         return #ok(updatedProposalsArray);
     };
 
-    public shared({caller}) func voteOnProposal({proposalIndex: Nat; adopt: Bool;}): 
+    public shared({caller}) func voteOnProposal(proposalIndex: Nat, adopt: Bool): 
     async Result.Result<(MainTypes.Proposal), MainTypes.Error> {
         let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
         let hasSufficientContributions = await treasuryCanister.userHasSufficientContributions(caller);

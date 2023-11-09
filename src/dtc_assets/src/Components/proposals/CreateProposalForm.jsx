@@ -90,7 +90,7 @@ const CreateProposalForm = (props) => {
         let amount = payloadDataType === PAYLOAD_DATA_TYPES.nat64 ? [toE8s(proposalPayload)] : [];
         let payload = {principal, amount};
         let action = {[proposalAction]: null};
-        let result = await actorState.backendActor.createProposal({ action, payload });
+        let result = await actorState.backendActor.createProposal(action, payload);
         if("err" in result){
             let errorMessagArray = Object.keys(result.err);
             let errorMessage = errorMessagArray[0];
