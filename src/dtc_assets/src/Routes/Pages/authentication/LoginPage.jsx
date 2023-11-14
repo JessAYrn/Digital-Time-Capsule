@@ -30,19 +30,19 @@ const isLocal = isLocalHost();
 export const accordionContent=[    
     {
         title:"1.) Navigate to your Personal DAO's unique URL and press the share button circled below ", 
-        image: `${isLocal ? "assets/" : ""}dtcscreengrab2.png`
+        image: `dtcscreengrab2.png`
     },
     {  
         title:"2.) Select the 'Add to Home Screen' button", 
-        image:`${isLocal ? "assets/" : ""}dtcscreengrab3.png`
+        image:`dtcscreengrab3.png`
     },
     {
         title:"3.) Enter a title and then press the 'add' button", 
-        image: `${isLocal ? "assets/" : ""}dtcscreengrab4.png`
+        image: `dtcscreengrab4.png`
     },
     {
         title:"4.) Your Personal DAO app will then be installed and visible on yoru Home Screen", 
-        image:`${isLocal ? "assets/" : ""}dtcscreengrab1.png`
+        image:`dtcscreengrab1.png`
     },
 
 ];
@@ -127,7 +127,7 @@ const LoginPage = (props) => {
             <Grid xs={11} md={9} display="flex" justifyContent="center" alignItems="center">
                 <img 
                     className={`img`}
-                    src={`${isLocal ? "../../../assets/" : ""}P2.svg`}
+                    src={'P2.svg'}
                     alt="Logo"
                 />
             </Grid>

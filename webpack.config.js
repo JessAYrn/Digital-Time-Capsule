@@ -1,44 +1,15 @@
+require("dotenv").config();
 const path = require("path");
 const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
 
-let localCanisters, prodCanisters, canisters;
-let LOCAL_II_CANISTER_ID = 'rrkah-fqaaa-aaaaa-aaaaq-cai';
-
-function initCanisterIds() {
-  try {
-    localCanisters = require(path.resolve(".dfx", "local", "canister_ids.json"));
-  } catch (error) {
-    console.log("No local canister_ids.json found. Continuing production");
-  }
-  try {
-    prodCanisters = require(path.resolve("canister_ids.json"));
-  } catch (error) {
-    console.log("No production canister_ids.json found. Continuing with local");
-  }
-
-  const network =
-    process.env.DFX_NETWORK ||
-    (process.env.NODE_ENV === "production" ? "ic" : "local");
-
-  canisters = network === "local" ? localCanisters : prodCanisters;
-
-  for (const canister in canisters) {
-    process.env[canister.toUpperCase() + "_CANISTER_ID"] =
-      canisters[canister][network];
-  }
-}
-initCanisterIds();
-
 const isDevelopment = process.env.NODE_ENV !== "production";
-const asset_entry = path.join(
-  "src",
-  "dtc_assets",
-  "src",
-  "index.html"
-);
+
+const frontendDirectory = "dtc_assets";
+
+const frontend_entry = path.join("src", frontendDirectory, "src", "index.html");
 
 module.exports = {
   target: "web",
@@ -46,7 +17,7 @@ module.exports = {
   entry: {
     // The frontend.entrypoint points to the HTML file for this build, so we need
     // to replace the extension to `.js`.
-    index: path.join(__dirname, asset_entry).replace(/\.html$/, ".jsx"),
+    index: path.join(__dirname, frontend_entry).replace(/\.html$/, ".jsx"),
   },
   devtool: isDevelopment ? "source-map" : false,
   optimization: {
@@ -65,7 +36,7 @@ module.exports = {
   },
   output: {
     filename: "index.js",
-    path: path.join(__dirname, "dist", "dtc_assets"),
+    path: path.join(__dirname, "dist", frontendDirectory),
   },
 
   // Depending in the language or framework you are using for
@@ -76,49 +47,51 @@ module.exports = {
   module: {
    rules: [
      { test: /\.(ts|tsx|jsx)$/, loader: "ts-loader" },
-     {
-      test: /\.css$/i,
-      use: ["style-loader", "css-loader"],
-     },
-     {
-      test: /\.scss$/,
-      use: ['style-loader', 'css-loader', 'sass-loader']
-    }
+     { test: /\.s[ac]ss$/i, use: ["style-loader", "css-loader", "sass-loader"]},
+     { test: /\.css$/, use: ['style-loader','css-loader'] }
    ]
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: path.join(__dirname, asset_entry),
-      cache: false
+      template: path.join(__dirname, frontend_entry),
+      cache: false,
     }),
-    new webpack.EnvironmentPlugin({
-      NODE_ENV: 'development',
-      DTC_CANISTER_ID: canisters["dtc"],
-      II_URL : isDevelopment ?
-      `http://localhost:8000?canisterId=${LOCAL_II_CANISTER_ID}#authorize` :
-      "https://identity.ic0.app/#authorize",
-    }),
+    new webpack.EnvironmentPlugin([
+      ...Object.keys(process.env).filter((key) => {
+        if (key.includes("CANISTER")) return true;
+        if (key.includes("DFX")) return true;
+        return false;
+      }),
+    ]),
     new webpack.ProvidePlugin({
       Buffer: [require.resolve("buffer/"), "Buffer"],
       process: require.resolve("process/browser"),
     }),
+    new CopyPlugin({
+      patterns: [
+        {
+          from: `src/${frontendDirectory}/src/.ic-assets.json*`,
+          to: ".ic-assets.json5",
+          noErrorOnMissing: true,
+        },
+      ],
+    }),
   ],
-  // proxy /api to port 8000 during development
+  // proxy /api to port 4943 during development.
+  // if you edit dfx.json to define a project-specific local network, change the port to match.
   devServer: {
-    // proxy: {
-    //   "/api": {
-    //     target: "http://localhost:8000",
-    //     changeOrigin: true,
-    //     pathRewrite: {
-    //       "^/api": "/api",
-    //     },
-    //   },
-    // },
-    hot: true,
-    static: {
-      directory: path.join(__dirname, "./src/dtc_assets"),
-      watch: true
+    proxy: {
+      "/api": {
+        target: "http://127.0.0.1:4943",
+        changeOrigin: true,
+        pathRewrite: {
+          "^/api": "/api",
+        },
+      },
     },
-    port: 3000
+    static: path.resolve(__dirname, "src", frontendDirectory, "assets"),
+    hot: true,
+    watchFiles: [path.resolve(__dirname, "src", frontendDirectory)],
+    liveReload: true,
   },
 };

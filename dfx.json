@@ -33,9 +33,7 @@
         }
       }
     },
-    "default": {
-      "ic": "bs4fi-aaaaa-aaaap-qaabq-cai"
-    },
+  
     "dtc_assets": {
       "dependencies": [
         "dtc"
