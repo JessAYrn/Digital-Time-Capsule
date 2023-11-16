@@ -13,25 +13,6 @@ import NotificationTypes "../../Types/Notifications/types";
 
 module{
 
-    public func appendNotificationsFromJournal(
-        caller: Principal, 
-        userProfilesMap: MainTypes.UserProfilesMap, 
-        notifications: NotificationTypes.Notifications
-    ): async [NotificationTypes.Notification]{
-        let userJournal = userProfilesMap.get(caller);
-        switch(userJournal){
-            case null {throw Error.reject("user profile not found")};
-            case(?journal){
-                let userCanister: Journal.Journal = actor(Principal.toText(journal.canisterId));
-                let notifications_ = await userCanister.getNotifications();
-                let notificationsBuffer = Buffer.fromArray<NotificationTypes.Notification>(notifications);
-                let notificationsBuffer_ = Buffer.fromArray<NotificationTypes.Notification>(notifications_);
-                notificationsBuffer.append(notificationsBuffer_);
-                return notificationsBuffer.toArray();
-            };
-        }
-    };
-
     public func updateUserCanisterNotifications(userProfilesMap: MainTypes.UserProfilesMap):
     async (){
         let profilesArray = Iter.toArray(userProfilesMap.entries());
@@ -57,19 +38,4 @@ module{
             };
         };
     };
-
-    public func notifyOfNewStableRelease(canisterData: MainTypes.DaoMetaData_V2): 
-    async [NotificationTypes.Notification] {
-        let managerCanister : Manager.Manager = actor(canisterData.managerCanisterPrincipal);
-        let wasmStore: WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
-        let currentReleaseVersion = await managerCanister.getCurrentReleaseVersion();
-        let nextStableVersion = await wasmStore.getNextAppropriateRelease(currentReleaseVersion);
-        if(nextStableVersion.number > currentReleaseVersion.number){
-            let text = Text.concat("New Stable Version Availabe: Version #", Nat.toText(nextStableVersion.number));
-            let key = null;
-            return [{text; key;}];
-        };
-        return [];
-    };
-
 };

@@ -88,7 +88,7 @@ shared(msg) actor class Manager (principal : Principal) = this {
         currentVersion := previousStableVersion;
     };
 
-    public shared({caller}) func getCurrentReleaseVersion(): async {number: Nat; isStable: Bool} {
+    public query({caller}) func getCurrentReleaseVersion(): async {number: Nat; isStable: Bool} {
         if( Principal.toText(caller) != mainCanisterId) { throw Error.reject("Unauthorized access."); };
         return currentVersion;
     };

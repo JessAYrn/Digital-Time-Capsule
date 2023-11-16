@@ -34,6 +34,8 @@ import NnsCyclesMinting "Ledger/NnsCyclesMinting";
 import TreasuryHelperMethods "Modules/Main/TreasuryHelperMethods";
 import AnalyticsHelperMethods "Modules/Analytics/AnalyticsHelperMethods";
 import AnalyticsTypes "Types/Analytics/types";
+import Journal "Journal";
+import WasmStore "Types/WasmStore/types";
 
 shared actor class User() = this {
 
@@ -65,6 +67,8 @@ shared actor class User() = this {
 
     private stable var startIndexForBlockChainQuery : Nat64 = 3_512_868;
 
+    private let ic : IC.Self = actor "aaaaa-aa";
+
     public query({caller}) func hasAccount() : async Bool {
         let userProfile = userProfilesMap.get(caller);
         switch(userProfile){ case null { return false}; case(?profile){ return true;}};
@@ -92,20 +96,51 @@ shared actor class User() = this {
         switch(result){ case(#ok(_)){ #ok(()); }; case(#err(e)){ #err(e); }; };
     };
     
-    public shared({ caller }) func readJournal () : async Result.Result<(MainTypes.JournalData), JournalTypes.Error> {
-        let result = await JournalHelperMethods.readJournal(caller, userProfilesMap);
+    public composite query({ caller }) func readJournal () : async Result.Result<(MainTypes.JournalData), JournalTypes.Error> {
+        let result = userProfilesMap.get(caller);
+        switch(result){
+            case null{ return #err(#NotFound); };
+            case(? v){
+                let journal: Journal.Journal = actor(Principal.toText(v.canisterId)); 
+                let (entriesArray, bio, canisterPrincipal) = await journal.readJournal();
+                return #ok({ userJournalData = (entriesArray, bio); email = v.email; userName = v.userName; principal = canisterPrincipal; });
+            };
+        };   
     };
 
-    public shared({ caller }) func readWalletData() : async Result.Result<({ balance : Ledger.ICP; address: [Nat8]; } ), JournalTypes.Error> {
-        let result = await JournalHelperMethods.readWalletData(caller, userProfilesMap);
+    public composite query({ caller }) func readWalletData() : async Result.Result<({ balance : Ledger.ICP; address: [Nat8]; } ), JournalTypes.Error> {
+        let result = userProfilesMap.get(caller);
+        switch(result){
+            case null{ return #err(#NotFound); };
+            case(? v){
+                let journal: Journal.Journal = actor(Principal.toText(v.canisterId)); 
+                let userBalance = await journal.canisterBalance();
+                let userAccountId = await journal.canisterAccount();
+                return #ok({ balance = userBalance; address = Blob.toArray(userAccountId); });
+            };
+        };
     };
 
-    public shared({ caller }) func readEntryFileChunk(fileId: Text, chunkId: Nat) : async Result.Result<(Blob),JournalTypes.Error>{
-        let result = await JournalHelperMethods.readEntryFileChunk(caller, userProfilesMap, fileId, chunkId);
+    public composite query({ caller }) func readEntryFileChunk(fileId: Text, chunkId: Nat) : async Result.Result<(Blob),JournalTypes.Error>{
+        let result = userProfilesMap.get(caller);
+        switch(result){
+            case null{ #err(#NotFound); };
+            case ( ? existingProfile){
+                let journal: Journal.Journal = actor(Principal.toText(existingProfile.canisterId));
+                let entryFile = await journal.readJournalFileChunk(fileId, chunkId);
+            };
+        };
     };
 
-    public shared({ caller }) func readEntryFileSize(fileId: Text) : async Result.Result<(Nat),JournalTypes.Error>{
-        let result = await JournalHelperMethods.readEntryFileSize(caller, userProfilesMap, fileId);
+    public composite query({ caller }) func readEntryFileSize(fileId: Text) : async Result.Result<(Nat),JournalTypes.Error>{
+        let result = userProfilesMap.get(caller);
+        switch(result){
+            case null{ #err(#NotFound); };
+            case ( ? existingProfile){
+                let journal: Journal.Journal = actor(Principal.toText(existingProfile.canisterId));
+                let entryFileSize = await journal.readJournalFileSize(fileId);
+            };
+        };
     };
 
     public shared({ caller }) func updateBio(bio: JournalTypes.Bio) : async Result.Result<(JournalTypes.Bio), JournalTypes.Error> {
@@ -149,8 +184,16 @@ shared actor class User() = this {
         let result = await TxHelperMethods.transferICP(caller, userProfilesMap, amount, canisterAccountId);
     };
 
-    public shared({caller}) func readTransaction() : async Result.Result<[(Nat, JournalTypes.Transaction)], JournalTypes.Error> {
-        let result = await TxHelperMethods.readTransaction(caller, userProfilesMap);
+    public composite query({caller}) func readTransaction() : async Result.Result<[(Nat, JournalTypes.Transaction)], JournalTypes.Error> {
+        let result = userProfilesMap.get(caller);
+        switch(result){
+            case null{ #err(#NotFound); }; 
+            case ( ? profile){
+                let userJournal : Journal.Journal = actor(Principal.toText(profile.canisterId));
+                let tx = await userJournal.readWalletTxHistory();
+                return #ok(tx);
+            };
+        };
     };
 
     private func updateUsersTxHistory() : async () {
@@ -232,7 +275,7 @@ shared actor class User() = this {
         daoMetaData_v2 := updatedMetaData;
     };
 
-    public shared({caller}) func getRequestingPrincipals() : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error>{
+    public query({caller}) func getRequestingPrincipals() : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error>{
         let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v2);
         if(not isAdmin){ return #err(#NotAuthorized); }
         else { return #ok(daoMetaData_v2.requestsForAccess) };
@@ -249,19 +292,44 @@ shared actor class User() = this {
         };
     };
 
-    public shared(msg) func getCanisterCyclesBalances() : async MainTypes.CanisterCyclesBalances{
-        let cyclesBalance_backend = Cycles.balance();
-        let balances = await CanisterManagementMethods.getCanisterCyclesBalances(cyclesBalance_backend, daoMetaData_v2);
-        return balances;
+    public composite query(msg) func getCanisterCyclesBalances() : async MainTypes.CanisterCyclesBalances{
+        let backendCyclesBalance = Cycles.balance();
+        let {cycles = frontendCyclesBalance } = await ic.canister_status({ canister_id = Principal.fromText(daoMetaData_v2.frontEndPrincipal) });
+        return {frontendCyclesBalance; backendCyclesBalance };
     };
 
-    public shared({caller}) func getCanisterData() : async Result.Result<(MainTypes.CanisterDataExport), JournalTypes.Error> {
-        let cyclesBalance_backend = Cycles.balance();
-        let daoMetaDataPackagedForExport = await CanisterManagementMethods.getCanisterData(caller, daoMetaData_v2, cyclesBalance_backend, userProfilesMap, proposalsMap);
-        return daoMetaDataPackagedForExport;
+    public composite query({caller}) func getCanisterData() : async Result.Result<(MainTypes.CanisterDataExport), JournalTypes.Error> {
+        let profile = userProfilesMap.get(caller);
+        switch(profile){
+            case null{ return #err(#NotAuthorized); };
+            case (? existingProfile){
+                let managerCanister : Manager.Manager = actor(daoMetaData_v2.managerCanisterPrincipal);
+                let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
+                let cyclesMintingCanister: NnsCyclesMinting.Interface = actor(NnsCyclesMinting.NnsCyclesMintingCanisterID);
+                let {data} = await cyclesMintingCanister.get_icp_xdr_conversion_rate();
+                let {xdr_permyriad_per_icp} = data;
+                let treasuryContributionsArray = await treasuryCanister.getTreasuryContributionsArray();
+                let profilesMetaData = CanisterManagementMethods.getProfilesMetaData(userProfilesMap);
+                let {cycles = currentCyclesBalance_frontend } = await ic.canister_status({ canister_id = Principal.fromText(daoMetaData_v2.frontEndPrincipal) });
+                let {cycles = currentCyclesBalance_manager } = await ic.canister_status({ canister_id = Principal.fromText(daoMetaData_v2.managerCanisterPrincipal) });
+                let {number = releaseVersion} = await managerCanister.getCurrentReleaseVersion();
+                let canisterDataPackagedForExport = {
+                    daoMetaData_v2 with 
+                    proposals = GovernanceHelperMethods.tallyAllProposalVotes({proposals = proposalsMap; treasuryContributionsArray; xdr_permyriad_per_icp});
+                    isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v2);
+                    currentCyclesBalance_backend = Cycles.balance();
+                    currentCyclesBalance_frontend;
+                    currentCyclesBalance_manager;
+                    journalCount = userProfilesMap.size();
+                    profilesMetaData;
+                    releaseVersion;
+                };
+                return #ok(canisterDataPackagedForExport);
+            };
+        };
     };
 
-    public shared({caller}) func getTreasuryData() : async Result.Result<TreasuryTypes.TreasuryDataExport, MainTypes.Error> {
+    public composite query({caller}) func getTreasuryData() : async Result.Result<TreasuryTypes.TreasuryDataExport, MainTypes.Error> {
         let userProfile = userProfilesMap.get(caller);
         if(userProfile == null) return #err(#NotAuthorizedToAccessData);
         let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
@@ -312,21 +380,6 @@ shared actor class User() = this {
         let timerId = setTimer(#nanoseconds(1), updateCanistersExceptBackend);
     };
 
-    public func getCanisterCongtrollers(canisterPrincipal: Principal) : async ([Text]) {
-        let canisterStatus = await MainTypes.self.canister_status({ canister_id = canisterPrincipal });
-        let settings = canisterStatus.settings;
-        let controllersOption = settings.controllers;
-        var controllers = Option.get(controllersOption, daoMetaData_v2.defaultControllers);
-        let ArrayBuffer = Buffer.Buffer<(Text)>(1);
-        let controllersIter = Iter.fromArray(controllers);
-        Iter.iterate<Principal>(controllersIter, func (x: Principal, index: Nat){
-            let text = Principal.toText(x);
-            ArrayBuffer.add(text);
-        });
-        let controllersAsTextArray = ArrayBuffer.toArray();
-        return controllersAsTextArray;
-    };
-
     public shared({caller}) func toggleSupportMode() : async Result.Result<(),JournalTypes.Error>{
         let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v2);
         if(not isAdmin){ return #err(#NotAuthorized); };
@@ -335,9 +388,23 @@ shared actor class User() = this {
         return #ok(());
     };
 
-    public shared({ caller }) func getNotifications(): async NotificationsTypes.Notifications{
-        let notifications = await NotificationProtocolMethods.notifyOfNewStableRelease(daoMetaData_v2);
-        let notifications_ = await NotificationProtocolMethods.appendNotificationsFromJournal(caller, userProfilesMap, notifications);
+    public composite query({ caller }) func getNotifications(): async NotificationsTypes.Notifications{
+        let userProfile = userProfilesMap.get(caller);
+        switch(userProfile){
+            case null {throw Error.reject("user profile not found")};
+            case(?profile){
+                let managerCanister : Manager.Manager = actor(daoMetaData_v2.managerCanisterPrincipal);
+                let wasmStore: WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
+                let userCanister: Journal.Journal = actor(Principal.toText(profile.canisterId));
+                let userNotifications = await userCanister.getNotifications();
+                let notificationsBuffer = Buffer.fromArray<NotificationsTypes.Notification>(userNotifications);
+                let currentReleaseVersion = await managerCanister.getCurrentReleaseVersion();
+                let nextStableVersion = await wasmStore.getNextAppropriateRelease(currentReleaseVersion);
+                let text = Text.concat("New Stable Version Availabe: Version #", Nat.toText(nextStableVersion.number));
+                if(nextStableVersion.number > currentReleaseVersion.number) notificationsBuffer.add({text; key = null});
+                return notificationsBuffer.toArray();
+            };
+        };
     };
 
     public shared({ caller }) func clearJournalNotifications(): async (){
@@ -358,12 +425,26 @@ shared actor class User() = this {
         return updatedBalance;
     };
     
-    public shared({ caller }) func retrieveUserBalances(): async AnalyticsTypes.BalancesArray {
-        let balances = await AnalyticsHelperMethods.retrieveUserBalances(caller, userProfilesMap);
+    public composite query({ caller }) func retrieveUserBalances(): async AnalyticsTypes.BalancesArray {
+        let userProfile = userProfilesMap.get(caller);
+        switch(userProfile){
+            case null { throw Error.reject("No profile found for this principal")};
+            case(?profile) {
+                let userCanister : Journal.Journal = actor(Principal.toText(profile.canisterId));
+                let balancesHistory = await userCanister.readBalancesHistory();
+            };
+        };
     };
 
-    public shared({ caller }) func retrieveTreasuryBalances() : async AnalyticsTypes.BalancesArray {
-        let balances = await AnalyticsHelperMethods.retrieveTreasuryBalances(daoMetaData_v2);
+    public composite query({ caller }) func retrieveTreasuryBalances() : async AnalyticsTypes.BalancesArray {
+        let userProfile = userProfilesMap.get(caller);
+        switch(userProfile){
+            case null { throw Error.reject("No profile found for this principal")};
+            case(?_){
+                let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
+                let balancesHistory = await treasuryCanister.readBalancesHistory();
+            };
+        };
     };
 
     public shared({caller}) func heartBeat(): async (){

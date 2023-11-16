@@ -158,7 +158,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         return #ok(fileId); 
     };
 
-    public shared({caller}) func readJournal() : 
+    public query({caller}) func readJournal() : 
     async ([JournalTypes.JournalEntryExportKeyValuePair], JournalTypes.Bio, Text) {
         if( Principal.toText(caller) != mainCanisterId_ ) { throw Error.reject("Unauthorized access."); };
         let journalAsArray = Iter.toArray(journalMap.entries());
@@ -215,7 +215,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         }
     };
 
-    public shared({caller}) func readJournalFileChunk (fileId : Text, chunkId: Nat) : async Result.Result<(Blob),JournalTypes.Error> {
+    public query({caller}) func readJournalFileChunk (fileId : Text, chunkId: Nat) : async Result.Result<(Blob),JournalTypes.Error> {
         if( Principal.toText(caller) != mainCanisterId_) { return #err(#NotAuthorized); };
 
         let file = filesMap.get(fileId);
@@ -236,7 +236,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         };
     };
 
-    public shared({caller}) func readJournalFileSize (fileId : Text) : async Result.Result<(Nat),JournalTypes.Error> {
+    public query({caller}) func readJournalFileSize (fileId : Text) : async Result.Result<(Nat),JournalTypes.Error> {
         if( Principal.toText(caller) != mainCanisterId_) { return #err(#NotAuthorized); };
         let file = filesMap.get(fileId);
         switch(file){
@@ -341,7 +341,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     public shared({caller}) func saveCurrentBalances() : async () {
         if( Principal.toText(caller) != mainCanisterId_) { throw Error.reject("Unauthorized access."); };
-        let icp = await canisterBalance();
+        let icp = await ledger.account_balance({ account = userAccountId() });
         //will need to retreive the proper balances of the other currencies once they've been integrated
         let icp_staked = {e8s: Nat64 = 0};
         let btc = {e8s: Nat64 = 0};
@@ -387,7 +387,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         };
     };
 
-    public shared({caller}) func readWalletTxHistory() : async [(Nat,JournalTypes.Transaction)] {
+    public query({caller}) func readWalletTxHistory() : async [(Nat,JournalTypes.Transaction)] {
         if( Principal.toText(caller) != mainCanisterId_) { throw Error.reject("Unauthorized access."); };
         Iter.toArray(txHistoryMap.entries());
     };
@@ -408,7 +408,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         userAccountId()
     };
 
-    public shared({caller}) func canisterBalance() : async Ledger.ICP {
+    public composite query({caller}) func canisterBalance() : async Ledger.ICP {
         let canisterId =  Principal.fromActor(this);
         if(  
             Principal.toText(caller) !=  Principal.toText(canisterId)

@@ -108,7 +108,7 @@ shared(msg) actor class Treasury (principal : Principal) = this {
 
     public shared({caller}) func saveCurrentBalances() : async () {
         if( Principal.toText(caller) != ownerCanisterId) { throw Error.reject("Unauthorized access."); };
-        let icp = await canisterBalance();
+        let icp = await ledger.account_balance({ account = userAccountId() });
         //will need to retreive the proper balances of the other currencies once they've been integrated
         let icp_staked = {e8s: Nat64 = 0};
         let btc = {e8s: Nat64 = 0};
@@ -136,7 +136,16 @@ shared(msg) actor class Treasury (principal : Principal) = this {
         userAccountId()
     };
 
-    public shared({caller}) func canisterBalance() : async Ledger.ICP {
+    public composite query({caller}) func canisterBalance() : async Ledger.ICP {
+        let canisterId =  Principal.fromActor(this);
+        if(  
+            Principal.toText(caller) !=  Principal.toText(canisterId)
+            and Principal.toText(caller) != ownerCanisterId
+        ) { throw Error.reject("Unauthorized access."); };
+        await ledger.account_balance({ account = userAccountId() })
+    };
+
+    public shared({caller}) func canisterBalance_shared() : async Ledger.ICP {
         let canisterId =  Principal.fromActor(this);
         if(  
             Principal.toText(caller) !=  Principal.toText(canisterId)

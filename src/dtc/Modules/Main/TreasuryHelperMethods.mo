@@ -34,7 +34,7 @@ module{
                 } else return #err(#InsufficientFunds);
             };
         };
-        let updatedBalance = await treasuryCanister.canisterBalance();
+        let updatedBalance = await treasuryCanister.canisterBalance_shared();
         return #ok(updatedBalance);
     };
 }

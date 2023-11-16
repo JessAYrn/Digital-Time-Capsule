@@ -10,6 +10,7 @@ import MainTypes "../../Types/Main/types";
 import Journal "../../Journal";
 import Ledger "../../Ledger/Ledger";
 import Blob "mo:base/Blob";
+import HashMap "mo:base/HashMap";
 import NotificationTypes "../../Types/Main/types";
 
 
@@ -17,79 +18,7 @@ module{
 
     private let oneICP : Nat64 = 100_000_000;
 
-    public func readJournal (callerId: Principal, profilesMap: MainTypes.UserProfilesMap) : 
-    async Result.Result<(JournalTypes.ReadJournalResult),  JournalTypes.Error> {
-
-        let result = profilesMap.get(callerId);
-
-        switch(result){
-            case null{ return #err(#NotFound); };
-            case(? v){
-                let journal: Journal.Journal = actor(Principal.toText(v.canisterId)); 
-                let (entriesArray, bio, canisterPrincipal) = await journal.readJournal();
-                
-                return #ok({
-                    userJournalData = (entriesArray, bio);
-                    email = v.email;
-                    userName = v.userName;
-                    principal = canisterPrincipal;
-                });
-            };
-        };   
-    };
-
-    public func readWalletData(callerId: Principal, profilesMap: MainTypes.UserProfilesMap) : 
-    async Result.Result<({ balance : Ledger.ICP; address: [Nat8]; } ), JournalTypes.Error> {
-
-        let result = profilesMap.get(callerId);
-
-        switch(result){
-            case null{ return #err(#NotFound); };
-            case(? v){
-                let journal: Journal.Journal = actor(Principal.toText(v.canisterId)); 
-                let userBalance = await journal.canisterBalance();
-                let userAccountId = await journal.canisterAccount();
-                
-                return #ok({
-                    balance = userBalance;
-                    address = Blob.toArray(userAccountId);
-                });
-                
-            };
-        };
-    };
-
-    public func readEntryFileChunk(callerId: Principal, profilesMap: MainTypes.UserProfilesMap, fileId: Text, chunkId: Nat) : 
-    async Result.Result<(Blob),JournalTypes.Error>{
-
-        let result = profilesMap.get(callerId);
-
-        switch(result){
-            case null{ #err(#NotFound); };
-            case ( ? existingProfile){
-                let journal: Journal.Journal = actor(Principal.toText(existingProfile.canisterId));
-                let entryFile = await journal.readJournalFileChunk(fileId, chunkId);
-                entryFile;
-            };
-        };
-
-    };
-
-    public func readEntryFileSize(callerId: Principal, profilesMap: MainTypes.UserProfilesMap,fileId: Text) : 
-    async Result.Result<(Nat),JournalTypes.Error>{
-
-        let result = profilesMap.get(callerId);
-
-        switch(result){
-            case null{ #err(#NotFound); };
-            case ( ? existingProfile){
-                let journal: Journal.Journal = actor(Principal.toText(existingProfile.canisterId));
-                let entryFileSize = await journal.readJournalFileSize(fileId);
-                entryFileSize;
-            };
-        };
-
-    };
+    
 
     public func updatePhotos(callerId: Principal, profilesMap: MainTypes.UserProfilesMap, photos: [JournalTypes.FileMetaData]) : 
     async Result.Result<(JournalTypes.Bio), JournalTypes.Error> {

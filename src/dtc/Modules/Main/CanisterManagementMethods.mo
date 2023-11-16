@@ -222,13 +222,6 @@ module{
         return (updatedMetaData);
     };
 
-    public func getCanisterCyclesBalances(backendCyclesBalance: Nat, canisterData: MainTypes.DaoMetaData_V2) 
-    : async  MainTypes.CanisterCyclesBalances {
-
-        let frontendCyclesBalance = await getCyclesBalance(Principal.fromText(canisterData.frontEndPrincipal));
-        return {frontendCyclesBalance = frontendCyclesBalance; backendCyclesBalance = backendCyclesBalance}
-    };
-
     public func getCanisterData(
         callerId: Principal, 
         daoMetaData: MainTypes.DaoMetaData_V2, 
@@ -342,7 +335,7 @@ module{
         await ic.start_canister({canister_id = canister_id});
     };
 
-    private func getCyclesBalance(principal: Principal) : async Nat {
+    public func getCyclesBalance(principal: Principal) : async Nat {
         let canisterStatus = await ic.canister_status({ canister_id = principal });
         let cyclesBalance = canisterStatus.cycles;
         return cyclesBalance;
