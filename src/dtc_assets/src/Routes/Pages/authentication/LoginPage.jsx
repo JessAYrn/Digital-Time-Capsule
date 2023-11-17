@@ -24,6 +24,7 @@ import '../../../SCSS/contentContainer.scss'
 import AccordionField from "../../../Components/Fields/Accordion";
 import { actorTypes } from "../../../reducers/actorReducer";
 import Grid from '@mui/material/Unstable_Grid2';
+import { homePageTypes } from "../../../reducers/homePageReducer";
 
 const isLocal = isLocalHost();
 
@@ -77,8 +78,6 @@ const LoginPage = (props) => {
         homePageDispatch 
     } = useContext(AppContext);
     
-    const [frontendCanisterBalance, setFrontendCanisterBalance] = useState(0);
-    const [backendCanisterBalance, setBackendCanisterBalance] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const [anonymousActor_dtc] = useCanister('dtc');
 
@@ -102,8 +101,14 @@ const LoginPage = (props) => {
     useEffect(async () => {
         let promises = [anonymousActor_dtc.getCanisterCyclesBalances(), anonymousActor_dtc.heartBeat()];
         let [result_0, result_1] = await Promise.all(promises);
-        setBackendCanisterBalance(parseInt(result_0.backendCyclesBalance));
-        setFrontendCanisterBalance(parseInt(result_0.frontendCyclesBalance));
+        const {currentCyclesBalance_backend, currentCyclesBalance_frontend} = result_0;
+        homePageDispatch({
+            payload: {
+                currentCyclesBalance_backend: parseInt(currentCyclesBalance_backend),
+                currentCyclesBalance_frontend: parseInt(currentCyclesBalance_frontend)
+            },
+            actionType: homePageTypes.SET_CANISTERS_CYCLES_BALANCES
+        });
         setIsLoading(false);
     },[]);
 
@@ -183,7 +188,7 @@ const LoginPage = (props) => {
                 <DataField
                     label={'Front-end Canister Balance: '}
                     className={'loginPage'}
-                    text={`${round2Decimals(inTrillions(frontendCanisterBalance))} T`}
+                    text={`${round2Decimals(inTrillions(homePageState.canistersCyclesBalances.currentCyclesBalance_frontend))} T`}
                     isLoading={isLoading}
                     disabled={true}
                 />
@@ -192,7 +197,7 @@ const LoginPage = (props) => {
                 <DataField
                     label={'Back-end Canister Balance: '}
                     className={'loginPage'}
-                    text={`${round2Decimals(inTrillions(backendCanisterBalance))} T`}
+                    text={`${round2Decimals(inTrillions(homePageState.canistersCyclesBalances.currentCyclesBalance_backend))} T`}
                     isLoading={isLoading}
                     disabled={true}
                 />

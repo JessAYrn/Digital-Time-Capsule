@@ -193,7 +193,7 @@ module {
 
     public type Interface = actor {
         transfer        : TransferArgs       -> async TransferResult;
-        account_balance : shared query AccountBalanceArgs -> async ICP;
+        account_balance : query AccountBalanceArgs -> async ICP;
         query_blocks : shared query GetBlocksArgs -> async QueryBlocksResponse;
     };
 

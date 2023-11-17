@@ -91,9 +91,6 @@ module{
         lastRecordedTime: Int;
         profilesMetaData: ProfilesMetaData;
         isAdmin: Bool;
-        currentCyclesBalance_backend: Nat;
-        currentCyclesBalance_frontend: Nat;
-        currentCyclesBalance_manager: Nat;
         supportMode: Bool;
         cyclesSaveMode: Bool;
         releaseVersion: Nat;
@@ -138,8 +135,9 @@ module{
     public type RequestsForAccess = [(Text, Approved)];
 
     public type CanisterCyclesBalances = {
-        backendCyclesBalance : Nat;
-        frontendCyclesBalance: Nat
+        currentCyclesBalance_backend: Nat;
+        currentCyclesBalance_frontend: Nat;
+        currentCyclesBalance_manager: Nat;
     };
 
 

@@ -292,10 +292,11 @@ shared actor class User() = this {
         };
     };
 
-    public composite query(msg) func getCanisterCyclesBalances() : async MainTypes.CanisterCyclesBalances{
-        let backendCyclesBalance = Cycles.balance();
-        let {cycles = frontendCyclesBalance } = await ic.canister_status({ canister_id = Principal.fromText(daoMetaData_v2.frontEndPrincipal) });
-        return {frontendCyclesBalance; backendCyclesBalance };
+    public shared(msg) func getCanisterCyclesBalances() : async MainTypes.CanisterCyclesBalances{
+        let currentCyclesBalance_backend = Cycles.balance();
+        let {cycles = currentCyclesBalance_frontend } = await ic.canister_status({ canister_id = Principal.fromText(daoMetaData_v2.frontEndPrincipal) });
+        let {cycles = currentCyclesBalance_manager } = await ic.canister_status({ canister_id = Principal.fromText(daoMetaData_v2.managerCanisterPrincipal) });
+        return {currentCyclesBalance_backend; currentCyclesBalance_frontend; currentCyclesBalance_manager };
     };
 
     public composite query({caller}) func getCanisterData() : async Result.Result<(MainTypes.CanisterDataExport), JournalTypes.Error> {
@@ -310,16 +311,12 @@ shared actor class User() = this {
                 let {xdr_permyriad_per_icp} = data;
                 let treasuryContributionsArray = await treasuryCanister.getTreasuryContributionsArray();
                 let profilesMetaData = CanisterManagementMethods.getProfilesMetaData(userProfilesMap);
-                let {cycles = currentCyclesBalance_frontend } = await ic.canister_status({ canister_id = Principal.fromText(daoMetaData_v2.frontEndPrincipal) });
-                let {cycles = currentCyclesBalance_manager } = await ic.canister_status({ canister_id = Principal.fromText(daoMetaData_v2.managerCanisterPrincipal) });
                 let {number = releaseVersion} = await managerCanister.getCurrentReleaseVersion();
                 let canisterDataPackagedForExport = {
                     daoMetaData_v2 with 
                     proposals = GovernanceHelperMethods.tallyAllProposalVotes({proposals = proposalsMap; treasuryContributionsArray; xdr_permyriad_per_icp});
                     isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v2);
                     currentCyclesBalance_backend = Cycles.balance();
-                    currentCyclesBalance_frontend;
-                    currentCyclesBalance_manager;
                     journalCount = userProfilesMap.size();
                     profilesMetaData;
                     releaseVersion;

@@ -260,13 +260,13 @@ const Analytics = () => {
                         />
                         <DataField
                             label={'Frontend Cycles Balance:'}
-                            text={`${round2Decimals(inTrillions(homePageState.canisterData[CANISTER_DATA_FIELDS.currentCyclesBalance_frontend]))} T`}
+                            text={`${round2Decimals(inTrillions(homePageState.canistersCyclesBalances.currentCyclesBalance_frontend))} T`}
                             isCycles={true}
                             disabled={true}
                         />
                         <DataField
                             label={'Backend Cycles Balance:'}
-                            text={`${round2Decimals(inTrillions(homePageState.canisterData[CANISTER_DATA_FIELDS.currentCyclesBalance_backend]))} T`}
+                            text={`${round2Decimals(inTrillions(homePageState.canistersCyclesBalances.currentCyclesBalance_backend))} T`}
                             isCycles={true}
                             disabled={true}
                         />

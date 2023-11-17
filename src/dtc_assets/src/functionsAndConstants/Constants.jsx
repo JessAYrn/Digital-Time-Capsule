@@ -50,8 +50,6 @@ export const CANISTER_DATA_FIELDS = {
     backEndPrincipal: "backEndPrincipal",
     backEndCyclesBurnRatePerDay: "backEndCyclesBurnRatePerDay",
     lastRecordedBackEndCyclesBalance: "lastRecordedBackEndCyclesBalance",
-    currentCyclesBalance_backend: "currentCyclesBalance_backend",
-    currentCyclesBalance_frontend: "currentCyclesBalance_frontend",
     RequestsForAccess: "RequestsForAccess",
     users: "users",
     journalCount: "journalCount"

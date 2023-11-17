@@ -28,7 +28,7 @@ module {
     };
 
     public type Self = actor {
-        canister_status : shared query { canister_id : canister_id } -> async canister_status_response;
+        canister_status : shared { canister_id : canister_id } -> async canister_status_response;
         create_canister : shared { settings : ?canister_settings } -> async {
             canister_id : canister_id;
         };
