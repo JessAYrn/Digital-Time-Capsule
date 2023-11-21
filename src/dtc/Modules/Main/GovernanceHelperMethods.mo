@@ -80,7 +80,6 @@ module{
             case(#FollowIcpNeuron){ return true };
             case(#SpawnIcpNeuron){ return true };
             case(#DispurseIcpNeuron){ return true };
-            case(#ToggleCyclesSaverMode){ return true };
             case(#PurchaseCycles){ return true };
             case(#UpgradeApp){ return true };
             case(#DepositIcpToTreasury){ return false };

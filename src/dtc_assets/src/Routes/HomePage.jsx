@@ -134,6 +134,7 @@ const HomePage = () => {
             }
             <ModalComponent 
                 {...modalProps}
+                displayConnectButton={true}
                 open={modalIsOpen} 
                 isLoading={isLoadingModal} 
             />      

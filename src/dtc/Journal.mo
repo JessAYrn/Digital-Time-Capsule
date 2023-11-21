@@ -74,6 +74,12 @@ shared(msg) actor class Journal (principal : Principal) = this {
         photos = [];
     };
 
+    private stable var tokenBalances : JournalTypes.Balances = {
+        icp = {e8s = 0};
+        eth = {e8s = 0};
+        btc = {e8s = 0};
+    };
+
     private stable var dataUsageInBytes = 0;
 
     private stable var notifications : NotificationsTypes.Notifications = [];
@@ -396,6 +402,13 @@ shared(msg) actor class Journal (principal : Principal) = this {
         if( Principal.toText(caller) != mainCanisterId_) { throw Error.reject("Unauthorized access."); };
         txHistoryMap.put(Nat64.toNat(timeStamp), tx);
         ignore updateDataUsageInMegaBytes();
+        ignore updateTokenBalances_();
+    };
+
+    private func updateTokenBalances_() : async () {
+        let icp = await ledger.account_balance({ account = userAccountId() });
+        //will have to do the same for the btc and eth ledgers
+        tokenBalances := {tokenBalances with icp };
     };
 
     private func userAccountId() : Account.AccountIdentifier {
@@ -408,13 +421,13 @@ shared(msg) actor class Journal (principal : Principal) = this {
         userAccountId()
     };
 
-    public composite query({caller}) func canisterBalance() : async Ledger.ICP {
+    public query({caller}) func canisterBalance() : async Ledger.ICP {
         let canisterId =  Principal.fromActor(this);
         if(  
             Principal.toText(caller) !=  Principal.toText(canisterId)
             and Principal.toText(caller) != mainCanisterId_
         ) { throw Error.reject("Unauthorized access."); };
-        await ledger.account_balance({ account = userAccountId() })
+        return tokenBalances.icp;
     };
 
     private func mapJournalEntriesArrayToExport(journalAsArray: [JournalTypes.JournalEntryKeyValuePair]) : 

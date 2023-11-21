@@ -34,6 +34,8 @@ shared(msg) actor class Manager (principal : Principal) = this {
 
     private stable var currentVersion : {number: Nat; isStable: Bool} = {number = 0; isStable = true;};
 
+    private stable var nextStableVersion : {number: Nat; isStable: Bool} = currentVersion;
+
     private stable var previousStableVersion : {number: Nat; isStable: Bool} = currentVersion;
 
     private stable var mainCanisterId : Text = Principal.toText(principal); 
@@ -190,6 +192,23 @@ shared(msg) actor class Manager (principal : Principal) = this {
         };
 
         release := { release with assets = AssetBuffer.toArray(); };
+    };
+
+    public shared({caller}) func notifyNextStableRelease(): async() {
+        if(Principal.toText(caller) != mainCanisterId) { throw Error.reject("Unauthorized access."); };
+        let wasmStore: WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
+        let nextStableVersion_ = await wasmStore.getNextAppropriateRelease(currentVersion);
+        nextStableVersion := nextStableVersion_;
+    };
+
+    public query({caller}) func getWhatIsNextStableReleaseVersion(): async {number: Nat; isStable: Bool} {
+        if(Principal.toText(caller) != mainCanisterId) { throw Error.reject("Unauthorized access."); };
+        return nextStableVersion;
+    };
+
+    public query ({caller}) func getCyclesBalance(): async Nat {
+        if(Principal.toText(caller) != mainCanisterId) { throw Error.reject("Unauthorized access."); };
+        return Cycles.balance();
     };
 
     // Return the cycles received up to the capacity allowed

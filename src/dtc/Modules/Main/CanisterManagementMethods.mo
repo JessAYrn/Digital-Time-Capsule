@@ -298,6 +298,8 @@ module{
 
     public func heartBeat(currentCylcesBalance: Nat, daoMetaData : MainTypes.DaoMetaData_V2, profilesMap: MainTypes.UserProfilesMap): 
     async MainTypes.DaoMetaData_V2{
+        let managerCanister : Manager.Manager = actor(daoMetaData.managerCanisterPrincipal);
+        ignore managerCanister.notifyNextStableRelease();
         ignore refillCanisterCycles(daoMetaData, profilesMap);
         let timeLapsed : Float = Float.fromInt(Time.now() - daoMetaData.lastRecordedTime);
         let timeLapsedInDays : Float = timeLapsed / nanosecondsInADay;

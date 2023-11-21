@@ -92,7 +92,6 @@ export const mapBackendCanisterDataToFrontEndObj = (props) => {
         supportMode,
         acceptingRequests,
         journalCount,
-        cyclesSaveMode,
         requestsForAccess
     } = props;
 
@@ -110,7 +109,6 @@ export const mapBackendCanisterDataToFrontEndObj = (props) => {
         supportMode: supportMode,
         acceptingRequests: acceptingRequests,
         journalCount: parseInt(journalCount),
-        cyclesSaveMode: cyclesSaveMode,
         requestsForAccess: requestsForAccess_
     }
 }; 

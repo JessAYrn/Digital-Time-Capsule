@@ -177,18 +177,6 @@ const Analytics = () => {
         setIsLoadingModal(false);
     };
 
-    const toggleCyclesSaveMode = async () => {
-        setIsLoadingModal(true);
-        setModalIsOpen(true);
-        let canisterData = await actorState.backendActor.toggleCyclesSaveMode();
-        homePageDispatch({
-            actionType: homePageTypes.SET_CANISTER_DATA,
-            payload: { ...homePageState.canisterData, cyclesSaveMode: canisterData.cyclesSaveMode }
-        });
-        setModalIsOpen(false);
-        setIsLoadingModal(false);
-    };
-
     const openProposalForm = () => {
         setModalIsOpen(true);
         setModalProps({
@@ -371,12 +359,6 @@ const Analytics = () => {
                             onClick={toggleAcceptRequest}
                             disabled={!homePageState.canisterData.isAdmin}
                             labelLeft={"Receive Requests:  "}
-                        />
-                        <Switch
-                            checked={homePageState.canisterData.cyclesSaveMode}
-                            onClick={toggleCyclesSaveMode}
-                            labelLeft={'Cycles Saver Mode: '}
-                            disabled={!homePageState.canisterData.isAdmin}
                         />
                     </Grid>
                     <Grid

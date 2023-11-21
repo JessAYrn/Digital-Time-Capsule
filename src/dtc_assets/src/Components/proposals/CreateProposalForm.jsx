@@ -65,7 +65,6 @@ const CreateProposalForm = (props) => {
         { text: PROPOSAL_ACTIONS.DissolveIcpNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.DissolveIcpNeuron, true, PAYLOAD_DATA_TYPES.text)},
         { text: PROPOSAL_ACTIONS.SpawnIcpNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.SpawnIcpNeuron, true, PAYLOAD_DATA_TYPES.text)},
         { text: PROPOSAL_ACTIONS.FollowIcpNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.FollowIcpNeuron, true, PAYLOAD_DATA_TYPES.text)},
-        { text: PROPOSAL_ACTIONS.ToggleCyclesSaverMode, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.ToggleCyclesSaverMode)},
     ];
 
     const onChange_payload = (payload_) => {

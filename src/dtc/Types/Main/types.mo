@@ -92,7 +92,6 @@ module{
         profilesMetaData: ProfilesMetaData;
         isAdmin: Bool;
         supportMode: Bool;
-        cyclesSaveMode: Bool;
         releaseVersion: Nat;
         requestsForAccess: RequestsForAccess;
     };
@@ -108,7 +107,6 @@ module{
         nftId: Int;
         acceptingRequests: Bool;
         lastRecordedTime: Int;
-        cyclesSaveMode: Bool;
         supportMode: Bool;
         requestsForAccess: RequestsForAccess;
         defaultControllers: [Principal];
@@ -124,7 +122,6 @@ module{
         admin: [(Text, AdminData)];
         acceptingRequests: Bool;
         lastRecordedTime: Int;
-        cyclesSaveMode: Bool;
         supportMode: Bool;
         requestsForAccess: RequestsForAccess;
         defaultControllers: [Principal];
@@ -180,7 +177,6 @@ module{
         #FollowIcpNeuron;
         #SpawnIcpNeuron;
         #DispurseIcpNeuron;
-        #ToggleCyclesSaverMode;
         #PurchaseCycles;
     };
 
@@ -197,7 +193,6 @@ module{
         admin = [];
         acceptingRequests = true;
         lastRecordedTime = 0;
-        cyclesSaveMode = false;
         supportMode = false;
         requestsForAccess = [];
         defaultControllers = [];

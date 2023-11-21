@@ -30,6 +30,13 @@ shared(msg) actor class Treasury (principal : Principal) = this {
 
     private stable var stakingMultiplier : Nat64 = 2;
 
+    private stable var tokenBalances : TreasuryTypes.Balances = {
+        icp = {e8s = 0};
+        icp_staked = {e8s = 0};
+        eth = {e8s = 0};
+        btc = {e8s = 0};
+    };
+
     private var contributorsMap : TreasuryTypes.TreasuryContributorsMap = 
     HashMap.fromIter<Text, TreasuryTypes.Balances>(
         Iter.fromArray(contributorsArray), 
@@ -103,6 +110,7 @@ shared(msg) actor class Treasury (principal : Principal) = this {
         };
 
         contributorsMap.put(userPrincipal, updatedContributions);
+        ignore updateTokenBalances_();
         return #ok(Iter.toArray(contributorsMap.entries()));
     };
 
@@ -142,7 +150,7 @@ shared(msg) actor class Treasury (principal : Principal) = this {
             Principal.toText(caller) !=  Principal.toText(canisterId)
             and Principal.toText(caller) != ownerCanisterId
         ) { throw Error.reject("Unauthorized access."); };
-        await ledger.account_balance({ account = userAccountId() })
+        return tokenBalances.icp;
     };
 
     public shared({caller}) func canisterBalance_shared() : async Ledger.ICP {
@@ -151,7 +159,18 @@ shared(msg) actor class Treasury (principal : Principal) = this {
             Principal.toText(caller) !=  Principal.toText(canisterId)
             and Principal.toText(caller) != ownerCanisterId
         ) { throw Error.reject("Unauthorized access."); };
-        await ledger.account_balance({ account = userAccountId() })
+        return tokenBalances.icp;
+    };
+
+    private func updateTokenBalances_() : async () {
+        let icp = await ledger.account_balance({ account = userAccountId() });
+        //will have to do the same for the btc and eth ledgers
+        tokenBalances := {tokenBalances with icp };
+    };
+
+    public query ({caller}) func getCyclesBalance(): async Nat {
+        if(Principal.toText(caller) != ownerCanisterId) { throw Error.reject("Unauthorized access."); };
+        return Cycles.balance();
     };
 
     // Return the cycles received up to the capacity allowed

@@ -8,7 +8,6 @@ export const PROPOSAL_ACTIONS = {
     FollowIcpNeuron: "FollowIcpNeuron",
     SpawnIcpNeuron: "SpawnIcpNeuron",
     DispurseIcpNeuron: "DispurseIcpNeuron",
-    ToggleCyclesSaverMode: "ToggleCyclesSaverMode",
     PurchaseCycles: "PurchaseCycles"
 };
 

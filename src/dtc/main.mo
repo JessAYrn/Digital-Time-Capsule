@@ -36,6 +36,7 @@ import AnalyticsHelperMethods "Modules/Analytics/AnalyticsHelperMethods";
 import AnalyticsTypes "Types/Analytics/types";
 import Journal "Journal";
 import WasmStore "Types/WasmStore/types";
+import SupportCanisterIds "SupportCanisterIds/SupportCanisterIds";
 
 shared actor class User() = this {
 
@@ -47,9 +48,9 @@ shared actor class User() = this {
 
     private stable var proposalsArray: MainTypes.Proposals = [];
 
-    private stable var everyFiveSecondsTimerId: {id: Nat; active: Bool} = {id = 0; active = false;};
+    private stable var xdr_permyriad_per_icp: Nat64 = 1;
 
-    private stable var dailyTimerId: {id: Nat; active: Bool;} = {id = 0; active = false;};
+    private stable var frontEndCanisterBalance: Nat = 1;
 
     private var userProfilesMap : MainTypes.UserProfilesMap = HashMap.fromIter<Principal, MainTypes.UserProfile>(
         Iter.fromArray(userProfilesArray), 
@@ -260,21 +261,6 @@ shared actor class User() = this {
         daoMetaData_v2 := updatedMetaData; return #ok(updatedMetaData);
     };
 
-    public shared({caller}) func toggleCyclesSaveMode() : async MainTypes.DaoMetaData_V2{
-        let updatedMetaData = { daoMetaData_v2 with cyclesSaveMode = not daoMetaData_v2.cyclesSaveMode; };
-        if(updatedMetaData.cyclesSaveMode) deactivateTimers()
-        else activateTimers();
-        daoMetaData_v2 := updatedMetaData;
-        return updatedMetaData;
-    };
-
-    private func toggleCyclesSaveMode_() : (){
-        let updatedMetaData = { daoMetaData_v2 with cyclesSaveMode = not daoMetaData_v2.cyclesSaveMode; };
-        if(updatedMetaData.cyclesSaveMode) deactivateTimers()
-        else activateTimers();
-        daoMetaData_v2 := updatedMetaData;
-    };
-
     public query({caller}) func getRequestingPrincipals() : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error>{
         let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v2);
         if(not isAdmin){ return #err(#NotAuthorized); }
@@ -292,11 +278,14 @@ shared actor class User() = this {
         };
     };
 
-    public shared(msg) func getCanisterCyclesBalances() : async MainTypes.CanisterCyclesBalances{
+    public composite query(msg) func getCanisterCyclesBalances() : async MainTypes.CanisterCyclesBalances{
         let currentCyclesBalance_backend = Cycles.balance();
-        let {cycles = currentCyclesBalance_frontend } = await ic.canister_status({ canister_id = Principal.fromText(daoMetaData_v2.frontEndPrincipal) });
-        let {cycles = currentCyclesBalance_manager } = await ic.canister_status({ canister_id = Principal.fromText(daoMetaData_v2.managerCanisterPrincipal) });
-        return {currentCyclesBalance_backend; currentCyclesBalance_frontend; currentCyclesBalance_manager };
+        let managerCanister: Manager.Manager = actor(daoMetaData_v2.managerCanisterPrincipal);
+        let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
+        let currentCyclesBalance_frontend  = frontEndCanisterBalance;
+        let currentCyclesBalance_treasury = await treasuryCanister.getCyclesBalance();
+        let currentCyclesBalance_manager = await managerCanister.getCyclesBalance();
+        return {currentCyclesBalance_backend; currentCyclesBalance_frontend; currentCyclesBalance_manager; currentCyclesBalance_treasury};
     };
 
     public composite query({caller}) func getCanisterData() : async Result.Result<(MainTypes.CanisterDataExport), JournalTypes.Error> {
@@ -306,9 +295,6 @@ shared actor class User() = this {
             case (? existingProfile){
                 let managerCanister : Manager.Manager = actor(daoMetaData_v2.managerCanisterPrincipal);
                 let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
-                let cyclesMintingCanister: NnsCyclesMinting.Interface = actor(NnsCyclesMinting.NnsCyclesMintingCanisterID);
-                let {data} = await cyclesMintingCanister.get_icp_xdr_conversion_rate();
-                let {xdr_permyriad_per_icp} = data;
                 let treasuryContributionsArray = await treasuryCanister.getTreasuryContributionsArray();
                 let profilesMetaData = CanisterManagementMethods.getProfilesMetaData(userProfilesMap);
                 let {number = releaseVersion} = await managerCanister.getCurrentReleaseVersion();
@@ -339,7 +325,9 @@ shared actor class User() = this {
 
     public shared({ caller }) func upgradeApp(): async (){
         let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v2);
-        if(not isAdmin){ throw Error.reject("Unauthorized Access"); };
+        if(not isAdmin and not (Principal.toText(caller) == SupportCanisterIds.TechSupportPrincipal2 and daoMetaData_v2.supportMode)){ 
+            throw Error.reject("Unauthorized Access"); 
+        };
         let managerCanister: Manager.Manager = actor(daoMetaData_v2.managerCanisterPrincipal);
         await managerCanister.loadRelease();
         try { await updateCanistersExceptBackend(); } 
@@ -391,12 +379,11 @@ shared actor class User() = this {
             case null {throw Error.reject("user profile not found")};
             case(?profile){
                 let managerCanister : Manager.Manager = actor(daoMetaData_v2.managerCanisterPrincipal);
-                let wasmStore: WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
                 let userCanister: Journal.Journal = actor(Principal.toText(profile.canisterId));
                 let userNotifications = await userCanister.getNotifications();
                 let notificationsBuffer = Buffer.fromArray<NotificationsTypes.Notification>(userNotifications);
                 let currentReleaseVersion = await managerCanister.getCurrentReleaseVersion();
-                let nextStableVersion = await wasmStore.getNextAppropriateRelease(currentReleaseVersion);
+                let nextStableVersion = await managerCanister.getWhatIsNextStableReleaseVersion();
                 let text = Text.concat("New Stable Version Availabe: Version #", Nat.toText(nextStableVersion.number));
                 if(nextStableVersion.number > currentReleaseVersion.number) notificationsBuffer.add({text; key = null});
                 return notificationsBuffer.toArray();
@@ -459,6 +446,15 @@ shared actor class User() = this {
         daoMetaData_v2 := updatedMetaData;
     };
 
+    private func heartBeat_hourly(): async () {
+        let cyclesMintingCanister: NnsCyclesMinting.Interface = actor(NnsCyclesMinting.NnsCyclesMintingCanisterID);
+        let {data} = await cyclesMintingCanister.get_icp_xdr_conversion_rate();
+        let {xdr_permyriad_per_icp = xdr_permyriad_per_icp_} = data;
+        let {cycles} = await ic.canister_status({ canister_id = Principal.fromText(daoMetaData_v2.frontEndPrincipal) });
+        frontEndCanisterBalance := cycles;
+        xdr_permyriad_per_icp := xdr_permyriad_per_icp_;
+    };
+
     let {recurringTimer; cancelTimer; setTimer} = Timer;
 
     public shared({caller}) func createProposal(action: MainTypes.ProposalActions, payload: MainTypes.ProposalPayload): 
@@ -470,9 +466,6 @@ shared actor class User() = this {
         let hasSufficientContributions = await treasuryCanister.userHasSufficientContributions(caller);
         if(not hasSufficientContributions and treasuryContributionRequired) return #err(#NotAuthorizedToCreateProposals);
         let treasuryContributionsArray = await treasuryCanister.getTreasuryContributionsArray();
-        let cyclesMintingCanister: NnsCyclesMinting.Interface = actor(NnsCyclesMinting.NnsCyclesMintingCanisterID);
-        let {data} = await cyclesMintingCanister.get_icp_xdr_conversion_rate();
-        let {xdr_permyriad_per_icp} = data;
         let proposer = Principal.toText(caller); let votes = [(proposer, {adopt = true})];
         let timeInitiated = Time.now(); let timeExecuted = null;
         var voteTally = {yay = Float.fromInt(0); nay = Float.fromInt(0); total = Float.fromInt(0);};
@@ -501,9 +494,6 @@ shared actor class User() = this {
                 let treasuryContributionsArray = await treasuryCanister.getTreasuryContributionsArray();
                 votesMap.put(Principal.toText(caller), {adopt});
                 var updatedProposal = {proposal with votes = Iter.toArray(votesMap.entries()); };
-                let cyclesMintingCanister: NnsCyclesMinting.Interface = actor(NnsCyclesMinting.NnsCyclesMintingCanisterID);
-                let {data} = await cyclesMintingCanister.get_icp_xdr_conversion_rate();
-                let {xdr_permyriad_per_icp} = data;
                 let voteTally = GovernanceHelperMethods.tallyVotes({treasuryContributionsArray; proposal = updatedProposal; xdr_permyriad_per_icp});
                 updatedProposal := {updatedProposal with voteTally};
                 proposalsMap.put(proposalIndex, updatedProposal);
@@ -527,9 +517,6 @@ shared actor class User() = this {
             case (?proposal){
                 let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
                 let treasuryContributionsArray = await treasuryCanister.getTreasuryContributionsArray();
-                let cyclesMintingCanister: NnsCyclesMinting.Interface = actor(NnsCyclesMinting.NnsCyclesMintingCanisterID);
-                let {data} = await cyclesMintingCanister.get_icp_xdr_conversion_rate();
-                let {xdr_permyriad_per_icp} = data;
                 let votingResults = GovernanceHelperMethods.tallyVotes({treasuryContributionsArray; proposal; xdr_permyriad_per_icp});
                 let {yay; nay; total } = votingResults;
                 var timeExecuted: ?Int = null;
@@ -595,28 +582,16 @@ shared actor class User() = this {
             case(#DispurseIcpNeuron){
                 //call function to dispurse ICP neuron
             };
-            //still need to delete the public toggleCyclesSaveMode method once the frontend has been updated
-            case(#ToggleCyclesSaverMode){ toggleCyclesSaveMode_(); };
             case(#PurchaseCycles){
                 //call function to purchase more cycles
             };
         };
     };
 
-    private func activateTimers() : () {
-        let timerId_daily = recurringTimer(#seconds (24 * 60 * 60), heartBeat_unshared);
-        let timerId_everyFiveSeconds = recurringTimer(#seconds (5), updateUsersTxHistory);
-        everyFiveSecondsTimerId := {id = timerId_everyFiveSeconds; active = true};
-        dailyTimerId := {id = timerId_daily; active = true;};
-    };
+    let timerId_daily = recurringTimer(#seconds (24 * 60 * 60), heartBeat_unshared);
+    let timerId_hourly = recurringTimer(#seconds (60 * 60), heartBeat_hourly);
+    let timerId_everyFiveSeconds = recurringTimer(#seconds (5), updateUsersTxHistory);
 
-    private func deactivateTimers() : () {
-        cancelTimer(everyFiveSecondsTimerId.id);
-        cancelTimer(dailyTimerId.id);
-        dailyTimerId := {dailyTimerId with active = false};
-        everyFiveSecondsTimerId := { everyFiveSecondsTimerId with active = false };
-    };
-    
     system func preupgrade() { 
         userProfilesArray := Iter.toArray(userProfilesMap.entries()); 
         proposalsArray := Iter.toArray(proposalsMap.entries());

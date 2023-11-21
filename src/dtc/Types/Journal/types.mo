@@ -16,6 +16,12 @@ module {
         photos: [FileMetaData];
     };
 
+    public type Balances = {
+        icp: {e8s : Nat64};
+        eth: {e8s: Nat64};
+        btc: {e8s: Nat64};
+    };
+
     public type Files = Trie.Trie2D<Text,Nat,Blob>;
 
     public type File = Trie.Trie<Nat,Blob>;
