@@ -26,8 +26,6 @@ import { actorTypes } from "../../../reducers/actorReducer";
 import Grid from '@mui/material/Unstable_Grid2';
 import { homePageTypes } from "../../../reducers/homePageReducer";
 
-const isLocal = isLocalHost();
-
 export const accordionContent=[    
     {
         title:"1.) Navigate to your Personal DAO's unique URL and press the share button circled below ", 
