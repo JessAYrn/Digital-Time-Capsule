@@ -1,30 +1,27 @@
 import React, {useContext, useEffect, useState} from "react";
 import { useNavigate } from "react-router-dom";
-import { AppContext as AccountContext} from '../../Account';
-import { AppContext as HomePageContext} from '../../HomePage';
-import { AppContext as JournalContext} from '../../App';
-import { AppContext as WalletContext} from '../../Wallet';
-import { AppContext as TreasuryContext} from '../../Treasury';
-import { AppContext as GroupJournalContext} from '../../GroupJournal';
-import { UI_CONTEXTS, retrieveContext } from "../../../functionsAndConstants/Contexts";
+import { AppContext as AccountContext} from '../Account';
+import { AppContext as HomePageContext} from '../HomePage';
+import { AppContext as JournalContext} from '../App';
+import { AppContext as WalletContext} from '../Wallet';
+import { AppContext as TreasuryContext} from '../Treasury';
+import { AppContext as GroupJournalContext} from '../GroupJournal';
+import { UI_CONTEXTS, retrieveContext } from "../../functionsAndConstants/Contexts";
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import ArticleIcon from '@mui/icons-material/Article';
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import DashboardIcon from '@mui/icons-material/Dashboard';
-import { NAV_LINKS } from "../../../functionsAndConstants/Constants";
-import "./LoginPage.scss";
-import "../../../SCSS/Animation.scss";
+import { NAV_LINKS } from "../../functionsAndConstants/Constants";
 import { ConnectButton, ConnectDialog, useConnect, useCanister } from "@connect2ic/react";
 import "@connect2ic/core/style.css"
-import ButtonField from "../../../Components/Fields/Button";
-import DataField from "../../../Components/Fields/DataField";
-import { types } from "../../../reducers/journalReducer";
-import { backendActor, isLocalHost, inTrillions, round2Decimals } from "../../../functionsAndConstants/Utils";
-import '../../../SCSS/contentContainer.scss'
-import AccordionField from "../../../Components/Fields/Accordion";
-import { actorTypes } from "../../../reducers/actorReducer";
+import ButtonField from "../../Components/Fields/Button";
+import DataField from "../../Components/Fields/DataField";
+import { types } from "../../reducers/journalReducer";
+import { backendActor, inTrillions, round2Decimals } from "../../functionsAndConstants/Utils";
+import AccordionField from "../../Components/Fields/Accordion";
+import { actorTypes } from "../../reducers/actorReducer";
 import Grid from '@mui/material/Unstable_Grid2';
-import { homePageTypes } from "../../../reducers/homePageReducer";
+import { homePageTypes } from "../../reducers/homePageReducer";
 
 export const accordionContent=[    
     {
@@ -129,6 +126,7 @@ const LoginPage = (props) => {
         <Grid container columns={12} xs={12} rowSpacing={8} display="flex" justifyContent="center" alignItems="center">
             <Grid xs={11} md={9} display="flex" justifyContent="center" alignItems="center">
                 <img 
+                    style={{maxWidth: "50vw", maxHeight: "50vh"}}
                     className={`img`}
                     src={'P2.svg'}
                     alt="Logo"

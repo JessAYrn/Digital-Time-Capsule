@@ -1,7 +1,7 @@
 import React, {useReducer, createContext, useEffect, useState, useMemo} from 'react';
 import journalReducer, { types, initialState } from '../reducers/journalReducer';
 import { useLocation } from 'react-router-dom';
-import LoginPage from './Pages/authentication/LoginPage';
+import LoginPage from './Pages/LoginPage';
 import { UI_CONTEXTS } from '../functionsAndConstants/Contexts';
 import { recoverState, loadAllDataIntoReduxStores, allStatesLoaded } from '../functionsAndConstants/loadingFunctions';
 import { useConnect } from '@connect2ic/react';

@@ -1,7 +1,7 @@
 import React, { createContext, useReducer, useEffect, useState, useMemo} from 'react';
 import { useLocation } from 'react-router-dom';
 import journalReducer, {initialState, types} from "../reducers/journalReducer";
-import LoginPage from './Pages/authentication/LoginPage';
+import LoginPage from './Pages/LoginPage';
 import { UI_CONTEXTS } from '../functionsAndConstants/Contexts';
 import Analytics from './Pages/Analytics';
 import "./HomePage.scss";
