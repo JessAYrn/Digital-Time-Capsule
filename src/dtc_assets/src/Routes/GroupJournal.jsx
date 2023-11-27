@@ -12,12 +12,14 @@ import homePageReducer, { homePageInitialState,homePageTypes } from '../reducers
 import accountReducer, { accountInitialState,accountTypes } from '../reducers/accountReducer';
 import actorReducer, { actorInitialState,actorTypes } from '../reducers/actorReducer';
 import notificationsReducer, {notificationsInitialState, notificationsTypes} from "../reducers/notificationsReducer";
+import treasuryReducer, {treasuryPageInitialState, treasuryTypes} from "../reducers/treasuryReducer";
 import ModalComponent from '../Components/modal/Modal';
 
 export const AppContext = createContext(DEFAULT_APP_CONTEXTS);
 
 const GroupJournal = () => {
     const [journalState, journalDispatch] = useReducer(journalReducer, initialState);
+    const [treasuryState, treasuryDispatch] = useReducer(treasuryReducer, treasuryPageInitialState);
     const [notificationsState, notificationsDispatch] = useReducer(notificationsReducer, notificationsInitialState);
     const [walletState, walletDispatch] = useReducer(walletReducer, walletInitialState);
     const [homePageState, homePageDispatch] =  useReducer(homePageReducer, homePageInitialState)
@@ -35,7 +37,8 @@ const GroupJournal = () => {
         accountDispatch,
         actorDispatch,
         homePageDispatch,
-        notificationsDispatch
+        notificationsDispatch,
+        treasuryDispatch
     }
 
     const ReducerTypes={
@@ -44,7 +47,8 @@ const GroupJournal = () => {
         accountTypes,
         actorTypes,
         homePageTypes,
-        notificationsTypes
+        notificationsTypes,
+        treasuryTypes
     }
 
     const ReducerStates = {
@@ -53,7 +57,8 @@ const GroupJournal = () => {
         accountState,
         homePageState,
         actorState,
-        notificationsState
+        notificationsState,
+        treasuryState
     };
     
     window.onbeforeunload = window.history.replaceState(null, '');
@@ -83,12 +88,14 @@ const GroupJournal = () => {
             journalState,
             notificationsState,
             walletState,
+            treasuryState,
             accountState,
             homePageState
         });
     },[
         journalState.isAuthenticated, 
         accountState.dataHasBeenLoaded,
+        treasuryState.dataHasBeenLoaded,
         journalState.dataHasBeenLoaded,
         walletState.dataHasBeenLoaded,
         homePageState.dataHasBeenLoaded,
@@ -110,7 +117,9 @@ const GroupJournal = () => {
         actorReducer,
         actorState,
         notificationsState,
-        notificationsDispatch
+        notificationsDispatch,
+        treasuryState,
+        treasuryDispatch
     }}
     >
         {           

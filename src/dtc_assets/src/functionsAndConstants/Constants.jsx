@@ -50,10 +50,6 @@ export const CANISTER_DATA_FIELDS = {
     backEndPrincipal: "backEndPrincipal",
     backEndCyclesBurnRatePerDay: "backEndCyclesBurnRatePerDay",
     lastRecordedBackEndCyclesBalance: "lastRecordedBackEndCyclesBalance",
-    nftOwner: "nftOwner",
-    currentCyclesBalance_backend: "currentCyclesBalance_backend",
-    currentCyclesBalance_frontend: "currentCyclesBalance_frontend",
-    nftId: "nftId",
     RequestsForAccess: "RequestsForAccess",
     users: "users",
     journalCount: "journalCount"
@@ -98,7 +94,9 @@ export const DEFAULT_APP_CONTEXTS={
     actorState:{},
     actorDispatch:()=>{},
     notificationsState:{},
-    notificationsDispatch: () => {}
+    notificationsDispatch: () => {},
+    treasuryState:{},
+    treasuryDispatch: () => {}
 }
 export const MASTER_COPY_FRONTEND_CANISTER_ID = "fkkq7-siaaa-aaaap-qaaya-cai";
 
@@ -111,4 +109,31 @@ export const BUTTON_TYPES = {
     icon: 'icon',
     text: 'text',
     loading: 'loading'
+};
+
+export const INPUT_BOX_FORMATS = {
+    numberFormat : "numberFormat",
+    noFormat : "noFormat"
+};
+
+export const CHART_TYPES = {
+    line: "LINE",
+    bar: "BAR",
+    pie: "PIE"
+}; 
+
+export const GRAPH_TIME_FRAMES = {
+    week: "week",
+    month: "month",
+    year: "year",
+    allTime: "allTime"
+}
+
+export const GRAPH_DISPLAY_CURRENCIES = {
+    icp: "ICP",
+    icp_staked: "ICP_STAKED",
+    btc: "BTC",
+    eth: "ETH",
+    xdrs: "XDRS"
+
 }

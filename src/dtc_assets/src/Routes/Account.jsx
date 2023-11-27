@@ -12,6 +12,7 @@ import walletReducer,{ walletInitialState, walletTypes } from '../reducers/walle
 import homePageReducer, { homePageInitialState, homePageTypes } from '../reducers/homePageReducer';
 import actorReducer, { actorInitialState,actorTypes } from "../reducers/actorReducer";
 import notificationsReducer, {notificationsInitialState, notificationsTypes} from "../reducers/notificationsReducer";
+import treasuryReducer, {treasuryPageInitialState, treasuryTypes} from "../reducers/treasuryReducer";
 import ModalComponent from '../Components/modal/Modal';
 
 export const AppContext = createContext(DEFAULT_APP_CONTEXTS);
@@ -19,6 +20,7 @@ export const AppContext = createContext(DEFAULT_APP_CONTEXTS);
 const AccountPage = () => {
 
     const [journalState, journalDispatch] = useReducer(journalReducer, initialState);
+    const [treasuryState, treasuryDispatch] = useReducer(treasuryReducer, treasuryPageInitialState);
     const [notificationsState, notificationsDispatch] = useReducer(notificationsReducer, notificationsInitialState);
     const [accountState, accountDispatch] = useReducer(accountReducer, accountInitialState);
     const [walletState, walletDispatch]=useReducer(walletReducer,walletInitialState);
@@ -42,7 +44,8 @@ const AccountPage = () => {
         accountDispatch,
         homePageDispatch,
         actorDispatch,
-        notificationsDispatch
+        notificationsDispatch,
+        treasuryDispatch
     }
 
     const ReducerTypes={
@@ -51,7 +54,8 @@ const AccountPage = () => {
         accountTypes,
         homePageTypes,
         actorTypes,
-        notificationsTypes
+        notificationsTypes,
+        treasuryTypes
     }
 
     const ReducerStates = {
@@ -60,7 +64,8 @@ const AccountPage = () => {
         accountState,
         homePageState,
         actorState,
-        notificationsState
+        notificationsState,
+        treasuryState
     };
 
     // gets state from previous route
@@ -82,6 +87,7 @@ const AccountPage = () => {
     const displayComponent = useMemo(() => {
         return journalState.isAuthenticated && allStatesLoaded({
             journalState,
+            treasuryState,
             notificationsState,
             walletState,
             accountState,
@@ -90,6 +96,7 @@ const AccountPage = () => {
     },[
         journalState.isAuthenticated, 
         accountState.dataHasBeenLoaded,
+        treasuryState.dataHasBeenLoaded,
         journalState.dataHasBeenLoaded,
         walletState.dataHasBeenLoaded,
         homePageState.dataHasBeenLoaded,
@@ -111,7 +118,9 @@ const AccountPage = () => {
                 actorState,
                 actorDispatch,
                 notificationsState,
-                notificationsDispatch
+                notificationsDispatch,
+                treasuryState,
+                treasuryDispatch
             }}
         >
             {

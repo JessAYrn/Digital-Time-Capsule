@@ -1,25 +1,26 @@
 import { mapApiObjectToFrontEndJournalEntriesObject } from "../mappers/journalPageMappers";
-import { delay, managerActor, backendActor, toHexString, nanoSecondsToMiliSeconds } from "./Utils";
+import { delay, backendActor, toHexString, nanoSecondsToMiliSeconds } from "./Utils";
 import { generateQrCode } from "./walletFunctions/GenerateQrCode";
 import { mapBackendCanisterDataToFrontEndObj } from "../mappers/dashboardMapperFunctions";
+import { mapBackendTreasuryDataToFrontEndObj } from "../mappers/treasuryPageMapperFunctions";
 import { getFileUrl_fromApi } from "../Components/Fields/fileManger/FileManagementTools";
-import { CreateUserJournal } from "../Routes/Pages/authentication/AuthenticationMethods";
 import DoNotDisturbOnIcon from '@mui/icons-material/DoNotDisturbOn';
 import ButtonField from "../Components/Fields/Button";
+import mapBalancesDataFromApiToFrontend from "../mappers/analyticsMappers";
 
 
 export const loadAllDataIntoReduxStores = async (states, dispatchFunctions, types, stateHasBeenRecovered) => {
     //doesn't reload data if the data has already been recovered
     if(stateHasBeenRecovered) return; 
 
-    let {walletState, homePageState, journalState, actorState, accountState, notificationsState} = states;
-    let {journalDispatch, walletDispatch, homePageDispatch, accountDispatch, notificationsDispatch} = dispatchFunctions;
-    let {journalTypes, walletTypes, homePageTypes, accountTypes, notificationsTypes } = types;
+    let {walletState, homePageState, journalState, actorState, accountState, notificationsState, treasuryState} = states;
+    let {journalDispatch, walletDispatch, homePageDispatch, accountDispatch, notificationsDispatch, treasuryDispatch} = dispatchFunctions;
+    let {journalTypes, walletTypes, homePageTypes, accountTypes, notificationsTypes, treasuryTypes } = types;
     let accountCreationAttemptResults;
     //checks to see if user has an account. If not, then it attemptes to make an account, if 
     //the account creation is unsuccessful, then it returns
     let hasAccount = await actorState.backendActor.hasAccount();
-    if(!hasAccount) accountCreationAttemptResults = await CreateUserJournal(actorState);
+    if(!hasAccount) accountCreationAttemptResults = await actorState.backendActor.create();
     if(accountCreationAttemptResults && "err" in accountCreationAttemptResults){
         return {
             openModal: true, 
@@ -48,8 +49,8 @@ export const loadAllDataIntoReduxStores = async (states, dispatchFunctions, type
     if(!journalState.dataHasBeenLoaded) promises.push(loadJournalData(actorState, journalDispatch, journalTypes));
     if(!accountState. dataHasBeenLoaded) promises.push(loadAccountData(actorState, accountDispatch, accountTypes));
     if(!notificationsState.dataHasBeenLoaded) promises.push(loadNotificationsData(actorState, notificationsDispatch, notificationsTypes));
+    if(!treasuryState.dataHasBeenLoaded) promises.push(loadTreasuryData(actorState, treasuryDispatch, treasuryTypes));
     await Promise.all(promises);
-
     return {}
 };
 
@@ -177,6 +178,27 @@ export const loadCanisterData = async (actorState, dispatch, types) => {
     return canisterData;
 }
 
+export const loadTreasuryData = async (actorState, dispatch, types) => {
+    let promises = [actorState.backendActor.getTreasuryData(), actorState.backendActor.retrieveTreasuryBalances()];
+    let [treasuryData, treasuryBalances] = await Promise.all(promises);
+    treasuryBalances = mapBalancesDataFromApiToFrontend(treasuryBalances)
+    treasuryData = treasuryData.ok;
+    treasuryData = mapBackendTreasuryDataToFrontEndObj(treasuryData);
+    dispatch({
+        actionType: types.SET_TREASURY_DATA,
+        payload: treasuryData
+    });
+    dispatch({
+        actionType: types.SET_TREASURY_BALANCES_DATA,
+        payload: treasuryBalances
+    });
+    dispatch({
+        actionType: types.SET_DATA_HAS_BEEN_LOADED,
+        payload: true,
+    });
+    return treasuryData;
+};
+
 export const handleErrorOnFirstLoad = async (fnForLoadingData, fnForRefiringAuthentication, props_ ) => {
     const {
         journalState, 
@@ -199,7 +221,7 @@ export const recoverState = async ( location, dispatchMethods, types, connection
     // dispatch state from previous route to redux store if that state exists
     if(!location.state) return;
     setStateHasBeenRecovered(true);
-    const{journal,wallet,homePage, account, notifications}=location.state;
+    const{journal,wallet,homePage, account, notifications, treasury}=location.state;
     if(dispatchMethods.journalDispatch){
         dispatchMethods.journalDispatch({
             actionType: types.journalTypes.SET_ENTIRE_REDUX_STATE,
@@ -235,21 +257,20 @@ export const recoverState = async ( location, dispatchMethods, types, connection
         })
     }
 
+    if(dispatchMethods.treasuryDispatch){
+        dispatchMethods.treasuryDispatch({
+            actionType: types.treasuryTypes.SET_ENTIRE_TREASURY_REDUX_STATE,
+            payload: treasury
+        })
+    }
+
     //wipe previous location state to prevent infinite loop
     location.state = null;
-    const promises = [
-        backendActor(connectionResult.activeProvider),
-        managerActor(connectionResult.activeProvider)
-    ];
-    const [backendActor_, managerActor_] = await Promise.all(promises);
+    const backendActor_ = await backendActor(connectionResult.activeProvider);
     dispatchMethods.actorDispatch({
         actionType: types.actorTypes.SET_BACKEND_ACTOR,
         payload: backendActor_
-    });
-    dispatchMethods.actorDispatch({
-        actionType: types.actorTypes.SET_MANAGER_ACTOR,
-        payload: managerActor_
-    });
+    })
 };
 
 export const fileLoaderHelper = async (props) => {

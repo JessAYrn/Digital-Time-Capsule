@@ -16,9 +16,12 @@ import DataTable from "../../Components/Fields/Table";
 import DatePickerField from "../../Components/Fields/DatePicker";
 import "../../SCSS/scrollable.scss";
 import "../../SCSS/contentContainer.scss";
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
 import { journalPagesTableColumns, mapRequestsForAccessToTableRows } from "../../mappers/journalPageMappers";
 import { mapApiObjectToFrontEndJournalEntriesObject } from "../../mappers/journalPageMappers";
 import ModalComponent from "../../Components/modal/Modal";
+import ButtonField from "../../Components/Fields/Button";
 
 const count = 30
 
@@ -29,6 +32,7 @@ const Journal = (props) => {
     const [counter, setCounter] = useState(1);
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [modalIsLoading, setModalIsLoading] = useState(false);
+    const [modelProps, setModalProps] = useState({});
 
     const sendData = async () => {
         journalDispatch({
@@ -90,7 +94,15 @@ const Journal = (props) => {
         setModalIsLoading(true);
         setModalIsOpen(true);
         const result = await actorState.backendActor.createJournalEntry();
-        
+        if('err' in result) {
+            setModalProps({
+                bigText: "Your data canisgter is full.", 
+                smallText: "You'll have to purchase another canister for storage",
+                Icon: ErrorOutlineIcon
+            });
+            setModalIsLoading(false)
+            return;
+        }
         let journalEntries = result.ok;
         journalEntries = mapApiObjectToFrontEndJournalEntriesObject(journalEntries);
         const entryKey = getHighestEntryKey(journalEntries);
@@ -246,7 +258,21 @@ const Journal = (props) => {
                 <SpeedDialField actions={speedDialActions} position={"right"}/>
             </>}  
         </Grid>
-        <ModalComponent open={modalIsOpen} isLoading={modalIsLoading} />
+        <ModalComponent 
+            open={modalIsOpen} 
+            isLoading={modalIsLoading} 
+            handleClose={() => {setModalIsOpen(false)}}
+            components={[{
+                Component: ButtonField, 
+                props: {
+                    active: true,
+                    text: "OK",
+                    Icon: ThumbUpAltIcon,
+                    onClick: () => setModalIsOpen(false)
+                }
+            }]}
+            {...modelProps}
+        />
         </>
     );
 

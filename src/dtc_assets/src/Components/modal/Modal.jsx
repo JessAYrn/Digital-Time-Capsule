@@ -5,6 +5,7 @@ import "./Modal.scss";
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
 import { ConnectButton, ConnectDialog, useConnect} from "@connect2ic/react";
 import ButtonField from '../Fields/Button';
+import { Typography } from '@mui/material';
 import PendingIcon from '@mui/icons-material/Pending';
 
 const style = {
@@ -48,9 +49,9 @@ const ModalComponent = (props_) => {
         aria-describedby="parent-modal-description"
       >
         <Box sx={{ ...style, width: 400 }} className={`modalBox ${isLoading ? 'transparent' : ''}`}>
-          {bigText && !isLoading && <h2 id="parent-modal-title">{bigText}</h2>}
+          {bigText && !isLoading && <Typography varient={"h2"} id="parent-modal-title">{bigText}</Typography>}
           {Icon && !isLoading &&  <Icon style={{height: "75px", width:"75px" }}/>}
-          {smallText && !isLoading && <p id="parent-modal-description">{smallText}</p>}
+          {smallText && !isLoading && <Typography varient={"body1"} id="parent-modal-description">{smallText}</Typography>}
           {imageSrc && !isLoading && <img className='modalImg' src={imageSrc} alt='Wrong src'/>}
           {isLoading && 
           <ButtonField 

@@ -127,10 +127,7 @@ const FileUpload = (props) => {
 
         if(hasError) {
             actorState.backendActor.deleteFile(fileId);
-            setModalProps({ 
-                bigText: "File Upload Unsuccessful.",
-                Icon: ErrorOutlineIcon
-            })
+            setModalProps({ bigText: "File Upload Unsuccessful.", Icon: ErrorOutlineIcon})
             setModalIsOpen(true);
             dispatch({
                 actionType: dispatchActionToChangeFileLoadStatus,

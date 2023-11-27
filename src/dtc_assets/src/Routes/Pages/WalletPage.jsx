@@ -1,8 +1,8 @@
-import React, {useCallback, useContext, useEffect, useState} from 'react';
+import React, {useMemo, useContext, useState} from 'react';
 import { AppContext } from '../Wallet';
 import { NavBar } from '../../Components/navigation/NavBar';
 import './WalletPage.scss';
-import { shortenHexString } from '../../functionsAndConstants/Utils';
+import { icpWalletAddressHasProperFormat, icpNumberHasProperFormat, shortenHexString } from '../../functionsAndConstants/Utils';
 import { e8sInOneICP } from '../../functionsAndConstants/Constants';
 import {  RenderQrCode } from '../../functionsAndConstants/walletFunctions/GenerateQrCode';
 import { copyText } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
@@ -32,8 +32,6 @@ const WalletPage = (props) => {
 
     const [loadingTx, setIsLoadingTx] = useState(false);
     const [showReloadButton, setShowReloadButton] = useState(false);
-    const [recipientAddress, setRecipientAddress] = useState("");
-    const [amountToSend, setAmountToSend] = useState(0);
     const [modalIsOpen, setModalIsOpen] = useState(false)
     const [modalProps, setModalProps] = useState({});
 
@@ -42,8 +40,6 @@ const WalletPage = (props) => {
             components: [{
                 Component: SendCryptoModal,
                 props: {
-                    onChangeRecipientAddress: setRecipientAddress,
-                    onChangeAmount: setAmountToSend,
                     onClickSend: () => {},
                     onClickCancel: () => {},
                     onClickScanQrCode: () => {}
@@ -52,8 +48,6 @@ const WalletPage = (props) => {
         });
         setModalIsOpen(true);
     };
-
-    console.log(amountToSend, recipientAddress);
 
     // const loadTxs = async () => {
     //     setIsLoadingTx(true);
@@ -67,7 +61,6 @@ const WalletPage = (props) => {
         {name: "New Transaction", icon: SendIcon , onClick: onSend}
     ]
 
-    console.log(walletState)
     return (
         <Grid 
             container 

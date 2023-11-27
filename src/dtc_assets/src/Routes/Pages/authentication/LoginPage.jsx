@@ -19,30 +19,29 @@ import "@connect2ic/core/style.css"
 import ButtonField from "../../../Components/Fields/Button";
 import DataField from "../../../Components/Fields/DataField";
 import { types } from "../../../reducers/journalReducer";
-import { backendActor, isLocalHost, inTrillions, managerActor, round2Decimals } from "../../../functionsAndConstants/Utils";
+import { backendActor, isLocalHost, inTrillions, round2Decimals } from "../../../functionsAndConstants/Utils";
 import '../../../SCSS/contentContainer.scss'
 import AccordionField from "../../../Components/Fields/Accordion";
 import { actorTypes } from "../../../reducers/actorReducer";
 import Grid from '@mui/material/Unstable_Grid2';
-
-const isLocal = isLocalHost();
+import { homePageTypes } from "../../../reducers/homePageReducer";
 
 export const accordionContent=[    
     {
         title:"1.) Navigate to your Personal DAO's unique URL and press the share button circled below ", 
-        image: `${isLocal ? "assets/" : ""}dtcscreengrab2.png`
+        image: `dtcscreengrab2.png`
     },
     {  
         title:"2.) Select the 'Add to Home Screen' button", 
-        image:`${isLocal ? "assets/" : ""}dtcscreengrab3.png`
+        image:`dtcscreengrab3.png`
     },
     {
         title:"3.) Enter a title and then press the 'add' button", 
-        image: `${isLocal ? "assets/" : ""}dtcscreengrab4.png`
+        image: `dtcscreengrab4.png`
     },
     {
         title:"4.) Your Personal DAO app will then be installed and visible on yoru Home Screen", 
-        image:`${isLocal ? "assets/" : ""}dtcscreengrab1.png`
+        image:`dtcscreengrab1.png`
     },
 
 ];
@@ -77,8 +76,6 @@ const LoginPage = (props) => {
         homePageDispatch 
     } = useContext(AppContext);
     
-    const [frontendCanisterBalance, setFrontendCanisterBalance] = useState(0);
-    const [backendCanisterBalance, setBackendCanisterBalance] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const [anonymousActor_dtc] = useCanister('dtc');
 
@@ -102,26 +99,24 @@ const LoginPage = (props) => {
     useEffect(async () => {
         let promises = [anonymousActor_dtc.getCanisterCyclesBalances(), anonymousActor_dtc.heartBeat()];
         let [result_0, result_1] = await Promise.all(promises);
-        setBackendCanisterBalance(parseInt(result_0.backendCyclesBalance));
-        setFrontendCanisterBalance(parseInt(result_0.frontendCyclesBalance));
+        const {currentCyclesBalance_backend, currentCyclesBalance_frontend} = result_0;
+        homePageDispatch({
+            payload: {
+                currentCyclesBalance_backend: parseInt(currentCyclesBalance_backend),
+                currentCyclesBalance_frontend: parseInt(currentCyclesBalance_frontend)
+            },
+            actionType: homePageTypes.SET_CANISTERS_CYCLES_BALANCES
+        });
         setIsLoading(false);
     },[]);
 
     useEffect(async () => {
         if(connectionResult.activeProvider){
-            const promises = [
-                backendActor(connectionResult.activeProvider),
-                managerActor(connectionResult.activeProvider)
-            ];
-            const [backendActor_, managerActor_] = await Promise.all(promises);
+            const backendActor_  = await backendActor(connectionResult.activeProvider);
             actorDispatch({
                 actionType: actorTypes.SET_BACKEND_ACTOR,
                 payload: backendActor_
-            });
-            actorDispatch({
-                actionType: actorTypes.SET_MANAGER_ACTOR,
-                payload: managerActor_
-            });
+            })
         }
         setIsLoading(true);
         journalDispatch({
@@ -135,7 +130,7 @@ const LoginPage = (props) => {
             <Grid xs={11} md={9} display="flex" justifyContent="center" alignItems="center">
                 <img 
                     className={`img`}
-                    src={`${isLocal ? "../../../assets/" : ""}P2.svg`}
+                    src={'P2.svg'}
                     alt="Logo"
                 />
             </Grid>
@@ -191,7 +186,7 @@ const LoginPage = (props) => {
                 <DataField
                     label={'Front-end Canister Balance: '}
                     className={'loginPage'}
-                    text={`${round2Decimals(inTrillions(frontendCanisterBalance))} T`}
+                    text={`${round2Decimals(inTrillions(homePageState.canistersCyclesBalances.currentCyclesBalance_frontend))} T`}
                     isLoading={isLoading}
                     disabled={true}
                 />
@@ -200,7 +195,7 @@ const LoginPage = (props) => {
                 <DataField
                     label={'Back-end Canister Balance: '}
                     className={'loginPage'}
-                    text={`${round2Decimals(inTrillions(backendCanisterBalance))} T`}
+                    text={`${round2Decimals(inTrillions(homePageState.canistersCyclesBalances.currentCyclesBalance_backend))} T`}
                     isLoading={isLoading}
                     disabled={true}
                 />

@@ -5,11 +5,15 @@
       "type": "motoko"
     },
     "journal": {
-      "main": "src/dtc/Journal/Journal.mo",
+      "main": "src/dtc/Journal.mo",
+      "type": "motoko"
+    },
+    "treasury": {
+      "main": "src/dtc/Treasury.mo",
       "type": "motoko"
     },
     "manager": {
-      "main": "src/dtc/Manager/Manager.mo",
+      "main": "src/dtc/Manager.mo",
       "type": "motoko"
     },
     "ledger": {
@@ -29,9 +33,7 @@
         }
       }
     },
-    "default": {
-      "ic": "bs4fi-aaaaa-aaaap-qaabq-cai"
-    },
+  
     "dtc_assets": {
       "dependencies": [
         "dtc"

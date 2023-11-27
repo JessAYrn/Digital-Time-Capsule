@@ -8,13 +8,18 @@ export const homePageTypes={
     SET_CANISTER_DATA: "SET_CANISTER_DATA",
     SET_DATA_HAS_BEEN_LOADED: "SET_DATA_HAS_BEEN_LOADED",
     SET_IS_LOADING:"SET_IS_LOADING",
-
+    SET_PROPOSALS_DATA: "SET_PROPOSALS_DATA",
+    SET_CANISTERS_CYCLES_BALANCES: "SET_CANISTERS_CYCLES_BALANCES",
 }
 
 
 export const homePageInitialState={
     dataHasBeenLoaded: undefined,
     isLoading: false,
+    canistersCyclesBalances: {
+        currentCyclesBalance_backend: 1,
+        currentCyclesBalance_frontend: 1,
+    },
     canisterData: {
         profilesMetaData: [],
         journalCount: 0,
@@ -22,11 +27,8 @@ export const homePageInitialState={
         backEndPrincipal: NULL_STRING_CAPITALIZED,
         frontEndPrincipal: NULL_STRING_CAPITALIZED,
         lastRecordedBackEndCyclesBalance: 1,
-        currentCyclesBalance_backend: 1,
-        currentCyclesBalance_frontend: 1,
-        nftOwner: NULL_STRING_CAPITALIZED,
-        isOwner: false,
-        nftId: NULL_STRING_CAPITALIZED,
+        proposals: [],
+        isAdmin: false,
         supportMode: false,
         acceptingRequests: false,
         requestsForAccess: []
@@ -48,6 +50,16 @@ const changeValue=(state=homePageInitialState, action)=>{
                 return {
                 ...state
             }
+        case homePageTypes.SET_CANISTERS_CYCLES_BALANCES:
+            state.canistersCyclesBalances = payload;
+            return {
+            ...state
+        }
+        case homePageTypes.SET_PROPOSALS_DATA:
+            state.canisterData.proposals = payload;
+            return {
+            ...state
+        }
         case homePageTypes.SET_IS_LOADING:
             state.isLoading = payload;
             return {

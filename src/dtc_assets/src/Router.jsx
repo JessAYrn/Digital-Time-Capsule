@@ -12,7 +12,6 @@ import * as canisterIds from "../../../canister_ids.json";
 import * as dtcFiles from "../../declarations/dtc"
 import Treasury from './Routes/Treasury';
 import GroupJournal from './Routes/GroupJournal';
-import * as managerCanisterFiles from "../../declarations/manager";
 import * as dtcAssetsFiles from "../../declarations/dtc_assets";
 import { extractCanisterIdFromURL, getCurrentURL } from './functionsAndConstants/Utils';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
@@ -21,7 +20,6 @@ const Router = (props) => {
 
     const [client, setClient] = useState(null);
     const dtc_idlFactory = dtcFiles.idlFactory;
-    const managerCanister_idlFactory = managerCanisterFiles.idlFactory;
 
     const theme = createTheme({
         palette: {
@@ -59,17 +57,14 @@ const Router = (props) => {
         
         const loadClient = async () => {
             let dtc_canisterId;
-            let managerCanister_canisterId;
             if(process.env.NODE_ENV === "development") {
                 dtc_canisterId = canisterIds.dtc.ic;
-                managerCanister_canisterId = canisterIds.manager.ic;
             } else {
                 let URL = getCurrentURL();
                 let frontEndPrincipal = extractCanisterIdFromURL(URL);
                 let dtcAssetsCanister = dtcAssetsFiles.createActor(frontEndPrincipal,{agentOptions: {host: "https://icp-api.io"}});
                 let authorizedPrincipals = await dtcAssetsCanister.list_authorized();
                 dtc_canisterId = authorizedPrincipals[0];
-                managerCanister_canisterId = authorizedPrincipals[1];
 
             }
             let client_ = createClient({
@@ -82,9 +77,6 @@ const Router = (props) => {
                     dtc: {
                         canisterId: dtc_canisterId,
                         idlFactory: dtc_idlFactory
-                    }, manager: {
-                        canisterId: managerCanister_canisterId,
-                        idlFactory: managerCanister_idlFactory
                     }
                 },
                 providers: defaultProviders

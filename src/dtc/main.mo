@@ -1,6 +1,5 @@
 import Error "mo:base/Error";
 import Nat64 "mo:base/Nat64";
-import Trie "mo:base/Trie";
 import HashMap "mo:base/HashMap";
 import Hash "mo:base/Hash";
 import Result "mo:base/Result";
@@ -12,24 +11,46 @@ import Text "mo:base/Text";
 import Option "mo:base/Option";
 import Ledger "Ledger/Ledger";
 import Account "Ledger/Account";
-import JournalTypes "Journal/journal.types";
-import MainMethods "Main/MainHelperMethods";
-import JournalHelperMethods "Main/JournalHelperMethods";
-import MainTypes "Main/types";
-import TxHelperMethods "Main/TransactionHelperMethods";
-import CanisterManagementMethods "Main/CanisterManagementMethods";
-import Manager "Manager/Manager";
-import AssetCanister "AssetCanister/AssetCanister";
-import NotificationProtocolMethods "Main/NotificationProtocolMethods";
-import NotificationsTypes "Main/types.notifications";
-import IC "IC/ic.types";
+import JournalTypes "Types/Journal/types";
+import MainMethods "Modules/Main/MainHelperMethods";
+import JournalHelperMethods "Modules/Main/JournalHelperMethods";
+import MainTypes "Types/Main/types";
+import TxHelperMethods "Modules/Main/TransactionHelperMethods";
+import CanisterManagementMethods "Modules/Main/CanisterManagementMethods";
+import Manager "Manager";
+import AssetCanister "Types/AssetCanister/types";
+import NotificationProtocolMethods "Modules/Main/NotificationProtocolMethods";
+import NotificationsTypes "Types/Notifications/types";
+import IC "Types/IC/types";
 import Timer "mo:base/Timer";
+import Nat "mo:base/Nat";
+import Time "mo:base/Time";
+import Float "mo:base/Float";
+import Blob "mo:base/Blob";
+import GovernanceHelperMethods "Modules/Main/GovernanceHelperMethods";
+import Treasury "Treasury";
+import TreasuryTypes "Types/Treasury/types";
+import NnsCyclesMinting "Ledger/NnsCyclesMinting";
+import TreasuryHelperMethods "Modules/Main/TreasuryHelperMethods";
+import AnalyticsHelperMethods "Modules/Analytics/AnalyticsHelperMethods";
+import AnalyticsTypes "Types/Analytics/types";
+import Journal "Journal";
+import WasmStore "Types/WasmStore/types";
+import SupportCanisterIds "SupportCanisterIds/SupportCanisterIds";
 
 shared actor class User() = this {
 
-    private stable var appMetaData : MainTypes.AppMetaData = MainTypes.DEFAULT_APP_METADATA;
+    private stable var daoMetaData_v2 : MainTypes.DaoMetaData_V2 = MainTypes.DEFAULT_DAO_METADATA_V2;
 
     private stable var userProfilesArray : [(Principal, MainTypes.UserProfile)] = [];
+
+    private stable var proposalIndex: Nat = 0;
+
+    private stable var proposalsArray: MainTypes.Proposals = [];
+
+    private stable var xdr_permyriad_per_icp: Nat64 = 1;
+
+    private stable var frontEndCanisterBalance: Nat = 1;
 
     private var userProfilesMap : MainTypes.UserProfilesMap = HashMap.fromIter<Principal, MainTypes.UserProfile>(
         Iter.fromArray(userProfilesArray), 
@@ -38,7 +59,16 @@ shared actor class User() = this {
         Principal.hash
     );
 
+    private var proposalsMap : MainTypes.ProposalsMap = HashMap.fromIter<Nat, MainTypes.Proposal>(
+        Iter.fromArray(proposalsArray), 
+        Iter.size(Iter.fromArray(proposalsArray)), 
+        Nat.equal,
+        Hash.hash
+    );
+
     private stable var startIndexForBlockChainQuery : Nat64 = 3_512_868;
+
+    private let ic : IC.Self = actor "aaaaa-aa";
 
     public query({caller}) func hasAccount() : async Bool {
         let userProfile = userProfilesMap.get(caller);
@@ -46,10 +76,10 @@ shared actor class User() = this {
     };
     
     public shared({ caller }) func create () : async Result.Result<MainTypes.AmountAccepted, JournalTypes.Error> {
-        let amountAccepted = await MainMethods.create(caller, userProfilesMap, appMetaData);
-        let updatedAppMetaData = await CanisterManagementMethods.removeFromRequestsList([Principal.toText(caller)], appMetaData);
+        let amountAccepted = await MainMethods.create(caller, userProfilesMap, daoMetaData_v2);
+        let updatedDaoMetaData = await CanisterManagementMethods.removeFromRequestsList([Principal.toText(caller)], daoMetaData_v2);
         switch(amountAccepted){
-            case(#ok(amount)){ appMetaData := updatedAppMetaData; return #ok(amount); };
+            case(#ok(amount)){ daoMetaData_v2 := updatedDaoMetaData; return #ok(amount); };
             case(#err(e)){ return #err(e); };
         };
     };
@@ -64,89 +94,107 @@ shared actor class User() = this {
 
     public shared({ caller }) func delete() : async Result.Result<(), JournalTypes.Error> {
         let result = await MainMethods.delete(caller, userProfilesMap);
-        switch(result){
-            case(#ok(_)){ #ok(()); };
-            case(#err(e)){ #err(e); };
-        };
+        switch(result){ case(#ok(_)){ #ok(()); }; case(#err(e)){ #err(e); }; };
     };
     
-    public shared({ caller }) func readJournal () : 
-    async Result.Result<(MainTypes.JournalData), JournalTypes.Error> {
-        let result = await JournalHelperMethods.readJournal(caller, userProfilesMap);
-        return result; 
+    public composite query({ caller }) func readJournal () : async Result.Result<(MainTypes.JournalData), JournalTypes.Error> {
+        let result = userProfilesMap.get(caller);
+        switch(result){
+            case null{ return #err(#NotFound); };
+            case(? v){
+                let journal: Journal.Journal = actor(Principal.toText(v.canisterId)); 
+                let (entriesArray, bio, canisterPrincipal) = await journal.readJournal();
+                return #ok({ userJournalData = (entriesArray, bio); email = v.email; userName = v.userName; principal = canisterPrincipal; });
+            };
+        };   
     };
 
-    public shared({ caller }) func readWalletData() : async Result.Result<({ balance : Ledger.ICP; address: [Nat8]; } ), JournalTypes.Error> {
-        let result = await JournalHelperMethods.readWalletData(caller, userProfilesMap);
-        return result;
+    public composite query({ caller }) func readWalletData() : async Result.Result<({ balance : Ledger.ICP; address: [Nat8]; } ), JournalTypes.Error> {
+        let result = userProfilesMap.get(caller);
+        switch(result){
+            case null{ return #err(#NotFound); };
+            case(? v){
+                let journal: Journal.Journal = actor(Principal.toText(v.canisterId)); 
+                let userBalance = await journal.canisterBalance();
+                let userAccountId = await journal.canisterAccount();
+                return #ok({ balance = userBalance; address = Blob.toArray(userAccountId); });
+            };
+        };
     };
 
-    public shared({ caller }) func readEntryFileChunk(fileId: Text, chunkId: Nat) : async Result.Result<(Blob),JournalTypes.Error>{
-        let result = await JournalHelperMethods.readEntryFileChunk(caller, userProfilesMap, fileId, chunkId);
-        return result;
+    public composite query({ caller }) func readEntryFileChunk(fileId: Text, chunkId: Nat) : async Result.Result<(Blob),JournalTypes.Error>{
+        let result = userProfilesMap.get(caller);
+        switch(result){
+            case null{ #err(#NotFound); };
+            case ( ? existingProfile){
+                let journal: Journal.Journal = actor(Principal.toText(existingProfile.canisterId));
+                let entryFile = await journal.readJournalFileChunk(fileId, chunkId);
+            };
+        };
     };
 
-    public shared({ caller }) func readEntryFileSize(fileId: Text) : async Result.Result<(Nat),JournalTypes.Error>{
-        let result = await JournalHelperMethods.readEntryFileSize(caller, userProfilesMap, fileId);
-        return result;
+    public composite query({ caller }) func readEntryFileSize(fileId: Text) : async Result.Result<(Nat),JournalTypes.Error>{
+        let result = userProfilesMap.get(caller);
+        switch(result){
+            case null{ #err(#NotFound); };
+            case ( ? existingProfile){
+                let journal: Journal.Journal = actor(Principal.toText(existingProfile.canisterId));
+                let entryFileSize = await journal.readJournalFileSize(fileId);
+            };
+        };
     };
 
     public shared({ caller }) func updateBio(bio: JournalTypes.Bio) : async Result.Result<(JournalTypes.Bio), JournalTypes.Error> {
         let result = await JournalHelperMethods.updateBio(caller, userProfilesMap, bio);
-        return result;
     };
 
-    public shared({caller}) func updatePhotos(photos: [JournalTypes.FileMetaData]) : 
-    async Result.Result<(JournalTypes.Bio), JournalTypes.Error> {
+    public shared({caller}) func updatePhotos(photos: [JournalTypes.FileMetaData]): async Result.Result<(JournalTypes.Bio), JournalTypes.Error> {
         let result = await JournalHelperMethods.updatePhotos(caller, userProfilesMap, photos);
-        return result;
     };
 
-    public shared({caller}) func createJournalEntry() : 
-    async Result.Result<([JournalTypes.JournalEntryExportKeyValuePair]), JournalTypes.Error> {
+    public shared({caller}) func createJournalEntry(): async Result.Result<([JournalTypes.JournalEntryExportKeyValuePair]), JournalTypes.Error> {
         let result = await JournalHelperMethods.createJournalEntry(caller, userProfilesMap);
-        return result;
     };
 
     public shared({ caller }) func markJournalEntryAsRead(entryKey: JournalTypes.EntryKey) : async Result.Result<(), JournalTypes.Error> {
         let result = await JournalHelperMethods.markJournalEntryAsRead(caller, userProfilesMap, entryKey);
-        return result;
     };
 
     public shared({caller}) func updateJournalEntry(entryKey : JournalTypes.EntryKey, entry : JournalTypes.JournalEntry) : 
     async Result.Result<([JournalTypes.JournalEntryExportKeyValuePair]), JournalTypes.Error> {
         let result = await JournalHelperMethods.updateJournalEntry(caller, userProfilesMap, entry, entryKey);
-        return result;
     };
 
     public shared({ caller }) func submitJournalEntry(entryKey: JournalTypes.EntryKey) : async Result.Result<[JournalTypes.JournalEntryExportKeyValuePair], JournalTypes.Error> {
         let result = await JournalHelperMethods.submitJournalEntry(caller, userProfilesMap, entryKey);
-        return result;
     };
 
     public shared({ caller }) func deleteJournalEntry(entryKey: JournalTypes.EntryKey) : async Result.Result<(), JournalTypes.Error> {
         let result = await JournalHelperMethods.deleteJournalEntry(caller, userProfilesMap, entryKey);
-        return result;
     };
 
     public shared({caller}) func deleteFile(fileId: Text) : async Result.Result<(), JournalTypes.Error> {
         let result = await JournalHelperMethods.deleteFile(caller, userProfilesMap, fileId);
-        return result;
     };
 
     public shared({caller}) func uploadJournalEntryFile(fileId: Text, chunkId: Nat, blobChunk: Blob): async Result.Result<(Text), JournalTypes.Error>{
         let result = await JournalHelperMethods.uploadJournalEntryFile(caller, userProfilesMap, fileId, chunkId, blobChunk);
-        return result;
     };
     
     public shared({caller}) func transferICP(amount: Nat64, canisterAccountId: Account.AccountIdentifier) : async Result.Result<(), JournalTypes.Error> {
         let result = await TxHelperMethods.transferICP(caller, userProfilesMap, amount, canisterAccountId);
-        return result;
     };
 
-    public shared({caller}) func readTransaction() : async Result.Result<[(Nat, JournalTypes.Transaction)], JournalTypes.Error> {
-        let result = await TxHelperMethods.readTransaction(caller, userProfilesMap);
-        return result;
+    public composite query({caller}) func readTransaction() : async Result.Result<[(Nat, JournalTypes.Transaction)], JournalTypes.Error> {
+        let result = userProfilesMap.get(caller);
+        switch(result){
+            case null{ #err(#NotFound); }; 
+            case ( ? profile){
+                let userJournal : Journal.Journal = actor(Principal.toText(profile.canisterId));
+                let tx = await userJournal.readWalletTxHistory();
+                return #ok(tx);
+            };
+        };
     };
 
     private func updateUsersTxHistory() : async () {
@@ -170,189 +218,384 @@ shared actor class User() = this {
         await MainTypes.ledger.account_balance({ account = myAccountId() })
     };
 
-    public shared(msg) func getPrincipalsList() : async [Principal] {
-        let callerId = msg.caller;
-        let result = await CanisterManagementMethods.getPrincipalsList(callerId, userProfilesMap, appMetaData);
-        return result;
-    };
-
     public shared({caller}) func grantAccess(principals : [Text]) : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error> {
-        let callerIdAsText = Principal.toText(caller);
-        if(callerIdAsText != appMetaData.nftOwner){ return #err(#NotAuthorized); };
-        let updatedAppMetaData = await CanisterManagementMethods.grantAccess(principals, appMetaData);
-        switch(updatedAppMetaData){
-            case(#ok(metaData)){ appMetaData := metaData; return #ok(metaData.requestsForAccess); };
+        let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v2);
+        if(not isAdmin){ return #err(#NotAuthorized); };
+        let updatedDaoMetaData = await CanisterManagementMethods.grantAccess(principals, daoMetaData_v2);
+        switch(updatedDaoMetaData){
+            case(#ok(metaData)){ daoMetaData_v2 := metaData; return #ok(metaData.requestsForAccess); };
             case(#err(e)){ return #err(e); };
         };
     };
 
     public shared({caller}) func updateApprovalStatus(principals: [Text], newApprovalStatus: Bool) : 
     async Result.Result<(MainTypes.ProfilesMetaData), JournalTypes.Error>{
-        let callerIdAsText = Principal.toText(caller);
-        if(callerIdAsText != appMetaData.nftOwner){ return #err(#NotAuthorized); };
+        let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v2);
+        if(not isAdmin){ return #err(#NotAuthorized); };
         CanisterManagementMethods.updateApprovalStatus(principals, userProfilesMap, newApprovalStatus);
         let profilesApprovalStatuses = CanisterManagementMethods.getProfilesMetaData(userProfilesMap);
         return #ok(profilesApprovalStatuses);
     };
 
     public shared({caller}) func removeFromRequestsList(principals: [Text]) : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error> {
-        let callerIdAsText = Principal.toText(caller);
-        if(callerIdAsText != appMetaData.nftOwner){ return #err(#NotAuthorized); };
-        let updatedAppMetaDataList = await CanisterManagementMethods.removeFromRequestsList(principals, appMetaData);
-        appMetaData := updatedAppMetaDataList;
-        return #ok(updatedAppMetaDataList.requestsForAccess);
+        let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v2);
+        if(not isAdmin){ return #err(#NotAuthorized); };
+        let updatedDaoMetaDataList = await CanisterManagementMethods.removeFromRequestsList(principals, daoMetaData_v2);
+        daoMetaData_v2 := updatedDaoMetaDataList;
+        return #ok(updatedDaoMetaDataList.requestsForAccess);
     };
 
-    public shared({caller}) func configureApp(frontEndPrincipal : Text, nftId: Int ) : async Result.Result<(), JournalTypes.Error> {
-        if(appMetaData.frontEndPrincipal == "Null" or appMetaData.nftId == -1 or appMetaData.managerCanisterPrincipal == "Null"){
-            let backEndPrincipalAsPrincipal = Principal.fromActor(this);
-            let backEndPrincipal = Principal.toText(backEndPrincipalAsPrincipal);
-            let updatedMetaData = await CanisterManagementMethods.configureApp( backEndPrincipal, frontEndPrincipal, nftId, appMetaData);
-            appMetaData := updatedMetaData;
-            #ok(());
-        } else { return #err(#NotAuthorized); };
+    public shared({caller}) func configureApp(frontEndPrincipal : Text, adminPrincipal: Text ) : async Result.Result<(), JournalTypes.Error> {
+        let canConfigureApp = CanisterManagementMethods.canConfigureApp(daoMetaData_v2);
+        if(not canConfigureApp){ return #err(#NotAuthorized); };
+        let backEndPrincipal = Principal.toText(Principal.fromActor(this));
+        let updatedMetaData = await CanisterManagementMethods.configureApp( backEndPrincipal, frontEndPrincipal, adminPrincipal, daoMetaData_v2);
+        daoMetaData_v2 := updatedMetaData;
+        #ok(());
     };
 
-    public shared({caller}) func authorizePrinicpalToViewAssets(prinicpal: Principal): async () {
-        assert(Principal.toText(caller) == appMetaData.nftOwner);
-        let frontEndPrincipal = Principal.fromText(appMetaData.frontEndPrincipal);
-        let result = await CanisterManagementMethods.authorizePrinicpalToViewAssets(prinicpal, frontEndPrincipal);
+    public shared({caller}) func toggleAcceptRequest() : async  Result.Result<(MainTypes.DaoMetaData_V2), JournalTypes.Error>{
+        let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v2);
+        if(not isAdmin){ return #err(#NotAuthorized); };
+        let updatedMetaData = { daoMetaData_v2 with acceptingRequests = not daoMetaData_v2.acceptingRequests; };
+        daoMetaData_v2 := updatedMetaData; return #ok(updatedMetaData);
     };
 
-    public shared(msg) func getAssetCanisterAuthorizedPrincipals() : async [Principal] {
-        let assetCanister: AssetCanister.Interface = actor(appMetaData.frontEndPrincipal);
-        let result = await assetCanister.list_authorized();
-    };
-
-    public shared({caller}) func toggleAcceptRequest() : async  Result.Result<(MainTypes.AppMetaData), JournalTypes.Error>{
-        let result = CanisterManagementMethods.toggleAcceptRequest(caller, appMetaData);
-        switch(result){
-            case(#err(e)){ return #err(e); };
-            case(#ok(updatedMetaData)){ appMetaData := updatedMetaData; return #ok(updatedMetaData);}
-        };
-    };
-
-    public shared({caller}) func toggleCyclesSaveMode() : async MainTypes.AppMetaData{
-        let updatedMetaData = await CanisterManagementMethods.toggleCyclesSaveMode(caller, appMetaData);
-        let managerCanister: Manager.Manager = actor(appMetaData.managerCanisterPrincipal);
-        await managerCanister.allowUpdatesToBackendCanister();
-        appMetaData := updatedMetaData;
-        return updatedMetaData;
-    };
-
-    public shared({caller}) func getRequestingPrincipals() : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error>{
-        let callerIdAsText = Principal.toText(caller);
-        if(callerIdAsText != appMetaData.nftOwner){ return #err(#NotAuthorized); } 
-        else { return #ok(appMetaData.requestsForAccess) };
+    public query({caller}) func getRequestingPrincipals() : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error>{
+        let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v2);
+        if(not isAdmin){ return #err(#NotAuthorized); }
+        else { return #ok(daoMetaData_v2.requestsForAccess) };
     };
 
     public shared({caller}) func requestApproval() : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error>{
-        let result = CanisterManagementMethods.requestApproval(caller, appMetaData);
+        let result = CanisterManagementMethods.requestApproval(caller, daoMetaData_v2);
         switch(result){
             case (#err(e)){ return #err(e)};
-            case (#ok(updatedAppMetaData)){ 
-                appMetaData := updatedAppMetaData;
-                return #ok(updatedAppMetaData.requestsForAccess)
+            case (#ok(updatedDaoMetaData)){ 
+                daoMetaData_v2 := updatedDaoMetaData;
+                return #ok(updatedDaoMetaData.requestsForAccess)
             };
         };
     };
 
-    public shared(msg) func getCanisterCyclesBalances() : async MainTypes.CanisterCyclesBalances{
-        let cyclesBalance_backend = Cycles.balance();
-        let balances = await CanisterManagementMethods.getCanisterCyclesBalances(cyclesBalance_backend, appMetaData);
-        return balances;
+    public composite query(msg) func getCanisterCyclesBalances() : async MainTypes.CanisterCyclesBalances{
+        let currentCyclesBalance_backend = Cycles.balance();
+        let managerCanister: Manager.Manager = actor(daoMetaData_v2.managerCanisterPrincipal);
+        let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
+        let currentCyclesBalance_frontend  = frontEndCanisterBalance;
+        let currentCyclesBalance_treasury = await treasuryCanister.getCyclesBalance();
+        let currentCyclesBalance_manager = await managerCanister.getCyclesBalance();
+        return {currentCyclesBalance_backend; currentCyclesBalance_frontend; currentCyclesBalance_manager; currentCyclesBalance_treasury};
     };
 
-    public shared({caller}) func getCanisterData() : async Result.Result<(MainTypes.CanisterDataExport), JournalTypes.Error> {
-        let cyclesBalance_backend = Cycles.balance();
-        let appMetaDataPackagedForExport = await CanisterManagementMethods.getCanisterData(caller, appMetaData, cyclesBalance_backend, userProfilesMap);
-        return appMetaDataPackagedForExport;
-    };
-
-    public shared({ caller }) func upgradeApp_exceptForBackendCanister(): async MainTypes.AppMetaData{
-        if(Principal.toText(caller) != appMetaData.nftOwner){ throw Error.reject("Unauthorized Access"); };
-        let managerCanister: Manager.Manager = actor(appMetaData.managerCanisterPrincipal);
-        await managerCanister.loadNextRelease();
-        await CanisterManagementMethods.installCode_managerCanister(appMetaData);
-        let result_0 = await managerCanister.installCode_frontendCanister(appMetaData);
-        let result_1 = await managerCanister.installCode_journalCanisters(Iter.toArray(userProfilesMap.entries()));
-        await managerCanister.allowUpdatesToBackendCanister();
-        return appMetaData;
-    };
-
-    public func getCanisterCongtrollers(canisterPrincipal: Principal) : async ([Text]) {
-        let canisterStatus = await MainTypes.self.canister_status({ canister_id = canisterPrincipal });
-        let settings = canisterStatus.settings;
-        let controllersOption = settings.controllers;
-        var controllers = Option.get(controllersOption, appMetaData.defaultControllers);
-        let ArrayBuffer = Buffer.Buffer<(Text)>(1);
-        let controllersIter = Iter.fromArray(controllers);
-        Iter.iterate<Principal>(controllersIter, func (x: Principal, index: Nat){
-            let text = Principal.toText(x);
-            ArrayBuffer.add(text);
-        });
-        let controllersAsTextArray = ArrayBuffer.toArray();
-        return controllersAsTextArray;
-    };
-
-    public shared({caller}) func toggleSupportMode() : async Result.Result<(),JournalTypes.Error>{
-        let result = await CanisterManagementMethods.toggleSupportMode(caller, appMetaData);
-        switch(result){
-            case (#ok(metaData)){ appMetaData := metaData; return #ok();};
-            case (#err(e)){ return #err(e)};
-        }
-    };
-
-    public shared({ caller }) func registerOwner() : async  Result.Result<(), JournalTypes.Error>{
-        let result = await CanisterManagementMethods.registerOwner(caller, appMetaData);
-        switch(result){
-            case(#ok(metaData)){ appMetaData := metaData; return #ok(());};
-            case(#err(e)){ return #err(e)};
+    public composite query({caller}) func getCanisterData() : async Result.Result<(MainTypes.CanisterDataExport), JournalTypes.Error> {
+        let profile = userProfilesMap.get(caller);
+        switch(profile){
+            case null{ return #err(#NotAuthorized); };
+            case (? existingProfile){
+                let managerCanister : Manager.Manager = actor(daoMetaData_v2.managerCanisterPrincipal);
+                let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
+                let treasuryContributionsArray = await treasuryCanister.getTreasuryContributionsArray();
+                let profilesMetaData = CanisterManagementMethods.getProfilesMetaData(userProfilesMap);
+                let {number = releaseVersion} = await managerCanister.getCurrentReleaseVersion();
+                let canisterDataPackagedForExport = {
+                    daoMetaData_v2 with 
+                    proposals = GovernanceHelperMethods.tallyAllProposalVotes({proposals = proposalsMap; treasuryContributionsArray; xdr_permyriad_per_icp});
+                    isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v2);
+                    currentCyclesBalance_backend = Cycles.balance();
+                    journalCount = userProfilesMap.size();
+                    profilesMetaData;
+                    releaseVersion;
+                };
+                return #ok(canisterDataPackagedForExport);
+            };
         };
     };
 
-    public shared({ caller }) func getNotifications(): async NotificationsTypes.Notifications{
-        let notifications = await NotificationProtocolMethods.notifyOfNewStableRelease(appMetaData);
-        let notifications_ = await NotificationProtocolMethods.appendNotificationsFromJournal(caller, userProfilesMap, notifications);
-        return notifications_;
+    public composite query({caller}) func getTreasuryData() : async Result.Result<TreasuryTypes.TreasuryDataExport, MainTypes.Error> {
+        let userProfile = userProfilesMap.get(caller);
+        if(userProfile == null) return #err(#NotAuthorizedToAccessData);
+        let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
+        let contributions = await treasuryCanister.getTreasuryContributionsArray();
+        let balance_icp = await treasuryCanister.canisterBalance();
+        let accountId_icp_blob = await treasuryCanister.canisterAccount();
+        let accountId_icp = Blob.toArray(accountId_icp_blob);
+        return #ok({ contributions; balance_icp; accountId_icp; });
+    };
+
+    public shared({ caller }) func upgradeApp(): async (){
+        let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v2);
+        if(not isAdmin and not (Principal.toText(caller) == SupportCanisterIds.TechSupportPrincipal2 and daoMetaData_v2.supportMode)){ 
+            throw Error.reject("Unauthorized Access"); 
+        };
+        let managerCanister: Manager.Manager = actor(daoMetaData_v2.managerCanisterPrincipal);
+        await managerCanister.loadRelease();
+        try { await updateCanistersExceptBackend(); } 
+        catch (e) {
+            await managerCanister.loadPreviousRelease();  
+            await updateCanistersExceptBackend();
+            throw Error.reject("Upgrade Failed, no code changes have been implemented.")
+        };
+        ignore managerCanister.scheduleBackendCanisterToBeUpdated();
+    };
+
+    private func upgradeApp_(): async (){
+        let managerCanister: Manager.Manager = actor(daoMetaData_v2.managerCanisterPrincipal);
+        await managerCanister.loadRelease();
+        try { await updateCanistersExceptBackend(); } 
+        catch (e) {
+            await managerCanister.loadPreviousRelease();  
+            await updateCanistersExceptBackend();
+            throw Error.reject("Upgrade Failed, no code changes have been implemented.")
+        };
+        ignore managerCanister.scheduleBackendCanisterToBeUpdated();
+    };
+
+    private func updateCanistersExceptBackend(): async (){
+        let managerCanister: Manager.Manager = actor(daoMetaData_v2.managerCanisterPrincipal);
+        await CanisterManagementMethods.installCode_managerCanister(daoMetaData_v2);
+        let result_0 = await managerCanister.installCode_frontendCanister(daoMetaData_v2);
+        let result_1 = await managerCanister.installCode_journalCanisters(Iter.toArray(userProfilesMap.entries()));
+        let result_2 = await managerCanister.installCode_treasuryCanister(daoMetaData_v2);
+    };
+
+    public shared({caller}) func scheduleCanistersToBeUpdatedExceptBackend(): async () {
+        if( Principal.toText(caller) != daoMetaData_v2.managerCanisterPrincipal) { throw Error.reject("Unauthorized access."); };
+        let {setTimer} = Timer;
+        let timerId = setTimer(#nanoseconds(1), updateCanistersExceptBackend);
+    };
+
+    public shared({caller}) func toggleSupportMode() : async Result.Result<(),JournalTypes.Error>{
+        let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v2);
+        if(not isAdmin){ return #err(#NotAuthorized); };
+        let updatedMetaData = await CanisterManagementMethods.toggleSupportMode(caller, daoMetaData_v2);
+        daoMetaData_v2 := updatedMetaData;
+        return #ok(());
+    };
+
+    public composite query({ caller }) func getNotifications(): async NotificationsTypes.Notifications{
+        let userProfile = userProfilesMap.get(caller);
+        switch(userProfile){
+            case null {throw Error.reject("user profile not found")};
+            case(?profile){
+                let managerCanister : Manager.Manager = actor(daoMetaData_v2.managerCanisterPrincipal);
+                let userCanister: Journal.Journal = actor(Principal.toText(profile.canisterId));
+                let userNotifications = await userCanister.getNotifications();
+                let notificationsBuffer = Buffer.fromArray<NotificationsTypes.Notification>(userNotifications);
+                let currentReleaseVersion = await managerCanister.getCurrentReleaseVersion();
+                let nextStableVersion = await managerCanister.getWhatIsNextStableReleaseVersion();
+                let text = Text.concat("New Stable Version Availabe: Version #", Nat.toText(nextStableVersion.number));
+                if(nextStableVersion.number > currentReleaseVersion.number) notificationsBuffer.add({text; key = null});
+                return notificationsBuffer.toArray();
+            };
+        };
     };
 
     public shared({ caller }) func clearJournalNotifications(): async (){
         await NotificationProtocolMethods.clearJournalNotifications(caller, userProfilesMap);
     };
 
+    public shared({ caller }) func depositToTreasury(amount: Nat64, currency: TreasuryTypes.SupportedCurrencies):
+    async Result.Result<Ledger.ICP, MainTypes.Error>{
+        let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v2);
+        if(not isAdmin) return #err(#NotAuthorized);
+        let updatedBalance = await TreasuryHelperMethods.depositAssetToTreasury({
+            depositorPrincipal = Principal.toText(caller);
+            treasuryCanisterPrincipal = daoMetaData_v2.treasuryCanisterPrincipal;
+            amount;
+            currency;
+            profilesMap = userProfilesMap;
+        });
+        return updatedBalance;
+    };
+    
+    public composite query({ caller }) func retrieveUserBalances(): async AnalyticsTypes.BalancesArray {
+        let userProfile = userProfilesMap.get(caller);
+        switch(userProfile){
+            case null { throw Error.reject("No profile found for this principal")};
+            case(?profile) {
+                let userCanister : Journal.Journal = actor(Principal.toText(profile.canisterId));
+                let balancesHistory = await userCanister.readBalancesHistory();
+            };
+        };
+    };
+
+    public composite query({ caller }) func retrieveTreasuryBalances() : async AnalyticsTypes.BalancesArray {
+        let userProfile = userProfilesMap.get(caller);
+        switch(userProfile){
+            case null { throw Error.reject("No profile found for this principal")};
+            case(?_){
+                let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
+                let balancesHistory = await treasuryCanister.readBalancesHistory();
+            };
+        };
+    };
+
     public shared({caller}) func heartBeat(): async (){
         let cyclesBalance_backend = Cycles.balance();
         ignore NotificationProtocolMethods.updateUserCanisterNotifications(userProfilesMap);
-        let updatedMetaData = await CanisterManagementMethods.heartBeat(cyclesBalance_backend, appMetaData, userProfilesMap);
-        appMetaData := updatedMetaData;
+        let updatedMetaData = await CanisterManagementMethods.heartBeat(cyclesBalance_backend, daoMetaData_v2, userProfilesMap);
+        daoMetaData_v2 := updatedMetaData;
     };  
 
     private func heartBeat_unshared(): async () {
         let cyclesBalance_backend = Cycles.balance();
         ignore NotificationProtocolMethods.updateUserCanisterNotifications(userProfilesMap);
-        let updatedMetaData = await CanisterManagementMethods.heartBeat(cyclesBalance_backend, appMetaData, userProfilesMap);
-        appMetaData := updatedMetaData;
+        ignore AnalyticsHelperMethods.saveCurrentBalances(userProfilesMap, daoMetaData_v2);
+        let updatedMetaData = await CanisterManagementMethods.heartBeat(cyclesBalance_backend, daoMetaData_v2, userProfilesMap);
+        daoMetaData_v2 := updatedMetaData;
     };
 
-    // public func getTipOfChainData() : async (Nat64, Nat64){
-    //     let tip =  await TxHelperMethods.tipOfChainDetails();
-    //     return (tip, startIndexForBlockChainQuery);
-    // };
+    private func heartBeat_hourly(): async () {
+        let cyclesMintingCanister: NnsCyclesMinting.Interface = actor(NnsCyclesMinting.NnsCyclesMintingCanisterID);
+        let {data} = await cyclesMintingCanister.get_icp_xdr_conversion_rate();
+        let {xdr_permyriad_per_icp = xdr_permyriad_per_icp_} = data;
+        let {cycles} = await ic.canister_status({ canister_id = Principal.fromText(daoMetaData_v2.frontEndPrincipal) });
+        frontEndCanisterBalance := cycles;
+        xdr_permyriad_per_icp := xdr_permyriad_per_icp_;
+    };
 
-    let {recurringTimer} = Timer;
+    let {recurringTimer; cancelTimer; setTimer} = Timer;
 
-    // let daily = recurringTimer(#seconds (24 * 60 * 60), heartBeat_unshared);
+    public shared({caller}) func createProposal(action: MainTypes.ProposalActions, payload: MainTypes.ProposalPayload): 
+    async Result.Result<(MainTypes.Proposals),MainTypes.Error>{
+        let callerProfile = userProfilesMap.get(caller);
+        if(callerProfile == null) return #err(#NotAuthorizedToCreateProposals);
+        let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
+        let treasuryContributionRequired = GovernanceHelperMethods.getDoesProposalRequireTreasuryContribution(action);
+        let hasSufficientContributions = await treasuryCanister.userHasSufficientContributions(caller);
+        if(not hasSufficientContributions and treasuryContributionRequired) return #err(#NotAuthorizedToCreateProposals);
+        let treasuryContributionsArray = await treasuryCanister.getTreasuryContributionsArray();
+        let proposer = Principal.toText(caller); let votes = [(proposer, {adopt = true})];
+        let timeInitiated = Time.now(); let timeExecuted = null;
+        var voteTally = {yay = Float.fromInt(0); nay = Float.fromInt(0); total = Float.fromInt(0);};
+        let proposal = {votes; action; proposer; timeInitiated; timeExecuted; payload; voteTally;};
+        let votingResults = GovernanceHelperMethods.tallyVotes({treasuryContributionsArray; proposal; xdr_permyriad_per_icp;});
+        proposalsMap.put(proposalIndex, {proposal with voteTally = votingResults} );
+        let timerId = setTimer(#seconds(24 * 60 * 60 * 3), finalizeProposalVotingPeriod);
+        proposalIndex += 1;
+        let updatedProposalsArray = Iter.toArray(proposalsMap.entries());
+        return #ok(updatedProposalsArray);
+    };
 
-    // let everyFiveSeconds = recurringTimer(#seconds (5), updateUsersTxHistory);
+    public shared({caller}) func voteOnProposal(proposalIndex: Nat, adopt: Bool): 
+    async Result.Result<(MainTypes.Proposal), MainTypes.Error> {
+        let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
+        let hasSufficientContributions = await treasuryCanister.userHasSufficientContributions(caller);
+        if(not hasSufficientContributions) return #err(#NotAuthorizedToVoteOnThisProposal);
+        let proposal_ = proposalsMap.get(proposalIndex);
+        if(proposal_ == null) return #err(#PorposalHasExpired);
+        let ?proposal = proposal_;
+        let {votes} = proposal;
+        let votesMap = HashMap.fromIter<Text, MainTypes.Vote>( Iter.fromArray(votes), Iter.size(Iter.fromArray(votes)), Text.equal, Text.hash );
+        let previousVote = votesMap.get(Principal.toText(caller));
+        switch(previousVote){
+            case null {
+                let treasuryContributionsArray = await treasuryCanister.getTreasuryContributionsArray();
+                votesMap.put(Principal.toText(caller), {adopt});
+                var updatedProposal = {proposal with votes = Iter.toArray(votesMap.entries()); };
+                let voteTally = GovernanceHelperMethods.tallyVotes({treasuryContributionsArray; proposal = updatedProposal; xdr_permyriad_per_icp});
+                updatedProposal := {updatedProposal with voteTally};
+                proposalsMap.put(proposalIndex, updatedProposal);
+                return #ok(updatedProposal);
+            };
+            case (?previousVote_){ return #err(#VoteHasAlreadyBeenSubmitted)};
+        };
+    };
 
-    system func preupgrade() { userProfilesArray := Iter.toArray(userProfilesMap.entries()); };
 
-    system func postupgrade() { userProfilesArray:= []; };
+    private func finalizeProposalVotingPeriod() : async () {
+        let proposalsIter = proposalsMap.entries();
+        var oldestPendingProposalId = proposalIndex;
+        Iter.iterate<(Nat, MainTypes.Proposal)>(proposalsIter, func(x : (Nat, MainTypes.Proposal), index : Nat){
+            let (proposalId, proposal) = x;
+            if(proposalId < oldestPendingProposalId) oldestPendingProposalId := proposalId;
+        });
+        let proposalOptional = proposalsMap.get(oldestPendingProposalId);
+        switch(proposalOptional){
+            case null {};
+            case (?proposal){
+                let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
+                let treasuryContributionsArray = await treasuryCanister.getTreasuryContributionsArray();
+                let votingResults = GovernanceHelperMethods.tallyVotes({treasuryContributionsArray; proposal; xdr_permyriad_per_icp});
+                let {yay; nay; total } = votingResults;
+                var timeExecuted: ?Int = null;
+                if( yay > nay) {
+                    ignore executeProposal(proposal);
+                    timeExecuted := ?Time.now();
+                };
+                // let updatedProposal = {proposal with voteTally = votingResults; timeExecuted;};
+                proposalsMap.delete(oldestPendingProposalId);
+            };
+        };
+    };
 
-    private  func key(x: Principal) : Trie.Key<Principal> { return {key = x; hash = Principal.hash(x)}; };
+    private func executeProposal(proposal: MainTypes.Proposal) : async () {
+        let {action; payload; proposer;} = proposal;
+        let {amount; principal} = payload;
+        switch(action){
+            case(#AddAdmin){
+                switch(payload.principal){
+                    case null { return };
+                    case(? principal){
+                        let updatedDaoMetaData = CanisterManagementMethods.addAdmin(Principal.fromText(principal), daoMetaData_v2);
+                        daoMetaData_v2 := updatedDaoMetaData;
+                    };
+                };            };
+            case(#RemoveAdmin){
+                switch(payload.principal){
+                    case null { return };
+                    case(? principal){
+                        let updatedDaoMetaData = CanisterManagementMethods.removeAdmin(Principal.fromText(principal), daoMetaData_v2);
+                        daoMetaData_v2 := updatedDaoMetaData;
+                    };
+                };
+            };
+            case (#DepositIcpToTreasury){
+                switch(amount){
+                    case null {};
+                    case(?amount_){
+                        let newBalance = await TreasuryHelperMethods.depositAssetToTreasury({
+                            depositorPrincipal = proposer;
+                            treasuryCanisterPrincipal = daoMetaData_v2.treasuryCanisterPrincipal;
+                            amount = amount_;
+                            currency = #Icp;
+                            profilesMap = userProfilesMap;
+                        })
+                    }
+                }
+            };
+            case (#DepositIcpToNeuron){
+                //call function to deposit ICP to treasury's neuron from user's wallet
+            };
+            //still need to delete the public upgradeApp method once the frontend has been updated
+            case (#UpgradeApp){ ignore upgradeApp_(); };
+            case(#DissolveIcpNeuron){
+                //call function to dissolve the Treasuries Neuron
+            };
+            case(#FollowIcpNeuron){
+                //call function to follow ICP neuron
+            };
+            case(#SpawnIcpNeuron){
+                //call function to spawn ICP neuron
+            };
+            case(#DispurseIcpNeuron){
+                //call function to dispurse ICP neuron
+            };
+            case(#PurchaseCycles){
+                //call function to purchase more cycles
+            };
+        };
+    };
 
-    private func natKey(x: Nat) : Trie.Key<Nat> { return {key = x; hash = Hash.hash(x)} };
+    let timerId_daily = recurringTimer(#seconds (24 * 60 * 60), heartBeat_unshared);
+    let timerId_hourly = recurringTimer(#seconds (60 * 60), heartBeat_hourly);
+    let timerId_everyFiveSeconds = recurringTimer(#seconds (5), updateUsersTxHistory);
 
-    private func textKey(x: Text) : Trie.Key<Text> { return {key = x; hash = Text.hash(x)} };
+    system func preupgrade() { 
+        userProfilesArray := Iter.toArray(userProfilesMap.entries()); 
+        proposalsArray := Iter.toArray(proposalsMap.entries());
+    };
+
+    system func postupgrade() { userProfilesArray:= []; proposalsArray := []};
 }

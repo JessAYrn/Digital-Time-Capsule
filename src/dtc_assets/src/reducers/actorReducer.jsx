@@ -1,12 +1,10 @@
 export const actorTypes={
-    SET_BACKEND_ACTOR: "SET_BACKEND_ACTOR",
-    SET_MANAGER_ACTOR: "SET_MANAGER_ACTOR",
+    SET_BACKEND_ACTOR: "SET_BACKEND_ACTOR"
 }
 
 
 export const actorInitialState={
     backendActor: undefined,
-    managerActor: undefined,
 }
 
 const changeValue=(state = actorInitialState, action)=>{
@@ -18,15 +16,10 @@ const changeValue=(state = actorInitialState, action)=>{
         return {
             ...state
         }
-    case actorTypes.SET_MANAGER_ACTOR:
-        state.managerActor = payload;
+    default:
         return {
             ...state
         }
-        default:
-            return {
-                ...state
-            }
     }
 }
 

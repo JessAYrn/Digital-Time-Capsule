@@ -12,6 +12,7 @@ import walletReducer,{ walletInitialState, walletTypes } from '../reducers/walle
 import actorReducer, { actorInitialState, actorTypes } from '../reducers/actorReducer';
 import homePageReducer,{ homePageInitialState, homePageTypes } from '../reducers/homePageReducer';
 import notificationsReducer, {notificationsInitialState, notificationsTypes} from "../reducers/notificationsReducer";
+import treasuryReducer, {treasuryPageInitialState, treasuryTypes} from "../reducers/treasuryReducer";
 import ModalComponent from '../Components/modal/Modal';
 
 export const AppContext = createContext(DEFAULT_APP_CONTEXTS);
@@ -23,6 +24,7 @@ const Treasury = () => {
     const [walletState, walletDispatch]=useReducer(walletReducer,walletInitialState);
     const [actorState, actorDispatch]= useReducer(actorReducer, actorInitialState);
     const [homePageState, homePageDispatch]= useReducer(homePageReducer, homePageInitialState);
+    const [treasuryState, treasuryDispatch]= useReducer(treasuryReducer, treasuryPageInitialState);
     
     const [stateHasBeenRecovered, setStateHasBeenRecovered] = useState(false);
     const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -39,7 +41,8 @@ const Treasury = () => {
         accountDispatch,
         actorDispatch,
         homePageDispatch,
-        notificationsDispatch
+        notificationsDispatch,
+        treasuryDispatch
     }
 
     const ReducerTypes={
@@ -48,7 +51,8 @@ const Treasury = () => {
         accountTypes,
         actorTypes,
         homePageTypes,
-        notificationsTypes
+        notificationsTypes,
+        treasuryTypes
     }
 
     const ReducerStates = {
@@ -57,7 +61,8 @@ const Treasury = () => {
         accountState,
         homePageState,
         actorState,
-        notificationsState
+        notificationsState,
+        treasuryState
     };
     
     //gets state from previous route
@@ -81,12 +86,14 @@ const Treasury = () => {
             notificationsState,
             walletState,
             accountState,
+            treasuryState,
             homePageState
         });
     },[
         journalState.isAuthenticated, 
         accountState.dataHasBeenLoaded,
         journalState.dataHasBeenLoaded,
+        treasuryState.dataHasBeenLoaded,
         walletState.dataHasBeenLoaded,
         homePageState.dataHasBeenLoaded,
         notificationsState.dataHasBeenLoaded,
@@ -108,7 +115,9 @@ const Treasury = () => {
         actorDispatch,
         actorState,
         notificationsState,
-        notificationsDispatch
+        notificationsDispatch,
+        treasuryState,
+        treasuryDispatch
     }}
     >
         {           
