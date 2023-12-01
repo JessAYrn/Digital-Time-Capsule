@@ -17,7 +17,7 @@ const theme = createTheme({
       // Then you will be able to use it like this: `<Button color="custom">`
       // (For TypeScript, you need to add module augmentation for the `custom` value)
       custom: {
-        main: '#F7931A',
+        main: '#F7931A !important',
       },
       white: {
         main: grey[100],
@@ -36,6 +36,7 @@ const theme = createTheme({
       MuiTextField:{
         styleOverrides: {
           root:{
+            width: '100%',
             backgroundColor: grey[900],
             opacity: 0.825,
           }
@@ -49,7 +50,7 @@ const theme = createTheme({
               color: '#F7931A'
             },
             "&.Mui-focused": {
-              color: grey[100]
+              color: grey[400]
             }
           }
         }
@@ -58,14 +59,14 @@ const theme = createTheme({
         styleOverrides:{
           root:{
             "&.Mui-disabled": {
-              color: grey[50],
-              "-webkit-text-fill-color": grey[100]
+              color: grey[400],
+              "-webkit-text-fill-color": grey[400]
             }
           },
           input:{
             "&.Mui-disabled": {
-              color: grey[50],
-              "-webkit-text-fill-color": grey[100]
+              color: grey[400],
+              "-webkit-text-fill-color": grey[400]
             }
           }
         }
@@ -75,12 +76,29 @@ const theme = createTheme({
           root:{
             color: grey[50],
             "&.Mui-disabled": {
-              color: grey[50],
-              "-webkit-text-fill-color": grey[100]
+              color: grey[400],
+              "-webkit-text-fill-color": grey[400]
             }
           }
         }
       },
+      MuiOutlinedInput: {
+        styleOverrides: {
+          input:{
+            color: grey[50]
+          }
+        }
+      },
+      MuiIconButton: {
+        styleOverrides: {
+          root:{
+            color: grey[50],
+            "&.Mui-disabled": {
+              color: grey[400]
+            }
+          }
+        }
+      }
     },
 });
 

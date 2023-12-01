@@ -160,16 +160,12 @@ const Journal = (props) => {
                         dispatchAction={types.CHANGE_NAME}
                         value={journalState.bio.name}
                     />
-                    <Grid xs={12} display={"flex"} justifyContent={"left"} alignItems={"center"}>
-                        <DatePickerField
-                            value={journalState.bio.dob[0]}
-                            label={"Date Of Birth"}
-                            onChange={onDatePickerChange}
-                            editable={true}
-                            md={11}
-                            xs={11}
-                        />
-                    </Grid>
+                    <DatePickerField
+                        value={journalState.bio.dob[0]}
+                        label={"Date Of Birth"}
+                        onChange={onDatePickerChange}
+                        editable={true}
+                    />
                     <InputBox
                         label={"Place of Birth: "}
                         rows={"1"}
