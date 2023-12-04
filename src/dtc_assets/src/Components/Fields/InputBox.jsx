@@ -64,7 +64,6 @@ const InputBox = (props) => {
 
     const {
         label,
-        maxLength,
         placeHolder,
         rows,
         disabled,
@@ -72,8 +71,8 @@ const InputBox = (props) => {
         dispatchAction,
         dispatch,
         index,
-        onBlur,
         onChange,
+        onDisableEdit,
         value,
         hasError,
         format
@@ -84,6 +83,7 @@ const InputBox = (props) => {
 
     const onChange_editButton = () => {
         setEditing(!editing);
+        if(onDisableEdit) onDisableEdit(!editing);
     };
 
     const theme = useTheme();

@@ -17,7 +17,7 @@ const theme = createTheme({
       // Then you will be able to use it like this: `<Button color="custom">`
       // (For TypeScript, you need to add module augmentation for the `custom` value)
       custom: {
-        main: '#F7931A !important',
+        main: '#F7931A',
       },
       white: {
         main: grey[100],
@@ -95,6 +95,31 @@ const theme = createTheme({
             color: grey[50],
             "&.Mui-disabled": {
               color: grey[400]
+            },
+            "&.MuiPickersArrowSwitcher-button":{
+              color: grey[900]
+            },
+            "&.MuiPickersCalendarHeader-switchViewButton":{
+              color: grey[900]
+            }
+          }
+        }
+      },
+      MuiCircularProgress: {
+        styleOverrides: {
+          root:{
+            color: grey[50],
+            "&.Mui-disabled": {
+              color: grey[50]
+            }
+          }
+        }
+      },
+      MuiSvgIcon: {
+        styleOverrides:{
+          root:{
+            "&.MuiDataGrid-booleanCell":{
+              color: '#fafafa !important',
             }
           }
         }

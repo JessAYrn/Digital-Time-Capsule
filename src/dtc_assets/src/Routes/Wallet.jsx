@@ -8,9 +8,6 @@ import WalletPage from './Pages/WalletPage';
 import { testTx } from '../testData/Transactions';
 import { recoverState, loadAllDataIntoReduxStores, allStatesLoaded } from '../functionsAndConstants/loadingFunctions';
 import { useConnect } from '@connect2ic/react';
-import CkBtcPage from './Pages/CkBtcPage';
-import EthPage from './Pages/EthPage';
-import BtcPage from './Pages/BtcPage';
 import { DEFAULT_APP_CONTEXTS, WALLET_TABS } from '../functionsAndConstants/Constants';
 import accountReducer , {accountTypes, accountInitialState} from '../reducers/accountReducer';
 import homePageReducer,{ homePageInitialState, homePageTypes } from '../reducers/homePageReducer';
@@ -80,14 +77,6 @@ const WalletApp = () => {
 
     window.onbeforeunload = window.history.replaceState(null, '');
 
-    
-    const WalletTabComponent = useMemo(() => {
-        if(walletState.walletPageTab===WALLET_TABS.icpTab) return WalletPage;
-        else if(walletState.walletPageTab===WALLET_TABS.btcTab) return BtcPage;
-        else if(walletState.walletPageTab===WALLET_TABS.ethTab) return EthPage;
-        else if(walletState.walletPageTab===WALLET_TABS.ckBtcTab) return CkBtcPage;
-    },[walletState.walletPageTab]);
-
     const displayComponent = useMemo(() => {
         return journalState.isAuthenticated && allStatesLoaded({
             journalState,
@@ -141,7 +130,7 @@ const WalletApp = () => {
             >
                 {
                     displayComponent ?
-                        <WalletTabComponent/> : 
+                        <WalletPage/> : 
                         <LoginPage
                             context={UI_CONTEXTS.WALLET}
                         /> 

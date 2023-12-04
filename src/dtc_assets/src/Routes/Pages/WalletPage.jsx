@@ -1,4 +1,4 @@
-import React, {useMemo, useContext, useState} from 'react';
+import React, { useContext, useState} from 'react';
 import { AppContext } from '../Wallet';
 import { NavBar } from '../../Components/navigation/NavBar';
 import './WalletPage.scss';
@@ -31,7 +31,6 @@ const WalletPage = (props) => {
     } = useContext(AppContext);
 
     const [loadingTx, setIsLoadingTx] = useState(false);
-    const [showReloadButton, setShowReloadButton] = useState(false);
     const [modalIsOpen, setModalIsOpen] = useState(false)
     const [modalProps, setModalProps] = useState({});
 
@@ -49,15 +48,17 @@ const WalletPage = (props) => {
         setModalIsOpen(true);
     };
 
-    // const loadTxs = async () => {
-    //     setIsLoadingTx(true);
-    //     setShowReloadButton(true);
-    //     let result = await loadTxHistory(actorState, walletDispatch, walletTypes);
-    //     setIsLoadingTx(false);
-    // };
+    const loadTxs = async () => {
+        setIsLoadingTx(true);
+        setModalIsOpen(true);
+        let result = await loadTxHistory(actorState, walletDispatch, walletTypes);
+        console.log(walletState.walletData.txHistory);
+        setModalIsOpen(false);
+        setIsLoadingTx(false);
+    };
 
     const speedDialActions = [
-        {name: "Refresh", icon: RefreshIcon, onClick: () => {}},
+        {name: "Refresh", icon: RefreshIcon, onClick: loadTxs},
         {name: "New Transaction", icon: SendIcon , onClick: onSend}
     ]
 
@@ -129,6 +130,7 @@ const WalletPage = (props) => {
             <SpeedDialField actions={speedDialActions} position={"right"}/>
             <ModalComponent
                 open={modalIsOpen}
+                isLoading={loadingTx}
                 handleClose={() => setModalIsOpen(false)}
                 {...modalProps}
             />

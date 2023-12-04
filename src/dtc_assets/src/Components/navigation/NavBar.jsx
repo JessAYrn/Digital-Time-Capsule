@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { useNavigate, useLocation } from "react-router-dom";
-import { JOURNAL_TABS, NAV_LINKS, WALLET_TABS } from '../../functionsAndConstants/Constants';
+import { JOURNAL_TABS, NAV_LINKS } from '../../functionsAndConstants/Constants';
 import { AppContext as AccountContext} from '../../Routes/Account';
 import { AppContext as HomePageContext} from '../../Routes/HomePage';
 import { AppContext as JournalContext} from '../../Routes/App';
@@ -14,9 +14,7 @@ import { ConnectButton, ConnectDialog, useConnect } from "@connect2ic/react";
 import { initialState } from '../../reducers/journalReducer';
 import "./NavBar.scss";
 import SdStorageIcon from '@mui/icons-material/SdStorage';
-import { walletTypes } from '../../reducers/walletReducer';
 import { retrieveContext } from '../../functionsAndConstants/Contexts';
-import CellTowerIcon from '@mui/icons-material/CellTower';
 import MenuField from "../Fields/MenuField";
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
@@ -52,8 +50,6 @@ export const NavBar = (props) => {
         treasuryState,
         treasuryDispatch
     } = useContext(AppContext);
-
-    const [sideBar, setSideBar] = useState(false);
 
     let navigate = useNavigate();
 
@@ -93,14 +89,6 @@ export const NavBar = (props) => {
         }
     });
 
-    const changeHandler_walletTab = (tab) => {
-        walletDispatch({
-            actionType: walletTypes.SET_WALLET_TABS,
-            payload: tab
-        });
-    };
-
-
     const changeHandler_journalTab=(tab)=>{
         journalDispatch({
             actionType:types.SET_JOURNAL_TAB,
@@ -124,13 +112,6 @@ export const NavBar = (props) => {
         { text: JOURNAL_TABS.diaryTab, onClick: () => changeHandler_journalTab(JOURNAL_TABS.diaryTab) },
         { text: JOURNAL_TABS.notesTab, onClick: () => changeHandler_journalTab(JOURNAL_TABS.notesTab) }
     ]
-
-    const walletTabMenuItemProps = [
-        { text: WALLET_TABS.icpTab, onClick: () => changeHandler_walletTab(WALLET_TABS.icpTab) }, 
-        { text: WALLET_TABS.ethTab, onClick: () => changeHandler_walletTab(WALLET_TABS.ethTab) }, 
-        { text: WALLET_TABS.btcTab, onClick: () => changeHandler_walletTab(WALLET_TABS.btcTab) },
-        { text: WALLET_TABS.ckBtcTab, onClick: () => changeHandler_walletTab(WALLET_TABS.ckBtcTab) }
-    ];
 
     const notificationsMenuItemProps = notificationsState.notifications.map(({key, text}) => {
         const key_ = key[0];
@@ -170,20 +151,6 @@ export const NavBar = (props) => {
                     active={true}
                     color={"custom"}
                     menuItemProps={journalTabMenuItemProps}
-                />
-            }
-            {pathname === NAV_LINKS.wallet &&
-                <MenuField
-                    MenuIcon={CellTowerIcon}
-                    xs={6}
-                    md={3}
-                    display={"flex"}
-                    alignItems={"center"}
-                    justifyContent={"right"}
-                    active={true}
-                    isLoading={isLoading}
-                    color={"custom"}
-                    menuItemProps={notificationsMenuItemProps}
                 />
             }
             <MenuField

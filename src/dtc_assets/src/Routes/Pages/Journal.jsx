@@ -60,6 +60,8 @@ const Journal = (props) => {
 
     const onTextBoxChange = () => setCounter(counter + 1);
 
+    const onDisableEdit = async (isEditing) => { if(!isEditing) sendData(); };
+
     const onDatePickerChange = async (e) => {
         const date = new Date(e);
         const dateInMilliseconds = date.getTime();
@@ -156,7 +158,7 @@ const Journal = (props) => {
                         editable={true}
                         dispatch={journalDispatch}
                         onChange={onTextBoxChange}
-                        onBlur={sendData}
+                        onDisableEdit={onDisableEdit}
                         dispatchAction={types.CHANGE_NAME}
                         value={journalState.bio.name}
                     />
@@ -171,7 +173,7 @@ const Journal = (props) => {
                         rows={"1"}
                         editable={true}
                         onChange={onTextBoxChange}
-                        onBlur={sendData}
+                        onDisableEdit={onDisableEdit}
                         dispatch={journalDispatch}
                         dispatchAction={types.CHANGE_POB}
                         value={journalState.bio.pob}
@@ -217,7 +219,7 @@ const Journal = (props) => {
                         label={"Dedications: "}
                         editable={true}
                         onChange={onTextBoxChange}
-                        onBlur={sendData}
+                        onDisableEdit={onDisableEdit}
                         rows={"8"}
                         dispatch={journalDispatch}
                         dispatchAction={types.CHANGE_DEDICATIONS}
@@ -227,7 +229,7 @@ const Journal = (props) => {
                         label={"Preface: "}
                         editable={true}
                         onChange={onTextBoxChange}
-                        onBlur={sendData}
+                        onDisableEdit={onDisableEdit}
                         rows={"16"}
                         dispatch={journalDispatch}
                         dispatchAction={types.CHANGE_PREFACE}
