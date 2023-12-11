@@ -78,7 +78,7 @@ const WalletApp = () => {
     window.onbeforeunload = window.history.replaceState(null, '');
 
     const displayComponent = useMemo(() => {
-        return journalState.isAuthenticated && allStatesLoaded({
+        return connectionResult.isConnected && allStatesLoaded({
             journalState,
             notificationsState,
             walletState,
@@ -87,7 +87,7 @@ const WalletApp = () => {
             homePageState
         });
     },[
-        journalState.isAuthenticated, 
+        connectionResult.isConnected, 
         accountState.dataHasBeenLoaded,
         journalState.dataHasBeenLoaded,
         treasuryState.dataHasBeenLoaded,
@@ -101,12 +101,14 @@ const WalletApp = () => {
     //Loading Time Capsule Data
     useEffect(async () => {
         if(!actorState.backendActor) return; 
-        setIsLoadingModal(true);
-        setModalIsOpen(true);
-        const response = await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes, stateHasBeenRecovered);
-        setModalIsOpen(response?.openModal);
-        setModalProps(response)
-        setIsLoadingModal(false);
+        try{
+            setIsLoadingModal(true);
+            setModalIsOpen(true);
+            let response = await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes, stateHasBeenRecovered);
+            setModalIsOpen(response?.openModal);
+            setModalProps(response)
+            setIsLoadingModal(false);    
+        } catch(e){ connectionResult.disconnect(); }   
     },[actorState.backendActor]);
     
     return(

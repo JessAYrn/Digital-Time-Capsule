@@ -2,19 +2,17 @@ import React, { useContext, useState} from 'react';
 import { AppContext } from '../Wallet';
 import { NavBar } from '../../Components/navigation/NavBar';
 import './WalletPage.scss';
-import { icpWalletAddressHasProperFormat, icpNumberHasProperFormat, shortenHexString } from '../../functionsAndConstants/Utils';
+import { shortenHexString } from '../../functionsAndConstants/Utils';
 import { e8sInOneICP } from '../../functionsAndConstants/Constants';
 import {  RenderQrCode } from '../../functionsAndConstants/walletFunctions/GenerateQrCode';
 import { copyText } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
-import { loadTxHistory } from '../../functionsAndConstants/loadingFunctions';
-import { testTx } from '../../testData/Transactions';
+import { loadWalletData } from '../../functionsAndConstants/loadingFunctions';
 import { walletTypes } from '../../reducers/walletReducer';
 import { UI_CONTEXTS } from '../../functionsAndConstants/Contexts';
 import { nanoSecondsToMiliSeconds } from '../../functionsAndConstants/Utils';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import SendIcon from '@mui/icons-material/Send';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import '../../SCSS/contentContainer.scss'
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
 import Paper  from '@mui/material/Paper';
 import DataField from '../../Components/Fields/DataField';
@@ -26,12 +24,10 @@ import SendCryptoModal from '../../Components/modal/SendCryptoModal';
 
 const WalletPage = (props) => {
 
-    const { 
-        walletState, walletDispatch, actorState, actorDispatch
-    } = useContext(AppContext);
+    const { walletState, walletDispatch, actorState, actorDispatch } = useContext(AppContext);
 
     const [loadingTx, setIsLoadingTx] = useState(false);
-    const [modalIsOpen, setModalIsOpen] = useState(false)
+    const [modalIsOpen, setModalIsOpen] = useState(false);
     const [modalProps, setModalProps] = useState({});
 
     const onSend = () => {
@@ -51,8 +47,7 @@ const WalletPage = (props) => {
     const loadTxs = async () => {
         setIsLoadingTx(true);
         setModalIsOpen(true);
-        let result = await loadTxHistory(actorState, walletDispatch, walletTypes);
-        console.log(walletState.walletData.txHistory);
+        await loadWalletData(actorState, walletDispatch, walletTypes);
         setModalIsOpen(false);
         setIsLoadingTx(false);
     };
@@ -65,7 +60,6 @@ const WalletPage = (props) => {
     return (
         <Grid 
             container 
-            className={'container_journal'} 
             columns={12} 
             xs={12} 
             rowSpacing={8} 

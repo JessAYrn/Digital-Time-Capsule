@@ -135,7 +135,7 @@ export const loadWalletData = async (actorState, walletDispatch, types ) => {
         actionType: types.SET_DATA_HAS_BEEN_LOADED,
         payload: true,
     });
-    loadTxHistory(actorState, walletDispatch, types);
+    await loadTxHistory(actorState, walletDispatch, types);
 };
 
 export const loadTxHistory = async (actorState, walletDispatch, types) => {

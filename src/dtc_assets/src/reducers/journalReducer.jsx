@@ -7,7 +7,6 @@ export const types = {
     SET_NOTIFICATIONS:"SET_NOTIFICATIONS",
     SET_BIO: "SET_BIO",
     SET_DATA_HAS_BEEN_LOADED: "SET_DATA_HAS_BEEN_LOADED",
-    SET_IS_AUTHENTICATED: "SET_IS_AUTHENTICATED",
     SET_IS_LOADING:"SET_IS_LOADING",
     CHANGE_LOCATION: "CHANGE_LOCATION",
     CHANGE_TEXT: "CHANGE_TEXT",
@@ -45,7 +44,6 @@ export const initialState = {
     },
     journal: [],
     notifications:[],
-    isAuthenticated: false,
     isLoading: false,
 };
 export const defaultFileMetaData = {
@@ -73,11 +71,6 @@ const changeValue = (state = initialState, action) => {
             }
         case types.SET_JOURNAL:
             state.journal = payload;
-            return {
-                ...state
-            }
-        case types.SET_IS_AUTHENTICATED:
-            state.isAuthenticated = payload;
             return {
                 ...state
             }

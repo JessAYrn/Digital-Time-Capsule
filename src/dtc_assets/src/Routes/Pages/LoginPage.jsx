@@ -78,15 +78,6 @@ const LoginPage = (props) => {
 
     let navigate = useNavigate();
 
-    //must remove function from state because useNavigate will send a null state if there is a function in the state.
-    //the reason this happens is because objects retrieved from useLocation must be serializable and function are not.
-    let reduxStates = {
-        journal: journalState,
-        wallet: walletState,
-        account: accountState,
-        homePage: homePageState
-    };
-
     const changeRoute = (route, states) => {
         navigate(route, { replace: false, state: states });
     };
@@ -116,10 +107,6 @@ const LoginPage = (props) => {
             })
         }
         setIsLoading(true);
-        journalDispatch({
-            actionType: types.SET_IS_AUTHENTICATED,
-            payload: connectionResult.isConnected
-        });
     }, [connectionResult.isConnected]);
 
     return(
@@ -139,7 +126,7 @@ const LoginPage = (props) => {
                         Icon={AccountBalanceWalletIcon}
                         iconSize={'large'}
                         iconColor={'#917153'}
-                        onClick={() => changeRoute(NAV_LINKS.wallet, reduxStates)}
+                        onClick={() => changeRoute(NAV_LINKS.wallet)}
                         withBox={true}
                     />
                 </Grid>
@@ -149,7 +136,7 @@ const LoginPage = (props) => {
                         active={context === UI_CONTEXTS.JOURNAL}
                         iconSize={'large'}
                         iconColor={'#917153'}
-                        onClick={() => changeRoute(NAV_LINKS.journal, reduxStates)}
+                        onClick={() => changeRoute(NAV_LINKS.journal)}
                         withBox={true}
                     />
                 </Grid>
@@ -161,7 +148,7 @@ const LoginPage = (props) => {
                         Icon={DashboardIcon}
                         iconSize={'large'}
                         iconColor={'#917153'}
-                        onClick={() => changeRoute(NAV_LINKS.dashboard, reduxStates)}
+                        onClick={() => changeRoute(NAV_LINKS.dashboard)}
                         withBox={true}
                     />
                 </Grid>
@@ -171,14 +158,14 @@ const LoginPage = (props) => {
                         Icon={AccountBoxIcon}
                         iconSize={'large'}
                         iconColor={'#917153'}
-                        onClick={() => changeRoute(NAV_LINKS.account, reduxStates)}
+                        onClick={() => changeRoute(NAV_LINKS.account)}
                         withBox={true}
                     />
                 </Grid>
             </Grid>
             <Grid xs={11} md={9} display="flex" justifyContent="center" alignItems="center">
                 <ConnectButton/>
-                <ConnectDialog />
+                <ConnectDialog dark={true}/>
             </Grid>
             <Grid xs={11} md={9} display="flex" justifyContent="center" alignItems="center">
                 <DataField

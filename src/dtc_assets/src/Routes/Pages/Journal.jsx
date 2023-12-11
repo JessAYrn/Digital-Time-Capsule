@@ -1,7 +1,6 @@
 import JournalPage from "./JournalPage";
 import React, { useContext, useEffect, useState } from "react";
 import {types} from "../../reducers/journalReducer";
-import "./Journal.scss";
 import { AppContext } from "../App";
 import InputBox from "../../Components/Fields/InputBox";
 import SpeedDialField from '../../Components/Fields/SpeedDialField'
@@ -127,7 +126,6 @@ const Journal = (props) => {
         <>
         <Grid 
             container 
-            className={'container_journal'} 
             columns={12} 
             xs={12} 
             rowSpacing={8} 
