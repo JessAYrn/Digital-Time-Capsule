@@ -66,7 +66,7 @@ shared actor class User() = this {
         Hash.hash
     );
 
-    private stable var startIndexForBlockChainQuery : Nat64 = 3_512_868;
+    private stable var startIndexForBlockChainQuery : Nat64 = 7_356_011;
 
     private let ic : IC.Self = actor "aaaaa-aa";
 
@@ -197,10 +197,18 @@ shared actor class User() = this {
         };
     };
 
+    var error : Error = Error.reject("nothing yet");
+
     private func updateUsersTxHistory() : async () {
-        let newStartIndexForNextQuery = await TxHelperMethods.updateUsersTxHistory(userProfilesMap, startIndexForBlockChainQuery);
-        startIndexForBlockChainQuery := newStartIndexForNextQuery;
+        try{
+            let newStartIndexForNextQuery = await TxHelperMethods.updateUsersTxHistory(userProfilesMap, startIndexForBlockChainQuery);
+            startIndexForBlockChainQuery := newStartIndexForNextQuery;
+        } catch (e) {
+            error := e;
+        }
     };
+
+    public query func getNumberOfErrors() : async Text { return Error.message(error)}; 
 
     func myAccountId() : Account.AccountIdentifier {
         Account.accountIdentifier(Principal.fromActor(this), Account.defaultSubaccount())
@@ -588,16 +596,21 @@ shared actor class User() = this {
         };
     };
 
+    let timerId_daily = recurringTimer(#seconds (24 * 60 * 60), heartBeat_unshared);
+    let timerId_hourly = recurringTimer(#seconds (60 * 60), heartBeat_hourly);
+    let timerId_everyThirtySeconds = recurringTimer(#seconds (30), updateUsersTxHistory);
+
     system func preupgrade() { 
         userProfilesArray := Iter.toArray(userProfilesMap.entries()); 
         proposalsArray := Iter.toArray(proposalsMap.entries());
     };
 
+    public query func getStartIndex(): async Nat64 {
+        startIndexForBlockChainQuery
+    };
+
     system func postupgrade() { 
         userProfilesArray:= []; 
         proposalsArray := [];
-        let timerId_daily = recurringTimer(#seconds (24 * 60 * 60), heartBeat_unshared);
-        let timerId_hourly = recurringTimer(#seconds (60 * 60), heartBeat_hourly);
-        let timerId_everyFiveSeconds = recurringTimer(#seconds (5), updateUsersTxHistory);
     };
 }

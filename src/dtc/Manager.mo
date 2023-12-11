@@ -1,5 +1,4 @@
 import Ledger "Ledger/Ledger";
-import LedgerCandid "Ledger/LedgerCandid";
 import Debug "mo:base/Debug";
 import Error "mo:base/Error";
 import Trie "mo:base/Trie";
