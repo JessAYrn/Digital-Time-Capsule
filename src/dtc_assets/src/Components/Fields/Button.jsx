@@ -11,6 +11,7 @@ const ButtonField = (props) => {
         Icon,
         iconSize,
         onClick,
+        onBlur,
         disabled,
         elevation,
         active,
@@ -22,7 +23,9 @@ const ButtonField = (props) => {
         ariaExpanded,
         color,
         className,
-        upload
+        upload,
+        sx,
+        paperSx
     } = props;
     
     let doNothing = () => {};
@@ -35,16 +38,19 @@ const ButtonField = (props) => {
     let handleClick = disabled ? doNothing : onClick;
     return (
             <Paper 
+            sx={paperSx}
             elevation={elevation ? elevation : 24} 
             className={`${transparentBackground ? "transparentBackground" : ""} ${className} buttonField`} 
             >
                 <ButtonType 
+                    sx={sx}
                     varient={upload ? 'contained' : null}
                     component={upload ? "label" : null}
                     aria-controls={ariaControls}
                     aria-haspopup={ariaHaspopup}
                     aria-expanded={ariaExpanded}
                     id={id}
+                    onBlur={onBlur}
                     size={iconSize} 
                     color={color || color_} 
                     endIcon={(text && Icon) ?<Icon/> : null} 

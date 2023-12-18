@@ -2,14 +2,13 @@ import React, { useContext, useState} from 'react';
 import { AppContext } from '../Wallet';
 import { NavBar } from '../../Components/navigation/NavBar';
 import './WalletPage.scss';
-import { shortenHexString } from '../../functionsAndConstants/Utils';
 import { e8sInOneICP } from '../../functionsAndConstants/Constants';
 import {  RenderQrCode } from '../../functionsAndConstants/walletFunctions/GenerateQrCode';
 import { copyText } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
 import { loadWalletData } from '../../functionsAndConstants/loadingFunctions';
 import { walletTypes } from '../../reducers/walletReducer';
 import { UI_CONTEXTS } from '../../functionsAndConstants/Contexts';
-import { nanoSecondsToMiliSeconds } from '../../functionsAndConstants/Utils';
+import { nanoSecondsToMiliSeconds, shortenHexString } from '../../functionsAndConstants/Utils';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import SendIcon from '@mui/icons-material/Send';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -35,9 +34,10 @@ const WalletPage = (props) => {
             components: [{
                 Component: SendCryptoModal,
                 props: {
-                    onClickSend: () => {},
-                    onClickCancel: () => {},
-                    onClickScanQrCode: () => {}
+                    onClickCancel: () => {setModalIsOpen(false); () => setModalProps({})},
+                    setModalProps,
+                    setModalIsOpen,
+                    setIsLoadingTx
                 }
             }]
         });
@@ -83,14 +83,12 @@ const WalletPage = (props) => {
                 <Paper elevation={24} className={'walletDataPaperComponent'}>
                     <RenderQrCode imgUrl={walletState.walletData.qrCodeImgUrl}/> 
                     <DataField
-                        className={'walletPageDataField'}
                         label={'Balance: '}
                         text={`${walletState.walletData.balance /  e8sInOneICP} ICP`}
                         isLoading={!walletState.dataHasBeenLoaded}
                         disabled={true}
                     />
                     <DataField
-                        className={'walletPageDataField'}
                         label={'Address: '}
                         text={`${shortenHexString(walletState.walletData.address)}`}
                         isLoading={!walletState.dataHasBeenLoaded}

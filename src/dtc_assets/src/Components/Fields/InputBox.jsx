@@ -46,17 +46,22 @@ const InputBox = (props) => {
 
     const [values, setValues] = useState({});
     
-    const handleChange = (event) => {
-    setValues({
-        ...values,
-        [event.target.name]: event.target.value,
-    });
-    if(dispatch) dispatch({
-        actionType: dispatchAction,
-        payload: event.target.value,
-        index: index
-    });
-    if(onChange) onChange(event.target.value);
+    const handleChange = (eventName, eventValue) => { 
+      setValues({
+          ...values,
+          [eventName]: `${eventValue}`,
+      });
+      if(dispatch) dispatch({
+          actionType: dispatchAction,
+          payload: `${eventValue}`,
+          index: index
+      });
+      if(onChange) onChange(`${eventValue}`);
+    };
+
+    const focusTextBox = () => {
+      let textbox = document.getElementById("formatted-numberFormat-input-label");
+      textbox.focus();
     };
     
 
@@ -75,7 +80,9 @@ const InputBox = (props) => {
         onDisableEdit,
         value,
         hasError,
-        format
+        format,
+        width,
+        maxValue
     } = props;
 
     let inputComponent;
@@ -97,6 +104,7 @@ const InputBox = (props) => {
       <Grid 
         columns={12} 
         xs={12} 
+        width={width}
         display="flex" 
         justifyContent="left" 
         alignItems="center" 
@@ -107,26 +115,38 @@ const InputBox = (props) => {
         paddingBottom={0}
       >
         {format == INPUT_BOX_FORMATS.numberFormat && 
-          <Stack direction="row" spacing={2}>
-            <TextField
-            columns={12} 
-            xs={12} 
-            width={"100%"}
-            color='white'
-            label={label}       
-            value={values[format]}
-            onChange={handleChange}
-            placeholder={placeHolder}
-            name={format}
-            id={`formatted-${format}-input`}
-            InputProps={{inputComponent}}
-            disabled={(editable && !editing) || disabled}
-            variant="standard"
-            multiline
-            maxRows={rows ? rows : 100}
-            fullWidth
-            />
-          </Stack>
+          <>
+            <Stack direction="row" spacing={2}>
+              <TextField
+              columns={12} 
+              xs={12} 
+              width={"100%"}
+              color='white'
+              label={label}       
+              value={values[format]}
+              onChange={(e) => handleChange(e.target.name, e.target.value)}
+              placeholder={placeHolder}
+              name={format}
+              id={`formatted-${format}-input`}
+              InputProps={{inputComponent}}
+              disabled={(editable && !editing) || disabled}
+              variant="standard"
+              multiline
+              maxRows={rows ? rows : 100}
+              fullWidth
+              />
+            </Stack>
+            {maxValue &&
+              <ButtonField
+                sx={{marginLeft: "-8px"}}
+                transparentBackground={true}
+                elevation={0}
+                text={"max"}
+                onClick={() => { handleChange(INPUT_BOX_FORMATS.numberFormat, maxValue); focusTextBox(); }}
+                iconSize={'small'}
+              />
+            }
+          </>
         }
         {(!format || format === INPUT_BOX_FORMATS.noFormat) &&
           <TextField
@@ -138,7 +158,7 @@ const InputBox = (props) => {
             placeholder={placeHolder}
             value={value}
             disabled={(editable && !editing) || disabled}
-            onChange={handleChange}
+            onChange={(e) => handleChange(e.target.name, e.target.value)}
             id="filled-multiline-flexible"
             label={label}
             multiline

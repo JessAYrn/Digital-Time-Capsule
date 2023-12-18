@@ -83,7 +83,7 @@ const AccountPage = () => {
             setModalIsOpen(response?.openModal);
             setModalProps(response)
             setIsLoadingModal(false);    
-        } catch(e){ connectionResult.disconnect(); }
+        } catch(e){ connectionResult.disconnect(); document.location.reload(); }
     },[actorState.backendActor]);
 
     const displayComponent = useMemo(() => {

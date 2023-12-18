@@ -64,6 +64,7 @@ const theme = createTheme({
             }
           },
           input:{
+            color: grey[50],
             "&.Mui-disabled": {
               color: grey[400],
               "-webkit-text-fill-color": grey[400]
@@ -86,6 +87,13 @@ const theme = createTheme({
         styleOverrides: {
           input:{
             color: grey[50]
+          }
+        }
+      },
+      MuiButton: {
+        styleOverrides: {
+          root:{
+            minWidth: "50px"
           }
         }
       },
@@ -120,6 +128,16 @@ const theme = createTheme({
           root:{
             "&.MuiDataGrid-booleanCell":{
               color: '#fafafa !important',
+            }
+          }
+        }
+      },
+      MuiStack: {
+        styleOverrides: {
+          root: {
+            width: "100%",
+            "& .MuiInputLabel-root": {
+              left: "12px"
             }
           }
         }

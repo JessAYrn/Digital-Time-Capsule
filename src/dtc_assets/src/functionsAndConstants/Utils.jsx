@@ -120,7 +120,11 @@ export const deviceType = () => {
 };
 
 export const round2Decimals = (num) => {
-  return Math.round(num * 100) / 100
+  return Math.round(num * 10 ** 2) / ( 10 ** 2 )
+};
+
+export const round8Decimals = (num) => {
+  return Math.round(num * 10 ** 8) / ( 10 ** 8 )
 };
 
 export const inTrillions = (num) => {
