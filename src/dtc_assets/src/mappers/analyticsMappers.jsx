@@ -1,4 +1,3 @@
-import React from "react";
 import { nanoSecondsToMiliSeconds, getDateAsStringMMDDYYY } from "../functionsAndConstants/Utils";
 import { GRAPH_DISPLAY_CURRENCIES } from "../functionsAndConstants/Constants";
 
@@ -62,13 +61,21 @@ const getDataSets = (data_) => {
 };
 
 const mapBalancesDataFromApiToFrontend = (data) => {
-    let length = data.length;
+    const data_ = data.sort(function(a, b){
+        const [date_a, balances_a] = a;
+        const [date_b, balances_b] = b;
+        const bigIntA = parseInt(date_a);
+        const bigIntB = parseInt(date_b);
+        if(bigIntA > bigIntB) return 1;
+        else return -1
+    });
+    let length = data_.length;
     if(!length) return dummyDataset;
     const week_dataset = [];
     const month_dataset = [];
     const year_dataset = [];
     const allTime_dataset= [];
-    data.forEach(([date, balances], index) => {
+    data_.forEach(([date, balances], index) => {
         date = parseFloat(date);
         date = nanoSecondsToMiliSeconds(date);
         date = getDateAsStringMMDDYYY(date);

@@ -2,13 +2,13 @@ import React, { useContext, useState} from 'react';
 import { AppContext } from '../Wallet';
 import { NavBar } from '../../Components/navigation/NavBar';
 import './WalletPage.scss';
-import { e8sInOneICP } from '../../functionsAndConstants/Constants';
-import {  RenderQrCode } from '../../functionsAndConstants/walletFunctions/GenerateQrCode';
+import { e8sInOneICP, CHART_TYPES, GRAPH_DISPLAY_CURRENCIES } from '../../functionsAndConstants/Constants';
 import { copyText } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
 import { loadWalletData } from '../../functionsAndConstants/loadingFunctions';
 import { walletTypes } from '../../reducers/walletReducer';
 import { UI_CONTEXTS } from '../../functionsAndConstants/Contexts';
 import { nanoSecondsToMiliSeconds, shortenHexString } from '../../functionsAndConstants/Utils';
+import QrCodeIcon from '@mui/icons-material/QrCode';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import SendIcon from '@mui/icons-material/Send';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -19,6 +19,9 @@ import AccordionField from '../../Components/Fields/Accordion';
 import SpeedDialField from '../../Components/Fields/SpeedDialField';
 import ModalComponent from '../../Components/modal/Modal';
 import SendCryptoModal from '../../Components/modal/SendCryptoModal';
+import ButtonField from '../../Components/Fields/Button';
+import DisplayQrCode from '../../Components/modal/DisplayQrCode';
+import Graph from '../../Components/Fields/Chart';
 
 
 const WalletPage = (props) => {
@@ -42,6 +45,18 @@ const WalletPage = (props) => {
             }]
         });
         setModalIsOpen(true);
+    };
+
+    const onClick_QrCode = () => {
+        setModalIsOpen(true);
+        setModalProps({
+            components: [{
+                Component: DisplayQrCode,
+                props: {
+                    onClose: () => {setModalIsOpen(false); () => setModalProps({})},
+                }
+            }]
+        });
     };
 
     const loadTxs = async () => {
@@ -72,7 +87,7 @@ const WalletPage = (props) => {
             <Grid 
                 columns={12} 
                 xs={11} 
-                md={5} 
+                md={9} 
                 rowSpacing={0} 
                 display="flex" 
                 justifyContent="center" 
@@ -80,27 +95,34 @@ const WalletPage = (props) => {
                 flexDirection={"column"} 
                 marginTop={"80px"}
             >
+                <Graph type={CHART_TYPES.line} inputData={walletState.balancesData} defaultLabel={GRAPH_DISPLAY_CURRENCIES.icp}/>
                 <Paper elevation={24} className={'walletDataPaperComponent'}>
-                    <RenderQrCode imgUrl={walletState.walletData.qrCodeImgUrl}/> 
                     <DataField
                         label={'Balance: '}
                         text={`${walletState.walletData.balance /  e8sInOneICP} ICP`}
                         isLoading={!walletState.dataHasBeenLoaded}
                         disabled={true}
                     />
-                    <DataField
-                        label={'Address: '}
-                        text={`${shortenHexString(walletState.walletData.address)}`}
-                        isLoading={!walletState.dataHasBeenLoaded}
-                        onClick={() => copyText( walletState.walletData.address )}
-                        buttonIcon={ContentCopyIcon}
-                    />
+                    <Grid width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} padding={"0"}>
+                        <DataField
+                            label={'Address: '}
+                            text={`${shortenHexString(walletState.walletData.address)}`}
+                            isLoading={!walletState.dataHasBeenLoaded}
+                            onClick={() => copyText( walletState.walletData.address )}
+                            buttonIcon={ContentCopyIcon}
+                        />
+                        <ButtonField
+                            Icon={QrCodeIcon}
+                            transparentBackground={true}
+                            onClick={onClick_QrCode}
+                        />
+                    </Grid>
                 </Paper> 
             </Grid>
             <Grid 
                 columns={12} 
                 xs={11} 
-                md={5} 
+                md={9} 
                 rowSpacing={0} 
                 display="flex" 
                 justifyContent="center" 
@@ -112,8 +134,8 @@ const WalletPage = (props) => {
                         const {balanceDelta, increase, recipient, timeStamp, source} = tx;
                         const date = new Date(nanoSecondsToMiliSeconds(parseInt(timeStamp))).toString()
                         const title = `${increase ? "+":"-"} ${balanceDelta / e8sInOneICP} ICP // ${date} `;
-                        const text_1 = `source: ${shortenHexString(source)} ICP`;
-                        const text_2 = `Recipient: ${shortenHexString(recipient)} ICP`;
+                        const text_1 = `source: ${shortenHexString(source)}`;
+                        const text_2 = `Recipient: ${shortenHexString(recipient)}`;
                         return (<div title={title} texts={[text_1, text_2]}></div>)
                     })}
                 </AccordionField>}

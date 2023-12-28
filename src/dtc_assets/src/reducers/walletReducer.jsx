@@ -1,4 +1,5 @@
 import {WALLET_TABS} from '../functionsAndConstants/Constants';
+import { dummyDateSets } from '../mappers/analyticsMappers';
 
 export const walletTypes={
     SET_ENTIRE_WALLET_REDUX_STATE: "SET_ENTIRE_WALLET_REDUX_STATE",
@@ -8,6 +9,7 @@ export const walletTypes={
     SET_DATA_HAS_BEEN_LOADED:'SET_DATA_HAS_BEEN_LOADED',
     SET_TX_HISTORY_DATA:"SET_TX_HISTORY_DATA",
     SET_IS_LOADING:"SET_IS_LOADING",
+    SET_WALLET_BALANCES_DATA: "SET_WALLET_BALANCES_DATA"
 }
 
 
@@ -24,6 +26,7 @@ export const walletInitialState={
             data: []
         }
     },
+    balancesData: dummyDateSets
 
 
 }
@@ -41,6 +44,11 @@ const changeValue = (state =walletInitialState, action) => {
         }
         case walletTypes.SET_IS_LOADING:
             state.isLoading = payload;
+        return {
+            ...state
+        }
+        case walletTypes.SET_WALLET_BALANCES_DATA:
+            state.balancesData = payload;
         return {
             ...state
         }

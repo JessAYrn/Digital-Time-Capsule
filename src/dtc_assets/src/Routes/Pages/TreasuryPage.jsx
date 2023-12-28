@@ -1,5 +1,5 @@
 import { NavBar } from "../../Components/navigation/NavBar";
-import React, { Component, useContext, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { UI_CONTEXTS } from "../../functionsAndConstants/Contexts";
 import { AppContext } from "../Treasury";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
@@ -17,7 +17,7 @@ import CreateProposalForm from "../../Components/proposals/CreateProposalForm";
 import DepositToTreasuryModal from "../../Components/modal/DepositToTreasuryModal";
 import Graph from "../../Components/Fields/Chart";
 import './TreasuryPage.scss'
-import { CHART_TYPES } from "../../functionsAndConstants/Constants";
+import { CHART_TYPES, GRAPH_DISPLAY_CURRENCIES } from "../../functionsAndConstants/Constants";
 
 const TreasuryPage = (props) => {
   const { treasuryState, homePageState, actorState } = useContext(AppContext);
@@ -89,7 +89,7 @@ const TreasuryPage = (props) => {
         flexDirection={"column"}
         marginTop={"60px"}
       >
-        <Graph type={CHART_TYPES.line} inputData={treasuryState.balancesData}/>
+        <Graph type={CHART_TYPES.line} inputData={treasuryState.balancesData} defaultLabel={GRAPH_DISPLAY_CURRENCIES.icp}/>
         <Paper className='treasury paper'>
         <DataField
           label={'Balance($ICP): '}

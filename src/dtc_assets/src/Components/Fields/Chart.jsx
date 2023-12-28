@@ -13,11 +13,12 @@ Chart.register(...registerables);
 const Graph = (props) => {
     const {
         type, 
-        inputData
+        inputData,
+        defaultLabel
     } = props
 
     const [timeFrame, setTimeFrame] = useState(GRAPH_TIME_FRAMES.week);
-    const [labelDisplayed, setLabelDisplayed] = useState(inputData[Object.keys(inputData)[0]]?.datasets[0]?.label);
+    const [labelDisplayed, setLabelDisplayed] = useState(defaultLabel);
 
     const data = useMemo(() => {
         let set = inputData[timeFrame];
@@ -45,18 +46,24 @@ const Graph = (props) => {
         justifyContent="center" 
         alignItems="center" 
         >
+            <Paper className="chart paper" sx={{marginBottom: "0px"}}>
+                <Chart_ data={data} height={"400px"}/>
+            </Paper>
+
             <Grid
             xs={12}
             display="flex"
-            justifyContent="left" 
+            justifyContent="right" 
             alignItems="center" 
+            paddingTop={0}
             >
                 <MenuField
                     MenuIcon={CellTowerIcon}
-                    xs={8}
+                    xs={1}
+                    sx={{width: "50px"}}
                     display={"flex"}
                     alignItems={"center"}
-                    justifyContent={"left"}
+                    justifyContent={"right"}
                     active={true}
                     color={"custom"}
                     menuItemProps={mainMenuItemProps_label}
@@ -64,7 +71,8 @@ const Graph = (props) => {
                 />
                 <MenuField
                     MenuIcon={DateRangeIcon}
-                    xs={8}
+                    xs={1}
+                    sx={{width: "50px"}}
                     display={"flex"}
                     alignItems={"center"}
                     justifyContent={"right"}
@@ -74,9 +82,6 @@ const Graph = (props) => {
                     margin={0}
                 />
             </Grid>
-            <Paper className="chart paper">
-                <Chart_ data={data}/>
-            </Paper>
         </Grid>
     )
 };
