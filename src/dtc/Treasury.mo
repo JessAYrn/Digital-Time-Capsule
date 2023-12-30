@@ -24,8 +24,6 @@ shared(msg) actor class Treasury (principal : Principal) = this {
 
     private stable let ownerCanisterId : Text = Principal.toText(principal);
 
-    private stable var collateralArray : TreasuryTypes.TreasuryCollateralArray = [];
-
     private stable var minimalRequiredVotingPower : Nat64 = 0;
 
     private stable var stakingMultiplier : Nat64 = 2;
@@ -36,6 +34,18 @@ shared(msg) actor class Treasury (principal : Principal) = this {
         eth = {e8s = 0};
         btc = {e8s = 0};
     };
+
+    private stable var usersStakesArray : TreasuryTypes.UserStakesArray = [];
+
+    private var usersStakesMap : TreasuryTypes.UserStakesMap = 
+    HashMap.fromIter<Principal, TreasuryTypes.UserStake>(
+        Iter.fromArray(usersStakesArray), 
+        Iter.size(Iter.fromArray(usersStakesArray)), 
+        Principal.equal,
+        Principal.hash
+    );
+
+    private stable var collateralArray : TreasuryTypes.TreasuryCollateralArray = [];
 
     private var collateralMap : TreasuryTypes.TreasuryCollateralMap = 
     HashMap.fromIter<Text, TreasuryTypes.Balances>(
@@ -63,17 +73,19 @@ shared(msg) actor class Treasury (principal : Principal) = this {
         return Iter.toArray(collateralMap.entries());
     };
 
-    public shared({caller}) func userHasSufficientCollateral(userPrincipal: Principal): async Bool {
+    public query({caller}) func getTreasuryUsersStakesArray(): async TreasuryTypes.UserStakesArray {
         if( Principal.toText(caller) != ownerCanisterId) { throw Error.reject("Unauthorized access."); };
-        let userCollateral = collateralMap.get(Principal.toText(userPrincipal));
-        switch(userCollateral){
+        return Iter.toArray(usersStakesMap.entries());
+    };
+
+    public shared({caller}) func userHasSufficientStake(userPrincipal: Principal): async Bool {
+        if( Principal.toText(caller) != ownerCanisterId) { throw Error.reject("Unauthorized access."); };
+        let userStake = usersStakesMap.get(userPrincipal);
+        switch(userStake){
             case null { return false};
-            case (?balances){
-                let cyclesMintingCanister: NnsCyclesMinting.Interface = actor(NnsCyclesMinting.NnsCyclesMintingCanisterID);
-                let {data} = await cyclesMintingCanister.get_icp_xdr_conversion_rate();
-                let {xdr_permyriad_per_icp} = data;
-                let votingPower = GovernanceHelperMethods.computeTotalXdrs({balances; xdr_permyriad_per_icp; });
-                if(votingPower < Float.fromInt64(Int64.fromNat64(minimalRequiredVotingPower))) return false;
+            case (?stake){
+                let { e8s = votingPower } = stake.icp;
+                if(votingPower < minimalRequiredVotingPower) return false;
                 return true;
             };
         };
@@ -122,11 +134,7 @@ shared(msg) actor class Treasury (principal : Principal) = this {
         let btc = {e8s: Nat64 = 0};
         let eth = {e8s: Nat64 = 0};
         let balances = {icp; icp_staked; btc; eth;};
-        let cyclesMintingCanister: NnsCyclesMinting.Interface = actor(NnsCyclesMinting.NnsCyclesMintingCanisterID);
-        let {data} = await cyclesMintingCanister.get_icp_xdr_conversion_rate();
-        let {xdr_permyriad_per_icp} = data;
-        let xdrs = GovernanceHelperMethods.computeTotalXdrs({balances; xdr_permyriad_per_icp});
-        balancesMap.put(Int.toText(Time.now()), {balances with xdrs});
+        balancesMap.put(Int.toText(Time.now()), balances);
     };
 
     public query({caller}) func readBalancesHistory() : async AnalyticsTypes.BalancesArray{
@@ -185,10 +193,16 @@ shared(msg) actor class Treasury (principal : Principal) = this {
         { accepted = Nat64.fromNat(accepted) };
     };
 
-    system func preupgrade() {
+    system func preupgrade() { 
+        usersStakesArray := Iter.toArray(usersStakesMap.entries()); 
+        collateralArray := Iter.toArray(collateralMap.entries());
+        balancesArray := Iter.toArray(balancesMap.entries());
     };
 
-    system func postupgrade() {
+    system func postupgrade() { 
+        usersStakesArray:= []; 
+        collateralArray := [];
+        balancesArray := [];
     };
    
     private  func key(x: Principal) : Trie.Key<Principal> {

@@ -7,7 +7,7 @@ import TreasuryTypes "../../Types/Treasury/types";
 import Ledger "../../Ledger/Ledger";
 
 module{    
-    public func depositAssetToTreasury({
+    public func depositCollateral({
         depositorPrincipal: Text; 
         treasuryCanisterPrincipal: Text;
         amount: Nat64;

@@ -352,11 +352,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         let btc = {e8s: Nat64 = 0};
         let eth = {e8s: Nat64 = 0};
         let balances = {icp; icp_staked; btc; eth;};
-        let cyclesMintingCanister: NnsCyclesMinting.Interface = actor(NnsCyclesMinting.NnsCyclesMintingCanisterID);
-        let {data} = await cyclesMintingCanister.get_icp_xdr_conversion_rate();
-        let {xdr_permyriad_per_icp} = data;
-        let xdrs = GovernanceHelperMethods.computeTotalXdrs({balances; xdr_permyriad_per_icp});
-        balancesMap.put(Int.toText(Time.now()), {balances with xdrs});
+        balancesMap.put(Int.toText(Time.now()), balances);
     };
 
     public query({caller}) func readBalancesHistory() : async AnalyticsTypes.BalancesArray{

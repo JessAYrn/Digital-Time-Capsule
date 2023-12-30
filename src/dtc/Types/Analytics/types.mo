@@ -7,7 +7,6 @@ module{
         icp_staked: {e8s: Nat64};
         eth: {e8s: Nat64};
         btc: {e8s: Nat64};
-        xdrs: Float;
     };
 
     public type BalancesArray = [(Text, Balances)];

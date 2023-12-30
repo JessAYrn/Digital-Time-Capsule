@@ -3,6 +3,7 @@ import Trie "mo:base/Trie";
 import Principal "mo:base/Principal";
 import HashMap "mo:base/HashMap";
 import JournalTypes "../Journal/types";
+import TreasuryTypes "../Treasury/types";
 import NotificationTypes "../Notifications/types";
 import IC "../IC/types";
 import Ledger "../../Ledger/Ledger";
@@ -148,13 +149,13 @@ module{
 
     public type ProposalPayload = {
         principal : ?Text;
-        amount : ?Nat64;
+        amount : ?Nat64; 
     };
     
     public type VotingResults = {
-        yay: Float;
-        nay: Float;
-        total: Float;
+        yay: Nat64;
+        nay: Nat64;
+        total: Nat64;
     };
 
     public type Proposal = {
@@ -170,8 +171,6 @@ module{
     public type ProposalActions = {
         #AddAdmin;
         #RemoveAdmin;
-        #DepositIcpToTreasury;
-        #DepositIcpToNeuron;
         #UpgradeApp;
         #DissolveIcpNeuron;
         #FollowIcpNeuron;

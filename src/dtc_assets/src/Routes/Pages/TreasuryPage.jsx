@@ -14,7 +14,7 @@ import ModalComponent from "../../Components/modal/Modal";
 import ButtonField from "../../Components/Fields/Button";
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import CreateProposalForm from "../../Components/proposals/CreateProposalForm";
-import DepositToTreasuryModal from "../../Components/modal/DepositToTreasuryModal";
+import DepositCollaterModal from "../../Components/modal/DepositCollateral";
 import Graph from "../../Components/Fields/Chart";
 import './TreasuryPage.scss'
 import { CHART_TYPES, GRAPH_DISPLAY_CURRENCIES } from "../../functionsAndConstants/Constants";
@@ -26,9 +26,9 @@ const TreasuryPage = (props) => {
   const [isLoadingModal, setIsLoadingModal] = useState(false);
   const [modalProps, setModalProps] = useState({});
 
-  const modalForm_depositToTreasury = [
+  const modalForm_depositCollateral = [
     {
-      Component: DepositToTreasuryModal,
+      Component: DepositCollaterModal,
       props: {
         context: UI_CONTEXTS.TREASURY, 
         setModalIsOpen, 
@@ -56,7 +56,7 @@ const TreasuryPage = (props) => {
   const openDepositForm = () => {
     setModalIsOpen(true);
     setModalProps({
-        components: modalForm_depositToTreasury,
+        components: modalForm_depositCollateral,
         handleClose: () => setModalIsOpen(false)
     });
   };

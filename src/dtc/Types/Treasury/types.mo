@@ -21,6 +21,12 @@ module{
         #InsufficientFunds;
     };
 
+    public type UserStake = {icp : {e8s : Nat64}};
+
+    public type UserStakesArray = [(Principal, UserStake)];
+
+    public type UserStakesMap = HashMap.HashMap<Principal, UserStake>;
+
     public type TreasuryDataExport = {
         collateral : TreasuryCollateralArray;
         balance_icp: {e8s : Nat64};

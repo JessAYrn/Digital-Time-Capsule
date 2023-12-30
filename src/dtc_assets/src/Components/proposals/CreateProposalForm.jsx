@@ -55,8 +55,6 @@ const CreateProposalForm = (props) => {
     };
 
     const mainMenuItemProps = [
-        { text: PROPOSAL_ACTIONS.DepositIcpToNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.DepositIcpToNeuron, true, PAYLOAD_DATA_TYPES.nat64)},
-        { text: PROPOSAL_ACTIONS.DepositIcpToTreasury, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.DepositIcpToTreasury, true, PAYLOAD_DATA_TYPES.nat64)},
         { text: PROPOSAL_ACTIONS.PurchaseCycles, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.PurchaseCycles, true, PAYLOAD_DATA_TYPES.nat64)},
         { text: PROPOSAL_ACTIONS.UpgradeApp, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.UpgradeApp, false)},
         { text: PROPOSAL_ACTIONS.AddAdmin, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.AddAdmin, true, PAYLOAD_DATA_TYPES.text)},

@@ -318,12 +318,12 @@ shared actor class User() = this {
             case (? existingProfile){
                 let managerCanister : Manager.Manager = actor(daoMetaData_v2.managerCanisterPrincipal);
                 let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
-                let treasuryCollateralArray = await treasuryCanister.getTreasuryCollateralArray();
+                let treasuryUsersStakesArray = await treasuryCanister.getTreasuryUsersStakesArray();
                 let profilesMetaData = CanisterManagementMethods.getProfilesMetaData(userProfilesMap);
                 let {number = releaseVersion} = await managerCanister.getCurrentReleaseVersion();
                 let canisterDataPackagedForExport = {
                     daoMetaData_v2 with 
-                    proposals = GovernanceHelperMethods.tallyAllProposalVotes({proposals = proposalsMap; treasuryCollateralArray; xdr_permyriad_per_icp});
+                    proposals = GovernanceHelperMethods.tallyAllProposalVotes({proposals = proposalsMap; treasuryUsersStakesArray;});
                     isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v2);
                     currentCyclesBalance_backend = Cycles.balance();
                     journalCount = userProfilesMap.size();
@@ -418,11 +418,11 @@ shared actor class User() = this {
         await NotificationProtocolMethods.clearJournalNotifications(caller, userProfilesMap);
     };
 
-    public shared({ caller }) func depositToTreasury(amount: Nat64, currency: TreasuryTypes.SupportedCurrencies):
+    public shared({ caller }) func depositCollateral(amount: Nat64, currency: TreasuryTypes.SupportedCurrencies):
     async Result.Result<Ledger.ICP, MainTypes.Error>{
         let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v2);
         if(not isAdmin) return #err(#NotAuthorized);
-        let updatedBalance = await TreasuryHelperMethods.depositAssetToTreasury({
+        let updatedBalance = await TreasuryHelperMethods.depositCollateral({
             depositorPrincipal = Principal.toText(caller);
             treasuryCanisterPrincipal = daoMetaData_v2.treasuryCanisterPrincipal;
             amount;
@@ -485,15 +485,14 @@ shared actor class User() = this {
         let callerProfile = userProfilesMap.get(caller);
         if(callerProfile == null) return #err(#NotAuthorizedToCreateProposals);
         let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
-        let treasuryContributionRequired = GovernanceHelperMethods.getDoesProposalRequireTreasuryContribution(action);
-        let hasSufficientContributions = await treasuryCanister.userHasSufficientCollateral(caller);
-        if(not hasSufficientContributions and treasuryContributionRequired) return #err(#NotAuthorizedToCreateProposals);
-        let treasuryCollateralArray = await treasuryCanister.getTreasuryCollateralArray();
+        let hasSufficientStake = await treasuryCanister.userHasSufficientStake(caller);
+        if(not hasSufficientStake) return #err(#NotAuthorizedToCreateProposals);
+        let treasuryUsersStakesArray = await treasuryCanister.getTreasuryUsersStakesArray();
         let proposer = Principal.toText(caller); let votes = [(proposer, {adopt = true})];
         let timeInitiated = Time.now(); let timeExecuted = null;
-        var voteTally = {yay = Float.fromInt(0); nay = Float.fromInt(0); total = Float.fromInt(0);};
+        var voteTally = {yay = Nat64.fromNat(0); nay = Nat64.fromNat(0); total = Nat64.fromNat(0);};
         let proposal = {votes; action; proposer; timeInitiated; timeExecuted; payload; voteTally;};
-        let votingResults = GovernanceHelperMethods.tallyVotes({treasuryCollateralArray; proposal; xdr_permyriad_per_icp;});
+        let votingResults = GovernanceHelperMethods.tallyVotes({treasuryUsersStakesArray; proposal;});
         proposalsMap.put(proposalIndex, {proposal with voteTally = votingResults} );
         let timerId = setTimer(#seconds(24 * 60 * 60 * 3), finalizeProposalVotingPeriod);
         proposalIndex += 1;
@@ -504,8 +503,8 @@ shared actor class User() = this {
     public shared({caller}) func voteOnProposal(proposalIndex: Nat, adopt: Bool): 
     async Result.Result<(MainTypes.Proposal), MainTypes.Error> {
         let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
-        let hasSufficientCollateral = await treasuryCanister.userHasSufficientCollateral(caller);
-        if(not hasSufficientCollateral) return #err(#NotAuthorizedToVoteOnThisProposal);
+        let hasSufficientStake = await treasuryCanister.userHasSufficientStake(caller);
+        if(not hasSufficientStake) return #err(#NotAuthorizedToVoteOnThisProposal);
         let proposal_ = proposalsMap.get(proposalIndex);
         if(proposal_ == null) return #err(#PorposalHasExpired);
         let ?proposal = proposal_;
@@ -514,10 +513,10 @@ shared actor class User() = this {
         let previousVote = votesMap.get(Principal.toText(caller));
         switch(previousVote){
             case null {
-                let treasuryCollateralArray = await treasuryCanister.getTreasuryCollateralArray();
+                let treasuryUsersStakesArray = await treasuryCanister.getTreasuryUsersStakesArray();
                 votesMap.put(Principal.toText(caller), {adopt});
                 var updatedProposal = {proposal with votes = Iter.toArray(votesMap.entries()); };
-                let voteTally = GovernanceHelperMethods.tallyVotes({treasuryCollateralArray; proposal = updatedProposal; xdr_permyriad_per_icp});
+                let voteTally = GovernanceHelperMethods.tallyVotes({treasuryUsersStakesArray; proposal = updatedProposal});
                 updatedProposal := {updatedProposal with voteTally};
                 proposalsMap.put(proposalIndex, updatedProposal);
                 return #ok(updatedProposal);
@@ -539,8 +538,8 @@ shared actor class User() = this {
             case null {};
             case (?proposal){
                 let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
-                let treasuryCollateralArray = await treasuryCanister.getTreasuryCollateralArray();
-                let votingResults = GovernanceHelperMethods.tallyVotes({treasuryCollateralArray; proposal; xdr_permyriad_per_icp});
+                let treasuryUsersStakesArray = await treasuryCanister.getTreasuryUsersStakesArray();
+                let votingResults = GovernanceHelperMethods.tallyVotes({treasuryUsersStakesArray; proposal;});
                 let {yay; nay; total } = votingResults;
                 var timeExecuted: ?Int = null;
                 if( yay > nay) {
@@ -574,23 +573,6 @@ shared actor class User() = this {
                     };
                 };
             };
-            case (#DepositIcpToTreasury){
-                switch(amount){
-                    case null {};
-                    case(?amount_){
-                        let newBalance = await TreasuryHelperMethods.depositAssetToTreasury({
-                            depositorPrincipal = proposer;
-                            treasuryCanisterPrincipal = daoMetaData_v2.treasuryCanisterPrincipal;
-                            amount = amount_;
-                            currency = #Icp;
-                            profilesMap = userProfilesMap;
-                        })
-                    }
-                }
-            };
-            case (#DepositIcpToNeuron){
-                //call function to deposit ICP to treasury's neuron from user's wallet
-            };
             //still need to delete the public upgradeApp method once the frontend has been updated
             case (#UpgradeApp){ ignore upgradeApp_(); };
             case(#DissolveIcpNeuron){
@@ -618,10 +600,6 @@ shared actor class User() = this {
     system func preupgrade() { 
         userProfilesArray := Iter.toArray(userProfilesMap.entries()); 
         proposalsArray := Iter.toArray(proposalsMap.entries());
-    };
-
-    public query func getStartIndex(): async Nat64 {
-        startIndexForBlockChainQuery
     };
 
     system func postupgrade() { 

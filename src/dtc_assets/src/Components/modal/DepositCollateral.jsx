@@ -10,7 +10,7 @@ import ButtonField from "../Fields/Button";
 import { isANumber, toE8s } from "../../functionsAndConstants/Utils";
 import { INPUT_BOX_FORMATS } from "../../functionsAndConstants/Constants";
 
-const DepositToTreasuryModal = (props) => {
+const DepositCollaterModal = (props) => {
     const {
         context,
         setModalIsOpen, 
@@ -30,15 +30,15 @@ const DepositToTreasuryModal = (props) => {
 
     const mainMenuItemProps = [
         { text: PROPOSAL_ACTIONS.DepositIcpToNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.DepositIcpToNeuron)},
-        { text: PROPOSAL_ACTIONS.DepositIcpToTreasury, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.DepositIcpToTreasury)},
+        { text: PROPOSAL_ACTIONS.DepositCollateral, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.DepositCollateral)},
     ];
 
-    const depositToTreasury = async () => {
+    const depositCollateral = async () => {
         setIsLoadingModal(true);
         let currency;
         if(action === PROPOSAL_ACTIONS.DepositIcpToNeuron) currency = {Icp_staked: null};
-        else if(action === PROPOSAL_ACTIONS.DepositIcpToTreasury) currency = {Icp: null};
-        let result = await actorState.backendActor.depositToTreasury(toE8s(amount), currency);
+        else if(action === PROPOSAL_ACTIONS.DepositCollateral) currency = {Icp: null};
+        let result = await actorState.backendActor.depositCollateral(toE8s(amount), currency);
         setIsLoadingModal(false);
         setModalProps({});
         setModalIsOpen(false);
@@ -85,7 +85,7 @@ const DepositToTreasuryModal = (props) => {
                 Icon={DoneIcon}
                 active={true}
                 text={'Submit Deposit'}
-                onClick={depositToTreasury}
+                onClick={depositCollateral}
                 />
             }
 
@@ -93,4 +93,4 @@ const DepositToTreasuryModal = (props) => {
     )
 };
 
-export default DepositToTreasuryModal;
+export default DepositCollaterModal;
