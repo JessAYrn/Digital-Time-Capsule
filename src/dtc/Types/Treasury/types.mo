@@ -22,12 +22,12 @@ module{
     };
 
     public type TreasuryDataExport = {
-        contributions : TreasuryContributorsArray;
+        collateral : TreasuryCollateralArray;
         balance_icp: {e8s : Nat64};
         accountId_icp: [Nat8];
     };
 
-    public type TreasuryContributorsArray = [(Text, Balances)];
+    public type TreasuryCollateralArray = [(Text, Balances)];
 
-    public type TreasuryContributorsMap = HashMap.HashMap<Text, Balances>;
+    public type TreasuryCollateralMap = HashMap.HashMap<Text, Balances>;
 }

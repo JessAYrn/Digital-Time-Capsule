@@ -25,7 +25,7 @@ module{
                 let treasuryIcpAccountId = await treasuryCanister.canisterAccount();
                 let trasnferCompleted = await userCanister.transferICP(amount, treasuryIcpAccountId);
                 if(trasnferCompleted) {
-                    let result = treasuryCanister.updateUserTreasruyContributions({
+                    let result = treasuryCanister.updateUserTreasruyCollateral({
                         userPrincipal = depositorPrincipal;
                         increase = true;
                         currency;

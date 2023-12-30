@@ -239,7 +239,7 @@ module{
                 let {data} = await cyclesMintingCanister.get_icp_xdr_conversion_rate();
                 let {xdr_permyriad_per_icp} = data;
                 let treasuryCanister: Treasury.Treasury = actor(daoMetaData.treasuryCanisterPrincipal);
-                let treasuryContributionsArray = await treasuryCanister.getTreasuryContributionsArray();
+                let treasuryCollateralArray = await treasuryCanister.getTreasuryCollateralArray();
                 let managerCanister : Manager.Manager = actor(daoMetaData.managerCanisterPrincipal);
                 let profilesApprovalStatus = getProfilesMetaData(profilesMap);
                 let frontendPrincipal = Principal.fromText(daoMetaData.frontEndPrincipal);
@@ -250,7 +250,7 @@ module{
                 let currentVersion = await managerCanister.getCurrentReleaseVersion();
                 let canisterDataPackagedForExport = {
                     daoMetaData with 
-                    proposals = GovernanceHelperMethods.tallyAllProposalVotes({proposals; treasuryContributionsArray; xdr_permyriad_per_icp});
+                    proposals = GovernanceHelperMethods.tallyAllProposalVotes({proposals; treasuryCollateralArray; xdr_permyriad_per_icp});
                     journalCount = profilesMap.size();
                     currentCyclesBalance_frontend = cyclesBalance_frontend;
                     currentCyclesBalance_backend = cyclesBalance_backend;

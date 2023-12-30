@@ -24,7 +24,7 @@ shared(msg) actor class Treasury (principal : Principal) = this {
 
     private stable let ownerCanisterId : Text = Principal.toText(principal);
 
-    private stable var contributorsArray : TreasuryTypes.TreasuryContributorsArray = [];
+    private stable var collateralArray : TreasuryTypes.TreasuryCollateralArray = [];
 
     private stable var minimalRequiredVotingPower : Nat64 = 0;
 
@@ -37,10 +37,10 @@ shared(msg) actor class Treasury (principal : Principal) = this {
         btc = {e8s = 0};
     };
 
-    private var contributorsMap : TreasuryTypes.TreasuryContributorsMap = 
+    private var collateralMap : TreasuryTypes.TreasuryCollateralMap = 
     HashMap.fromIter<Text, TreasuryTypes.Balances>(
-        Iter.fromArray(contributorsArray), 
-        Iter.size(Iter.fromArray(contributorsArray)), 
+        Iter.fromArray(collateralArray), 
+        Iter.size(Iter.fromArray(collateralArray)), 
         Text.equal,
         Text.hash
     );
@@ -58,15 +58,15 @@ shared(msg) actor class Treasury (principal : Principal) = this {
 
     private let ledger : Ledger.Interface  = actor(Ledger.CANISTER_ID);
 
-    public query({caller}) func getTreasuryContributionsArray(): async TreasuryTypes.TreasuryContributorsArray {
+    public query({caller}) func getTreasuryCollateralArray(): async TreasuryTypes.TreasuryCollateralArray {
         if( Principal.toText(caller) != ownerCanisterId) { throw Error.reject("Unauthorized access."); };
-        return Iter.toArray(contributorsMap.entries());
+        return Iter.toArray(collateralMap.entries());
     };
 
-    public shared({caller}) func userHasSufficientContributions(userPrincipal: Principal): async Bool {
+    public shared({caller}) func userHasSufficientCollateral(userPrincipal: Principal): async Bool {
         if( Principal.toText(caller) != ownerCanisterId) { throw Error.reject("Unauthorized access."); };
-        let userContributions = contributorsMap.get(Principal.toText(userPrincipal));
-        switch(userContributions){
+        let userCollateral = collateralMap.get(Principal.toText(userPrincipal));
+        switch(userCollateral){
             case null { return false};
             case (?balances){
                 let cyclesMintingCanister: NnsCyclesMinting.Interface = actor(NnsCyclesMinting.NnsCyclesMintingCanisterID);
@@ -79,39 +79,39 @@ shared(msg) actor class Treasury (principal : Principal) = this {
         };
     };  
 
-    public shared({caller}) func updateUserTreasruyContributions({
+    public shared({caller}) func updateUserTreasruyCollateral({
         userPrincipal: Text; 
         increase: Bool; 
         currency : TreasuryTypes.SupportedCurrencies;
         amount: Nat64
-    }) : async Result.Result<TreasuryTypes.TreasuryContributorsArray,TreasuryTypes.Error> {
+    }) : async Result.Result<TreasuryTypes.TreasuryCollateralArray,TreasuryTypes.Error> {
         if( Principal.toText(caller) != ownerCanisterId) { throw Error.reject("Unauthorized access."); };
-        let contributions = contributorsMap.get(userPrincipal);
-        var updatedContributions = {icp = {e8s: Nat64 = 0}; icp_staked = {e8s: Nat64  = 0}; eth = {e8s: Nat64  = 0}; btc = {e8s: Nat64  = 0};};
+        let collateral = collateralMap.get(userPrincipal);
+        var updatedCollateral = {icp = {e8s: Nat64 = 0}; icp_staked = {e8s: Nat64  = 0}; eth = {e8s: Nat64  = 0}; btc = {e8s: Nat64  = 0};};
         var currencyAmount : Nat64 = 0;
-        switch(contributions){
+        switch(collateral){
             case null { if(increase == false) return #err(#InsufficientFunds)};
-            case(?contributions_){ var updatedContributions = contributions_ };
+            case(?collateral_){ var updatedCollateral = collateral_ };
         };
         switch(currency) {
-            case(#Icp){ currencyAmount := updatedContributions.icp.e8s; };
-            case(#Icp_staked){ currencyAmount := updatedContributions.icp_staked.e8s; };
-            case(#Eth){ currencyAmount := updatedContributions.eth.e8s; };
-            case(#Btc){ currencyAmount := updatedContributions.btc.e8s; };
+            case(#Icp){ currencyAmount := updatedCollateral.icp.e8s; };
+            case(#Icp_staked){ currencyAmount := updatedCollateral.icp_staked.e8s; };
+            case(#Eth){ currencyAmount := updatedCollateral.eth.e8s; };
+            case(#Btc){ currencyAmount := updatedCollateral.btc.e8s; };
         };
         if(not increase and currencyAmount < amount) return #err(#InsufficientFunds);
         if(not increase) currencyAmount -= amount;
         if(increase) currencyAmount += amount;
         switch(currency) {
-            case(#Icp){ updatedContributions := {updatedContributions with icp = {e8s = currencyAmount}}};
-            case(#Icp_staked){ updatedContributions := {updatedContributions with icp_staked = {e8s = currencyAmount}}};
-            case(#Eth){ updatedContributions := {updatedContributions with eth = {e8s = currencyAmount}}};
-            case(#Btc){ updatedContributions := {updatedContributions with btc = {e8s = currencyAmount}}};
+            case(#Icp){ updatedCollateral := {updatedCollateral with icp = {e8s = currencyAmount}}};
+            case(#Icp_staked){ updatedCollateral := {updatedCollateral with icp_staked = {e8s = currencyAmount}}};
+            case(#Eth){ updatedCollateral := {updatedCollateral with eth = {e8s = currencyAmount}}};
+            case(#Btc){ updatedCollateral := {updatedCollateral with btc = {e8s = currencyAmount}}};
         };
 
-        contributorsMap.put(userPrincipal, updatedContributions);
+        collateralMap.put(userPrincipal, updatedCollateral);
         ignore updateTokenBalances_();
-        return #ok(Iter.toArray(contributorsMap.entries()));
+        return #ok(Iter.toArray(collateralMap.entries()));
     };
 
     public shared({caller}) func saveCurrentBalances() : async () {

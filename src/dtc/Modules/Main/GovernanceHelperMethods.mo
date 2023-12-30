@@ -27,7 +27,7 @@ module{
     };
 
     public func tallyVotes({
-        treasuryContributionsArray : TreasuryTypes.TreasuryContributorsArray; 
+        treasuryCollateralArray : TreasuryTypes.TreasuryCollateralArray; 
         proposal: MainTypes.Proposal;
         xdr_permyriad_per_icp: Nat64
     }) :  MainTypes.VotingResults {
@@ -40,10 +40,10 @@ module{
             Text.hash
         );
 
-        let arrayLength = treasuryContributionsArray.size();
+        let arrayLength = treasuryCollateralArray.size();
         var index = 0;
         while(index < arrayLength){
-            let (principal, balances) = treasuryContributionsArray[index];
+            let (principal, balances) = treasuryCollateralArray[index];
             let votingPower = computeTotalXdrs({ balances; xdr_permyriad_per_icp});
             let vote = proposalVotesHashMap.get(principal);
             switch(vote){
@@ -57,7 +57,7 @@ module{
     };
 
     public func tallyAllProposalVotes({
-        treasuryContributionsArray : TreasuryTypes.TreasuryContributorsArray; 
+        treasuryCollateralArray : TreasuryTypes.TreasuryCollateralArray; 
         proposals: MainTypes.ProposalsMap;
         xdr_permyriad_per_icp: Nat64
     }) : MainTypes.Proposals{
@@ -65,7 +65,7 @@ module{
         Iter.iterate<(Nat,MainTypes.Proposal)>(
             proposals.entries(), 
             func((key, proposal) : (Nat,MainTypes.Proposal), _index) {
-            let voteTally =  tallyVotes({treasuryContributionsArray; xdr_permyriad_per_icp; proposal});
+            let voteTally =  tallyVotes({treasuryCollateralArray; xdr_permyriad_per_icp; proposal});
             let updatedProposal = {proposal with voteTally = voteTally};
             proposals.put(key, updatedProposal);
         });
