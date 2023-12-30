@@ -37,6 +37,7 @@ import AnalyticsTypes "Types/Analytics/types";
 import Journal "Journal";
 import WasmStore "Types/WasmStore/types";
 import SupportCanisterIds "SupportCanisterIds/SupportCanisterIds";
+import MarketData "Modules/HTTPRequests/MarketData";
 
 shared actor class User() = this {
 
@@ -260,6 +261,20 @@ shared actor class User() = this {
         let updatedMetaData = await CanisterManagementMethods.configureApp( backEndPrincipal, frontEndPrincipal, adminPrincipal, daoMetaData_v2);
         daoMetaData_v2 := updatedMetaData;
         #ok(());
+    };
+
+    public query func transform({context: Blob; response: IC.http_response}) : async IC.http_response {
+      let transformed : IC.http_response = {
+        status = response.status;
+        body = response.body;
+        headers = [];
+      };
+      transformed;
+    };
+
+    public shared func getCurrencyExchangeRate(unitCurrency: Text, otherCurrency: Text) : async IC.http_response_with_text {
+        let {status; body; headers; } = await MarketData.getCurrencyExchangeRate(unitCurrency, otherCurrency, transform);
+        return {status; headers; body = Text.decodeUtf8(body)};
     };
 
     public shared({caller}) func toggleAcceptRequest() : async  Result.Result<(MainTypes.DaoMetaData_V2), JournalTypes.Error>{

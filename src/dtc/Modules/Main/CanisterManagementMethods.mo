@@ -331,8 +331,9 @@ module{
         await ic.install_code({
             arg = to_candid(arg);
             wasm_module = wasmModule;
-            mode = #upgrade;
+            mode = #upgrade(?{skip_pre_upgrade = ?false});
             canister_id = canister_id;
+            sender_canister_version = null;
         });
         await ic.start_canister({canister_id = canister_id});
     };
@@ -374,6 +375,7 @@ module{
         let result = await ic.update_settings({
             canister_id = canisterPrincipal;
             settings = updatedSettings;
+            sender_canister_version = null;
         });
     };
 
@@ -382,8 +384,7 @@ module{
         
         let canisterStatus = await ic.canister_status({canister_id = canisterPrincipal });
         let { settings } = canisterStatus;
-        let controllersOption = settings.controllers;
-        var controllers = Option.get(controllersOption, defaultControllers);
+        let { controllers } = settings;
         let ArrayBuffer = Buffer.Buffer<(Principal)>(1);
         let controllersIter = Iter.fromArray(controllers);
         var index = 0;
@@ -394,14 +395,14 @@ module{
             index += 1;
         };
         Iter.iterate<Principal>(controllersIter, func (x: Principal, index: Nat){ ArrayBuffer.add(x); });
-        controllers := ArrayBuffer.toArray();
+        let updatedControllers = ArrayBuffer.toArray();
         let updatedSettings  = { 
-            controllers = ?controllers;
+            controllers = ?updatedControllers;
             freezing_threshold = ?settings.freezing_threshold;
             memory_allocation = ?settings.memory_allocation;
             compute_allocation = ?settings.compute_allocation;
         };
-        let result = await ic.update_settings({ canister_id = canisterPrincipal; settings = updatedSettings; });
+        let result = await ic.update_settings({ canister_id = canisterPrincipal; settings = updatedSettings; sender_canister_version = null;});
     };
 
     public func toggleSupportMode( caller: Principal, daoMetaData: MainTypes.DaoMetaData_V2) : 
