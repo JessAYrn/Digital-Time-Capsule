@@ -1,10 +1,10 @@
 import MainTypes "../../Types/Main/types";
-import Account "../../Ledger/Account";
+import Account "../../NNS/Account";
 import Result "mo:base/Result";
 import Trie "mo:base/Trie";
 import Principal "mo:base/Principal";
 import JournalTypes "../../Types/Journal/types";
-import Ledger "../../Ledger/Ledger";
+import Ledger "../../NNS/Ledger";
 import Iter "mo:base/Iter";
 import Blob "mo:base/Blob";
 import Journal "../../Journal";

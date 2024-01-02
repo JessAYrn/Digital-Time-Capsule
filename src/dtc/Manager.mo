@@ -1,4 +1,4 @@
-import Ledger "Ledger/Ledger";
+import Ledger "NNS/Ledger";
 import Debug "mo:base/Debug";
 import Error "mo:base/Error";
 import Trie "mo:base/Trie";
@@ -15,7 +15,7 @@ import Timer "mo:base/Timer";
 import Iter "mo:base/Iter";
 import Buffer "mo:base/Buffer";
 import Int "mo:base/Int";
-import Account "Ledger/Account";
+import Account "NNS/Account";
 import Bool "mo:base/Bool";
 import Option "mo:base/Option";
 import IC "Types/IC/types";

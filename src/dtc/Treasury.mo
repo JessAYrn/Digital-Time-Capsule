@@ -1,5 +1,5 @@
-import Account "Ledger/Account";
-import Ledger "Ledger/Ledger";
+import Account "NNS/Account";
+import Ledger "NNS/Ledger";
 import Trie "mo:base/Trie";
 import Principal "mo:base/Principal";
 import Error "mo:base/Error";
@@ -16,7 +16,7 @@ import Result "mo:base/Result";
 import Int "mo:base/Int";
 import Time "mo:base/Time";
 import GovernanceHelperMethods "Modules/Main/GovernanceHelperMethods";
-import NnsCyclesMinting "Ledger/NnsCyclesMinting";
+import NnsCyclesMinting "NNS/NnsCyclesMinting";
 import MainTypes "Types/Main/types";
 import AnalyticsTypes "Types/Analytics/types";
 

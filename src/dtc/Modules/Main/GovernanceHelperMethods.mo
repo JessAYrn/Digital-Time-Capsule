@@ -9,7 +9,7 @@ import Time "mo:base/Time";
 import Float "mo:base/Float";
 import Nat64 "mo:base/Nat64";
 import Int64 "mo:base/Int64";
-import NnsCyclesMinting "../../Ledger/NnsCyclesMinting";
+import NnsCyclesMinting "../../NNS/NnsCyclesMinting";
 
 
 module{    

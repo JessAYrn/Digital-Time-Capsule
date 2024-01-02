@@ -4,7 +4,7 @@ import MainTypes "../../Types/Main/types";
 import Journal "../../Journal";
 import Treasury "../../Treasury";
 import TreasuryTypes "../../Types/Treasury/types";
-import Ledger "../../Ledger/Ledger";
+import Ledger "../../NNS/Ledger";
 
 module{    
     public func depositCollateral({

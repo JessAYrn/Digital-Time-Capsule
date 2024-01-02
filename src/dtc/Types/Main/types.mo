@@ -1,4 +1,4 @@
-import Account "../../Ledger/Account";
+import Account "../../NNS/Account";
 import Trie "mo:base/Trie";
 import Principal "mo:base/Principal";
 import HashMap "mo:base/HashMap";
@@ -6,7 +6,7 @@ import JournalTypes "../Journal/types";
 import TreasuryTypes "../Treasury/types";
 import NotificationTypes "../Notifications/types";
 import IC "../IC/types";
-import Ledger "../../Ledger/Ledger";
+import Ledger "../../NNS/Ledger";
 
 
 module{

@@ -1,4 +1,4 @@
-import Ledger "Ledger/Ledger";
+import Ledger "NNS/Ledger";
 import Debug "mo:base/Debug";
 import Error "mo:base/Error";
 import Trie "mo:base/Trie";
@@ -14,7 +14,7 @@ import Time "mo:base/Time";
 import Iter "mo:base/Iter";
 import Buffer "mo:base/Buffer";
 import Int "mo:base/Int";
-import Account "Ledger/Account";
+import Account "NNS/Account";
 import Bool "mo:base/Bool";
 import Option "mo:base/Option";
 import JournalTypes "Types/Journal/types";
@@ -24,7 +24,7 @@ import NotificationsTypes "Types/Notifications/types";
 import IC "Types/IC/types";
 import AnalyticsTypes "Types/Analytics/types";
 import GovernanceHelperMethods "Modules/Main/GovernanceHelperMethods";
-import NnsCyclesMinting "Ledger/NnsCyclesMinting";
+import NnsCyclesMinting "NNS/NnsCyclesMinting";
 
 shared(msg) actor class Journal (principal : Principal) = this {
 

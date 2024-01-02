@@ -1,4 +1,4 @@
-import Account "../../Ledger/Account";
+import Account "../../NNS/Account";
 import Trie "mo:base/Trie";
 import HashMap "mo:base/HashMap";
 import NotificationsTypes "../Notifications/types";
