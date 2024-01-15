@@ -202,7 +202,7 @@ shared actor class User() = this {
 
     private func updateUsersTxHistory() : async () {
         try{
-            let newStartIndexForNextQuery = await TxHelperMethods.updateUsersTxHistory(userProfilesMap, startIndexForBlockChainQuery);
+            let newStartIndexForNextQuery = await TxHelperMethods.updateUsersTxHistory(userProfilesMap, startIndexForBlockChainQuery, daoMetaData_v2);
             startIndexForBlockChainQuery := newStartIndexForNextQuery;
         } catch (e) {
             error := e;
@@ -341,7 +341,7 @@ shared actor class User() = this {
         let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
         let collateral = await treasuryCanister.getTreasuryCollateralArray();
         let balance_icp = await treasuryCanister.canisterBalance();
-        let accountId_icp_blob = await treasuryCanister.canisterAccount();
+        let accountId_icp_blob = await treasuryCanister.canisterAccountId();
         let accountId_icp = Blob.toArray(accountId_icp_blob);
         return #ok({ collateral; balance_icp; accountId_icp; });
     };

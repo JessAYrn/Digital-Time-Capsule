@@ -643,7 +643,7 @@ module {
     public type WaitForQuietState = {
         current_deadline_timestamp_seconds : Nat64;
     };
-    public type Self = Governance -> async actor {
+    public type Interface = actor {
         claim_gtc_neurons : shared (Principal, [NeuronId]) -> async Result;
         claim_or_refresh_neuron_from_account : shared ClaimOrRefreshNeuronFromAccount -> async ClaimOrRefreshNeuronFromAccountResponse;
         get_build_metadata : shared query () -> async Text;

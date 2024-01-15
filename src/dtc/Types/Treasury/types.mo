@@ -1,5 +1,6 @@
 import HashMap "mo:base/HashMap";
 import Principal "mo:base/Principal";
+import Governance "../../NNS/Governance";
 
 
 module{
@@ -19,6 +20,9 @@ module{
 
     public type Error = {
         #InsufficientFunds;
+        #NeuronClaimFailed;
+        #NoNeuronIdRetreived;
+        #UnexpectedResponse : {response : Governance.Command_1};
     };
 
     public type UserStake = {icp : {e8s : Nat64}};

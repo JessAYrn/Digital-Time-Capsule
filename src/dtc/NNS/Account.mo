@@ -4,8 +4,10 @@ import Nat8      "mo:base/Nat8";
 import Nat32     "mo:base/Nat32";
 import Principal "mo:base/Principal";
 import Text      "mo:base/Text";
+import Nat64 "mo:base/Nat64";
 import CRC32     "./CRC32";
 import SHA224    "./SHA224";
+import SHA256    "./SHA256";
 
 module {
   // 32-byte array.
@@ -13,11 +15,18 @@ module {
   // 32-byte array.
   public type Subaccount = Blob;
 
-  func beBytes(n: Nat32) : [Nat8] {
+  func beBytes32to8(n: Nat32) : [Nat8] {
     func byte(n: Nat32) : Nat8 {
       Nat8.fromNat(Nat32.toNat(n & 0xff))
     };
     [byte(n >> 24), byte(n >> 16), byte(n >> 8), byte(n)]
+  };
+
+  func beBytes64to8(n: Nat64) : [Nat8] {
+    func byte(n: Nat64) : Nat8 {
+      Nat8.fromNat(Nat64.toNat(n & 0xff))
+    };
+    [byte(n >> 56), byte(n >> 48),byte(n >> 40),byte(n >> 32),byte(n >> 24), byte(n >> 16), byte(n >> 8), byte(n)]
   };
 
   public func defaultSubaccount() : Subaccount {
@@ -31,8 +40,26 @@ module {
     hash.write(Blob.toArray(Principal.toBlob(principal)));
     hash.write(Blob.toArray(subaccount));
     let hashSum = hash.sum();
-    let crc32Bytes = beBytes(CRC32.ofArray(hashSum));
-    Blob.fromArray(Array.append(crc32Bytes, hashSum))
+    let crc32Bytes = beBytes32to8(CRC32.ofArray(hashSum));
+    Blob.fromArray(Array.append(crc32Bytes, hashSum));
+  };
+
+  public func neuronSubaccount(principal: Principal, memo: Nat64) : AccountIdentifier {
+    let hash = SHA256.Digest();
+    hash.write([0x0C]);
+    hash.write(Blob.toArray(Text.encodeUtf8("neuron-stake")));
+    hash.write(Blob.toArray(Principal.toBlob(principal)));
+    hash.write(beBytes64to8(memo));
+    let hashSum = hash.sum();
+    Blob.fromArray(hashSum);
+  };
+
+  public func getSelfAuthenticatingPrincipal(public_key: Blob): { principalAsBlob : Blob } {
+    let hash = SHA224.Digest();
+    hash.write(Blob.toArray(public_key));
+    let hashSum = hash.sum();
+    let tag : [Nat8] = [0x02];
+    { principalAsBlob = Blob.fromArray(Array.append(hashSum, tag)) };
   };
 
   public func validateAccountIdentifier(accountIdentifier : AccountIdentifier) : Bool {
@@ -43,6 +70,6 @@ module {
     let accIdPart    = Array.tabulate(28, func(i: Nat): Nat8 { a[i + 4] });
     let checksumPart = Array.tabulate(4,  func(i: Nat): Nat8 { a[i] });
     let crc32 = CRC32.ofArray(accIdPart);
-    Array.equal(beBytes(crc32), checksumPart, Nat8.equal)
+    Array.equal(beBytes32to8(crc32), checksumPart, Nat8.equal)
   };
 }

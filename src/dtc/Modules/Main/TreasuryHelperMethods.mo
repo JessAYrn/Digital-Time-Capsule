@@ -22,7 +22,7 @@ module{
             case(?profile){
                 let {canisterId} = profile;
                 let userCanister : Journal.Journal = actor(Principal.toText(canisterId));
-                let treasuryIcpAccountId = await treasuryCanister.canisterAccount();
+                let treasuryIcpAccountId = await treasuryCanister.canisterAccountId();
                 let trasnferCompleted = await userCanister.transferICP(amount, treasuryIcpAccountId);
                 if(trasnferCompleted) {
                     let result = treasuryCanister.updateUserTreasruyCollateral({
@@ -34,7 +34,7 @@ module{
                 } else return #err(#InsufficientFunds);
             };
         };
-        let updatedBalance = await treasuryCanister.canisterBalance_shared();
+        let updatedBalance = await treasuryCanister.canisterBalance();
         return #ok(updatedBalance);
     };
 }

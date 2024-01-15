@@ -12,6 +12,8 @@ import Nat64 "mo:base/Nat64";
 import Error "mo:base/Error";
 import Array "mo:base/Array";
 import Option "mo:base/Option";
+import Hex "../../NNS/Hex";
+import Treasury "../../Treasury";
 
 module{
 
@@ -36,7 +38,8 @@ module{
 
     public func updateUsersTxHistory(
         profilesMap: MainTypes.UserProfilesMap,
-        startIndexForBlockChainQuery: Nat64
+        startIndexForBlockChainQuery: Nat64,
+        metaData : {treasuryCanisterPrincipal : Text}
     ) : async (Nat64) {
         let queryBlockArgs = { start = startIndexForBlockChainQuery; length = Ledger.MAX_BLOCK_QUERY_LENGTH; };
         let {blocks; chain_length = newStartIndexForNextQuery} = await ledger.query_blocks(queryBlockArgs);
@@ -72,6 +75,14 @@ module{
                                     let tx : JournalTypes.Transaction = { balanceDelta = amount.e8s; increase = true; recipient = to; timeStamp = timeOfCreation; source = from; };
                                     ignore userJournal.updateTxHistory(timeOfCreation,tx);
                                 };
+                            };
+                            let treasuryCanister : Treasury.Treasury = actor(metaData.treasuryCanisterPrincipal);
+                            let recipientAsText : Text = Hex.encode(Blob.toArray(to));
+                            let sourceAsText : Text = Hex.encode(Blob.toArray(from));
+                            let treasuryAccountId = await treasuryCanister.canisterAccountId();
+                            let treasuryAccountIdAsText = Hex.encode(Blob.toArray(treasuryAccountId));
+                            if(recipientAsText == treasuryAccountIdAsText or sourceAsText == treasuryAccountIdAsText){
+                                await treasuryCanister.updateTokenBalances();
                             };
                         };
                         case(#Approve(r)){};

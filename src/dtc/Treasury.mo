@@ -1,5 +1,6 @@
 import Account "NNS/Account";
 import Ledger "NNS/Ledger";
+import Governance "NNS/Governance";
 import Trie "mo:base/Trie";
 import Principal "mo:base/Principal";
 import Error "mo:base/Error";
@@ -15,10 +16,13 @@ import Int64 "mo:base/Int64";
 import Result "mo:base/Result";
 import Int "mo:base/Int";
 import Time "mo:base/Time";
+import Nat32 "mo:base/Nat32";
 import GovernanceHelperMethods "Modules/Main/GovernanceHelperMethods";
 import NnsCyclesMinting "NNS/NnsCyclesMinting";
 import MainTypes "Types/Main/types";
 import AnalyticsTypes "Types/Analytics/types";
+import IC "Types/IC/types";
+import EcdsaHelperMethods "Modules/ECDSA/ECDSAHelperMethods";
 
 shared(msg) actor class Treasury (principal : Principal) = this {
 
@@ -64,9 +68,15 @@ shared(msg) actor class Treasury (principal : Principal) = this {
         Text.hash
     );
 
+    private stable var neuronID : Nat64 = 0;
+
     private var capacity = 1000000000000;
 
+    private let txFee : Nat64 = 10_000;
+
     private let ledger : Ledger.Interface  = actor(Ledger.CANISTER_ID);
+
+    private let neuronMemo : Nat64 = 0;
 
     public query({caller}) func getTreasuryCollateralArray(): async TreasuryTypes.TreasuryCollateralArray {
         if( Principal.toText(caller) != ownerCanisterId) { throw Error.reject("Unauthorized access."); };
@@ -122,13 +132,13 @@ shared(msg) actor class Treasury (principal : Principal) = this {
         };
 
         collateralMap.put(userPrincipal, updatedCollateral);
-        ignore updateTokenBalances_();
+        ignore updateTokenBalances();
         return #ok(Iter.toArray(collateralMap.entries()));
     };
 
     public shared({caller}) func saveCurrentBalances() : async () {
         if( Principal.toText(caller) != ownerCanisterId) { throw Error.reject("Unauthorized access."); };
-        let icp = await ledger.account_balance({ account = userAccountId() });
+        let icp = await ledger.account_balance({ account = tresasuryAccountId() });
         //will need to retreive the proper balances of the other currencies once they've been integrated
         let icp_staked = {e8s: Nat64 = 0};
         let btc = {e8s: Nat64 = 0};
@@ -142,17 +152,29 @@ shared(msg) actor class Treasury (principal : Principal) = this {
         return Iter.toArray(balancesMap.entries());
     };
 
-    private func userAccountId() : Account.AccountIdentifier {
-        let canisterId =  Principal.fromActor(this);
-        Account.accountIdentifier(canisterId, Account.defaultSubaccount())
+    private func tresasuryAccountId() : Account.AccountIdentifier {
+        Account.accountIdentifier(Principal.fromActor(this), Account.defaultSubaccount())
     };
 
-    public query({caller}) func canisterAccount() : async Account.AccountIdentifier {
+    public query({caller}) func canisterAccountId() : async Account.AccountIdentifier {
         if( Principal.toText(caller) != ownerCanisterId) { throw Error.reject("Unauthorized access."); };
-        userAccountId()
+        tresasuryAccountId()
     };
 
-    public composite query({caller}) func canisterBalance() : async Ledger.ICP {
+    private func getTreasuryNeuronAccountId(memo: Nat64) : async Account.AccountIdentifier {
+        let {public_key} = await EcdsaHelperMethods.getPublicKey(null, Principal.fromActor(this));
+        let {principalAsBlob} = Account.getSelfAuthenticatingPrincipal(public_key);
+        let principal = Principal.fromBlob(principalAsBlob);
+        let treasuryNeuronSubaccount = Account.neuronSubaccount(principal, memo);
+        Account.accountIdentifier(Principal.fromText(Governance.CANISTER_ID), treasuryNeuronSubaccount);
+    };
+
+    public shared({caller}) func getNeuronAccountId() : async Account.AccountIdentifier {
+        if( Principal.toText(caller) != ownerCanisterId) { throw Error.reject("Unauthorized access."); };
+        let accountId = await getTreasuryNeuronAccountId(neuronMemo);
+    };
+
+    public query({caller}) func canisterBalance() : async Ledger.ICP {
         let canisterId =  Principal.fromActor(this);
         if(  
             Principal.toText(caller) !=  Principal.toText(canisterId)
@@ -161,17 +183,13 @@ shared(msg) actor class Treasury (principal : Principal) = this {
         return tokenBalances.icp;
     };
 
-    public shared({caller}) func canisterBalance_shared() : async Ledger.ICP {
+    public shared({caller}) func updateTokenBalances() : async () {
         let canisterId =  Principal.fromActor(this);
         if(  
             Principal.toText(caller) !=  Principal.toText(canisterId)
             and Principal.toText(caller) != ownerCanisterId
         ) { throw Error.reject("Unauthorized access."); };
-        return tokenBalances.icp;
-    };
-
-    private func updateTokenBalances_() : async () {
-        let icp = await ledger.account_balance({ account = userAccountId() });
+        let icp = await ledger.account_balance({ account = tresasuryAccountId() });
         //will have to do the same for the btc and eth ledgers
         tokenBalances := {tokenBalances with icp };
     };
@@ -180,6 +198,52 @@ shared(msg) actor class Treasury (principal : Principal) = this {
         if(Principal.toText(caller) != ownerCanisterId) { throw Error.reject("Unauthorized access."); };
         return Cycles.balance();
     };
+
+    private func manageNeuron(args: Governance.ManageNeuron): async () {
+        let this_canister_id: Principal = Principal.fromActor(this);
+        let {public_key} = await EcdsaHelperMethods.getPublicKey(null, this_canister_id);
+        let {principalAsBlob} = Account.getSelfAuthenticatingPrincipal(public_key);
+        let sender = Principal.fromBlob(principalAsBlob);
+        let canister_id: Principal = Principal.fromText(Governance.CANISTER_ID);
+        let method_name: Text = "manage_neuron";
+        let request = await EcdsaHelperMethods.prepareCanisterCallViaEcdsa({sender; public_key; canister_id; this_canister_id; args; method_name;});
+
+    };
+    
+    // public shared({caller})func createNeuron(amount: Nat64, memo: Nat64): async Result.Result<Governance.NeuronId ,TreasuryTypes.Error> {
+    //     // let canisterId =  Principal.fromActor(this);
+    //     // if(  Principal.toText(caller) !=  Principal.toText(canisterId) and Principal.toText(caller) != ownerCanisterId) throw Error.reject("Unauthorized access."); 
+    //     let treasuryNeuronAccountId = await getTreasuryNeuronAccountId(memo);
+    //     let res = await ledger.transfer({
+    //       memo = memo;
+    //       from_subaccount = null;
+    //       to = treasuryNeuronAccountId;
+    //       amount = { e8s = amount };
+    //       fee = { e8s = txFee };
+    //       created_at_time = ?{ timestamp_nanos = Nat64.fromNat(Int.abs(Time.now())) };
+    //     });
+    //     switch(res){
+    //         case (#Err(_)) { return #err(#InsufficientFunds)};
+    //         case (#Ok(blockIndex)) {
+    //             let neuronSubaccountId = Account.neuronSubaccount(Principal.fromActor(this), memo);
+    //             let {command} = await manageNeuron({ 
+    //                 id = null; 
+    //                 command = ?#ClaimOrRefresh({ by = ?#MemoAndController({controller = ?Principal.fromActor(this); memo = memo; }); });
+    //                 neuron_id_or_subaccount = ?#Subaccount (neuronSubaccountId);
+    //             });
+    //             switch(command){
+    //                 case null { return #err(#NeuronClaimFailed)};
+    //                 case (?#ClaimOrRefresh( {refreshed_neuron_id} )){
+    //                     switch(refreshed_neuron_id){
+    //                         case null { return #err(#NoNeuronIdRetreived)};
+    //                         case (?neuronId) { return #ok(neuronId)};
+    //                     };
+    //                 };
+    //                 case (? otherResponse) {return #err(#UnexpectedResponse {response = otherResponse})};
+    //             };
+    //         };
+    //     };
+    // };
 
     // Return the cycles received up to the capacity allowed
     public func wallet_receive() : async { accepted: Nat64 } {
@@ -203,18 +267,5 @@ shared(msg) actor class Treasury (principal : Principal) = this {
         usersStakesArray:= []; 
         collateralArray := [];
         balancesArray := [];
-    };
-   
-    private  func key(x: Principal) : Trie.Key<Principal> {
-        return {key = x; hash = Principal.hash(x)}
-    };
-
-    private func natKey(x: Nat) : Trie.Key<Nat> {
-        return {key = x; hash = Hash.hash(x)}
-    };
-
-    private func textKey(x: Text) : Trie.Key<Text> {
-        return {key = x; hash = Text.hash(x)}
-    };
-
-}
+    };    
+};
