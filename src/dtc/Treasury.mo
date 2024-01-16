@@ -1,4 +1,4 @@
-import Account "NNS/Account";
+import Account "HashersAndSerializers/Account";
 import Ledger "NNS/Ledger";
 import Governance "NNS/Governance";
 import Trie "mo:base/Trie";
@@ -17,12 +17,15 @@ import Result "mo:base/Result";
 import Int "mo:base/Int";
 import Time "mo:base/Time";
 import Nat32 "mo:base/Nat32";
+import Blob "mo:base/Blob";
 import GovernanceHelperMethods "Modules/Main/GovernanceHelperMethods";
 import NnsCyclesMinting "NNS/NnsCyclesMinting";
 import MainTypes "Types/Main/types";
 import AnalyticsTypes "Types/Analytics/types";
 import IC "Types/IC/types";
 import EcdsaHelperMethods "Modules/ECDSA/ECDSAHelperMethods";
+import Hex "HashersAndSerializers/Hex";
+
 
 shared(msg) actor class Treasury (principal : Principal) = this {
 
@@ -169,9 +172,24 @@ shared(msg) actor class Treasury (principal : Principal) = this {
         Account.accountIdentifier(Principal.fromText(Governance.CANISTER_ID), treasuryNeuronSubaccount);
     };
 
-    public shared({caller}) func getNeuronAccountId() : async Account.AccountIdentifier {
-        if( Principal.toText(caller) != ownerCanisterId) { throw Error.reject("Unauthorized access."); };
+    public shared({caller}) func getNeuronAccountId() : async Text {
+        // if( Principal.toText(caller) != ownerCanisterId) { throw Error.reject("Unauthorized access."); };
         let accountId = await getTreasuryNeuronAccountId(neuronMemo);
+        let accountId_ = Hex.encode(Blob.toArray(accountId));
+    };
+
+    public shared(msg) func getSelfAuthenticatingPrincipal(): async Text {
+        let {public_key} = await EcdsaHelperMethods.getPublicKey(null, Principal.fromActor(this));
+        let {principalAsBlob} = Account.getSelfAuthenticatingPrincipal(public_key);
+        Principal.toText(Principal.fromBlob(principalAsBlob));
+    };
+
+    public shared(msg) func getNeuronSubAccountId(): async Text {
+        let {public_key} = await EcdsaHelperMethods.getPublicKey(null, Principal.fromActor(this));
+        let {principalAsBlob} = Account.getSelfAuthenticatingPrincipal(public_key);
+        let principal = Principal.fromBlob(principalAsBlob);
+        let treasuryNeuronSubaccount = Account.neuronSubaccount(principal, 0);
+        Hex.encode(Blob.toArray(treasuryNeuronSubaccount));
     };
 
     public query({caller}) func canisterBalance() : async Ledger.ICP {
@@ -199,51 +217,54 @@ shared(msg) actor class Treasury (principal : Principal) = this {
         return Cycles.balance();
     };
 
-    private func manageNeuron(args: Governance.ManageNeuron): async () {
+    public shared(msg) func manageNeuron(args: Governance.ManageNeuron): async IC.http_response_with_text {
         let this_canister_id: Principal = Principal.fromActor(this);
         let {public_key} = await EcdsaHelperMethods.getPublicKey(null, this_canister_id);
         let {principalAsBlob} = Account.getSelfAuthenticatingPrincipal(public_key);
         let sender = Principal.fromBlob(principalAsBlob);
         let canister_id: Principal = Principal.fromText(Governance.CANISTER_ID);
-        let method_name: Text = "manage_neuron";
+        let method_name: Text = "simulate_manage_neuron";
         let request = await EcdsaHelperMethods.prepareCanisterCallViaEcdsa({sender; public_key; canister_id; this_canister_id; args; method_name;});
-
+        let {envelope} = await EcdsaHelperMethods.getSignedEnvelope(request, this_canister_id);
+        let body = ?to_candid(envelope);
+        let {request_url = url} = request;
+        let max_response_bytes: ?Nat64 = ?Nat64.fromNat(1024 * 1024);
+        let method = #post;
+        let transform_context = { function = transformFn; context = Blob.fromArray([]); };
+        let transform = ?transform_context;
+        let headers = [{name = "content-type"; value= "application/cbor"}];
+        let ic : IC.Self = actor("aaaaa-aa");
+        let http_request = {body; url; headers; transform; method; max_response_bytes};
+        Cycles.add(20_949_972_000);
+        let {status; body = responseBodyAsBlob; headers = responseHeaders} : IC.http_response = await ic.http_request(http_request);
+        return { status; body = Text.decodeUtf8(responseBodyAsBlob); headers };
     };
     
-    // public shared({caller})func createNeuron(amount: Nat64, memo: Nat64): async Result.Result<Governance.NeuronId ,TreasuryTypes.Error> {
-    //     // let canisterId =  Principal.fromActor(this);
-    //     // if(  Principal.toText(caller) !=  Principal.toText(canisterId) and Principal.toText(caller) != ownerCanisterId) throw Error.reject("Unauthorized access."); 
-    //     let treasuryNeuronAccountId = await getTreasuryNeuronAccountId(memo);
-    //     let res = await ledger.transfer({
-    //       memo = memo;
-    //       from_subaccount = null;
-    //       to = treasuryNeuronAccountId;
-    //       amount = { e8s = amount };
-    //       fee = { e8s = txFee };
-    //       created_at_time = ?{ timestamp_nanos = Nat64.fromNat(Int.abs(Time.now())) };
-    //     });
-    //     switch(res){
-    //         case (#Err(_)) { return #err(#InsufficientFunds)};
-    //         case (#Ok(blockIndex)) {
-    //             let neuronSubaccountId = Account.neuronSubaccount(Principal.fromActor(this), memo);
-    //             let {command} = await manageNeuron({ 
-    //                 id = null; 
-    //                 command = ?#ClaimOrRefresh({ by = ?#MemoAndController({controller = ?Principal.fromActor(this); memo = memo; }); });
-    //                 neuron_id_or_subaccount = ?#Subaccount (neuronSubaccountId);
-    //             });
-    //             switch(command){
-    //                 case null { return #err(#NeuronClaimFailed)};
-    //                 case (?#ClaimOrRefresh( {refreshed_neuron_id} )){
-    //                     switch(refreshed_neuron_id){
-    //                         case null { return #err(#NoNeuronIdRetreived)};
-    //                         case (?neuronId) { return #ok(neuronId)};
-    //                     };
-    //                 };
-    //                 case (? otherResponse) {return #err(#UnexpectedResponse {response = otherResponse})};
-    //             };
-    //         };
-    //     };
-    // };
+    public shared({caller})func createNeuron(amount: Nat64, memo: Nat64): async IC.http_response_with_text{
+        // let canisterId =  Principal.fromActor(this);
+        // if(  Principal.toText(caller) !=  Principal.toText(canisterId) and Principal.toText(caller) != ownerCanisterId) throw Error.reject("Unauthorized access."); 
+        let treasuryNeuronAccountId = await getTreasuryNeuronAccountId(memo);
+        let res = await ledger.transfer({
+          memo = memo;
+          from_subaccount = null;
+          to = treasuryNeuronAccountId;
+          amount = { e8s = amount };
+          fee = { e8s = txFee };
+          created_at_time = ?{ timestamp_nanos = Nat64.fromNat(Int.abs(Time.now())) };
+        });
+        switch(res){
+            case (#Err(_)) { return throw Error.reject("Transfer NNS neuron failed")};
+            case (#Ok(blockIndex)) {
+                let neuronSubaccountId = Account.neuronSubaccount(Principal.fromActor(this), memo);
+                let response = await manageNeuron({ 
+                    id = null; 
+                    command = ?#ClaimOrRefresh({ by = ?#MemoAndController({controller = ?Principal.fromActor(this); memo = memo; }); });
+                    neuron_id_or_subaccount = ?#Subaccount (neuronSubaccountId);
+                });
+                return response;
+            };
+        };
+    };
 
     // Return the cycles received up to the capacity allowed
     public func wallet_receive() : async { accepted: Nat64 } {
@@ -255,6 +276,15 @@ shared(msg) actor class Treasury (principal : Principal) = this {
         let deposit = Cycles.accept(accepted);
         assert (deposit == accepted);
         { accepted = Nat64.fromNat(accepted) };
+    };
+
+    public query func transformFn({context: Blob; response: IC.http_response}) : async IC.http_response {
+      let transformed : IC.http_response = {
+        status = response.status;
+        body = response.body;
+        headers = [];
+      };
+      transformed;
     };
 
     system func preupgrade() { 

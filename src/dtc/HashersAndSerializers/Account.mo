@@ -55,11 +55,9 @@ module {
   };
 
   public func getSelfAuthenticatingPrincipal(public_key: Blob): { principalAsBlob : Blob } {
-    let hash = SHA224.Digest();
-    hash.write(Blob.toArray(public_key));
-    let hashSum = hash.sum();
+    let hash = SHA224.sha224(Blob.toArray(public_key));
     let tag : [Nat8] = [0x02];
-    { principalAsBlob = Blob.fromArray(Array.append(hashSum, tag)) };
+    { principalAsBlob = Blob.fromArray(Array.append(hash, tag)) };
   };
 
   public func validateAccountIdentifier(accountIdentifier : AccountIdentifier) : Bool {

@@ -4,7 +4,7 @@ import Buffer "mo:base/Buffer";
 import Option "mo:base/Option";
 import Text "mo:base/Text";
 import Result "mo:base/Result";
-import Account "../../NNS/Account";
+import Account "../../HashersAndSerializers/Account";
 import JournalTypes "../../Types/Journal/types";
 import Principal "mo:base/Principal";
 import Cycles "mo:base/ExperimentalCycles";

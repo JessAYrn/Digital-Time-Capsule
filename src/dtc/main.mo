@@ -10,7 +10,7 @@ import Iter "mo:base/Iter";
 import Text "mo:base/Text";
 import Option "mo:base/Option";
 import Ledger "NNS/Ledger";
-import Account "NNS/Account";
+import Account "HashersAndSerializers/Account";
 import JournalTypes "Types/Journal/types";
 import MainMethods "Modules/Main/MainHelperMethods";
 import JournalHelperMethods "Modules/Main/JournalHelperMethods";

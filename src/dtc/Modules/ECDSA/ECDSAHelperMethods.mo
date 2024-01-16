@@ -8,8 +8,10 @@ import Time "mo:base/Time";
 import Int "mo:base/Int";
 import Blob "mo:base/Blob";
 import RandomNums "../Random/Random";
-import Account "../../NNS/Account";
+import Account "../../HashersAndSerializers/Account";
 import Governance "../../NNS/Governance";
+import Cycles "mo:base/ExperimentalCycles";
+import Sha256 "../../HashersAndSerializers/SHA256";
 
 module{
 
@@ -23,6 +25,12 @@ module{
         canister_id: Principal;
         method_name: Text;
         arg: [Nat8];
+    };
+
+    public type Envelope = {
+        content: EnvelopeContent;
+        sender_pubkey: ?[Nat8];
+        sender_sig: ?[Nat8];
     };
 
     public type CanisterEcdsaRequest = {
@@ -50,7 +58,7 @@ module{
             canister_id;
             derivation_path = [ Principal.toBlob(caller) ];
             //this code uses the mainnet test key
-            key_id = { curve = #secp256k1; name = "key_1" };
+            key_id = { curve = #secp256k1; name = "test_key_1" };
         });
         { public_key }
         } catch (err) { throw Error.reject("Public Key Retreival failed") };
@@ -60,10 +68,21 @@ module{
         let {canister_id; sender; method_name; args; this_canister_id; public_key} = arguments;
         let arg = Blob.toArray(to_candid(args));
         let request_url : Text = IC_URL # "/api/v2/canister/" # Principal.toText(canister_id) # "/call";
-        let key_id = { name : Text = "key_1"; curve : IC.ecdsa_curve = #secp256k1};
+        let key_id = { name : Text = "test_key_1"; curve : IC.ecdsa_curve = #secp256k1};
         let nonce = await RandomNums.generateNonceForECDSA();
         let ingress_expiry : Nat64 = Nat64.fromNat(Int.abs(Time.now())) + ( 5 * 1_000_000_000);
         let envelope_content : EnvelopeContent = { request_url; nonce = ?nonce; ingress_expiry; canister_id; method_name; arg; sender};
         return { request_url; envelope_content; key_id; this_canister_id; public_key = Blob.toArray(public_key) };
     };
+
+    public func getSignedEnvelope(request : CanisterEcdsaRequest, caller: Principal) : 
+    async {envelope: Envelope}{
+        let {envelope_content; key_id; public_key} = request;
+        let message_hash: Blob = Blob.fromArray(Sha256.sha256(Blob.toArray(to_candid(envelope_content))));
+        Cycles.add(25_000_000_000);
+        let { signature } = await ic.sign_with_ecdsa({ message_hash; derivation_path = [ Principal.toBlob(caller) ]; key_id = { curve = #secp256k1; name = "test_key_1" }; });
+        let envelope = { content = envelope_content; sender_pubkey = ?public_key; sender_sig = ?Blob.toArray(signature); };
+        return {envelope};
+    };
+
 };
