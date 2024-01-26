@@ -309,4 +309,25 @@ module {
       case (#b64) 8;
     };
   };
+
+  public func pow_mod(base: Nat, exponent: Nat, modulus: Nat ) : Nat {
+    var result: Nat = 1;
+    var base_ = base;
+    var exponent_ = exponent;
+
+    base_ := base_ % modulus;
+    while (exponent_ > 0){
+      if(exponent_ % 2 == 1) result := (result * base_) % modulus;
+      exponent_ := exponent_ / 2;
+      base_ := (base_ * base_) % modulus
+    };
+    return result;
+  };
+
+  public func modulo(num: Int, modulus:Nat): Nat {
+    var result = num % modulus;
+    if(result < 0) result += modulus;
+    return Int.abs(result);
+  };
+
 };

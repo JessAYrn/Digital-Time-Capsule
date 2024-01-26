@@ -27,6 +27,8 @@ import Nat "mo:base/Nat";
 import Time "mo:base/Time";
 import Float "mo:base/Float";
 import Blob "mo:base/Blob";
+import Order "mo:base/Order";
+import Array "mo:base/Array";
 import GovernanceHelperMethods "Modules/Main/GovernanceHelperMethods";
 import Treasury "Treasury";
 import TreasuryTypes "Types/Treasury/types";
@@ -38,6 +40,8 @@ import Journal "Journal";
 import WasmStore "Types/WasmStore/types";
 import SupportCanisterIds "SupportCanisterIds/SupportCanisterIds";
 import MarketData "Modules/HTTPRequests/MarketData";
+import RepresentationIndependentHash "HashersAndSerializers/RepresentationIndependentHash";
+import Hex "HashersAndSerializers/Hex";
 
 shared actor class User() = this {
 

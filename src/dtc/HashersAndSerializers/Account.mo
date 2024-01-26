@@ -60,6 +60,12 @@ module {
     { principalAsBlob = Blob.fromArray(Array.append(hash, tag)) };
   };
 
+  public func getSelfAuthenticatingPrincipal2(public_key: [Nat8]): { principalAsArray : [Nat8] } {
+    let hash = SHA224.sha224(public_key);
+    let tag : [Nat8] = [0x02];
+    { principalAsArray = Array.append(hash, tag) };
+  };
+
   public func validateAccountIdentifier(accountIdentifier : AccountIdentifier) : Bool {
     if (accountIdentifier.size() != 32) {
       return false;

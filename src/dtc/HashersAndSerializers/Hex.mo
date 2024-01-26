@@ -8,6 +8,10 @@ import Text "mo:base/Text";
 import Nat "mo:base/Nat";
 import Nat32 "mo:base/Nat32";
 import Option "mo:base/Option";
+import Error "mo:base/Error";
+import Buffer "mo:base/Buffer";
+import Order "mo:base/Order";
+import Int "mo:base/Int";
 
 module {
 
@@ -52,5 +56,102 @@ module {
     };
     let result = Array.freeze(res);
     return result;
+  };
+
+  public func toNat(hex: Text): async Nat {
+    var num = 0;
+    let hexCharArray = Text.toArray(hex);
+    let hexCharArrayIter = Iter.fromArray<Char>(Array.reverse(hexCharArray));
+    var error : Bool = false;
+    Iter.iterate<Char>(hexCharArrayIter, func (char: Char, index: Nat){
+      var digit: Nat = 0;
+      switch(Nat.fromText(Text.fromChar(char))){ 
+        case null { 
+          if(char == 'A' or char == 'a'){digit := 10 }
+          else if(char == 'B' or char == 'b'){digit := 11 }
+          else if(char == 'C' or char == 'c'){digit := 12 }
+          else if(char == 'D' or char == 'd'){digit := 13 }
+          else if(char == 'E' or char == 'e'){digit := 14 }
+          else if(char == 'F' or char == 'f'){digit := 15 }
+          else error := true;
+        }; 
+        case (?nat) {digit := nat}; 
+        };
+      num += digit * ( 16 ** index );
+    });
+    if(error) { throw Error.reject("Failed to convert hexadecimal to decimal")};
+    return num;
+  };
+
+  public func toHex(nat: Nat): Text {
+    func highestPowerOf16(num: Nat): Nat { 
+      var power: Nat = 0; 
+      while(16 ** power <= num){ power += 1; }; 
+      power -= 1; 
+      return power; 
+    };
+    func highestMultipleOf(num: Nat, factor: Nat): Nat { 
+      var multiple: Nat = 0;  
+      while(factor * multiple <= num){ multiple += 1; }; 
+      multiple -= 1; 
+      return multiple; 
+    };
+    var largestPower : Nat = 0;
+    let hexMap = HashMap.HashMap<Nat,Text>(1, Nat.equal, Hash.hash);
+    var num : Nat = nat;
+    while(num > 0){
+      let power = highestPowerOf16(num);
+      let coefficient = highestMultipleOf(num, 16 ** power);
+      if(coefficient <= 9) { hexMap.put(power, Nat.toText(coefficient)) }
+      else if(coefficient == 10) hexMap.put(power, "A")
+      else if(coefficient == 11) hexMap.put(power, "B")
+      else if(coefficient == 12) hexMap.put(power, "C")
+      else if(coefficient == 13) hexMap.put(power, "D")
+      else if(coefficient == 14) hexMap.put(power, "E")
+      else if(coefficient == 15) hexMap.put(power, "F");
+      if(power > largestPower) largestPower := power;
+      num -= coefficient * (16 ** power);
+    };
+    var index: Int = largestPower;
+    while(index >= 0){
+      let val = hexMap.get(Int.abs(index));
+      switch(val){ case null {hexMap.put(Int.abs(index), "0")}; case(?v){}};
+      index -= 1;
+    };
+    let hexMapBuffer = Buffer.fromIter<(Nat,Text)>(hexMap.entries());
+    hexMapBuffer.sort(func (( (placeValue_1, digit_1) : (Nat, Text), ((placeValue_2, digit_2) : (Nat, Text)))): Order.Order{
+      if(placeValue_1 > placeValue_2) return #less
+      else if (placeValue_1 < placeValue_2) return #greater
+      else return #equal;
+    });
+    let hexBuffer = Buffer.map<(Nat,Text), Text>(hexMapBuffer, func ((placeValue, digit) : (Nat, Text)): Text { return digit; });
+    convertTextArrayToText(hexBuffer.toArray());
+  };
+
+  public func convertTextArrayToText(charArray: [Text]): Text {
+      var text : Text = "";
+      let iter = Iter.fromArray<Text>(charArray);
+      Iter.iterate<Text>(iter, func (char: Text, index: Nat){ text := Text.concat(text, char); });
+      return text;
+  };
+
+  public func convertCharArrayToText(charArray: [Char]): Text {
+      var text : Text = "";
+      let iter = Iter.fromArray<Char>(charArray);
+      Iter.iterate<Char>(iter, func (char: Char, index: Nat){ text := Text.concat(text, Char.toText(char)); }); 
+      return text;
+  };
+
+  public func padHex(digit: Text, hex: Text, length: Nat): Text {
+    let hexAsCharArray: [Char] = Text.toArray(hex);
+    var hexLength = hexAsCharArray.size();
+    let hexCharBuffer = Buffer.fromArray<Char>(hexAsCharArray);
+    Buffer.reverse(hexCharBuffer);
+    while(hexLength < length){
+      hexCharBuffer.append(Buffer.fromArray<Char>(Text.toArray(digit)));
+      hexLength += 1;
+    };
+    Buffer.reverse(hexCharBuffer);
+    convertCharArrayToText(hexCharBuffer.toArray());
   };
 };

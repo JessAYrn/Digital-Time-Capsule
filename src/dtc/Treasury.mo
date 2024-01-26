@@ -18,6 +18,8 @@ import Int "mo:base/Int";
 import Time "mo:base/Time";
 import Nat32 "mo:base/Nat32";
 import Blob "mo:base/Blob";
+import Buffer "mo:base/Buffer";
+import Char "mo:base/Char";
 import GovernanceHelperMethods "Modules/Main/GovernanceHelperMethods";
 import NnsCyclesMinting "NNS/NnsCyclesMinting";
 import MainTypes "Types/Main/types";
@@ -25,6 +27,11 @@ import AnalyticsTypes "Types/Analytics/types";
 import IC "Types/IC/types";
 import EcdsaHelperMethods "Modules/ECDSA/ECDSAHelperMethods";
 import Hex "HashersAndSerializers/Hex";
+import Encoder "HashersAndSerializers/CBOR/Encoder";
+import RepresentationIndependentHash "HashersAndSerializers/RepresentationIndependentHash";
+import Value "HashersAndSerializers/CBOR/Value";
+import Errors "HashersAndSerializers/CBOR/Errors";
+import Decoder "HashersAndSerializers/CBOR/Decoder";
 
 
 shared(msg) actor class Treasury (principal : Principal) = this {
@@ -78,6 +85,8 @@ shared(msg) actor class Treasury (principal : Principal) = this {
     private let txFee : Nat64 = 10_000;
 
     private let ledger : Ledger.Interface  = actor(Ledger.CANISTER_ID);
+
+    private var idempotency_key : Nat64 = 0;
 
     private let neuronMemo : Nat64 = 0;
 
@@ -165,11 +174,22 @@ shared(msg) actor class Treasury (principal : Principal) = this {
     };
 
     private func getTreasuryNeuronAccountId(memo: Nat64) : async Account.AccountIdentifier {
-        let {public_key} = await EcdsaHelperMethods.getPublicKey(null, Principal.fromActor(this));
+        let {public_key} = await EcdsaHelperMethods.getPublicKey(null);
         let {principalAsBlob} = Account.getSelfAuthenticatingPrincipal(public_key);
         let principal = Principal.fromBlob(principalAsBlob);
         let treasuryNeuronSubaccount = Account.neuronSubaccount(principal, memo);
         Account.accountIdentifier(Principal.fromText(Governance.CANISTER_ID), treasuryNeuronSubaccount);
+    };
+
+    public shared func getDecompressedPublicKey(): async {decompressedPublicKey: Blob; x: Text; y: Text } {
+        let ic : IC.Self = actor("aaaaa-aa");
+        let {public_key} = await ic.ecdsa_public_key({
+            //When `null`, it defaults to getting the public key of the canister that makes this call
+            canister_id = null;
+            derivation_path = [];
+            key_id = { curve = #secp256k1; name = "key_1" };
+        });
+        await EcdsaHelperMethods.decompressPublicKey(public_key);
     };
 
     public shared({caller}) func getNeuronAccountId() : async Text {
@@ -179,13 +199,13 @@ shared(msg) actor class Treasury (principal : Principal) = this {
     };
 
     public shared(msg) func getSelfAuthenticatingPrincipal(): async Text {
-        let {public_key} = await EcdsaHelperMethods.getPublicKey(null, Principal.fromActor(this));
+        let {public_key} = await EcdsaHelperMethods.getPublicKey(null);
         let {principalAsBlob} = Account.getSelfAuthenticatingPrincipal(public_key);
         Principal.toText(Principal.fromBlob(principalAsBlob));
     };
 
     public shared(msg) func getNeuronSubAccountId(): async Text {
-        let {public_key} = await EcdsaHelperMethods.getPublicKey(null, Principal.fromActor(this));
+        let {public_key} = await EcdsaHelperMethods.getPublicKey(null);
         let {principalAsBlob} = Account.getSelfAuthenticatingPrincipal(public_key);
         let principal = Principal.fromBlob(principalAsBlob);
         let treasuryNeuronSubaccount = Account.neuronSubaccount(principal, 0);
@@ -217,29 +237,31 @@ shared(msg) actor class Treasury (principal : Principal) = this {
         return Cycles.balance();
     };
 
-    public shared(msg) func manageNeuron(args: Governance.ManageNeuron): async IC.http_response_with_text {
-        let this_canister_id: Principal = Principal.fromActor(this);
-        let {public_key} = await EcdsaHelperMethods.getPublicKey(null, this_canister_id);
+    public shared(msg) func manageNeuron(args: Governance.ManageNeuron): 
+    async {status : Nat; body : ?Text; headers : [IC.http_header]; string : Text;} {
+
+        let {public_key} = await EcdsaHelperMethods.getPublicKey(null);
         let {principalAsBlob} = Account.getSelfAuthenticatingPrincipal(public_key);
         let sender = Principal.fromBlob(principalAsBlob);
         let canister_id: Principal = Principal.fromText(Governance.CANISTER_ID);
-        let method_name: Text = "simulate_manage_neuron";
-        let request = await EcdsaHelperMethods.prepareCanisterCallViaEcdsa({sender; public_key; canister_id; this_canister_id; args; method_name;});
-        let {envelope} = await EcdsaHelperMethods.getSignedEnvelope(request, this_canister_id);
-        let body = ?to_candid(envelope);
+        let method_name: Text = "manage_neuron";
+        let request = await EcdsaHelperMethods.prepareCanisterCallViaEcdsa({sender; public_key; canister_id; args; method_name;});
+        let {envelopeCborEncoded} = await EcdsaHelperMethods.getSignedEnvelope(request);
+        let headers = [ {name = "content-type"; value= "application/cbor"}];
         let {request_url = url} = request;
-        let max_response_bytes: ?Nat64 = ?Nat64.fromNat(1024 * 1024);
+        let body = ?Blob.fromArray(envelopeCborEncoded);
         let method = #post;
+        let max_response_bytes: ?Nat64 = ?Nat64.fromNat(1024 * 1024);
         let transform_context = { function = transformFn; context = Blob.fromArray([]); };
         let transform = ?transform_context;
-        let headers = [{name = "content-type"; value= "application/cbor"}];
         let ic : IC.Self = actor("aaaaa-aa");
         let http_request = {body; url; headers; transform; method; max_response_bytes};
         Cycles.add(20_949_972_000);
-        let {status; body = responseBodyAsBlob; headers = responseHeaders} : IC.http_response = await ic.http_request(http_request);
-        return { status; body = Text.decodeUtf8(responseBodyAsBlob); headers };
+        let {status; body = responseBody; headers = responseHeaders} : IC.http_response = await ic.http_request(http_request);
+        return { status; body = Text.decodeUtf8(responseBody); headers; string = Hex.encode(envelopeCborEncoded)};
+        
     };
-    
+
     public shared({caller})func createNeuron(amount: Nat64, memo: Nat64): async IC.http_response_with_text{
         // let canisterId =  Principal.fromActor(this);
         // if(  Principal.toText(caller) !=  Principal.toText(canisterId) and Principal.toText(caller) != ownerCanisterId) throw Error.reject("Unauthorized access."); 
@@ -278,14 +300,14 @@ shared(msg) actor class Treasury (principal : Principal) = this {
         { accepted = Nat64.fromNat(accepted) };
     };
 
-    public query func transformFn({context: Blob; response: IC.http_response}) : async IC.http_response {
+    public query func transformFn({ response : IC.http_response; context: Blob }) : async IC.http_response {
       let transformed : IC.http_response = {
-        status = response.status;
-        body = response.body;
-        headers = [];
+          status = response.status;
+          body = response.body;
+          headers = [];
       };
       transformed;
-    };
+  };
 
     system func preupgrade() { 
         usersStakesArray := Iter.toArray(usersStakesMap.entries()); 
@@ -298,4 +320,30 @@ shared(msg) actor class Treasury (principal : Principal) = this {
         collateralArray := [];
         balancesArray := [];
     };    
+
+    //3056301006
+    //072a8648ce
+    //3d02010605
+    //2b8104000a
+    //034200040d
+    //aaf4f84db5
+    //38c64bd542
+    //a738e4db78
+    //b9a206e9d8
+    //2cd4fc5cba
+    //d3c392a264
+
+    //040daaf4f8
+    //4db538c64b
+    //d542a738e4
+    //db78b9a206
+    //e9d82cd4fc
+    //5cbad3c392
+    //a264aa0b10
+    //84e1dc567d
+    //4187472d4e
+    //73eed6393e
+    //cad3a2107c
+    //604080967e
+    //698953a259
 };
