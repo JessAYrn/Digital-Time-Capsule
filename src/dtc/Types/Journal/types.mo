@@ -1,4 +1,4 @@
-import Account "../../HashersAndSerializers/Account";
+import Account "../../Serializers/Account";
 import Trie "mo:base/Trie";
 import HashMap "mo:base/HashMap";
 import NotificationsTypes "../Notifications/types";

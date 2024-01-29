@@ -1,4 +1,4 @@
-import Account "HashersAndSerializers/Account";
+import Account "Serializers/Account";
 import Ledger "NNS/Ledger";
 import Governance "NNS/Governance";
 import Trie "mo:base/Trie";
@@ -26,12 +26,11 @@ import MainTypes "Types/Main/types";
 import AnalyticsTypes "Types/Analytics/types";
 import IC "Types/IC/types";
 import EcdsaHelperMethods "Modules/ECDSA/ECDSAHelperMethods";
-import Hex "HashersAndSerializers/Hex";
-import Encoder "HashersAndSerializers/CBOR/Encoder";
-import RepresentationIndependentHash "HashersAndSerializers/RepresentationIndependentHash";
-import Value "HashersAndSerializers/CBOR/Value";
-import Errors "HashersAndSerializers/CBOR/Errors";
-import Decoder "HashersAndSerializers/CBOR/Decoder";
+import Hex "Serializers/Hex";
+import Encoder "Serializers/CBOR/Encoder";
+import Value "Serializers/CBOR/Value";
+import Errors "Serializers/CBOR/Errors";
+import Decoder "Serializers/CBOR/Decoder";
 
 
 shared(msg) actor class Treasury (principal : Principal) = this {

@@ -1,5 +1,5 @@
-import Value "CBOR/Value";
-import Encoder "CBOR/Encoder";
+import Value "../Serializers/CBOR/Value";
+import Encoder "../Serializers/CBOR/Encoder";
 import Error "mo:base/Error";
 import Array "mo:base/Array";
 import Text "mo:base/Text";
@@ -9,7 +9,7 @@ import Nat8 "mo:base/Nat8";
 import Buffer "mo:base/Buffer";
 import Iter "mo:base/Iter";
 import Order "mo:base/Order";
-import Sha256 "SHA256";
+import Sha256 "../Hash/SHA256";
 import IntX "../MotokoNumbers/IntX";
 import NatX "../MotokoNumbers/NatX";
 

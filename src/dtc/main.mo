@@ -10,7 +10,7 @@ import Iter "mo:base/Iter";
 import Text "mo:base/Text";
 import Option "mo:base/Option";
 import Ledger "NNS/Ledger";
-import Account "HashersAndSerializers/Account";
+import Account "Serializers/Account";
 import JournalTypes "Types/Journal/types";
 import MainMethods "Modules/Main/MainHelperMethods";
 import JournalHelperMethods "Modules/Main/JournalHelperMethods";
@@ -40,8 +40,7 @@ import Journal "Journal";
 import WasmStore "Types/WasmStore/types";
 import SupportCanisterIds "SupportCanisterIds/SupportCanisterIds";
 import MarketData "Modules/HTTPRequests/MarketData";
-import RepresentationIndependentHash "HashersAndSerializers/RepresentationIndependentHash";
-import Hex "HashersAndSerializers/Hex";
+
 
 shared actor class User() = this {
 

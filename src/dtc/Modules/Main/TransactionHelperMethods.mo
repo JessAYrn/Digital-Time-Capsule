@@ -1,5 +1,5 @@
 import MainTypes "../../Types/Main/types";
-import Account "../../HashersAndSerializers/Account";
+import Account "../../Serializers/Account";
 import Result "mo:base/Result";
 import Trie "mo:base/Trie";
 import Principal "mo:base/Principal";
@@ -12,7 +12,7 @@ import Nat64 "mo:base/Nat64";
 import Error "mo:base/Error";
 import Array "mo:base/Array";
 import Option "mo:base/Option";
-import Hex "../../HashersAndSerializers/Hex";
+import Hex "../../Serializers/Hex";
 import Treasury "../../Treasury";
 
 module{

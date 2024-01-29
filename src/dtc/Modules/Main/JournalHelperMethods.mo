@@ -2,7 +2,7 @@ import Trie "mo:base/Trie";
 import Iter "mo:base/Iter";
 import Buffer "mo:base/Buffer";
 import Result "mo:base/Result";
-import Account "../../HashersAndSerializers/Account";
+import Account "../../Serializers/Account";
 import JournalTypes "../../Types/Journal/types";
 import Principal "mo:base/Principal";
 import Cycles "mo:base/ExperimentalCycles";

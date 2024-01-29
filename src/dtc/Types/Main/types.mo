@@ -1,4 +1,4 @@
-import Account "../../HashersAndSerializers/Account";
+import Account "../../Serializers/Account";
 import Trie "mo:base/Trie";
 import Principal "mo:base/Principal";
 import HashMap "mo:base/HashMap";

@@ -1,13 +1,13 @@
-import Array     "mo:base/Array";
-import Blob      "mo:base/Blob";
-import Nat8      "mo:base/Nat8";
-import Nat32     "mo:base/Nat32";
+import Array "mo:base/Array";
+import Blob "mo:base/Blob";
+import Nat8 "mo:base/Nat8";
+import Nat32 "mo:base/Nat32";
 import Principal "mo:base/Principal";
-import Text      "mo:base/Text";
+import Text "mo:base/Text";
 import Nat64 "mo:base/Nat64";
-import CRC32     "./CRC32";
-import SHA224    "./SHA224";
-import SHA256    "./SHA256";
+import SHA224 "../Hash/SHA224";
+import SHA256 "../Hash/SHA256";
+import CRC32 "./CRC32";
 
 module {
   // 32-byte array.

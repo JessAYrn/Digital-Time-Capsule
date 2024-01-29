@@ -15,7 +15,7 @@ import Timer "mo:base/Timer";
 import Iter "mo:base/Iter";
 import Buffer "mo:base/Buffer";
 import Int "mo:base/Int";
-import Account "HashersAndSerializers/Account";
+import Account "Serializers/Account";
 import Bool "mo:base/Bool";
 import Option "mo:base/Option";
 import IC "Types/IC/types";
