@@ -20,6 +20,10 @@ import Nat32 "mo:base/Nat32";
 import Blob "mo:base/Blob";
 import Buffer "mo:base/Buffer";
 import Char "mo:base/Char";
+import Nat "mo:base/Nat";
+import Order "mo:base/Order";
+import Timer "mo:base/Timer";
+import Debug "mo:base/Debug";
 import GovernanceHelperMethods "Modules/Main/GovernanceHelperMethods";
 import NnsCyclesMinting "NNS/NnsCyclesMinting";
 import MainTypes "Types/Main/types";
@@ -31,6 +35,7 @@ import Encoder "Serializers/CBOR/Encoder";
 import Value "Serializers/CBOR/Value";
 import Errors "Serializers/CBOR/Errors";
 import Decoder "Serializers/CBOR/Decoder";
+import NeuronManager "Modules/HTTPRequests/NeuronManager";
 
 
 shared(msg) actor class Treasury (principal : Principal) = this {
@@ -77,17 +82,31 @@ shared(msg) actor class Treasury (principal : Principal) = this {
         Text.hash
     );
 
-    private stable var neuronID : Nat64 = 0;
+    private stable var neuronDataArray : TreasuryTypes.NeuronInfoArray = [];
+
+    private var neuronDataMap : TreasuryTypes.NeuronInfoMap = HashMap.fromIter<TreasuryTypes.NeuronIdAsNat, Governance.Neuron>(
+        Iter.fromArray(neuronDataArray), 
+        Iter.size(Iter.fromArray(neuronDataArray)), 
+        Nat.equal,
+        Hash.hash
+    );
+
+    private stable var memoToNeuronIdArray : TreasuryTypes.MemoToNeuronIdArray = [];
+
+    private var memoToNeuronIdMap : TreasuryTypes.MemoToNeuronIdMap = HashMap.fromIter<TreasuryTypes.Memo, TreasuryTypes.NeuronIdAsNat>(
+        Iter.fromArray(memoToNeuronIdArray), 
+        Iter.size(Iter.fromArray(memoToNeuronIdArray)), 
+        Nat.equal,
+        Hash.hash
+    );
+
+    private var cachedRequest : ?TreasuryTypes.CachedRequest = null;  
 
     private var capacity = 1000000000000;
 
-    private let txFee : Nat64 = 10_000;
-
     private let ledger : Ledger.Interface  = actor(Ledger.CANISTER_ID);
 
-    private var idempotency_key : Nat64 = 0;
-
-    private let neuronMemo : Nat64 = 0;
+    private stable let neuronMemo : Nat64 = 0;
 
     public query({caller}) func getTreasuryCollateralArray(): async TreasuryTypes.TreasuryCollateralArray {
         if( Principal.toText(caller) != ownerCanisterId) { throw Error.reject("Unauthorized access."); };
@@ -172,32 +191,7 @@ shared(msg) actor class Treasury (principal : Principal) = this {
         tresasuryAccountId()
     };
 
-    private func getTreasuryNeuronAccountId(memo: Nat64) : async Account.AccountIdentifier {
-        let {public_key} = await EcdsaHelperMethods.getPublicKey(null);
-        let {principalAsBlob} = Account.getSelfAuthenticatingPrincipal(public_key);
-        let principal = Principal.fromBlob(principalAsBlob);
-        let treasuryNeuronSubaccount = Account.neuronSubaccount(principal, memo);
-        Account.accountIdentifier(Principal.fromText(Governance.CANISTER_ID), treasuryNeuronSubaccount);
-    };
-
-    public shared func getDecompressedPublicKey(): async {decompressedPublicKey: Blob; x: Text; y: Text } {
-        let ic : IC.Self = actor("aaaaa-aa");
-        let {public_key} = await ic.ecdsa_public_key({
-            //When `null`, it defaults to getting the public key of the canister that makes this call
-            canister_id = null;
-            derivation_path = [];
-            key_id = { curve = #secp256k1; name = "key_1" };
-        });
-        await EcdsaHelperMethods.decompressPublicKey(public_key);
-    };
-
-    public shared({caller}) func getNeuronAccountId() : async Text {
-        // if( Principal.toText(caller) != ownerCanisterId) { throw Error.reject("Unauthorized access."); };
-        let accountId = await getTreasuryNeuronAccountId(neuronMemo);
-        let accountId_ = Hex.encode(Blob.toArray(accountId));
-    };
-
-    public shared(msg) func getSelfAuthenticatingPrincipal(): async Text {
+    private func getSelfAuthenticatingPrincipal(): async Text {
         let {public_key} = await EcdsaHelperMethods.getPublicKey(null);
         let {principalAsBlob} = Account.getSelfAuthenticatingPrincipal(public_key);
         Principal.toText(Principal.fromBlob(principalAsBlob));
@@ -209,6 +203,192 @@ shared(msg) actor class Treasury (principal : Principal) = this {
         let principal = Principal.fromBlob(principalAsBlob);
         let treasuryNeuronSubaccount = Account.neuronSubaccount(principal, 0);
         Hex.encode(Blob.toArray(treasuryNeuronSubaccount));
+    };
+
+
+    public shared({caller}) func createOrIncreaseNeuron(amount: Nat64, memo: ?Nat64) : async IC.http_response  {
+        let canisterId =  Principal.fromActor(this);
+        // if(Principal.toText(caller) != Principal.toText(canisterId) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
+        let {setTimer} = Timer;
+        switch(cachedRequest){
+            case(?cachedRequest_){ 
+                let {expiry} = cachedRequest_;
+                if(Time.now() > Nat64.toNat(expiry)) { cachedRequest := null; };
+                let timerId = setTimer(#seconds(10), func (): async () {let result = await createOrIncreaseNeuron(amount, memo) });
+                throw Error.reject("A request is already pending.");
+            };
+            case(null){
+                let memoUsed = switch(memo){ case null { neuronMemo }; case (?memo_) { memo_ }; };
+                let {response; requestId; ingress_expiry} =  await NeuronManager.createOrIncreaseNeuron(amount, memoUsed, transformFn);
+                if(response.status == 202) { cachedRequest := ?{
+                    requestId; 
+                    expiry = ingress_expiry; 
+                    memoUsed = ?memoUsed;
+                    expectedResponseType = #CreateOrIncreaseNeuronResponse;
+                    neuronId = null
+                };};
+                let timerId = setTimer(#seconds(10), func (): async () {let result = await readRequestResponse(0) });
+                return response;
+
+            };
+        };
+    };
+
+    private func getFullNeuron(args: TreasuryTypes.NeuronId) : async IC.http_response {
+        let canisterId =  Principal.fromActor(this);
+        let {setTimer} = Timer;
+        switch(cachedRequest){
+            case(?cachedRequest_){ 
+                let {expiry; requestId; expectedResponseType} = cachedRequest_;
+                if(Time.now() > Nat64.toNat(expiry)) { cachedRequest := null; };
+                let timerId = setTimer(#seconds(10), func (): async () {let result = await getFullNeuron(args) });
+                throw Error.reject("A request is already pending.");
+            };
+            case(null){
+                let {response; requestId; ingress_expiry;} = await NeuronManager.getFullNeuron(args, transformFn);
+                if(response.status == 202) { cachedRequest := ?{
+                    requestId; 
+                    expiry = ingress_expiry; 
+                    memoUsed = null;
+                    expectedResponseType = #GetFullNeuronResponse;
+                    neuronId = ?args
+                };};
+                let timerId = setTimer(#seconds(10), func (): async () {let result = await readRequestResponse(0) });
+                return response;
+            };
+        };
+    };
+
+    public shared({caller}) func manageNeuron( args: Governance.ManageNeuron): async IC.http_response {
+        let canisterId =  Principal.fromActor(this);
+        // if(Principal.toText(caller) != Principal.toText(canisterId) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
+        let ?neuronId = args.id else Debug.trap("No neuronId in request");
+        let {setTimer} = Timer;
+        switch(cachedRequest){
+            case(?cachedRequest_){ 
+                let {expiry; requestId; expectedResponseType} = cachedRequest_;
+                if(Time.now() > Nat64.toNat(expiry)) { cachedRequest := null; };
+                let timerId = setTimer(#seconds(10), func (): async () {let result = await manageNeuron(args) });
+                throw Error.reject("A request is already pending.");
+            };
+            case(null){
+                let {public_key} = await EcdsaHelperMethods.getPublicKey(null);
+                let {principalAsBlob} = Account.getSelfAuthenticatingPrincipal(public_key);
+                let selfAuthPrincipal = Principal.fromBlob(principalAsBlob);
+                let {setTimer} = Timer;
+                let ?command = args.command else Debug.trap("No command in request");
+                let expectedResponseType = switch(command){
+                    case(#Spawn(_)) { #Spawn };
+                    case(#Split(_)) { #Split };
+                    case(#Follow(_)) { #Follow };
+                    case(#Configure(_)) { #Configure };
+                    case(#Disburse(_)) { #Disburse };
+                    case(#ClaimOrRefresh(_)) { #ClaimOrRefresh };
+                    case(#RegisterVote(_)) { #RegisterVote };
+                    case(#Merge(_)) { #Merge };
+                    case(#DisburseToNeuron(_)) { #DisburseToNeuron };
+                    case(#MakeProposal(_)) { #MakeProposal };
+                    case(#StakeMaturity(_)) { #StakeMaturity };
+                    case(#MergeMaturity(_)) { #MergeMaturity };
+                };
+                let {response; requestId; ingress_expiry;} = await NeuronManager.manageNeuron( args, selfAuthPrincipal, public_key, transformFn);
+                if(response.status == 202) { cachedRequest := ?{
+                    requestId; 
+                    expiry = ingress_expiry; 
+                    expectedResponseType;
+                    memoUsed = null;
+                    neuronId = ?neuronId.id;
+                };};
+                let timerId = setTimer(#seconds(10), func (): async () {let result = await readRequestResponse(0) });
+                return response;
+            };
+        };
+    };
+
+    public query(msg) func viewNeuronMap() : async TreasuryTypes.NeuronInfoArray {
+        return Iter.toArray(neuronDataMap.entries());
+    };
+
+    private func readRequestResponse(numOfFailedAttempts: Nat): async TreasuryTypes.RequestResponses  {
+        if(numOfFailedAttempts == 3){cachedRequest := null; Debug.trap("Failed to read request response after 3 attempts.")};
+        let {setTimer} = Timer;
+        switch(cachedRequest){
+            case null { 
+                let timerId = setTimer(#seconds(10), func (): async () {let result = await readRequestResponse(numOfFailedAttempts + 1)});
+                throw Error.reject("No request to read response for.");
+            };
+            case(?cachedRequest_){ 
+                try{
+                    let result = await NeuronManager.readRequestResponse(cachedRequest_, transformFn);
+                    switch(result){
+                        case(#CreateOrIncreaseNeuronResponse(response)){
+                            let ?memoUsed = cachedRequest_.memoUsed else Debug.trap("No memo used in request");
+                            let ?nueronId = response.refreshed_neuron_id else Debug.trap("No command in response");
+                            memoToNeuronIdMap.put(Nat64.toNat(memoUsed), Nat64.toNat(nueronId.id));
+                            cachedRequest := null;
+                            let timerId = setTimer(#seconds(10), func (): async () {let result = await getFullNeuron(nueronId.id)});
+                        };
+                        case(#ClaimOrRefresh(response)){
+                            let ?nueronId = response.refreshed_neuron_id else Debug.trap("No command in response");
+                            cachedRequest := null;
+                            let timerId = setTimer(#seconds(10), func (): async () {let result = await getFullNeuron(nueronId.id)});
+                        };
+                        case(#Spawn(response)){
+                            ///TODO: handle response
+                        };
+                        case(#Split(response)){
+                            ///TODO: handle response
+                        };
+                        case(#Follow(response)){
+                            ///TODO: handle response
+                        };
+                        case(#Configure(response)){
+                            ///TODO: handle response
+                        };
+                        case(#Disburse(response)){
+                            ///TODO: handle response
+                        };
+                        case(#RegisterVote(response)){
+                            ///TODO: handle response
+                        };
+                        case(#Merge(response)){
+                            /// TODO: handle response
+                        };
+                        case(#DisburseToNeuron(response)){
+                            ///TODO: handle response
+                        };
+                        case(#MakeProposal(response)){
+                            ///TODO: handle response
+                        };
+                        case(#StakeMaturity(response)){
+                            ///TODO: handle response
+                        };
+                        case(#MergeMaturity(response)){
+                            ///TODO: handle response
+                        };
+                        case(#Error(e)){
+                            ///TODO: handle error
+                        };
+                        case(#GetFullNeuronResponse(response)){
+                            switch(response){
+                                case(#Ok(neuron)){
+                                    let ?neuronId = cachedRequest_.neuronId else Debug.trap("No neuronId in request");
+                                    neuronDataMap.put(Nat64.toNat(neuronId), neuron);
+                                    cachedRequest := null;
+                                }; 
+                                case(#Err(e)){ 
+                                    Debug.trap("Received an Error when trying to retreive full neuron info"); 
+                                }
+                            };
+                        };
+                    };
+                    return result;
+                } catch(e){
+                    let timerId = setTimer(#seconds(10), func (): async () {let result = await readRequestResponse(numOfFailedAttempts + 1)});
+                    throw Error.reject("No request to read response for.");
+                };
+            };
+        };
     };
 
     public query({caller}) func canisterBalance() : async Ledger.ICP {
@@ -236,57 +416,6 @@ shared(msg) actor class Treasury (principal : Principal) = this {
         return Cycles.balance();
     };
 
-    public shared(msg) func manageNeuron(args: Governance.ManageNeuron): 
-    async {status : Nat; body : ?Text; headers : [IC.http_header]; string : Text;} {
-
-        let {public_key} = await EcdsaHelperMethods.getPublicKey(null);
-        let {principalAsBlob} = Account.getSelfAuthenticatingPrincipal(public_key);
-        let sender = Principal.fromBlob(principalAsBlob);
-        let canister_id: Principal = Principal.fromText(Governance.CANISTER_ID);
-        let method_name: Text = "manage_neuron";
-        let request = await EcdsaHelperMethods.prepareCanisterCallViaEcdsa({sender; public_key; canister_id; args; method_name;});
-        let {envelopeCborEncoded} = await EcdsaHelperMethods.getSignedEnvelope(request);
-        let headers = [ {name = "content-type"; value= "application/cbor"}];
-        let {request_url = url} = request;
-        let body = ?Blob.fromArray(envelopeCborEncoded);
-        let method = #post;
-        let max_response_bytes: ?Nat64 = ?Nat64.fromNat(1024 * 1024);
-        let transform_context = { function = transformFn; context = Blob.fromArray([]); };
-        let transform = ?transform_context;
-        let ic : IC.Self = actor("aaaaa-aa");
-        let http_request = {body; url; headers; transform; method; max_response_bytes};
-        Cycles.add(20_949_972_000);
-        let {status; body = responseBody; headers = responseHeaders} : IC.http_response = await ic.http_request(http_request);
-        return { status; body = Text.decodeUtf8(responseBody); headers; string = Hex.encode(envelopeCborEncoded)};
-        
-    };
-
-    public shared({caller})func createNeuron(amount: Nat64, memo: Nat64): async IC.http_response_with_text{
-        // let canisterId =  Principal.fromActor(this);
-        // if(  Principal.toText(caller) !=  Principal.toText(canisterId) and Principal.toText(caller) != ownerCanisterId) throw Error.reject("Unauthorized access."); 
-        let treasuryNeuronAccountId = await getTreasuryNeuronAccountId(memo);
-        let res = await ledger.transfer({
-          memo = memo;
-          from_subaccount = null;
-          to = treasuryNeuronAccountId;
-          amount = { e8s = amount };
-          fee = { e8s = txFee };
-          created_at_time = ?{ timestamp_nanos = Nat64.fromNat(Int.abs(Time.now())) };
-        });
-        switch(res){
-            case (#Err(_)) { return throw Error.reject("Transfer NNS neuron failed")};
-            case (#Ok(blockIndex)) {
-                let neuronSubaccountId = Account.neuronSubaccount(Principal.fromActor(this), memo);
-                let response = await manageNeuron({ 
-                    id = null; 
-                    command = ?#ClaimOrRefresh({ by = ?#MemoAndController({controller = ?Principal.fromActor(this); memo = memo; }); });
-                    neuron_id_or_subaccount = ?#Subaccount (neuronSubaccountId);
-                });
-                return response;
-            };
-        };
-    };
-
     // Return the cycles received up to the capacity allowed
     public func wallet_receive() : async { accepted: Nat64 } {
         let amount = Cycles.available();
@@ -300,49 +429,27 @@ shared(msg) actor class Treasury (principal : Principal) = this {
     };
 
     public query func transformFn({ response : IC.http_response; context: Blob }) : async IC.http_response {
-      let transformed : IC.http_response = {
-          status = response.status;
-          body = response.body;
-          headers = [];
-      };
-      transformed;
-  };
+        let transformed : IC.http_response = {
+            status = response.status;
+            body = response.body;
+            headers = [];
+        };
+        transformed;
+    };
 
     system func preupgrade() { 
         usersStakesArray := Iter.toArray(usersStakesMap.entries()); 
         collateralArray := Iter.toArray(collateralMap.entries());
         balancesArray := Iter.toArray(balancesMap.entries());
+        neuronDataArray := Iter.toArray(neuronDataMap.entries());
+        memoToNeuronIdArray := Iter.toArray(memoToNeuronIdMap.entries());
     };
 
     system func postupgrade() { 
         usersStakesArray:= []; 
         collateralArray := [];
         balancesArray := [];
+        neuronDataArray := [];
+        memoToNeuronIdArray := [];
     };    
-
-    //3056301006
-    //072a8648ce
-    //3d02010605
-    //2b8104000a
-    //034200040d
-    //aaf4f84db5
-    //38c64bd542
-    //a738e4db78
-    //b9a206e9d8
-    //2cd4fc5cba
-    //d3c392a264
-
-    //040daaf4f8
-    //4db538c64b
-    //d542a738e4
-    //db78b9a206
-    //e9d82cd4fc
-    //5cbad3c392
-    //a264aa0b10
-    //84e1dc567d
-    //4187472d4e
-    //73eed6393e
-    //cad3a2107c
-    //604080967e
-    //698953a259
 };
