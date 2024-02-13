@@ -208,7 +208,7 @@ shared(msg) actor class Treasury (principal : Principal) = this {
 
     public shared({caller}) func createOrIncreaseNeuron(amount: Nat64, memo: ?Nat64) : async IC.http_response  {
         let canisterId =  Principal.fromActor(this);
-        // if(Principal.toText(caller) != Principal.toText(canisterId) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
+        if(Principal.toText(caller) != Principal.toText(canisterId) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         let {setTimer} = Timer;
         switch(cachedRequest){
             case(?cachedRequest_){ 
@@ -261,7 +261,7 @@ shared(msg) actor class Treasury (principal : Principal) = this {
 
     public shared({caller}) func manageNeuron( args: Governance.ManageNeuron): async IC.http_response {
         let canisterId =  Principal.fromActor(this);
-        // if(Principal.toText(caller) != Principal.toText(canisterId) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
+        if(Principal.toText(caller) != Principal.toText(canisterId) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         let ?neuronId = args.id else Debug.trap("No neuronId in request");
         let {setTimer} = Timer;
         switch(cachedRequest){
@@ -334,37 +334,69 @@ shared(msg) actor class Treasury (principal : Principal) = this {
                             let timerId = setTimer(#seconds(10), func (): async () {let result = await getFullNeuron(nueronId.id)});
                         };
                         case(#Spawn(response)){
-                            ///TODO: handle response
+                            let ?created_neuron_id = response.created_neuron_id else Debug.trap("No new created_neuron_id in response");
+                            cachedRequest := null;
+                            let timerId_0 = setTimer(#seconds(10), func (): async () {let result = await getFullNeuron(created_neuron_id.id)});
+                            let ?neuronId = cachedRequest_.neuronId else Debug.trap("No neuronId in request");
+                            let timerId_1 = setTimer(#seconds(70), func (): async () {let result = await getFullNeuron(neuronId)});
                         };
                         case(#Split(response)){
-                            ///TODO: handle response
+                            let ?created_neuron_id = response.created_neuron_id else Debug.trap("No new created_neuron_id in response");
+                            cachedRequest := null;
+                            let timerId_0 = setTimer(#seconds(10), func (): async () {let result = await getFullNeuron(created_neuron_id.id)});
+                            let ?neuronId = cachedRequest_.neuronId else Debug.trap("No neuronId in request");
+                            let timerId_1 = setTimer(#seconds(70), func (): async () {let result = await getFullNeuron(neuronId)});
                         };
                         case(#Follow(response)){
-                            ///TODO: handle response
+                            let ?neuronId = cachedRequest_.neuronId else Debug.trap("No neuronId in request");
+                            cachedRequest := null;
+                            let timerId = setTimer(#seconds(10), func (): async () {let result = await getFullNeuron(neuronId)});
                         };
                         case(#Configure(response)){
-                            ///TODO: handle response
+                            let ?neuronId = cachedRequest_.neuronId else Debug.trap("No neuronId in request");
+                            cachedRequest := null;
+                            let timerId = setTimer(#seconds(10), func (): async () {let result = await getFullNeuron(neuronId)});
                         };
                         case(#Disburse(response)){
-                            ///TODO: handle response
+                            let ?neuronId = cachedRequest_.neuronId else Debug.trap("No neuronId in request");
+                            cachedRequest := null;
+                            let timerId = setTimer(#seconds(10), func (): async () {let result = await getFullNeuron(neuronId)});
                         };
                         case(#RegisterVote(response)){
-                            ///TODO: handle response
+                            let ?neuronId = cachedRequest_.neuronId else Debug.trap("No neuronId in request");
+                            cachedRequest := null;
+                            let timerId = setTimer(#seconds(10), func (): async () {let result = await getFullNeuron(neuronId)});
                         };
                         case(#Merge(response)){
-                            /// TODO: handle response
+                            let ?target_neuron = response.target_neuron else Debug.trap("No target_neuron in response");
+                            let ?source_neuron = response.source_neuron else Debug.trap("No source_neuron in response");
+                            let ?targetNeuronId = target_neuron.id else Debug.trap("No targetNeuronId in response");
+                            let ?sourceNeuronId = source_neuron.id else Debug.trap("No sourceNeuronId in response");
+                            neuronDataMap.put(Nat64.toNat(targetNeuronId.id), target_neuron);
+                            neuronDataMap.put(Nat64.toNat(sourceNeuronId.id), source_neuron);
+                            cachedRequest := null;
                         };
                         case(#DisburseToNeuron(response)){
-                            ///TODO: handle response
+                            let ?created_neuron_id = response.created_neuron_id else Debug.trap("No new created_neuron_id in response");
+                            cachedRequest := null;
+                            let timerId_0 = setTimer(#seconds(10), func (): async () {let result = await getFullNeuron(created_neuron_id.id)});
+                            let ?neuronId = cachedRequest_.neuronId else Debug.trap("No neuronId in request");
+                            let timerId_1 = setTimer(#seconds(70), func (): async () {let result = await getFullNeuron(neuronId)});
                         };
                         case(#MakeProposal(response)){
-                            ///TODO: handle response
+                            let ?neuronId = cachedRequest_.neuronId else Debug.trap("No neuronId in request");
+                            cachedRequest := null;
+                            let timerId = setTimer(#seconds(10), func (): async () {let result = await getFullNeuron(neuronId)});
                         };
                         case(#StakeMaturity(response)){
-                            ///TODO: handle response
+                            let ?neuronId = cachedRequest_.neuronId else Debug.trap("No neuronId in request");
+                            cachedRequest := null;
+                            let timerId = setTimer(#seconds(10), func (): async () {let result = await getFullNeuron(neuronId)});
                         };
                         case(#MergeMaturity(response)){
-                            ///TODO: handle response
+                            let ?neuronId = cachedRequest_.neuronId else Debug.trap("No neuronId in request");
+                            cachedRequest := null;
+                            let timerId = setTimer(#seconds(10), func (): async () {let result = await getFullNeuron(neuronId)});
                         };
                         case(#Error(e)){
                             ///TODO: handle error
