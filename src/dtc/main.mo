@@ -483,7 +483,7 @@ shared actor class User() = this {
 
     let {recurringTimer; cancelTimer; setTimer} = Timer;
 
-    public shared({caller}) func createProposal(action: MainTypes.ProposalActions, payload: MainTypes.ProposalPayload): 
+    public shared({caller}) func createProposal(action: MainTypes.ProposalActions): 
     async Result.Result<(MainTypes.Proposals),MainTypes.Error>{
         let callerProfile = userProfilesMap.get(caller);
         if(callerProfile == null) return #err(#NotAuthorizedToCreateProposals);
@@ -494,7 +494,7 @@ shared actor class User() = this {
         let proposer = Principal.toText(caller); let votes = [(proposer, {adopt = true})];
         let timeInitiated = Time.now(); let timeExecuted = null;
         var voteTally = {yay = Nat64.fromNat(0); nay = Nat64.fromNat(0); total = Nat64.fromNat(0);};
-        let proposal = {votes; action; proposer; timeInitiated; timeExecuted; payload; voteTally;};
+        let proposal = {votes; action; proposer; timeInitiated; timeExecuted; voteTally;};
         let votingResults = GovernanceHelperMethods.tallyVotes({treasuryUsersStakesArray; proposal;});
         proposalsMap.put(proposalIndex, {proposal with voteTally = votingResults} );
         let timerId = setTimer(#seconds(24 * 60 * 60 * 3), finalizeProposalVotingPeriod);
@@ -556,41 +556,28 @@ shared actor class User() = this {
     };
 
     private func executeProposal(proposal: MainTypes.Proposal) : async () {
-        let {action; payload; proposer;} = proposal;
-        let {amount; principal} = payload;
+        let {action; proposer;} = proposal;
         switch(action){
-            case(#AddAdmin){
-                switch(payload.principal){
-                    case null { return };
-                    case(? principal){
-                        let updatedDaoMetaData = CanisterManagementMethods.addAdmin(Principal.fromText(principal), daoMetaData_v2);
-                        daoMetaData_v2 := updatedDaoMetaData;
-                    };
-                };            };
-            case(#RemoveAdmin){
-                switch(payload.principal){
-                    case null { return };
-                    case(? principal){
-                        let updatedDaoMetaData = CanisterManagementMethods.removeAdmin(Principal.fromText(principal), daoMetaData_v2);
-                        daoMetaData_v2 := updatedDaoMetaData;
-                    };
-                };
+            case(#AddAdmin({principal})){
+                let updatedDaoMetaData = CanisterManagementMethods.addAdmin(Principal.fromText(principal), daoMetaData_v2);
+                daoMetaData_v2 := updatedDaoMetaData;               
+            };
+            case(#RemoveAdmin({principal})){
+                let updatedDaoMetaData = CanisterManagementMethods.removeAdmin(Principal.fromText(principal), daoMetaData_v2);
+                daoMetaData_v2 := updatedDaoMetaData;
             };
             //still need to delete the public upgradeApp method once the frontend has been updated
             case (#UpgradeApp){ ignore upgradeApp_(); };
-            case(#DissolveIcpNeuron){
-                //call function to dissolve the Treasuries Neuron
+            case (#CreateOrIncreaseNeuron(args)){
+                //call functions to transfer ICP from the proposer's canister to the treasury canister
+                let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
+                let response = await treasuryCanister.createOrIncreaseNeuron(args);
             };
-            case(#FollowIcpNeuron){
-                //call function to follow ICP neuron
+            case(#ManageNeuron(args)){
+                let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
+                let response = await treasuryCanister.manageNeuron(args);
             };
-            case(#SpawnIcpNeuron){
-                //call function to spawn ICP neuron
-            };
-            case(#DispurseIcpNeuron){
-                //call function to dispurse ICP neuron
-            };
-            case(#PurchaseCycles){
+            case(#PurchaseCycles({amount})){
                 //call function to purchase more cycles
             };
         };

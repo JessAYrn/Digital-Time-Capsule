@@ -7,6 +7,7 @@ import TreasuryTypes "../Treasury/types";
 import NotificationTypes "../Notifications/types";
 import IC "../IC/types";
 import Ledger "../../NNS/Ledger";
+import Governance "../../NNS/Governance";
 
 
 module{
@@ -146,11 +147,6 @@ module{
     public type Proposals = [(Nat,Proposal)];
 
     public type ProposalsMap = HashMap.HashMap<Nat, Proposal>;
-
-    public type ProposalPayload = {
-        principal : ?Text;
-        amount : ?Nat64; 
-    };
     
     public type VotingResults = {
         yay: Nat64;
@@ -162,21 +158,18 @@ module{
         votes: [(Text, Vote)];
         voteTally: VotingResults;
         action: ProposalActions;
-        payload: ProposalPayload;
         proposer: Text;
         timeInitiated: Int;
         timeExecuted: ?Int;
     };
 
     public type ProposalActions = {
-        #AddAdmin;
-        #RemoveAdmin;
+        #AddAdmin: {principal: Text};
+        #RemoveAdmin: {principal: Text};
         #UpgradeApp;
-        #DissolveIcpNeuron;
-        #FollowIcpNeuron;
-        #SpawnIcpNeuron;
-        #DispurseIcpNeuron;
-        #PurchaseCycles;
+        #CreateOrIncreaseNeuron: {amount: Nat64; memo: ?Nat64};
+        #ManageNeuron: Governance.ManageNeuron;
+        #PurchaseCycles: {amount : {icp: {e8s: Nat64};};};
     };
 
     public type Vote = { adopt: Bool };

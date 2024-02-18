@@ -27,7 +27,21 @@ module{
         #UnexpectedResponse : {response : Governance.Command_1};
     };
 
-    public type UserStake = {icp : {e8s : Nat64}};
+    public type StakeAmount = {
+        #stake_e8s : Int;
+        #maturity_e8s : Int;
+        #voting_power : Int;
+        #staked_maturity_e8s : Int;
+    };
+
+    public type NeuronStakeInfo = {
+        stake_e8s : Nat64;
+        maturity_e8s : Nat64;
+        voting_power : Nat64;
+        staked_maturity_e8s : Nat64;
+    };
+
+    public type UserStake = {icp : [(NeuronIdAsNat, NeuronStakeInfo)]};
 
     public type UserStakesArray = [(Principal, UserStake)];
 
@@ -49,9 +63,11 @@ module{
 
     public type NeuronIdAsNat = Nat;
 
-    public type NeuronInfoArray = [(NeuronIdAsNat, Governance.Neuron)];
+    public type NeuronData = { neuron: Governance.Neuron; neuronInfo: ?Governance.NeuronInfo};
 
-    public type NeuronInfoMap = HashMap.HashMap<NeuronIdAsNat, Governance.Neuron>;
+    public type NeuronsDataArray = [(NeuronIdAsNat, NeuronData)];
+
+    public type NeuronsDataMap = HashMap.HashMap<NeuronIdAsNat, NeuronData>;
 
     public type MemoToNeuronIdMap = HashMap.HashMap<Memo, NeuronIdAsNat>;
 
@@ -72,6 +88,7 @@ module{
     public type ExpectedRequestResponses = {
         #CreateOrIncreaseNeuronResponse;
         #GetFullNeuronResponse;
+        #GetNeuronInfoResponse;
         #Spawn;
         #Split;
         #Follow;
@@ -89,6 +106,7 @@ module{
     public type RequestResponses = {
         #CreateOrIncreaseNeuronResponse : Governance.ClaimOrRefreshResponse;
         #GetFullNeuronResponse : Governance.Result_2;
+        #GetNeuronInfoResponse : Governance.Result_5;
         #Error : Governance.GovernanceError;
         #Spawn : Governance.SpawnResponse;
         #Split : Governance.SpawnResponse;

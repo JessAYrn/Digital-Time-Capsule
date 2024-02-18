@@ -10,6 +10,8 @@ import Float "mo:base/Float";
 import Nat64 "mo:base/Nat64";
 import Int64 "mo:base/Int64";
 import NnsCyclesMinting "../../NNS/NnsCyclesMinting";
+import Nat "mo:base/Nat";
+import Hash "mo:base/Hash";
 
 
 module{    
@@ -29,18 +31,18 @@ module{
             Text.equal,
             Text.hash
         );
-
-        let arrayLength = treasuryUsersStakesArray.size();
-        var index = 0;
-        while(index < arrayLength){
-            let (principal, {icp}) = treasuryUsersStakesArray[index];
-            let { e8s = votingPower } = icp;
-            let vote = proposalVotesHashMap.get(Principal.toText(principal));
-            switch(vote){
-                case null {};
-                case(? v){ let {adopt} = v; if(adopt) yay += votingPower else nay += votingPower; };
+        let usersStakesIter = Iter.fromArray<(Principal, TreasuryTypes.UserStake)>(treasuryUsersStakesArray);
+        for(userStakes in usersStakesIter){
+            let (principal, {icp}) = userStakes;
+            let icpNeuronsStakesIter = Iter.fromArray<(TreasuryTypes.NeuronIdAsNat, TreasuryTypes.NeuronStakeInfo)>(icp);
+            for(icpNeuronStake in icpNeuronsStakesIter){
+                let {voting_power} = icpNeuronStake.1;
+                let vote = proposalVotesHashMap.get(Principal.toText(principal));
+                switch(vote){
+                    case null {};
+                    case(? v){ let {adopt} = v; if(adopt) yay += voting_power else nay += voting_power; };
+                };
             };
-            index += 1;
         };
         let total = yay + nay;
         return {yay; nay; total};

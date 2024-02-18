@@ -103,13 +103,13 @@ module {
         return {response; requestId; ingress_expiry;};
     };
 
-    public func getFullNeuron(args: TreasuryTypes.NeuronId, transformFn: TransformFnSignature):
+    public func getNeuronData(args: TreasuryTypes.NeuronId, transformFn: TransformFnSignature, methodName: {#GetFullNeuron; #GetNeuronInfo}):
     async {response: IC.http_response; requestId: Blob; ingress_expiry: Nat64;}{
         let {public_key} = await EcdsaHelperMethods.getPublicKey(null);
         let {principalAsBlob} = Account.getSelfAuthenticatingPrincipal(public_key);
         let sender = Principal.fromBlob(principalAsBlob);
         let canister_id: Principal = Principal.fromText(Governance.CANISTER_ID);
-        let method_name: Text = "get_full_neuron";
+        let method_name: Text = switch(methodName){ case(#GetFullNeuron){ "get_full_neuron"}; case(#GetNeuronInfo){"get_neuron_info"} };
         let request = EcdsaHelperMethods.prepareCanisterCallViaEcdsa({sender; public_key; canister_id; args = to_candid(args); method_name;});
         let {envelopeCborEncoded} = await EcdsaHelperMethods.getSignedEnvelope(request);
         let headers = [ {name = "content-type"; value= "application/cbor"}];    
@@ -163,26 +163,34 @@ module {
                     case(?replyEncoded) {
                         let reply_1: ?Governance.ManageNeuronResponse = from_candid(replyEncoded);
                         let reply_2: ?Governance.Result_2 = from_candid(replyEncoded);
-                        switch(reply_1){
-                            case(?reply_1_) { 
-                                let ?command = reply_1_.command else { return Debug.trap("Response candid decoding took unexpected form") };
-                                switch(expectedResponseType){
-                                    case(#CreateOrIncreaseNeuronResponse){
-                                        switch(command){
-                                            case(#ClaimOrRefresh(response)) { return #CreateOrIncreaseNeuronResponse(response) };
-                                            case(_) { return Debug.trap("Unexpected command type") };
+                        let resply_3: ?Governance.Result_5 = from_candid(replyEncoded);
+                        if(reply_1 != null){
+                            switch(reply_1){
+                                case(null) { Debug.trap("Response candid decoding took unexpected form") };
+                                case(?reply_1_) { 
+                                    let ?command = reply_1_.command else { return Debug.trap("Response candid decoding took unexpected form") };
+                                    switch(expectedResponseType){
+                                        case(#CreateOrIncreaseNeuronResponse){
+                                            switch(command){
+                                                case(#ClaimOrRefresh(response)) { return #CreateOrIncreaseNeuronResponse(response) };
+                                                case(_) { return Debug.trap("Unexpected command type") };
+                                            };
                                         };
+                                        case(_){ return command};
                                     };
-                                    case(_){ return command};
                                 };
                             };
-                            case(null) {
-                                switch(reply_2){
-                                    case(?reply_2_) { return #GetFullNeuronResponse(reply_2_) };
-                                    case(null) { return Debug.trap("Response candid decoding took unexpected form") };
-                                };
+                        } else if(reply_2 != null){
+                            switch(reply_2){
+                                case(null) { Debug.trap("Response candid decoding took unexpected form") };
+                                case(?reply_2_) { return #GetFullNeuronResponse(reply_2_) };
                             };
-                        };
+                        } else if(resply_3 != null){
+                            switch(resply_3){
+                                case(null) { Debug.trap("Response candid decoding took unexpected form") };
+                                case(?reply_3_) { return #GetNeuronInfoResponse(reply_3_) };
+                            };
+                        } else { Debug.trap("Response candid decoding took unexpected form") };
                     };
                 };
             };
