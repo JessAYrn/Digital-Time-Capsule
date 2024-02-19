@@ -38,7 +38,7 @@ import Decoder "Serializers/CBOR/Decoder";
 import NeuronManager "Modules/HTTPRequests/NeuronManager";
 
 
-shared(msg) actor class Treasury (principal : Principal) = this {
+shared actor class Treasury (principal : Principal) = this {
 
     private stable let ownerCanisterId : Text = Principal.toText(principal);
 
@@ -106,6 +106,8 @@ shared(msg) actor class Treasury (principal : Principal) = this {
 
     private stable var neuronMemo : Nat64 = 0;
 
+    let {recurringTimer; setTimer} = Timer;
+
     public query({caller}) func getTreasuryCollateralArray(): async TreasuryTypes.TreasuryCollateralArray {
         if( Principal.toText(caller) != ownerCanisterId) { throw Error.reject("Unauthorized access."); };
         return Iter.toArray(collateralMap.entries());
@@ -134,10 +136,10 @@ shared(msg) actor class Treasury (principal : Principal) = this {
         };
     };  
 
-    public shared({caller}) func updateUserTreasuryStake({
+    public shared({caller}) func updateUserTreasuryStakeData({
         userPrincipal: Principal; 
         currency : TreasuryTypes.SupportedCurrencies;
-        amount: TreasuryTypes.StakeAmount;
+        newAmount: TreasuryTypes.StakeAmount;
         neuronId: Nat64;
     }): async Result.Result<TreasuryTypes.UserStakesArray, TreasuryTypes.Error>{
         if(Principal.toText(caller) != ownerCanisterId) { throw Error.reject("Unauthorized access."); };
@@ -157,22 +159,22 @@ shared(msg) actor class Treasury (principal : Principal) = this {
                     case null { {stake_e8s : Nat64 = 0; maturity_e8s : Nat64 = 0; voting_power : Nat64 = 0; staked_maturity_e8s: Nat64 = 0} };
                     case(?icpNeuronStake_){ icpNeuronStake_ };
                 };
-                switch(amount){
-                    case(#stake_e8s(delta)){
-                        if(Nat64.toNat(icpNeuronStake.stake_e8s) + delta < 0){ throw Error.reject("Insufficient funds.")};
-                        icpNeuronStake := {icpNeuronStake with stake_e8s = Nat64.fromNat(Int.abs(Nat64.toNat(icpNeuronStake.stake_e8s) + delta))};
+                switch(newAmount){
+                    case(#stake_e8s(amount)){
+                        if(amount < 0){ throw Error.reject("Insufficient funds.")};
+                        icpNeuronStake := {icpNeuronStake with stake_e8s = amount};
                     };
-                    case(#maturity_e8s(delta)){
-                        if(Nat64.toNat(icpNeuronStake.maturity_e8s) + delta < 0){ throw Error.reject("Insufficient funds.")};
-                        icpNeuronStake := {icpNeuronStake with maturity_e8s = Nat64.fromNat(Int.abs(Nat64.toNat(icpNeuronStake.maturity_e8s) + delta))};
+                    case(#maturity_e8s(amount)){
+                        if(amount < 0){ throw Error.reject("Insufficient funds.")};
+                        icpNeuronStake := {icpNeuronStake with maturity_e8s = amount};
                     };
-                    case(#voting_power(delta)){
-                        if(Nat64.toNat(icpNeuronStake.voting_power) + delta < 0){ throw Error.reject("Insufficient funds.")};
-                        icpNeuronStake := {icpNeuronStake with voting_power = Nat64.fromNat(Int.abs(Nat64.toNat(icpNeuronStake.voting_power) + delta))};
+                    case(#voting_power(amount)){
+                        if(amount < 0){ throw Error.reject("Insufficient funds.")};
+                        icpNeuronStake := {icpNeuronStake with voting_power = amount};
                     };
-                    case(#staked_maturity_e8s(delta)){
-                        if(Nat64.toNat(icpNeuronStake.staked_maturity_e8s) + delta < 0){ throw Error.reject("Insufficient funds.")};
-                        icpNeuronStake := {icpNeuronStake with staked_maturity_e8s = Nat64.fromNat(Int.abs(Nat64.toNat(icpNeuronStake.staked_maturity_e8s) + delta))};
+                    case(#staked_maturity_e8s(amount)){
+                        if(amount < 0){ throw Error.reject("Insufficient funds.")};
+                        icpNeuronStake := {icpNeuronStake with staked_maturity_e8s = amount};
                     };
                 };
                 icpNeuronsStakesMap.put(Nat64.toNat(neuronId), icpNeuronStake);
@@ -181,6 +183,51 @@ shared(msg) actor class Treasury (principal : Principal) = this {
             };
             case(_){ throw Error.reject("Currency not supported.");};
         };
+    };
+
+    private func updateNeuronStakeInfos( currency: {#Icp}, neuronId: Nat64): () {
+        let newUsersStakesMap = HashMap.fromIter<Principal, TreasuryTypes.UserStake>(
+            Iter.fromArray([]), 
+            Iter.size(Iter.fromArray([])), 
+            Principal.equal,
+            Principal.hash
+        );
+        for(userStakes in usersStakesMap.entries()){
+            switch(currency){
+                case(#Icp){
+                    let ?neuronData = neuronDataMap.get(Nat64.toNat(neuronId)) else { Debug.trap("No neuronData for neuronId") };
+                    let ?neuronInfo = neuronData.neuronInfo else { Debug.trap("No neuronInfo for neuronId") };
+                    let {neuron} = neuronData;
+                    let {stake_e8s = totalNeuronStakeE8s; voting_power = totalNeuronVotingPowerE8s; } = neuronInfo;
+                    let {staked_maturity_e8s_equivalent; maturity_e8s_equivalent = totalNeuronMaturityE8sEquivalent} = neuron;
+                    let totalNeuronStakedMaturityE8sEquivalent: Nat64 = switch(staked_maturity_e8s_equivalent){
+                        case null {0}; 
+                        case(?staked_maturity_e8s_equivalent_){staked_maturity_e8s_equivalent_} 
+                    };
+                    let (userPrincipal, stakes) = userStakes;
+                    let {icp} = stakes;
+                    let userIcpNeuronsStakesIter = Iter.fromArray<(TreasuryTypes.NeuronIdAsNat, TreasuryTypes.NeuronStakeInfo)>(icp);
+                    let userIcpNeuronsStakesMap = HashMap.fromIter<TreasuryTypes.NeuronIdAsNat, TreasuryTypes.NeuronStakeInfo>(
+                        userIcpNeuronsStakesIter, 
+                        Iter.size(userIcpNeuronsStakesIter), 
+                        Nat.equal,
+                        Hash.hash
+                    );
+                    switch(userIcpNeuronsStakesMap.get(Nat64.toNat(neuronId))){
+                        case(null){};
+                        case(?userIcpNeuronStake){
+                            let {stake_e8s; maturity_e8s; staked_maturity_e8s} = userIcpNeuronStake;
+                            let userTotalValueLocked = stake_e8s + maturity_e8s + staked_maturity_e8s;
+                            let totalValueLockedInNeuron = totalNeuronStakeE8s + totalNeuronMaturityE8sEquivalent + totalNeuronStakedMaturityE8sEquivalent;
+                            let userVotingPower = (userTotalValueLocked * totalNeuronVotingPowerE8s) / totalValueLockedInNeuron;
+                            userIcpNeuronsStakesMap.put(Nat64.toNat(neuronId), {userIcpNeuronStake with voting_power = userVotingPower});
+                            newUsersStakesMap.put(userPrincipal, {stakes with icp = Iter.toArray(userIcpNeuronsStakesMap.entries())});
+                        };
+                    };
+                };
+            };
+        };
+        usersStakesMap := newUsersStakesMap;
     };
 
     public shared({caller}) func updateUserTreasruyCollateral({
@@ -261,7 +308,6 @@ shared(msg) actor class Treasury (principal : Principal) = this {
     public shared({caller}) func createOrIncreaseNeuron({amount: Nat64; memo: ?Nat64}) : async IC.http_response  {
         let canisterId =  Principal.fromActor(this);
         if(Principal.toText(caller) != Principal.toText(canisterId) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
-        let {setTimer} = Timer;
         switch(cachedRequest){
             case(?cachedRequest_){ 
                 let {expiry} = cachedRequest_;
@@ -289,7 +335,6 @@ shared(msg) actor class Treasury (principal : Principal) = this {
 
     private func getNeuronData(args: TreasuryTypes.NeuronId, methodName: {#GetFullNeuron; #GetNeuronInfo}) : async IC.http_response {
         let canisterId =  Principal.fromActor(this);
-        let {setTimer} = Timer;
         switch(cachedRequest){
             case(?cachedRequest_){ 
                 let {expiry; requestId; expectedResponseType} = cachedRequest_;
@@ -319,7 +364,6 @@ shared(msg) actor class Treasury (principal : Principal) = this {
         let canisterId =  Principal.fromActor(this);
         if(Principal.toText(caller) != Principal.toText(canisterId) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         let ?neuronId = args.id else Debug.trap("No neuronId in request");
-        let {setTimer} = Timer;
         switch(cachedRequest){
             case(?cachedRequest_){ 
                 let {expiry; requestId; expectedResponseType} = cachedRequest_;
@@ -331,7 +375,6 @@ shared(msg) actor class Treasury (principal : Principal) = this {
                 let {public_key} = await EcdsaHelperMethods.getPublicKey(null);
                 let {principalAsBlob} = Account.getSelfAuthenticatingPrincipal(public_key);
                 let selfAuthPrincipal = Principal.fromBlob(principalAsBlob);
-                let {setTimer} = Timer;
                 let ?command = args.command else Debug.trap("No command in request");
                 let expectedResponseType = switch(command){
                     case(#Spawn(_)) { #Spawn };
@@ -367,7 +410,6 @@ shared(msg) actor class Treasury (principal : Principal) = this {
 
     private func readRequestResponse(numOfFailedAttempts: Nat): async TreasuryTypes.RequestResponses  {
         if(numOfFailedAttempts == 3){cachedRequest := null; Debug.trap("Failed to read request response after 3 attempts.")};
-        let {setTimer} = Timer;
         switch(cachedRequest){
             case null { 
                 let timerId = setTimer(#seconds(10), func (): async () {let result = await readRequestResponse(numOfFailedAttempts + 1)});
@@ -479,6 +521,7 @@ shared(msg) actor class Treasury (principal : Principal) = this {
                                         case null { Debug.trap("No neuron in neuronDataMap"); };
                                         case(?neuronData){
                                             neuronDataMap.put(Nat64.toNat(neuronId), {neuronData with neuronInfo = ?neuronInfo});
+                                            updateNeuronStakeInfos(#Icp, neuronId);
                                         };
                                     };
                                     cachedRequest := null;
@@ -542,6 +585,19 @@ shared(msg) actor class Treasury (principal : Principal) = this {
         transformed;
     };
 
+    private func refreshNeuronsData() : async () {
+        let interval =  12 * 60;
+        var index = 0;
+        for(neuronData in neuronDataMap.entries()){
+            let (neuronId, {neuron; neuronInfo}) = neuronData;
+            let timerId = setTimer(
+                #seconds(interval * index), 
+                func (): async () {let result = await getNeuronData(Nat64.fromNat(neuronId), #GetFullNeuron)}
+            );
+            index += 1;
+        };
+    };
+
     system func preupgrade() { 
         usersStakesArray := Iter.toArray(usersStakesMap.entries()); 
         collateralArray := Iter.toArray(collateralMap.entries());
@@ -556,5 +612,7 @@ shared(msg) actor class Treasury (principal : Principal) = this {
         balancesArray := [];
         neuronDataArray := [];
         memoToNeuronIdArray := [];
+        
+        let timerId = recurringTimer(#seconds(7 * 24 * 60 * 60), refreshNeuronsData);
     };    
 };

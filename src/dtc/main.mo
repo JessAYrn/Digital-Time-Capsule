@@ -583,10 +583,6 @@ shared actor class User() = this {
         };
     };
 
-    let timerId_daily = recurringTimer(#seconds (24 * 60 * 60), heartBeat_unshared);
-    let timerId_hourly = recurringTimer(#seconds (60 * 60), heartBeat_hourly);
-    let timerId_everyThirtySeconds = recurringTimer(#seconds (30), updateUsersTxHistory);
-
     system func preupgrade() { 
         userProfilesArray := Iter.toArray(userProfilesMap.entries()); 
         proposalsArray := Iter.toArray(proposalsMap.entries());
@@ -595,5 +591,9 @@ shared actor class User() = this {
     system func postupgrade() { 
         userProfilesArray:= []; 
         proposalsArray := [];
+        
+        let timerId_daily = recurringTimer(#seconds (24 * 60 * 60), heartBeat_unshared);
+        let timerId_hourly = recurringTimer(#seconds (60 * 60), heartBeat_hourly);
+        let timerId_everyThirtySeconds = recurringTimer(#seconds (30), updateUsersTxHistory);
     };
 }

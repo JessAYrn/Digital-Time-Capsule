@@ -28,10 +28,10 @@ module{
     };
 
     public type StakeAmount = {
-        #stake_e8s : Int;
-        #maturity_e8s : Int;
-        #voting_power : Int;
-        #staked_maturity_e8s : Int;
+        #stake_e8s : Nat64;
+        #maturity_e8s : Nat64;
+        #voting_power : Nat64;
+        #staked_maturity_e8s : Nat64;
     };
 
     public type NeuronStakeInfo = {
