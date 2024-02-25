@@ -88,8 +88,9 @@ export const loadAccountData = async (actorState, accountDispatch, accountTypes)
 export const loadJournalData = async (actorState, journalDispatch, types) => {
     let journal = await actorState.backendActor.readJournal();
     journal = journal.ok;
-    let { userJournalData } = journal;
+    let { userJournalData, principal } = journal;
     let [journalEntries, journalBio] = userJournalData;
+    console.log(principal);
     const filesMetaData = journalBio.photos.map(fileData => {
         return { ...fileData, lastModified : parseInt(fileData.lastModified), isLoading: true };
     });
@@ -192,7 +193,6 @@ export const loadTreasuryData = async (actorState, dispatch, types) => {
     treasuryBalances = mapBalancesDataFromApiToFrontend(treasuryBalances)
     treasuryData = treasuryData.ok;
     treasuryData = mapBackendTreasuryDataToFrontEndObj(treasuryData);
-    console.log(treasuryBalances)
     dispatch({
         actionType: types.SET_TREASURY_DATA,
         payload: treasuryData

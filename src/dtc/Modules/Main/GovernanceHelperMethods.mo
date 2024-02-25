@@ -34,7 +34,7 @@ module{
         let usersStakesIter = Iter.fromArray<(Principal, TreasuryTypes.UserStake)>(treasuryUsersStakesArray);
         for(userStakes in usersStakesIter){
             let (principal, {icp}) = userStakes;
-            let icpNeuronsStakesIter = Iter.fromArray<(TreasuryTypes.NeuronIdAsNat, TreasuryTypes.NeuronStakeInfo)>(icp);
+            let icpNeuronsStakesIter = Iter.fromArray<(TreasuryTypes.NeuronIdAsText, TreasuryTypes.NeuronStakeInfo)>(icp);
             for(icpNeuronStake in icpNeuronsStakesIter){
                 let {voting_power} = icpNeuronStake.1;
                 let vote = proposalVotesHashMap.get(Principal.toText(principal));

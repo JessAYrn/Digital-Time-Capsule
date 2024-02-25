@@ -19,19 +19,20 @@ module{
 
     private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
 
-    private let Gas: Nat64 = 10000;
-
     public func transferICP(callerId: Principal, profilesMap: MainTypes.UserProfilesMap ,amount: Nat64, canisterAccountId: Account.AccountIdentifier) : 
-    async Result.Result<(), JournalTypes.Error> {
+    async Result.Result<({blockIndex: Nat64}), JournalTypes.Error> {
 
         let userProfile = profilesMap.get(callerId);
         switch(userProfile) {
             case null{ #err(#NotFound) }; 
             case (? profile){
                 let userJournal : Journal.Journal = actor(Principal.toText(profile.canisterId));
-                let icpTransferStatus = await userJournal.transferICP(amount, canisterAccountId);
-                if(icpTransferStatus == true){ #ok(()); } 
-                else { #err(#TxFailed); }
+                try{
+                    let {blockIndex} = await userJournal.transferICP(amount, canisterAccountId);
+                    return #ok({blockIndex});
+                } catch (error) {
+                    return #err(#TxFailed);
+                };
             };
         };
     };

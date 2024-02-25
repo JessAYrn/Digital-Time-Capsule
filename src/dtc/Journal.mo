@@ -360,7 +360,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         return Iter.toArray(balancesMap.entries());
     };
 
-    public shared({caller}) func transferICP(amount: Nat64, recipientAccountId: Account.AccountIdentifier) : async Bool {
+    public shared({caller}) func transferICP(amount: Nat64, recipientAccountId: Account.AccountIdentifier) : async {blockIndex: Nat64} {
         if( Principal.toText(caller) != mainCanisterId_) { throw Error.reject("Unauthorized access."); };
         let res = await ledger.transfer({
           memo = Nat64.fromNat(10);
@@ -372,19 +372,16 @@ shared(msg) actor class Journal (principal : Principal) = this {
         });
 
         switch (res) {
-          case (#Ok(blockIndex)) {
-
-            Debug.print("Paid reward to " # debug_show Principal.fromActor(this) # " in block " # debug_show blockIndex);
-            return true;
-          };
-          case (#Err(#InsufficientFunds { balance })) {
-            throw Error.reject("Top me up! The balance is only " # debug_show balance # " e8s");
-            return false;
-          };
-          case (#Err(other)) {
-            throw Error.reject("Unexpected error: " # debug_show other);
-            return false;
-          };
+            case (#Ok(blockIndex)) {
+                Debug.print("Paid reward to " # debug_show Principal.fromActor(this) # " in block " # debug_show blockIndex);
+                return {blockIndex};
+            };
+            case (#Err(#InsufficientFunds { balance })) {
+                throw Error.reject("Top me up! The balance is only " # debug_show balance # " e8s");    
+            };
+            case (#Err(other)) {
+                throw Error.reject("Unexpected error: " # debug_show other);
+            };
         };
     };
 

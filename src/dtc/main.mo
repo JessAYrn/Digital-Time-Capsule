@@ -35,11 +35,11 @@ import TreasuryTypes "Types/Treasury/types";
 import NnsCyclesMinting "NNS/NnsCyclesMinting";
 import TreasuryHelperMethods "Modules/Main/TreasuryHelperMethods";
 import AnalyticsHelperMethods "Modules/Analytics/AnalyticsHelperMethods";
-import AnalyticsTypes "Types/Analytics/types";
 import Journal "Journal";
 import WasmStore "Types/WasmStore/types";
 import SupportCanisterIds "SupportCanisterIds/SupportCanisterIds";
 import MarketData "Modules/HTTPRequests/MarketData";
+import AnalyticsTypes "Types/Analytics/types";
 
 
 shared actor class User() = this {
@@ -71,6 +71,8 @@ shared actor class User() = this {
     );
 
     private stable var startIndexForBlockChainQuery : Nat64 = 7_356_011;
+
+    private let txFee : Nat64 = 10_000;
 
     private let ic : IC.Self = actor "aaaaa-aa";
 
@@ -185,7 +187,7 @@ shared actor class User() = this {
         let result = await JournalHelperMethods.uploadJournalEntryFile(caller, userProfilesMap, fileId, chunkId, blobChunk);
     };
     
-    public shared({caller}) func transferICP(amount: Nat64, canisterAccountId: Account.AccountIdentifier) : async Result.Result<(), JournalTypes.Error> {
+    public shared({caller}) func transferICP(amount: Nat64, canisterAccountId: Account.AccountIdentifier) : async Result.Result<({blockIndex: Nat64}), JournalTypes.Error> {
         let result = await TxHelperMethods.transferICP(caller, userProfilesMap, amount, canisterAccountId);
     };
 
@@ -342,11 +344,12 @@ shared actor class User() = this {
         let userProfile = userProfilesMap.get(caller);
         if(userProfile == null) return #err(#NotAuthorizedToAccessData);
         let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
-        let collateral = await treasuryCanister.getTreasuryCollateralArray();
+        let deposits = await treasuryCanister.getTreasuryDepositsArray();
+        let stakes = await treasuryCanister.getTreasuryUsersStakesArray();
         let balance_icp = await treasuryCanister.canisterBalance();
         let accountId_icp_blob = await treasuryCanister.canisterAccountId();
         let accountId_icp = Blob.toArray(accountId_icp_blob);
-        return #ok({ collateral; balance_icp; accountId_icp; });
+        return #ok({ deposits; balance_icp; accountId_icp; stakes; });
     };
 
     public shared({ caller }) func upgradeApp(): async (){
@@ -419,20 +422,6 @@ shared actor class User() = this {
 
     public shared({ caller }) func clearJournalNotifications(): async (){
         await NotificationProtocolMethods.clearJournalNotifications(caller, userProfilesMap);
-    };
-
-    public shared({ caller }) func depositCollateral(amount: Nat64, currency: TreasuryTypes.SupportedCurrencies):
-    async Result.Result<Ledger.ICP, MainTypes.Error>{
-        let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v2);
-        if(not isAdmin) return #err(#NotAuthorized);
-        let updatedBalance = await TreasuryHelperMethods.depositCollateral({
-            depositorPrincipal = Principal.toText(caller);
-            treasuryCanisterPrincipal = daoMetaData_v2.treasuryCanisterPrincipal;
-            amount;
-            currency;
-            profilesMap = userProfilesMap;
-        });
-        return updatedBalance;
     };
     
     public composite query({ caller }) func retrieveUserBalances(): async AnalyticsTypes.BalancesArray {
@@ -568,10 +557,25 @@ shared actor class User() = this {
             };
             //still need to delete the public upgradeApp method once the frontend has been updated
             case (#UpgradeApp){ ignore upgradeApp_(); };
-            case (#CreateOrIncreaseNeuron(args)){
-                //call functions to transfer ICP from the proposer's canister to the treasury canister
+            case (#CreateNeuron({amount;})){
+                let ?userProfile = userProfilesMap.get(Principal.fromText(proposer)) else { throw Error.reject("User profile not found") };
+                let {canisterId} = userProfile;
                 let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
-                let response = await treasuryCanister.createOrIncreaseNeuron(args);
+                let treasuryAccountId = await treasuryCanister.canisterAccountId();
+                let userCanister : Journal.Journal = actor(Principal.toText(canisterId));
+                let response_0 = await userCanister.transferICP(amount + txFee, treasuryAccountId);
+                let response_1 = await treasuryCanister.creditUserIcpDeposits(Principal.fromText(proposer), amount + txFee);
+                let response_2 = await treasuryCanister.createNeuron({amount; contributor = Principal.fromText(proposer);});
+            };
+            case(#IncreaseNeuron({amount; neuronId;})){
+                let ?userProfile = userProfilesMap.get(Principal.fromText(proposer)) else { throw Error.reject("User profile not found") };
+                let {canisterId} = userProfile;
+                let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
+                let treasuryAccountId = await treasuryCanister.canisterAccountId();
+                let userCanister : Journal.Journal = actor(Principal.toText(canisterId));
+                let response_0 = await userCanister.transferICP(amount + txFee, treasuryAccountId);
+                let response_1 = await treasuryCanister.creditUserIcpDeposits(Principal.fromText(proposer), amount + txFee);
+                let response_2 = await treasuryCanister.increaseNeuron({amount; neuronId; contributor = Principal.fromText(proposer);});
             };
             case(#ManageNeuron(args)){
                 let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
@@ -591,7 +595,7 @@ shared actor class User() = this {
     system func postupgrade() { 
         userProfilesArray:= []; 
         proposalsArray := [];
-        
+
         let timerId_daily = recurringTimer(#seconds (24 * 60 * 60), heartBeat_unshared);
         let timerId_hourly = recurringTimer(#seconds (60 * 60), heartBeat_hourly);
         let timerId_everyThirtySeconds = recurringTimer(#seconds (30), updateUsersTxHistory);

@@ -40,7 +40,7 @@ module {
 
     public type TransformFnSignature = query { response : IC.http_response; context: Blob } -> async IC.http_response;
 
-    private func transferIcpToNeuron(amount: Nat64, memo: Nat64): 
+    public func transferIcpToNeuronWithMemo(amount: Nat64, memo: Nat64): 
     async {public_key: Blob; selfAuthPrincipal: Principal;} {
         let {public_key} = await EcdsaHelperMethods.getPublicKey(null);
         let {principalAsBlob} = Account.getSelfAuthenticatingPrincipal(public_key);
@@ -59,23 +59,30 @@ module {
 
         switch(res){
             case(#Ok(_)) { return {public_key; selfAuthPrincipal = principal}; };
-            case(#Err(_)) { Debug.trap("Error in transferIcpToNeuron")};
+            case(#Err(_)) { throw Error.reject("Error in transferIcpToNeuron")};
         };
     };
 
-    public func createOrIncreaseNeuron( amount: Nat64, memo: Nat64, transformFn: TransformFnSignature):
-    async {response: IC.http_response; requestId: Blob; ingress_expiry: Nat64;}{
-        let { public_key; selfAuthPrincipal; } = await transferIcpToNeuron(amount, memo);
-        await manageNeuron(
-            {
-                id = null; 
-                command = ?#ClaimOrRefresh( {by = ?#MemoAndController( {controller = ?selfAuthPrincipal; memo} )} );
-                neuron_id_or_subaccount = null;
-            }, 
-            selfAuthPrincipal, 
-            public_key, 
-            transformFn
-        );
+    public func transferIcpToNeuronWithSubaccount(amount: Nat64, subaccount: Blob): 
+    async {public_key: Blob; selfAuthPrincipal: Principal;} {
+        let {public_key} = await EcdsaHelperMethods.getPublicKey(null);
+        let {principalAsBlob} = Account.getSelfAuthenticatingPrincipal(public_key);
+        let principal = Principal.fromBlob(principalAsBlob);
+        let treasuryNeuronAccountId = Account.accountIdentifier(Principal.fromText(Governance.CANISTER_ID), subaccount);
+
+        let res = await ledger.transfer({
+          memo = 0;
+          from_subaccount = null;
+          to = treasuryNeuronAccountId;
+          amount = { e8s = amount };
+          fee = { e8s = txFee };
+          created_at_time = ?{ timestamp_nanos = Nat64.fromNat(Int.abs(Time.now())) };
+        });
+
+        switch(res){
+            case(#Ok(_)) { return {public_key; selfAuthPrincipal = principal}; };
+            case(#Err(_)) { throw Error.reject("Error in transferIcpToNeuron")};
+        };
     };
 
     public func manageNeuron( args: Governance.ManageNeuron, selfAuthPrincipal: Principal, public_key: Blob, transformFn: TransformFnSignature): 
@@ -103,13 +110,17 @@ module {
         return {response; requestId; ingress_expiry;};
     };
 
-    public func getNeuronData(args: TreasuryTypes.NeuronId, transformFn: TransformFnSignature, methodName: {#GetFullNeuron; #GetNeuronInfo}):
+    public func getNeuronData(
+        args: TreasuryTypes.NeuronId, 
+        transformFn: TransformFnSignature, 
+        methodType: TreasuryTypes.NeuronDataMethodTypes
+    ):
     async {response: IC.http_response; requestId: Blob; ingress_expiry: Nat64;}{
         let {public_key} = await EcdsaHelperMethods.getPublicKey(null);
         let {principalAsBlob} = Account.getSelfAuthenticatingPrincipal(public_key);
         let sender = Principal.fromBlob(principalAsBlob);
         let canister_id: Principal = Principal.fromText(Governance.CANISTER_ID);
-        let method_name: Text = switch(methodName){ case(#GetFullNeuron){ "get_full_neuron"}; case(#GetNeuronInfo){"get_neuron_info"} };
+        let method_name = switch(methodType){ case(#GetFullNeuronResponse(_)) { "get_full_neuron" }; case(#GetNeuronInfoResponse(_)) { "get_neuron_info" };};
         let request = EcdsaHelperMethods.prepareCanisterCallViaEcdsa({sender; public_key; canister_id; args = to_candid(args); method_name;});
         let {envelopeCborEncoded} = await EcdsaHelperMethods.getSignedEnvelope(request);
         let headers = [ {name = "content-type"; value= "application/cbor"}];    
@@ -149,53 +160,111 @@ module {
         let {status; body = responseBody; headers = headers_;} : IC.http_response = await ic.http_request(http_request);
     };
 
-    public func readRequestResponse(cachedRequestInfo: TreasuryTypes.CachedRequest, transformFn: TransformFnSignature): 
+    public func readRequestResponse(cachedRequestInfo: TreasuryTypes.ReadRequestInput, transformFn: TransformFnSignature): 
     async TreasuryTypes.RequestResponses {
         let {requestId; expiry; expectedResponseType} = cachedRequestInfo;
-        if(Nat64.toNat(expiry) < Time.now()) { Debug.trap("Request expired") };
+        if(Nat64.toNat(expiry) < Time.now()) { throw Error.reject("Request expired") };
         let path = [Text.encodeUtf8("request_status"),requestId, Text.encodeUtf8("reply")];
         let {body} = await readRequestState([path], transformFn);
         switch(from_response_blob(body)){
-            case (#err(e)) { return Debug.trap("Certificate retrieval unsuccessful") };
+            case (#err(e)) { return throw Error.reject("Certificate retrieval unsuccessful") };
             case(#ok(cert)){
                 switch(cert.lookup(path)){
-                    case(null) { return Debug.trap("Request lookup unsuccessful") };
+                    case(null) { return throw Error.reject("Request lookup unsuccessful") };
                     case(?replyEncoded) {
-                        let reply_1: ?Governance.ManageNeuronResponse = from_candid(replyEncoded);
-                        let reply_2: ?Governance.Result_2 = from_candid(replyEncoded);
-                        let resply_3: ?Governance.Result_5 = from_candid(replyEncoded);
-                        if(reply_1 != null){
-                            switch(reply_1){
-                                case(null) { Debug.trap("Response candid decoding took unexpected form") };
-                                case(?reply_1_) { 
-                                    let ?command = reply_1_.command else { return Debug.trap("Response candid decoding took unexpected form") };
-                                    switch(expectedResponseType){
-                                        case(#CreateOrIncreaseNeuronResponse){
-                                            switch(command){
-                                                case(#ClaimOrRefresh(response)) { return #CreateOrIncreaseNeuronResponse(response) };
-                                                case(_) { return Debug.trap("Unexpected command type") };
-                                            };
-                                        };
-                                        case(_){ return command};
-                                    };
+                        switch(expectedResponseType){
+                            case(#GetFullNeuronResponse{neuronId; args;}) {
+                                let ?reply: ?Governance.Result_2 = from_candid(replyEncoded) else { return throw Error.reject("Response candid decoding took unexpected form") };
+                                return #GetFullNeuronResponse({response = reply; neuronId; args;});
+                            };
+                            case(#GetNeuronInfoResponse({ neuronId; args;})){
+                                let ?reply: ?Governance.Result_5 = from_candid(replyEncoded) else { return throw Error.reject("Response candid decoding took unexpected form") };
+                                return #GetNeuronInfoResponse({response = reply; neuronId; args;});
+                            };
+                            case(#CreateNeuronResponse({memo; contributor; amount;})){
+                                let ?reply: ?Governance.ManageNeuronResponse = from_candid(replyEncoded) else { return throw Error.reject("Response candid decoding took unexpected form") };
+                                let ?command = reply.command else { return throw Error.reject("Response candid decoding took unexpected form") };
+                                switch(command){
+                                    case(#ClaimOrRefresh(response)) { return #CreateNeuronResponse({response; memo; amount; contributor}) };
+                                    case(_) { return throw Error.reject("Unexpected command type") };
                                 };
                             };
-                        } else if(reply_2 != null){
-                            switch(reply_2){
-                                case(null) { Debug.trap("Response candid decoding took unexpected form") };
-                                case(?reply_2_) { return #GetFullNeuronResponse(reply_2_) };
+                            case(#IncreaseNeuronResponse({neuronId})){
+                                let ?reply: ?Governance.ManageNeuronResponse = from_candid(replyEncoded) else { return throw Error.reject("Response candid decoding took unexpected form") };
+                                let ?command = reply.command else { return throw Error.reject("Response candid decoding took unexpected form") };
+                                switch(command){
+                                    case(#ClaimOrRefresh(response)) { return #IncreaseNeuronResponse({response; neuronId}) };
+                                    case(_) { return throw Error.reject("Unexpected command type") };
+                                };
                             };
-                        } else if(resply_3 != null){
-                            switch(resply_3){
-                                case(null) { Debug.trap("Response candid decoding took unexpected form") };
-                                case(?reply_3_) { return #GetNeuronInfoResponse(reply_3_) };
+                            case(#ClaimOrRefresh({neuronId;})){ 
+                                let ?reply: ?Governance.ManageNeuronResponse = from_candid(replyEncoded) else { return throw Error.reject("Response candid decoding took unexpected form") };
+                                let ?command = reply.command else { return throw Error.reject("Response candid decoding took unexpected form") };
+                                switch(command){
+                                    case(#ClaimOrRefresh(response)) { return #ClaimOrRefresh({response; neuronId}) };
+                                    case(#Error(response)) { return #Error({response;}) };
+                                    case(_) { return throw Error.reject("Unexpected command type") };
+                                };
                             };
-                        } else { Debug.trap("Response candid decoding took unexpected form") };
+                            case(#Disburse({neuronId;})){ 
+                                let ?reply: ?Governance.ManageNeuronResponse = from_candid(replyEncoded) else { return throw Error.reject("Response candid decoding took unexpected form") };
+                                let ?command = reply.command else { return throw Error.reject("Response candid decoding took unexpected form") };
+                                switch(command){
+                                    case(#Disburse(response)) { return #Disburse({response; neuronId;}) };
+                                    case(#Error(response)) { return #Error({response; neuronId;}) };
+                                    case(_) { return throw Error.reject("Unexpected command type") };
+                                };
+                            };
+                            case(#Spawn({neuronId;})){ 
+                                let ?reply: ?Governance.ManageNeuronResponse = from_candid(replyEncoded) else { return throw Error.reject("Response candid decoding took unexpected form") };
+                                let ?command = reply.command else { return throw Error.reject("Response candid decoding took unexpected form") };
+                                switch(command){
+                                    case(#Spawn(response)) { return #Spawn({response; neuronId;}) };
+                                    case(#Error(response)) { return #Error({response; neuronId;}) };
+                                    case(_) { return throw Error.reject("Unexpected command type") };
+                                };
+                            };
+                            case(#Split({neuronId;})){ 
+                                let ?reply: ?Governance.ManageNeuronResponse = from_candid(replyEncoded) else { return throw Error.reject("Response candid decoding took unexpected form") };
+                                let ?command = reply.command else { return throw Error.reject("Response candid decoding took unexpected form") };
+                                switch(command){
+                                    case(#Split(response)) { return #Split({response; neuronId;}) };
+                                    case(#Error(response)) { return #Error({response; neuronId;}) };
+                                    case(_) { return throw Error.reject("Unexpected command type") };
+                                };
+                            };
+                            case(#Follow({neuronId;})){ 
+                                let ?reply: ?Governance.ManageNeuronResponse = from_candid(replyEncoded) else { return throw Error.reject("Response candid decoding took unexpected form") };
+                                let ?command = reply.command else { return throw Error.reject("Response candid decoding took unexpected form") };
+                                switch(command){
+                                    case(#Follow(response)) { return #Follow({ response; neuronId;}) };
+                                    case(#Error(response)) { return #Error({response; neuronId;}) };
+                                    case(_) { return throw Error.reject("Unexpected command type") };
+                                };
+                            };
+                            case(#Configure({neuronId;})){ 
+                                let ?reply: ?Governance.ManageNeuronResponse = from_candid(replyEncoded) else { return throw Error.reject("Response candid decoding took unexpected form") };
+                                let ?command = reply.command else { return throw Error.reject("Response candid decoding took unexpected form") };
+                                switch(command){
+                                    case(#Configure(response)) { return #Configure({ response; neuronId;}) };
+                                    case(#Error(response)) { return #Error({response; neuronId;}) };
+                                    case(_) { return throw Error.reject("Unexpected command type") };
+                                };
+                            };
+                            case(#RegisterVote({neuronId;})){ 
+                                let ?reply: ?Governance.ManageNeuronResponse = from_candid(replyEncoded) else { return throw Error.reject("Response candid decoding took unexpected form") };
+                                let ?command = reply.command else { return throw Error.reject("Response candid decoding took unexpected form") };
+                                switch(command){
+                                    case(#RegisterVote(response)) { return #RegisterVote({ response; neuronId;}) };
+                                    case(#Error(response)) { return #Error({response; neuronId;}) };
+                                    case(_) { return throw Error.reject("Unexpected command type") };
+                                };
+                            };
+                        };
                     };
                 };
             };
-        };
-            
+        };    
     };
 
     public func from_response_blob(response: Blob): Result.Result<Certificate, Text> {

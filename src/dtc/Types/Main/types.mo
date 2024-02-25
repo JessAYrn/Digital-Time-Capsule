@@ -167,7 +167,8 @@ module{
         #AddAdmin: {principal: Text};
         #RemoveAdmin: {principal: Text};
         #UpgradeApp;
-        #CreateOrIncreaseNeuron: {amount: Nat64; memo: ?Nat64};
+        #CreateNeuron: {amount: Nat64; };
+        #IncreaseNeuron: {amount: Nat64; neuronId: Nat64; };
         #ManageNeuron: Governance.ManageNeuron;
         #PurchaseCycles: {amount : {icp: {e8s: Nat64};};};
     };
