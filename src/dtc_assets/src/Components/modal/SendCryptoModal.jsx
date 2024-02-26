@@ -44,7 +44,11 @@ const SendCrypto = (props) => {
         const accountId = fromHexString(recipientAddress);
         const result = await actorState.backendActor.transferICP(e8s, accountId);
         setIsLoadingTx(false);
-        setModalIsOpen(false)
+        setModalIsOpen(false);
+        if("err" in result){
+            alert("Error: " + Object.keys(result.err)[0]);
+            return;
+        };
         alert("Your balance may take up to 30 seconds to update")
     }
 

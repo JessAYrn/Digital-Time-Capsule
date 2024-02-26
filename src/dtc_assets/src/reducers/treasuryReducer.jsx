@@ -13,7 +13,8 @@ export const treasuryPageInitialState={
     dataHasBeenLoaded: undefined,
     isLoading: false,
     treasuryData: {
-        collateral: [],
+        deposits: [],
+        stakes: [],
         balance_icp: 0,
         accountId_icp: "" 
     },
