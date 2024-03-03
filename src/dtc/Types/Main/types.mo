@@ -98,22 +98,6 @@ module{
         requestsForAccess: RequestsForAccess;
     };
 
-    public type DaoMetaData = {
-        managerCanisterPrincipal: Text; 
-        treasuryCanisterPrincipal: Text;
-        frontEndPrincipal: Text;
-        backEndPrincipal: Text;
-        lastRecordedBackEndCyclesBalance: Nat;
-        backEndCyclesBurnRatePerDay: Nat;
-        nftOwner: Text;
-        nftId: Int;
-        acceptingRequests: Bool;
-        lastRecordedTime: Int;
-        supportMode: Bool;
-        requestsForAccess: RequestsForAccess;
-        defaultControllers: [Principal];
-    };
-
     public type DaoMetaData_V2 = {
         managerCanisterPrincipal: Text; 
         treasuryCanisterPrincipal: Text;

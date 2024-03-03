@@ -352,6 +352,10 @@ shared actor class User() = this {
         return #ok({ deposits; balance_icp; accountId_icp; stakes; });
     };
 
+    public shared({caller}) func depositIcpToTreasury(amount: Nat64, recipientAddress: Account.AccountIdentifier) : async {blockIndex: Nat64} {
+        let result = await TreasuryHelperMethods.depositIcpToTreasury(daoMetaData_v2, userProfilesMap, caller, amount, recipientAddress);
+    };
+
     public shared({ caller }) func upgradeApp(): async (){
         let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v2);
         if(not isAdmin and not (Principal.toText(caller) == SupportCanisterIds.TechSupportPrincipal2 and daoMetaData_v2.supportMode)){ 
@@ -558,23 +562,11 @@ shared actor class User() = this {
             //still need to delete the public upgradeApp method once the frontend has been updated
             case (#UpgradeApp){ ignore upgradeApp_(); };
             case (#CreateNeuron({amount;})){
-                let ?userProfile = userProfilesMap.get(Principal.fromText(proposer)) else { throw Error.reject("User profile not found") };
-                let {canisterId} = userProfile;
                 let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
-                let treasuryAccountId = await treasuryCanister.canisterAccountId();
-                let userCanister : Journal.Journal = actor(Principal.toText(canisterId));
-                let response_0 = await userCanister.transferICP(amount + txFee, treasuryAccountId);
-                let response_1 = await treasuryCanister.creditUserIcpDeposits(Principal.fromText(proposer), amount + txFee);
                 let response_2 = await treasuryCanister.createNeuron({amount; contributor = Principal.fromText(proposer);});
             };
             case(#IncreaseNeuron({amount; neuronId;})){
-                let ?userProfile = userProfilesMap.get(Principal.fromText(proposer)) else { throw Error.reject("User profile not found") };
-                let {canisterId} = userProfile;
                 let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
-                let treasuryAccountId = await treasuryCanister.canisterAccountId();
-                let userCanister : Journal.Journal = actor(Principal.toText(canisterId));
-                let response_0 = await userCanister.transferICP(amount + txFee, treasuryAccountId);
-                let response_1 = await treasuryCanister.creditUserIcpDeposits(Principal.fromText(proposer), amount + txFee);
                 let response_2 = await treasuryCanister.increaseNeuron({amount; neuronId; contributor = Principal.fromText(proposer);});
             };
             case(#ManageNeuron(args)){

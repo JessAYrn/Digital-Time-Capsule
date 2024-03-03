@@ -14,10 +14,10 @@ export const mapBackendTreasuryDataToFrontEndObj = (props) => {
         return [
             principal, 
             {
-                icp: {total: parseInt(icp.total.e8s), collateral: parseInt(icp.collateral.e8s)},
-                icp_staked: {total: parseInt(icp_staked.total.e8s), collateral: parseInt(icp_staked.collateral.e8s)},
-                eth: {total: parseInt(eth.total.e8s), collateral: parseInt(eth.collateral.e8s)},
-                btc: {total: parseInt(btc.total.e8s), collateral: parseInt(btc.collateral.e8s)}
+                icp: {e8s: parseInt(icp.e8s)},
+                icp_staked: {e8s: parseInt(icp_staked.e8s)},
+                eth: {e8s: parseInt(eth.e8s)},
+                btc: {e8s: parseInt(btc.e8s)}
             }
         ];
     });
