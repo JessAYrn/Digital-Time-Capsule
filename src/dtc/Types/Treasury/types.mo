@@ -41,11 +41,11 @@ module{
         voting_power : Nat64;
     };
 
-    public type UserStake = {icp : [(NeuronIdAsText, NeuronStakeInfo)]};
+    public type UserTreasuryData = {icp : [(NeuronIdAsText, NeuronStakeInfo)]};
 
-    public type UserStakesArray = [(Principal, UserStake)];
+    public type UsersTreasuryDataArray = [(Principal, UserTreasuryData)];
 
-    public type UserStakesMap = HashMap.HashMap<Principal, UserStake>;
+    public type UsersTreasuryDataMap = HashMap.HashMap<Principal, UserTreasuryData>;
 
     public type TransferIcpToNeuronResponse = {
         #ok : {public_key: Blob; selfAuthPrincipal: Principal;};
@@ -53,7 +53,7 @@ module{
     };
 
     public type TreasuryDataExport = {
-        stakes : UserStakesArray;
+        stakes : UserTreasuryData;
         deposits : TreasuryDepositsArray;
         balance_icp: {e8s : Nat64};
         accountId_icp: [Nat8];
