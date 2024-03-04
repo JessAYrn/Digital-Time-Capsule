@@ -251,7 +251,7 @@ shared actor class Treasury (principal : Principal) = this {
         };
     };
 
-    public shared({caller}) func manageNeuron( args: Governance.ManageNeuron): async Result.Result<() , TreasuryTypes.Error>{
+    public shared({caller}) func manageNeuron( args: Governance.ManageNeuron, proposer: Principal): async Result.Result<() , TreasuryTypes.Error>{
         let canisterId =  Principal.fromActor(this);
         if(Principal.toText(caller) != Principal.toText(canisterId) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         let response = await TreasuryHelperMethods.manageNeuron(
@@ -263,7 +263,8 @@ shared actor class Treasury (principal : Principal) = this {
             memoToNeuronIdMap,
             updateTokenBalances,
             transformFn,
-            args
+            args,
+            proposer
         );
         switch(response){
             case(#ok()) return #ok(());

@@ -153,7 +153,7 @@ module{
         #UpgradeApp;
         #CreateNeuron: {amount: Nat64; };
         #IncreaseNeuron: {amount: Nat64; neuronId: Nat64; };
-        #ManageNeuron: Governance.ManageNeuron;
+        #ManageNeuron: {args: Governance.ManageNeuron; proposer: Principal; };
         #PurchaseCycles: {amount : {icp: {e8s: Nat64};};};
     };
 

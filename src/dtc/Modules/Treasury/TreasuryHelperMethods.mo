@@ -69,6 +69,7 @@ module{
         sourceNeuronId: Nat64, 
         targetNeuronId: Nat64, 
         splitAmount: Nat64,
+        proposer: Principal,
         usersStakesMap: TreasuryTypes.UserStakesMap, 
         neuronDataMap: TreasuryTypes.NeuronsDataMap,
     ): () {
@@ -77,24 +78,45 @@ module{
         let {stake_e8s = oldNeuronTotalStake} = neuronStakeInfo_;
         var splitAmount_: Nat64 = 0;
 
-        for((userPrincipal, userStakes) in usersStakesMap.entries()){
+        label splitLoop for((userPrincipal, userStakes) in usersStakesMap.entries()){
             let userIcpNeuronsStakesMap = HashMap.fromIter<TreasuryTypes.NeuronIdAsText, TreasuryTypes.NeuronStakeInfo>(
                 Iter.fromArray(userStakes.icp), 
                 Iter.size(Iter.fromArray(userStakes.icp)), 
                 Text.equal,
                 Text.hash
             );
-            switch(userIcpNeuronsStakesMap.get(Nat64.toText(sourceNeuronId))){
-                case(null){};
-                case(?oldNeuronStakeInfo){
-                    let {stake_e8s = oldNeuronStake} = oldNeuronStakeInfo;
-                    let newNeuronStake = (oldNeuronStake * splitAmount) / oldNeuronTotalStake;
-                    splitAmount_ += newNeuronStake;
-                    userIcpNeuronsStakesMap.put(Nat64.toText(sourceNeuronId), {oldNeuronStakeInfo with stake_e8s = oldNeuronStake - newNeuronStake});
-                    userIcpNeuronsStakesMap.put(Nat64.toText(targetNeuronId), {stake_e8s = newNeuronStake; voting_power = 0});
-                    usersStakesMap.put(userPrincipal, {userStakes with icp = Iter.toArray(userIcpNeuronsStakesMap.entries())});
-                };
+            let ?oldNeuronStakeInfo = userIcpNeuronsStakesMap.get(Nat64.toText(sourceNeuronId)) else {continue splitLoop};
+            let {stake_e8s = oldNeuronStake} = oldNeuronStakeInfo;
+            let newNeuronStake = (oldNeuronStake * splitAmount) / oldNeuronTotalStake;
+            splitAmount_ += newNeuronStake;
+            var updatedOldNeuronStake = oldNeuronStake - newNeuronStake;
+            if(userPrincipal == proposer) { updatedOldNeuronStake -= txFee; };
+            userIcpNeuronsStakesMap.put(Nat64.toText(sourceNeuronId), {oldNeuronStakeInfo with stake_e8s = updatedOldNeuronStake});
+            userIcpNeuronsStakesMap.put(Nat64.toText(targetNeuronId), {stake_e8s = newNeuronStake; voting_power = 0});
+            usersStakesMap.put(userPrincipal, {userStakes with icp = Iter.toArray(userIcpNeuronsStakesMap.entries())});
+        };
+
+        var slippage = splitAmount - splitAmount_;
+        var index = 0;
+        var remainingSlippage = slippage;
+        label slippageOutterLoop while(slippage > 0){
+            label slippageInnerLoop for((userPrincipal, userStakes) in usersStakesMap.entries()){
+                if(slippage <= 0) break slippageOutterLoop;
+                let userIcpNeuronsStakesMap = HashMap.fromIter<TreasuryTypes.NeuronIdAsText, TreasuryTypes.NeuronStakeInfo>(
+                    Iter.fromArray(userStakes.icp), 
+                    Iter.size(Iter.fromArray(userStakes.icp)), 
+                    Text.equal,
+                    Text.hash
+                );
+                let ?oldNeuronStakeInfo = userIcpNeuronsStakesMap.get(Nat64.toText(sourceNeuronId)) else {continue slippageInnerLoop};
+                let ?newNeuronStakeInfo = userIcpNeuronsStakesMap.get(Nat64.toText(targetNeuronId)) else {continue slippageInnerLoop};
+                userIcpNeuronsStakesMap.put(Nat64.toText(sourceNeuronId), {oldNeuronStakeInfo with stake_e8s = oldNeuronStakeInfo.stake_e8s - 1});
+                userIcpNeuronsStakesMap.put(Nat64.toText(targetNeuronId), {newNeuronStakeInfo with stake_e8s = newNeuronStakeInfo.stake_e8s + 1;});
+                usersStakesMap.put(userPrincipal, {userStakes with icp = Iter.toArray(userIcpNeuronsStakesMap.entries())});
+                slippage -= 1;
             };
+            if (remainingSlippage == slippage) { break slippageOutterLoop; };
+            remainingSlippage := slippage;
         };
         computeNeuronStakeInfosVotingPowers(neuronDataMap, usersStakesMap, Nat64.toText(sourceNeuronId));
         computeNeuronStakeInfosVotingPowers(neuronDataMap, usersStakesMap, Nat64.toText(targetNeuronId));
@@ -365,14 +387,14 @@ module{
                     let _ = pendingActionsMap.remove("spawn_"#Nat64.toText(neuronId));
                     activityLogsMap.put(Int.toText(Time.now()),"successfully completed action: spawn_"#Nat64.toText(neuronId));
                 };
-                case(#Split({response; neuronId; amount_e8s; })){
+                case(#Split({response; neuronId; amount_e8s; proposer;})){
                     let ?created_neuron_id = response.created_neuron_id else {
                         activityLogsMap.put(Int.toText(Time.now()),"Failed to complete action: No new created_neuron_id in response");
                         Debug.trap("No new created_neuron_id in response");
                     };
                     ignore getNeuronData( neuronDataMap, usersStakesMap, depositsMap, pendingActionsMap, activityLogsMap, memoToNeuronIdMap, updateTokenBalances, transformFn, #GetFullNeuronResponse({neuronId;}) );
                     ignore getNeuronData( neuronDataMap, usersStakesMap, depositsMap, pendingActionsMap, activityLogsMap, memoToNeuronIdMap, updateTokenBalances, transformFn, #GetFullNeuronResponse({neuronId = created_neuron_id.id;}));
-                    let splitAmount = splitNeuronStakeInfo(neuronId, created_neuron_id.id,amount_e8s, usersStakesMap, neuronDataMap);
+                    splitNeuronStakeInfo(neuronId, created_neuron_id.id,amount_e8s,proposer, usersStakesMap, neuronDataMap);
                     let _ = pendingActionsMap.remove("split_"#Nat64.toText(neuronId));
                     activityLogsMap.put(Int.toText(Time.now()),"successfully completed action: split_"#Nat64.toText(neuronId));
                 };
@@ -466,7 +488,8 @@ module{
         memoToNeuronIdMap: TreasuryTypes.MemoToNeuronIdMap,
         updateTokenBalances: shared () -> async (),
         transformFn: NeuronManager.TransformFnSignature,
-        args: Governance.ManageNeuron
+        args: Governance.ManageNeuron,
+        proposer: Principal
     ): async Result.Result<(), TreasuryTypes.Error> {
         
         let ?neuronId = args.id else {
@@ -480,11 +503,17 @@ module{
         let {public_key} = await EcdsaHelperMethods.getPublicKey(null);
         let {principalAsBlob} = Account.getSelfAuthenticatingPrincipal(public_key);
         let selfAuthPrincipal = Principal.fromBlob(principalAsBlob);
-        var args_ : Governance.ManageNeuron = args;
         
         let (expectedResponseType, pendingActionId) : (TreasuryTypes.ExpectedRequestResponses, Text) = switch(command){
             case(#Spawn(_)) { (#Spawn({neuronId = neuronId.id; }), "spawn_"#Nat64.toText(neuronId.id)); };
-            case(#Split({amount_e8s; })) { (#Split({neuronId = neuronId.id; amount_e8s; }), "split_"#Nat64.toText(neuronId.id)); };
+            case(#Split({amount_e8s; })) { 
+                let proposerNeuronStake = getUserNeuronStakeInfo(proposer, usersStakesMap, Nat64.toText(neuronId.id));
+                if(proposerNeuronStake.stake_e8s < txFee) { 
+                    activityLogsMap.put(Int.toText(Time.now()), "Proposer has insufficient stake to cover transaction fee.");
+                    return #err(#InsufficientFunds);
+                };
+                (#Split({neuronId = neuronId.id; amount_e8s; proposer;}), "split_"#Nat64.toText(neuronId.id)); 
+            };
             case(#Follow(_)) { (#Follow({neuronId = neuronId.id; }), "follow_"#Nat64.toText(neuronId.id)); };
             case(#Configure(_)) { (#Configure({neuronId = neuronId.id; }), "configure_"#Nat64.toText(neuronId.id)); };
             case(#Disburse(_)) { (#Disburse({neuronId = neuronId.id;}), "disburse_"#Nat64.toText(neuronId.id)); };
@@ -493,7 +522,7 @@ module{
             case(_) { return #err(#ActionNotSupported) };
         };
         let newPendingAction: TreasuryTypes.PendingAction = {
-            args = ?args_;
+            args = ?args;
             expectedResponseType;
             selfAuthPrincipal;
             public_key;
