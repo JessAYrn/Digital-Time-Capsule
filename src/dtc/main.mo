@@ -323,12 +323,12 @@ shared actor class User() = this {
             case (? existingProfile){
                 let managerCanister : Manager.Manager = actor(daoMetaData_v2.managerCanisterPrincipal);
                 let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
-                let treasuryUsersStakesArray = await treasuryCanister.getTreasuryUsersStakesArray();
+                let usersTreasuryDataArray = await treasuryCanister.getUsersTreasuryDataArray();
                 let profilesMetaData = CanisterManagementMethods.getProfilesMetaData(userProfilesMap);
                 let {number = releaseVersion} = await managerCanister.getCurrentReleaseVersion();
                 let canisterDataPackagedForExport = {
                     daoMetaData_v2 with 
-                    proposals = GovernanceHelperMethods.tallyAllProposalVotes({proposals = proposalsMap; treasuryUsersStakesArray;});
+                    proposals = GovernanceHelperMethods.tallyAllProposalVotes({proposals = proposalsMap; usersTreasuryDataArray;});
                     isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v2);
                     currentCyclesBalance_backend = Cycles.balance();
                     journalCount = userProfilesMap.size();
@@ -344,12 +344,11 @@ shared actor class User() = this {
         let userProfile = userProfilesMap.get(caller);
         if(userProfile == null) return #err(#NotAuthorizedToAccessData);
         let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
-        let deposits = await treasuryCanister.getTreasuryDepositsArray();
-        let stakes = await treasuryCanister.getTreasuryUsersStakesArray();
+        let usersTreasuryDataArray = await treasuryCanister.getUsersTreasuryDataArray();
         let balance_icp = await treasuryCanister.canisterBalance();
         let accountId_icp_blob = await treasuryCanister.canisterAccountId();
         let accountId_icp = Blob.toArray(accountId_icp_blob);
-        return #ok({ deposits; balance_icp; accountId_icp; stakes; });
+        return #ok({usersTreasuryDataArray; balance_icp; accountId_icp; });
     };
 
     public shared({caller}) func depositIcpToTreasury(amount: Nat64, recipientAddress: Account.AccountIdentifier) : async {blockIndex: Nat64} {
@@ -483,12 +482,12 @@ shared actor class User() = this {
         let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
         let hasSufficientStake = await treasuryCanister.userHasSufficientStake(caller);
         if(not hasSufficientStake) return #err(#NotAuthorizedToCreateProposals);
-        let treasuryUsersStakesArray = await treasuryCanister.getTreasuryUsersStakesArray();
+        let usersTreasuryDataArray = await treasuryCanister.getUsersTreasuryDataArray();
         let proposer = Principal.toText(caller); let votes = [(proposer, {adopt = true})];
         let timeInitiated = Time.now(); let timeExecuted = null;
         var voteTally = {yay = Nat64.fromNat(0); nay = Nat64.fromNat(0); total = Nat64.fromNat(0);};
         let proposal = {votes; action; proposer; timeInitiated; timeExecuted; voteTally;};
-        let votingResults = GovernanceHelperMethods.tallyVotes({treasuryUsersStakesArray; proposal;});
+        let votingResults = GovernanceHelperMethods.tallyVotes({usersTreasuryDataArray; proposal;});
         proposalsMap.put(proposalIndex, {proposal with voteTally = votingResults} );
         let timerId = setTimer(#seconds(24 * 60 * 60 * 3), finalizeProposalVotingPeriod);
         proposalIndex += 1;
@@ -509,10 +508,10 @@ shared actor class User() = this {
         let previousVote = votesMap.get(Principal.toText(caller));
         switch(previousVote){
             case null {
-                let treasuryUsersStakesArray = await treasuryCanister.getTreasuryUsersStakesArray();
+                let usersTreasuryDataArray = await treasuryCanister.getUsersTreasuryDataArray();
                 votesMap.put(Principal.toText(caller), {adopt});
                 var updatedProposal = {proposal with votes = Iter.toArray(votesMap.entries()); };
-                let voteTally = GovernanceHelperMethods.tallyVotes({treasuryUsersStakesArray; proposal = updatedProposal});
+                let voteTally = GovernanceHelperMethods.tallyVotes({usersTreasuryDataArray; proposal = updatedProposal});
                 updatedProposal := {updatedProposal with voteTally};
                 proposalsMap.put(proposalIndex, updatedProposal);
                 return #ok(updatedProposal);
@@ -534,8 +533,8 @@ shared actor class User() = this {
             case null {};
             case (?proposal){
                 let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
-                let treasuryUsersStakesArray = await treasuryCanister.getTreasuryUsersStakesArray();
-                let votingResults = GovernanceHelperMethods.tallyVotes({treasuryUsersStakesArray; proposal;});
+                let usersTreasuryDataArray = await treasuryCanister.getUsersTreasuryDataArray();
+                let votingResults = GovernanceHelperMethods.tallyVotes({usersTreasuryDataArray; proposal;});
                 let {yay; nay; total } = votingResults;
                 var timeExecuted: ?Int = null;
                 if( yay > nay) {

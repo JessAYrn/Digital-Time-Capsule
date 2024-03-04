@@ -61,16 +61,6 @@ shared actor class Treasury (principal : Principal) = this {
         Principal.hash
     );
 
-    private stable var depositsArray : TreasuryTypes.TreasuryDepositsArray = [];
-
-    private var depositsMap : TreasuryTypes.TreasuryDepositsMap = 
-    HashMap.fromIter<Text, TreasuryTypes.Deposits>(
-        Iter.fromArray(depositsArray), 
-        Iter.size(Iter.fromArray(depositsArray)), 
-        Text.equal,
-        Text.hash
-    );
-
     private stable var balancesHistoryArray : AnalyticsTypes.BalancesArray = [];
 
     private var balancesHistoryMap : AnalyticsTypes.BalancesMap = HashMap.fromIter<Text, AnalyticsTypes.Balances>(
@@ -108,12 +98,7 @@ shared actor class Treasury (principal : Principal) = this {
 
     let {recurringTimer; setTimer} = Timer;
 
-    public query({caller}) func getTreasuryDepositsArray(): async TreasuryTypes.TreasuryDepositsArray {
-        if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
-        return Iter.toArray(depositsMap.entries());
-    };
-
-    public query({caller}) func getTreasuryUsersStakesArray(): async TreasuryTypes.UsersTreasuryDataArray {
+    public query({caller}) func getUsersTreasuryDataArray(): async TreasuryTypes.UsersTreasuryDataArray {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         return Iter.toArray(usersTreasuryDataMap.entries());
     };
@@ -125,7 +110,7 @@ shared actor class Treasury (principal : Principal) = this {
 
     public shared({caller})func creditUserIcpDeposits(userPrincipal: Principal, amount: Nat64): async () {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
-        SyncronousHelperMethods.creditUserIcpDeposits(depositsMap, updateTokenBalances, {userPrincipal; amount});
+        SyncronousHelperMethods.creditUserIcpDeposits(usersTreasuryDataMap, updateTokenBalances, {userPrincipal; amount});
     };
 
     public shared({caller}) func saveCurrentBalances() : async () {
@@ -171,28 +156,30 @@ shared actor class Treasury (principal : Principal) = this {
     public shared({caller}) func createNeuron({amount: Nat64; contributor: Principal}) : async Result.Result<(), TreasuryTypes.Error> {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         actionLogsMap.put(Int.toText(Time.now()),"Creating Neuron, amount: " # Nat64.toText(amount) # ", contributor: " # Principal.toText(contributor));
-        let depositsArrayUnaltered = Iter.toArray(depositsMap.entries());
+        let usersTreasuryDataArrayUnaltered = Iter.toArray(usersTreasuryDataMap.entries());
 
         let response = await AsyncronousHelperMethods.createNeuron(
             neuronDataMap,
             usersTreasuryDataMap,
-            depositsMap,
             pendingActionsMap,
             actionLogsMap,
             memoToNeuronIdMap,
             updateTokenBalances,
             transformFn,
-            {amount; contributor; neuronMemo = 0;}
+            {amount; contributor; neuronMemo;}
         );
         switch(response){
-            case(#ok()) { neuronMemo += 1; return #ok(()); };
+            case(#ok()) { 
+                neuronMemo += 1; 
+                return #ok(()); 
+            };
             case(#err(#TxFailed)) {
                 actionLogsMap.put(Int.toText(Time.now()),"Error creating neuron: Transaction failed.");
-                depositsMap := HashMap.fromIter<Text, TreasuryTypes.Deposits>(
-                    Iter.fromArray(depositsArrayUnaltered), 
-                    Array.size(depositsArrayUnaltered), 
-                    Text.equal,
-                    Text.hash
+                usersTreasuryDataMap := HashMap.fromIter<Principal, TreasuryTypes.UserTreasuryData>(
+                    Iter.fromArray(usersTreasuryDataArrayUnaltered), 
+                    Array.size(usersTreasuryDataArrayUnaltered), 
+                    Principal.equal,
+                    Principal.hash
                 );
                 throw Error.reject("Error creating neuron.");
             };
@@ -207,12 +194,11 @@ shared actor class Treasury (principal : Principal) = this {
     public shared({caller}) func increaseNeuron({amount: Nat64; neuronId: Nat64; contributor: Principal}) : async Result.Result<() , TreasuryTypes.Error>{
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
 
-        let depositsArrayUnaltered = Iter.toArray(depositsMap.entries());
+        let usersTreasuryDataArrayUnaltered = Iter.toArray(usersTreasuryDataMap.entries());
 
         let response = await AsyncronousHelperMethods.increaseNeuron(
             neuronDataMap,
             usersTreasuryDataMap,
-            depositsMap,
             pendingActionsMap,
             actionLogsMap,
             memoToNeuronIdMap,
@@ -224,11 +210,11 @@ shared actor class Treasury (principal : Principal) = this {
             case(#ok()) return #ok(());
             case(#err(#TxFailed)) {
                 actionLogsMap.put(Int.toText(Time.now()),"Error increasing neuron: Transaction failed.");
-                depositsMap := HashMap.fromIter<Text, TreasuryTypes.Deposits>(
-                    Iter.fromArray(depositsArrayUnaltered), 
-                    Array.size(depositsArrayUnaltered), 
-                    Text.equal,
-                    Text.hash
+                usersTreasuryDataMap := HashMap.fromIter<Principal, TreasuryTypes.UserTreasuryData>(
+                    Iter.fromArray(usersTreasuryDataArrayUnaltered), 
+                    Array.size(usersTreasuryDataArrayUnaltered), 
+                    Principal.equal,
+                    Principal.hash
                 );
                 throw Error.reject("Error increasing neuron.");
             };
@@ -242,7 +228,6 @@ shared actor class Treasury (principal : Principal) = this {
         let response = await AsyncronousHelperMethods.manageNeuron(
             neuronDataMap,
             usersTreasuryDataMap,
-            depositsMap,
             pendingActionsMap,
             actionLogsMap,
             memoToNeuronIdMap,
@@ -267,7 +252,7 @@ shared actor class Treasury (principal : Principal) = this {
         return Iter.toArray(pendingActionsMap.entries());
     };
 
-    public query({caller}) func viewErrorLogs() : async TreasuryTypes.ActionLogsArray {
+    public query({caller}) func viewActivityLogs() : async TreasuryTypes.ActionLogsArray {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         return Iter.toArray(actionLogsMap.entries());
     };
@@ -328,7 +313,6 @@ shared actor class Treasury (principal : Principal) = this {
         await AsyncronousHelperMethods.resolvePendingActions(
             neuronDataMap,
             usersTreasuryDataMap,
-            depositsMap,
             pendingActionsMap,
             actionLogsMap,
             memoToNeuronIdMap,
@@ -340,7 +324,6 @@ shared actor class Treasury (principal : Principal) = this {
 
     system func preupgrade() { 
         usersStakesArray := Iter.toArray(usersTreasuryDataMap.entries()); 
-        depositsArray := Iter.toArray(depositsMap.entries());
         balancesHistoryArray := Iter.toArray(balancesHistoryMap.entries());
         neuronDataArray := Iter.toArray(neuronDataMap.entries());
         memoToNeuronIdArray := Iter.toArray(memoToNeuronIdMap.entries());
@@ -350,7 +333,6 @@ shared actor class Treasury (principal : Principal) = this {
 
     system func postupgrade() { 
         usersStakesArray:= []; 
-        depositsArray := [];
         balancesHistoryArray := [];
         neuronDataArray := [];
         memoToNeuronIdArray := [];
@@ -361,7 +343,6 @@ shared actor class Treasury (principal : Principal) = this {
             await AsyncronousHelperMethods.refreshNeuronsData(
                 neuronDataMap,
                 usersTreasuryDataMap,
-                depositsMap,
                 pendingActionsMap,
                 actionLogsMap,
                 memoToNeuronIdMap,

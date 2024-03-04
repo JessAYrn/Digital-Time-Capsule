@@ -236,7 +236,7 @@ module{
             case null{ return #err(#NotAuthorized); };
             case ( ? existingProfile){
                 let treasuryCanister: Treasury.Treasury = actor(daoMetaData.treasuryCanisterPrincipal);
-                let treasuryUsersStakesArray = await treasuryCanister.getTreasuryUsersStakesArray();
+                let usersTreasuryDataArray = await treasuryCanister.getUsersTreasuryDataArray();
                 let managerCanister : Manager.Manager = actor(daoMetaData.managerCanisterPrincipal);
                 let profilesApprovalStatus = getProfilesMetaData(profilesMap);
                 let frontendPrincipal = Principal.fromText(daoMetaData.frontEndPrincipal);
@@ -247,7 +247,7 @@ module{
                 let currentVersion = await managerCanister.getCurrentReleaseVersion();
                 let canisterDataPackagedForExport = {
                     daoMetaData with 
-                    proposals = GovernanceHelperMethods.tallyAllProposalVotes({proposals; treasuryUsersStakesArray});
+                    proposals = GovernanceHelperMethods.tallyAllProposalVotes({proposals; usersTreasuryDataArray});
                     journalCount = profilesMap.size();
                     currentCyclesBalance_frontend = cyclesBalance_frontend;
                     currentCyclesBalance_backend = cyclesBalance_backend;

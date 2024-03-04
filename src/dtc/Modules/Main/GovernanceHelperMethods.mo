@@ -21,7 +21,7 @@ module{
     
     type XDRs = Float;
 
-    public func tallyVotes({ treasuryUsersStakesArray : TreasuryTypes.UserStakesArray; proposal: MainTypes.Proposal;}):
+    public func tallyVotes({ usersTreasuryDataArray : TreasuryTypes.UsersTreasuryDataArray; proposal: MainTypes.Proposal;}):
     MainTypes.VotingResults {
         var yay: Nat64 = 0;
         var nay: Nat64 = 0;
@@ -31,10 +31,10 @@ module{
             Text.equal,
             Text.hash
         );
-        let usersStakesIter = Iter.fromArray<(Principal, TreasuryTypes.UserStake)>(treasuryUsersStakesArray);
-        for(userStakes in usersStakesIter){
-            let (principal, {icp}) = userStakes;
-            let icpNeuronsStakesIter = Iter.fromArray<(TreasuryTypes.NeuronIdAsText, TreasuryTypes.NeuronStakeInfo)>(icp);
+        let usersTreasuryDataIter = Iter.fromArray<(Principal, TreasuryTypes.UserTreasuryData)>(usersTreasuryDataArray);
+        for(treasuryData in usersTreasuryDataIter){
+            let (principal, {neurons}) = treasuryData;
+            let icpNeuronsStakesIter = Iter.fromArray<(TreasuryTypes.NeuronIdAsText, TreasuryTypes.NeuronStakeInfo)>(neurons.icp);
             for(icpNeuronStake in icpNeuronsStakesIter){
                 let {voting_power} = icpNeuronStake.1;
                 let vote = proposalVotesHashMap.get(Principal.toText(principal));
@@ -48,13 +48,13 @@ module{
         return {yay; nay; total};
     };
 
-    public func tallyAllProposalVotes({ treasuryUsersStakesArray : TreasuryTypes.UserStakesArray; proposals: MainTypes.ProposalsMap;}): 
+    public func tallyAllProposalVotes({ usersTreasuryDataArray : TreasuryTypes.UsersTreasuryDataArray; proposals: MainTypes.ProposalsMap;}): 
     MainTypes.Proposals{
 
         Iter.iterate<(Nat,MainTypes.Proposal)>(
             proposals.entries(), 
             func((key, proposal) : (Nat,MainTypes.Proposal), _index) {
-            let voteTally =  tallyVotes({treasuryUsersStakesArray; proposal});
+            let voteTally =  tallyVotes({usersTreasuryDataArray; proposal});
             let updatedProposal = {proposal with voteTally = voteTally};
             proposals.put(key, updatedProposal);
         });

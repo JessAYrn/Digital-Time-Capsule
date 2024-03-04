@@ -15,10 +15,6 @@ module{
         btc: {e8s : Nat64};
     };
 
-    public type TreasuryDepositsArray = [(Text, Deposits)];
-
-    public type TreasuryDepositsMap = HashMap.HashMap<Text, Deposits>;
-
     public type SupportedCurrencies = {
         #Icp;
         #Icp_staked;
@@ -41,7 +37,10 @@ module{
         voting_power : Nat64;
     };
 
-    public type UserTreasuryData = {icp : [(NeuronIdAsText, NeuronStakeInfo)]};
+    public type UserTreasuryData = {
+        neurons : { icp: [(NeuronIdAsText, NeuronStakeInfo)]; };
+        deposits : Deposits;
+    };
 
     public type UsersTreasuryDataArray = [(Principal, UserTreasuryData)];
 
@@ -53,8 +52,7 @@ module{
     };
 
     public type TreasuryDataExport = {
-        stakes : UserTreasuryData;
-        deposits : TreasuryDepositsArray;
+        usersTreasuryDataArray : UsersTreasuryDataArray;
         balance_icp: {e8s : Nat64};
         accountId_icp: [Nat8];
     };
