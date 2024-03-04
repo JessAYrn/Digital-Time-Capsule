@@ -1,7 +1,6 @@
 import Account "Serializers/Account";
 import Ledger "NNS/Ledger";
 import Governance "NNS/Governance";
-import Trie "mo:base/Trie";
 import Principal "mo:base/Principal";
 import Error "mo:base/Error";
 import Hash "mo:base/Hash";
@@ -11,33 +10,19 @@ import HashMap "mo:base/HashMap";
 import Iter "mo:base/Iter";
 import Cycles "mo:base/ExperimentalCycles";
 import Nat64 "mo:base/Nat64";
-import Float "mo:base/Float";
-import Int64 "mo:base/Int64";
 import Result "mo:base/Result";
 import Int "mo:base/Int";
 import Time "mo:base/Time";
-import Nat32 "mo:base/Nat32";
 import Blob "mo:base/Blob";
-import Buffer "mo:base/Buffer";
-import Char "mo:base/Char";
 import Nat "mo:base/Nat";
-import Order "mo:base/Order";
 import Timer "mo:base/Timer";
-import Debug "mo:base/Debug";
 import Array "mo:base/Array";
-import GovernanceHelperMethods "Modules/Main/GovernanceHelperMethods";
-import NnsCyclesMinting "NNS/NnsCyclesMinting";
-import MainTypes "Types/Main/types";
 import IC "Types/IC/types";
 import EcdsaHelperMethods "Modules/ECDSA/ECDSAHelperMethods";
 import Hex "Serializers/Hex";
-import Encoder "Serializers/CBOR/Encoder";
-import Value "Serializers/CBOR/Value";
-import Errors "Serializers/CBOR/Errors";
-import Decoder "Serializers/CBOR/Decoder";
-import NeuronManager "Modules/HTTPRequests/NeuronManager";
 import AnalyticsTypes "Types/Analytics/types";
-import TreasuryHelperMethods "Modules/Treasury/TreasuryHelperMethods";
+import AsyncronousHelperMethods "Modules/Treasury/AsyncronousHelperMethods";
+import SyncronousHelperMethods "Modules/Treasury/SyncronousHelperMethods";
 
 shared actor class Treasury (principal : Principal) = this {
 
@@ -135,12 +120,12 @@ shared actor class Treasury (principal : Principal) = this {
 
     public shared({caller}) func userHasSufficientStake(userPrincipal: Principal): async Bool {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
-        TreasuryHelperMethods.userHasSufficientStake(userPrincipal, usersStakesMap, minimalRequiredVotingPower);
+        SyncronousHelperMethods.userHasSufficientStake(userPrincipal, usersStakesMap, minimalRequiredVotingPower);
     };  
 
     public shared({caller})func creditUserIcpDeposits(userPrincipal: Principal, amount: Nat64): async () {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
-        TreasuryHelperMethods.creditUserIcpDeposits(depositsMap, updateTokenBalances, {userPrincipal; amount});
+        SyncronousHelperMethods.creditUserIcpDeposits(depositsMap, updateTokenBalances, {userPrincipal; amount});
     };
 
     public shared({caller}) func saveCurrentBalances() : async () {
@@ -188,7 +173,7 @@ shared actor class Treasury (principal : Principal) = this {
         actionLogsMap.put(Int.toText(Time.now()),"Creating Neuron, amount: " # Nat64.toText(amount) # ", contributor: " # Principal.toText(contributor));
         let depositsArrayUnaltered = Iter.toArray(depositsMap.entries());
 
-        let response = await TreasuryHelperMethods.createNeuron(
+        let response = await AsyncronousHelperMethods.createNeuron(
             neuronDataMap,
             usersStakesMap,
             depositsMap,
@@ -224,7 +209,7 @@ shared actor class Treasury (principal : Principal) = this {
 
         let depositsArrayUnaltered = Iter.toArray(depositsMap.entries());
 
-        let response = await TreasuryHelperMethods.increaseNeuron(
+        let response = await AsyncronousHelperMethods.increaseNeuron(
             neuronDataMap,
             usersStakesMap,
             depositsMap,
@@ -254,7 +239,7 @@ shared actor class Treasury (principal : Principal) = this {
     public shared({caller}) func manageNeuron( args: Governance.ManageNeuron, proposer: Principal): async Result.Result<() , TreasuryTypes.Error>{
         let canisterId =  Principal.fromActor(this);
         if(Principal.toText(caller) != Principal.toText(canisterId) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
-        let response = await TreasuryHelperMethods.manageNeuron(
+        let response = await AsyncronousHelperMethods.manageNeuron(
             neuronDataMap,
             usersStakesMap,
             depositsMap,
@@ -340,7 +325,7 @@ shared actor class Treasury (principal : Principal) = this {
 
     public shared({caller}) func resolvePendingActions() : async () {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
-        await TreasuryHelperMethods.resolvePendingActions(
+        await AsyncronousHelperMethods.resolvePendingActions(
             neuronDataMap,
             usersStakesMap,
             depositsMap,
@@ -373,7 +358,7 @@ shared actor class Treasury (principal : Principal) = this {
         actionLogsArray := [];
 
         let timerId = recurringTimer(#seconds(7 * 24 * 60 * 60), func (): async () { 
-            await TreasuryHelperMethods.refreshNeuronsData(
+            await AsyncronousHelperMethods.refreshNeuronsData(
                 neuronDataMap,
                 usersStakesMap,
                 depositsMap,

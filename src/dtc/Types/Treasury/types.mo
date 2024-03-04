@@ -15,6 +15,10 @@ module{
         btc: {e8s : Nat64};
     };
 
+    public type TreasuryDepositsArray = [(Text, Deposits)];
+
+    public type TreasuryDepositsMap = HashMap.HashMap<Text, Deposits>;
+
     public type SupportedCurrencies = {
         #Icp;
         #Icp_staked;
@@ -54,10 +58,6 @@ module{
         balance_icp: {e8s : Nat64};
         accountId_icp: [Nat8];
     };
-
-    public type TreasuryDepositsArray = [(Text, Deposits)];
-
-    public type TreasuryDepositsMap = HashMap.HashMap<Text, Deposits>;
 
     public type Memo = Nat;
 
