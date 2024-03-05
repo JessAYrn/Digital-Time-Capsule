@@ -104,8 +104,8 @@ shared actor class Treasury (principal : Principal) = this {
     };
 
     public shared({caller}) func userHasSufficientStake(userPrincipal: Principal): async Bool {
-        if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
-        SyncronousHelperMethods.userHasSufficientStake(userPrincipal, usersTreasuryDataMap, minimalRequiredVotingPower);
+        // if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
+        SyncronousHelperMethods.userHasSufficientStake(userPrincipal, neuronDataMap, minimalRequiredVotingPower);
     };  
 
     public shared({caller})func creditUserIcpDeposits(userPrincipal: Principal, amount: Nat64): async () {
@@ -242,7 +242,7 @@ shared actor class Treasury (principal : Principal) = this {
         };
     };
 
-    public query({caller}) func viewNeuronMap() : async TreasuryTypes.NeuronsDataArray {
+    public query({caller}) func getNeuronsDataArray() : async TreasuryTypes.NeuronsDataArray {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         return Iter.toArray(neuronDataMap.entries());
     };

@@ -21,7 +21,7 @@ module{
     
     type XDRs = Float;
 
-    public func tallyVotes({ usersTreasuryDataArray : TreasuryTypes.UsersTreasuryDataArray; proposal: MainTypes.Proposal;}):
+    public func tallyVotes({ neuronsDataArray : TreasuryTypes.NeuronsDataArray; proposal: MainTypes.Proposal;}):
     MainTypes.VotingResults {
         var yay: Nat64 = 0;
         var nay: Nat64 = 0;
@@ -31,13 +31,13 @@ module{
             Text.equal,
             Text.hash
         );
-        let usersTreasuryDataIter = Iter.fromArray<(Principal, TreasuryTypes.UserTreasuryData)>(usersTreasuryDataArray);
-        for(treasuryData in usersTreasuryDataIter){
-            let (principal, {neurons}) = treasuryData;
-            let icpNeuronsStakesIter = Iter.fromArray<(TreasuryTypes.NeuronIdAsText, TreasuryTypes.NeuronStakeInfo)>(neurons.icp);
-            for(icpNeuronStake in icpNeuronsStakesIter){
-                let {voting_power} = icpNeuronStake.1;
-                let vote = proposalVotesHashMap.get(Principal.toText(principal));
+        let neuronsDataIter = Iter.fromArray<(TreasuryTypes.NeuronIdAsText, TreasuryTypes.NeuronData)>(neuronsDataArray);
+        for((neuronId, neuronData) in neuronsDataIter){
+            let {contributions} = neuronData;
+            let neuronsStakesInfoIter = Iter.fromArray<(Principal, TreasuryTypes.NeuronStakeInfo)>(contributions);
+            for((contributor, stakesInfo) in neuronsStakesInfoIter){
+                let {voting_power} = stakesInfo;
+                let vote = proposalVotesHashMap.get(Principal.toText(contributor));
                 switch(vote){
                     case null {};
                     case(? v){ let {adopt} = v; if(adopt) yay += voting_power else nay += voting_power; };
@@ -48,13 +48,13 @@ module{
         return {yay; nay; total};
     };
 
-    public func tallyAllProposalVotes({ usersTreasuryDataArray : TreasuryTypes.UsersTreasuryDataArray; proposals: MainTypes.ProposalsMap;}): 
+    public func tallyAllProposalVotes({ neuronsDataArray : TreasuryTypes.NeuronsDataArray; proposals: MainTypes.ProposalsMap;}): 
     MainTypes.Proposals{
 
         Iter.iterate<(Nat,MainTypes.Proposal)>(
             proposals.entries(), 
             func((key, proposal) : (Nat,MainTypes.Proposal), _index) {
-            let voteTally =  tallyVotes({usersTreasuryDataArray; proposal});
+            let voteTally =  tallyVotes({neuronsDataArray; proposal});
             let updatedProposal = {proposal with voteTally = voteTally};
             proposals.put(key, updatedProposal);
         });

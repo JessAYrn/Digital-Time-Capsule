@@ -13,22 +13,23 @@ module{
 
     let txFee: Nat64 = 10_000;
 
-    public func userHasSufficientStake(userPrincipal: Principal, usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap, minimalRequiredVotingPower: Nat64): 
+    public func userHasSufficientStake(userPrincipal: Principal, neuronsDataMap: TreasuryTypes.NeuronsDataMap, minimalRequiredVotingPower: Nat64): 
     Bool {
-        let userTreasuryData = usersTreasuryDataMap.get(userPrincipal);
-        switch(userTreasuryData){
-            case null { return false};
-            case (?userTreasuryData_){
-                var totalVotingPower : Nat64 = 0;
-                let icpNeuronsStakesIter = Iter.fromArray<(TreasuryTypes.NeuronIdAsText, TreasuryTypes.NeuronStakeInfo)>(userTreasuryData_.neurons.icp);
-                for( neuronStake in icpNeuronsStakesIter){
-                    let {voting_power} = neuronStake.1;
-                    totalVotingPower += voting_power;
-                };
-                if(totalVotingPower < minimalRequiredVotingPower) return false;
-                return true;
-            };
+        var totalVotingPower : Nat64 = 0;
+        label neuronDataLoop for( (neuronId, neuronData)  in neuronsDataMap.entries()){
+            let {contributions} = neuronData;
+            let contributionsMap = HashMap.fromIter<Principal, TreasuryTypes.NeuronStakeInfo>(
+                Iter.fromArray(contributions), 
+                Iter.size(Iter.fromArray(contributions)), 
+                Principal.equal,
+                Principal.hash
+            );
+            let ?neuronStakeInfo = contributionsMap.get(userPrincipal) else { continue neuronDataLoop };
+            let {voting_power} = neuronStakeInfo;
+            totalVotingPower += voting_power;
         };
+        if(totalVotingPower < minimalRequiredVotingPower) return false;
+        return true;
     };  
 
     public func updateUserTreasruyDeposits(
@@ -64,67 +65,74 @@ module{
 
     public func computeNeuronStakeInfosVotingPowers(
         neuronDataMap:TreasuryTypes.NeuronsDataMap, 
-        usersTreasuryDataMap:TreasuryTypes.UsersTreasuryDataMap,
         neuronId: Text
     ): () {
         let ?neuronData = neuronDataMap.get(neuronId) else { return };
         let ?neuronInfo = neuronData.neuronInfo else { return };
         let {stake_e8s = neuronTotalStake; voting_power = neuronTotalVotingPower; } = neuronInfo;
-
-        for((userPrincipal, userTreasuryData) in usersTreasuryDataMap.entries()){
-            let userIcpNeuronsStakesIter = Iter.fromArray<(TreasuryTypes.NeuronIdAsText, TreasuryTypes.NeuronStakeInfo)>(userTreasuryData.neurons.icp);
-            let userIcpNeuronsStakesMap = HashMap.fromIter<TreasuryTypes.NeuronIdAsText, TreasuryTypes.NeuronStakeInfo>(
-                userIcpNeuronsStakesIter, 
-                Iter.size(Iter.fromArray(userTreasuryData.neurons.icp)), 
-                Text.equal,
-                Text.hash
-            );
-            switch(userIcpNeuronsStakesMap.get(neuronId)){
-                case(null){};
-                case(?userIcpNeuronStake){
-                    let {stake_e8s = userTotalStake} = userIcpNeuronStake;
-                    let userVotingPower = (userTotalStake * neuronTotalVotingPower) / neuronTotalStake;
-                    userIcpNeuronsStakesMap.put(neuronId, {userIcpNeuronStake with voting_power = userVotingPower});
-                    usersTreasuryDataMap.put(userPrincipal, {userTreasuryData with neurons = {userTreasuryData.neurons with icp = Iter.toArray(userIcpNeuronsStakesMap.entries())}});
-                };
-            };
+        let {contributions} = neuronData;
+        let contributionsMap = HashMap.fromIter<Principal, TreasuryTypes.NeuronStakeInfo>(
+            Iter.fromArray(contributions), 
+            Iter.size(Iter.fromArray(contributions)), 
+            Principal.equal,
+            Principal.hash
+        );
+        for((contributor, neuronStakeInfo) in contributionsMap.entries()){
+            let {stake_e8s = userTotalStake} = neuronStakeInfo;
+            let userVotingPower = (userTotalStake * neuronTotalVotingPower) / neuronTotalStake;
+            contributionsMap.put(contributor, {neuronStakeInfo with voting_power = userVotingPower});
+            neuronDataMap.put(neuronId, {neuronData with contributions = Iter.toArray(contributionsMap.entries())});
         };
     };
 
     public func updateUserNeuronStakeInfo(
         neuronDataMap:TreasuryTypes.NeuronsDataMap, 
-        usersTreasuryDataMap:TreasuryTypes.UsersTreasuryDataMap,
+        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap,
         { userPrincipal: Principal; newAmount: Nat64; neuronId: Text;}
     ): () {
+        let neuronData = switch(neuronDataMap.get(neuronId)){
+            case null { {neuron = null; neuronInfo = null; parentNeuronContributions = null; contributions = []; };};
+            case(?neuronData_){ neuronData_ };
+        };
+        let {contributions} = neuronData;
+        let contributionsMap = HashMap.fromIter<Principal, TreasuryTypes.NeuronStakeInfo>(
+            Iter.fromArray(contributions), 
+            Iter.size(Iter.fromArray(contributions)), 
+            Principal.equal,
+            Principal.hash
+        );
+        var neuronStakeInfo = switch(contributionsMap.get(userPrincipal)){
+            case null { {stake_e8s : Nat64 = 0; voting_power : Nat64 = 0;} };
+            case(?neuronStakeInfo_){ neuronStakeInfo_ };
+        };
         let userTreasuryData = switch(usersTreasuryDataMap.get(userPrincipal)){
             case null { 
-                { 
+                {
                     neurons = {icp = [] };
                     deposits = {
-                        icp = {e8s : Nat64 = 0};
-                        icp_staked = {e8s : Nat64 = 0};
-                        eth = {e8s : Nat64 = 0};
-                        btc = {e8s : Nat64 = 0};
+                        icp = {e8s: Nat64 = 0};
+                        icp_staked = {e8s: Nat64 = 0};
+                        eth = {e8s: Nat64 = 0};
+                        btc = {e8s: Nat64 = 0};
                     };
-                } 
-            }; 
-            case(?userTreasuryData_){ userTreasuryData_ } };
-        let {neurons} = userTreasuryData;
-        let userIcpNeuronsStakesIter = Iter.fromArray<(TreasuryTypes.NeuronIdAsText, TreasuryTypes.NeuronStakeInfo)>(neurons.icp);
-        let userIcpNeuronsStakesMap = HashMap.fromIter<TreasuryTypes.NeuronIdAsText, TreasuryTypes.NeuronStakeInfo>(
-            userIcpNeuronsStakesIter, 
-            Iter.size(Iter.fromArray(neurons.icp)), 
+                };
+            };
+            case(?userTreasuryData_){ userTreasuryData_ };
+        };
+        let userIcpNeuronsMap = HashMap.fromIter<TreasuryTypes.NeuronIdAsText, {neuronId: TreasuryTypes.NeuronIdAsText}>(
+            Iter.fromArray(userTreasuryData.neurons.icp), 
+            Iter.size(Iter.fromArray(userTreasuryData.neurons.icp)), 
             Text.equal,
             Text.hash
         );
-        var userIcpNeuronStake = switch(userIcpNeuronsStakesMap.get(neuronId)){
-            case null { {stake_e8s : Nat64 = 0; voting_power : Nat64 = 0;} };
-            case(?icpNeuronStake_){ icpNeuronStake_ };
-        };
-        userIcpNeuronStake := {userIcpNeuronStake with stake_e8s = newAmount};
-        userIcpNeuronsStakesMap.put(neuronId, userIcpNeuronStake);
-        usersTreasuryDataMap.put(userPrincipal, {userTreasuryData with neurons = {neurons with icp = Iter.toArray(userIcpNeuronsStakesMap.entries())}});
-        computeNeuronStakeInfosVotingPowers(neuronDataMap, usersTreasuryDataMap, neuronId);
+
+        neuronStakeInfo := {neuronStakeInfo with stake_e8s = newAmount};
+        contributionsMap.put(userPrincipal, neuronStakeInfo);
+        neuronDataMap.put(neuronId, {neuronData with contributions = Iter.toArray(contributionsMap.entries())});
+
+        userIcpNeuronsMap.put(neuronId, {neuronId});
+        usersTreasuryDataMap.put(userPrincipal, {userTreasuryData with neurons = {userTreasuryData.neurons with icp = Iter.toArray(userIcpNeuronsMap.entries())}});
+        computeNeuronStakeInfosVotingPowers(neuronDataMap, neuronId);
     };
 
     public func creditUserNeuronStake(
@@ -148,28 +156,21 @@ module{
             };
         };
         updateUserTreasruyDeposits(usersTreasuryDataMap,updateTokenBalances, {userPrincipal; currency = #Icp_staked; newAmount = treasuryData.deposits.icp_staked.e8s + delta});
-        let userNeuronStakeInfo = getUserNeuronStakeInfo(userPrincipal, usersTreasuryDataMap, neuronId);
+        let userNeuronStakeInfo = getUserNeuronStakeInfo(userPrincipal, neuronDataMap, neuronId);
         updateUserNeuronStakeInfo( neuronDataMap, usersTreasuryDataMap, {userPrincipal; newAmount = userNeuronStakeInfo.stake_e8s + delta; neuronId;});
     };
 
-    public func getUserNeuronStakeInfo(userPrincipal: Principal,usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap, neuronId: Text): TreasuryTypes.NeuronStakeInfo {
-        let userStakes = usersTreasuryDataMap.get(userPrincipal);
-        switch(userStakes){
-            case null { return  { stake_e8s : Nat64 = 0; voting_power : Nat64 = 0; }; };
-            case (?userTreasuryData){
-                let icpNeuronsStakesIter = Iter.fromArray<(TreasuryTypes.NeuronIdAsText, TreasuryTypes.NeuronStakeInfo)>(userTreasuryData.neurons.icp);
-                let icpNeuronsStakesMap = HashMap.fromIter<TreasuryTypes.NeuronIdAsText, TreasuryTypes.NeuronStakeInfo>(
-                    icpNeuronsStakesIter, 
-                    Iter.size(Iter.fromArray(userTreasuryData.neurons.icp)), 
-                    Text.equal,
-                    Text.hash
-                );
-                switch(icpNeuronsStakesMap.get(neuronId)){
-                    case null { return  { stake_e8s : Nat64 = 0; voting_power : Nat64 = 0; }; };
-                    case(?neuronStake){ return neuronStake; };
-                };
-            };
-        };
+    public func getUserNeuronStakeInfo(userPrincipal: Principal, neruonsDataMap: TreasuryTypes.NeuronsDataMap, neuronId: Text): TreasuryTypes.NeuronStakeInfo {
+        let ?neuronData = neruonsDataMap.get(neuronId) else { return  { stake_e8s : Nat64 = 0; voting_power : Nat64 = 0; }; };
+        let {contributions} = neuronData;
+        let contributionsMap = HashMap.fromIter<Principal, TreasuryTypes.NeuronStakeInfo>(
+            Iter.fromArray(contributions), 
+            Iter.size(Iter.fromArray(contributions)), 
+            Principal.equal,
+            Principal.hash
+        );
+        let ?neuronStakeInfo = contributionsMap.get(userPrincipal) else { return  { stake_e8s : Nat64 = 0; voting_power : Nat64 = 0; }; };
+        return neuronStakeInfo;
     };
 
     public func creditUserIcpDeposits(
@@ -205,25 +206,22 @@ module{
     public func finalizeNewlyCreatedNeuronStakeInfo(
         placeHolderKey: Text,  
         newNeuronId: Nat64,
+        neuronDataMap: TreasuryTypes.NeuronsDataMap,
         usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap
     ): () {
-        for((userPrincipal, userTreasuryData) in usersTreasuryDataMap.entries()){
-            let userIcpNeuronsStakesIter = Iter.fromArray<(TreasuryTypes.NeuronIdAsText, TreasuryTypes.NeuronStakeInfo)>(userTreasuryData.neurons.icp);
-            let userIcpNeuronsStakesMap = HashMap.fromIter<TreasuryTypes.NeuronIdAsText, TreasuryTypes.NeuronStakeInfo>(
-                userIcpNeuronsStakesIter, 
+        label usersTreasuryDataLoop for((userPrincipal, userTreasuryData) in usersTreasuryDataMap.entries()){
+            let userIcpNeurons = HashMap.fromIter<TreasuryTypes.NeuronIdAsText, {neuronId: TreasuryTypes.NeuronIdAsText}>(
+                Iter.fromArray(userTreasuryData.neurons.icp), 
                 Iter.size(Iter.fromArray(userTreasuryData.neurons.icp)), 
                 Text.equal,
                 Text.hash
             );
-            switch(userIcpNeuronsStakesMap.get(placeHolderKey)){
-                case(null){};
-                case(?newNeuronStakeInfo){
-                    userIcpNeuronsStakesMap.put(Nat64.toText(newNeuronId), newNeuronStakeInfo);
-                    let _ = userIcpNeuronsStakesMap.remove(placeHolderKey);
-                    usersTreasuryDataMap.put(userPrincipal, {userTreasuryData with neurons = {userTreasuryData.neurons with icp = Iter.toArray(userIcpNeuronsStakesMap.entries())}});
-                };
-            };
+            let ?neuronId = userIcpNeurons.remove(placeHolderKey) else { continue usersTreasuryDataLoop};
+            userIcpNeurons.put(Nat64.toText(newNeuronId), {neuronId = Nat64.toText(newNeuronId)});
+            usersTreasuryDataMap.put(userPrincipal, {userTreasuryData with neurons = {userTreasuryData.neurons with icp = Iter.toArray(userIcpNeurons.entries())}});
         };
+        let ?neuronData = neuronDataMap.remove(placeHolderKey) else { return };
+        neuronDataMap.put(Nat64.toText(newNeuronId), neuronData);
     };
 
     public func splitNeuronStakeInfo(
@@ -234,53 +232,82 @@ module{
         usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap, 
         neuronDataMap: TreasuryTypes.NeuronsDataMap,
     ): () {
-        let ?{neuron; neuronInfo} = neuronDataMap.get(Nat64.toText(sourceNeuronId)) else { Debug.trap("No neuronData for neuronId") };
-        let ?neuronStakeInfo_ = neuronInfo else { Debug.trap("No neuronInfo for neuronId") };
-        let {stake_e8s = oldNeuronTotalStake} = neuronStakeInfo_;
+        let ?neuronData = neuronDataMap.get(Nat64.toText(sourceNeuronId)) else { Debug.trap("No neuronData for neuronId") };
+        let ?neuronInfo = neuronData.neuronInfo else { Debug.trap("No neuronInfo for neuronId") };
+        let {contributions} = neuronData;
+        let sourceNeuronContributionsMap = HashMap.fromIter<Principal, TreasuryTypes.NeuronStakeInfo>(
+            Iter.fromArray(contributions), 
+            Iter.size(Iter.fromArray(contributions)), 
+            Principal.equal,
+            Principal.hash
+        );
+        let targetNeuronContributionsMap = HashMap.HashMap<Principal, TreasuryTypes.NeuronStakeInfo>(1, Principal.equal, Principal.hash);
+        
+        let {stake_e8s = sourceNeuronTotalStake} = neuronInfo;
         var splitAmount_: Nat64 = 0;
 
-        label splitLoop for((userPrincipal, userTreasuryData) in usersTreasuryDataMap.entries()){
-            let userIcpNeuronsStakesMap = HashMap.fromIter<TreasuryTypes.NeuronIdAsText, TreasuryTypes.NeuronStakeInfo>(
+        label splitLoop for((userPrincipal, neuronStakeInfo) in sourceNeuronContributionsMap.entries()){
+            let {stake_e8s = sourceNeuronStake} = neuronStakeInfo;
+            let targetNeuronStake = (sourceNeuronStake * splitAmount) / sourceNeuronTotalStake;
+            splitAmount_ += targetNeuronStake;
+            var updatedSourceNeuronStake = sourceNeuronStake - targetNeuronStake;
+            if(userPrincipal == proposer) { updatedSourceNeuronStake -= txFee; };
+
+            sourceNeuronContributionsMap.put(userPrincipal, {neuronStakeInfo with stake_e8s = updatedSourceNeuronStake});
+            targetNeuronContributionsMap.put(userPrincipal, {stake_e8s = targetNeuronStake ; voting_power = 0;});
+
+            let userTreasuryData = switch(usersTreasuryDataMap.get(userPrincipal)){
+                case null { 
+                    {
+                        neurons = {icp = [] };
+                        deposits = {
+                            icp = {e8s: Nat64 = 0}; 
+                            icp_staked = {e8s: Nat64 = 0};
+                            eth = {e8s: Nat64 = 0};
+                            btc = {e8s: Nat64 = 0};
+                        };
+                    };
+                };
+                case(?userTreasuryData_){ userTreasuryData_ };
+            };
+            let userIcpNeuronsMap = HashMap.fromIter<TreasuryTypes.NeuronIdAsText, {neuronId: TreasuryTypes.NeuronIdAsText}>(
                 Iter.fromArray(userTreasuryData.neurons.icp), 
                 Iter.size(Iter.fromArray(userTreasuryData.neurons.icp)), 
                 Text.equal,
                 Text.hash
             );
-            let ?oldNeuronStakeInfo = userIcpNeuronsStakesMap.get(Nat64.toText(sourceNeuronId)) else {continue splitLoop};
-            let {stake_e8s = oldNeuronStake} = oldNeuronStakeInfo;
-            let newNeuronStake = (oldNeuronStake * splitAmount) / oldNeuronTotalStake;
-            splitAmount_ += newNeuronStake;
-            var updatedOldNeuronStake = oldNeuronStake - newNeuronStake;
-            if(userPrincipal == proposer) { updatedOldNeuronStake -= txFee; };
-            userIcpNeuronsStakesMap.put(Nat64.toText(sourceNeuronId), {oldNeuronStakeInfo with stake_e8s = updatedOldNeuronStake});
-            userIcpNeuronsStakesMap.put(Nat64.toText(targetNeuronId), {stake_e8s = newNeuronStake; voting_power = 0});
-            usersTreasuryDataMap.put(userPrincipal, {userTreasuryData with neurons = {userTreasuryData.neurons with icp = Iter.toArray(userIcpNeuronsStakesMap.entries())}});
+            var userDeposits = userTreasuryData.deposits;
+            if(userPrincipal == proposer) { userDeposits := {userDeposits with deposits = {userTreasuryData.deposits with icp_staked = userTreasuryData.deposits.icp_staked.e8s - txFee}}};
+            userIcpNeuronsMap.put(Nat64.toText(sourceNeuronId), {neuronId = Nat64.toText(sourceNeuronId)});
+            userIcpNeuronsMap.put(Nat64.toText(targetNeuronId), {neuronId = Nat64.toText(targetNeuronId)});
+            let updatedUserTreasuryData = {
+                userTreasuryData with 
+                neurons = { userTreasuryData.neurons with icp = Iter.toArray(userIcpNeuronsMap.entries()) };
+                deposits = userDeposits
+            };
+            usersTreasuryDataMap.put( userPrincipal, updatedUserTreasuryData);
         };
 
         var slippage = splitAmount - splitAmount_;
-        var index = 0;
         var remainingSlippage = slippage;
+
         label slippageOutterLoop while(slippage > 0){
-            label slippageInnerLoop for((userPrincipal, userTreasuryData) in usersTreasuryDataMap.entries()){
-                if(slippage <= 0) break slippageOutterLoop;
-                let userIcpNeuronsStakesMap = HashMap.fromIter<TreasuryTypes.NeuronIdAsText, TreasuryTypes.NeuronStakeInfo>(
-                    Iter.fromArray(userTreasuryData.neurons.icp), 
-                    Iter.size(Iter.fromArray(userTreasuryData.neurons.icp)), 
-                    Text.equal,
-                    Text.hash
-                );
-                let ?oldNeuronStakeInfo = userIcpNeuronsStakesMap.get(Nat64.toText(sourceNeuronId)) else {continue slippageInnerLoop};
-                let ?newNeuronStakeInfo = userIcpNeuronsStakesMap.get(Nat64.toText(targetNeuronId)) else {continue slippageInnerLoop};
-                userIcpNeuronsStakesMap.put(Nat64.toText(sourceNeuronId), {oldNeuronStakeInfo with stake_e8s = oldNeuronStakeInfo.stake_e8s - 1});
-                userIcpNeuronsStakesMap.put(Nat64.toText(targetNeuronId), {newNeuronStakeInfo with stake_e8s = newNeuronStakeInfo.stake_e8s + 1;});
-                usersTreasuryDataMap.put(userPrincipal, {userTreasuryData with neurons = {userTreasuryData.neurons with icp = Iter.toArray(userIcpNeuronsStakesMap.entries())}});
+            label slippageInnerLoop for((userPrincipal, sourceNeuronStakeInfo) in sourceNeuronContributionsMap.entries()){
+                if(slippage <= 0) break slippageInnerLoop;
+                let ?targetNeuronStakeInfo = targetNeuronContributionsMap.get(userPrincipal) else { continue slippageInnerLoop };
+                sourceNeuronContributionsMap.put(userPrincipal, {sourceNeuronStakeInfo with stake_e8s = sourceNeuronStakeInfo.stake_e8s - 1});
+                targetNeuronContributionsMap.put(userPrincipal, {targetNeuronStakeInfo with stake_e8s = targetNeuronStakeInfo.stake_e8s + 1});
                 slippage -= 1;
             };
             if (remainingSlippage == slippage) { break slippageOutterLoop; };
             remainingSlippage := slippage;
         };
-        computeNeuronStakeInfosVotingPowers(neuronDataMap, usersTreasuryDataMap, Nat64.toText(sourceNeuronId));
-        computeNeuronStakeInfosVotingPowers(neuronDataMap, usersTreasuryDataMap, Nat64.toText(targetNeuronId));
+
+        neuronDataMap.put(Nat64.toText(sourceNeuronId), {neuronData with contributions = Iter.toArray(sourceNeuronContributionsMap.entries())});
+        neuronDataMap.put(Nat64.toText(targetNeuronId), {contributions = Iter.toArray(targetNeuronContributionsMap.entries()); neuron = null; neuronInfo = null; parentNeuronContributions = null});
+
+        computeNeuronStakeInfosVotingPowers(neuronDataMap, Nat64.toText(sourceNeuronId));
+        computeNeuronStakeInfosVotingPowers(neuronDataMap, Nat64.toText(targetNeuronId));
     };
 
 

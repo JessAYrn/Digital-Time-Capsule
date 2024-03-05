@@ -323,12 +323,12 @@ shared actor class User() = this {
             case (? existingProfile){
                 let managerCanister : Manager.Manager = actor(daoMetaData_v2.managerCanisterPrincipal);
                 let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
-                let usersTreasuryDataArray = await treasuryCanister.getUsersTreasuryDataArray();
+                let neuronsDataArray = await treasuryCanister.getNeuronsDataArray();
                 let profilesMetaData = CanisterManagementMethods.getProfilesMetaData(userProfilesMap);
                 let {number = releaseVersion} = await managerCanister.getCurrentReleaseVersion();
                 let canisterDataPackagedForExport = {
                     daoMetaData_v2 with 
-                    proposals = GovernanceHelperMethods.tallyAllProposalVotes({proposals = proposalsMap; usersTreasuryDataArray;});
+                    proposals = GovernanceHelperMethods.tallyAllProposalVotes({proposals = proposalsMap; neuronsDataArray;});
                     isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v2);
                     currentCyclesBalance_backend = Cycles.balance();
                     journalCount = userProfilesMap.size();
@@ -418,7 +418,7 @@ shared actor class User() = this {
                 let nextStableVersion = await managerCanister.getWhatIsNextStableReleaseVersion();
                 let text = Text.concat("New Stable Version Availabe: Version #", Nat.toText(nextStableVersion.number));
                 if(nextStableVersion.number > currentReleaseVersion.number) notificationsBuffer.add({text; key = null});
-                return notificationsBuffer.toArray();
+                return Buffer.toArray(notificationsBuffer);
             };
         };
     };
@@ -482,12 +482,12 @@ shared actor class User() = this {
         let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
         let hasSufficientStake = await treasuryCanister.userHasSufficientStake(caller);
         if(not hasSufficientStake) return #err(#NotAuthorizedToCreateProposals);
-        let usersTreasuryDataArray = await treasuryCanister.getUsersTreasuryDataArray();
+        let neuronsDataArray = await treasuryCanister.getNeuronsDataArray();
         let proposer = Principal.toText(caller); let votes = [(proposer, {adopt = true})];
         let timeInitiated = Time.now(); let timeExecuted = null;
         var voteTally = {yay = Nat64.fromNat(0); nay = Nat64.fromNat(0); total = Nat64.fromNat(0);};
         let proposal = {votes; action; proposer; timeInitiated; timeExecuted; voteTally;};
-        let votingResults = GovernanceHelperMethods.tallyVotes({usersTreasuryDataArray; proposal;});
+        let votingResults = GovernanceHelperMethods.tallyVotes({neuronsDataArray; proposal;});
         proposalsMap.put(proposalIndex, {proposal with voteTally = votingResults} );
         let timerId = setTimer(#seconds(24 * 60 * 60 * 3), finalizeProposalVotingPeriod);
         proposalIndex += 1;
@@ -502,16 +502,16 @@ shared actor class User() = this {
         if(not hasSufficientStake) return #err(#NotAuthorizedToVoteOnThisProposal);
         let proposal_ = proposalsMap.get(proposalIndex);
         if(proposal_ == null) return #err(#PorposalHasExpired);
-        let ?proposal = proposal_;
+        let ?proposal = proposal_ else { return #err(#PorposalHasExpired) };
         let {votes} = proposal;
         let votesMap = HashMap.fromIter<Text, MainTypes.Vote>( Iter.fromArray(votes), Iter.size(Iter.fromArray(votes)), Text.equal, Text.hash );
         let previousVote = votesMap.get(Principal.toText(caller));
         switch(previousVote){
             case null {
-                let usersTreasuryDataArray = await treasuryCanister.getUsersTreasuryDataArray();
+                let neuronsDataArray = await treasuryCanister.getNeuronsDataArray();
                 votesMap.put(Principal.toText(caller), {adopt});
                 var updatedProposal = {proposal with votes = Iter.toArray(votesMap.entries()); };
-                let voteTally = GovernanceHelperMethods.tallyVotes({usersTreasuryDataArray; proposal = updatedProposal});
+                let voteTally = GovernanceHelperMethods.tallyVotes({neuronsDataArray; proposal = updatedProposal});
                 updatedProposal := {updatedProposal with voteTally};
                 proposalsMap.put(proposalIndex, updatedProposal);
                 return #ok(updatedProposal);
@@ -533,8 +533,8 @@ shared actor class User() = this {
             case null {};
             case (?proposal){
                 let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
-                let usersTreasuryDataArray = await treasuryCanister.getUsersTreasuryDataArray();
-                let votingResults = GovernanceHelperMethods.tallyVotes({usersTreasuryDataArray; proposal;});
+                let neuronsDataArray = await treasuryCanister.getNeuronsDataArray();
+                let votingResults = GovernanceHelperMethods.tallyVotes({neuronsDataArray; proposal;});
                 let {yay; nay; total } = votingResults;
                 var timeExecuted: ?Int = null;
                 if( yay > nay) {

@@ -38,7 +38,7 @@ module{
     };
 
     public type UserTreasuryData = {
-        neurons : { icp: [(NeuronIdAsText, NeuronStakeInfo)]; };
+        neurons : { icp: [(NeuronIdAsText, {neuronId: NeuronIdAsText})]; };
         deposits : Deposits;
     };
 
@@ -63,7 +63,9 @@ module{
 
     public type NeuronIdAsText = Text;
 
-    public type NeuronData = { neuron: Governance.Neuron; neuronInfo: ?Governance.NeuronInfo};
+    public type NeuronContributions = [(Principal, NeuronStakeInfo)];
+
+    public type NeuronData = { contributions: NeuronContributions; neuron: ?Governance.Neuron; neuronInfo: ?Governance.NeuronInfo; parentNeuronContributions: ?NeuronContributions; };
 
     public type NeuronsDataArray = [(NeuronIdAsText, NeuronData)];
 
