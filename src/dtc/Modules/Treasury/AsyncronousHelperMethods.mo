@@ -126,6 +126,13 @@ module{
                         activityLogsMap.put(Int.toText(Time.now()),"Failed to complete action: No new created_neuron_id in response");
                         Debug.trap("No new created_neuron_id in response"); 
                     };
+                    let ?parentNeuron = neuronDataMap.get(Nat64.toText(neuronId)) else {
+                        activityLogsMap.put(Int.toText(Time.now()),"Failed to complete action: No parentNeuronContributions were recorded for newly spawned neuron");
+                        neuronDataMap.put(Nat64.toText(created_neuron_id.id), {neuron = null; neuronInfo = null; parentNeuronContributions = null; contributions = []; });
+                        Debug.trap("No parent neuron in neuronDataMap");
+                    };
+                    let parentNeuronContributions = ?parentNeuron.contributions;
+                    neuronDataMap.put(Nat64.toText(created_neuron_id.id), {neuron = null; neuronInfo = null; parentNeuronContributions; contributions = []; });
                     ignore getNeuronData( neuronDataMap, usersTreasuryDataMap, pendingActionsMap, activityLogsMap, memoToNeuronIdMap, updateTokenBalances, transformFn, #GetFullNeuronResponse({neuronId;}) );
                     ignore getNeuronData( neuronDataMap, usersTreasuryDataMap, pendingActionsMap, activityLogsMap ,memoToNeuronIdMap, updateTokenBalances, transformFn, #GetFullNeuronResponse({neuronId = created_neuron_id.id;}) );
                     let _ = pendingActionsMap.remove("spawn_"#Nat64.toText(neuronId));
@@ -152,9 +159,9 @@ module{
                     let _ = pendingActionsMap.remove("configure_"#Nat64.toText(neuronId));
                     activityLogsMap.put(Int.toText(Time.now()),"successfully completed action: configure_"#Nat64.toText(neuronId));
                 };
-                case(#Disburse({response; neuronId;})){
-                    ignore getNeuronData( neuronDataMap, usersTreasuryDataMap, pendingActionsMap, activityLogsMap, memoToNeuronIdMap, updateTokenBalances, transformFn, #GetFullNeuronResponse({neuronId;}) );
+                case(#Disburse({response; neuronId; proposer;})){
                     let _ = pendingActionsMap.remove("disburse_"#Nat64.toText(neuronId));
+                    SyncronousHelperMethods.creditUsersForDispursedNeuron(neuronDataMap, usersTreasuryDataMap, updateTokenBalances, Nat64.toText(neuronId), proposer);
                     activityLogsMap.put(Int.toText(Time.now()),"successfully completed action: disburse_"#Nat64.toText(neuronId));
                 };
                 case(#RegisterVote({response; neuronId;})){
@@ -196,6 +203,7 @@ module{
                                 case(?neuronData){
                                     neuronDataMap.put(Nat64.toText(neuronId), {neuronData with neuronInfo = ?neuronInfo});
                                     SyncronousHelperMethods.computeNeuronStakeInfosVotingPowers(neuronDataMap, Nat64.toText(neuronId));
+                                    if(neuronData.contributions.size() == 0) SyncronousHelperMethods.allocateNewlySpawnedNeuronStakes(neuronDataMap, Nat64.toText(neuronId));
                                     let _ = pendingActionsMap.remove("getNeuronInfoResponse_"#Nat64.toText(neuronId));
                                     activityLogsMap.put(Int.toText(Time.now()),"successfully completed action: getNeuronInfoResponse_"#Nat64.toText(neuronId));
                                 };
@@ -250,7 +258,14 @@ module{
         let selfAuthPrincipal = Principal.fromBlob(principalAsBlob);
         
         let (expectedResponseType, pendingActionId) : (TreasuryTypes.ExpectedRequestResponses, Text) = switch(command){
-            case(#Spawn(_)) { (#Spawn({neuronId = neuronId.id; }), "spawn_"#Nat64.toText(neuronId.id)); };
+            case(#Spawn(_)) { 
+                let proposerNeuronStake = SyncronousHelperMethods.getUserNeuronStakeInfo(proposer, neuronDataMap, Nat64.toText(neuronId.id));
+                if(proposerNeuronStake.stake_e8s < txFee) { 
+                    activityLogsMap.put(Int.toText(Time.now()), "Proposer has insufficient stake to cover transaction fee.");
+                    return #err(#InsufficientFunds);
+                };
+                (#Spawn({neuronId = neuronId.id; }), "spawn_"#Nat64.toText(neuronId.id)); 
+            };
             case(#Split({amount_e8s; })) { 
                 let proposerNeuronStake = SyncronousHelperMethods.getUserNeuronStakeInfo(proposer, neuronDataMap, Nat64.toText(neuronId.id));
                 if(proposerNeuronStake.stake_e8s < txFee) { 
@@ -261,7 +276,14 @@ module{
             };
             case(#Follow(_)) { (#Follow({neuronId = neuronId.id; }), "follow_"#Nat64.toText(neuronId.id)); };
             case(#Configure(_)) { (#Configure({neuronId = neuronId.id; }), "configure_"#Nat64.toText(neuronId.id)); };
-            case(#Disburse(_)) { (#Disburse({neuronId = neuronId.id;}), "disburse_"#Nat64.toText(neuronId.id)); };
+            case(#Disburse(_)) {
+                let proposerNeuronStake = SyncronousHelperMethods.getUserNeuronStakeInfo(proposer, neuronDataMap, Nat64.toText(neuronId.id));
+                if(proposerNeuronStake.stake_e8s < txFee) { 
+                    activityLogsMap.put(Int.toText(Time.now()), "Proposer has insufficient stake to cover transaction fee.");
+                    return #err(#InsufficientFunds);
+                };
+                (#Disburse({neuronId = neuronId.id; proposer}), "disburse_"#Nat64.toText(neuronId.id)); 
+            };
             case(#ClaimOrRefresh(_)) { (#ClaimOrRefresh({neuronId = neuronId.id; }), "claimOrRefresh_"#Nat64.toText(neuronId.id));};
             case(#RegisterVote(_)) { (#RegisterVote({neuronId = neuronId.id; }), "registerVote_"#Nat64.toText(neuronId.id));};
             case(_) { return #err(#ActionNotSupported) };

@@ -20,6 +20,7 @@ import Array "mo:base/Array";
 import IC "Types/IC/types";
 import EcdsaHelperMethods "Modules/ECDSA/ECDSAHelperMethods";
 import Hex "Serializers/Hex";
+import Debug "mo:base/Debug";
 import AnalyticsTypes "Types/Analytics/types";
 import AsyncronousHelperMethods "Modules/Treasury/AsyncronousHelperMethods";
 import SyncronousHelperMethods "Modules/Treasury/SyncronousHelperMethods";
@@ -51,12 +52,12 @@ shared actor class Treasury (principal : Principal) = this {
         Text.hash
     );
 
-    private stable var usersStakesArray : TreasuryTypes.UsersTreasuryDataArray = [];
+    private stable var usersTreasuryDataArray : TreasuryTypes.UsersTreasuryDataArray = [];
 
     private var usersTreasuryDataMap : TreasuryTypes.UsersTreasuryDataMap = 
     HashMap.fromIter<Principal, TreasuryTypes.UserTreasuryData>(
-        Iter.fromArray(usersStakesArray), 
-        Iter.size(Iter.fromArray(usersStakesArray)), 
+        Iter.fromArray(usersTreasuryDataArray), 
+        Iter.size(Iter.fromArray(usersTreasuryDataArray)), 
         Principal.equal,
         Principal.hash
     );
@@ -111,6 +112,11 @@ shared actor class Treasury (principal : Principal) = this {
     public shared({caller})func creditUserIcpDeposits(userPrincipal: Principal, amount: Nat64): async () {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         SyncronousHelperMethods.creditUserIcpDeposits(usersTreasuryDataMap, updateTokenBalances, {userPrincipal; amount});
+    };
+
+    public shared({caller}) func debitUserIcpDeposits(userPrincipal: Principal, amount: Nat64): async () {
+        if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
+        SyncronousHelperMethods.debitUserIcpDeposits(usersTreasuryDataMap, updateTokenBalances, {userPrincipal; amount});
     };
 
     public shared({caller}) func saveCurrentBalances() : async () {
@@ -321,9 +327,33 @@ shared actor class Treasury (principal : Principal) = this {
         );
     };
 
+    public shared({caller}) func transferICP(amount: Nat64, recipientAccountId: Account.AccountIdentifier) : async {blockIndex: Nat64} {
+        if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
+        let res = await ledger.transfer({
+          memo = Nat64.fromNat(0);
+          from_subaccount = null;
+          to = recipientAccountId;
+          amount = { e8s = amount };
+          fee = { e8s = txFee };
+          created_at_time = ?{ timestamp_nanos = Nat64.fromNat(Int.abs(Time.now())) };
+        });
+
+        switch (res) {
+            case (#Ok(blockIndex)) {
+                Debug.print("Paid reward to " # debug_show Principal.fromActor(this) # " in block " # debug_show blockIndex);
+                return {blockIndex};
+            };
+            case (#Err(#InsufficientFunds { balance })) {
+                throw Error.reject("Top me up! The balance is only " # debug_show balance # " e8s");    
+            };
+            case (#Err(other)) {
+                throw Error.reject("Unexpected error: " # debug_show other);
+            };
+        };
+    };
 
     system func preupgrade() { 
-        usersStakesArray := Iter.toArray(usersTreasuryDataMap.entries()); 
+        usersTreasuryDataArray := Iter.toArray(usersTreasuryDataMap.entries()); 
         balancesHistoryArray := Iter.toArray(balancesHistoryMap.entries());
         neuronDataArray := Iter.toArray(neuronDataMap.entries());
         memoToNeuronIdArray := Iter.toArray(memoToNeuronIdMap.entries());
@@ -332,7 +362,7 @@ shared actor class Treasury (principal : Principal) = this {
     };
 
     system func postupgrade() { 
-        usersStakesArray:= []; 
+        usersTreasuryDataArray:= []; 
         balancesHistoryArray := [];
         neuronDataArray := [];
         memoToNeuronIdArray := [];

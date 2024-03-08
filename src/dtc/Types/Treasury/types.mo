@@ -94,7 +94,7 @@ module{
         #ClaimOrRefresh: {neuronId: Nat64;};
         #Configure: {neuronId: Nat64; };
         #RegisterVote: {neuronId: Nat64; };
-        #Disburse: {neuronId: Nat64;};
+        #Disburse: {neuronId: Nat64; proposer: Principal;};
     };
 
     public type RequestResponses = {
@@ -108,7 +108,7 @@ module{
         #ClaimOrRefresh : { response: Governance.ClaimOrRefreshResponse; neuronId: Nat64;};
         #Configure : {response: {}; neuronId: Nat64; };
         #RegisterVote : {response: {}; neuronId: Nat64; };
-        #Disburse : { response: Governance.DisburseResponse; neuronId: Nat64; };
+        #Disburse : { response: Governance.DisburseResponse; neuronId: Nat64; proposer: Principal;};
     };
 
     public type ReadRequestInput = {

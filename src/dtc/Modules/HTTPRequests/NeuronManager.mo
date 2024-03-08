@@ -198,11 +198,11 @@ module {
                                     case(_) { return throw Error.reject("Unexpected command type") };
                                 };
                             };
-                            case(#Disburse({neuronId;})){ 
+                            case(#Disburse({neuronId; proposer})){ 
                                 let ?reply: ?Governance.ManageNeuronResponse = from_candid(replyEncoded) else { return throw Error.reject("Response candid decoding took unexpected form") };
                                 let ?command = reply.command else { return throw Error.reject("Response candid decoding took unexpected form") };
                                 switch(command){
-                                    case(#Disburse(response)) { return #Disburse({response; neuronId;}) };
+                                    case(#Disburse(response)) { return #Disburse({response; neuronId; proposer}) };
                                     case(#Error(response)) { return #Error({response; neuronId;}) };
                                     case(_) { return throw Error.reject("Unexpected command type") };
                                 };
