@@ -29,6 +29,7 @@ const ModalComponent = (props_) => {
       components, 
       isLoading, 
       imageSrc, 
+      flexDirection
     } = props_
 
   let isOpen = useMemo(() => {return open}, [open]);
@@ -56,7 +57,7 @@ const ModalComponent = (props_) => {
           />}
           {
             components && !isLoading &&
-            <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"}>
+            <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} flexDirection={flexDirection}>
                 {components.map(component => {
                     const {Component, props} = component
                     return <Component {...props} className={"modalChildCompoent"}/>

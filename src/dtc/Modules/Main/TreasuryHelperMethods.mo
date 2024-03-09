@@ -17,14 +17,14 @@ module{
         daoMetaData: MainTypes.DaoMetaData_V2,
         profiles: MainTypes.UserProfilesMap,
         caller: Principal,
-        amount: Nat64,
-        recipientAddress: Account.AccountIdentifier
+        amount: Nat64
     ) : async {blockIndex: Nat64} {
         let ?userProfile = profiles.get(caller) else { throw Error.reject("User not found") };
         let userCanisterId = userProfile.canisterId;
         let userCanister: Journal.Journal = actor(Principal.toText(userCanisterId));
         let treasury: Treasury.Treasury = actor(daoMetaData.treasuryCanisterPrincipal);
-        let {blockIndex} = await userCanister.transferICP(amount, recipientAddress);
+        let treasuryAccountId = await treasury.canisterAccountId();
+        let {blockIndex} = await userCanister.transferICP(amount, treasuryAccountId);
         await treasury.creditUserIcpDeposits(caller, amount);
         return {blockIndex};
     };
@@ -33,8 +33,7 @@ module{
         daoMetaData: MainTypes.DaoMetaData_V2,
         profiles: MainTypes.UserProfilesMap,
         caller: Principal,
-        amount: Nat64,
-        recipientAddress: Account.AccountIdentifier
+        amount: Nat64
     ) : async {blockIndex: Nat64} {
         let ?userProfile = profiles.get(caller) else { throw Error.reject("User not found") };
         let userCanisterId = userProfile.canisterId;

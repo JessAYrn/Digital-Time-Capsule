@@ -176,7 +176,7 @@ shared(msg) actor class Manager (principal : Principal) = this {
                 } catch(e){ continue_ := false; };
             };
 
-            let chunks = ChunksBuffer.toArray();
+            let chunks = Buffer.toArray(ChunksBuffer);
 
             let asset: AssetCanister.AssetArgs = {
                 content_type;
@@ -190,7 +190,7 @@ shared(msg) actor class Manager (principal : Principal) = this {
             index += 1;
         };
 
-        release := { release with assets = AssetBuffer.toArray(); };
+        release := { release with assets = Buffer.toArray(AssetBuffer); };
     };
 
     public shared({caller}) func notifyNextStableRelease(): async() {

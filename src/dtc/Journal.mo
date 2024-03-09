@@ -190,7 +190,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
                 journalMap.put(key,updatedJournalEntry);
             };
         });
-        notifications := notificationsBuffer.toArray();
+        notifications := Buffer.toArray(notificationsBuffer);
         ignore updateDataUsageInMegaBytes();
     };
 

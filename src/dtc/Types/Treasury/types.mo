@@ -52,9 +52,11 @@ module{
     };
 
     public type TreasuryDataExport = {
+        neurons : { icp: NeuronsDataArray; };
         usersTreasuryDataArray : UsersTreasuryDataArray;
         balance_icp: {e8s : Nat64};
         accountId_icp: [Nat8];
+        userPrincipal: Text;
     };
 
     public type Memo = Nat;

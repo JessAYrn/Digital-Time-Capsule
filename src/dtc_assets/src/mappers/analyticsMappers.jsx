@@ -1,4 +1,4 @@
-import { nanoSecondsToMiliSeconds, getDateAsStringMMDDYYY } from "../functionsAndConstants/Utils";
+import { nanoSecondsToMiliSeconds, getDateAsStringMMDDYYY, fromE8s } from "../functionsAndConstants/Utils";
 import { GRAPH_DISPLAY_CURRENCIES } from "../functionsAndConstants/Constants";
 
 const dummyLabels = [
@@ -33,7 +33,7 @@ const parseBigIntsFromBalances = (balances) => {
     let currencies = Object.keys(balances);
     currencies.forEach(currency => {
         let balance = (balances[currency]?.e8s !== undefined) ?  balances[currency]?.e8s : balances[currency];
-        balances[currency] = parseInt(balance);
+        balances[currency] = fromE8s(parseInt(balance));
     });
     return balances;
 }

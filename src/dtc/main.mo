@@ -110,7 +110,7 @@ shared actor class User() = this {
             case(? v){
                 let journal: Journal.Journal = actor(Principal.toText(v.canisterId)); 
                 let (entriesArray, bio, canisterPrincipal) = await journal.readJournal();
-                return #ok({ userJournalData = (entriesArray, bio); email = v.email; userName = v.userName; principal = canisterPrincipal; });
+                return #ok({ userJournalData = (entriesArray, bio); email = v.email; userName = v.userName; userPrincipal = Principal.toText(caller) ; rootCanisterPrincipal = canisterPrincipal; });
             };
         };   
     };
@@ -345,14 +345,20 @@ shared actor class User() = this {
         if(userProfile == null) return #err(#NotAuthorizedToAccessData);
         let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
         let usersTreasuryDataArray = await treasuryCanister.getUsersTreasuryDataArray();
+        let neurons = {icp = await treasuryCanister.getNeuronsDataArray()};
         let balance_icp = await treasuryCanister.canisterBalance();
         let accountId_icp_blob = await treasuryCanister.canisterAccountId();
         let accountId_icp = Blob.toArray(accountId_icp_blob);
-        return #ok({usersTreasuryDataArray; balance_icp; accountId_icp; });
+        let userPrincipal = Principal.toText(caller);
+        return #ok({usersTreasuryDataArray; balance_icp; accountId_icp; neurons; userPrincipal});
     };
 
-    public shared({caller}) func depositIcpToTreasury(amount: Nat64, recipientAddress: Account.AccountIdentifier) : async {blockIndex: Nat64} {
-        let result = await TreasuryHelperMethods.depositIcpToTreasury(daoMetaData_v2, userProfilesMap, caller, amount, recipientAddress);
+    public shared({caller}) func depositIcpToTreasury(amount: Nat64) : async {blockIndex: Nat64} {
+        let result = await TreasuryHelperMethods.depositIcpToTreasury(daoMetaData_v2, userProfilesMap, caller, amount);
+    };
+
+    public shared({caller}) func withdrawIcpFromTreasury(amount: Nat64) : async {blockIndex: Nat64} {
+        let result = await TreasuryHelperMethods.withdrawIcpFromTreasury(daoMetaData_v2, userProfilesMap, caller, amount);
     };
 
     public shared({ caller }) func upgradeApp(): async (){

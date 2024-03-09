@@ -33,6 +33,13 @@ const theme = createTheme({
       tonalOffset: 0.2,
     },
     components: {
+      MuiTypography:{
+        styleOverrides: {
+          root:{
+            color: grey[50]
+          }
+        }
+      },
       MuiTextField:{
         styleOverrides: {
           root:{

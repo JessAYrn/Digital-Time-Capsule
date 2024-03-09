@@ -9,6 +9,11 @@ export const PROPOSAL_ACTIONS = {
     PurchaseCycles: "PurchaseCycles"
 };
 
+export const TREASURY_ACTIONS = {
+    DepositIcpToTreasury: "DepositIcpToTreasury",
+    WithdrawIcpFromTreasury: "WithdrawIcpFromTreasury"
+};
+
 export const PAYLOAD_DATA_TYPES = {
     text: "text",
     nat64: "nat64"

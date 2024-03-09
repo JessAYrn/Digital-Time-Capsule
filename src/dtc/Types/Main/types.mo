@@ -30,7 +30,8 @@ module{
         userJournalData : ([JournalTypes.JournalEntryExportKeyValuePair], JournalTypes.Bio,); 
         email: ?Text; 
         userName: ?Text;
-        principal: Text;
+        rootCanisterPrincipal: Text;
+        userPrincipal: Text;
     };
 
     public type Error = {
