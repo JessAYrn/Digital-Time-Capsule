@@ -145,7 +145,7 @@ module{
                     };
                     ignore getNeuronData( neuronDataMap, usersTreasuryDataMap, pendingActionsMap, activityLogsMap, memoToNeuronIdMap, updateTokenBalances, transformFn, #GetFullNeuronResponse({neuronId;}) );
                     ignore getNeuronData( neuronDataMap, usersTreasuryDataMap, pendingActionsMap, activityLogsMap, memoToNeuronIdMap, updateTokenBalances, transformFn, #GetFullNeuronResponse({neuronId = created_neuron_id.id;}));
-                    SyncronousHelperMethods.splitNeuronStakeInfo(neuronId, created_neuron_id.id,amount_e8s,proposer, usersTreasuryDataMap, neuronDataMap);
+                    SyncronousHelperMethods.splitNeuronStakeInfo(neuronId, created_neuron_id.id,amount_e8s, Principal.toText(proposer), usersTreasuryDataMap, neuronDataMap);
                     let _ = pendingActionsMap.remove("split_"#Nat64.toText(neuronId));
                     activityLogsMap.put(Int.toText(Time.now()),"successfully completed action: split_"#Nat64.toText(neuronId));
                 };
@@ -161,7 +161,7 @@ module{
                 };
                 case(#Disburse({response; neuronId; proposer;})){
                     let _ = pendingActionsMap.remove("disburse_"#Nat64.toText(neuronId));
-                    SyncronousHelperMethods.creditUsersForDispursedNeuron(neuronDataMap, usersTreasuryDataMap, updateTokenBalances, Nat64.toText(neuronId), proposer);
+                    SyncronousHelperMethods.creditUsersForDispursedNeuron(neuronDataMap, usersTreasuryDataMap, updateTokenBalances, Nat64.toText(neuronId), Principal.toText(proposer));
                     activityLogsMap.put(Int.toText(Time.now()),"successfully completed action: disburse_"#Nat64.toText(neuronId));
                 };
                 case(#RegisterVote({response; neuronId;})){
@@ -259,7 +259,7 @@ module{
         
         let (expectedResponseType, pendingActionId) : (TreasuryTypes.ExpectedRequestResponses, Text) = switch(command){
             case(#Spawn(_)) { 
-                let proposerNeuronStake = SyncronousHelperMethods.getUserNeuronStakeInfo(proposer, neuronDataMap, Nat64.toText(neuronId.id));
+                let proposerNeuronStake = SyncronousHelperMethods.getUserNeuronStakeInfo(Principal.toText(proposer), neuronDataMap, Nat64.toText(neuronId.id));
                 if(proposerNeuronStake.stake_e8s < txFee) { 
                     activityLogsMap.put(Int.toText(Time.now()), "Proposer has insufficient stake to cover transaction fee.");
                     return #err(#InsufficientFunds);
@@ -267,7 +267,7 @@ module{
                 (#Spawn({neuronId = neuronId.id; }), "spawn_"#Nat64.toText(neuronId.id)); 
             };
             case(#Split({amount_e8s; })) { 
-                let proposerNeuronStake = SyncronousHelperMethods.getUserNeuronStakeInfo(proposer, neuronDataMap, Nat64.toText(neuronId.id));
+                let proposerNeuronStake = SyncronousHelperMethods.getUserNeuronStakeInfo(Principal.toText(proposer), neuronDataMap, Nat64.toText(neuronId.id));
                 if(proposerNeuronStake.stake_e8s < txFee) { 
                     activityLogsMap.put(Int.toText(Time.now()), "Proposer has insufficient stake to cover transaction fee.");
                     return #err(#InsufficientFunds);
@@ -277,7 +277,7 @@ module{
             case(#Follow(_)) { (#Follow({neuronId = neuronId.id; }), "follow_"#Nat64.toText(neuronId.id)); };
             case(#Configure(_)) { (#Configure({neuronId = neuronId.id; }), "configure_"#Nat64.toText(neuronId.id)); };
             case(#Disburse(_)) {
-                let proposerNeuronStake = SyncronousHelperMethods.getUserNeuronStakeInfo(proposer, neuronDataMap, Nat64.toText(neuronId.id));
+                let proposerNeuronStake = SyncronousHelperMethods.getUserNeuronStakeInfo(Principal.toText(proposer), neuronDataMap, Nat64.toText(neuronId.id));
                 if(proposerNeuronStake.stake_e8s < txFee) { 
                     activityLogsMap.put(Int.toText(Time.now()), "Proposer has insufficient stake to cover transaction fee.");
                     return #err(#InsufficientFunds);
@@ -315,7 +315,7 @@ module{
         let ?neuron = neuronData.neuron else Debug.trap("No neuron for neuronId");
         let {account} = neuron;
         
-        try{ SyncronousHelperMethods.debitUserIcpDeposits( usersTreasuryDataMap, updateTokenBalances, {userPrincipal = contributor; amount = amount + txFee});} 
+        try{ SyncronousHelperMethods.debitUserIcpDeposits( usersTreasuryDataMap, updateTokenBalances, {userPrincipal = Principal.toText(contributor); amount = amount + txFee});} 
         catch(e){ return #err(#InsufficientFunds)};
         
         let txResult = await NeuronManager.transferIcpToNeuronWithSubaccount(amount, account);
@@ -323,7 +323,7 @@ module{
             case(#err(e)){ return #err(e)};
             case(#ok({public_key; selfAuthPrincipal})) { 
                 ignore updateTokenBalances();
-                SyncronousHelperMethods.creditUserNeuronStake( neuronDataMap, usersTreasuryDataMap, updateTokenBalances,{ userPrincipal = contributor;  delta = amount; neuronId = Nat64.toText(neuronId); });
+                SyncronousHelperMethods.creditUserNeuronStake( neuronDataMap, usersTreasuryDataMap, updateTokenBalances,{ userPrincipal = Principal.toText(contributor);  delta = amount; neuronId = Nat64.toText(neuronId); });
                 let newPendingAction: TreasuryTypes.PendingAction = {
                     args = ?{ id = null; command = ?#ClaimOrRefresh( {by = ?#NeuronIdOrSubaccount( {} )} );neuron_id_or_subaccount = ?#Subaccount(account); };
                     expectedResponseType = #ClaimOrRefresh({neuronId});
@@ -349,7 +349,7 @@ module{
         {amount: Nat64; contributor: Principal; neuronMemo: Nat64}
     ) : async Result.Result<(), TreasuryTypes.Error>  {
 
-        try{ SyncronousHelperMethods.debitUserIcpDeposits( usersTreasuryDataMap, updateTokenBalances, {userPrincipal = contributor; amount = amount + txFee});} 
+        try{ SyncronousHelperMethods.debitUserIcpDeposits( usersTreasuryDataMap, updateTokenBalances, {userPrincipal = Principal.toText(contributor); amount = amount + txFee});} 
         catch(e){ return #err(#InsufficientFunds)};
 
         let txResult = await NeuronManager.transferIcpToNeuronWithMemo(amount, neuronMemo);
@@ -359,7 +359,7 @@ module{
             case(#ok({public_key; selfAuthPrincipal})) { 
                 ignore updateTokenBalances();
                 let newNeuronIdPlaceholderKey : Text = Nat64.toText(neuronMemo)#PENDING_NEURON_SUFFIX;
-                SyncronousHelperMethods.creditUserNeuronStake( neuronDataMap, usersTreasuryDataMap, updateTokenBalances,{ userPrincipal = contributor;  delta = amount; neuronId = newNeuronIdPlaceholderKey; });
+                SyncronousHelperMethods.creditUserNeuronStake( neuronDataMap, usersTreasuryDataMap, updateTokenBalances,{ userPrincipal = Principal.toText(contributor);  delta = amount; neuronId = newNeuronIdPlaceholderKey; });
                 let newPendingAction: TreasuryTypes.PendingAction = {
                     args = ?{ id = null; command = ?#ClaimOrRefresh( {by = ?#MemoAndController( {controller = ?selfAuthPrincipal; memo = neuronMemo} )} ); neuron_id_or_subaccount = null; };
                     expectedResponseType = #CreateNeuronResponse({memo = neuronMemo; newNeuronIdPlaceholderKey});

@@ -1,4 +1,4 @@
-import { dummyDateSets } from "../mappers/analyticsMappers";
+import { dummyDataSets } from "../mappers/analyticsMappers";
 
 export const treasuryTypes={
     SET_ENTIRE_TREASURY_REDUX_STATE:'SET_ENTIRE_TREASURY_REDUX_STATE',
@@ -18,7 +18,7 @@ export const treasuryPageInitialState={
         balance_icp: 0,
         accountId_icp: "" 
     },
-    balancesData: dummyDateSets
+    balancesData: dummyDataSets
 }
 
 const changeValue=(state=treasuryPageInitialState, action)=>{

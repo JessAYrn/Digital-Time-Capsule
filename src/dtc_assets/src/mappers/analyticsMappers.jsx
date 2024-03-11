@@ -14,15 +14,18 @@ const dummyLabels = [
 const dummyData = {data: [0,0,0,0,0,0,0], fill: false,radius: 2, boarderWidth: 0.5};
 
 
-const dummyDataset = [
-    {labels: dummyLabels, datasets: [{...dummyData, label: GRAPH_DISPLAY_CURRENCIES.icp }]},
-    {labels: dummyLabels, datasets: [{...dummyData, label: GRAPH_DISPLAY_CURRENCIES.btc }]},
-    {labels: dummyLabels, datasets: [{...dummyData, label: GRAPH_DISPLAY_CURRENCIES.eth }]},
-    {labels: dummyLabels, datasets: [{...dummyData, label: GRAPH_DISPLAY_CURRENCIES.icp_staked }]},
-    {labels: dummyLabels, datasets: [{...dummyData, label: GRAPH_DISPLAY_CURRENCIES.xdrs }]}
-]
+const dummyDataset = 
+    {
+        labels: dummyLabels, 
+        datasets: [
+        {...dummyData, label: GRAPH_DISPLAY_CURRENCIES.icp },
+        {...dummyData, label: GRAPH_DISPLAY_CURRENCIES.btc },
+        {...dummyData, label: GRAPH_DISPLAY_CURRENCIES.eth },
+        {...dummyData, label: GRAPH_DISPLAY_CURRENCIES.icp_staked }
+    ]}
 
-export const dummyDateSets = {
+
+export const dummyDataSets = {
     week: dummyDataset,
     month: dummyDataset,
     year: dummyDataset,
@@ -41,7 +44,6 @@ const parseBigIntsFromBalances = (balances) => {
 const getLabels = (data) => {return data.map(([date, balances]) => {return date})};
 const getDataSet = (data_, currency) => {
     const data = data_.map(([date, balances]) => {
-        let balance = balances[currency];
         return balances[currency]?.e8s || balances[currency]
     });
     const label = currency.toUpperCase();
@@ -70,7 +72,7 @@ const mapBalancesDataFromApiToFrontend = (data) => {
         else return -1
     });
     let length = data_.length;
-    if(!length) return dummyDataset;
+    if(!length) return dummyDataSets;
     const week_dataset = [];
     const month_dataset = [];
     const year_dataset = [];

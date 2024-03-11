@@ -34,10 +34,10 @@ module{
         let neuronsDataIter = Iter.fromArray<(TreasuryTypes.NeuronIdAsText, TreasuryTypes.NeuronData)>(neuronsDataArray);
         for((neuronId, neuronData) in neuronsDataIter){
             let {contributions} = neuronData;
-            let neuronsStakesInfoIter = Iter.fromArray<(Principal, TreasuryTypes.NeuronStakeInfo)>(contributions);
+            let neuronsStakesInfoIter = Iter.fromArray<(TreasuryTypes.PrincipalAsText, TreasuryTypes.NeuronStakeInfo)>(contributions);
             for((contributor, stakesInfo) in neuronsStakesInfoIter){
                 let {voting_power} = stakesInfo;
-                let vote = proposalVotesHashMap.get(Principal.toText(contributor));
+                let vote = proposalVotesHashMap.get(contributor);
                 switch(vote){
                     case null {};
                     case(? v){ let {adopt} = v; if(adopt) yay += voting_power else nay += voting_power; };

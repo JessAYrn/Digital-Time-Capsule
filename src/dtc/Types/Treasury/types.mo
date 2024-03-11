@@ -42,9 +42,11 @@ module{
         deposits : Deposits;
     };
 
-    public type UsersTreasuryDataArray = [(Principal, UserTreasuryData)];
+    public type PrincipalAsText = Text;
 
-    public type UsersTreasuryDataMap = HashMap.HashMap<Principal, UserTreasuryData>;
+    public type UsersTreasuryDataArray = [(PrincipalAsText, UserTreasuryData)];
+
+    public type UsersTreasuryDataMap = HashMap.HashMap<PrincipalAsText, UserTreasuryData>;
 
     public type TransferIcpToNeuronResponse = {
         #ok : {public_key: Blob; selfAuthPrincipal: Principal;};
@@ -65,7 +67,7 @@ module{
 
     public type NeuronIdAsText = Text;
 
-    public type NeuronContributions = [(Principal, NeuronStakeInfo)];
+    public type NeuronContributions = [(PrincipalAsText, NeuronStakeInfo)];
 
     public type NeuronData = { contributions: NeuronContributions; neuron: ?Governance.Neuron; neuronInfo: ?Governance.NeuronInfo; parentNeuronContributions: ?NeuronContributions; };
 

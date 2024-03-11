@@ -55,11 +55,11 @@ shared actor class Treasury (principal : Principal) = this {
     private stable var usersTreasuryDataArray : TreasuryTypes.UsersTreasuryDataArray = [];
 
     private var usersTreasuryDataMap : TreasuryTypes.UsersTreasuryDataMap = 
-    HashMap.fromIter<Principal, TreasuryTypes.UserTreasuryData>(
+    HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryData>(
         Iter.fromArray(usersTreasuryDataArray), 
         Iter.size(Iter.fromArray(usersTreasuryDataArray)), 
-        Principal.equal,
-        Principal.hash
+        Text.equal,
+        Text.hash
     );
 
     private stable var balancesHistoryArray : AnalyticsTypes.BalancesArray = [];
@@ -105,18 +105,18 @@ shared actor class Treasury (principal : Principal) = this {
     };
 
     public shared({caller}) func userHasSufficientStake(userPrincipal: Principal): async Bool {
-        // if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
-        SyncronousHelperMethods.userHasSufficientStake(userPrincipal, neuronDataMap, minimalRequiredVotingPower);
+        if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
+        SyncronousHelperMethods.userHasSufficientStake(Principal.toText(userPrincipal), neuronDataMap, minimalRequiredVotingPower);
     };  
 
     public shared({caller})func creditUserIcpDeposits(userPrincipal: Principal, amount: Nat64): async () {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
-        SyncronousHelperMethods.creditUserIcpDeposits(usersTreasuryDataMap, updateTokenBalances, {userPrincipal; amount});
+        SyncronousHelperMethods.creditUserIcpDeposits(usersTreasuryDataMap, updateTokenBalances, {userPrincipal = Principal.toText(userPrincipal); amount});
     };
 
     public shared({caller}) func debitUserIcpDeposits(userPrincipal: Principal, amount: Nat64): async () {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
-        SyncronousHelperMethods.debitUserIcpDeposits(usersTreasuryDataMap, updateTokenBalances, {userPrincipal; amount});
+        SyncronousHelperMethods.debitUserIcpDeposits(usersTreasuryDataMap, updateTokenBalances, {userPrincipal = Principal.toText(userPrincipal); amount});
     };
 
     public shared({caller}) func saveCurrentBalances() : async () {
@@ -181,11 +181,11 @@ shared actor class Treasury (principal : Principal) = this {
             };
             case(#err(#TxFailed)) {
                 actionLogsMap.put(Int.toText(Time.now()),"Error creating neuron: Transaction failed.");
-                usersTreasuryDataMap := HashMap.fromIter<Principal, TreasuryTypes.UserTreasuryData>(
+                usersTreasuryDataMap := HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryData>(
                     Iter.fromArray(usersTreasuryDataArrayUnaltered), 
                     Array.size(usersTreasuryDataArrayUnaltered), 
-                    Principal.equal,
-                    Principal.hash
+                    Text.equal,
+                    Text.hash
                 );
                 throw Error.reject("Error creating neuron.");
             };
@@ -216,11 +216,11 @@ shared actor class Treasury (principal : Principal) = this {
             case(#ok()) return #ok(());
             case(#err(#TxFailed)) {
                 actionLogsMap.put(Int.toText(Time.now()),"Error increasing neuron: Transaction failed.");
-                usersTreasuryDataMap := HashMap.fromIter<Principal, TreasuryTypes.UserTreasuryData>(
+                usersTreasuryDataMap := HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryData>(
                     Iter.fromArray(usersTreasuryDataArrayUnaltered), 
                     Array.size(usersTreasuryDataArrayUnaltered), 
-                    Principal.equal,
-                    Principal.hash
+                    Text.equal,
+                    Text.hash
                 );
                 throw Error.reject("Error increasing neuron.");
             };

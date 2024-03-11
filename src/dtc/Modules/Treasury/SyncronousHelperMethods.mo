@@ -13,16 +13,16 @@ module{
 
     let txFee: Nat64 = 10_000;
 
-    public func userHasSufficientStake(userPrincipal: Principal, neuronsDataMap: TreasuryTypes.NeuronsDataMap, minimalRequiredVotingPower: Nat64): 
+    public func userHasSufficientStake(userPrincipal: Text, neuronsDataMap: TreasuryTypes.NeuronsDataMap, minimalRequiredVotingPower: Nat64): 
     Bool {
         var totalVotingPower : Nat64 = 0;
         label neuronDataLoop for( (neuronId, neuronData)  in neuronsDataMap.entries()){
             let {contributions} = neuronData;
-            let contributionsMap = HashMap.fromIter<Principal, TreasuryTypes.NeuronStakeInfo>(
+            let contributionsMap = HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.NeuronStakeInfo>(
                 Iter.fromArray(contributions), 
                 Iter.size(Iter.fromArray(contributions)), 
-                Principal.equal,
-                Principal.hash
+                Text.equal,
+                Text.hash
             );
             let ?neuronStakeInfo = contributionsMap.get(userPrincipal) else { continue neuronDataLoop };
             let {voting_power} = neuronStakeInfo;
@@ -35,7 +35,7 @@ module{
     public func updateUserTreasruyDeposits(
         usersTreasuryData: TreasuryTypes.UsersTreasuryDataMap, 
         updateTokenBalances: shared () -> async (),
-        {userPrincipal: Principal; currency : TreasuryTypes.SupportedCurrencies; newAmount: Nat64;}): 
+        {userPrincipal: Text; currency : TreasuryTypes.SupportedCurrencies; newAmount: Nat64;}): 
     () {
         let treasuryData = usersTreasuryData.get(userPrincipal);
         var updatedTreasuryData = switch(treasuryData){
@@ -71,11 +71,11 @@ module{
         let ?neuronInfo = neuronData.neuronInfo else { return };
         let {stake_e8s = neuronTotalStake; voting_power = neuronTotalVotingPower; } = neuronInfo;
         let {contributions} = neuronData;
-        let contributionsMap = HashMap.fromIter<Principal, TreasuryTypes.NeuronStakeInfo>(
+        let contributionsMap = HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.NeuronStakeInfo>(
             Iter.fromArray(contributions), 
             Iter.size(Iter.fromArray(contributions)), 
-            Principal.equal,
-            Principal.hash
+            Text.equal,
+            Text.hash
         );
         for((contributor, neuronStakeInfo) in contributionsMap.entries()){
             let {stake_e8s = userTotalStake} = neuronStakeInfo;
@@ -88,18 +88,18 @@ module{
     public func updateUserNeuronStakeInfo(
         neuronDataMap:TreasuryTypes.NeuronsDataMap, 
         usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap,
-        { userPrincipal: Principal; newAmount: Nat64; neuronId: Text;}
+        { userPrincipal: Text; newAmount: Nat64; neuronId: Text;}
     ): () {
         let neuronData = switch(neuronDataMap.get(neuronId)){
             case null { {neuron = null; neuronInfo = null; parentNeuronContributions = null; contributions = []; };};
             case(?neuronData_){ neuronData_ };
         };
         let {contributions} = neuronData;
-        let contributionsMap = HashMap.fromIter<Principal, TreasuryTypes.NeuronStakeInfo>(
+        let contributionsMap = HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.NeuronStakeInfo>(
             Iter.fromArray(contributions), 
             Iter.size(Iter.fromArray(contributions)), 
-            Principal.equal,
-            Principal.hash
+            Text.equal,
+            Text.hash
         );
         var neuronStakeInfo = getUserNeuronStakeInfo(userPrincipal, neuronDataMap, neuronId);
         let userTreasuryData = switch(usersTreasuryDataMap.get(userPrincipal)){
@@ -136,7 +136,7 @@ module{
         neuronDataMap: TreasuryTypes.NeuronsDataMap,
         usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap,
         updateTokenBalances: shared () -> async (),
-        {userPrincipal: Principal; delta: Nat64; neuronId: Text }
+        {userPrincipal: Text; delta: Nat64; neuronId: Text }
     ): () {
         let treasuryData = switch(usersTreasuryDataMap.get(userPrincipal)){
             case(?treasuryData_){ treasuryData_ };
@@ -160,7 +160,7 @@ module{
     public func creditUserIcpDeposits(
         usersTreasuryData: TreasuryTypes.UsersTreasuryDataMap,
         updateTokenBalances: shared () -> async (),
-        {userPrincipal: Principal; amount: Nat64}): () {
+        {userPrincipal: Text; amount: Nat64}): () {
         let treasuryData = switch(usersTreasuryData.get(userPrincipal)){
             case null { 
                 {
@@ -181,7 +181,7 @@ module{
     public func debitUserIcpDeposits(
         usersTreasuryData: TreasuryTypes.UsersTreasuryDataMap,
         updateTokenBalances: shared () -> async (),
-        {userPrincipal: Principal; amount: Nat64}): () {
+        {userPrincipal: Text; amount: Nat64}): () {
         let ?treasuryData = usersTreasuryData.get(userPrincipal) else Debug.trap("No deposits for contributor");
         if(treasuryData.deposits.icp.e8s < amount) { Debug.trap("Insufficient deposit amount."); };
         updateUserTreasruyDeposits(usersTreasuryData, updateTokenBalances, {userPrincipal; currency = #Icp; newAmount = treasuryData.deposits.icp.e8s - amount});
@@ -212,20 +212,20 @@ module{
         sourceNeuronId: Nat64, 
         targetNeuronId: Nat64, 
         splitAmount: Nat64,
-        proposer: Principal,
+        proposer: Text,
         usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap, 
         neuronDataMap: TreasuryTypes.NeuronsDataMap,
     ): () {
         let ?neuronData = neuronDataMap.get(Nat64.toText(sourceNeuronId)) else { Debug.trap("No neuronData for neuronId") };
         let ?neuronInfo = neuronData.neuronInfo else { Debug.trap("No neuronInfo for neuronId") };
         let {contributions} = neuronData;
-        let sourceNeuronContributionsMap = HashMap.fromIter<Principal, TreasuryTypes.NeuronStakeInfo>(
+        let sourceNeuronContributionsMap = HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.NeuronStakeInfo>(
             Iter.fromArray(contributions), 
             Iter.size(Iter.fromArray(contributions)), 
-            Principal.equal,
-            Principal.hash
+            Text.equal,
+            Text.hash
         );
-        let targetNeuronContributionsMap = HashMap.HashMap<Principal, TreasuryTypes.NeuronStakeInfo>(1, Principal.equal, Principal.hash);
+        let targetNeuronContributionsMap = HashMap.HashMap<TreasuryTypes.PrincipalAsText, TreasuryTypes.NeuronStakeInfo>(1, Text.equal, Text.hash);
         
         let {stake_e8s = sourceNeuronTotalStake} = neuronInfo;
         var splitAmount_: Nat64 = 0;
@@ -301,11 +301,11 @@ module{
         let {stake_e8s = newNeuronTotalStake; } = neuronInfo;
 
         let ?parentNeuronContributions = neuronData.parentNeuronContributions else { return };
-        let parentNeuronContributionsMap = HashMap.fromIter<Principal, TreasuryTypes.NeuronStakeInfo>(
+        let parentNeuronContributionsMap = HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.NeuronStakeInfo>(
             Iter.fromArray(parentNeuronContributions), 
             Iter.size(Iter.fromArray(parentNeuronContributions)), 
-            Principal.equal,
-            Principal.hash
+            Text.equal,
+            Text.hash
         );
 
         var parentNeuronTotalStake: Nat64 = 0;
@@ -315,11 +315,11 @@ module{
         };
 
         let {contributions} = neuronData;
-        let newNeuronContributionsMap = HashMap.fromIter<Principal, TreasuryTypes.NeuronStakeInfo>(
+        let newNeuronContributionsMap = HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.NeuronStakeInfo>(
             Iter.fromArray(contributions), 
             Iter.size(Iter.fromArray(contributions)), 
-            Principal.equal,
-            Principal.hash
+            Text.equal,
+            Text.hash
         );
 
         for((contributor, neuronStakeInfo) in parentNeuronContributionsMap.entries()){
@@ -332,14 +332,14 @@ module{
         computeNeuronStakeInfosVotingPowers(neuronDataMap, neuronId);
     };
 
-    public func getUserNeuronStakeInfo(userPrincipal: Principal, neruonsDataMap: TreasuryTypes.NeuronsDataMap, neuronId: Text): TreasuryTypes.NeuronStakeInfo {
+    public func getUserNeuronStakeInfo(userPrincipal: Text, neruonsDataMap: TreasuryTypes.NeuronsDataMap, neuronId: Text): TreasuryTypes.NeuronStakeInfo {
         let ?neuronData = neruonsDataMap.get(neuronId) else { return  { stake_e8s : Nat64 = 0; voting_power : Nat64 = 0; }; };
         let {contributions} = neuronData;
-        let contributionsMap = HashMap.fromIter<Principal, TreasuryTypes.NeuronStakeInfo>(
+        let contributionsMap = HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.NeuronStakeInfo>(
             Iter.fromArray(contributions), 
             Iter.size(Iter.fromArray(contributions)), 
-            Principal.equal,
-            Principal.hash
+            Text.equal,
+            Text.hash
         );
         let ?neuronStakeInfo = contributionsMap.get(userPrincipal) else { return  { stake_e8s : Nat64 = 0; voting_power : Nat64 = 0; }; };
         return neuronStakeInfo;
@@ -350,15 +350,15 @@ module{
         usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap, 
         updateTokenBalances: shared () -> async (), 
         neuronId: Text,
-        proposer: Principal
+        proposer: Text
     ): () {
         let ?neuronData = neuronDataMap.get(neuronId) else { return };
         let {contributions} = neuronData;
-        let contributionsMap = HashMap.fromIter<Principal, TreasuryTypes.NeuronStakeInfo>(
+        let contributionsMap = HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.NeuronStakeInfo>(
             Iter.fromArray(contributions), 
             Iter.size(Iter.fromArray(contributions)), 
-            Principal.equal,
-            Principal.hash
+            Text.equal,
+            Text.hash
         );
         for((userPrincipal, neuronStakeInfo) in contributionsMap.entries()){
             var userStake = neuronStakeInfo.stake_e8s;
