@@ -5,7 +5,7 @@ import { AppContext } from "../Treasury";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import { Paper, Typography } from "@mui/material";
 import { copyText } from "../../functionsAndConstants/walletFunctions/CopyWalletAddress";
-import { fromE8s, shortenHexString } from "../../functionsAndConstants/Utils";
+import { fromE8s, shortenHexString, round2Decimals } from "../../functionsAndConstants/Utils";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import SpeedDialField from "../../Components/Fields/SpeedDialField";
@@ -147,10 +147,33 @@ const TreasuryPage = (props) => {
         flexDirection={"column"}
         marginTop={"60px"}
       >
-        <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>
-          <Grid xs={12} display={"flex"} justifyContent={"left"} alignItems={"left"} flexDirection={"column"}>
-            <Typography>Treasury Balances:</Typography>
-            <Typography variant="h4">{`${fromE8s(treasuryState.treasuryData.balance_icp)}`} ICP</Typography>
+        <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"}>
+          <Grid xs={5}  width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"} flexDirection={"column"}>
+            <Typography width={"100%"}>Liquid:</Typography>
+            <Typography width={"100%"} variant="h6" color={"custom"}>
+              {`${round2Decimals(fromE8s(treasuryState.treasuryData.balance_icp))}`} ICP
+            </Typography>
+            <Typography width={"100%"} style={{color: '#bdbdbd'}}>
+              {`${round2Decimals(fromE8s(treasuryState.treasuryData.userTreasuryData?.deposits.icp || 0))}`} ICP
+            </Typography>
+          </Grid>
+          <Grid xs={2} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
+            <Typography width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"}>Staked:</Typography>
+            <Typography width={"100%"} variant="h6" display={"flex"} justifyContent={"center"} alignItems={"center"}>
+              {`${round2Decimals(fromE8s(treasuryState.treasuryData.balance_icpStaked))}`} ICP
+            </Typography>
+            <Typography width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} style={{color: '#bdbdbd'}}>
+              {`${round2Decimals(fromE8s(treasuryState.treasuryData.userTreasuryData?.deposits.icp_staked || 0))}`} ICP
+            </Typography>
+          </Grid>
+          <Grid xs={5} width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"} flexDirection={"column"}>
+            <Typography width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"} >Voting Power:</Typography>
+            <Typography width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"} variant="h6">
+              {`${round2Decimals(fromE8s(treasuryState.treasuryData.votingPower))}`} ICP 
+            </Typography>
+            <Typography width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"} style={{color: '#bdbdbd'}}>
+              {`${round2Decimals(fromE8s(treasuryState.treasuryData.userVotingPower))}`} ICP 
+            </Typography>
           </Grid>
         </Grid>
         <Graph type={CHART_TYPES.line} inputData={treasuryState.balancesData} defaultLabel={GRAPH_DISPLAY_CURRENCIES.icp}/>

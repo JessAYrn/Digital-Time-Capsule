@@ -1,4 +1,12 @@
 import { toHexString } from "../functionsAndConstants/Utils";
+
+export const getUserTreasuryData = (userPrincipal, usersTreasuryDataArray) => {
+    let userTreasuryData = usersTreasuryDataArray.find(([principal, _]) => {
+        return principal === userPrincipal;
+    });
+    return userTreasuryData ? userTreasuryData[1] : undefined;
+};
+
 export const mapBackendTreasuryDataToFrontEndObj = (props) => {
     const {
         usersTreasuryDataArray,
@@ -21,8 +29,7 @@ export const mapBackendTreasuryDataToFrontEndObj = (props) => {
         }; 
         return [ principal, { ...treasuryData, deposits} ];
     });
-    let neuronsBalance = 0;
-    let userNeuronsBalance = 0;
+    let balance_icpStaked = 0;
     let votingPower = 0;
     let userVotingPower = 0;
 
@@ -31,30 +38,29 @@ export const mapBackendTreasuryDataToFrontEndObj = (props) => {
     const icpNeurons = neurons.icp.map(([neuronId, {contributions, neuron, neuronInfo}]) => {
         let {voting_power, stake_e8s} = neuronInfo[0];
         votingPower += parseInt(voting_power);
-        neuronsBalance += parseInt(stake_e8s);
+        balance_icpStaked += parseInt(stake_e8s);
         let userContribution = contributions.find(([contributor, _]) => {
             return contributor === userPrincipal
         });
         let neuronData = [neuronId, {contributions, neuron: neuron[0], neuronInfo: neuronInfo[0]}];
         if(userContribution){
             userIcpNeurons.push(neuronData);
-            userNeuronsBalance += parseInt(userContribution[1].stake_e8s);
-            userVotingPower += parseInt(userContribution[1].voting_power.e8s);
+            userVotingPower += parseInt(userContribution[1].voting_power);
         };
         return neuronData;
     });
 
-
+    let userTreasuryData = getUserTreasuryData(userPrincipal, usersTreasuryDataArray_);
 
     return {
         usersTreasuryDataArray: usersTreasuryDataArray_, 
         balance_icp: balance_icp_, 
         accountId_icp: accountId_icp_,
         neurons: {...neurons, icp: icpNeurons},
-        neuronsBalance,
+        balance_icpStaked,
         userNeurons: {icp: userIcpNeurons},
-        userNeuronsBalance,
         votingPower,
-        userVotingPower
+        userVotingPower,
+        userTreasuryData
     };
 };
