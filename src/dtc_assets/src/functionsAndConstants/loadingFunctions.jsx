@@ -2,11 +2,10 @@ import { mapApiObjectToFrontEndJournalEntriesObject } from "../mappers/journalPa
 import { delay, backendActor, toHexString, nanoSecondsToMiliSeconds } from "./Utils";
 import { generateQrCode } from "./walletFunctions/GenerateQrCode";
 import { mapBackendCanisterDataToFrontEndObj } from "../mappers/dashboardMapperFunctions";
-import { mapBackendTreasuryDataToFrontEndObj } from "../mappers/treasuryPageMapperFunctions";
+import { mapBalancesDataFromApiToFrontend, mapBackendTreasuryDataToFrontEndObj } from "../mappers/treasuryPageMapperFunctions";
 import { getFileUrl_fromApi } from "../Components/Fields/fileManger/FileManagementTools";
 import DoNotDisturbOnIcon from '@mui/icons-material/DoNotDisturbOn';
 import ButtonField from "../Components/Fields/Button";
-import mapBalancesDataFromApiToFrontend from "../mappers/analyticsMappers";
 
 
 export const loadAllDataIntoReduxStores = async (states, dispatchFunctions, types, stateHasBeenRecovered) => {

@@ -1,4 +1,4 @@
-import { dummyDataSets } from "../mappers/analyticsMappers";
+import { dummyDataSets } from "../mappers/treasuryPageMapperFunctions";
 
 export const treasuryTypes={
     SET_ENTIRE_TREASURY_REDUX_STATE:'SET_ENTIRE_TREASURY_REDUX_STATE',

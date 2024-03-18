@@ -147,6 +147,18 @@ export const delay = (ms) => {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+export const secondsToHours = (seconds) => {
+  return seconds / 3600;
+};
+
+export const hoursToDays = (hours) => {
+  return hours / 24;
+};
+
+export const daysToMonths = (days) => {
+  return days / 30;
+};
+
 export const getDateInMilliseconds = (date) => {
   let dateArray = date.split('-');
   let year = dateArray[0].slice(2);

@@ -100,7 +100,10 @@ const theme = createTheme({
       MuiButton: {
         styleOverrides: {
           root:{
-            minWidth: "50px"
+            minWidth: "50px",
+            "&.Mui-disabled": {
+              color: grey[400]
+            },
           }
         }
       },

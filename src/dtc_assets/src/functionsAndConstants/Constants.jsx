@@ -122,18 +122,21 @@ export const CHART_TYPES = {
     pie: "PIE"
 }; 
 
-export const GRAPH_TIME_FRAMES = {
+export const GRAPH_DATA_SETS = {
     week: "week",
     month: "month",
     year: "year",
-    allTime: "allTime"
+    allTime: "allTime",
+    neuronContributions: "neuronContributions",
 }
 
-export const GRAPH_DISPLAY_CURRENCIES = {
+export const GRAPH_DISPLAY_LABELS = {
     icp: "ICP",
     icp_staked: "ICP_STAKED",
     btc: "BTC",
     eth: "ETH",
-    xdrs: "XDRS"
+    xdrs: "XDRS",
+    stake: "Stake",
+    votingPower: "Voting Power"
 
 }

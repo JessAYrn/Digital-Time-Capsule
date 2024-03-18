@@ -18,8 +18,10 @@ import CreateProposalForm from "../../Components/proposals/CreateProposalForm";
 import DepositOrWithdrawModal from "../../Components/modal/DepositOrWithdraw";
 import Graph from "../../Components/Fields/Chart";
 import './TreasuryPage.scss'
-import { CHART_TYPES, GRAPH_DISPLAY_CURRENCIES } from "../../functionsAndConstants/Constants";
+import { CHART_TYPES, GRAPH_DATA_SETS, GRAPH_DISPLAY_LABELS } from "../../functionsAndConstants/Constants";
 import { TREASURY_ACTIONS } from "../../Components/proposals/utils";
+import AccordionField from "../../Components/Fields/Accordion";
+import DisplayNeuron from "../../Components/Neurons/DisplayNeuron";
 
 const TreasuryPage = (props) => {
   const { treasuryState, homePageState, actorState } = useContext(AppContext);
@@ -123,6 +125,8 @@ const TreasuryPage = (props) => {
     {name: "Deposit To Treasury", icon: AccountBalanceIcon , onClick: () => openDepositOrWithdrawForm(TREASURY_ACTIONS.DepositIcpToTreasury)}
   ];
 
+  console.log(treasuryState.balancesData);
+
   return (
     <Grid 
       container 
@@ -176,8 +180,23 @@ const TreasuryPage = (props) => {
             </Typography>
           </Grid>
         </Grid>
-        <Graph type={CHART_TYPES.line} inputData={treasuryState.balancesData} defaultLabel={GRAPH_DISPLAY_CURRENCIES.icp}/>
+        <Graph 
+          type={CHART_TYPES.line} 
+          inputData={treasuryState.balancesData} 
+          defaultLabel={GRAPH_DISPLAY_LABELS.icp} 
+          defaultDataSetName={GRAPH_DATA_SETS.week}
+        />
+        <AccordionField>
+          <div 
+          title={`${treasuryState.treasuryData?.neurons?.icp[0][0]}`}
+          subtitle={`${round2Decimals(fromE8s(parseInt(treasuryState.treasuryData?.neurons?.icp[0][1].neuronInfo.stake_e8s)))} ICP`}
+          CustomComponent={DisplayNeuron} 
+          neuronData={treasuryState.treasuryData?.neurons?.icp[0]}
+          userPrincipal={treasuryState.treasuryData?.userPrincipal}
+          ></div> 
+        </AccordionField>
         <ButtonField
+          paperSx={{marginTop: "20px"}}
           text={"View Treasury Account ID"}
           onClick={openTreasuryAccountIdModal}
           iconSize={'large'}
@@ -185,10 +204,10 @@ const TreasuryPage = (props) => {
       </Grid>
       <SpeedDialField actions={speedDialActions} position={"right"}/>
       <ModalComponent 
-                {...modalProps}
-                open={modalIsOpen} 
-                isLoading={isLoadingModal} 
-            /> 
+          {...modalProps}
+          open={modalIsOpen} 
+          isLoading={isLoadingModal} 
+      /> 
     </Grid>
     
   );

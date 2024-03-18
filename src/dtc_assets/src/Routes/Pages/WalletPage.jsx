@@ -2,7 +2,7 @@ import React, { useContext, useState} from 'react';
 import { AppContext } from '../Wallet';
 import { NavBar } from '../../Components/navigation/NavBar';
 import './WalletPage.scss';
-import { e8sInOneICP, CHART_TYPES, GRAPH_DISPLAY_CURRENCIES } from '../../functionsAndConstants/Constants';
+import { e8sInOneICP, CHART_TYPES, GRAPH_DISPLAY_LABELS, GRAPH_DATA_SETS } from '../../functionsAndConstants/Constants';
 import { copyText } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
 import { loadWalletData } from '../../functionsAndConstants/loadingFunctions';
 import { walletTypes } from '../../reducers/walletReducer';
@@ -95,7 +95,12 @@ const WalletPage = (props) => {
                 flexDirection={"column"} 
                 marginTop={"80px"}
             >
-                <Graph type={CHART_TYPES.line} inputData={walletState.balancesData} defaultLabel={GRAPH_DISPLAY_CURRENCIES.icp}/>
+                <Graph 
+                    type={CHART_TYPES.line} 
+                    inputData={walletState.balancesData} 
+                    defaultLabel={GRAPH_DISPLAY_LABELS.icp}
+                    defaultDataSetName={GRAPH_DATA_SETS.week}
+                />
                 <Paper elevation={24} className={'walletDataPaperComponent'}>
                     <DataField
                         label={'Balance: '}
@@ -133,10 +138,11 @@ const WalletPage = (props) => {
                     {walletState.walletData.txHistory.data.map(([mapKey, tx]) => {
                         const {balanceDelta, increase, recipient, timeStamp, source} = tx;
                         const date = new Date(nanoSecondsToMiliSeconds(parseInt(timeStamp))).toString()
-                        const title = `${increase ? "+":"-"} ${balanceDelta / e8sInOneICP} ICP // ${date} `;
+                        const title = `${date} `;
+                        const subtitle = `${increase ? "+":"-"} ${balanceDelta / e8sInOneICP} ICP`
                         const text_1 = `source: ${shortenHexString(source)}`;
                         const text_2 = `Recipient: ${shortenHexString(recipient)}`;
-                        return (<div title={title} texts={[text_1, text_2]}></div>)
+                        return (<div title={title} subtitle={subtitle} texts={[text_1, text_2]}></div>)
                     })}
                 </AccordionField>}
 
