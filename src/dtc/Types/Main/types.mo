@@ -154,8 +154,13 @@ module{
         #UpgradeApp;
         #CreateNeuron: {amount: Nat64; };
         #IncreaseNeuron: {amount: Nat64; neuronId: Nat64; };
-        #ManageNeuron: {args: Governance.ManageNeuron; proposer: Principal; };
-        #PurchaseCycles: {amount : {icp: {e8s: Nat64};};};
+        #PurchaseCycles: {amount : Nat64;};
+        #SplitNeuron: {neuronId: Nat64; amount: Nat64; };
+        #SpawnNeuron: {neuronId: Nat64; percentage_to_spawn : Nat32;};
+        #DisburseNeuron: {neuronId: Nat64; };
+        #DissolveNeuron: {neuronId: Nat64; };
+        #IncreaseDissolveDelay: {neuronId: Nat64; additionalDissolveDelaySeconds: Nat64; };
+        #FollowNeuron: {neuronId: Nat64; topic : Int32; followees : [Nat64] };
     };
 
     public type Vote = { adopt: Bool };

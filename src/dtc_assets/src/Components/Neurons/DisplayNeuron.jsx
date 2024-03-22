@@ -6,6 +6,7 @@ import Graph from "../Fields/Chart";
 import { CHART_TYPES, GRAPH_DATA_SETS, GRAPH_DISPLAY_LABELS } from "../../functionsAndConstants/Constants";
 import { getUserNeuronContribution, mapNeuronContributionsDataToChartFormat, neuronContributionsTableColumns, mapNeuronContributionsToTableRows } from "../../mappers/treasuryPageMapperFunctions";
 import ButtonField from "../Fields/Button";
+import AddIcon from '@mui/icons-material/Add';
 import HourglassTopIcon from '@mui/icons-material/HourglassTop';
 import LockIcon from '@mui/icons-material/Lock';
 import HistoryToggleOffIcon from '@mui/icons-material/HistoryToggleOff';
@@ -44,12 +45,6 @@ const DisplayNeuron = (props) => {
     else if(neuronInfo.state === NeuronStates.spawning)  {neuronState = "Spawning"; buttonIcon = HistoryToggleOffIcon;}
 
     const userMaturity = fromE8s(parseInt(neuron.maturity_e8s_equivalent) * (parseInt(userContribution.stake_e8s)/parseInt(neuronInfo.stake_e8s)));
-    
-    console.log("contributions", contributions);
-    console.log("neuron", neuron);
-    console.log("neuronInfo", neuronInfo);
-    console.log("userContribution", userContribution);
-    console.log(mapNeuronContributionsDataToChartFormat(contributions));
 
     return (
         <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} xs={12} flexDirection={"column"} padding={0}>
@@ -70,7 +65,18 @@ const DisplayNeuron = (props) => {
                 <Typography color={"#bdbdbd"} width={"50%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>Your Stake</Typography>
                 <Typography color={"#bdbdbd"} width={"50%"} display={"flex"} justifyContent={"right"} alignItems={"center"}>{`${round2Decimals(fromE8s(parseInt(userContribution.stake_e8s)))} ICP`}</Typography>
             </Grid>
-
+            <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0} paddingTop={"10px"}>
+                <Grid display={"flex"} justifyContent={"right"} alignItems={"center"} width={"100%"} xs={12} padding={0}>
+                    <ButtonField
+                    paperSx={{display: "flex", justifyContent: "center", alignItems: "center", width: "160px"}}
+                    elevation={0}
+                    text={"Increase Stake"}
+                    onClick={() => {}}
+                    Icon={AddIcon}
+                    iconSize={'small'}
+                    />
+                </Grid>
+            </Grid>
             <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0} paddingTop={"25px"}>
                 <Typography width={"50%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>Neuron State</Typography>
                 <ButtonField
@@ -97,6 +103,36 @@ const DisplayNeuron = (props) => {
                     disabled={true}
                 />
             </Grid>
+            <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0} paddingTop={"10px"}>
+                <Grid display={"flex"} justifyContent={"left"} alignItems={"center"} width={"33%"} xs={12} padding={0}>
+                    <ButtonField
+                    paperSx={{display: "flex", justifyContent: "center", alignItems: "center", width: "230px"}}
+                    elevation={0}
+                    text={"Dissolve Neuron"}
+                    onClick={() => {}}
+                    iconSize={'small'}
+                    />
+                </Grid>
+                <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"33%"} xs={12} padding={0}>
+                    <ButtonField
+                    paperSx={{display: "flex", justifyContent: "center", alignItems: "center", width: "230px"}}
+                    elevation={0}
+                    text={"Disperse Neuron"}
+                    onClick={() => {}}
+                    iconSize={'small'}
+                    />
+                </Grid>
+                <Grid display={"flex"} justifyContent={"right"} alignItems={"center"} width={"33%"} xs={12} padding={0}>
+                    <ButtonField
+                    paperSx={{display: "flex", justifyContent: "center", alignItems: "center", width: "230px"}}
+                    elevation={0}
+                    text={"Increase Dissolve Delay"}
+                    onClick={() => {}}
+                    Icon={AddIcon}
+                    iconSize={'small'}
+                    />
+                </Grid>
+            </Grid>
             <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0} paddingTop={"25px"}>
                 <Typography width={"50%"} display={"flex"} justifyContent={"left"} alignItems={"center"} variant="h6">Neuron Maturity</Typography>
                 <Typography width={"50%"} display={"flex"} justifyContent={"right"} alignItems={"center"} variant="h6">{`${round2Decimals(fromE8s(parseInt(neuron.maturity_e8s_equivalent)))} ICP`}</Typography>
@@ -105,13 +141,24 @@ const DisplayNeuron = (props) => {
                 <Typography color={"#bdbdbd"} width={"50%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>Your Maturity</Typography>
                 <Typography color={"#bdbdbd"} width={"50%"} display={"flex"} justifyContent={"right"} alignItems={"center"}>{`${round2Decimals(userMaturity)} ICP`}</Typography>
             </Grid>
+            <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0} paddingTop={"10px"}>
+                <Grid display={"flex"} justifyContent={"right"} alignItems={"center"} width={"100%"} xs={12} padding={0}>
+                    <ButtonField
+                    paperSx={{display: "flex", justifyContent: "center", alignItems: "center", width: "230px"}}
+                    elevation={0}
+                    text={"Spawn Neuron From Maturity"}
+                    onClick={() => {}}
+                    iconSize={'small'}
+                    />
+                </Grid>
+            </Grid>
             <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} xs={12} padding={0} paddingTop={"25px"} flexDirection={'column'}>
                 <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0}>
                     <Typography width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"} variant="h6">Neuron Contributions: </Typography>
                 </Grid>
                 <Grid display={"flex"} width={"100%"} justifyContent={"center"} alignItems={"center"} xs={12} padding={0} margin={"10px"}>
                     <Graph
-                        paperWidth={"100%"}
+                        withoutPaper={true}
                         width={"25%"}
                         hideButton2={true}
                         type={CHART_TYPES.pie}

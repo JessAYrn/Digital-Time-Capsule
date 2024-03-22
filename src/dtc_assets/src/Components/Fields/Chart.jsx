@@ -21,6 +21,7 @@ const Graph = (props) => {
         paperWidth,
         hideButton1,
         hideButton2,
+        withoutPaper
     } = props
 
     const [dataSetName, setDataSetName] = useState(defaultDataSetName);
@@ -54,17 +55,22 @@ const Graph = (props) => {
         justifyContent="center" 
         alignItems="center" 
         >
-            <Paper className="chart paper" sx={{
+            { !withoutPaper && <Paper className="chart paper" sx={{
                 marginBottom: "0px", 
                 width: paperWidth || "100%", 
                 display: "flex", 
                 justifyContent: "center",
                 alignItems: "center",
             }} >
-                <Grid xs={12} minWidth={"325px"} width={width} display="flex" justifyContent="center" alignItems="center" flexDirection={"column"}>
+                <Grid xs={12} minWidth={"325px"} width={width} display="flex" justifyContent="center" alignItems="center" flexDirection={"column"} >
                 <Chart_ data={data} height={height || "175px"} />
                 </Grid> 
-            </Paper>
+            </Paper>}
+            { withoutPaper &&
+                <Grid xs={12} minWidth={"325px"} width={width} display="flex" justifyContent="center" alignItems="center" flexDirection={"column"} >
+                    <Chart_ data={data} height={height || "175px"} />
+                </Grid> 
+            }
 
             <Grid
             xs={12}

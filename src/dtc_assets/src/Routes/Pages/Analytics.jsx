@@ -275,7 +275,6 @@ const Analytics = () => {
                                         title={`Propsoal #${id}`}
                                         proposalId={id}
                                         proposer={proposer}
-                                        payload={payload}
                                         action={action}
                                         timeInitiated={timeInitiated}
                                         timeExecuted={timeExecuted}

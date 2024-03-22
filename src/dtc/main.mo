@@ -574,9 +574,23 @@ shared actor class User() = this {
                 let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
                 let response_2 = await treasuryCanister.increaseNeuron({amount; neuronId; contributor = Principal.fromText(proposer);});
             };
-            case(#ManageNeuron({args; proposer})){
-                let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
-                let response = await treasuryCanister.manageNeuron(args, proposer);
+            case(#DisburseNeuron({neuronId;})){
+                
+            };
+            case(#DissolveNeuron({neuronId;})){
+
+            };
+            case(#FollowNeuron({neuronId: Nat64; topic : Int32; followees : [Nat64]})){
+
+            };
+            case(#IncreaseDissolveDelay({neuronId; additionalDissolveDelaySeconds;})){
+                
+            };
+            case(#SplitNeuron({neuronId; amount;})){
+                
+            };
+            case(#SpawnNeuron({neuronId; percentage_to_spawn;})){
+                
             };
             case(#PurchaseCycles({amount})){
                 //call function to purchase more cycles
