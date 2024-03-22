@@ -40,6 +40,7 @@ import WasmStore "Types/WasmStore/types";
 import SupportCanisterIds "SupportCanisterIds/SupportCanisterIds";
 import MarketData "Modules/HTTPRequests/MarketData";
 import AnalyticsTypes "Types/Analytics/types";
+import Governance "NNS/Governance";
 
 
 shared actor class User() = this {
@@ -554,6 +555,7 @@ shared actor class User() = this {
     };
 
     private func executeProposal(proposal: MainTypes.Proposal) : async () {
+        let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
         let {action; proposer;} = proposal;
         switch(action){
             case(#AddAdmin({principal})){
@@ -567,30 +569,78 @@ shared actor class User() = this {
             //still need to delete the public upgradeApp method once the frontend has been updated
             case (#UpgradeApp){ ignore upgradeApp_(); };
             case (#CreateNeuron({amount;})){
-                let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
                 let response_2 = await treasuryCanister.createNeuron({amount; contributor = Principal.fromText(proposer);});
             };
             case(#IncreaseNeuron({amount; neuronId;})){
-                let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
                 let response_2 = await treasuryCanister.increaseNeuron({amount; neuronId; contributor = Principal.fromText(proposer);});
             };
             case(#DisburseNeuron({neuronId;})){
-                
+                let treasuryAccountId = await treasuryCanister.canisterAccountId();
+                let neuronsDataArray: TreasuryTypes.NeuronsDataArray = await treasuryCanister.getNeuronsDataArray();
+                let neuronsDataMap: TreasuryTypes.NeuronsDataMap = HashMap.fromIter<TreasuryTypes.NeuronIdAsText, TreasuryTypes.NeuronData>(
+                    Iter.fromArray(neuronsDataArray), 
+                    Iter.size(Iter.fromArray(neuronsDataArray)), 
+                    Text.equal, 
+                    Text.hash
+                );
+                let ?neuronData = neuronsDataMap.get(Nat64.toText(neuronId)) else { throw Error.reject("Neuron not found") };
+                let ?neuronInfo = neuronData.neuronInfo else { throw Error.reject("Neuron Info not found") };
+                let {stake_e8s;} = neuronInfo;
+                let args : Governance.ManageNeuron = {
+                    id = ?{id = neuronId;};
+                    command = ?#Disburse({to_account = ?{hash = treasuryAccountId}; amount = ?{e8s = stake_e8s - txFee} });
+                    neuron_id_or_subaccount = null;
+                };
+                let result = await treasuryCanister.manageNeuron(args, Principal.fromText(proposer));
             };
             case(#DissolveNeuron({neuronId;})){
+                let args : Governance.ManageNeuron = {
+                    id = ?{id = neuronId;};
+                    command = ?#Configure({operation = ?#StartDissolving({});});
+                    neuron_id_or_subaccount = null;
+                };
+                let result = await treasuryCanister.manageNeuron(args, Principal.fromText(proposer));
 
             };
-            case(#FollowNeuron({neuronId: Nat64; topic : Int32; followees : [Nat64]})){
-
+            case(#FollowNeuron({neuronId; topic; followee;})){
+                let followees : [{id: Nat64;}] = [{id = followee;}];
+                let args : Governance.ManageNeuron = {
+                    id = ?{id = neuronId;};
+                    command = ?#Follow({topic; followees;});
+                    neuron_id_or_subaccount = null;
+                };
+                let result = await treasuryCanister.manageNeuron(args, Principal.fromText(proposer));
             };
             case(#IncreaseDissolveDelay({neuronId; additionalDissolveDelaySeconds;})){
-                
+                let additional_dissolve_delay_seconds = additionalDissolveDelaySeconds;
+                let args : Governance.ManageNeuron = {
+                    id = ?{id = neuronId;};
+                    command = ?#Configure({operation = ?#IncreaseDissolveDelay({additional_dissolve_delay_seconds});});
+                    neuron_id_or_subaccount = null;
+                };
+                let result = await treasuryCanister.manageNeuron(args, Principal.fromText(proposer));
             };
             case(#SplitNeuron({neuronId; amount;})){
-                
+                let args : Governance.ManageNeuron = {
+                    id = ?{id = neuronId;};
+                    command = ?#Split({amount_e8s = amount;});
+                    neuron_id_or_subaccount = null;
+                };
+                let result = await treasuryCanister.manageNeuron(args, Principal.fromText(proposer));
             };
             case(#SpawnNeuron({neuronId; percentage_to_spawn;})){
-                
+                let treasurySelfAuthPrincipal = await treasuryCanister.getSelfAuthenticatingPrincipal();
+                let spawnArgs : Governance.Spawn = {
+                    percentage_to_spawn : ?Nat32 = ?percentage_to_spawn;
+                    new_controller : ?Principal = ?Principal.fromText(treasurySelfAuthPrincipal);
+                    nonce : ?Nat64 = ?Nat64.fromNat(0);
+                };
+                let args : Governance.ManageNeuron = {
+                    id = ?{id = neuronId;};
+                    command = ?#Spawn(spawnArgs);
+                    neuron_id_or_subaccount = null;
+                };
+                let result = await treasuryCanister.manageNeuron(args, Principal.fromText(proposer));
             };
             case(#PurchaseCycles({amount})){
                 //call function to purchase more cycles

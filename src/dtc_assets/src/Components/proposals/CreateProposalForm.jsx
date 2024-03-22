@@ -123,7 +123,7 @@ const TOPIC_PAYLOAD_REQUIRED_ACTIONS = [
     PROPOSAL_ACTIONS.FollowNeuron
 ];
 
-const FOLLOWEES_PAYLOAD_REQUIRED_ACTIONS = [
+const FOLLOWEE_PAYLOAD_REQUIRED_ACTIONS = [
     PROPOSAL_ACTIONS.FollowNeuron
 ];
 
@@ -135,7 +135,7 @@ const actionReadyToSubmit = (proposalAction, proposalPayload) => {
     let ready = true;
     if(NEURON_ID_REQUIRED_ACTIONS.includes(proposalAction) && !proposalPayload?.neuronId) ready = false;
     if(TOPIC_PAYLOAD_REQUIRED_ACTIONS.includes(proposalAction) && !proposalPayload?.topic) ready = false;
-    if(FOLLOWEES_PAYLOAD_REQUIRED_ACTIONS.includes(proposalAction) && !proposalPayload?.followees) ready = false;
+    if(FOLLOWEE_PAYLOAD_REQUIRED_ACTIONS.includes(proposalAction) && !proposalPayload?.followee) ready = false;
     if(PRINCIPAL_REQUIRED_ACTIONS.includes(proposalAction) && !proposalPayload?.principal) ready = false;
     if(AMOUNT_PAYLOAD_REQUIRED_ACTIONS.includes(proposalAction) && !proposalPayload?.amount) ready = false;
     if(PERCENTAGE_PAYLOAD_REQUIRED_ACTIONS.includes(proposalAction) && !proposalPayload?.percentage_to_spawn) ready = false;
@@ -224,7 +224,7 @@ const CreateProposalForm = (props) => {
         if(payload.percentage_to_spawn) payload.percentage_to_spawn = parseInt(payload.percentage_to_spawn);
         if(payload.additionalDissolveDelaySeconds) payload.additionalDissolveDelaySeconds = parseInt(payload.additionalDissolveDelaySeconds);
         if(payload.neuronId) payload.neuronId = BigInt(payload.neuronId);
-        if(payload.followees) payload.followees = [BigInt(payload.followees)];
+        if(payload.followee) payload.followee = BigInt(payload.followee);
         let action = {[proposalAction_]: payload};
         console.log(action);
         let result = await actorState.backendActor.createProposal(action);
@@ -308,13 +308,13 @@ const CreateProposalForm = (props) => {
                 </>
             }
             {
-                proposalAction_ && FOLLOWEES_PAYLOAD_REQUIRED_ACTIONS.includes(proposalAction_) &&
+                proposalAction_ && FOLLOWEE_PAYLOAD_REQUIRED_ACTIONS.includes(proposalAction_) &&
                 <InputBox
                     hasError={hasError_1}
                     label={"Neuron Id to Follow"}
                     rows={"1"}
-                    onChange={(neuronId) => onChange_payload({followees: [neuronId]}, "followees", PAYLOAD_DATA_TYPES.nat)}
-                    value={proposalPayload?.followees}
+                    onChange={(neuronId) => onChange_payload({followee: neuronId}, "followee", PAYLOAD_DATA_TYPES.nat)}
+                    value={proposalPayload?.followee}
                     format={INPUT_BOX_FORMATS.numberFormat}
                 />
             }

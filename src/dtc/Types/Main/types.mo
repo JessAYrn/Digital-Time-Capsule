@@ -159,8 +159,8 @@ module{
         #SpawnNeuron: {neuronId: Nat64; percentage_to_spawn : Nat32;};
         #DisburseNeuron: {neuronId: Nat64; };
         #DissolveNeuron: {neuronId: Nat64; };
-        #IncreaseDissolveDelay: {neuronId: Nat64; additionalDissolveDelaySeconds: Nat64; };
-        #FollowNeuron: {neuronId: Nat64; topic : Int32; followees : [Nat64] };
+        #IncreaseDissolveDelay: {neuronId: Nat64; additionalDissolveDelaySeconds: Nat32; };
+        #FollowNeuron: {neuronId: Nat64; topic : Int32; followee :  Nat64 };
     };
 
     public type Vote = { adopt: Bool };

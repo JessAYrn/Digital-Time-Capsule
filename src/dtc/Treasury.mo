@@ -144,7 +144,8 @@ shared actor class Treasury (principal : Principal) = this {
         tresasuryAccountId()
     };
 
-    private func getSelfAuthenticatingPrincipal(): async Text {
+    public shared({caller}) func getSelfAuthenticatingPrincipal(): async Text {
+         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         let {public_key} = await EcdsaHelperMethods.getPublicKey(null);
         let {principalAsBlob} = Account.getSelfAuthenticatingPrincipal(public_key);
         Principal.toText(Principal.fromBlob(principalAsBlob));
