@@ -11,6 +11,7 @@ export const PROPOSAL_ACTIONS = {
     DissolveNeuron: "DissolveNeuron",
     IncreaseDissolveDelay: "IncreaseDissolveDelay",
     FollowNeuron: "FollowNeuron",
+    ToggleSupportMode: "ToggleSupportMode",
 };
 
 export const TREASURY_ACTIONS = {

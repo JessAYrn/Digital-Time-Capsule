@@ -198,7 +198,8 @@ const CreateProposalForm = (props) => {
         { text: PROPOSAL_ACTIONS.FollowNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.FollowNeuron)},
         { text: PROPOSAL_ACTIONS.IncreaseDissolveDelay, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.IncreaseDissolveDelay)},
         { text: PROPOSAL_ACTIONS.CreateNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.CreateNeuron)},
-        { text: PROPOSAL_ACTIONS.IncreaseNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.IncreaseNeuron)}
+        { text: PROPOSAL_ACTIONS.IncreaseNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.IncreaseNeuron)},
+        { text: PROPOSAL_ACTIONS.ToggleSupportMode, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.ToggleSupportMode)},
     ];
 
     const onChange_payload = (payload_, property, format) => {
@@ -226,7 +227,6 @@ const CreateProposalForm = (props) => {
         if(payload.neuronId) payload.neuronId = BigInt(payload.neuronId);
         if(payload.followee) payload.followee = BigInt(payload.followee);
         let action = {[proposalAction_]: payload};
-        console.log(action);
         let result = await actorState.backendActor.createProposal(action);
         if("err" in result){
             let errorMessagArray = Object.keys(result.err);

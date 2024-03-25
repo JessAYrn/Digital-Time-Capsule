@@ -151,7 +151,7 @@ module{
     public type ProposalActions = {
         #AddAdmin: {principal: Text};
         #RemoveAdmin: {principal: Text};
-        #UpgradeApp;
+        #UpgradeApp: {};
         #CreateNeuron: {amount: Nat64; };
         #IncreaseNeuron: {amount: Nat64; neuronId: Nat64; };
         #PurchaseCycles: {amount : Nat64;};
@@ -161,6 +161,7 @@ module{
         #DissolveNeuron: {neuronId: Nat64; };
         #IncreaseDissolveDelay: {neuronId: Nat64; additionalDissolveDelaySeconds: Nat32; };
         #FollowNeuron: {neuronId: Nat64; topic : Int32; followee :  Nat64 };
+        #ToggleSupportMode: {};
     };
 
     public type Vote = { adopt: Bool };

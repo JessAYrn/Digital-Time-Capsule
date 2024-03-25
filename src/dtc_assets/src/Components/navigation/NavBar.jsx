@@ -110,11 +110,11 @@ export const NavBar = (props) => {
 
     const mainMenuItemProps = [
         { text: "Wallet", onClick: () => changeRoute(NAV_LINKS.wallet, reduxStates) },
-        { text: "Storage", onClick: () => changeRoute(NAV_LINKS.journal, reduxStates) },
+        // { text: "Storage", onClick: () => changeRoute(NAV_LINKS.journal, reduxStates) },
         { text: "Treasury", onClick: () => changeRoute(NAV_LINKS.treasury, reduxStates) },
         { text: "Dashboard", onClick: () => changeRoute(NAV_LINKS.dashboard, reduxStates) },
-        { text: "Community", onClick: () => changeRoute(NAV_LINKS.groupJournal, reduxStates) },
-        { text: "Account", onClick: () => changeRoute(NAV_LINKS.account, reduxStates) }
+        // { text: "Community", onClick: () => changeRoute(NAV_LINKS.groupJournal, reduxStates) },
+        // { text: "Account", onClick: () => changeRoute(NAV_LINKS.account, reduxStates) }
     ];
 
     const journalTabMenuItemProps=[

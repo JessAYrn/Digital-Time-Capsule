@@ -407,7 +407,7 @@ shared actor class User() = this {
     public shared({caller}) func toggleSupportMode() : async Result.Result<(),JournalTypes.Error>{
         let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v2);
         if(not isAdmin){ return #err(#NotAuthorized); };
-        let updatedMetaData = await CanisterManagementMethods.toggleSupportMode(caller, daoMetaData_v2);
+        let updatedMetaData = await CanisterManagementMethods.toggleSupportMode(daoMetaData_v2);
         daoMetaData_v2 := updatedMetaData;
         return #ok(());
     };
@@ -496,7 +496,7 @@ shared actor class User() = this {
         let proposal = {votes; action; proposer; timeInitiated; timeExecuted; voteTally;};
         let votingResults = GovernanceHelperMethods.tallyVotes({neuronsDataArray; proposal;});
         proposalsMap.put(proposalIndex, {proposal with voteTally = votingResults} );
-        let timerId = setTimer(#seconds(24 * 60 * 60 * 3), finalizeProposalVotingPeriod);
+        let timerId = setTimer(#seconds(60 * 10), finalizeProposalVotingPeriod);
         proposalIndex += 1;
         let updatedProposalsArray = Iter.toArray(proposalsMap.entries());
         return #ok(updatedProposalsArray);
@@ -567,7 +567,7 @@ shared actor class User() = this {
                 daoMetaData_v2 := updatedDaoMetaData;
             };
             //still need to delete the public upgradeApp method once the frontend has been updated
-            case (#UpgradeApp){ ignore upgradeApp_(); };
+            case (#UpgradeApp({})){ ignore upgradeApp_(); };
             case (#CreateNeuron({amount;})){
                 let response_2 = await treasuryCanister.createNeuron({amount; contributor = Principal.fromText(proposer);});
             };
@@ -644,6 +644,10 @@ shared actor class User() = this {
             };
             case(#PurchaseCycles({amount})){
                 //call function to purchase more cycles
+            };
+            case(#ToggleSupportMode({})){
+                let updatedMetaData = await CanisterManagementMethods.toggleSupportMode(daoMetaData_v2);
+                daoMetaData_v2 := updatedMetaData;
             };
         };
     };
