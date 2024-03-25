@@ -2,11 +2,10 @@ import { mapApiObjectToFrontEndJournalEntriesObject } from "../mappers/journalPa
 import { delay, backendActor, toHexString, nanoSecondsToMiliSeconds } from "./Utils";
 import { generateQrCode } from "./walletFunctions/GenerateQrCode";
 import { mapBackendCanisterDataToFrontEndObj } from "../mappers/dashboardMapperFunctions";
-import { mapBackendTreasuryDataToFrontEndObj } from "../mappers/treasuryPageMapperFunctions";
+import { mapBalancesDataFromApiToFrontend, mapBackendTreasuryDataToFrontEndObj } from "../mappers/treasuryPageMapperFunctions";
 import { getFileUrl_fromApi } from "../Components/Fields/fileManger/FileManagementTools";
 import DoNotDisturbOnIcon from '@mui/icons-material/DoNotDisturbOn';
 import ButtonField from "../Components/Fields/Button";
-import mapBalancesDataFromApiToFrontend from "../mappers/analyticsMappers";
 
 
 export const loadAllDataIntoReduxStores = async (states, dispatchFunctions, types, stateHasBeenRecovered) => {
@@ -88,7 +87,7 @@ export const loadAccountData = async (actorState, accountDispatch, accountTypes)
 export const loadJournalData = async (actorState, journalDispatch, types) => {
     let journal = await actorState.backendActor.readJournal();
     journal = journal.ok;
-    let { userJournalData } = journal;
+    let { userJournalData, userPrincipal } = journal;
     let [journalEntries, journalBio] = userJournalData;
     const filesMetaData = journalBio.photos.map(fileData => {
         return { ...fileData, lastModified : parseInt(fileData.lastModified), isLoading: true };
@@ -114,8 +113,13 @@ export const loadJournalData = async (actorState, journalDispatch, types) => {
 };
 
 export const loadWalletData = async (actorState, walletDispatch, types ) => {
-
-    let walletDataFromApi = await actorState.backendActor.readWalletData();
+    let promises = [ 
+        actorState.backendActor.readWalletData(), 
+        actorState.backendActor.retrieveUserBalances(), 
+        loadTxHistory(actorState, walletDispatch, types) 
+    ];
+    const [walletDataFromApi, balancesHistory, _ ] = await Promise.all(promises);
+    const userBalancesHistory = mapBalancesDataFromApiToFrontend(balancesHistory);
     const address = toHexString(new Uint8Array( [...walletDataFromApi.ok.address]));
     const walletData = { 
         balance : parseInt(walletDataFromApi.ok.balance.e8s), 
@@ -132,10 +136,13 @@ export const loadWalletData = async (actorState, walletDispatch, types ) => {
         actionType: types.SET_WALLET_DATA
     });
     walletDispatch({
+        actionType: types.SET_WALLET_BALANCES_DATA,
+        payload: userBalancesHistory
+    });
+    walletDispatch({
         actionType: types.SET_DATA_HAS_BEEN_LOADED,
         payload: true,
     });
-    loadTxHistory(actorState, walletDispatch, types);
 };
 
 export const loadTxHistory = async (actorState, walletDispatch, types) => {
@@ -181,9 +188,10 @@ export const loadCanisterData = async (actorState, dispatch, types) => {
 export const loadTreasuryData = async (actorState, dispatch, types) => {
     let promises = [actorState.backendActor.getTreasuryData(), actorState.backendActor.retrieveTreasuryBalances()];
     let [treasuryData, treasuryBalances] = await Promise.all(promises);
-    treasuryBalances = mapBalancesDataFromApiToFrontend(treasuryBalances)
+    treasuryBalances = mapBalancesDataFromApiToFrontend(treasuryBalances);
     treasuryData = treasuryData.ok;
     treasuryData = mapBackendTreasuryDataToFrontEndObj(treasuryData);
+    console.log(treasuryData);
     dispatch({
         actionType: types.SET_TREASURY_DATA,
         payload: treasuryData

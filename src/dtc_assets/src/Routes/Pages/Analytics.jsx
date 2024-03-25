@@ -33,25 +33,19 @@ import CreateProposalForm from '../../Components/proposals/CreateProposalForm';
 import Proposal from '../../Components/proposals/Proposal';
 
 const Analytics = () => {
-    const { 
-        homePageDispatch, homePageState, actorDispatch, actorState
-    } = useContext(AppContext);
 
+    const { homePageDispatch, homePageState, actorState } = useContext(AppContext);
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [isLoadingModal, setIsLoadingModal] = useState(false);
     const [modalProps, setModalProps] = useState({});
-
     const [requestsTableIsLoading, setRequestsTableIsLoading] = useState(false);
     const [usersTableIsLoading, setUsersTableIsLoading] = useState(false);
 
     const modalButton_close = [
-        {Component: ButtonField,
-        props: {
-            active: true,
-            text: "Close",
-            Icon: CloseIcon,
-            onClick: () => setModalIsOpen(false)
-        }}
+        {
+            Component: ButtonField,
+            props: { active: true, text: "Close", Icon: CloseIcon, onClick: () => setModalIsOpen(false)}
+        }
     ];
 
     const modalForm_createProposal = [
@@ -199,7 +193,6 @@ const Analytics = () => {
             justifyContent="center" 
             alignItems="center" 
             flexDirection={"column"}
-            className={"container_analytics"}
         > 
             <NavBar context={UI_CONTEXTS.HOME_PAGE}/>
             <>
@@ -282,7 +275,6 @@ const Analytics = () => {
                                         title={`Propsoal #${id}`}
                                         proposalId={id}
                                         proposer={proposer}
-                                        payload={payload}
                                         action={action}
                                         timeInitiated={timeInitiated}
                                         timeExecuted={timeExecuted}

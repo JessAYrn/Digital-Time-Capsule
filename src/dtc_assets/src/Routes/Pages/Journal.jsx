@@ -1,7 +1,6 @@
 import JournalPage from "./JournalPage";
 import React, { useContext, useEffect, useState } from "react";
 import {types} from "../../reducers/journalReducer";
-import "./Journal.scss";
 import { AppContext } from "../App";
 import InputBox from "../../Components/Fields/InputBox";
 import SpeedDialField from '../../Components/Fields/SpeedDialField'
@@ -59,6 +58,8 @@ const Journal = (props) => {
 
 
     const onTextBoxChange = () => setCounter(counter + 1);
+
+    const onDisableEdit = async (isEditing) => { if(!isEditing) sendData(); };
 
     const onDatePickerChange = async (e) => {
         const date = new Date(e);
@@ -125,7 +126,6 @@ const Journal = (props) => {
         <>
         <Grid 
             container 
-            className={'container_journal'} 
             columns={12} 
             xs={12} 
             rowSpacing={8} 
@@ -156,26 +156,22 @@ const Journal = (props) => {
                         editable={true}
                         dispatch={journalDispatch}
                         onChange={onTextBoxChange}
-                        onBlur={sendData}
+                        onDisableEdit={onDisableEdit}
                         dispatchAction={types.CHANGE_NAME}
                         value={journalState.bio.name}
                     />
-                    <Grid xs={12} display={"flex"} justifyContent={"left"} alignItems={"center"}>
-                        <DatePickerField
-                            value={journalState.bio.dob[0]}
-                            label={"Date Of Birth"}
-                            onChange={onDatePickerChange}
-                            editable={true}
-                            md={11}
-                            xs={11}
-                        />
-                    </Grid>
+                    <DatePickerField
+                        value={journalState.bio.dob[0]}
+                        label={"Date Of Birth"}
+                        onChange={onDatePickerChange}
+                        editable={true}
+                    />
                     <InputBox
                         label={"Place of Birth: "}
                         rows={"1"}
                         editable={true}
                         onChange={onTextBoxChange}
-                        onBlur={sendData}
+                        onDisableEdit={onDisableEdit}
                         dispatch={journalDispatch}
                         dispatchAction={types.CHANGE_POB}
                         value={journalState.bio.pob}
@@ -221,7 +217,7 @@ const Journal = (props) => {
                         label={"Dedications: "}
                         editable={true}
                         onChange={onTextBoxChange}
-                        onBlur={sendData}
+                        onDisableEdit={onDisableEdit}
                         rows={"8"}
                         dispatch={journalDispatch}
                         dispatchAction={types.CHANGE_DEDICATIONS}
@@ -231,7 +227,7 @@ const Journal = (props) => {
                         label={"Preface: "}
                         editable={true}
                         onChange={onTextBoxChange}
-                        onBlur={sendData}
+                        onDisableEdit={onDisableEdit}
                         rows={"16"}
                         dispatch={journalDispatch}
                         dispatchAction={types.CHANGE_PREFACE}

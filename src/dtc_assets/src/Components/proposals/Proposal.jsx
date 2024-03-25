@@ -7,7 +7,7 @@ import { AppContext as  GroupJournalContext } from "../../Routes/GroupJournal";
 import { AppContext as JournalContext } from "../../Routes/App";
 import { AppContext as  AccountContext } from "../../Routes/Account";
 import { AppContext as  HomePageContext} from "../../Routes/HomePage";
-import { nanoSecondsToMiliSeconds, getDateAsStringMMDDYYY, shortenHexString } from "../../functionsAndConstants/Utils";
+import { nanoSecondsToMiliSeconds, getDateAsStringMMDDYYY, shortenHexString, fromE8s, round2Decimals } from "../../functionsAndConstants/Utils";
 import { retrieveContext } from "../../functionsAndConstants/Contexts";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
@@ -17,6 +17,8 @@ import CloseIcon from '@mui/icons-material/Close';
 import ButtonField from "../Fields/Button";
 import CheckIcon from '@mui/icons-material/Check';
 import ModalComponent from "../modal/Modal";
+import { copyText } from "../../functionsAndConstants/walletFunctions/CopyWalletAddress";
+import { NEURON_TOPICS } from "./CreateProposalForm";
 
 
 const Proposal = (props) => {
@@ -26,7 +28,6 @@ const Proposal = (props) => {
         context,
         proposalId,
         proposer,
-        payload,
         action,
         timeInitiated,
         timeExecuted,
@@ -52,12 +53,8 @@ const Proposal = (props) => {
 
     const { actorState } = useContext(AppContext);
 
-    let payload_;
-    let payloadLabel;
-    let payloadButtonIcon;
-    if(payload.principal[0]) {payload_ = shortenHexString(payload.principal[0]); payloadLabel = "Principal"; payloadButtonIcon = ContentCopyIcon}
-    else if(payload.amount[0]) {payload_ = payload.amount[0]; payloadLabel = "Amount";}
-
+    let actionType = getProposalType(action);
+    let payload = action[actionType];
     let {yay, nay, total} = voteTally;
 
     const getModalButtonsComponents = (bool) => {
@@ -117,17 +114,34 @@ const Proposal = (props) => {
                     text={`${getProposalType(action)}`}
                     disabled={true}
                 />
-                { payload_ && 
-                    <DataField
-                        label={`Payload(${payloadLabel}): `}
-                        text={`${payload_}`}
-                        buttonIcon={payloadButtonIcon}
-                    />
+                { payload && 
+                    <>
+                        {
+                            Object.keys(payload).map((key, index) => {
+                                let text = payload[key];
+                                let key_ = key;
+                                if(key === "amount") text = fromE8s(parseInt(payload[key])) + ' ICP';
+                                if(key === "percentage_to_spawn") text = `${payload[key]}%`;
+                                if(key === "neuronId") text = BigInt(payload[key]).toString();
+                                if(key === "followees") {text = BigInt(payload[key][0]).toString(); key_ = "followee";}
+                                if(key === "topic") {text = Object.keys(NEURON_TOPICS).find(thisKey => NEURON_TOPICS[thisKey] === payload[key])}
+
+                                return(
+                                    <DataField
+                                        label={key_}
+                                        text={`${text}`}
+                                        disabled={true}
+                                    />
+                                )
+                            })
+                        }
+                    </>
                 }
                 <DataField
                     label={'Author: '}
                     text={`${shortenHexString(proposer)}`}
                     buttonIcon={ContentCopyIcon}
+                    onClick={() => copyText(proposer)}
                 />
                 <DataField
                     label={'Time Initiated: '}
@@ -151,19 +165,19 @@ const Proposal = (props) => {
             >
                 <DataField
                     label={'Adopt: '}
-                    text={`${parseInt(yay)}`}
+                    text={`${round2Decimals(fromE8s(parseInt(yay)))} Voting Power`}
                     onClick={() => onVote(true)}
                     buttonIcon={ThumbUpIcon}
                 />
                 <DataField
                     label={'Reject: '}
                     onClick={() => onVote(false)}
-                    text={`${parseInt(nay)}`}
+                    text={`${round2Decimals(fromE8s(parseInt(nay)))} Voting Power`}
                     buttonIcon={ThumbDownIcon}
                 />
                 <DataField
                     label={'Total Voting Power Participated: '}
-                    text={`${parseInt(total)}`}
+                    text={`${round2Decimals(fromE8s(parseInt(total)))} Voting Power`}
                     disabled={true}
                 />
             </Grid>

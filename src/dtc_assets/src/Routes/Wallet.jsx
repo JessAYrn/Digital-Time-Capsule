@@ -1,5 +1,5 @@
 import React, { createContext, useReducer, useEffect, useMemo, useState} from 'react';
-import LoginPage from './Pages/authentication/LoginPage';
+import LoginPage from './Pages/LoginPage';
 import { useLocation } from 'react-router-dom';
 import journalReducer, {initialState, types} from '../reducers/journalReducer';
 import walletReducer ,{walletInitialState, walletTypes} from '../reducers/walletReducer';
@@ -8,9 +8,6 @@ import WalletPage from './Pages/WalletPage';
 import { testTx } from '../testData/Transactions';
 import { recoverState, loadAllDataIntoReduxStores, allStatesLoaded } from '../functionsAndConstants/loadingFunctions';
 import { useConnect } from '@connect2ic/react';
-import CkBtcPage from './Pages/CkBtcPage';
-import EthPage from './Pages/EthPage';
-import BtcPage from './Pages/BtcPage';
 import { DEFAULT_APP_CONTEXTS, WALLET_TABS } from '../functionsAndConstants/Constants';
 import accountReducer , {accountTypes, accountInitialState} from '../reducers/accountReducer';
 import homePageReducer,{ homePageInitialState, homePageTypes } from '../reducers/homePageReducer';
@@ -80,16 +77,8 @@ const WalletApp = () => {
 
     window.onbeforeunload = window.history.replaceState(null, '');
 
-    
-    const WalletTabComponent = useMemo(() => {
-        if(walletState.walletPageTab===WALLET_TABS.icpTab) return WalletPage;
-        else if(walletState.walletPageTab===WALLET_TABS.btcTab) return BtcPage;
-        else if(walletState.walletPageTab===WALLET_TABS.ethTab) return EthPage;
-        else if(walletState.walletPageTab===WALLET_TABS.ckBtcTab) return CkBtcPage;
-    },[walletState.walletPageTab]);
-
     const displayComponent = useMemo(() => {
-        return journalState.isAuthenticated && allStatesLoaded({
+        return connectionResult.isConnected && allStatesLoaded({
             journalState,
             notificationsState,
             walletState,
@@ -98,7 +87,7 @@ const WalletApp = () => {
             homePageState
         });
     },[
-        journalState.isAuthenticated, 
+        connectionResult.isConnected, 
         accountState.dataHasBeenLoaded,
         journalState.dataHasBeenLoaded,
         treasuryState.dataHasBeenLoaded,
@@ -112,12 +101,14 @@ const WalletApp = () => {
     //Loading Time Capsule Data
     useEffect(async () => {
         if(!actorState.backendActor) return; 
-        setIsLoadingModal(true);
-        setModalIsOpen(true);
-        const response = await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes, stateHasBeenRecovered);
-        setModalIsOpen(response?.openModal);
-        setModalProps(response)
-        setIsLoadingModal(false);
+        try{
+            setIsLoadingModal(true);
+            setModalIsOpen(true);
+            let response = await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes, stateHasBeenRecovered);
+            setModalIsOpen(response?.openModal);
+            setModalProps(response)
+            setIsLoadingModal(false);    
+        } catch(e){ connectionResult.disconnect(); document.location.reload(); }   
     },[actorState.backendActor]);
     
     return(
@@ -141,7 +132,7 @@ const WalletApp = () => {
             >
                 {
                     displayComponent ?
-                        <WalletTabComponent/> : 
+                        <WalletPage/> : 
                         <LoginPage
                             context={UI_CONTEXTS.WALLET}
                         /> 

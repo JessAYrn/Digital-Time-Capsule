@@ -1,6 +1,5 @@
-import React, {useState, useRef} from 'react';
+import React, {useState} from 'react';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
-import Box from '@mui/material/Box';
 import PropTypes from 'prop-types';
 import { NumericFormat } from 'react-number-format';
 import Stack from '@mui/material/Stack';
@@ -10,7 +9,6 @@ import EditIcon from '@mui/icons-material/Edit';
 import UploadIcon from '@mui/icons-material/Upload';
 import ButtonField from './Button';
 import { INPUT_BOX_FORMATS } from '../../functionsAndConstants/Constants';
-import "./InputBox.scss";
   
   const NumericFormatCustom = React.forwardRef(function NumericFormatCustom(
     props,
@@ -48,17 +46,22 @@ const InputBox = (props) => {
 
     const [values, setValues] = useState({});
     
-    const handleChange = (event) => {
-    setValues({
-        ...values,
-        [event.target.name]: event.target.value,
-    });
-    if(dispatch) dispatch({
-        actionType: dispatchAction,
-        payload: event.target.value,
-        index: index
-    });
-    if(onChange) onChange(event.target.value);
+    const handleChange = (eventName, eventValue) => { 
+      setValues({
+          ...values,
+          [eventName]: `${eventValue}`,
+      });
+      if(dispatch) dispatch({
+          actionType: dispatchAction,
+          payload: `${eventValue}`,
+          index: index
+      });
+      if(onChange) onChange(`${eventValue}`);
+    };
+
+    const focusTextBox = () => {
+      let textbox = document.getElementById("formatted-numberFormat-input-label");
+      textbox.focus();
     };
     
 
@@ -66,7 +69,6 @@ const InputBox = (props) => {
 
     const {
         label,
-        maxLength,
         placeHolder,
         rows,
         disabled,
@@ -74,11 +76,13 @@ const InputBox = (props) => {
         dispatchAction,
         dispatch,
         index,
-        onBlur,
         onChange,
+        onDisableEdit,
         value,
         hasError,
-        format
+        format,
+        width,
+        maxValue
     } = props;
 
     let inputComponent;
@@ -86,6 +90,7 @@ const InputBox = (props) => {
 
     const onChange_editButton = () => {
         setEditing(!editing);
+        if(onDisableEdit) onDisableEdit(!editing);
     };
 
     const theme = useTheme();
@@ -95,83 +100,84 @@ const InputBox = (props) => {
     else if(!editing) EditIcon_ = EditIcon;
 
     return(
-        <ThemeProvider theme={theme}>
-            <Grid 
-                columns={12} 
-                xs={12} 
-                display="flex" 
-                justifyContent="center" 
-                alignItems="center" 
-                flexDirection={"column"}
-                className="textField"
-                marginTop={"25px"}
-                marginBottom={"25px"}
-                paddingTop={0}
-                paddingBottom={0}
-                borderRadius={"60px"}
-            >
-                <Box
-                    width={"100%"}
-                    columns={12} 
-                    xs={12} 
-                    onBlur={onBlur}
-                    component="form"
-                    noValidate
-                    autoComplete="on"
-                >
-                    {
-                        editable && 
-                        <ButtonField
-                            className={"inputBox"}
-                            transparentBackground={true}
-                            elevation={0}
-                            onClick={onChange_editButton}
-                            Icon={EditIcon_}
-                            iconSize={'small'}
-                        />
-                    }
-                    {format == INPUT_BOX_FORMATS.numberFormat && 
-                        <Stack direction="row" spacing={2}>
-                            <TextField
-                            columns={12} 
-                            xs={12} 
-                            width={"100%"}
-                            color='custom'
-                            label={label}                       
-                            value={values[format]}
-                            onChange={handleChange}
-                            placeholder={placeHolder}
-                            name={format}
-                            id={`formatted-${format}-input`}
-                            InputProps={{inputComponent}}
-                            disabled={(editable && !editing) || disabled}
-                            variant="standard"
-                            multiline
-                            maxRows={rows ? rows : 100}
-                            />
-                        </Stack>
-                    }
-                    {(!format || format === INPUT_BOX_FORMATS.noFormat) &&
-                    <TextField
-                        columns={12} 
-                        xs={12} 
-                        error={hasError}
-                        width={"100%"}
-                        color='custom'
-                        placeholder={placeHolder}
-                        value={value}
-                        disabled={(editable && !editing) || disabled}
-                        onChange={handleChange}
-                        id="filled-multiline-flexible"
-                        label={label}
-                        multiline
-                        maxRows={rows ? rows : 100}
-                        variant="filled"
-                    />
-                    }
-                </Box>
-            </Grid>
-        </ThemeProvider>
+
+      <Grid 
+        columns={12} 
+        xs={12} 
+        width={width}
+        display="flex" 
+        justifyContent="left" 
+        alignItems="center" 
+        className="textField"
+        marginTop={"25px"}
+        marginBottom={"25px"}
+        paddingTop={0}
+        paddingBottom={0}
+      >
+        {format == INPUT_BOX_FORMATS.numberFormat && 
+          <>
+            <Stack direction="row" spacing={2}>
+              <TextField
+              columns={12} 
+              xs={12} 
+              width={"100%"}
+              color='white'
+              label={label}       
+              value={values[format]}
+              onChange={(e) => handleChange(e.target.name, e.target.value)}
+              placeholder={placeHolder}
+              name={format}
+              id={`formatted-${format}-input`}
+              InputProps={{inputComponent}}
+              disabled={(editable && !editing) || disabled}
+              variant="standard"
+              multiline
+              maxRows={rows ? rows : 100}
+              fullWidth
+              />
+            </Stack>
+            {maxValue &&
+              <ButtonField
+                sx={{marginLeft: "-8px"}}
+                transparentBackground={true}
+                elevation={0}
+                text={"max"}
+                onClick={() => { handleChange(INPUT_BOX_FORMATS.numberFormat, maxValue); focusTextBox(); }}
+                iconSize={'small'}
+              />
+            }
+          </>
+        }
+        {(!format || format === INPUT_BOX_FORMATS.noFormat) &&
+          <TextField
+            columns={12} 
+            xs={12} 
+            error={hasError}
+            width={"100%"}
+            color='white'
+            placeholder={placeHolder}
+            value={value}
+            disabled={(editable && !editing) || disabled}
+            onChange={(e) => handleChange(e.target.name, e.target.value)}
+            id="filled-multiline-flexible"
+            label={label}
+            multiline
+            maxRows={rows ? rows : 100}
+            variant="filled"
+            fullWidth
+          />
+        }
+        {editable && 
+          <ButtonField
+            className={"inputBox"}
+            transparentBackground={true}
+            elevation={0}
+            onClick={onChange_editButton}
+            Icon={EditIcon_}
+            iconSize={'small'}
+          />
+        }
+      </Grid>
     )
 }; 
 

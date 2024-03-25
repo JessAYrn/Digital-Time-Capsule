@@ -1,8 +1,10 @@
 import React from 'react';
 import { QrReader } from 'react-qr-reader';
 import ButtonField from '../Fields/Button';
+import Grid from '@mui/material/Unstable_Grid2/Grid2';
+import { Typography } from '@mui/material';
 
-export const QrReaderContent = (props) => {
+const QrReaderContent = (props) => {
 
     const {
         setRecipientAddress,
@@ -10,8 +12,8 @@ export const QrReaderContent = (props) => {
     } = props;
 
     return(
-        <>
-            <div className="cameraDiv">
+        <Grid width={"100%"}>
+            <Typography display={"flex"} justifyContent={"center"} alignItems={"center"}>Scan QR Code</Typography>
             <QrReader
                 constraints = {{ facingMode: "environment" }}
                 onResult={(result, error) => {
@@ -26,12 +28,13 @@ export const QrReaderContent = (props) => {
                     }}
                     style={{ height: '50%' }}
             />
-            </div>
             <ButtonField
                 text={'Cancel'}
                 className={'qrCancelButtonDiv'}
                 onClick={() => setShowQrReader(false)}
             />
-        </>
+        </Grid>
     )
-}
+};
+
+export default QrReaderContent;

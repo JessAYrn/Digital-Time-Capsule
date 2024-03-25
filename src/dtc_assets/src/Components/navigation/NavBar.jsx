@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { useNavigate, useLocation } from "react-router-dom";
-import { JOURNAL_TABS, NAV_LINKS, WALLET_TABS } from '../../functionsAndConstants/Constants';
+import { JOURNAL_TABS, NAV_LINKS } from '../../functionsAndConstants/Constants';
 import { AppContext as AccountContext} from '../../Routes/Account';
 import { AppContext as HomePageContext} from '../../Routes/HomePage';
 import { AppContext as JournalContext} from '../../Routes/App';
@@ -10,16 +10,15 @@ import { AppContext as GroupJournalContext} from '../../Routes/GroupJournal';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
 import MenuIcon from '@mui/icons-material/Menu';
 import { types } from '../../reducers/journalReducer';
-import { ConnectButton, ConnectDialog, useConnect } from "@connect2ic/react";
+import { useConnect } from "@connect2ic/react";
 import { initialState } from '../../reducers/journalReducer';
 import "./NavBar.scss";
 import SdStorageIcon from '@mui/icons-material/SdStorage';
-import { walletTypes } from '../../reducers/walletReducer';
 import { retrieveContext } from '../../functionsAndConstants/Contexts';
-import CellTowerIcon from '@mui/icons-material/CellTower';
 import MenuField from "../Fields/MenuField";
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
+import LogoutIcon from '@mui/icons-material/Logout';
 
 
 
@@ -53,7 +52,8 @@ export const NavBar = (props) => {
         treasuryDispatch
     } = useContext(AppContext);
 
-    const [sideBar, setSideBar] = useState(false);
+    const {disconnect} = useConnect({ onConnect: () => {}, onDisconnect: () => {} });
+
 
     let navigate = useNavigate();
 
@@ -71,6 +71,11 @@ export const NavBar = (props) => {
 
     const changeRoute = (route, states) => {
         navigate(route, { replace: false, state: states });
+    };
+
+    const onClick_logout = () => {
+        disconnect();
+        document.location.reload();
     };
 
     const onClick_notifications = (key, route, states) => {
@@ -93,14 +98,6 @@ export const NavBar = (props) => {
         }
     });
 
-    const changeHandler_walletTab = (tab) => {
-        walletDispatch({
-            actionType: walletTypes.SET_WALLET_TABS,
-            payload: tab
-        });
-    };
-
-
     const changeHandler_journalTab=(tab)=>{
         journalDispatch({
             actionType:types.SET_JOURNAL_TAB,
@@ -113,11 +110,11 @@ export const NavBar = (props) => {
 
     const mainMenuItemProps = [
         { text: "Wallet", onClick: () => changeRoute(NAV_LINKS.wallet, reduxStates) },
-        { text: "Storage", onClick: () => changeRoute(NAV_LINKS.journal, reduxStates) },
+        // { text: "Storage", onClick: () => changeRoute(NAV_LINKS.journal, reduxStates) },
         { text: "Treasury", onClick: () => changeRoute(NAV_LINKS.treasury, reduxStates) },
         { text: "Dashboard", onClick: () => changeRoute(NAV_LINKS.dashboard, reduxStates) },
-        { text: "Community", onClick: () => changeRoute(NAV_LINKS.groupJournal, reduxStates) },
-        { text: "Account", onClick: () => changeRoute(NAV_LINKS.account, reduxStates) }
+        // { text: "Community", onClick: () => changeRoute(NAV_LINKS.groupJournal, reduxStates) },
+        // { text: "Account", onClick: () => changeRoute(NAV_LINKS.account, reduxStates) }
     ];
 
     const journalTabMenuItemProps=[
@@ -125,30 +122,29 @@ export const NavBar = (props) => {
         { text: JOURNAL_TABS.notesTab, onClick: () => changeHandler_journalTab(JOURNAL_TABS.notesTab) }
     ]
 
-    const walletTabMenuItemProps = [
-        { text: WALLET_TABS.icpTab, onClick: () => changeHandler_walletTab(WALLET_TABS.icpTab) }, 
-        { text: WALLET_TABS.ethTab, onClick: () => changeHandler_walletTab(WALLET_TABS.ethTab) }, 
-        { text: WALLET_TABS.btcTab, onClick: () => changeHandler_walletTab(WALLET_TABS.btcTab) },
-        { text: WALLET_TABS.ckBtcTab, onClick: () => changeHandler_walletTab(WALLET_TABS.ckBtcTab) }
-    ];
-
     const notificationsMenuItemProps = notificationsState.notifications.map(({key, text}) => {
         const key_ = key[0];
         return { text, onClick: () => onClick_notifications(key_, NAV_LINKS.journal, reduxStates) };
     });
 
+    const logoutMenuItemProps = [
+        { text: "log out", onClick: () => onClick_logout(JOURNAL_TABS.diaryTab) }
+    ]
+
     return (
         <Grid 
-            xs={12} 
-            display="flex" 
-            justifyContent="center" 
-            alignItems="center" 
-            padding={0} 
-            className={'navBarContainer'} 
-            zIndex={10}>
+        xs={12} 
+        display="flex" 
+        justifyContent="center" 
+        alignItems="center" 
+        padding={0} 
+        className={'navBarContainer'} 
+        zIndex={10}
+        >
+            <Grid xs={4} columns={12} display={"flex"} justifyContent={"left"} alignItems={"center"} padding={0}> 
             <MenuField
                 MenuIcon={MenuIcon}
-                xs={8}
+                xs={6}
                 display={"flex"}
                 alignItems={"center"}
                 justifyContent={"left"}
@@ -157,46 +153,45 @@ export const NavBar = (props) => {
                 color={"custom"}
                 menuItemProps={mainMenuItemProps}
             />
-            <Grid xs={4} columns={12} display={"flex"} justifyContent={"right"} alignItems={"center"} padding={0}> 
+            </Grid>
+            <Grid xs={8} columns={12} display={"flex"} justifyContent={"right"} alignItems={"center"} padding={0}> 
             {pathname === NAV_LINKS.journal &&
                 <MenuField
                     MenuIcon={SdStorageIcon}
-                    xs={6}
-                    md={3}
+                    xs={2}
+                    md={1}
                     display={"flex"}
                     disabled={isLoading}
                     alignItems={"center"}
-                    justifyContent={"right"}
+                    justifyContent={"center"}
                     active={true}
                     color={"custom"}
                     menuItemProps={journalTabMenuItemProps}
                 />
             }
-            {pathname === NAV_LINKS.wallet &&
-                <MenuField
-                    MenuIcon={CellTowerIcon}
-                    xs={6}
-                    md={3}
-                    display={"flex"}
-                    alignItems={"center"}
-                    justifyContent={"right"}
-                    active={true}
-                    isLoading={isLoading}
-                    color={"custom"}
-                    menuItemProps={notificationsMenuItemProps}
-                />
-            }
             <MenuField
                 MenuIcon={NotificationIcon}
-                xs={6}
-                md={3}
+                xs={2}
+                md={1}
                 display={"flex"}
                 alignItems={"center"}
-                justifyContent={"right"}
+                justifyContent={"center"}
+                disabled={isLoading}
+                active={true}
+                color={"custom"}
+                menuItemProps={notificationsMenuItemProps}
+            />
+            <MenuField
+                MenuIcon={LogoutIcon}
+                xs={2}
+                md={1}
+                display={"flex"}
+                alignItems={"center"}
+                justifyContent={"center"}
                 active={true}
                 isLoading={isLoading}
                 color={"custom"}
-                menuItemProps={notificationsMenuItemProps}
+                menuItemProps={logoutMenuItemProps}
             />
             </Grid>
         </Grid>

@@ -6,7 +6,6 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import EditIcon from '@mui/icons-material/Edit';
 import PublishIcon from '@mui/icons-material/Publish';
 import  ButtonField  from "./Button"
-import "./DatePicker.scss";
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
 
 
@@ -35,21 +34,22 @@ const DatePickerField = (props) => {
     else if(!editing) EditIcon_ = EditIcon;
 
     return(
-        <Grid xs={xs ? xs : 12} md={md ? md :4} display={"flex"} flexDirection={"column"} justifyContent={"center"} alignItems={"center"}>
+        <Grid 
+            xs={xs ? xs : 12} 
+            md={md ? md : 12} 
+            display={"flex"} 
+            justifyContent={"center"} 
+            alignItems={"center"}
+        >
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker className='datePicker'
-                    value={dayjs(value)}
-                    label={label}
-                    onChange={(e) => onChange(e.$d)}
-                    disablePast={disablePast}
-                    minDate={minDate}
-                    maxDate={maxDate}
-                    disabled={(editable && !editing) || disabled}
-                        sx={{
-                            "& .css-3cta2m-MuiInputBase-root-MuiOutlinedInput-root": {
-                                color: "white"
-                            }
-                        }}
+                    <DatePicker
+                        value={dayjs(value)}
+                        label={label}
+                        onChange={(e) => onChange(e.$d)}
+                        disablePast={disablePast}
+                        minDate={minDate}
+                        maxDate={maxDate}
+                        disabled={(editable && !editing) || disabled}
                     />
                 </LocalizationProvider>
                 {

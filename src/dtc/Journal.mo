@@ -1,5 +1,4 @@
-import Ledger "Ledger/Ledger";
-import LedgerCandid "Ledger/LedgerCandid";
+import Ledger "NNS/Ledger";
 import Debug "mo:base/Debug";
 import Error "mo:base/Error";
 import Trie "mo:base/Trie";
@@ -15,7 +14,7 @@ import Time "mo:base/Time";
 import Iter "mo:base/Iter";
 import Buffer "mo:base/Buffer";
 import Int "mo:base/Int";
-import Account "Ledger/Account";
+import Account "Serializers/Account";
 import Bool "mo:base/Bool";
 import Option "mo:base/Option";
 import JournalTypes "Types/Journal/types";
@@ -25,7 +24,7 @@ import NotificationsTypes "Types/Notifications/types";
 import IC "Types/IC/types";
 import AnalyticsTypes "Types/Analytics/types";
 import GovernanceHelperMethods "Modules/Main/GovernanceHelperMethods";
-import NnsCyclesMinting "Ledger/NnsCyclesMinting";
+import NnsCyclesMinting "NNS/NnsCyclesMinting";
 
 shared(msg) actor class Journal (principal : Principal) = this {
 
@@ -191,7 +190,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
                 journalMap.put(key,updatedJournalEntry);
             };
         });
-        notifications := notificationsBuffer.toArray();
+        notifications := Buffer.toArray(notificationsBuffer);
         ignore updateDataUsageInMegaBytes();
     };
 
@@ -353,11 +352,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         let btc = {e8s: Nat64 = 0};
         let eth = {e8s: Nat64 = 0};
         let balances = {icp; icp_staked; btc; eth;};
-        let cyclesMintingCanister: NnsCyclesMinting.Interface = actor(NnsCyclesMinting.NnsCyclesMintingCanisterID);
-        let {data} = await cyclesMintingCanister.get_icp_xdr_conversion_rate();
-        let {xdr_permyriad_per_icp} = data;
-        let xdrs = GovernanceHelperMethods.computeTotalXdrs({balances; xdr_permyriad_per_icp});
-        balancesMap.put(Int.toText(Time.now()), {balances with xdrs});
+        balancesMap.put(Int.toText(Time.now()), balances);
     };
 
     public query({caller}) func readBalancesHistory() : async AnalyticsTypes.BalancesArray{
@@ -365,7 +360,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         return Iter.toArray(balancesMap.entries());
     };
 
-    public shared({caller}) func transferICP(amount: Nat64, recipientAccountId: Account.AccountIdentifier) : async Bool {
+    public shared({caller}) func transferICP(amount: Nat64, recipientAccountId: Account.AccountIdentifier) : async {blockIndex: Nat64} {
         if( Principal.toText(caller) != mainCanisterId_) { throw Error.reject("Unauthorized access."); };
         let res = await ledger.transfer({
           memo = Nat64.fromNat(10);
@@ -377,19 +372,16 @@ shared(msg) actor class Journal (principal : Principal) = this {
         });
 
         switch (res) {
-          case (#Ok(blockIndex)) {
-
-            Debug.print("Paid reward to " # debug_show Principal.fromActor(this) # " in block " # debug_show blockIndex);
-            return true;
-          };
-          case (#Err(#InsufficientFunds { balance })) {
-            throw Error.reject("Top me up! The balance is only " # debug_show balance # " e8s");
-            return false;
-          };
-          case (#Err(other)) {
-            throw Error.reject("Unexpected error: " # debug_show other);
-            return false;
-          };
+            case (#Ok(blockIndex)) {
+                Debug.print("Paid reward to " # debug_show Principal.fromActor(this) # " in block " # debug_show blockIndex);
+                return {blockIndex};
+            };
+            case (#Err(#InsufficientFunds { balance })) {
+                throw Error.reject("Top me up! The balance is only " # debug_show balance # " e8s");    
+            };
+            case (#Err(other)) {
+                throw Error.reject("Unexpected error: " # debug_show other);
+            };
         };
     };
 

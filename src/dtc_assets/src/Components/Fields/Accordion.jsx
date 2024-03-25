@@ -15,18 +15,24 @@ const AccordionField = (props_) => {
     <div className='accordianField_containter'>
         {elements.map((child) => {
             const {props} = child;
-            const {title, texts, image, CustomComponent } = props;
+            const {title, subtitle, texts, image, CustomComponent } = props;
             return (
                 <Accordion className='accordianField'>
-                    <div className='title '>
+                    <Grid display={'flex'} justifyContent={'center'} alignItems={'center'} columns={12} width={"100%"} padding={0}>
                         <AccordionSummary
                             expandIcon={<ExpandMoreIcon />}
                             aria-controls="panel1a-content"
                             id="panel1a-header"
+                            sx={{width: '100%'}}
                         >
-                            {title && <Typography color={'white'}>{title}</Typography>}
+                            {title && <Grid display={"flex"} justifyContent={"left"} alignItems={"center"} paddingBottom={0} xs={subtitle? 8 : 12} width={"100%"} padding={0}>
+                                <Typography color={'white'}>{title}</Typography>
+                            </Grid>}
+                            {subtitle && <Grid display={"flex"} justifyContent={"right"} alignItems={"center"} paddingBottom={0} xs={4} width={"100%"} padding={0}>
+                                <Typography color={"#bdbdbd"}>{subtitle}</Typography>
+                            </Grid>}
                         </AccordionSummary>
-                    </div>
+                    </Grid>
                     <AccordionDetails>
                         {texts && 
                             <Grid display={'flex'} justifyContent={'center'} alignItems={'center'} flexDirection={'column'}>

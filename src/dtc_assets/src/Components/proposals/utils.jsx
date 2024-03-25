@@ -1,19 +1,27 @@
 export const PROPOSAL_ACTIONS = {
-    AddAdmin: "AddAdmin",
-    RemoveAdmin: "RemoveAdmin",
+    AddAdmin: "AddAdmin" ,
+    RemoveAdmin: "RemoveAdmin" ,
+    UpgradeApp : "UpgradeApp",
+    CreateNeuron: "CreateNeuron",
+    IncreaseNeuron: "IncreaseNeuron",
+    PurchaseCycles: "PurchaseCycles",
+    SplitNeuron: "SplitNeuron",
+    SpawnNeuron: "SpawnNeuron",
+    DisburseNeuron: "DisburseNeuron",
+    DissolveNeuron: "DissolveNeuron",
+    IncreaseDissolveDelay: "IncreaseDissolveDelay",
+    FollowNeuron: "FollowNeuron",
+    ToggleSupportMode: "ToggleSupportMode",
+};
+
+export const TREASURY_ACTIONS = {
     DepositIcpToTreasury: "DepositIcpToTreasury",
-    DepositIcpToNeuron: "DepositIcpToNeuron",
-    UpgradeApp: "UpgradeApp",
-    DissolveIcpNeuron: "DissolveIcpNeuron",
-    FollowIcpNeuron: "FollowIcpNeuron",
-    SpawnIcpNeuron: "SpawnIcpNeuron",
-    DispurseIcpNeuron: "DispurseIcpNeuron",
-    PurchaseCycles: "PurchaseCycles"
+    WithdrawIcpFromTreasury: "WithdrawIcpFromTreasury"
 };
 
 export const PAYLOAD_DATA_TYPES = {
-    text: "text",
-    nat64: "nat64"
+    principal: "principal",
+    nat: "nat"
 };
 
 export const getProposalType = (action) => {

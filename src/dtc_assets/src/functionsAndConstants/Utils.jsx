@@ -120,7 +120,11 @@ export const deviceType = () => {
 };
 
 export const round2Decimals = (num) => {
-  return Math.round(num * 100) / 100
+  return Math.round(num * 10 ** 2) / ( 10 ** 2 )
+};
+
+export const round8Decimals = (num) => {
+  return Math.round(num * 10 ** 8) / ( 10 ** 8 )
 };
 
 export const inTrillions = (num) => {
@@ -142,6 +146,18 @@ export const getFileArrayBuffer = (inputFile) => {
 export const delay = (ms) => {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+export const secondsToHours = (seconds) => {
+  return seconds / 3600;
+};
+
+export const hoursToDays = (hours) => {
+  return hours / 24;
+};
+
+export const daysToMonths = (days) => {
+  return days / 30;
+};
 
 export const getDateInMilliseconds = (date) => {
   let dateArray = date.split('-');

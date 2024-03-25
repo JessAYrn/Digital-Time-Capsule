@@ -1,40 +1,49 @@
 import Result "mo:base/Result";
 import Principal "mo:base/Principal";
+import Error "mo:base/Error";
+import Float "mo:base/Float";
+import Int64 "mo:base/Int64";
+import Int "mo:base/Int";
 import MainTypes "../../Types/Main/types";
 import Journal "../../Journal";
 import Treasury "../../Treasury";
 import TreasuryTypes "../../Types/Treasury/types";
-import Ledger "../../Ledger/Ledger";
+import Ledger "../../NNS/Ledger";
+import Account "../../Serializers/Account";
 
-module{    
-    public func depositAssetToTreasury({
-        depositorPrincipal: Text; 
-        treasuryCanisterPrincipal: Text;
-        amount: Nat64;
-        currency : TreasuryTypes.SupportedCurrencies;
-        profilesMap: MainTypes.UserProfilesMap;
-    }) : async Result.Result<(Ledger.ICP), MainTypes.Error> {
+module{
 
-        let userProfile = profilesMap.get(Principal.fromText(depositorPrincipal));
-        let treasuryCanister : Treasury.Treasury = actor(treasuryCanisterPrincipal);
-        switch(userProfile){
-            case null {};
-            case(?profile){
-                let {canisterId} = profile;
-                let userCanister : Journal.Journal = actor(Principal.toText(canisterId));
-                let treasuryIcpAccountId = await treasuryCanister.canisterAccount();
-                let trasnferCompleted = await userCanister.transferICP(amount, treasuryIcpAccountId);
-                if(trasnferCompleted) {
-                    let result = treasuryCanister.updateUserTreasruyContributions({
-                        userPrincipal = depositorPrincipal;
-                        increase = true;
-                        currency;
-                        amount;
-                    });
-                } else return #err(#InsufficientFunds);
-            };
-        };
-        let updatedBalance = await treasuryCanister.canisterBalance_shared();
-        return #ok(updatedBalance);
+    public func depositIcpToTreasury(
+        daoMetaData: MainTypes.DaoMetaData_V2,
+        profiles: MainTypes.UserProfilesMap,
+        caller: Principal,
+        amount: Nat64
+    ) : async {blockIndex: Nat64} {
+        let ?userProfile = profiles.get(caller) else { throw Error.reject("User not found") };
+        let userCanisterId = userProfile.canisterId;
+        let userCanister: Journal.Journal = actor(Principal.toText(userCanisterId));
+        let treasury: Treasury.Treasury = actor(daoMetaData.treasuryCanisterPrincipal);
+        let treasuryAccountId = await treasury.canisterAccountId();
+        let {blockIndex} = await userCanister.transferICP(amount, treasuryAccountId);
+        await treasury.creditUserIcpDeposits(caller, amount);
+        return {blockIndex};
     };
+
+    public func withdrawIcpFromTreasury(
+        daoMetaData: MainTypes.DaoMetaData_V2,
+        profiles: MainTypes.UserProfilesMap,
+        caller: Principal,
+        amount: Nat64
+    ) : async {blockIndex: Nat64} {
+        let ?userProfile = profiles.get(caller) else { throw Error.reject("User not found") };
+        let userCanisterId = userProfile.canisterId;
+        let userCanister: Journal.Journal = actor(Principal.toText(userCanisterId));
+        let userAccountId = await userCanister.canisterAccount();
+        let treasury: Treasury.Treasury = actor(daoMetaData.treasuryCanisterPrincipal);
+        let withdrawelamount = Int64.toNat64(Float.toInt64(Float.trunc(Float.fromInt64(Int64.fromNat64(amount)) * 0.995)));
+        let {blockIndex} = await treasury.transferICP(withdrawelamount,userAccountId);
+        await treasury.debitUserIcpDeposits(caller, amount);
+        return {blockIndex};
+    };
+    
 }

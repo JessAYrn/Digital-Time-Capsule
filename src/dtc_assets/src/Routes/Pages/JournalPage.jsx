@@ -2,7 +2,6 @@ import React, {useState, useContext, useMemo, useEffect, Component} from "react"
 import InputBox from "../../Components/Fields/InputBox";
 import {types} from "../../reducers/journalReducer";
 import  {AppContext} from "../App";
-import "./JournalPage.scss";
 import DatePickerField from "../../Components/Fields/DatePicker";
 import { monthInMilliSeconds} from "../../functionsAndConstants/Constants";
 import { milisecondsToNanoSeconds, scrollToTop } from "../../functionsAndConstants/Utils";

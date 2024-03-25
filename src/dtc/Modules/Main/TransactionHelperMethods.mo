@@ -1,88 +1,101 @@
 import MainTypes "../../Types/Main/types";
-import Account "../../Ledger/Account";
+import Account "../../Serializers/Account";
 import Result "mo:base/Result";
 import Trie "mo:base/Trie";
 import Principal "mo:base/Principal";
 import JournalTypes "../../Types/Journal/types";
-import Ledger "../../Ledger/Ledger";
-import LedgerCandid "../../Ledger/LedgerCandid";
+import Ledger "../../NNS/Ledger";
 import Iter "mo:base/Iter";
 import Blob "mo:base/Blob";
 import Journal "../../Journal";
 import Nat64 "mo:base/Nat64";
 import Error "mo:base/Error";
 import Array "mo:base/Array";
+import Option "mo:base/Option";
+import Hex "../../Serializers/Hex";
+import Treasury "../../Treasury";
 
 module{
 
-    private let ledgerC : LedgerCandid.Interface = actor(LedgerCandid.CANISTER_ID);
     private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
 
-    private let Gas: Nat64 = 10000;
-
     public func transferICP(callerId: Principal, profilesMap: MainTypes.UserProfilesMap ,amount: Nat64, canisterAccountId: Account.AccountIdentifier) : 
-    async Result.Result<(), JournalTypes.Error> {
+    async Result.Result<({blockIndex: Nat64}), JournalTypes.Error> {
 
         let userProfile = profilesMap.get(callerId);
         switch(userProfile) {
             case null{ #err(#NotFound) }; 
             case (? profile){
                 let userJournal : Journal.Journal = actor(Principal.toText(profile.canisterId));
-                let icpTransferStatus = await userJournal.transferICP(amount, canisterAccountId);
-                if(icpTransferStatus == true){ #ok(()); } 
-                else { #err(#TxFailed); }
+                try{
+                    let {blockIndex} = await userJournal.transferICP(amount, canisterAccountId);
+                    return #ok({blockIndex});
+                } catch (error) {
+                    return #err(#TxFailed);
+                };
             };
         };
     };
 
     public func updateUsersTxHistory(
         profilesMap: MainTypes.UserProfilesMap,
-        startIndexForBlockChainQuery: Nat64
+        startIndexForBlockChainQuery: Nat64,
+        metaData : {treasuryCanisterPrincipal : Text}
     ) : async (Nat64) {
-
-        let tipOfChainIndex = await tipOfChainDetails();
-        let newStartIndexForNextQuery = Nat64.min( tipOfChainIndex, startIndexForBlockChainQuery + LedgerCandid.maxBlockQueryLength );
-        let getBlocksArgs = { start = startIndexForBlockChainQuery; length = LedgerCandid.maxBlockQueryLength; };
-        let {blocks} = await ledger.query_blocks(getBlocksArgs);
-        let numberOfBlocks = Iter.size(Iter.fromArray(blocks));
+        let queryBlockArgs = { start = startIndexForBlockChainQuery; length = Ledger.MAX_BLOCK_QUERY_LENGTH; };
+        let {blocks; chain_length = newStartIndexForNextQuery} = await ledger.query_blocks(queryBlockArgs);
+        let numberOfBlocks = Array.size(blocks);
         if(numberOfBlocks == 0){ return newStartIndexForNextQuery; };
         
         var index = 0;
         while(index < numberOfBlocks){
             let {transaction} = blocks[index];
-            if(transaction.operation == null) return newStartIndexForNextQuery;
-            let ?operation = transaction.operation;
+            let {operation} = transaction;
             switch(operation){
-                case(#Transfer({to; from; amount; fee;})){
-                    let timeOfCreation = transaction.created_at_time.timestamp_nanos;
-                    var userProfile = findProfileWithGivenAccountId(profilesMap, to);
-                    if(userProfile == null) userProfile := findProfileWithGivenAccountId(profilesMap, from);
-                    if(userProfile == null) return newStartIndexForNextQuery;
-                    let ?(principal, profile) = userProfile;
-                    let ?accountId = profile.accountId;
-                    let userJournal : Journal.Journal = actor(Principal.toText(profile.canisterId));
-                    let tx_from : JournalTypes.Transaction = { balanceDelta = amount.e8s + fee.e8s; increase = false; recipient = to; timeStamp = timeOfCreation; source = from; };
-                    let tx_to : JournalTypes.Transaction = { tx_from with balanceDelta = amount.e8s; increase = true; };
-                    if(Blob.equal(accountId, from) == true) ignore userJournal.updateTxHistory(timeOfCreation,tx_from);
-                    if(Blob.equal(accountId, to) == true) ignore userJournal.updateTxHistory(timeOfCreation,tx_to);
+                case null {};
+                case(?operation_){
+                    switch(operation_){
+                        case(#Transfer({to; from; amount; fee;})){
+                            let timeOfCreation = transaction.created_at_time.timestamp_nanos;
+                            let userProfile_sender = findProfileWithGivenAccountId(profilesMap, from);
+                            let userProfile_recipient = findProfileWithGivenAccountId(profilesMap, to);
+                            switch(userProfile_sender){
+                                case null {};
+                                case(?userProfile_sender_){
+                                    let (_, profile) = userProfile_sender_;
+                                    let userJournal : Journal.Journal = actor(Principal.toText(profile.canisterId));
+                                    let tx : JournalTypes.Transaction = { balanceDelta = amount.e8s + fee.e8s; increase = false; recipient = to; timeStamp = timeOfCreation; source = from; };
+                                    ignore userJournal.updateTxHistory(timeOfCreation,tx);
+                                };
+                            };
+                            switch(userProfile_recipient){
+                                case null {};
+                                case(?userProfile_recipient_){
+                                    let (_, profile) = userProfile_recipient_;
+                                    let userJournal : Journal.Journal = actor(Principal.toText(profile.canisterId));
+                                    let tx : JournalTypes.Transaction = { balanceDelta = amount.e8s; increase = true; recipient = to; timeStamp = timeOfCreation; source = from; };
+                                    ignore userJournal.updateTxHistory(timeOfCreation,tx);
+                                };
+                            };
+                            let treasuryCanister : Treasury.Treasury = actor(metaData.treasuryCanisterPrincipal);
+                            let recipientAsText : Text = Hex.encode(Blob.toArray(to));
+                            let sourceAsText : Text = Hex.encode(Blob.toArray(from));
+                            let treasuryAccountId = await treasuryCanister.canisterAccountId();
+                            let treasuryAccountIdAsText = Hex.encode(Blob.toArray(treasuryAccountId));
+                            if(recipientAsText == treasuryAccountIdAsText or sourceAsText == treasuryAccountIdAsText){
+                                await treasuryCanister.updateTokenBalances();
+                            };
+                        };
+                        case(#Approve(r)){};
+                        case(#Burn(r)){};
+                        case(#Mint(r)){};
+                    };
                 };
-                case(#Burn(r)){};
-                case(#Mint(r)){};
             };
             index += 1;
         };
         return newStartIndexForNextQuery;
     };
-
-    public func tipOfChainDetails() : async (Ledger.BlockIndex) {
-        let tip = await ledgerC.tip_of_chain();
-        switch (tip) {
-            case (#Err(_)) { throw Error.reject("Tip of chain could not be read"); };
-            case (#Ok(t)) { return t.tip_index; };
-        };
-    };
-
-
 
     private func findProfileWithGivenAccountId(profilesMap: MainTypes.UserProfilesMap, accountId_: Account.AccountIdentifier)
     : ?(Principal, MainTypes.UserProfile){
@@ -93,7 +106,7 @@ module{
                 let {accountId} = profile;
                 switch(accountId){
                     case null return false;
-                    case(? aID){ if (Blob.equal(aID, accountId_)) return true else return false};
+                    case(? aID){ return Blob.equal(aID, accountId_) };
                 }
         });
         return userProfile;

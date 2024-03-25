@@ -1,5 +1,4 @@
-import Ledger "Ledger/Ledger";
-import LedgerCandid "Ledger/LedgerCandid";
+import Ledger "NNS/Ledger";
 import Debug "mo:base/Debug";
 import Error "mo:base/Error";
 import Trie "mo:base/Trie";
@@ -16,7 +15,7 @@ import Timer "mo:base/Timer";
 import Iter "mo:base/Iter";
 import Buffer "mo:base/Buffer";
 import Int "mo:base/Int";
-import Account "Ledger/Account";
+import Account "Serializers/Account";
 import Bool "mo:base/Bool";
 import Option "mo:base/Option";
 import IC "Types/IC/types";
@@ -177,7 +176,7 @@ shared(msg) actor class Manager (principal : Principal) = this {
                 } catch(e){ continue_ := false; };
             };
 
-            let chunks = ChunksBuffer.toArray();
+            let chunks = Buffer.toArray(ChunksBuffer);
 
             let asset: AssetCanister.AssetArgs = {
                 content_type;
@@ -191,7 +190,7 @@ shared(msg) actor class Manager (principal : Principal) = this {
             index += 1;
         };
 
-        release := { release with assets = AssetBuffer.toArray(); };
+        release := { release with assets = Buffer.toArray(AssetBuffer); };
     };
 
     public shared({caller}) func notifyNextStableRelease(): async() {

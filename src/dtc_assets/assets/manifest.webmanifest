@@ -1,18 +1,18 @@
 {
-  "short_name": "DTC",
-  "name": "The Digital Time Capsule",
+  "short_name": "PD",
+  "name": "Personal DAO",
   "icons": [
     {
-      "src": "https://fkkq7-siaaa-aaaap-qaaya-cai.raw.ic0.app/logo-thumbnail.png",
+      "src": "https://fkkq7-siaaa-aaaap-qaaya-cai.icp0.io/P2.svg",
       "type": "image/png",
       "sizes": "192x192",
       "purpose": "any maskable"
     }
   ],
-  "start_url": "/#/app",
-  "background_color": "#060b26",
+  "start_url": "/#/",
+  "background_color": "#0A0A0A",
   "display": "standalone",
   "scope": "/",
-  "theme_color": "#060b26",
+  "theme_color": "#0A0A0A",
   "description": "Document you legacy"
 }

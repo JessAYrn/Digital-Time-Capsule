@@ -139,8 +139,9 @@ module{
         await ic.install_code({
             arg;
             wasm_module;
-            mode = #upgrade;
+            mode = #upgrade(?{ skip_pre_upgrade = ?false });
             canister_id;
+            sender_canister_version = null;
         });
         await ic.start_canister({canister_id});
     };

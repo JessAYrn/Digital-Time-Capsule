@@ -2,13 +2,13 @@ import Trie "mo:base/Trie";
 import Iter "mo:base/Iter";
 import Buffer "mo:base/Buffer";
 import Result "mo:base/Result";
-import Account "../../Ledger/Account";
+import Account "../../Serializers/Account";
 import JournalTypes "../../Types/Journal/types";
 import Principal "mo:base/Principal";
 import Cycles "mo:base/ExperimentalCycles";
 import MainTypes "../../Types/Main/types";
 import Journal "../../Journal";
-import Ledger "../../Ledger/Ledger";
+import Ledger "../../NNS/Ledger";
 import Blob "mo:base/Blob";
 import Text "mo:base/Text";
 import Hash "mo:base/Hash";
@@ -22,7 +22,7 @@ import AssetCanister "../../Types/AssetCanister/types";
 import HashMap "mo:base/HashMap";
 import AssetManagementFunctions "../../Modules/AssetCanister/AssetManagementFunctions";
 import WasmStore "../../Types/WasmStore/types";
-import Hex "../../Ledger/Hex";
+import Hex "../../Serializers/Hex";
 import NftCollection "../../Types/NftCollection/types";
 import Nat32 "mo:base/Nat32";
 import Support "../../SupportCanisterIds/SupportCanisterIds";
@@ -32,7 +32,7 @@ import Int "mo:base/Int";
 import Treasury "../../Treasury";
 import GovernanceHelperMethods "GovernanceHelperMethods";
 import TreasuryTypes "../../Types/Treasury/types";
-import NnsCyclesMinting "../../Ledger/NnsCyclesMinting";
+import NnsCyclesMinting "../../NNS/NnsCyclesMinting";
 
 module{
 
@@ -235,11 +235,8 @@ module{
         switch(profile){
             case null{ return #err(#NotAuthorized); };
             case ( ? existingProfile){
-                let cyclesMintingCanister: NnsCyclesMinting.Interface = actor(NnsCyclesMinting.NnsCyclesMintingCanisterID);
-                let {data} = await cyclesMintingCanister.get_icp_xdr_conversion_rate();
-                let {xdr_permyriad_per_icp} = data;
                 let treasuryCanister: Treasury.Treasury = actor(daoMetaData.treasuryCanisterPrincipal);
-                let treasuryContributionsArray = await treasuryCanister.getTreasuryContributionsArray();
+                let neuronsDataArray = await treasuryCanister.getNeuronsDataArray();
                 let managerCanister : Manager.Manager = actor(daoMetaData.managerCanisterPrincipal);
                 let profilesApprovalStatus = getProfilesMetaData(profilesMap);
                 let frontendPrincipal = Principal.fromText(daoMetaData.frontEndPrincipal);
@@ -250,7 +247,7 @@ module{
                 let currentVersion = await managerCanister.getCurrentReleaseVersion();
                 let canisterDataPackagedForExport = {
                     daoMetaData with 
-                    proposals = GovernanceHelperMethods.tallyAllProposalVotes({proposals; treasuryContributionsArray; xdr_permyriad_per_icp});
+                    proposals = GovernanceHelperMethods.tallyAllProposalVotes({proposals; neuronsDataArray});
                     journalCount = profilesMap.size();
                     currentCyclesBalance_frontend = cyclesBalance_frontend;
                     currentCyclesBalance_backend = cyclesBalance_backend;
@@ -331,8 +328,9 @@ module{
         await ic.install_code({
             arg = to_candid(arg);
             wasm_module = wasmModule;
-            mode = #upgrade;
+            mode = #upgrade(?{skip_pre_upgrade = ?false});
             canister_id = canister_id;
+            sender_canister_version = null;
         });
         await ic.start_canister({canister_id = canister_id});
     };
@@ -374,6 +372,7 @@ module{
         let result = await ic.update_settings({
             canister_id = canisterPrincipal;
             settings = updatedSettings;
+            sender_canister_version = null;
         });
     };
 
@@ -382,8 +381,7 @@ module{
         
         let canisterStatus = await ic.canister_status({canister_id = canisterPrincipal });
         let { settings } = canisterStatus;
-        let controllersOption = settings.controllers;
-        var controllers = Option.get(controllersOption, defaultControllers);
+        let { controllers } = settings;
         let ArrayBuffer = Buffer.Buffer<(Principal)>(1);
         let controllersIter = Iter.fromArray(controllers);
         var index = 0;
@@ -394,17 +392,17 @@ module{
             index += 1;
         };
         Iter.iterate<Principal>(controllersIter, func (x: Principal, index: Nat){ ArrayBuffer.add(x); });
-        controllers := ArrayBuffer.toArray();
+        let updatedControllers = ArrayBuffer.toArray();
         let updatedSettings  = { 
-            controllers = ?controllers;
+            controllers = ?updatedControllers;
             freezing_threshold = ?settings.freezing_threshold;
             memory_allocation = ?settings.memory_allocation;
             compute_allocation = ?settings.compute_allocation;
         };
-        let result = await ic.update_settings({ canister_id = canisterPrincipal; settings = updatedSettings; });
+        let result = await ic.update_settings({ canister_id = canisterPrincipal; settings = updatedSettings; sender_canister_version = null;});
     };
 
-    public func toggleSupportMode( caller: Principal, daoMetaData: MainTypes.DaoMetaData_V2) : 
+    public func toggleSupportMode(daoMetaData: MainTypes.DaoMetaData_V2) : 
     async MainTypes.DaoMetaData_V2{
 
         let { 
@@ -414,13 +412,9 @@ module{
         if(supportMode_updated){
             let techSupportPrincipals = [ Support.TechSupportPrincipal1, Support.TechSupportPrincipal2 ];
             let result1 = ignore addControllers( techSupportPrincipals, Principal.fromText(backEndPrincipal), defaultControllers );
-            let result2 = ignore addControllers( techSupportPrincipals, Principal.fromText(backEndPrincipal), defaultControllers );
-            let result3 = ignore addControllers( techSupportPrincipals, Principal.fromText(managerCanisterPrincipal), defaultControllers );
-            let result4 = ignore addControllers( techSupportPrincipals, Principal.fromText(managerCanisterPrincipal), defaultControllers );
-            let result5 = ignore addControllers( techSupportPrincipals, Principal.fromText(treasuryCanisterPrincipal), defaultControllers );
-            let result6 = ignore addControllers( techSupportPrincipals, Principal.fromText(treasuryCanisterPrincipal), defaultControllers );
-            let result7 = ignore addControllers( techSupportPrincipals, Principal.fromText(frontEndPrincipal), defaultControllers );
-            let result8 = ignore addControllers( techSupportPrincipals, Principal.fromText(frontEndPrincipal), defaultControllers );
+            let result2 = ignore addControllers( techSupportPrincipals, Principal.fromText(managerCanisterPrincipal), defaultControllers );
+            let result3 = ignore addControllers( techSupportPrincipals, Principal.fromText(treasuryCanisterPrincipal), defaultControllers );
+            let result4 = ignore addControllers( techSupportPrincipals, Principal.fromText(frontEndPrincipal), defaultControllers );
         } else {
             let result1 = ignore setToDefualtControllerSettings( Principal.fromText(backEndPrincipal), defaultControllers );
             let result2 = ignore setToDefualtControllerSettings( Principal.fromText(managerCanisterPrincipal), defaultControllers );

@@ -9,8 +9,8 @@ import Buffer "mo:base/Buffer";
 import Iter "mo:base/Iter";
 import Text "mo:base/Text";
 import Option "mo:base/Option";
-import Ledger "Ledger/Ledger";
-import Account "Ledger/Account";
+import Ledger "NNS/Ledger";
+import Account "Serializers/Account";
 import JournalTypes "Types/Journal/types";
 import MainMethods "Modules/Main/MainHelperMethods";
 import JournalHelperMethods "Modules/Main/JournalHelperMethods";
@@ -27,16 +27,21 @@ import Nat "mo:base/Nat";
 import Time "mo:base/Time";
 import Float "mo:base/Float";
 import Blob "mo:base/Blob";
+import Order "mo:base/Order";
+import Array "mo:base/Array";
 import GovernanceHelperMethods "Modules/Main/GovernanceHelperMethods";
 import Treasury "Treasury";
 import TreasuryTypes "Types/Treasury/types";
-import NnsCyclesMinting "Ledger/NnsCyclesMinting";
+import NnsCyclesMinting "NNS/NnsCyclesMinting";
 import TreasuryHelperMethods "Modules/Main/TreasuryHelperMethods";
 import AnalyticsHelperMethods "Modules/Analytics/AnalyticsHelperMethods";
-import AnalyticsTypes "Types/Analytics/types";
 import Journal "Journal";
 import WasmStore "Types/WasmStore/types";
 import SupportCanisterIds "SupportCanisterIds/SupportCanisterIds";
+import MarketData "Modules/HTTPRequests/MarketData";
+import AnalyticsTypes "Types/Analytics/types";
+import Governance "NNS/Governance";
+
 
 shared actor class User() = this {
 
@@ -66,7 +71,9 @@ shared actor class User() = this {
         Hash.hash
     );
 
-    private stable var startIndexForBlockChainQuery : Nat64 = 3_512_868;
+    private stable var startIndexForBlockChainQuery : Nat64 = 7_356_011;
+
+    private let txFee : Nat64 = 10_000;
 
     private let ic : IC.Self = actor "aaaaa-aa";
 
@@ -104,7 +111,7 @@ shared actor class User() = this {
             case(? v){
                 let journal: Journal.Journal = actor(Principal.toText(v.canisterId)); 
                 let (entriesArray, bio, canisterPrincipal) = await journal.readJournal();
-                return #ok({ userJournalData = (entriesArray, bio); email = v.email; userName = v.userName; principal = canisterPrincipal; });
+                return #ok({ userJournalData = (entriesArray, bio); email = v.email; userName = v.userName; userPrincipal = Principal.toText(caller) ; rootCanisterPrincipal = canisterPrincipal; });
             };
         };   
     };
@@ -181,7 +188,7 @@ shared actor class User() = this {
         let result = await JournalHelperMethods.uploadJournalEntryFile(caller, userProfilesMap, fileId, chunkId, blobChunk);
     };
     
-    public shared({caller}) func transferICP(amount: Nat64, canisterAccountId: Account.AccountIdentifier) : async Result.Result<(), JournalTypes.Error> {
+    public shared({caller}) func transferICP(amount: Nat64, canisterAccountId: Account.AccountIdentifier) : async Result.Result<({blockIndex: Nat64}), JournalTypes.Error> {
         let result = await TxHelperMethods.transferICP(caller, userProfilesMap, amount, canisterAccountId);
     };
 
@@ -197,10 +204,18 @@ shared actor class User() = this {
         };
     };
 
+    var error : Error = Error.reject("nothing yet");
+
     private func updateUsersTxHistory() : async () {
-        let newStartIndexForNextQuery = await TxHelperMethods.updateUsersTxHistory(userProfilesMap, startIndexForBlockChainQuery);
-        startIndexForBlockChainQuery := newStartIndexForNextQuery;
+        try{
+            let newStartIndexForNextQuery = await TxHelperMethods.updateUsersTxHistory(userProfilesMap, startIndexForBlockChainQuery, daoMetaData_v2);
+            startIndexForBlockChainQuery := newStartIndexForNextQuery;
+        } catch (e) {
+            error := e;
+        }
     };
+
+    public query func getNumberOfErrors() : async Text { return Error.message(error)}; 
 
     func myAccountId() : Account.AccountIdentifier {
         Account.accountIdentifier(Principal.fromActor(this), Account.defaultSubaccount())
@@ -254,6 +269,20 @@ shared actor class User() = this {
         #ok(());
     };
 
+    public query func transform({context: Blob; response: IC.http_response}) : async IC.http_response {
+      let transformed : IC.http_response = {
+        status = response.status;
+        body = response.body;
+        headers = [];
+      };
+      transformed;
+    };
+
+    public shared func getCurrencyExchangeRate(unitCurrency: Text, otherCurrency: Text) : async IC.http_response_with_text {
+        let {status; body; headers; } = await MarketData.getCurrencyExchangeRate(unitCurrency, otherCurrency, transform);
+        return {status; headers; body = Text.decodeUtf8(body)};
+    };
+
     public shared({caller}) func toggleAcceptRequest() : async  Result.Result<(MainTypes.DaoMetaData_V2), JournalTypes.Error>{
         let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v2);
         if(not isAdmin){ return #err(#NotAuthorized); };
@@ -295,12 +324,12 @@ shared actor class User() = this {
             case (? existingProfile){
                 let managerCanister : Manager.Manager = actor(daoMetaData_v2.managerCanisterPrincipal);
                 let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
-                let treasuryContributionsArray = await treasuryCanister.getTreasuryContributionsArray();
+                let neuronsDataArray = await treasuryCanister.getNeuronsDataArray();
                 let profilesMetaData = CanisterManagementMethods.getProfilesMetaData(userProfilesMap);
                 let {number = releaseVersion} = await managerCanister.getCurrentReleaseVersion();
                 let canisterDataPackagedForExport = {
                     daoMetaData_v2 with 
-                    proposals = GovernanceHelperMethods.tallyAllProposalVotes({proposals = proposalsMap; treasuryContributionsArray; xdr_permyriad_per_icp});
+                    proposals = GovernanceHelperMethods.tallyAllProposalVotes({proposals = proposalsMap; neuronsDataArray;});
                     isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v2);
                     currentCyclesBalance_backend = Cycles.balance();
                     journalCount = userProfilesMap.size();
@@ -316,11 +345,21 @@ shared actor class User() = this {
         let userProfile = userProfilesMap.get(caller);
         if(userProfile == null) return #err(#NotAuthorizedToAccessData);
         let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
-        let contributions = await treasuryCanister.getTreasuryContributionsArray();
+        let usersTreasuryDataArray = await treasuryCanister.getUsersTreasuryDataArray();
+        let neurons = {icp = await treasuryCanister.getNeuronsDataArray()};
         let balance_icp = await treasuryCanister.canisterBalance();
-        let accountId_icp_blob = await treasuryCanister.canisterAccount();
+        let accountId_icp_blob = await treasuryCanister.canisterAccountId();
         let accountId_icp = Blob.toArray(accountId_icp_blob);
-        return #ok({ contributions; balance_icp; accountId_icp; });
+        let userPrincipal = Principal.toText(caller);
+        return #ok({usersTreasuryDataArray; balance_icp; accountId_icp; neurons; userPrincipal});
+    };
+
+    public shared({caller}) func depositIcpToTreasury(amount: Nat64) : async {blockIndex: Nat64} {
+        let result = await TreasuryHelperMethods.depositIcpToTreasury(daoMetaData_v2, userProfilesMap, caller, amount);
+    };
+
+    public shared({caller}) func withdrawIcpFromTreasury(amount: Nat64) : async {blockIndex: Nat64} {
+        let result = await TreasuryHelperMethods.withdrawIcpFromTreasury(daoMetaData_v2, userProfilesMap, caller, amount);
     };
 
     public shared({ caller }) func upgradeApp(): async (){
@@ -368,7 +407,7 @@ shared actor class User() = this {
     public shared({caller}) func toggleSupportMode() : async Result.Result<(),JournalTypes.Error>{
         let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v2);
         if(not isAdmin){ return #err(#NotAuthorized); };
-        let updatedMetaData = await CanisterManagementMethods.toggleSupportMode(caller, daoMetaData_v2);
+        let updatedMetaData = await CanisterManagementMethods.toggleSupportMode(daoMetaData_v2);
         daoMetaData_v2 := updatedMetaData;
         return #ok(());
     };
@@ -386,27 +425,13 @@ shared actor class User() = this {
                 let nextStableVersion = await managerCanister.getWhatIsNextStableReleaseVersion();
                 let text = Text.concat("New Stable Version Availabe: Version #", Nat.toText(nextStableVersion.number));
                 if(nextStableVersion.number > currentReleaseVersion.number) notificationsBuffer.add({text; key = null});
-                return notificationsBuffer.toArray();
+                return Buffer.toArray(notificationsBuffer);
             };
         };
     };
 
     public shared({ caller }) func clearJournalNotifications(): async (){
         await NotificationProtocolMethods.clearJournalNotifications(caller, userProfilesMap);
-    };
-
-    public shared({ caller }) func depositToTreasury(amount: Nat64, currency: TreasuryTypes.SupportedCurrencies):
-    async Result.Result<Ledger.ICP, MainTypes.Error>{
-        let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v2);
-        if(not isAdmin) return #err(#NotAuthorized);
-        let updatedBalance = await TreasuryHelperMethods.depositAssetToTreasury({
-            depositorPrincipal = Principal.toText(caller);
-            treasuryCanisterPrincipal = daoMetaData_v2.treasuryCanisterPrincipal;
-            amount;
-            currency;
-            profilesMap = userProfilesMap;
-        });
-        return updatedBalance;
     };
     
     public composite query({ caller }) func retrieveUserBalances(): async AnalyticsTypes.BalancesArray {
@@ -457,22 +482,21 @@ shared actor class User() = this {
 
     let {recurringTimer; cancelTimer; setTimer} = Timer;
 
-    public shared({caller}) func createProposal(action: MainTypes.ProposalActions, payload: MainTypes.ProposalPayload): 
+    public shared({caller}) func createProposal(action: MainTypes.ProposalActions): 
     async Result.Result<(MainTypes.Proposals),MainTypes.Error>{
         let callerProfile = userProfilesMap.get(caller);
         if(callerProfile == null) return #err(#NotAuthorizedToCreateProposals);
         let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
-        let treasuryContributionRequired = GovernanceHelperMethods.getDoesProposalRequireTreasuryContribution(action);
-        let hasSufficientContributions = await treasuryCanister.userHasSufficientContributions(caller);
-        if(not hasSufficientContributions and treasuryContributionRequired) return #err(#NotAuthorizedToCreateProposals);
-        let treasuryContributionsArray = await treasuryCanister.getTreasuryContributionsArray();
+        let hasSufficientStake = await treasuryCanister.userHasSufficientStake(caller);
+        if(not hasSufficientStake) return #err(#NotAuthorizedToCreateProposals);
+        let neuronsDataArray = await treasuryCanister.getNeuronsDataArray();
         let proposer = Principal.toText(caller); let votes = [(proposer, {adopt = true})];
         let timeInitiated = Time.now(); let timeExecuted = null;
-        var voteTally = {yay = Float.fromInt(0); nay = Float.fromInt(0); total = Float.fromInt(0);};
-        let proposal = {votes; action; proposer; timeInitiated; timeExecuted; payload; voteTally;};
-        let votingResults = GovernanceHelperMethods.tallyVotes({treasuryContributionsArray; proposal; xdr_permyriad_per_icp;});
+        var voteTally = {yay = Nat64.fromNat(0); nay = Nat64.fromNat(0); total = Nat64.fromNat(0);};
+        let proposal = {votes; action; proposer; timeInitiated; timeExecuted; voteTally;};
+        let votingResults = GovernanceHelperMethods.tallyVotes({neuronsDataArray; proposal;});
         proposalsMap.put(proposalIndex, {proposal with voteTally = votingResults} );
-        let timerId = setTimer(#seconds(24 * 60 * 60 * 3), finalizeProposalVotingPeriod);
+        let timerId = setTimer(#seconds(60 * 10), finalizeProposalVotingPeriod);
         proposalIndex += 1;
         let updatedProposalsArray = Iter.toArray(proposalsMap.entries());
         return #ok(updatedProposalsArray);
@@ -481,20 +505,20 @@ shared actor class User() = this {
     public shared({caller}) func voteOnProposal(proposalIndex: Nat, adopt: Bool): 
     async Result.Result<(MainTypes.Proposal), MainTypes.Error> {
         let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
-        let hasSufficientContributions = await treasuryCanister.userHasSufficientContributions(caller);
-        if(not hasSufficientContributions) return #err(#NotAuthorizedToVoteOnThisProposal);
+        let hasSufficientStake = await treasuryCanister.userHasSufficientStake(caller);
+        if(not hasSufficientStake) return #err(#NotAuthorizedToVoteOnThisProposal);
         let proposal_ = proposalsMap.get(proposalIndex);
         if(proposal_ == null) return #err(#PorposalHasExpired);
-        let ?proposal = proposal_;
+        let ?proposal = proposal_ else { return #err(#PorposalHasExpired) };
         let {votes} = proposal;
         let votesMap = HashMap.fromIter<Text, MainTypes.Vote>( Iter.fromArray(votes), Iter.size(Iter.fromArray(votes)), Text.equal, Text.hash );
         let previousVote = votesMap.get(Principal.toText(caller));
         switch(previousVote){
             case null {
-                let treasuryContributionsArray = await treasuryCanister.getTreasuryContributionsArray();
+                let neuronsDataArray = await treasuryCanister.getNeuronsDataArray();
                 votesMap.put(Principal.toText(caller), {adopt});
                 var updatedProposal = {proposal with votes = Iter.toArray(votesMap.entries()); };
-                let voteTally = GovernanceHelperMethods.tallyVotes({treasuryContributionsArray; proposal = updatedProposal; xdr_permyriad_per_icp});
+                let voteTally = GovernanceHelperMethods.tallyVotes({neuronsDataArray; proposal = updatedProposal});
                 updatedProposal := {updatedProposal with voteTally};
                 proposalsMap.put(proposalIndex, updatedProposal);
                 return #ok(updatedProposal);
@@ -516,8 +540,8 @@ shared actor class User() = this {
             case null {};
             case (?proposal){
                 let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
-                let treasuryContributionsArray = await treasuryCanister.getTreasuryContributionsArray();
-                let votingResults = GovernanceHelperMethods.tallyVotes({treasuryContributionsArray; proposal; xdr_permyriad_per_icp});
+                let neuronsDataArray = await treasuryCanister.getNeuronsDataArray();
+                let votingResults = GovernanceHelperMethods.tallyVotes({neuronsDataArray; proposal;});
                 let {yay; nay; total } = votingResults;
                 var timeExecuted: ?Int = null;
                 if( yay > nay) {
@@ -531,71 +555,114 @@ shared actor class User() = this {
     };
 
     private func executeProposal(proposal: MainTypes.Proposal) : async () {
-        let {action; payload; proposer;} = proposal;
-        let {amount; principal} = payload;
+        let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
+        let {action; proposer;} = proposal;
         switch(action){
-            case(#AddAdmin){
-                switch(payload.principal){
-                    case null { return };
-                    case(? principal){
-                        let updatedDaoMetaData = CanisterManagementMethods.addAdmin(Principal.fromText(principal), daoMetaData_v2);
-                        daoMetaData_v2 := updatedDaoMetaData;
-                    };
-                };            };
-            case(#RemoveAdmin){
-                switch(payload.principal){
-                    case null { return };
-                    case(? principal){
-                        let updatedDaoMetaData = CanisterManagementMethods.removeAdmin(Principal.fromText(principal), daoMetaData_v2);
-                        daoMetaData_v2 := updatedDaoMetaData;
-                    };
-                };
+            case(#AddAdmin({principal})){
+                let updatedDaoMetaData = CanisterManagementMethods.addAdmin(Principal.fromText(principal), daoMetaData_v2);
+                daoMetaData_v2 := updatedDaoMetaData;               
             };
-            case (#DepositIcpToTreasury){
-                switch(amount){
-                    case null {};
-                    case(?amount_){
-                        let newBalance = await TreasuryHelperMethods.depositAssetToTreasury({
-                            depositorPrincipal = proposer;
-                            treasuryCanisterPrincipal = daoMetaData_v2.treasuryCanisterPrincipal;
-                            amount = amount_;
-                            currency = #Icp;
-                            profilesMap = userProfilesMap;
-                        })
-                    }
-                }
-            };
-            case (#DepositIcpToNeuron){
-                //call function to deposit ICP to treasury's neuron from user's wallet
+            case(#RemoveAdmin({principal})){
+                let updatedDaoMetaData = CanisterManagementMethods.removeAdmin(Principal.fromText(principal), daoMetaData_v2);
+                daoMetaData_v2 := updatedDaoMetaData;
             };
             //still need to delete the public upgradeApp method once the frontend has been updated
-            case (#UpgradeApp){ ignore upgradeApp_(); };
-            case(#DissolveIcpNeuron){
-                //call function to dissolve the Treasuries Neuron
+            case (#UpgradeApp({})){ ignore upgradeApp_(); };
+            case (#CreateNeuron({amount;})){
+                let response_2 = await treasuryCanister.createNeuron({amount; contributor = Principal.fromText(proposer);});
             };
-            case(#FollowIcpNeuron){
-                //call function to follow ICP neuron
+            case(#IncreaseNeuron({amount; neuronId;})){
+                let response_2 = await treasuryCanister.increaseNeuron({amount; neuronId; contributor = Principal.fromText(proposer);});
             };
-            case(#SpawnIcpNeuron){
-                //call function to spawn ICP neuron
+            case(#DisburseNeuron({neuronId;})){
+                let treasuryAccountId = await treasuryCanister.canisterAccountId();
+                let neuronsDataArray: TreasuryTypes.NeuronsDataArray = await treasuryCanister.getNeuronsDataArray();
+                let neuronsDataMap: TreasuryTypes.NeuronsDataMap = HashMap.fromIter<TreasuryTypes.NeuronIdAsText, TreasuryTypes.NeuronData>(
+                    Iter.fromArray(neuronsDataArray), 
+                    Iter.size(Iter.fromArray(neuronsDataArray)), 
+                    Text.equal, 
+                    Text.hash
+                );
+                let ?neuronData = neuronsDataMap.get(Nat64.toText(neuronId)) else { throw Error.reject("Neuron not found") };
+                let ?neuronInfo = neuronData.neuronInfo else { throw Error.reject("Neuron Info not found") };
+                let {stake_e8s;} = neuronInfo;
+                let args : Governance.ManageNeuron = {
+                    id = ?{id = neuronId;};
+                    command = ?#Disburse({to_account = ?{hash = treasuryAccountId}; amount = ?{e8s = stake_e8s - txFee} });
+                    neuron_id_or_subaccount = null;
+                };
+                let result = await treasuryCanister.manageNeuron(args, Principal.fromText(proposer));
             };
-            case(#DispurseIcpNeuron){
-                //call function to dispurse ICP neuron
+            case(#DissolveNeuron({neuronId;})){
+                let args : Governance.ManageNeuron = {
+                    id = ?{id = neuronId;};
+                    command = ?#Configure({operation = ?#StartDissolving({});});
+                    neuron_id_or_subaccount = null;
+                };
+                let result = await treasuryCanister.manageNeuron(args, Principal.fromText(proposer));
+
             };
-            case(#PurchaseCycles){
+            case(#FollowNeuron({neuronId; topic; followee;})){
+                let followees : [{id: Nat64;}] = [{id = followee;}];
+                let args : Governance.ManageNeuron = {
+                    id = ?{id = neuronId;};
+                    command = ?#Follow({topic; followees;});
+                    neuron_id_or_subaccount = null;
+                };
+                let result = await treasuryCanister.manageNeuron(args, Principal.fromText(proposer));
+            };
+            case(#IncreaseDissolveDelay({neuronId; additionalDissolveDelaySeconds;})){
+                let additional_dissolve_delay_seconds = additionalDissolveDelaySeconds;
+                let args : Governance.ManageNeuron = {
+                    id = ?{id = neuronId;};
+                    command = ?#Configure({operation = ?#IncreaseDissolveDelay({additional_dissolve_delay_seconds});});
+                    neuron_id_or_subaccount = null;
+                };
+                let result = await treasuryCanister.manageNeuron(args, Principal.fromText(proposer));
+            };
+            case(#SplitNeuron({neuronId; amount;})){
+                let args : Governance.ManageNeuron = {
+                    id = ?{id = neuronId;};
+                    command = ?#Split({amount_e8s = amount;});
+                    neuron_id_or_subaccount = null;
+                };
+                let result = await treasuryCanister.manageNeuron(args, Principal.fromText(proposer));
+            };
+            case(#SpawnNeuron({neuronId; percentage_to_spawn;})){
+                let treasurySelfAuthPrincipal = await treasuryCanister.getSelfAuthenticatingPrincipal();
+                let spawnArgs : Governance.Spawn = {
+                    percentage_to_spawn : ?Nat32 = ?percentage_to_spawn;
+                    new_controller : ?Principal = ?Principal.fromText(treasurySelfAuthPrincipal);
+                    nonce : ?Nat64 = ?Nat64.fromNat(0);
+                };
+                let args : Governance.ManageNeuron = {
+                    id = ?{id = neuronId;};
+                    command = ?#Spawn(spawnArgs);
+                    neuron_id_or_subaccount = null;
+                };
+                let result = await treasuryCanister.manageNeuron(args, Principal.fromText(proposer));
+            };
+            case(#PurchaseCycles({amount})){
                 //call function to purchase more cycles
+            };
+            case(#ToggleSupportMode({})){
+                let updatedMetaData = await CanisterManagementMethods.toggleSupportMode(daoMetaData_v2);
+                daoMetaData_v2 := updatedMetaData;
             };
         };
     };
-
-    let timerId_daily = recurringTimer(#seconds (24 * 60 * 60), heartBeat_unshared);
-    let timerId_hourly = recurringTimer(#seconds (60 * 60), heartBeat_hourly);
-    let timerId_everyFiveSeconds = recurringTimer(#seconds (5), updateUsersTxHistory);
 
     system func preupgrade() { 
         userProfilesArray := Iter.toArray(userProfilesMap.entries()); 
         proposalsArray := Iter.toArray(proposalsMap.entries());
     };
 
-    system func postupgrade() { userProfilesArray:= []; proposalsArray := []};
+    system func postupgrade() { 
+        userProfilesArray:= []; 
+        proposalsArray := [];
+
+        let timerId_daily = recurringTimer(#seconds (24 * 60 * 60), heartBeat_unshared);
+        let timerId_hourly = recurringTimer(#seconds (60 * 60), heartBeat_hourly);
+        let timerId_everyThirtySeconds = recurringTimer(#seconds (30), updateUsersTxHistory);
+    };
 }

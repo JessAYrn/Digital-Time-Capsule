@@ -1,11 +1,13 @@
-import Account "../../Ledger/Account";
+import Account "../../Serializers/Account";
 import Trie "mo:base/Trie";
 import Principal "mo:base/Principal";
 import HashMap "mo:base/HashMap";
 import JournalTypes "../Journal/types";
+import TreasuryTypes "../Treasury/types";
 import NotificationTypes "../Notifications/types";
 import IC "../IC/types";
-import Ledger "../../Ledger/Ledger";
+import Ledger "../../NNS/Ledger";
+import Governance "../../NNS/Governance";
 
 
 module{
@@ -28,7 +30,8 @@ module{
         userJournalData : ([JournalTypes.JournalEntryExportKeyValuePair], JournalTypes.Bio,); 
         email: ?Text; 
         userName: ?Text;
-        principal: Text;
+        rootCanisterPrincipal: Text;
+        userPrincipal: Text;
     };
 
     public type Error = {
@@ -96,22 +99,6 @@ module{
         requestsForAccess: RequestsForAccess;
     };
 
-    public type DaoMetaData = {
-        managerCanisterPrincipal: Text; 
-        treasuryCanisterPrincipal: Text;
-        frontEndPrincipal: Text;
-        backEndPrincipal: Text;
-        lastRecordedBackEndCyclesBalance: Nat;
-        backEndCyclesBurnRatePerDay: Nat;
-        nftOwner: Text;
-        nftId: Int;
-        acceptingRequests: Bool;
-        lastRecordedTime: Int;
-        supportMode: Bool;
-        requestsForAccess: RequestsForAccess;
-        defaultControllers: [Principal];
-    };
-
     public type DaoMetaData_V2 = {
         managerCanisterPrincipal: Text; 
         treasuryCanisterPrincipal: Text;
@@ -145,39 +132,36 @@ module{
     public type Proposals = [(Nat,Proposal)];
 
     public type ProposalsMap = HashMap.HashMap<Nat, Proposal>;
-
-    public type ProposalPayload = {
-        principal : ?Text;
-        amount : ?Nat64;
-    };
     
     public type VotingResults = {
-        yay: Float;
-        nay: Float;
-        total: Float;
+        yay: Nat64;
+        nay: Nat64;
+        total: Nat64;
     };
 
     public type Proposal = {
         votes: [(Text, Vote)];
         voteTally: VotingResults;
         action: ProposalActions;
-        payload: ProposalPayload;
         proposer: Text;
         timeInitiated: Int;
         timeExecuted: ?Int;
     };
 
     public type ProposalActions = {
-        #AddAdmin;
-        #RemoveAdmin;
-        #DepositIcpToTreasury;
-        #DepositIcpToNeuron;
-        #UpgradeApp;
-        #DissolveIcpNeuron;
-        #FollowIcpNeuron;
-        #SpawnIcpNeuron;
-        #DispurseIcpNeuron;
-        #PurchaseCycles;
+        #AddAdmin: {principal: Text};
+        #RemoveAdmin: {principal: Text};
+        #UpgradeApp: {};
+        #CreateNeuron: {amount: Nat64; };
+        #IncreaseNeuron: {amount: Nat64; neuronId: Nat64; };
+        #PurchaseCycles: {amount : Nat64;};
+        #SplitNeuron: {neuronId: Nat64; amount: Nat64; };
+        #SpawnNeuron: {neuronId: Nat64; percentage_to_spawn : Nat32;};
+        #DisburseNeuron: {neuronId: Nat64; };
+        #DissolveNeuron: {neuronId: Nat64; };
+        #IncreaseDissolveDelay: {neuronId: Nat64; additionalDissolveDelaySeconds: Nat32; };
+        #FollowNeuron: {neuronId: Nat64; topic : Int32; followee :  Nat64 };
+        #ToggleSupportMode: {};
     };
 
     public type Vote = { adopt: Bool };
