@@ -181,8 +181,9 @@ module{
         backEndPrincipal : Text, 
         frontEndPrincipal : Text, 
         adminPrincipal : Text,
-        metaData : MainTypes.DaoMetaData_V2) 
-    : async (MainTypes.DaoMetaData_V2) {
+        nftId: Nat,
+        metaData : MainTypes.DaoMetaData_V2
+    ) : async (MainTypes.DaoMetaData_V2) {
 
         var managerCanisterPrincipal = metaData.managerCanisterPrincipal;
         var treasuryCanisterPrincipal = metaData.treasuryCanisterPrincipal;
@@ -191,7 +192,7 @@ module{
             Cycles.add(1_000_000_000_000);
             let managerCanister = await Manager.Manager(Principal.fromText(backEndPrincipal));
             let amountAccepted_manager = await managerCanister.wallet_receive();
-            await managerCanister.loadRelease();
+            ignore managerCanister.loadRelease();
             managerCanisterPrincipal := Principal.toText(Principal.fromActor(managerCanister));
         };
 
@@ -206,7 +207,7 @@ module{
         let updatedDefaultControllers_0 = addDefualtController([] , Principal.fromText(backEndPrincipal));
         let updatedDefaultControllers_1 = addDefualtController(updatedDefaultControllers_0 ,Principal.fromText(managerCanisterPrincipal));
 
-        let result = await authorizePrinicpalToViewAssets(backEndPrincipal, frontEndPrincipal);
+        ignore authorizePrinicpalToViewAssets(backEndPrincipal, frontEndPrincipal);
         let admin = [(adminPrincipal, {percentage = 100})];
 
         let updatedMetaData = {
@@ -216,6 +217,7 @@ module{
             treasuryCanisterPrincipal;
             frontEndPrincipal;
             backEndPrincipal;
+            nftId;
             defaultControllers = updatedDefaultControllers_1;
         };
 
@@ -466,31 +468,31 @@ module{
         return true;
     };
 
-    // public func verifyOwnership( principal: Principal, daoMetaData: MainTypes.DaoMetaData ): async Bool {
-    //     let accountIdBlob = Account.accountIdentifier(principal, Account.defaultSubaccount());
-    //     let accountIdArray = Blob.toArray(accountIdBlob);
-    //     let accountIdText = Hex.encode(accountIdArray);
-    //     let tokens_ext_result = await nftCollection.tokens_ext(accountIdText);
-    //     switch(tokens_ext_result){
-    //         case(#ok(tokensOwned)){
-    //             var index = 0;
-    //             let tokensOwnedIter = Iter.fromArray(tokensOwned);
-    //             let numberOfTokensOwned = Iter.size(tokensOwnedIter);
-    //             while(index < numberOfTokensOwned){
-    //                 let tokenData = tokensOwned[index];
-    //                 let tokenIndex = tokenData.0;
-    //                 var tokenIndexAsNat = Nat32.toNat(tokenIndex);
-    //                 tokenIndexAsNat := tokenIndexAsNat + 1;
-    //                 if(tokenIndexAsNat == daoMetaData.nftId){
-    //                     return true;
-    //                 };
-    //                 index += 1;
-    //             };
-    //             return false;
-    //         };
-    //         case(#err(e)){ return false; };
-    //     };  
-    // };
+    public func verifyUserHasAdminNft( principal: Principal, daoMetaData: MainTypes.DaoMetaData_V2 ): async Bool {
+        let accountIdBlob = Account.accountIdentifier(principal, Account.defaultSubaccount());
+        let accountIdArray = Blob.toArray(accountIdBlob);
+        let accountIdText = Hex.encode(accountIdArray);
+        let tokens_ext_result = await nftCollection.tokens_ext(accountIdText);
+        switch(tokens_ext_result){
+            case(#ok(tokensOwned)){
+                var index = 0;
+                let tokensOwnedIter = Iter.fromArray(tokensOwned);
+                let numberOfTokensOwned = Iter.size(tokensOwnedIter);
+                while(index < numberOfTokensOwned){
+                    let tokenData = tokensOwned[index];
+                    let (tokenIndex, _, _) = tokenData;
+                    var tokenIndexAsNat = Nat32.toNat(tokenIndex);
+                    tokenIndexAsNat += 1;
+                    if(tokenIndexAsNat == daoMetaData.nftId){
+                        return true;
+                    };
+                    index += 1;
+                };
+                return false;
+            };
+            case(#err(e)){ return false; };
+        };  
+    };
 
     private  func key(x: Principal) : Trie.Key<Principal> {
         return {key = x; hash = Principal.hash(x)};

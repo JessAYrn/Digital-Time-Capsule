@@ -94,6 +94,7 @@ module{
         lastRecordedTime: Int;
         profilesMetaData: ProfilesMetaData;
         isAdmin: Bool;
+        nftId: Nat;
         supportMode: Bool;
         releaseVersion: Nat;
         requestsForAccess: RequestsForAccess;
@@ -110,6 +111,7 @@ module{
         acceptingRequests: Bool;
         lastRecordedTime: Int;
         supportMode: Bool;
+        nftId: Nat;
         requestsForAccess: RequestsForAccess;
         defaultControllers: [Principal];
     };
@@ -180,6 +182,7 @@ module{
         supportMode = true;
         requestsForAccess = [];
         defaultControllers = [];
+        nftId = 0;
     };
 
     public type Interface = actor {

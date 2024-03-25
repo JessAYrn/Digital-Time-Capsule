@@ -260,11 +260,11 @@ shared actor class User() = this {
         return #ok(updatedDaoMetaDataList.requestsForAccess);
     };
 
-    public shared({caller}) func configureApp(frontEndPrincipal : Text, adminPrincipal: Text ) : async Result.Result<(), JournalTypes.Error> {
+    public shared({caller}) func configureApp(frontEndPrincipal : Text, adminPrincipal: Text, nftId: Nat ) : async Result.Result<(), JournalTypes.Error> {
         let canConfigureApp = CanisterManagementMethods.canConfigureApp(daoMetaData_v2);
         if(not canConfigureApp){ return #err(#NotAuthorized); };
         let backEndPrincipal = Principal.toText(Principal.fromActor(this));
-        let updatedMetaData = await CanisterManagementMethods.configureApp( backEndPrincipal, frontEndPrincipal, adminPrincipal, daoMetaData_v2);
+        let updatedMetaData = await CanisterManagementMethods.configureApp( backEndPrincipal, frontEndPrincipal, adminPrincipal, nftId, daoMetaData_v2);
         daoMetaData_v2 := updatedMetaData;
         #ok(());
     };
