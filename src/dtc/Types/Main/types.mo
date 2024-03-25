@@ -177,7 +177,7 @@ module{
         admin = [];
         acceptingRequests = true;
         lastRecordedTime = 0;
-        supportMode = false;
+        supportMode = true;
         requestsForAccess = [];
         defaultControllers = [];
     };
