@@ -45,7 +45,7 @@ import Governance "NNS/Governance";
 
 shared actor class User() = this {
 
-    private stable var daoMetaData_v2 : MainTypes.DaoMetaData_V2 = MainTypes.DEFAULT_DAO_METADATA_V2;
+    private stable var daoMetaData_v3 : MainTypes.DaoMetaData_V3 = MainTypes.DEFAULT_DAO_METADATA_V3;
 
     private stable var userProfilesArray : [(Principal, MainTypes.UserProfile)] = [];
 
@@ -83,10 +83,10 @@ shared actor class User() = this {
     };
     
     public shared({ caller }) func create () : async Result.Result<MainTypes.AmountAccepted, JournalTypes.Error> {
-        let amountAccepted = await MainMethods.create(caller, userProfilesMap, daoMetaData_v2);
-        let updatedDaoMetaData = await CanisterManagementMethods.removeFromRequestsList([Principal.toText(caller)], daoMetaData_v2);
+        let amountAccepted = await MainMethods.create(caller, userProfilesMap, daoMetaData_v3);
+        let updatedDaoMetaData = await CanisterManagementMethods.removeFromRequestsList([Principal.toText(caller)], daoMetaData_v3);
         switch(amountAccepted){
-            case(#ok(amount)){ daoMetaData_v2 := updatedDaoMetaData; return #ok(amount); };
+            case(#ok(amount)){ daoMetaData_v3 := updatedDaoMetaData; return #ok(amount); };
             case(#err(e)){ return #err(e); };
         };
     };
@@ -208,7 +208,7 @@ shared actor class User() = this {
 
     private func updateUsersTxHistory() : async () {
         try{
-            let newStartIndexForNextQuery = await TxHelperMethods.updateUsersTxHistory(userProfilesMap, startIndexForBlockChainQuery, daoMetaData_v2);
+            let newStartIndexForNextQuery = await TxHelperMethods.updateUsersTxHistory(userProfilesMap, startIndexForBlockChainQuery, daoMetaData_v3);
             startIndexForBlockChainQuery := newStartIndexForNextQuery;
         } catch (e) {
             error := e;
@@ -234,18 +234,18 @@ shared actor class User() = this {
     };
 
     public shared({caller}) func grantAccess(principals : [Text]) : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error> {
-        let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v2);
+        let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v3);
         if(not isAdmin){ return #err(#NotAuthorized); };
-        let updatedDaoMetaData = await CanisterManagementMethods.grantAccess(principals, daoMetaData_v2);
+        let updatedDaoMetaData = await CanisterManagementMethods.grantAccess(principals, daoMetaData_v3);
         switch(updatedDaoMetaData){
-            case(#ok(metaData)){ daoMetaData_v2 := metaData; return #ok(metaData.requestsForAccess); };
+            case(#ok(metaData)){ daoMetaData_v3 := metaData; return #ok(metaData.requestsForAccess); };
             case(#err(e)){ return #err(e); };
         };
     };
 
     public shared({caller}) func updateApprovalStatus(principals: [Text], newApprovalStatus: Bool) : 
     async Result.Result<(MainTypes.ProfilesMetaData), JournalTypes.Error>{
-        let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v2);
+        let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v3);
         if(not isAdmin){ return #err(#NotAuthorized); };
         CanisterManagementMethods.updateApprovalStatus(principals, userProfilesMap, newApprovalStatus);
         let profilesApprovalStatuses = CanisterManagementMethods.getProfilesMetaData(userProfilesMap);
@@ -253,19 +253,19 @@ shared actor class User() = this {
     };
 
     public shared({caller}) func removeFromRequestsList(principals: [Text]) : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error> {
-        let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v2);
+        let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v3);
         if(not isAdmin){ return #err(#NotAuthorized); };
-        let updatedDaoMetaDataList = await CanisterManagementMethods.removeFromRequestsList(principals, daoMetaData_v2);
-        daoMetaData_v2 := updatedDaoMetaDataList;
+        let updatedDaoMetaDataList = await CanisterManagementMethods.removeFromRequestsList(principals, daoMetaData_v3);
+        daoMetaData_v3 := updatedDaoMetaDataList;
         return #ok(updatedDaoMetaDataList.requestsForAccess);
     };
 
     public shared({caller}) func configureApp(frontEndPrincipal : Text, adminPrincipal: Text, nftId: Nat ) : async Result.Result<(), JournalTypes.Error> {
-        let canConfigureApp = CanisterManagementMethods.canConfigureApp(daoMetaData_v2);
+        let canConfigureApp = CanisterManagementMethods.canConfigureApp(daoMetaData_v3);
         if(not canConfigureApp){ return #err(#NotAuthorized); };
         let backEndPrincipal = Principal.toText(Principal.fromActor(this));
-        let updatedMetaData = await CanisterManagementMethods.configureApp( backEndPrincipal, frontEndPrincipal, adminPrincipal, nftId, daoMetaData_v2);
-        daoMetaData_v2 := updatedMetaData;
+        let updatedMetaData = await CanisterManagementMethods.configureApp( backEndPrincipal, frontEndPrincipal, adminPrincipal, nftId, daoMetaData_v3);
+        daoMetaData_v3 := updatedMetaData;
         #ok(());
     };
 
@@ -283,25 +283,25 @@ shared actor class User() = this {
         return {status; headers; body = Text.decodeUtf8(body)};
     };
 
-    public shared({caller}) func toggleAcceptRequest() : async  Result.Result<(MainTypes.DaoMetaData_V2), JournalTypes.Error>{
-        let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v2);
+    public shared({caller}) func toggleAcceptRequest() : async  Result.Result<(MainTypes.DaoMetaData_V3), JournalTypes.Error>{
+        let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v3);
         if(not isAdmin){ return #err(#NotAuthorized); };
-        let updatedMetaData = { daoMetaData_v2 with acceptingRequests = not daoMetaData_v2.acceptingRequests; };
-        daoMetaData_v2 := updatedMetaData; return #ok(updatedMetaData);
+        let updatedMetaData = { daoMetaData_v3 with acceptingRequests = not daoMetaData_v3.acceptingRequests; };
+        daoMetaData_v3 := updatedMetaData; return #ok(updatedMetaData);
     };
 
     public query({caller}) func getRequestingPrincipals() : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error>{
-        let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v2);
+        let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v3);
         if(not isAdmin){ return #err(#NotAuthorized); }
-        else { return #ok(daoMetaData_v2.requestsForAccess) };
+        else { return #ok(daoMetaData_v3.requestsForAccess) };
     };
 
     public shared({caller}) func requestApproval() : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error>{
-        let result = CanisterManagementMethods.requestApproval(caller, daoMetaData_v2);
+        let result = CanisterManagementMethods.requestApproval(caller, daoMetaData_v3);
         switch(result){
             case (#err(e)){ return #err(e)};
             case (#ok(updatedDaoMetaData)){ 
-                daoMetaData_v2 := updatedDaoMetaData;
+                daoMetaData_v3 := updatedDaoMetaData;
                 return #ok(updatedDaoMetaData.requestsForAccess)
             };
         };
@@ -309,8 +309,8 @@ shared actor class User() = this {
 
     public composite query(msg) func getCanisterCyclesBalances() : async MainTypes.CanisterCyclesBalances{
         let currentCyclesBalance_backend = Cycles.balance();
-        let managerCanister: Manager.Manager = actor(daoMetaData_v2.managerCanisterPrincipal);
-        let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
+        let managerCanister: Manager.Manager = actor(daoMetaData_v3.managerCanisterPrincipal);
+        let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v3.treasuryCanisterPrincipal);
         let currentCyclesBalance_frontend  = frontEndCanisterBalance;
         let currentCyclesBalance_treasury = await treasuryCanister.getCyclesBalance();
         let currentCyclesBalance_manager = await managerCanister.getCyclesBalance();
@@ -322,19 +322,20 @@ shared actor class User() = this {
         switch(profile){
             case null{ return #err(#NotAuthorized); };
             case (? existingProfile){
-                let managerCanister : Manager.Manager = actor(daoMetaData_v2.managerCanisterPrincipal);
-                let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
+                let managerCanister : Manager.Manager = actor(daoMetaData_v3.managerCanisterPrincipal);
+                let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v3.treasuryCanisterPrincipal);
                 let neuronsDataArray = await treasuryCanister.getNeuronsDataArray();
                 let profilesMetaData = CanisterManagementMethods.getProfilesMetaData(userProfilesMap);
-                let {number = releaseVersion} = await managerCanister.getCurrentReleaseVersion();
+                let currentVersions = await managerCanister.getCurrentVersions();
                 let canisterDataPackagedForExport = {
-                    daoMetaData_v2 with 
+                    daoMetaData_v3 with 
                     proposals = GovernanceHelperMethods.tallyAllProposalVotes({proposals = proposalsMap; neuronsDataArray;});
-                    isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v2);
+                    isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v3);
                     currentCyclesBalance_backend = Cycles.balance();
                     journalCount = userProfilesMap.size();
                     profilesMetaData;
-                    releaseVersion;
+                    releaseVersionInstalled = currentVersions.currentVersionInstalled.number;
+                    releaseVersionLoaded = currentVersions.currentVersionLoaded.number;
                 };
                 return #ok(canisterDataPackagedForExport);
             };
@@ -344,7 +345,7 @@ shared actor class User() = this {
     public composite query({caller}) func getTreasuryData() : async Result.Result<TreasuryTypes.TreasuryDataExport, MainTypes.Error> {
         let userProfile = userProfilesMap.get(caller);
         if(userProfile == null) return #err(#NotAuthorizedToAccessData);
-        let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
+        let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v3.treasuryCanisterPrincipal);
         let usersTreasuryDataArray = await treasuryCanister.getUsersTreasuryDataArray();
         let neurons = {icp = await treasuryCanister.getNeuronsDataArray()};
         let balance_icp = await treasuryCanister.canisterBalance();
@@ -355,32 +356,39 @@ shared actor class User() = this {
     };
 
     public shared({caller}) func depositIcpToTreasury(amount: Nat64) : async {blockIndex: Nat64} {
-        let result = await TreasuryHelperMethods.depositIcpToTreasury(daoMetaData_v2, userProfilesMap, caller, amount);
+        let result = await TreasuryHelperMethods.depositIcpToTreasury(daoMetaData_v3, userProfilesMap, caller, amount);
     };
 
     public shared({caller}) func withdrawIcpFromTreasury(amount: Nat64) : async {blockIndex: Nat64} {
-        let result = await TreasuryHelperMethods.withdrawIcpFromTreasury(daoMetaData_v2, userProfilesMap, caller, amount);
+        let result = await TreasuryHelperMethods.withdrawIcpFromTreasury(daoMetaData_v3, userProfilesMap, caller, amount);
     };
 
-    public shared({ caller }) func upgradeApp(): async (){
-        let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v2);
-        if(not isAdmin and not (Principal.toText(caller) == SupportCanisterIds.TechSupportPrincipal2 and daoMetaData_v2.supportMode)){ 
+    public shared({ caller }) func loadUpgrades(): async (){
+        let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v3);
+        if(not isAdmin and not (Principal.toText(caller) == SupportCanisterIds.TechSupportPrincipal2 and daoMetaData_v3.supportMode)){ 
             throw Error.reject("Unauthorized Access"); 
         };
-        let managerCanister: Manager.Manager = actor(daoMetaData_v2.managerCanisterPrincipal);
-        await managerCanister.loadRelease();
-        try { await updateCanistersExceptBackend(); } 
-        catch (e) {
-            await managerCanister.loadPreviousRelease();  
-            await updateCanistersExceptBackend();
-            throw Error.reject("Upgrade Failed, no code changes have been implemented.")
-        };
-        ignore managerCanister.scheduleBackendCanisterToBeUpdated();
+        await loadUpgrades_();
     };
 
-    private func upgradeApp_(): async (){
-        let managerCanister: Manager.Manager = actor(daoMetaData_v2.managerCanisterPrincipal);
+    public shared({ caller }) func installUpgrades(): async (){
+        let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v3);
+        if(not isAdmin and not (Principal.toText(caller) == SupportCanisterIds.TechSupportPrincipal2 and daoMetaData_v3.supportMode)){ 
+            throw Error.reject("Unauthorized Access"); 
+        };
+        await installUpgrades_();
+    };
+
+    private func loadUpgrades_(): async (){
+        let managerCanister: Manager.Manager = actor(daoMetaData_v3.managerCanisterPrincipal);
+        await managerCanister.resetLoadProgress();
         await managerCanister.loadRelease();
+    };
+
+    private func installUpgrades_(): async (){
+        let managerCanister: Manager.Manager = actor(daoMetaData_v3.managerCanisterPrincipal);
+        let loadCompleted = await managerCanister.getIsLoadingComplete();
+        if(not loadCompleted) throw Error.reject("Load not completed");
         try { await updateCanistersExceptBackend(); } 
         catch (e) {
             await managerCanister.loadPreviousRelease();  
@@ -391,24 +399,24 @@ shared actor class User() = this {
     };
 
     private func updateCanistersExceptBackend(): async (){
-        let managerCanister: Manager.Manager = actor(daoMetaData_v2.managerCanisterPrincipal);
-        await CanisterManagementMethods.installCode_managerCanister(daoMetaData_v2);
-        let result_0 = await managerCanister.installCode_frontendCanister(daoMetaData_v2);
+        let managerCanister: Manager.Manager = actor(daoMetaData_v3.managerCanisterPrincipal);
+        await CanisterManagementMethods.installCode_managerCanister(daoMetaData_v3);
+        let result_0 = await managerCanister.installCode_frontendCanister(daoMetaData_v3);
         let result_1 = await managerCanister.installCode_journalCanisters(Iter.toArray(userProfilesMap.entries()));
-        let result_2 = await managerCanister.installCode_treasuryCanister(daoMetaData_v2);
+        let result_2 = await managerCanister.installCode_treasuryCanister(daoMetaData_v3);
     };
 
     public shared({caller}) func scheduleCanistersToBeUpdatedExceptBackend(): async () {
-        if( Principal.toText(caller) != daoMetaData_v2.managerCanisterPrincipal) { throw Error.reject("Unauthorized access."); };
+        if( Principal.toText(caller) != daoMetaData_v3.managerCanisterPrincipal) { throw Error.reject("Unauthorized access."); };
         let {setTimer} = Timer;
         let timerId = setTimer(#nanoseconds(1), updateCanistersExceptBackend);
     };
 
     public shared({caller}) func toggleSupportMode() : async Result.Result<(),JournalTypes.Error>{
-        let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v2);
+        let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v3);
         if(not isAdmin){ return #err(#NotAuthorized); };
-        let updatedMetaData = await CanisterManagementMethods.toggleSupportMode(daoMetaData_v2);
-        daoMetaData_v2 := updatedMetaData;
+        let updatedMetaData = await CanisterManagementMethods.toggleSupportMode(daoMetaData_v3);
+        daoMetaData_v3 := updatedMetaData;
         return #ok(());
     };
 
@@ -417,14 +425,14 @@ shared actor class User() = this {
         switch(userProfile){
             case null {throw Error.reject("user profile not found")};
             case(?profile){
-                let managerCanister : Manager.Manager = actor(daoMetaData_v2.managerCanisterPrincipal);
+                let managerCanister : Manager.Manager = actor(daoMetaData_v3.managerCanisterPrincipal);
                 let userCanister: Journal.Journal = actor(Principal.toText(profile.canisterId));
                 let userNotifications = await userCanister.getNotifications();
                 let notificationsBuffer = Buffer.fromArray<NotificationsTypes.Notification>(userNotifications);
-                let currentReleaseVersion = await managerCanister.getCurrentReleaseVersion();
+                let currentVersions = await managerCanister.getCurrentVersions();
                 let nextStableVersion = await managerCanister.getWhatIsNextStableReleaseVersion();
                 let text = Text.concat("New Stable Version Availabe: Version #", Nat.toText(nextStableVersion.number));
-                if(nextStableVersion.number > currentReleaseVersion.number) notificationsBuffer.add({text; key = null});
+                if(nextStableVersion.number > currentVersions.currentVersionInstalled.number) notificationsBuffer.add({text; key = null});
                 return Buffer.toArray(notificationsBuffer);
             };
         };
@@ -450,7 +458,7 @@ shared actor class User() = this {
         switch(userProfile){
             case null { throw Error.reject("No profile found for this principal")};
             case(?_){
-                let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
+                let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v3.treasuryCanisterPrincipal);
                 let balancesHistory = await treasuryCanister.readBalancesHistory();
             };
         };
@@ -459,23 +467,23 @@ shared actor class User() = this {
     public shared({caller}) func heartBeat(): async (){
         let cyclesBalance_backend = Cycles.balance();
         ignore NotificationProtocolMethods.updateUserCanisterNotifications(userProfilesMap);
-        let updatedMetaData = await CanisterManagementMethods.heartBeat(cyclesBalance_backend, daoMetaData_v2, userProfilesMap);
-        daoMetaData_v2 := updatedMetaData;
+        let updatedMetaData = await CanisterManagementMethods.heartBeat(cyclesBalance_backend, daoMetaData_v3, userProfilesMap);
+        daoMetaData_v3 := updatedMetaData;
     };  
 
     private func heartBeat_unshared(): async () {
         let cyclesBalance_backend = Cycles.balance();
         ignore NotificationProtocolMethods.updateUserCanisterNotifications(userProfilesMap);
-        ignore AnalyticsHelperMethods.saveCurrentBalances(userProfilesMap, daoMetaData_v2);
-        let updatedMetaData = await CanisterManagementMethods.heartBeat(cyclesBalance_backend, daoMetaData_v2, userProfilesMap);
-        daoMetaData_v2 := updatedMetaData;
+        ignore AnalyticsHelperMethods.saveCurrentBalances(userProfilesMap, daoMetaData_v3);
+        let updatedMetaData = await CanisterManagementMethods.heartBeat(cyclesBalance_backend, daoMetaData_v3, userProfilesMap);
+        daoMetaData_v3 := updatedMetaData;
     };
 
     private func heartBeat_hourly(): async () {
         let cyclesMintingCanister: NnsCyclesMinting.Interface = actor(NnsCyclesMinting.NnsCyclesMintingCanisterID);
         let {data} = await cyclesMintingCanister.get_icp_xdr_conversion_rate();
         let {xdr_permyriad_per_icp = xdr_permyriad_per_icp_} = data;
-        let {cycles} = await ic.canister_status({ canister_id = Principal.fromText(daoMetaData_v2.frontEndPrincipal) });
+        let {cycles} = await ic.canister_status({ canister_id = Principal.fromText(daoMetaData_v3.frontEndPrincipal) });
         frontEndCanisterBalance := cycles;
         xdr_permyriad_per_icp := xdr_permyriad_per_icp_;
     };
@@ -486,7 +494,7 @@ shared actor class User() = this {
     async Result.Result<(MainTypes.Proposals),MainTypes.Error>{
         let callerProfile = userProfilesMap.get(caller);
         if(callerProfile == null) return #err(#NotAuthorizedToCreateProposals);
-        let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
+        let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v3.treasuryCanisterPrincipal);
         let hasSufficientStake = await treasuryCanister.userHasSufficientStake(caller);
         if(not hasSufficientStake) return #err(#NotAuthorizedToCreateProposals);
         let neuronsDataArray = await treasuryCanister.getNeuronsDataArray();
@@ -504,7 +512,7 @@ shared actor class User() = this {
 
     public shared({caller}) func voteOnProposal(proposalIndex: Nat, adopt: Bool): 
     async Result.Result<(MainTypes.Proposal), MainTypes.Error> {
-        let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
+        let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v3.treasuryCanisterPrincipal);
         let hasSufficientStake = await treasuryCanister.userHasSufficientStake(caller);
         if(not hasSufficientStake) return #err(#NotAuthorizedToVoteOnThisProposal);
         let proposal_ = proposalsMap.get(proposalIndex);
@@ -539,7 +547,7 @@ shared actor class User() = this {
         switch(proposalOptional){
             case null {};
             case (?proposal){
-                let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
+                let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v3.treasuryCanisterPrincipal);
                 let neuronsDataArray = await treasuryCanister.getNeuronsDataArray();
                 let votingResults = GovernanceHelperMethods.tallyVotes({neuronsDataArray; proposal;});
                 let {yay; nay; total } = votingResults;
@@ -555,19 +563,20 @@ shared actor class User() = this {
     };
 
     private func executeProposal(proposal: MainTypes.Proposal) : async () {
-        let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v2.treasuryCanisterPrincipal);
+        let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v3.treasuryCanisterPrincipal);
         let {action; proposer;} = proposal;
         switch(action){
             case(#AddAdmin({principal})){
-                let updatedDaoMetaData = CanisterManagementMethods.addAdmin(Principal.fromText(principal), daoMetaData_v2);
-                daoMetaData_v2 := updatedDaoMetaData;               
+                let updatedDaoMetaData = CanisterManagementMethods.addAdmin(Principal.fromText(principal), daoMetaData_v3);
+                daoMetaData_v3 := updatedDaoMetaData;               
             };
             case(#RemoveAdmin({principal})){
-                let updatedDaoMetaData = CanisterManagementMethods.removeAdmin(Principal.fromText(principal), daoMetaData_v2);
-                daoMetaData_v2 := updatedDaoMetaData;
+                let updatedDaoMetaData = CanisterManagementMethods.removeAdmin(Principal.fromText(principal), daoMetaData_v3);
+                daoMetaData_v3 := updatedDaoMetaData;
             };
             //still need to delete the public upgradeApp method once the frontend has been updated
-            case (#UpgradeApp({})){ ignore upgradeApp_(); };
+            case(#LoadUpgrades({})){ ignore loadUpgrades_(); };
+            case (#InstallUpgrades({})){ ignore installUpgrades_(); };
             case (#CreateNeuron({amount;})){
                 let response_2 = await treasuryCanister.createNeuron({amount; contributor = Principal.fromText(proposer);});
             };
@@ -646,8 +655,8 @@ shared actor class User() = this {
                 //call function to purchase more cycles
             };
             case(#ToggleSupportMode({})){
-                let updatedMetaData = await CanisterManagementMethods.toggleSupportMode(daoMetaData_v2);
-                daoMetaData_v2 := updatedMetaData;
+                let updatedMetaData = await CanisterManagementMethods.toggleSupportMode(daoMetaData_v3);
+                daoMetaData_v3 := updatedMetaData;
             };
         };
     };

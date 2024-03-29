@@ -1,7 +1,8 @@
 export const PROPOSAL_ACTIONS = {
     AddAdmin: "AddAdmin" ,
     RemoveAdmin: "RemoveAdmin" ,
-    UpgradeApp : "UpgradeApp",
+    LoadUpgrades: "LoadUpgrades",
+    InstallUpgrades: "InstallUpgrades",
     CreateNeuron: "CreateNeuron",
     IncreaseNeuron: "IncreaseNeuron",
     PurchaseCycles: "PurchaseCycles",

@@ -149,13 +149,13 @@ const Analytics = () => {
         });
     };
 
-    const handleUpgrade = async () => {
+    const handleInstallUpgrade = async () => {
         setIsLoadingModal(true);
         setModalIsOpen(true);
         try{
-            await actorState.backendActor.upgradeApp();
+            await actorState.backendActor.installUpgrades();
             setModalProps({
-                bigText: "Upgrade Complete",
+                bigText: "Install Complete",
                 smallText: "Refresh page in order to have the changes take effect",
                 Icon: CheckCircleOutlineIcon,
                 components: modalButton_close
@@ -163,7 +163,29 @@ const Analytics = () => {
         } catch(e){
             console.log("Error: ", e);
             setModalProps({
-                bigText: "Upgrade Unsuccessfull",
+                bigText: "Install Unsuccessfull",
+                Icon: ErrorOutlineIcon,
+                components: modalButton_close
+            })
+        };
+        setIsLoadingModal(false);
+    };
+
+    const handleLoadUpgrade = async () => {
+        setIsLoadingModal(true);
+        setModalIsOpen(true);
+        try{
+            await actorState.backendActor.loadUpgrades();
+            setModalProps({
+                bigText: "Load Complete",
+                smallText: "Refresh page in order to have the changes take effect",
+                Icon: CheckCircleOutlineIcon,
+                components: modalButton_close
+            })
+        } catch(e){
+            console.log("Error: ", e);
+            setModalProps({
+                bigText: "Load Unsuccessfull",
                 Icon: ErrorOutlineIcon,
                 components: modalButton_close
             })
@@ -373,8 +395,17 @@ const Analytics = () => {
                                 <ButtonField
                                     Icon={UpgradeIcon}
                                     active={homePageState.canisterData.isAdmin}
-                                    text={'Upgrade'}
-                                    onClick={handleUpgrade}
+                                    text={'Load Upgrade'}
+                                    onClick={handleLoadUpgrade}
+                                    disabled={!homePageState.canisterData.isAdmin}
+                                />
+                            </Grid>
+                            <Grid xs={6} width={"110px"}>
+                                <ButtonField
+                                    Icon={UpgradeIcon}
+                                    active={homePageState.canisterData.isAdmin}
+                                    text={'Install Upgrade'}
+                                    onClick={handleInstallUpgrade}
                                     disabled={!homePageState.canisterData.isAdmin}
                                 />
                             </Grid>
