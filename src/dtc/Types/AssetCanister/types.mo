@@ -198,9 +198,9 @@ module {
         http_request: query (request: HttpRequest) -> async (HttpResponse);
         http_request_streaming_callback: query (token: StreamingCallbackToken) -> async (? StreamingCallbackHttpResponse);
         authorize: (Principal) -> async ();
-        deauthorize: (Principal) -> ();
+        deauthorize: (Principal) -> async ();
         list_authorized: query () -> async ([Principal]) ;
-        grant_permission: (GrantPermission) -> ();
+        grant_permission: (GrantPermission) -> async ();
         revoke_permission: (RevokePermission) -> ();
         list_permitted: query (ListPermitted) -> async ([Principal]);
         take_ownership: () -> async ();

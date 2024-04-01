@@ -15,34 +15,50 @@ module{
     
     private let ic : IC.Self = actor "aaaaa-aa";
 
-    public func installCodeJournalWasms( wasmModule: Blob, profilesArray : [(Principal, {canisterId: Principal})]): 
+    public func installCodeJournalWasms( 
+        wasmModule: Blob, 
+        profilesArray : [(Principal, {canisterId: Principal})],
+        mode: {#upgrade: ?{skip_pre_upgrade: ?Bool}; #install; #reinstall}
+    ): 
     async () {
         let profilesSize = profilesArray.size();
         var index = 0;
         while(index < profilesSize){
             let (principal, profile) = profilesArray[index];
-            ignore installCode_(?principal, wasmModule, profile.canisterId);
+            ignore installCode_(?principal, wasmModule, profile.canisterId, mode);
             index += 1;
         };
     };
 
-    public func installCodeBackendWasm( backEndPrincipal: Text, wasmModule: Blob): async (){
+    public func installCodeBackendWasm( 
+        backEndPrincipal: Text, 
+        wasmModule: Blob,
+        mode: {#upgrade: ?{skip_pre_upgrade: ?Bool}; #install; #reinstall}
+    ): async (){
         let backEndPrincipalBlob = Principal.fromText(backEndPrincipal);
-        await installCode_(null, wasmModule, backEndPrincipalBlob);
+        await installCode_(null, wasmModule, backEndPrincipalBlob, mode);
     };
 
-    public func installCodeTreasuryWasm( daoMetaData: {treasuryCanisterPrincipal: Text; backEndPrincipal: Text;}, wasmModule: Blob): async (){
+    public func installCodeTreasuryWasm( 
+        daoMetaData: {treasuryCanisterPrincipal: Text; backEndPrincipal: Text;}, 
+        wasmModule: Blob,
+         mode: {#upgrade: ?{skip_pre_upgrade: ?Bool}; #install; #reinstall}
+    ): async (){
         let {treasuryCanisterPrincipal; backEndPrincipal;} = daoMetaData;
         let treasuryCanisterBlob = Principal.fromText(treasuryCanisterPrincipal);
         let backEndPrincipalBlob = Principal.fromText(backEndPrincipal);
-        await installCode_(?backEndPrincipalBlob, wasmModule, treasuryCanisterBlob);
+        await installCode_(?backEndPrincipalBlob, wasmModule, treasuryCanisterBlob, mode);
     };
 
 
-    public func installFrontendWasm( daoMetaData: {frontEndPrincipal: Text}, wasmModule: Blob): async (){
+    public func installFrontendWasm( 
+        daoMetaData: {frontEndPrincipal: Text}, 
+        wasmModule: Blob,
+        mode: {#upgrade: ?{skip_pre_upgrade: ?Bool}; #install; #reinstall}
+    ): async (){
         let {frontEndPrincipal} = daoMetaData;
         let frontEndPrincipalBlob = Principal.fromText(frontEndPrincipal);
-        await installCode_(null, wasmModule, frontEndPrincipalBlob);
+        await installCode_(null, wasmModule, frontEndPrincipalBlob, mode);
     };
 
     public func uploadAssetsToFrontEndCanister(canisterData: {frontEndPrincipal: Text}, release: WasmStore.Release) : 
@@ -132,14 +148,19 @@ module{
         return operations;
     };
 
-    private func installCode_ (argument: ?Principal, wasm_module: Blob, canister_id: Principal) : async () {
+    private func installCode_ (
+        argument: ?Principal, 
+        wasm_module: Blob, 
+        canister_id: Principal, 
+        mode: {#upgrade: ?{skip_pre_upgrade: ?Bool}; #install; #reinstall}
+    ) : async () {
         var arg = to_candid(null);
         switch(argument){ case null {}; case (?argument_){ arg := to_candid(argument_); } };
         await ic.stop_canister({canister_id});
         await ic.install_code({
             arg;
             wasm_module;
-            mode = #upgrade(?{ skip_pre_upgrade = ?false });
+            mode;
             canister_id;
             sender_canister_version = null;
         });

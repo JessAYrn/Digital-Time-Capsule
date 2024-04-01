@@ -260,13 +260,44 @@ shared actor class User() = this {
         return #ok(updatedDaoMetaDataList.requestsForAccess);
     };
 
-    public shared({caller}) func configureApp(frontEndPrincipal : Text, adminPrincipal: Text, nftId: Nat ) : async Result.Result<(), JournalTypes.Error> {
+    private func createManagerCanister(): async () {
+        let {managerCanisterPrincipal} = await CanisterManagementMethods.createManagerCanister(daoMetaData_v3);
+        daoMetaData_v3 := {daoMetaData_v3 with managerCanisterPrincipal};
+    };
+
+    private func createTreasuryCanister(backEndPrincipal: Text, managerCanisterPrincipal: Text): async () {
+        let {treasuryCanisterPrincipal} = await CanisterManagementMethods.createTreasuryCanister(daoMetaData_v3);
+        daoMetaData_v3 := {daoMetaData_v3 with treasuryCanisterPrincipal};
+    };
+    
+    private func createFrontEndCanister(backEndPrincipal: Text, managerCanisterPrincipal: Text): async () {
+        let {frontEndPrincipal} = await CanisterManagementMethods.createUiCanister(daoMetaData_v3);
+        daoMetaData_v3 := {daoMetaData_v3 with frontEndPrincipal};
+    };
+
+    public shared({caller}) func configureApp(founder: {#NftId: Nat; #Principal: Text}) : async Result.Result<(), JournalTypes.Error> {
         let canConfigureApp = CanisterManagementMethods.canConfigureApp(daoMetaData_v3);
         if(not canConfigureApp){ return #err(#NotAuthorized); };
-        let backEndPrincipal = Principal.toText(Principal.fromActor(this));
-        let updatedMetaData = await CanisterManagementMethods.configureApp( backEndPrincipal, frontEndPrincipal, adminPrincipal, nftId, daoMetaData_v3);
+        daoMetaData_v3 := {daoMetaData_v3 with backEndPrincipal = Principal.toText(Principal.fromActor(this))};
+        await createManagerCanister();
+        let {backEndPrincipal; managerCanisterPrincipal} = daoMetaData_v3;
+        let managerCanister : Manager.Manager = actor(managerCanisterPrincipal);
+        await managerCanister.loadRelease();
+        var updatedMetaData = {daoMetaData_v3 with defaultControllers = [Principal.fromText(backEndPrincipal), Principal.fromText(managerCanisterPrincipal)];};
+
+        switch(founder){
+            case(#NftId(nftId)){ updatedMetaData := { daoMetaData_v3 with nftId; }; };
+            case(#Principal(principal)){
+                let adminPrincipal = Principal.fromText(principal);
+                let admin = [(adminPrincipal, {percentage = 100})];
+                let updatedMetaData = { daoMetaData_v3 with admin; };
+            };
+        };
         daoMetaData_v3 := updatedMetaData;
-        #ok(());
+
+        ignore createTreasuryCanister(backEndPrincipal,managerCanisterPrincipal);
+        ignore createFrontEndCanister(backEndPrincipal,managerCanisterPrincipal);
+        return #ok(());
     };
 
     public query func transform({context: Blob; response: IC.http_response}) : async IC.http_response {
@@ -401,9 +432,9 @@ shared actor class User() = this {
     private func updateCanistersExceptBackend(): async (){
         let managerCanister: Manager.Manager = actor(daoMetaData_v3.managerCanisterPrincipal);
         await CanisterManagementMethods.installCode_managerCanister(daoMetaData_v3);
-        let result_0 = await managerCanister.installCode_frontendCanister(daoMetaData_v3);
-        let result_1 = await managerCanister.installCode_journalCanisters(Iter.toArray(userProfilesMap.entries()));
-        let result_2 = await managerCanister.installCode_treasuryCanister(daoMetaData_v3);
+        let result_0 = await managerCanister.installCode_frontendCanister(daoMetaData_v3, #upgrade(?{skip_pre_upgrade = ?false}));
+        let result_1 = await managerCanister.installCode_journalCanisters(Iter.toArray(userProfilesMap.entries()), #upgrade(?{skip_pre_upgrade = ?false}));
+        let result_2 = await managerCanister.installCode_treasuryCanister(daoMetaData_v3, #upgrade(?{skip_pre_upgrade = ?false}));
     };
 
     public shared({caller}) func scheduleCanistersToBeUpdatedExceptBackend(): async () {
