@@ -158,6 +158,7 @@ module{
             daoMetaData.frontEndPrincipal == "Null" or 
             daoMetaData.managerCanisterPrincipal == "Null" or 
             daoMetaData.treasuryCanisterPrincipal == "Null" 
+            or (daoMetaData.admin.size() == 0 and daoMetaData.nftId == 0)
         ) return true;
         return false;
     };

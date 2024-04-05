@@ -289,8 +289,8 @@ shared actor class User() = this {
             case(#NftId(nftId)){ updatedMetaData := { daoMetaData_v3 with nftId; }; };
             case(#Principal(principal)){
                 let adminPrincipal = Principal.fromText(principal);
-                let admin = [(adminPrincipal, {percentage = 100})];
-                let updatedMetaData = { daoMetaData_v3 with admin; };
+                let admin = [(Principal.toText(adminPrincipal), {percentage = 100})];
+                updatedMetaData := { daoMetaData_v3 with admin; };
             };
         };
         daoMetaData_v3 := updatedMetaData;

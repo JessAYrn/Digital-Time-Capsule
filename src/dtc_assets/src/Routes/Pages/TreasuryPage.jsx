@@ -125,7 +125,6 @@ const TreasuryPage = (props) => {
     {name: "Deposit To Treasury", icon: AccountBalanceIcon , onClick: () => openDepositOrWithdrawForm(TREASURY_ACTIONS.DepositIcpToTreasury)}
   ];
 
-  console.log(treasuryState.balancesData);
 
   return (
     <Grid 
@@ -186,15 +185,24 @@ const TreasuryPage = (props) => {
           defaultLabel={GRAPH_DISPLAY_LABELS.icp} 
           defaultDataSetName={GRAPH_DATA_SETS.week}
         />
-        <AccordionField>
-          <div 
-          title={`${treasuryState.treasuryData?.neurons?.icp[0][0]}`}
-          subtitle={`${round2Decimals(fromE8s(parseInt(treasuryState.treasuryData?.neurons?.icp[0][1].neuronInfo.stake_e8s)))} ICP`}
-          CustomComponent={DisplayNeuron} 
-          neuronData={treasuryState.treasuryData?.neurons?.icp[0]}
-          userPrincipal={treasuryState.treasuryData?.userPrincipal}
-          ></div> 
-        </AccordionField>
+        {
+          treasuryState.treasuryData?.neurons?.icp && treasuryState.treasuryData?.neurons?.icp.length > 0 &&
+          <AccordionField>
+            {
+              treasuryState.treasuryData?.neurons?.icp.map(neuron => {
+                return (
+                  <div 
+                  title={`${neuron[0]}`}
+                  subtitle={`${round2Decimals(fromE8s(parseInt(neuron[1].neuronInfo.stake_e8s)))} ICP`}
+                  CustomComponent={DisplayNeuron} 
+                  neuronData={neuron}
+                  userPrincipal={treasuryState.treasuryData?.userPrincipal}
+                  ></div> 
+                )
+              })
+            }
+          </AccordionField>
+        }
         <ButtonField
           paperSx={{marginTop: "20px"}}
           text={"View Treasury Account ID"}
