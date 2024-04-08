@@ -295,7 +295,7 @@ shared actor class Treasury (principal : Principal) = this {
     };
 
     // Return the cycles received up to the capacity allowed
-    public func wallet_receive() : async { accepted: Nat64 } {
+    public shared func wallet_receive() : async { accepted: Nat64 } {
         let amount = Cycles.available();
         let limit : Nat = capacity - Cycles.balance();
         let accepted = 

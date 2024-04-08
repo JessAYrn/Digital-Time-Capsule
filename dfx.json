@@ -18,7 +18,6 @@
     },
     "dtc_assets": {
       "dependencies": [
-        "dtc"
       ],
       "frontend": {
         "entrypoint": "src/dtc_assets/src/index.html"
