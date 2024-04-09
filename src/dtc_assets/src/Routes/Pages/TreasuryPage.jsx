@@ -24,7 +24,7 @@ import AccordionField from "../../Components/Fields/Accordion";
 import DisplayNeuron from "../../Components/Neurons/DisplayNeuron";
 
 const TreasuryPage = (props) => {
-  const { treasuryState, homePageState, actorState } = useContext(AppContext);
+  const { treasuryState } = useContext(AppContext);
 
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [isLoadingModal, setIsLoadingModal] = useState(false);
@@ -65,14 +65,17 @@ const TreasuryPage = (props) => {
   const displayTreasuryAccountId = () => {
     setModalProps({
         flexDirection: "column",
-        bigText: "Treasury Account ID ($ICP):",
+        bigText: "Treasury ICP Account ID:",
         smallText: `${shortenHexString(treasuryState.treasuryData.accountId_icp)}`,
         components: [
           {
             Component: ButtonField,
             props: {
               text: "Copy To Clipboard",
-              onClick: () => copyText(treasuryState.treasuryData.accountId_icp),
+              onClick: () => {
+                const promise = new Promise ((res, rej) => {setModalIsOpen(false); res()});
+                promise.then(() => { copyText(treasuryState.treasuryData.accountId_icp); });
+              },
               iconSize: 'small',
               Icon: ContentCopyIcon,
             }
@@ -95,7 +98,7 @@ const TreasuryPage = (props) => {
     setModalProps({
         flexDirection: "column",
         bigText: "Be Careful!",
-        smallText: "Sending ICP directly to this treasury account ID without using the 'Deposit To Treasury' button will result in no treasury contribution being recorded from you account. In other words, you're essentially donating to the treasury without receiving any credit. If you're not sure what you're doing, please don't proceed. If you're sure, please proceed. If you mean receive credit for your deposit to the treasury, please use the 'Deposit To Treasury' button.",
+        smallText: "Sending ICP directly to this account ID without using the 'Deposit To Treasury' button will result in no treasury contribution being recorded from your account. In other words, you're essentially donating to the treasury without receiving any credit. If you're not sure what you're doing, do NOT proceed. If you mean to receive credit for your deposit to the treasury, use the 'Deposit To Treasury' button.",
         Icon: WarningAmberIcon,
         components: [
           {

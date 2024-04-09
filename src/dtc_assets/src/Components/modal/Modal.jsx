@@ -9,7 +9,7 @@ import PendingIcon from '@mui/icons-material/Pending';
 
 const style = {
   position: 'absolute',
-  width: "267px",
+  minWidth: "267px",
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',

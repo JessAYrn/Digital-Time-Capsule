@@ -36,11 +36,13 @@ module{
             let {contributions} = neuronData;
             let neuronsStakesInfoIter = Iter.fromArray<(TreasuryTypes.PrincipalAsText, TreasuryTypes.NeuronStakeInfo)>(contributions);
             for((contributor, stakesInfo) in neuronsStakesInfoIter){
+                var votingPower: Nat64 = 1;
                 let {voting_power} = stakesInfo;
+                if(voting_power > votingPower){ votingPower := voting_power; };
                 let vote = proposalVotesHashMap.get(contributor);
                 switch(vote){
                     case null {};
-                    case(? v){ let {adopt} = v; if(adopt) yay += voting_power else nay += voting_power; };
+                    case(? v){ let {adopt} = v; if(adopt) yay += votingPower else nay += votingPower; };
                 };
             };
         };

@@ -32,13 +32,13 @@ export const usersTableColumns = [
     },
     {
       field: 'userPrincipal',
-      headerName: 'User Principal',
+      headerName: 'User Identity',
       width: 150,
       editable: false,
     },
     {
         field: 'canisterId',
-        headerName: 'Canisrer Principal',
+        headerName: 'Root Canister',
         width: 150,
         editable: false,
     },
