@@ -535,7 +535,8 @@ shared actor class User() = this {
         let proposal = {votes; action; proposer; timeInitiated; timeExecuted; voteTally;};
         let votingResults = GovernanceHelperMethods.tallyVotes({neuronsDataArray; proposal;});
         proposalsMap.put(proposalIndex, {proposal with voteTally = votingResults} );
-        let timerId = setTimer(#seconds(60 * 10), finalizeProposalVotingPeriod);
+        let proposalId = proposalIndex;
+        let timerId = setTimer(#seconds(60 * 5), func(): async (){await finalizeProposalVotingPeriod(proposalId);});
         proposalIndex += 1;
         let updatedProposalsArray = Iter.toArray(proposalsMap.entries());
         return #ok(updatedProposalsArray);
@@ -566,31 +567,15 @@ shared actor class User() = this {
         };
     };
 
-
-    private func finalizeProposalVotingPeriod() : async () {
-        let proposalsIter = proposalsMap.entries();
-        var oldestPendingProposalId = proposalIndex;
-        Iter.iterate<(Nat, MainTypes.Proposal)>(proposalsIter, func(x : (Nat, MainTypes.Proposal), index : Nat){
-            let (proposalId, proposal) = x;
-            if(proposalId < oldestPendingProposalId) oldestPendingProposalId := proposalId;
-        });
-        let proposalOptional = proposalsMap.get(oldestPendingProposalId);
-        switch(proposalOptional){
-            case null {};
-            case (?proposal){
-                let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v3.treasuryCanisterPrincipal);
-                let neuronsDataArray = await treasuryCanister.getNeuronsDataArray();
-                let votingResults = GovernanceHelperMethods.tallyVotes({neuronsDataArray; proposal;});
-                let {yay; nay; total } = votingResults;
-                var timeExecuted: ?Int = null;
-                if( yay > nay) {
-                    ignore executeProposal(proposal);
-                    timeExecuted := ?Time.now();
-                };
-                // let updatedProposal = {proposal with voteTally = votingResults; timeExecuted;};
-                proposalsMap.delete(oldestPendingProposalId);
-            };
-        };
+    private func finalizeProposalVotingPeriod(proposalId: Nat) : async () {
+        let ?proposal = proposalsMap.get(proposalId) else return;
+        let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v3.treasuryCanisterPrincipal);
+        let neuronsDataArray = await treasuryCanister.getNeuronsDataArray();
+        let {yay; nay; total } = GovernanceHelperMethods.tallyVotes({neuronsDataArray; proposal;});
+        var timeExecuted: ?Int = null;
+        if( yay > nay) { await executeProposal(proposal); timeExecuted := ?Time.now(); };
+        let updatedProposal = {proposal with voteTally = {yay; nay; total }; timeExecuted;};
+        proposalsMap.put(proposalId, updatedProposal);
     };
 
     private func executeProposal(proposal: MainTypes.Proposal) : async () {

@@ -317,7 +317,7 @@ const Analytics = () => {
                             onClick_button_2={onDenyAccess}
                             text_1={'Approve'}
                             text_2={'Deny'}
-                            onCellClick={copyText}
+                            onCellClick={(e) => { if(e === "yes" || e === "no") return; else copyText(e)}}
                             transparent={true}
                             checkboxSelection={true}
                             disabled={!homePageState.canisterData.isAdmin}
@@ -333,7 +333,7 @@ const Analytics = () => {
                             iconSize={"medium"}
                             onClick_button_1={subsidize}
                             onClick_button_2={Unsubsidize}
-                            onCellClick={copyText}
+                            onCellClick={(e) => { if(e === "yes" || e === "no") return; else copyText(e)}}
                             text_1={'Subsidize'}
                             text_2={'Unsubsidize'}
                             transparent={true}
