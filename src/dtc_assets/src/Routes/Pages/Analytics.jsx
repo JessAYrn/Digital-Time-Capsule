@@ -22,7 +22,7 @@ import '../../SCSS/container.scss';
 import '../../SCSS/contentContainer.scss'
 import '../../SCSS/section.scss'
 import {homePageTypes} from '../../reducers/homePageReducer';
-import { inTrillions, round2Decimals, shortenHexString } from '../../functionsAndConstants/Utils';
+import { inTrillions, isANumber, round2Decimals, shortenHexString } from '../../functionsAndConstants/Utils';
 import { copyText } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
 import DataTable from '../../Components/Fields/Table';
 import { mapRequestsForAccessToTableRows, mapUsersProfileDataToTableRows, requestsForAccessTableColumns, usersTableColumns } from '../../mappers/dashboardMapperFunctions';
@@ -30,7 +30,7 @@ import ModalComponent from '../../Components/modal/Modal';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import SpeedDialField from '../../Components/Fields/SpeedDialField';
 import CreateProposalForm from '../../Components/proposals/CreateProposalForm';
-import Proposal from '../../Components/proposals/Proposal';
+import DisplayProposals from '../../Components/proposals/DisplayProposal';
 
 const Analytics = () => {
 
@@ -40,6 +40,9 @@ const Analytics = () => {
     const [modalProps, setModalProps] = useState({});
     const [requestsTableIsLoading, setRequestsTableIsLoading] = useState(false);
     const [usersTableIsLoading, setUsersTableIsLoading] = useState(false);
+
+    let activeProposal = homePageState?.canisterData?.proposals?.filter(proposal => BigInt(proposal[1].timeExecuted) === BigInt(0) );
+    let inactiveProposals = homePageState?.canisterData?.proposals?.filter(proposal => { return BigInt(proposal[1].timeExecuted) !== BigInt(0)});
 
     const modalButton_close = [
         {
@@ -285,29 +288,26 @@ const Analytics = () => {
                     alignItems="center" 
                     flexDirection={"column"}
                 >
-                    {homePageState?.canisterData?.proposals.length > 0 && 
+                <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
+
+                </Grid>
+
                     <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
                         <AccordionField>
-                            {homePageState?.canisterData?.proposals?.map(([proposalId, proposal]) => {
-                                let id = parseInt(proposalId);
-                                let {action, payload, proposer, timeExecuted, timeInitiated, voteTally, votes} = proposal;
-                                return (
-                                    <div 
-                                        context={UI_CONTEXTS.HOME_PAGE}
-                                        title={`Propsoal #${id}`}
-                                        proposalId={id}
-                                        proposer={proposer}
-                                        action={action}
-                                        timeInitiated={timeInitiated}
-                                        timeExecuted={timeExecuted}
-                                        votes={votes}
-                                        voteTally={voteTally}
-                                        CustomComponent={Proposal}
-                                    />
-                                )
-                            })}
+                        <div 
+                            title={"Active Proposals"} 
+                            proposals={activeProposal}
+                            CustomComponent={DisplayProposals}
+                        ></div>
+                        <div 
+                            title={"Inactive Proposals"} 
+                            proposals={inactiveProposals}
+                            CustomComponent={DisplayProposals}
+                        ></div>
                         </AccordionField>
-                    </Grid>}
+                    </Grid>
+                    
+
                     <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
                         <AccordionField>
                         <div 

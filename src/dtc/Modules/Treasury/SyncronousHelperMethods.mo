@@ -11,26 +11,7 @@ module{
 
     let {setTimer} = Timer;
 
-    let txFee: Nat64 = 10_000;
-
-    public func userHasSufficientStake(userPrincipal: Text, neuronsDataMap: TreasuryTypes.NeuronsDataMap, minimalRequiredVotingPower: Nat64): 
-    Bool {
-        var totalVotingPower : Nat64 = 0;
-        label neuronDataLoop for( (neuronId, neuronData)  in neuronsDataMap.entries()){
-            let {contributions} = neuronData;
-            let contributionsMap = HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.NeuronStakeInfo>(
-                Iter.fromArray(contributions), 
-                Iter.size(Iter.fromArray(contributions)), 
-                Text.equal,
-                Text.hash
-            );
-            let ?neuronStakeInfo = contributionsMap.get(userPrincipal) else { continue neuronDataLoop };
-            let {voting_power} = neuronStakeInfo;
-            totalVotingPower += voting_power;
-        };
-        if(totalVotingPower < minimalRequiredVotingPower) return false;
-        return true;
-    };  
+    let txFee: Nat64 = 10_000; 
 
     public func updateUserTreasruyDeposits(
         usersTreasuryData: TreasuryTypes.UsersTreasuryDataMap, 

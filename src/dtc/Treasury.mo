@@ -104,11 +104,6 @@ shared actor class Treasury (principal : Principal) = this {
         return Iter.toArray(usersTreasuryDataMap.entries());
     };
 
-    public shared({caller}) func userHasSufficientStake(userPrincipal: Principal): async Bool {
-        if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
-        SyncronousHelperMethods.userHasSufficientStake(Principal.toText(userPrincipal), neuronDataMap, minimalRequiredVotingPower);
-    };  
-
     public shared({caller})func creditUserIcpDeposits(userPrincipal: Principal, amount: Nat64): async () {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         SyncronousHelperMethods.creditUserIcpDeposits(usersTreasuryDataMap, updateTokenBalances, {userPrincipal = Principal.toText(userPrincipal); amount});

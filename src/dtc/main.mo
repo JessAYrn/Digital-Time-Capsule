@@ -526,8 +526,6 @@ shared actor class User() = this {
         let callerProfile = userProfilesMap.get(caller);
         if(callerProfile == null) return #err(#NotAuthorizedToCreateProposals);
         let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v3.treasuryCanisterPrincipal);
-        let hasSufficientStake = await treasuryCanister.userHasSufficientStake(caller);
-        if(not hasSufficientStake) return #err(#NotAuthorizedToCreateProposals);
         let neuronsDataArray = await treasuryCanister.getNeuronsDataArray();
         let proposer = Principal.toText(caller); let votes = [(proposer, {adopt = true})];
         let timeInitiated = Time.now(); let timeExecuted = null;
@@ -545,8 +543,6 @@ shared actor class User() = this {
     public shared({caller}) func voteOnProposal(proposalIndex: Nat, adopt: Bool): 
     async Result.Result<(MainTypes.Proposal), MainTypes.Error> {
         let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v3.treasuryCanisterPrincipal);
-        let hasSufficientStake = await treasuryCanister.userHasSufficientStake(caller);
-        if(not hasSufficientStake) return #err(#NotAuthorizedToVoteOnThisProposal);
         let proposal_ = proposalsMap.get(proposalIndex);
         if(proposal_ == null) return #err(#PorposalHasExpired);
         let ?proposal = proposal_ else { return #err(#PorposalHasExpired) };
@@ -572,10 +568,25 @@ shared actor class User() = this {
         let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v3.treasuryCanisterPrincipal);
         let neuronsDataArray = await treasuryCanister.getNeuronsDataArray();
         let {yay; nay; total } = GovernanceHelperMethods.tallyVotes({neuronsDataArray; proposal;});
-        var timeExecuted: ?Int = null;
-        if( yay > nay) { await executeProposal(proposal); timeExecuted := ?Time.now(); };
+        var timeExecuted: ?Int = ?Time.now();
+        if( yay > nay) { await executeProposal(proposal); };
         let updatedProposal = {proposal with voteTally = {yay; nay; total }; timeExecuted;};
         proposalsMap.put(proposalId, updatedProposal);
+    };
+
+    private func discardUnexecutedProposals() : () {
+        let prunedProposals = Iter.filter<(Nat, MainTypes.Proposal)>(
+            proposalsMap.entries(), 
+            func ((proposalId: Nat, proposal: MainTypes.Proposal)): Bool {
+                switch(proposal.timeExecuted){ case null { return false; }; case (?v){ return true; };};
+            }
+        );
+        proposalsMap := HashMap.fromIter<Nat, MainTypes.Proposal>(
+            prunedProposals, 
+            Array.size(Iter.toArray(prunedProposals)), 
+            Nat.equal, 
+            Hash.hash
+        );
     };
 
     private func executeProposal(proposal: MainTypes.Proposal) : async () {
@@ -678,6 +689,7 @@ shared actor class User() = this {
     };
 
     system func preupgrade() { 
+        discardUnexecutedProposals();
         userProfilesArray := Iter.toArray(userProfilesMap.entries()); 
         proposalsArray := Iter.toArray(proposalsMap.entries());
     };
