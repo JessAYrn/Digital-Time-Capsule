@@ -70,7 +70,7 @@ const DataTable = (props) => {
                             color: 'white.main'
                         }
                     }}
-                    disableRowSelectionOnClick={disabled}
+                    disableRowSelectionOnClick={true}
                     onStateChange={ (state) => onStateChange_(state) }
                     columns={columns}
                     onCellClick={ (e) => { if(onCellClick){onCellClick(e.formattedValue)}} }

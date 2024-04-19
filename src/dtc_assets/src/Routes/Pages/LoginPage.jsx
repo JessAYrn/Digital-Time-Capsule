@@ -119,54 +119,7 @@ const LoginPage = (props) => {
                     alt="Logo"
                 />
             </Grid>
-            <Grid container xs={11} md={9}>
-                <Grid xs display="flex" justifyContent="center" alignItems="center">
-                    <ButtonField
-                        active={context === UI_CONTEXTS.WALLET}
-                        Icon={AccountBalanceWalletIcon}
-                        iconSize={'large'}
-                        iconColor={'#917153'}
-                        onClick={() => changeRoute(NAV_LINKS.wallet)}
-                        withBox={true}
-                    />
-                </Grid>
-                <Grid xs display="flex" justifyContent="center" alignItems="center">
-                    <ButtonField
-                        Icon={ArticleIcon}
-                        active={context === UI_CONTEXTS.JOURNAL}
-                        iconSize={'large'}
-                        iconColor={'#917153'}
-                        onClick={() => changeRoute(NAV_LINKS.journal)}
-                        withBox={true}
-                    />
-                </Grid>
-            </Grid>
-            <Grid container xs={11} md={9}>
-                <Grid xs display="flex" justifyContent="center" alignItems="center">
-                    <ButtonField
-                        active={context === UI_CONTEXTS.HOME_PAGE}
-                        Icon={DashboardIcon}
-                        iconSize={'large'}
-                        iconColor={'#917153'}
-                        onClick={() => changeRoute(NAV_LINKS.dashboard)}
-                        withBox={true}
-                    />
-                </Grid>
-                <Grid xs display="flex" justifyContent="center" alignItems="center">
-                    <ButtonField
-                        active={context === UI_CONTEXTS.ACCOUNT_PAGE}
-                        Icon={AccountBoxIcon}
-                        iconSize={'large'}
-                        iconColor={'#917153'}
-                        onClick={() => changeRoute(NAV_LINKS.account)}
-                        withBox={true}
-                    />
-                </Grid>
-            </Grid>
-            <Grid xs={11} md={9} display="flex" justifyContent="center" alignItems="center">
-                <ConnectButton/>
-                <ConnectDialog dark={true}/>
-            </Grid>
+
             <Grid xs={11} md={9} display="flex" justifyContent="center" alignItems="center">
                 <DataField
                     label={'Front-end Canister Balance: '}
@@ -185,6 +138,12 @@ const LoginPage = (props) => {
                     disabled={true}
                 />
             </Grid>
+
+            <Grid xs={11} md={9} display="flex" justifyContent="center" alignItems="center">
+                <ConnectButton/>
+                <ConnectDialog dark={true}/>
+            </Grid>
+        
             <Grid xs={11} md={9} display="flex" justifyContent="center" alignItems="center">
                 <AccordionField>
                     <div title={accordionContent[0].title} image={accordionContent[0].image}></div>
