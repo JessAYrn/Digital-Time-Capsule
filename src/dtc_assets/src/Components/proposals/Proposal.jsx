@@ -1,6 +1,7 @@
 import React, {useState, useContext} from "react";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import DataField from "../Fields/DataField";
+import Typography from "@mui/material/Typography";
 import { AppContext as WalletContext } from "../../Routes/Wallet";
 import { AppContext as  TreasuryContext } from "../../Routes/Treasury";
 import { AppContext as  GroupJournalContext } from "../../Routes/GroupJournal";
@@ -48,6 +49,10 @@ const Proposal = (props) => {
         TreasuryContext,
         GroupJournalContext
     };
+
+    let numberOfNays = votes.filter(vote => vote[1].adopt === false).length;
+    let numberOfYays = votes.filter(vote => vote[1].adopt === true).length;
+    let totalVotes = votes.length;
 
     let AppContext = retrieveContext(contexts, context);
 
@@ -163,23 +168,69 @@ const Proposal = (props) => {
                 alignItems="center" 
                 flexDirection={"column"} 
             >
-                <DataField
-                    label={'Adopt: '}
-                    text={`${round2Decimals(fromE8s(parseInt(yay)))} Voting Power`}
-                    onClick={() => onVote(true)}
-                    buttonIcon={ThumbUpIcon}
-                />
-                <DataField
-                    label={'Reject: '}
-                    onClick={() => onVote(false)}
-                    text={`${round2Decimals(fromE8s(parseInt(nay)))} Voting Power`}
-                    buttonIcon={ThumbDownIcon}
-                />
-                <DataField
-                    label={'Total Voting Power Participated: '}
-                    text={`${round2Decimals(fromE8s(parseInt(total)))} Voting Power`}
-                    disabled={true}
-                />
+                <Typography variant="h6">Voting Report</Typography>
+                <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"}>
+                    <DataField
+                        label={'Votes To Adopt: '}
+                        text={`${numberOfYays}`}
+                        onClick={() => {}}
+                        disabled={true}
+                    />
+                    <DataField
+                        label={'Voting Power: '}
+                        text={`${round2Decimals(fromE8s(parseInt(yay)))}`}
+                        onClick={() => {}}
+                        disabled={true}
+                    />
+                </Grid>
+                <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"}>
+                    <DataField
+                        label={'Votes To Reject: '}
+                        text={`${numberOfNays}`}
+                        onClick={() => {}}
+                        disabled={true}
+                    />
+                    <DataField
+                        label={'Voting Power: '}
+                        text={`${round2Decimals(fromE8s(parseInt(nay)))}`}
+                        onClick={() => {}}
+                        disabled={true}
+                    />
+                </Grid>
+                <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"}>
+                    <DataField
+                        label={'Total Votes: '}
+                        text={`${totalVotes}`}
+                        onClick={() => {}}
+                        disabled={true}
+                    />
+                    <DataField
+                        label={'Total Voting Power: '}
+                        text={`${round2Decimals(fromE8s(parseInt(total)))}`}
+                        onClick={() => {}}
+                        disabled={true}
+                    />
+                </Grid>
+                { !timeExecuted[0] && 
+                    <Grid xs={12} width={"97%"} display={"flex"} justifyContent={"center"} alignItems={"center"}>
+                        <Grid xs={6} width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>
+                            <ButtonField
+                                text={"Adopt"}
+                                onClick={() => onVote(true)}
+                                Icon={ThumbUpIcon}
+                                active={true}
+                            />
+                        </Grid>
+                        <Grid xs={6} width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"}>
+                            <ButtonField
+                                text={"Reject"}
+                                onClick={() => onVote(false)}
+                                Icon={ThumbDownIcon}
+                                active={true}
+                            />
+                        </Grid>
+                    </Grid>
+                }
             </Grid>
             <ModalComponent
             {...modalProps}

@@ -165,7 +165,7 @@ const CreateProposalForm = (props) => {
     let AppContext = retrieveContext(contexts, context);
 
 
-    const {  actorState, homePageDispatch, treasuryState } = useContext(AppContext);
+    const {  actorState, homePageDispatch, treasuryState, homePageState } = useContext(AppContext);
 
     let selectedAction = proposalAction;
     let selectedNeuronId = proposalPayload?.neuronId;
@@ -184,6 +184,13 @@ const CreateProposalForm = (props) => {
             text: neuronId,  
             onClick: () => setProposalPayload({ ...proposalPayload_, neuronId: neuronId }),
             selected: neuronId === selectedNeuronId
+        }
+    });
+
+    const principalsMenuItemProps = homePageState?.canisterData?.profilesMetaData?.map(({userPrincipal}) => {
+        return {
+            text: userPrincipal,  
+            onClick: () => setProposalPayload({ ...proposalPayload_, principal: userPrincipal }),
         }
     });
 
@@ -326,14 +333,20 @@ const CreateProposalForm = (props) => {
             }
             {
                 proposalAction_ && PRINCIPAL_REQUIRED_ACTIONS.includes(proposalAction_) &&
-                <InputBox
-                    hasError={hasError_1}
-                    label={"Input Principal"}
-                    rows={"1"}
-                    onChange={(principal) => onChange_payload({principal}, "principal", PAYLOAD_DATA_TYPES.principal)}
-                    value={proposalPayload_?.principal}
-                    format={INPUT_BOX_FORMATS.noFormat}
-                />
+                <>
+                    <MenuField
+                        xs={8}
+                        display={"flex"}
+                        alignItems={"center"}
+                        justifyContent={"left"}
+                        active={true}
+                        color={"custom"}
+                        label={`Principal to ${proposalAction_ === PROPOSAL_ACTIONS.AddAdmin ? "Add" : "Remove"}`}
+                        MenuIcon={KeyboardArrowDownIcon}
+                        menuItemProps={principalsMenuItemProps}
+                    />
+                    {proposalPayload_?.principal && <Typography varient={"h6"} color={"#bdbdbd"}> {proposalPayload_?.principal} </Typography>}
+                </>
             }
             {
                 proposalAction_ && AMOUNT_PAYLOAD_REQUIRED_ACTIONS.includes(proposalAction_) &&
