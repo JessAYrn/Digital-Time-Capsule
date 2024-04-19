@@ -35,7 +35,7 @@ const DisplayNeuron = (props) => {
     const{contributions, neuron, neuronInfo} = neuronData_;
 
     let timeSpan = "hours";
-    let dissolveDelay = secondsToHours(parseInt(neuronInfo.dissolve_delay_seconds));
+    let dissolveDelay = secondsToHours(parseInt(neuronInfo?.dissolve_delay_seconds || 0));
     if(dissolveDelay > 24){ dissolveDelay = hoursToDays(dissolveDelay); timeSpan = "days";};
     if(dissolveDelay > 30){ dissolveDelay = daysToMonths(dissolveDelay); timeSpan = "months";};
 
@@ -43,12 +43,12 @@ const DisplayNeuron = (props) => {
     let neuronState = "unlocked";
     let buttonIcon = LockOpenIcon;
 
-    if(neuronInfo.state === NeuronStates.locked)  {neuronState = "Locked"; buttonIcon = LockIcon;}
-    else if(neuronInfo.state === NeuronStates.dissolving)  {neuronState = "Dissolving"; buttonIcon = HourglassTopIcon;}
-    else if(neuronInfo.state === NeuronStates.unlocked)  {neuronState = "unlocked"; buttonIcon = LockOpenIcon;}
-    else if(neuronInfo.state === NeuronStates.spawning)  {neuronState = "Spawning"; buttonIcon = HistoryToggleOffIcon;}
+    if(neuronInfo?.state === NeuronStates.locked)  {neuronState = "Locked"; buttonIcon = LockIcon;}
+    else if(neuronInfo?.state === NeuronStates.dissolving)  {neuronState = "Dissolving"; buttonIcon = HourglassTopIcon;}
+    else if(neuronInfo?.state === NeuronStates.unlocked)  {neuronState = "unlocked"; buttonIcon = LockOpenIcon;}
+    else if(neuronInfo?.state === NeuronStates.spawning)  {neuronState = "Spawning"; buttonIcon = HistoryToggleOffIcon;}
 
-    const userMaturity = fromE8s(parseInt(neuron.maturity_e8s_equivalent) * (parseInt(userContribution.stake_e8s)/parseInt(neuronInfo.stake_e8s)));
+    const userMaturity = fromE8s(parseInt(neuron?.maturity_e8s_equivalent || 0) * (parseInt(userContribution.stake_e8s)/parseInt(neuronInfo?.stake_e8s || 1)));
 
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [isLoadingModal, setIsLoadingModal] = useState(false);
@@ -80,7 +80,7 @@ const DisplayNeuron = (props) => {
             <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} xs={12} flexDirection={"column"} padding={0}>
                 <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0}>
                     <Typography width={"50%"} display={"flex"} justifyContent={"left"} alignItems={"center"} variant="h6">Neuron Voting Power</Typography>
-                    <Typography width={"50%"} display={"flex"} justifyContent={"right"} alignItems={"center"} variant="h6">{`${round2Decimals(fromE8s(parseInt(neuronInfo.voting_power)))}`}</Typography>
+                    <Typography width={"50%"} display={"flex"} justifyContent={"right"} alignItems={"center"} variant="h6">{`${neuronInfo?.voting_power ? round2Decimals(fromE8s(parseInt(neuronInfo?.voting_power))) : "Retrieving..."}`}</Typography>
                 </Grid>
                 <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0}>
                     <Typography color={"#bdbdbd"} width={"50%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>Your Voting Power</Typography>
@@ -89,7 +89,7 @@ const DisplayNeuron = (props) => {
 
                 <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0} paddingTop={"25px"}>
                     <Typography width={"50%"} display={"flex"} justifyContent={"left"} alignItems={"center"} variant="h6">Neuron Stake</Typography>
-                    <Typography width={"50%"} display={"flex"} justifyContent={"right"} alignItems={"center"} variant="h6">{`${round2Decimals(fromE8s(parseInt(neuronInfo.stake_e8s)))} ICP`}</Typography>
+                    <Typography width={"50%"} display={"flex"} justifyContent={"right"} alignItems={"center"} variant="h6">{neuronInfo?.stake_e8s ? `${round2Decimals(fromE8s(parseInt(neuronInfo?.stake_e8s)))} ICP` : "Retrieving..."}</Typography>
                 </Grid>
                 <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0}>
                     <Typography color={"#bdbdbd"} width={"50%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>Your Stake</Typography>
@@ -177,7 +177,7 @@ const DisplayNeuron = (props) => {
                 </Grid>
                 <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0} paddingTop={"25px"}>
                     <Typography width={"50%"} display={"flex"} justifyContent={"left"} alignItems={"center"} variant="h6">Neuron Maturity</Typography>
-                    <Typography width={"50%"} display={"flex"} justifyContent={"right"} alignItems={"center"} variant="h6">{`${round2Decimals(fromE8s(parseInt(neuron.maturity_e8s_equivalent)))} ICP`}</Typography>
+                    <Typography width={"50%"} display={"flex"} justifyContent={"right"} alignItems={"center"} variant="h6">{`${round2Decimals(fromE8s(parseInt(neuron?.maturity_e8s_equivalent || 0)))} ICP`}</Typography>
                 </Grid>
                 <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0}>
                     <Typography color={"#bdbdbd"} width={"50%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>Your Maturity</Typography>

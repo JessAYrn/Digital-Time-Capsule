@@ -193,10 +193,11 @@ const TreasuryPage = (props) => {
           <AccordionField>
             {
               treasuryState.treasuryData?.neurons?.icp.map(neuron => {
+                let subtitle = neuron[1]?.neuronInfo?.stake_e8s ? `${round2Decimals(fromE8s(parseInt(neuron[1].neuronInfo.stake_e8s)))} ICP` : "Retrieving...";
                 return (
                   <div 
                   title={`${neuron[0]}`}
-                  subtitle={`${round2Decimals(fromE8s(parseInt(neuron[1].neuronInfo.stake_e8s)))} ICP`}
+                  subtitle={subtitle}
                   CustomComponent={DisplayNeuron} 
                   neuronData={neuron}
                   userPrincipal={treasuryState.treasuryData?.userPrincipal}

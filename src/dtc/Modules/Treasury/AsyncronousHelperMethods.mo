@@ -112,7 +112,7 @@ module{
                     };
                     memoToNeuronIdMap.put(Nat64.toNat(memo), neuronId.id);
                     ignore getNeuronData( neuronDataMap, usersTreasuryDataMap, pendingActionsMap, activityLogsMap,  memoToNeuronIdMap, updateTokenBalances, transformFn, #GetFullNeuronResponse({neuronId = neuronId.id;}));
-                    SyncronousHelperMethods.finalizeNewlyCreatedNeuronStakeInfo(newNeuronIdPlaceholderKey, neuronId.id, neuronDataMap, usersTreasuryDataMap);
+                    SyncronousHelperMethods.finalizeNewlyCreatedNeuronStakeInfo(newNeuronIdPlaceholderKey, neuronId.id, neuronDataMap);
                     let _ = pendingActionsMap.remove("createNeuronResponse_"#Nat64.toText(memo));
                     activityLogsMap.put(Int.toText(Time.now()),"successfully completed action: createNeuronResponse_"#Nat64.toText(memo));
                 };
@@ -323,7 +323,7 @@ module{
             case(#err(e)){ return #err(e)};
             case(#ok({public_key; selfAuthPrincipal})) { 
                 ignore updateTokenBalances();
-                SyncronousHelperMethods.creditUserNeuronStake( neuronDataMap, usersTreasuryDataMap, updateTokenBalances,{ userPrincipal = Principal.toText(contributor);  delta = amount; neuronId = Nat64.toText(neuronId); });
+                SyncronousHelperMethods.creditUserNeuronStake( neuronDataMap,{ userPrincipal = Principal.toText(contributor);  delta = amount; neuronId = Nat64.toText(neuronId); });
                 let newPendingAction: TreasuryTypes.PendingAction = {
                     args = ?{ id = null; command = ?#ClaimOrRefresh( {by = ?#NeuronIdOrSubaccount( {} )} );neuron_id_or_subaccount = ?#Subaccount(account); };
                     expectedResponseType = #ClaimOrRefresh({neuronId});
@@ -359,7 +359,7 @@ module{
             case(#ok({public_key; selfAuthPrincipal})) { 
                 ignore updateTokenBalances();
                 let newNeuronIdPlaceholderKey : Text = Nat64.toText(neuronMemo)#PENDING_NEURON_SUFFIX;
-                SyncronousHelperMethods.creditUserNeuronStake( neuronDataMap, usersTreasuryDataMap, updateTokenBalances,{ userPrincipal = Principal.toText(contributor);  delta = amount; neuronId = newNeuronIdPlaceholderKey; });
+                SyncronousHelperMethods.creditUserNeuronStake( neuronDataMap,{ userPrincipal = Principal.toText(contributor);  delta = amount; neuronId = newNeuronIdPlaceholderKey; });
                 let newPendingAction: TreasuryTypes.PendingAction = {
                     args = ?{ id = null; command = ?#ClaimOrRefresh( {by = ?#MemoAndController( {controller = ?selfAuthPrincipal; memo = neuronMemo} )} ); neuron_id_or_subaccount = null; };
                     expectedResponseType = #CreateNeuronResponse({memo = neuronMemo; newNeuronIdPlaceholderKey});

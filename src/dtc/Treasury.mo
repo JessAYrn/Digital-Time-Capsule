@@ -99,9 +99,19 @@ shared actor class Treasury (principal : Principal) = this {
 
     let {recurringTimer; setTimer} = Timer;
 
-    public query({caller}) func getUsersTreasuryDataArray(): async TreasuryTypes.UsersTreasuryDataArray {
+    public query({caller}) func getUsersTreasuryDataArray(): async TreasuryTypes.UsersTreasuryDataArrayExport {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
-        return Iter.toArray(usersTreasuryDataMap.entries());
+        let usersDataExport = Iter.map<
+            (TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryData),
+            (TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryDataExport)
+        >(
+            usersTreasuryDataMap.entries(),
+            func((userPrincipal, {deposits}): (TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryData)): (TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryDataExport) {
+                let e8s = SyncronousHelperMethods.computeTotalStakeDeposit(neuronDataMap, userPrincipal);
+                return (userPrincipal, {deposits = {deposits with icp_staked = {e8s}}} );          
+            }
+        );
+        return Iter.toArray(usersDataExport);
     };
 
     public shared({caller})func creditUserIcpDeposits(userPrincipal: Principal, amount: Nat64): async () {
@@ -365,7 +375,7 @@ shared actor class Treasury (principal : Principal) = this {
         pendingActionsArray := [];
         actionLogsArray := [];
 
-        let timerId = recurringTimer(#seconds(7 * 24 * 60 * 60), func (): async () { 
+        let timerId = recurringTimer(#seconds(24 * 60 * 60), func (): async () { 
             await AsyncronousHelperMethods.refreshNeuronsData(
                 neuronDataMap,
                 usersTreasuryDataMap,

@@ -534,7 +534,7 @@ shared actor class User() = this {
         let votingResults = GovernanceHelperMethods.tallyVotes({neuronsDataArray; proposal;});
         proposalsMap.put(proposalIndex, {proposal with voteTally = votingResults} );
         let proposalId = proposalIndex;
-        let timerId = setTimer(#seconds(60 * 5), func(): async (){await finalizeProposalVotingPeriod(proposalId);});
+        let timerId = setTimer(#seconds(60 * 6), func(): async (){await finalizeProposalVotingPeriod(proposalId);});
         proposalIndex += 1;
         let updatedProposalsArray = Iter.toArray(proposalsMap.entries());
         return #ok(updatedProposalsArray);
@@ -575,15 +575,15 @@ shared actor class User() = this {
     };
 
     private func discardUnexecutedProposals() : () {
-        let prunedProposals = Iter.filter<(Nat, MainTypes.Proposal)>(
-            proposalsMap.entries(), 
-            func ((proposalId: Nat, proposal: MainTypes.Proposal)): Bool {
-                switch(proposal.timeExecuted){ case null { return false; }; case (?v){ return true; };};
-            }
-        );
+        let prunedProposalsArray = Buffer.Buffer<(Nat, MainTypes.Proposal)>(1);
+        for((proposalId, proposal) in proposalsMap.entries()){
+            let {timeExecuted} = proposal;
+            if(timeExecuted != null) { prunedProposalsArray.add((proposalId, proposal)); };
+        };
+
         proposalsMap := HashMap.fromIter<Nat, MainTypes.Proposal>(
-            prunedProposals, 
-            Array.size(Iter.toArray(prunedProposals)), 
+            Iter.fromArray(Buffer.toArray(prunedProposalsArray)), 
+            prunedProposalsArray.size(), 
             Nat.equal, 
             Hash.hash
         );
