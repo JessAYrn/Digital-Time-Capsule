@@ -126,6 +126,7 @@ module{
         currentCyclesBalance_backend: Nat;
         currentCyclesBalance_frontend: Nat;
         currentCyclesBalance_manager: Nat;
+        currentCyclesBalance_treasury: Nat;
     };
 
 

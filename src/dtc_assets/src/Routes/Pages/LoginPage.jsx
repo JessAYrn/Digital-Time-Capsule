@@ -87,11 +87,18 @@ const LoginPage = (props) => {
     useEffect(async () => {
         let promises = [anonymousActor_dtc.getCanisterCyclesBalances(), anonymousActor_dtc.heartBeat()];
         let [result_0, result_1] = await Promise.all(promises);
-        const {currentCyclesBalance_backend, currentCyclesBalance_frontend} = result_0;
+        const {
+            currentCyclesBalance_backend, 
+            currentCyclesBalance_frontend, 
+            currentCyclesBalance_treasury, 
+            currentCyclesBalance_manager
+        } = result_0;
         homePageDispatch({
             payload: {
                 currentCyclesBalance_backend: parseInt(currentCyclesBalance_backend),
-                currentCyclesBalance_frontend: parseInt(currentCyclesBalance_frontend)
+                currentCyclesBalance_frontend: parseInt(currentCyclesBalance_frontend),
+                currentCyclesBalance_treasury: parseInt(currentCyclesBalance_treasury),
+                currentCyclesBalance_manager: parseInt(currentCyclesBalance_manager)
             },
             actionType: homePageTypes.SET_CANISTERS_CYCLES_BALANCES
         });
@@ -120,7 +127,7 @@ const LoginPage = (props) => {
                 />
             </Grid>
 
-            <Grid xs={11} md={9} display="flex" justifyContent="center" alignItems="center">
+            <Grid xs={11} md={9} display="flex" justifyContent="center" alignItems="center" paddingBottom={0} paddingTop={0}>
                 <DataField
                     label={'Front-end Canister Balance: '}
                     className={'loginPage'}
@@ -129,7 +136,7 @@ const LoginPage = (props) => {
                     disabled={true}
                 />
             </Grid>
-            <Grid xs={11} md={9} display="flex" justifyContent="center" alignItems="center">
+            <Grid xs={11} md={9} display="flex" justifyContent="center" alignItems="center" paddingBottom={0} paddingTop={0}>
                 <DataField
                     label={'Back-end Canister Balance: '}
                     className={'loginPage'}
@@ -138,8 +145,26 @@ const LoginPage = (props) => {
                     disabled={true}
                 />
             </Grid>
+            <Grid xs={11} md={9} display="flex" justifyContent="center" alignItems="center" paddingBottom={0} paddingTop={0}>
+                <DataField
+                    label={'Treasury Canister Balance: '}
+                    className={'loginPage'}
+                    text={`${round2Decimals(inTrillions(homePageState.canistersCyclesBalances.currentCyclesBalance_treasury))} T`}
+                    isLoading={isLoading}
+                    disabled={true}
+                />
+            </Grid>
+            <Grid xs={11} md={9} display="flex" justifyContent="center" alignItems="center" paddingBottom={0} paddingTop={0}>
+                <DataField
+                    label={'Manager Canister Balance: '}
+                    className={'loginPage'}
+                    text={`${round2Decimals(inTrillions(homePageState.canistersCyclesBalances.currentCyclesBalance_manager))} T`}
+                    isLoading={isLoading}
+                    disabled={true}
+                />
+            </Grid>
 
-            <Grid xs={11} md={9} display="flex" justifyContent="center" alignItems="center">
+            <Grid xs={11} md={9} display="flex" justifyContent="center" alignItems="center" paddingBottom={0} paddingTop={0}>
                 <ConnectButton/>
                 <ConnectDialog dark={true}/>
             </Grid>

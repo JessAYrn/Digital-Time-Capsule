@@ -233,49 +233,103 @@ const Analytics = () => {
                 marginTop={"60px"}
                 >
                     <Paper className='analytics paper'>
-                        <DataField
-                            label={'Journals Created:'}
-                            text={homePageState.canisterData[CANISTER_DATA_FIELDS.journalCount]}
-                            disabled={true}
-                        />
-                        <DataField
-                            label={'Frontend Canister Principal:'}
-                            text={`${shortenHexString(homePageState.canisterData[CANISTER_DATA_FIELDS.frontEndPrincipal])}`}
-                            buttonIcon={ContentCopyIcon}
-                            onClick={
-                                () => copyText(
-                                    homePageState.canisterData[CANISTER_DATA_FIELDS.frontEndPrincipal]
-                                )
-                            }
-                        />
-                        <DataField
-                            label={'Backend Canister Principal:'}
-                            text={`${shortenHexString(homePageState.canisterData[CANISTER_DATA_FIELDS.backEndPrincipal])}`}
-                            buttonIcon={ContentCopyIcon}
-                            onClick={
-                                () => copyText(
-                                    homePageState.canisterData[CANISTER_DATA_FIELDS.backEndPrincipal]
-                                )
-                            }
-                        />
-                        <DataField
-                            label={'Cycles Burned Per Day:'}
-                            text={`${round2Decimals(inTrillions(homePageState.canisterData[CANISTER_DATA_FIELDS.backEndCyclesBurnRatePerDay]))} T`}
-                            isCycles={true}
-                            disabled={true}
-                        />
-                        <DataField
-                            label={'Frontend Cycles Balance:'}
-                            text={`${round2Decimals(inTrillions(homePageState.canistersCyclesBalances.currentCyclesBalance_frontend))} T`}
-                            isCycles={true}
-                            disabled={true}
-                        />
-                        <DataField
-                            label={'Backend Cycles Balance:'}
-                            text={`${round2Decimals(inTrillions(homePageState.canistersCyclesBalances.currentCyclesBalance_backend))} T`}
-                            isCycles={true}
-                            disabled={true}
-                        />
+                        <Grid xs={12} display="flex" justifyContent="center" alignItems="center" paddingBottom={"15px"} flexDirection={"column"}>
+                            <DataField
+                                label={'Journals Created:'}
+                                text={homePageState.canisterData[CANISTER_DATA_FIELDS.journalCount]}
+                                disabled={true}
+                            />
+                        </Grid>
+                        <Grid xs={12} display="flex" justifyContent="center" alignItems="center" paddingBottom={"15px"} paddingTop={"15px"} flexDirection={"column"}>
+                            <DataField
+                                label={'Frontend Canister Principal:'}
+                                text={`${shortenHexString(homePageState.canisterData[CANISTER_DATA_FIELDS.frontEndPrincipal])}`}
+                                buttonIcon={ContentCopyIcon}
+                                onClick={
+                                    () => copyText(
+                                        homePageState.canisterData[CANISTER_DATA_FIELDS.frontEndPrincipal]
+                                    )
+                                }
+                            />
+                            <DataField
+                                label={'Backend Canister Principal:'}
+                                text={`${shortenHexString(homePageState.canisterData[CANISTER_DATA_FIELDS.backEndPrincipal])}`}
+                                buttonIcon={ContentCopyIcon}
+                                onClick={
+                                    () => copyText(
+                                        homePageState.canisterData[CANISTER_DATA_FIELDS.backEndPrincipal]
+                                    )
+                                }
+                            />
+                            <DataField
+                                label={'Treasury Canister Principal:'}
+                                text={`${shortenHexString(homePageState.canisterData[CANISTER_DATA_FIELDS.treasuryCanisterPrincipal])}`}
+                                buttonIcon={ContentCopyIcon}
+                                onClick={
+                                    () => copyText(
+                                        homePageState.canisterData[CANISTER_DATA_FIELDS.treasuryCanisterPrincipal]
+                                    )
+                                }
+                            />
+                            <DataField
+                                label={'Manager Canister Principal:'}
+                                text={`${shortenHexString(homePageState.canisterData[CANISTER_DATA_FIELDS.managerCanisterPrincipal])}`}
+                                buttonIcon={ContentCopyIcon}
+                                onClick={
+                                    () => copyText(
+                                        homePageState.canisterData[CANISTER_DATA_FIELDS.managerCanisterPrincipal]
+                                    )
+                                }
+                            />
+                        </Grid>
+                        <Grid xs={12} display="flex" justifyContent="center" alignItems="center" paddingBottom={"15px"} paddingTop={"15px"} flexDirection={"column"}>
+                            <DataField
+                                label={'Frontend Cycles Balance:'}
+                                text={`${round2Decimals(inTrillions(homePageState.canistersCyclesBalances.currentCyclesBalance_frontend))} T`}
+                                isCycles={true}
+                                disabled={true}
+                            />
+                            <DataField
+                                label={'Backend Cycles Balance:'}
+                                text={`${round2Decimals(inTrillions(homePageState.canistersCyclesBalances.currentCyclesBalance_backend))} T`}
+                                isCycles={true}
+                                disabled={true}
+                            />
+                            <DataField
+                                label={'Treasury Cycles Balance:'}
+                                text={`${round2Decimals(inTrillions(homePageState.canistersCyclesBalances.currentCyclesBalance_treasury))} T`}
+                                isCycles={true}
+                                disabled={true}
+                            />
+                            <DataField
+                                label={'Manager Cycles Balance:'}
+                                text={`${round2Decimals(inTrillions(homePageState.canistersCyclesBalances.currentCyclesBalance_manager))} T`}
+                                isCycles={true}
+                                disabled={true}
+                            />
+                        </Grid>
+                        <Grid xs={12} display="flex" justifyContent="center" alignItems="center" paddingBottom={"15px"} paddingTop={"15px"} flexDirection={"column"}>
+                            <DataField
+                                label={'Cycles Burned Per Day:'}
+                                text={`${round2Decimals(inTrillions(homePageState.canisterData[CANISTER_DATA_FIELDS.backEndCyclesBurnRatePerDay]))} T`}
+                                isCycles={true}
+                                disabled={true}
+                            />
+                        </Grid>
+                        <Grid xs={12} display="flex" justifyContent="center" alignItems="center" paddingBottom={"15px"} paddingTop={"15px"} flexDirection={"column"}>
+                            <DataField
+                                label={'Release Version Downloaded:'}
+                                text={`${homePageState.canisterData[CANISTER_DATA_FIELDS.releaseVersionLoaded]}`}
+                                isCycles={true}
+                                disabled={true}
+                            />
+                            <DataField
+                                label={'Release Version Installed:'}
+                                text={`${homePageState.canisterData[CANISTER_DATA_FIELDS.releaseVersionInstalled]}`}
+                                isCycles={true}
+                                disabled={true}
+                            />
+                        </Grid>
                     </Paper>
                 </Grid>
                 <Grid 

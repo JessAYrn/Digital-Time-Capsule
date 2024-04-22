@@ -52,7 +52,18 @@ export const CANISTER_DATA_FIELDS = {
     lastRecordedBackEndCyclesBalance: "lastRecordedBackEndCyclesBalance",
     RequestsForAccess: "RequestsForAccess",
     users: "users",
-    journalCount: "journalCount"
+    journalCount: "journalCount",
+    profilesMetaData: "profilesMetaData",
+    treasuryCanisterPrincipal: "treasuryCanisterPrincipal",
+    managerCanisterPrincipal: "managerCanisterPrincipal",
+    releaseVersionLoaded: "releaseVersionLoaded",
+    releaseVersionInstalled: "releaseVersionInstalled",
+    nftId: "nftId",
+    proposals: "proposals",
+    isAdmin: "isAdmin",
+    supportMode: "supportMode",
+    acceptingRequests: "acceptingRequests",
+    canistersCyclesBalances: "canistersCyclesBalances",
 };
 
 export const PAGES = {
