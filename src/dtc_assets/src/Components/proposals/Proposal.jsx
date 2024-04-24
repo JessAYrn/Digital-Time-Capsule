@@ -8,7 +8,7 @@ import { AppContext as  GroupJournalContext } from "../../Routes/GroupJournal";
 import { AppContext as JournalContext } from "../../Routes/App";
 import { AppContext as  AccountContext } from "../../Routes/Account";
 import { AppContext as  HomePageContext} from "../../Routes/HomePage";
-import { nanoSecondsToMiliSeconds, getDateAsStringMMDDYYY, shortenHexString, fromE8s, round2Decimals } from "../../functionsAndConstants/Utils";
+import { nanoSecondsToMiliSeconds, getDateAsStringMMDDYYY, shortenHexString, fromE8s, round2Decimals, secondsToHours, hoursToDays, daysToMonths } from "../../functionsAndConstants/Utils";
 import { retrieveContext } from "../../functionsAndConstants/Contexts";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
@@ -125,6 +125,7 @@ const Proposal = (props) => {
                             Object.keys(payload).map((key, index) => {
                                 let text = payload[key];
                                 let key_ = key;
+                                if(key === "additionalDissolveDelaySeconds") {text = `${ daysToMonths(hoursToDays(secondsToHours(payload[key]))) } months`; key_ = "additionalDissolveDelay";};
                                 if(key === "amount") text = fromE8s(parseInt(payload[key])) + ' ICP';
                                 if(key === "percentage_to_spawn") text = `${payload[key]}%`;
                                 if(key === "neuronId") text = BigInt(payload[key]).toString();

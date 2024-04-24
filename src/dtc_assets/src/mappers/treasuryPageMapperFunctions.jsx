@@ -214,9 +214,12 @@ export const mapBackendTreasuryDataToFrontEndObj = (props) => {
     const userIcpNeurons = [];
 
     const icpNeurons = neurons.icp.map(([neuronId, {contributions, neuron, neuronInfo}]) => {
-        let {voting_power, stake_e8s} = neuronInfo[0];
-        votingPower += parseInt(voting_power);
-        balance_icpStaked += parseInt(stake_e8s);
+        console.log(neuronInfo);
+        let voting_power = neuronInfo[0]?.voting_power
+        let stake_e8s = neuronInfo[0]?.stake_e8s;
+
+        votingPower += parseInt(voting_power || 0);
+        balance_icpStaked += parseInt(stake_e8s || 0);
         let userContribution = contributions.find(([contributor, _]) => {
             return contributor === userPrincipal
         });

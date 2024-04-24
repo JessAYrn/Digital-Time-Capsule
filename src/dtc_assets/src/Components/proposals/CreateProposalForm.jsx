@@ -8,7 +8,7 @@ import { AppContext as AccountContext } from "../../Routes/Account";
 import { AppContext as JournalContext } from "../../Routes/App";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import { PAYLOAD_DATA_TYPES, PROPOSAL_ACTIONS } from "./utils";
-import { isANumber, principalHasProperFormat, toE8s  } from "../../functionsAndConstants/Utils";
+import { daysToMonths, hoursToDays, isANumber, principalHasProperFormat, round2Decimals, secondsToHours, toE8s  } from "../../functionsAndConstants/Utils";
 import { homePageTypes } from "../../reducers/homePageReducer";
 import { retrieveContext } from "../../functionsAndConstants/Contexts";
 import InputBox from "../Fields/InputBox";
@@ -186,6 +186,26 @@ const CreateProposalForm = (props) => {
             selected: neuronId === selectedNeuronId
         }
     });
+
+    const getIncreaseDissolveDelayMenuItemProps = (neuronId) => {
+        let neuronData = treasuryState.treasuryData.neurons.icp.find(([neuronId_, neuronData]) => {
+            return neuronId_ === neuronId;
+        });
+        const { neuronInfo } = neuronData[1];
+        const {dissolve_delay_seconds} = neuronInfo;
+        const secondsInAMonth = 60 * 60 * 24 * 30;
+        const maxDissolveDelayInSeconds = secondsInAMonth * 96;
+        const maxAdditionalDissolveDelayInSeconds = maxDissolveDelayInSeconds - parseInt(dissolve_delay_seconds);
+        
+        let increaseDissolveDelayMenuItemProps = [];
+        for(let i = 1; i * secondsInAMonth <= maxAdditionalDissolveDelayInSeconds; i++){
+            increaseDissolveDelayMenuItemProps.push({
+                text: `${ round2Decimals(daysToMonths(hoursToDays(secondsToHours(i * secondsInAMonth)))) } months`,
+                onClick: () => setProposalPayload({ ...proposalPayload_, additionalDissolveDelaySeconds: i * secondsInAMonth }),
+            });
+        };
+        return increaseDissolveDelayMenuItemProps;
+    };
 
     const principalsMenuItemProps = homePageState?.canisterData?.profilesMetaData?.map(({userPrincipal}) => {
         return {
@@ -371,15 +391,25 @@ const CreateProposalForm = (props) => {
                 />
             }
             {
-                proposalAction_ && SECONDS_PAYLOAD_REQUIRED_ACTIONS.includes(proposalAction_) &&
-                <InputBox
-                    hasError={hasError_1}
-                    label={"Seconds "}
-                    rows={"1"}
-                    onChange={(additionalDissolveDelaySeconds) => onChange_payload({additionalDissolveDelaySeconds},"additionalDissolveDelaySeconds", PAYLOAD_DATA_TYPES.nat)}
-                    value={proposalPayload_?.additionalDissolveDelaySeconds}
-                    format={INPUT_BOX_FORMATS.numberFormat}
-                />
+                proposalAction_ && SECONDS_PAYLOAD_REQUIRED_ACTIONS.includes(proposalAction_) && proposalPayload_.neuronId &&
+
+                <>
+                    <MenuField
+                        xs={8}
+                        display={"flex"}
+                        alignItems={"center"}
+                        justifyContent={"left"}
+                        active={true}
+                        color={"custom"}
+                        label={"Increase Dissolve Delay By"}
+                        MenuIcon={KeyboardArrowDownIcon}
+                        menuItemProps={getIncreaseDissolveDelayMenuItemProps(proposalPayload_.neuronId)}
+                    />
+                    {proposalPayload_?.additionalDissolveDelaySeconds && 
+                    <Typography varient={"h6"} color={"#bdbdbd"}> 
+                        { daysToMonths(hoursToDays(secondsToHours(proposalPayload_?.additionalDissolveDelaySeconds))) } months
+                    </Typography>}
+                </>
             }
             { proposalAction_ && actionReadyToSubmit(proposalAction_, proposalPayload_) && !hasError_1 &&
                 <ButtonField
