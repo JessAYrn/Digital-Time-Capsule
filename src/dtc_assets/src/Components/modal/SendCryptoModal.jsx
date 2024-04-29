@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { AppContext } from "../../Routes/Wallet";
+import { AppContext } from "../../Context";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import InputBox from "../Fields/InputBox";
 import { icpWalletAddressHasProperFormat, isANumber, round8Decimals, shortenHexString, fromHexString  } from "../../functionsAndConstants/Utils";

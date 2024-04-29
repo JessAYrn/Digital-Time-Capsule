@@ -12,12 +12,10 @@ export const treasuryTypes={
 export const treasuryPageInitialState={
     dataHasBeenLoaded: undefined,
     isLoading: false,
-    treasuryData: {
-        deposits: [],
-        stakes: [],
-        balance_icp: 0,
-        accountId_icp: "" 
-    },
+    deposits: [],
+    stakes: [],
+    balance_icp: 0,
+    accountId_icp: "" ,
     balancesData: dummyDataSets
 }
 
@@ -36,9 +34,9 @@ const changeValue=(state=treasuryPageInitialState, action)=>{
                 ...state
             }
         case treasuryTypes.SET_TREASURY_DATA:
-                state.treasuryData = payload;
                 return {
-                ...state
+                ...state,
+                ...payload
             }
         case treasuryTypes.SET_IS_LOADING:
             state.isLoading = payload;

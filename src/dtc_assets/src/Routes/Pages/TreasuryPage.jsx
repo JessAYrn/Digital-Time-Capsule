@@ -1,7 +1,7 @@
 import { NavBar } from "../../Components/navigation/NavBar";
 import React, { useContext, useState } from 'react';
 import { UI_CONTEXTS } from "../../functionsAndConstants/Contexts";
-import { AppContext } from "../Treasury";
+import { AppContext } from "../../Context";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import { Paper, Typography } from "@mui/material";
 import { copyText } from "../../functionsAndConstants/walletFunctions/CopyWalletAddress";
@@ -66,7 +66,7 @@ const TreasuryPage = (props) => {
     setModalProps({
         flexDirection: "column",
         bigText: "Treasury ICP Account ID:",
-        smallText: `${shortenHexString(treasuryState.treasuryData.accountId_icp)}`,
+        smallText: `${shortenHexString(treasuryState.accountId_icp)}`,
         components: [
           {
             Component: ButtonField,
@@ -74,7 +74,7 @@ const TreasuryPage = (props) => {
               text: "Copy To Clipboard",
               onClick: () => {
                 const promise = new Promise ((res, rej) => {setModalIsOpen(false); res()});
-                promise.then(() => { copyText(treasuryState.treasuryData.accountId_icp); });
+                promise.then(() => { copyText(treasuryState.accountId_icp); });
               },
               iconSize: 'small',
               Icon: ContentCopyIcon,
@@ -157,28 +157,28 @@ const TreasuryPage = (props) => {
           <Grid xs={5}  width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"} flexDirection={"column"}>
             <Typography width={"100%"}>Liquid:</Typography>
             <Typography width={"100%"} variant="h6" color={"custom"}>
-              {`${round2Decimals(fromE8s(treasuryState.treasuryData.balance_icp))}`} ICP
+              {`${round2Decimals(fromE8s(treasuryState.balance_icp))}`} ICP
             </Typography>
             <Typography width={"100%"} style={{color: '#bdbdbd'}}>
-              {`${round2Decimals(fromE8s(treasuryState.treasuryData.userTreasuryData?.deposits.icp || 0))}`} ICP
+              {`${round2Decimals(fromE8s(treasuryState.userTreasuryData?.deposits.icp || 0))}`} ICP
             </Typography>
           </Grid>
           <Grid xs={2} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
             <Typography width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"}>Staked:</Typography>
             <Typography width={"100%"} variant="h6" display={"flex"} justifyContent={"center"} alignItems={"center"}>
-              {`${round2Decimals(fromE8s(treasuryState.treasuryData.balance_icpStaked))}`} ICP
+              {`${round2Decimals(fromE8s(treasuryState.balance_icpStaked))}`} ICP
             </Typography>
             <Typography width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} style={{color: '#bdbdbd'}}>
-              {`${round2Decimals(fromE8s(treasuryState.treasuryData.userTreasuryData?.deposits.icp_staked || 0))}`} ICP
+              {`${round2Decimals(fromE8s(treasuryState.userTreasuryData?.deposits.icp_staked || 0))}`} ICP
             </Typography>
           </Grid>
           <Grid xs={5} width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"} flexDirection={"column"}>
             <Typography width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"} >Voting Power:</Typography>
             <Typography width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"} variant="h6">
-              {`${round2Decimals(fromE8s(treasuryState.treasuryData.votingPower))}`} ICP 
+              {`${round2Decimals(fromE8s(treasuryState.votingPower))}`} ICP 
             </Typography>
             <Typography width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"} style={{color: '#bdbdbd'}}>
-              {`${round2Decimals(fromE8s(treasuryState.treasuryData.userVotingPower))}`} ICP 
+              {`${round2Decimals(fromE8s(treasuryState.userVotingPower))}`} ICP 
             </Typography>
           </Grid>
         </Grid>
@@ -189,10 +189,10 @@ const TreasuryPage = (props) => {
           defaultDataSetName={GRAPH_DATA_SETS.week}
         />
         {
-          treasuryState.treasuryData?.neurons?.icp && treasuryState.treasuryData?.neurons?.icp.length > 0 &&
+          treasuryState?.neurons?.icp && treasuryState?.neurons?.icp.length > 0 &&
           <AccordionField>
             {
-              treasuryState.treasuryData?.neurons?.icp.map(neuron => {
+              treasuryState?.neurons?.icp.map(neuron => {
                 let subtitle = neuron[1]?.neuronInfo?.stake_e8s ? `${round2Decimals(fromE8s(parseInt(neuron[1].neuronInfo.stake_e8s)))} ICP` : "Retrieving...";
                 return (
                   <div 
@@ -200,7 +200,7 @@ const TreasuryPage = (props) => {
                   subtitle={subtitle}
                   CustomComponent={DisplayNeuron} 
                   neuronData={neuron}
-                  userPrincipal={treasuryState.treasuryData?.userPrincipal}
+                  userPrincipal={treasuryState?.userPrincipal}
                   ></div> 
                 )
               })

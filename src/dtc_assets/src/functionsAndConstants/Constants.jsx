@@ -93,22 +93,6 @@ export const WALLET_TABS={
     ckBtcTab:'ckBtc_tab'
 }
 
-export const DEFAULT_APP_CONTEXTS={
-    journalState:{},
-    journalDispatch: () => {},
-    walletState:{},
-    walletDispatch:()=>{},
-    accountState:{},
-    accountDispatch:()=>{},
-    homePageDispatch:()=>{},
-    homePageState:{},
-    actorState:{},
-    actorDispatch:()=>{},
-    notificationsState:{},
-    notificationsDispatch: () => {},
-    treasuryState:{},
-    treasuryDispatch: () => {}
-}
 export const MASTER_COPY_FRONTEND_CANISTER_ID = "fkkq7-siaaa-aaaap-qaaya-cai";
 
 export const forbiddenFileTypes = [

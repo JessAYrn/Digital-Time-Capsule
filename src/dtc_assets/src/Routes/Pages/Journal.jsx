@@ -1,7 +1,7 @@
 import JournalPage from "./JournalPage";
 import React, { useContext, useEffect, useState } from "react";
 import {types} from "../../reducers/journalReducer";
-import { AppContext } from "../App";
+import { AppContext } from "../../Context";
 import InputBox from "../../Components/Fields/InputBox";
 import SpeedDialField from '../../Components/Fields/SpeedDialField'
 import NoteAddIcon from '@mui/icons-material/NoteAdd';

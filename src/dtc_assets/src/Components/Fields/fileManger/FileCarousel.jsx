@@ -3,7 +3,6 @@ import FileUpload from "./FileUpload";
 import { UI_CONTEXTS } from "../../../functionsAndConstants/Contexts";
 import EditIcon from '@mui/icons-material/Edit';
 import UploadIcon from '@mui/icons-material/Upload';
-import { retrieveContext } from "../../../functionsAndConstants/Contexts";
 import "./fileCarousel.scss";
 import { fileLoaderHelper } from "../../../functionsAndConstants/loadingFunctions";
 import ButtonField from "../Button";

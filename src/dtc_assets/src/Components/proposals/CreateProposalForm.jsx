@@ -1,16 +1,9 @@
 import React, {useState, useContext} from "react";
 import MenuField from "../Fields/MenuField";
-import { AppContext as TreasuryContext } from "../../Routes/Treasury";
-import { AppContext as HomePageContext } from "../../Routes/HomePage";
-import { AppContext as  WalletContext } from "../../Routes/Wallet";
-import { AppContext as GroupJournalContext } from "../../Routes/GroupJournal";
-import { AppContext as AccountContext } from "../../Routes/Account";
-import { AppContext as JournalContext } from "../../Routes/App";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import { PAYLOAD_DATA_TYPES, PROPOSAL_ACTIONS } from "./utils";
 import { daysToMonths, hoursToDays, isANumber, principalHasProperFormat, round2Decimals, secondsToHours, toE8s  } from "../../functionsAndConstants/Utils";
 import { homePageTypes } from "../../reducers/homePageReducer";
-import { retrieveContext } from "../../functionsAndConstants/Contexts";
 import InputBox from "../Fields/InputBox";
 import { Typography } from "@mui/material";
 import ButtonField from "../Fields/Button";
@@ -19,6 +12,7 @@ import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import DoneIcon from '@mui/icons-material/Done';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { INPUT_BOX_FORMATS } from "../../functionsAndConstants/Constants";
+import { AppContext } from "../../Context";
 
 export const NEURON_TOPICS = {
         // The `Unspecified` topic is used as a fallback when
@@ -145,25 +139,12 @@ const actionReadyToSubmit = (proposalAction, proposalPayload) => {
 
 const CreateProposalForm = (props) => {
     const {
-        context, 
         setModalIsOpen, 
         setModalProps, 
         setIsLoadingModal,
         proposalAction,
         proposalPayload,
     } = props;
-
-    let contexts = {
-        WalletContext,
-        JournalContext,
-        HomePageContext,
-        AccountContext,
-        TreasuryContext,
-        GroupJournalContext
-    };
-
-    let AppContext = retrieveContext(contexts, context);
-
 
     const {  actorState, homePageDispatch, treasuryState, homePageState } = useContext(AppContext);
 
@@ -179,7 +160,7 @@ const CreateProposalForm = (props) => {
         setProposalAction(proposalAction);
     };
 
-    const neuronMenuItemProps = treasuryState.treasuryData.neurons.icp.map(([neuronId, neuronData]) => {
+    const neuronMenuItemProps = treasuryState.neurons.icp.map(([neuronId, neuronData]) => {
         return {
             text: neuronId,  
             onClick: () => setProposalPayload({ ...proposalPayload_, neuronId: neuronId }),
@@ -188,7 +169,7 @@ const CreateProposalForm = (props) => {
     });
 
     const getIncreaseDissolveDelayMenuItemProps = (neuronId) => {
-        let neuronData = treasuryState.treasuryData.neurons.icp.find(([neuronId_, neuronData]) => {
+        let neuronData = treasuryState.neurons.icp.find(([neuronId_, neuronData]) => {
             return neuronId_ === neuronId;
         });
         const { neuronInfo } = neuronData[1];

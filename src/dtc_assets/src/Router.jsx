@@ -1,76 +1,153 @@
-import React, {useState, useEffect} from 'react';
-import { Route, Routes, HashRouter } from 'react-router-dom';
-import HomePage from './Routes/HomePage';
-import App from './Routes/App';
-import AccountPage from "./Routes/Account"
-import WalletApp from './Routes/Wallet';
-import { defaultProviders } from "@connect2ic/core/providers"
-import { createClient } from "@connect2ic/core"
-import { Connect2ICProvider } from "@connect2ic/react"
-import { NAV_LINKS } from './functionsAndConstants/Constants';
-import * as canisterIds from "../../../canister_ids.json";
-import * as dtcFiles from "../../declarations/dtc"
-import Treasury from './Routes/Treasury';
-import GroupJournal from './Routes/GroupJournal';
-import * as dtcAssetsFiles from "../../declarations/dtc_assets";
-import { extractCanisterIdFromURL, getCurrentURL } from './functionsAndConstants/Utils';
+import React, {useState, useReducer, useEffect, useMemo} from 'react';
+import notificationsReducer, { notificationsInitialState, notificationsTypes } from './reducers/notificationsReducer';
+import journalReducer, { initialState, types } from './reducers/journalReducer';
+import { allStatesLoaded, loadAllDataIntoReduxStores } from './functionsAndConstants/loadingFunctions';
+import walletReducer, { walletInitialState, walletTypes } from './reducers/walletReducer';
+import accountReducer, { accountInitialState, accountTypes } from './reducers/accountReducer';
+import homePageReducer, { homePageInitialState, homePageTypes } from './reducers/homePageReducer';
+import treasuryReducer, { treasuryPageInitialState, treasuryTypes } from './reducers/treasuryReducer';
+import actorReducer, { actorInitialState, actorTypes } from './reducers/actorReducer';
+import Analytics from './Routes/Pages/Analytics';
+import Journal from './Routes/Pages/Journal';
+import Notes from './Routes/Pages/Notes';
+import ModalComponent from './Components/modal/Modal';
+import LoginPage from './Routes/Pages/LoginPage';
+import { NAV_LINKS, JOURNAL_TABS } from './functionsAndConstants/Constants';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from './Theme';
+import { AppContext } from './Context';
+import AccountSection from './Routes/Pages/AccountPage';
+import WalletPage from './Routes/Pages/WalletPage';
+import TreasuryPage from './Routes/Pages/TreasuryPage';
+import GroupJournalPage from './Routes/Pages/GroupJournalPage';
 
 const Router = (props) => {
 
-    const [client, setClient] = useState(null);
-    const dtc_idlFactory = dtcFiles.idlFactory;
-  
-    useEffect(() => {
-        
-        const loadClient = async () => {
-            let dtc_canisterId;
-            if(process.env.NODE_ENV === "development") {
-                dtc_canisterId = canisterIds.dtc.ic;
-            } else {
-                let URL = getCurrentURL();
-                let frontEndPrincipal = extractCanisterIdFromURL(URL);
-                let dtcAssetsCanister = dtcAssetsFiles.createActor(frontEndPrincipal,{agentOptions: {host: "https://icp-api.io"}});
-                let authorizedPrincipals = await dtcAssetsCanister.list_authorized();
-                dtc_canisterId = authorizedPrincipals[0];
+    const [route, setRoute] = useState(NAV_LINKS.dashboard);
 
-            }
-            let client_ = createClient({
-                globalProviderConfig: {
-                    host: 'https://mainnet.ic0.app',
-                    whitelist: [dtc_canisterId],
-                    appName: ''
-                },
-                canisters: {
-                    dtc: {
-                        canisterId: dtc_canisterId,
-                        idlFactory: dtc_idlFactory
-                    }
-                },
-                providers: defaultProviders
-            });
-            setClient(client_);
-        };
+    const [journalState, journalDispatch] = useReducer(journalReducer, initialState);
+    const [notificationsState, notificationsDispatch] = useReducer(notificationsReducer, notificationsInitialState);
+    const [walletState, walletDispatch] = useReducer(walletReducer, walletInitialState);
+    const [accountState, accountDispatch] = useReducer(accountReducer, accountInitialState);
+    const [homePageState, homePageDispatch] = useReducer(homePageReducer, homePageInitialState);
+    const [treasuryState, treasuryDispatch] = useReducer(treasuryReducer, treasuryPageInitialState);
+    const [actorState, actorDispatch] = useReducer(actorReducer, actorInitialState);
+    
+    const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [isLoadingModal, setIsLoadingModal] = useState(false);
+    const [modalProps, setModalProps] = useState({});
 
-      loadClient();
-    },[]);
+    const ReducerDispatches={
+        walletDispatch,
+        journalDispatch,
+        accountDispatch,
+        homePageDispatch,
+        actorDispatch,
+        notificationsDispatch,
+        treasuryDispatch
+    }
+
+    const ReducerTypes={
+        journalTypes:types,
+        walletTypes,
+        accountTypes,
+        homePageTypes,
+        actorTypes,
+        notificationsTypes,
+        treasuryTypes
+    }
+
+    const ReducerStates = {
+        journalState,
+        walletState,
+        accountState,
+        homePageState,
+        actorState,
+        notificationsState,
+        treasuryState
+    };
+
+    const context = {
+        journalState,
+        journalDispatch,
+        accountState,
+        accountDispatch,
+        walletDispatch,
+        walletState,
+        homePageDispatch,
+        homePageState,
+        actorDispatch,
+        actorState,
+        notificationsState,
+        notificationsDispatch,
+        treasuryState,
+        treasuryDispatch,
+        setRoute,
+        setModalIsOpen,
+        setIsLoadingModal,
+        setModalProps
+    };
+
+    useEffect( async () => {
+        if(!actorState.backendActor) return;
+        try{
+            setIsLoadingModal(true);
+            setModalIsOpen(true);
+            let response = await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes);
+            setModalIsOpen(response?.openModal);
+            setModalProps(response)
+            setIsLoadingModal(false);    
+        } catch(e){ 
+            // disconnect the user if there is an error
+            document.location.reload(); 
+        }
+    }, [actorState.backendActor]);
+
+    const displayComponent = useMemo(() => {
+        return actorState?.userObject?.agent && allStatesLoaded({
+            journalState,
+            notificationsState,
+            walletState,
+            accountState,
+            homePageState,
+            treasuryState
+        });
+    },[
+        actorState.userObject.principal, 
+        accountState.dataHasBeenLoaded,
+        treasuryState.dataHasBeenLoaded,
+        journalState.dataHasBeenLoaded,
+        walletState.dataHasBeenLoaded,
+        homePageState.dataHasBeenLoaded,
+        notificationsState.dataHasBeenLoaded,
+        actorState.dataHasBeenLoaded
+    ])
+
+    let JournalComponent = useMemo(()=>{
+        if(journalState.journalPageTab===JOURNAL_TABS.diaryTab) return Journal;
+        else return Notes;
+    },[journalState.journalPageTab])
     
     return(
-       client &&
        <ThemeProvider theme={theme}>
-            <Connect2ICProvider client={client}>
-                <HashRouter>
-                    <Routes>
-                        <Route path={NAV_LINKS.dashboard} element={<HomePage />}/>
-                        <Route path={NAV_LINKS.journal} element={<App />}/>
-                        <Route path={NAV_LINKS.account} element={<AccountPage />}/>
-                        <Route path={NAV_LINKS.wallet} element={<WalletApp />}/>
-                        <Route path={NAV_LINKS.treasury} element={<Treasury/>}/>
-                        <Route path={NAV_LINKS.groupJournal} element={<GroupJournal/>}/>
-                    </Routes>
-                </HashRouter>
-            </Connect2ICProvider>
+            <AppContext.Provider value={context}>
+                {displayComponent ? 
+                    <>
+                        {route === NAV_LINKS.dashboard && <Analytics/>}
+                        {route === NAV_LINKS.journal && <JournalComponent />}
+                        {route === NAV_LINKS.account && <AccountSection />}
+                        {route === NAV_LINKS.wallet && <WalletPage />}
+                        {route === NAV_LINKS.treasury && <TreasuryPage />}
+                        {route === NAV_LINKS.groupJournal && <GroupJournalPage />}
+                    </>  : 
+                    <LoginPage context={AppContext}/>
+                }  
+                <ModalComponent 
+                {...modalProps}
+                open={modalIsOpen} 
+                isLoading={isLoadingModal} 
+            />     
+            </AppContext.Provider>                 
         </ThemeProvider>
     );
 };

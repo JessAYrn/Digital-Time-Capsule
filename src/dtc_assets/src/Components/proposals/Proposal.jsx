@@ -2,14 +2,7 @@ import React, {useState, useContext} from "react";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import DataField from "../Fields/DataField";
 import Typography from "@mui/material/Typography";
-import { AppContext as WalletContext } from "../../Routes/Wallet";
-import { AppContext as  TreasuryContext } from "../../Routes/Treasury";
-import { AppContext as  GroupJournalContext } from "../../Routes/GroupJournal";
-import { AppContext as JournalContext } from "../../Routes/App";
-import { AppContext as  AccountContext } from "../../Routes/Account";
-import { AppContext as  HomePageContext} from "../../Routes/HomePage";
 import { nanoSecondsToMiliSeconds, getDateAsStringMMDDYYY, shortenHexString, fromE8s, round2Decimals, secondsToHours, hoursToDays, daysToMonths } from "../../functionsAndConstants/Utils";
-import { retrieveContext } from "../../functionsAndConstants/Contexts";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
@@ -20,13 +13,12 @@ import CheckIcon from '@mui/icons-material/Check';
 import ModalComponent from "../modal/Modal";
 import { copyText } from "../../functionsAndConstants/walletFunctions/CopyWalletAddress";
 import { NEURON_TOPICS } from "./CreateProposalForm";
-
+import { AppContext } from "../../Context";
 
 const Proposal = (props) => {
 
 
     const {
-        context,
         proposalId,
         proposer,
         action,
@@ -41,20 +33,9 @@ const Proposal = (props) => {
     const [isLoadingModal, setIsLoading] = useState(false);
     const [adoptProposal, setAdoptProposal] = useState(null);
 
-    let contexts = {
-        WalletContext,
-        JournalContext,
-        HomePageContext,
-        AccountContext,
-        TreasuryContext,
-        GroupJournalContext
-    };
-
     let numberOfNays = votes.filter(vote => vote[1].adopt === false).length;
     let numberOfYays = votes.filter(vote => vote[1].adopt === true).length;
     let totalVotes = votes.length;
-
-    let AppContext = retrieveContext(contexts, context);
 
     const { actorState } = useContext(AppContext);
 

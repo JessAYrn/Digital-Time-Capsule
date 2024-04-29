@@ -1,5 +1,5 @@
 import React, { useContext, useState} from 'react';
-import { AppContext } from '../Wallet';
+import { AppContext } from '../../Context';
 import { NavBar } from '../../Components/navigation/NavBar';
 import './WalletPage.scss';
 import { e8sInOneICP, CHART_TYPES, GRAPH_DISPLAY_LABELS, GRAPH_DATA_SETS } from '../../functionsAndConstants/Constants';

@@ -1,5 +1,4 @@
 import React, { useContext, useState} from 'react';
-import { AppContext } from '../HomePage';
 import { NavBar } from '../../Components/navigation/NavBar';
 import { UI_CONTEXTS } from '../../functionsAndConstants/Contexts';
 import "./Analytics.scss"
@@ -31,8 +30,9 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import SpeedDialField from '../../Components/Fields/SpeedDialField';
 import CreateProposalForm from '../../Components/proposals/CreateProposalForm';
 import DisplayProposals from '../../Components/proposals/DisplayProposal';
+import { AppContext } from '../../Context';
 
-const Analytics = () => {
+const Analytics = (props) => {
 
     const { homePageDispatch, homePageState, actorState } = useContext(AppContext);
     const [modalIsOpen, setModalIsOpen] = useState(false);
