@@ -1,5 +1,14 @@
 import {createContext} from 'react';
 
+export const UI_CONTEXTS = {
+    JOURNAL: 'journal',
+    ACCOUNT_PAGE: 'accountPage',
+    WALLET: 'wallet',
+    HOME_PAGE: 'homePage',
+    TREASURY:'treasury',
+    GROUPJOURNAL:'groupjournal'
+};
+
 const APP_CONTEXTS={
     journalState:{},
     journalDispatch: () => {},

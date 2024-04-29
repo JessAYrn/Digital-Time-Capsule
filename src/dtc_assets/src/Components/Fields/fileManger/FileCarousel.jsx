@@ -1,6 +1,5 @@
 import React, {useState, useMemo} from "react";
 import FileUpload from "./FileUpload";
-import { UI_CONTEXTS } from "../../../functionsAndConstants/Contexts";
 import EditIcon from '@mui/icons-material/Edit';
 import UploadIcon from '@mui/icons-material/Upload';
 import "./fileCarousel.scss";
@@ -52,7 +51,6 @@ const FileCarousel = (props) => {
                         onChange={onChange}
                         fileIndex={fileIndex}
                         key={fileIndex}
-                        context={UI_CONTEXTS.JOURNAL}
                         setChangesWereMade={setChangesWereMade}
                         dispatch={dispatch}
                         dispatchActionToChangeFileMetaData={dispatchActionToChangeFileMetaData}

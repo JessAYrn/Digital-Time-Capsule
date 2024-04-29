@@ -1,6 +1,5 @@
 import React, { useContext, useState} from 'react';
 import { NavBar } from '../../Components/navigation/NavBar';
-import { UI_CONTEXTS } from '../../functionsAndConstants/Contexts';
 import "./Analytics.scss"
 import DataField from '../../Components/Fields/DataField';
 import Switch from '../../Components/Fields/Switch';
@@ -54,7 +53,7 @@ const Analytics = (props) => {
     const modalForm_createProposal = [
         {
             Component: CreateProposalForm,
-            props: {context: UI_CONTEXTS.HOME_PAGE, setModalIsOpen, setModalProps, setIsLoadingModal}
+            props: { setModalIsOpen, setModalProps, setIsLoadingModal}
         }
     ];
 
@@ -219,7 +218,7 @@ const Analytics = (props) => {
             alignItems="center" 
             flexDirection={"column"}
         > 
-            <NavBar context={UI_CONTEXTS.HOME_PAGE}/>
+            <NavBar/>
             <>
                 <Grid 
                 columns={12}

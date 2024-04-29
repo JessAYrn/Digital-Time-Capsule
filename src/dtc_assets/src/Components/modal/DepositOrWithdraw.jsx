@@ -12,7 +12,6 @@ import { INPUT_BOX_FORMATS } from "../../functionsAndConstants/Constants";
 const DepositOrWithdrawModal = (props) => {
     const {
         action,
-        context,
         setModalIsOpen, 
         setModalProps, 
         setIsLoadingModal

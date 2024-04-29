@@ -15,7 +15,6 @@ import DataTable from "../Fields/Table";
 import CreateProposalForm from "../proposals/CreateProposalForm";
 import ModalComponent from "../modal/Modal";
 import { PROPOSAL_ACTIONS } from "../proposals/utils";
-import { UI_CONTEXTS } from "../../functionsAndConstants/Contexts";
 
 const NeuronStates = {
     locked: 1,
@@ -62,7 +61,6 @@ const DisplayNeuron = (props) => {
               {
                 Component: CreateProposalForm,
                 props: {
-                    context: UI_CONTEXTS.TREASURY, 
                     setModalIsOpen, 
                     setModalProps, 
                     setIsLoadingModal,

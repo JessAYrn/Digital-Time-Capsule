@@ -7,7 +7,6 @@ import SpeedDialField from '../../Components/Fields/SpeedDialField'
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import { NavBar } from "../../Components/navigation/NavBar";
-import { UI_CONTEXTS } from "../../functionsAndConstants/Contexts";
 import { getHighestEntryKey, milisecondsToNanoSeconds } from "../../functionsAndConstants/Utils";
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 import FileCarousel from "../../Components/Fields/fileManger/FileCarousel";
@@ -134,7 +133,7 @@ const Journal = (props) => {
             alignItems="center" 
             flexDirection={"column"}
         >
-            <NavBar context={UI_CONTEXTS.JOURNAL} isLoading={journalState.isLoading}/>
+            <NavBar isLoading={journalState.isLoading}/>
             {(getIndexOfVisiblePage() >=0) ?
             <JournalPage index={getIndexOfVisiblePage()}/> :
             <>

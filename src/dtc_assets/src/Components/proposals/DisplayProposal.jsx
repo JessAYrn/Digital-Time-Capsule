@@ -2,7 +2,6 @@ import React from 'react';
 import Grid from '@mui/material/Unstable_Grid2';
 import AccordionField from '../../Components/Fields/Accordion';
 import Proposal from './Proposal';
-import {UI_CONTEXTS} from '../../functionsAndConstants/Contexts';
 
 const DisplayProposals = (props) => {
     let {proposals} = props;
@@ -17,7 +16,6 @@ const DisplayProposals = (props) => {
                             let {action, payload, proposer, timeExecuted, timeInitiated, voteTally, votes} = proposal;
                             return (
                                 <div 
-                                    context={UI_CONTEXTS.HOME_PAGE}
                                     title={`Propsoal #${id}`}
                                     proposalId={id}
                                     proposer={proposer}

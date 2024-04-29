@@ -1,9 +1,8 @@
 import { NavBar } from "../../Components/navigation/NavBar";
 import React, { useContext, useState } from 'react';
-import { UI_CONTEXTS } from "../../functionsAndConstants/Contexts";
 import { AppContext } from "../../Context";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
-import { Paper, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import { copyText } from "../../functionsAndConstants/walletFunctions/CopyWalletAddress";
 import { fromE8s, shortenHexString, round2Decimals } from "../../functionsAndConstants/Utils";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
@@ -36,7 +35,7 @@ const TreasuryPage = (props) => {
         components: [
           {
             Component: CreateProposalForm,
-            props: {context: UI_CONTEXTS.TREASURY, setModalIsOpen, setModalProps, setIsLoadingModal}
+            props: { setModalIsOpen, setModalProps, setIsLoadingModal}
           }
         ],
         handleClose: () => setModalIsOpen(false)
@@ -51,7 +50,6 @@ const TreasuryPage = (props) => {
             Component: DepositOrWithdrawModal,
             props: {
               action,
-              context: UI_CONTEXTS.TREASURY, 
               setModalIsOpen, 
               setModalProps, 
               setIsLoadingModal,
@@ -141,7 +139,7 @@ const TreasuryPage = (props) => {
       flexDirection={"column"}
       className={"container_treasury"}
     > 
-      <NavBar context={UI_CONTEXTS.TREASURY} />
+      <NavBar />
       <Grid 
         columns={12}
         xs={11}  
