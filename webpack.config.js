@@ -46,7 +46,7 @@ module.exports = {
   // tutorial, uncomment the following lines:
   module: {
    rules: [
-     { test: /\.(ts|tsx|jsx)$/, loader: "ts-loader" },
+     { test: /\.(ts|tsx|jsx)$/, loader: "ts-loader", options: { allowTsInNodeModules: true }, },
      { test: /\.s[ac]ss$/i, use: ["style-loader", "css-loader", "sass-loader"]},
      { test: /\.css$/, use: ['style-loader','css-loader'] }
    ]
@@ -82,11 +82,9 @@ module.exports = {
   devServer: {
     proxy: {
       "/api": {
-        target: "http://127.0.0.1:4943",
+        target: "https://icp-api.io",
         changeOrigin: true,
-        pathRewrite: {
-          "^/api": "/api",
-        },
+        
       },
     },
     static: path.resolve(__dirname, "src", frontendDirectory, "assets"),

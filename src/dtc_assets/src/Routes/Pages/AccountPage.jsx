@@ -2,9 +2,8 @@ import React, { useContext, useState } from 'react';
 import  InputBox  from '../../Components/Fields/InputBox';
 import "./AccountPage.scss";
 import "./SubscriptionPage.scss";
-import { AppContext } from '../Account';
+import { AppContext } from '../../Context';
 import { NavBar } from '../../Components/navigation/NavBar';
-import { UI_CONTEXTS } from '../../functionsAndConstants/Contexts';
 import  { accountTypes } from '../../reducers/accountReducer';
 
 
@@ -37,14 +36,7 @@ const AccountSection = (props) => {
 
 return(
     <>
-        <NavBar
-            walletLink={true}
-            journalLink={true}
-            accountLink={false}
-            dashboardLink={true}
-            notificationIcon={false}
-            context={UI_CONTEXTS.ACCOUNT_PAGE}
-        />
+        <NavBar/>
         <div className='container__accountPage'>
             <div className={`logoDiv account`}>
                 <img className={'logoImg'}src="dtc-logo-black.png" alt="Logo"/>

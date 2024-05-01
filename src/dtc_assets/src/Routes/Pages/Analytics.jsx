@@ -1,7 +1,5 @@
 import React, { useContext, useState} from 'react';
-import { AppContext } from '../HomePage';
 import { NavBar } from '../../Components/navigation/NavBar';
-import { UI_CONTEXTS } from '../../functionsAndConstants/Contexts';
 import "./Analytics.scss"
 import DataField from '../../Components/Fields/DataField';
 import Switch from '../../Components/Fields/Switch';
@@ -22,7 +20,7 @@ import '../../SCSS/container.scss';
 import '../../SCSS/contentContainer.scss'
 import '../../SCSS/section.scss'
 import {homePageTypes} from '../../reducers/homePageReducer';
-import { inTrillions, round2Decimals, shortenHexString } from '../../functionsAndConstants/Utils';
+import { inTrillions, isANumber, round2Decimals, shortenHexString } from '../../functionsAndConstants/Utils';
 import { copyText } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
 import DataTable from '../../Components/Fields/Table';
 import { mapRequestsForAccessToTableRows, mapUsersProfileDataToTableRows, requestsForAccessTableColumns, usersTableColumns } from '../../mappers/dashboardMapperFunctions';
@@ -30,9 +28,10 @@ import ModalComponent from '../../Components/modal/Modal';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import SpeedDialField from '../../Components/Fields/SpeedDialField';
 import CreateProposalForm from '../../Components/proposals/CreateProposalForm';
-import Proposal from '../../Components/proposals/Proposal';
+import DisplayProposals from '../../Components/proposals/DisplayProposal';
+import { AppContext } from '../../Context';
 
-const Analytics = () => {
+const Analytics = (props) => {
 
     const { homePageDispatch, homePageState, actorState } = useContext(AppContext);
     const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -40,6 +39,9 @@ const Analytics = () => {
     const [modalProps, setModalProps] = useState({});
     const [requestsTableIsLoading, setRequestsTableIsLoading] = useState(false);
     const [usersTableIsLoading, setUsersTableIsLoading] = useState(false);
+
+    let activeProposal = homePageState?.canisterData?.proposals?.filter(proposal => BigInt(proposal[1].timeExecuted) === BigInt(0) );
+    let inactiveProposals = homePageState?.canisterData?.proposals?.filter(proposal => { return BigInt(proposal[1].timeExecuted) !== BigInt(0)});
 
     const modalButton_close = [
         {
@@ -51,7 +53,7 @@ const Analytics = () => {
     const modalForm_createProposal = [
         {
             Component: CreateProposalForm,
-            props: {context: UI_CONTEXTS.HOME_PAGE, setModalIsOpen, setModalProps, setIsLoadingModal}
+            props: { setModalIsOpen, setModalProps, setIsLoadingModal}
         }
     ];
 
@@ -149,13 +151,13 @@ const Analytics = () => {
         });
     };
 
-    const handleUpgrade = async () => {
+    const handleInstallUpgrade = async () => {
         setIsLoadingModal(true);
         setModalIsOpen(true);
         try{
-            await actorState.backendActor.upgradeApp();
+            await actorState.backendActor.installUpgrades();
             setModalProps({
-                bigText: "Upgrade Complete",
+                bigText: "Install Complete",
                 smallText: "Refresh page in order to have the changes take effect",
                 Icon: CheckCircleOutlineIcon,
                 components: modalButton_close
@@ -163,7 +165,29 @@ const Analytics = () => {
         } catch(e){
             console.log("Error: ", e);
             setModalProps({
-                bigText: "Upgrade Unsuccessfull",
+                bigText: "Install Unsuccessfull",
+                Icon: ErrorOutlineIcon,
+                components: modalButton_close
+            })
+        };
+        setIsLoadingModal(false);
+    };
+
+    const handleLoadUpgrade = async () => {
+        setIsLoadingModal(true);
+        setModalIsOpen(true);
+        try{
+            await actorState.backendActor.loadUpgrades();
+            setModalProps({
+                bigText: "Load Complete",
+                smallText: "Refresh page in order to have the changes take effect",
+                Icon: CheckCircleOutlineIcon,
+                components: modalButton_close
+            })
+        } catch(e){
+            console.log("Error: ", e);
+            setModalProps({
+                bigText: "Load Unsuccessfull",
                 Icon: ErrorOutlineIcon,
                 components: modalButton_close
             })
@@ -194,7 +218,7 @@ const Analytics = () => {
             alignItems="center" 
             flexDirection={"column"}
         > 
-            <NavBar context={UI_CONTEXTS.HOME_PAGE}/>
+            <NavBar/>
             <>
                 <Grid 
                 columns={12}
@@ -208,49 +232,103 @@ const Analytics = () => {
                 marginTop={"60px"}
                 >
                     <Paper className='analytics paper'>
-                        <DataField
-                            label={'Journals Created:'}
-                            text={homePageState.canisterData[CANISTER_DATA_FIELDS.journalCount]}
-                            disabled={true}
-                        />
-                        <DataField
-                            label={'Frontend Canister Principal:'}
-                            text={`${shortenHexString(homePageState.canisterData[CANISTER_DATA_FIELDS.frontEndPrincipal])}`}
-                            buttonIcon={ContentCopyIcon}
-                            onClick={
-                                () => copyText(
-                                    homePageState.canisterData[CANISTER_DATA_FIELDS.frontEndPrincipal]
-                                )
-                            }
-                        />
-                        <DataField
-                            label={'Backend Canister Principal:'}
-                            text={`${shortenHexString(homePageState.canisterData[CANISTER_DATA_FIELDS.backEndPrincipal])}`}
-                            buttonIcon={ContentCopyIcon}
-                            onClick={
-                                () => copyText(
-                                    homePageState.canisterData[CANISTER_DATA_FIELDS.backEndPrincipal]
-                                )
-                            }
-                        />
-                        <DataField
-                            label={'Cycles Burned Per Day:'}
-                            text={`${round2Decimals(inTrillions(homePageState.canisterData[CANISTER_DATA_FIELDS.backEndCyclesBurnRatePerDay]))} T`}
-                            isCycles={true}
-                            disabled={true}
-                        />
-                        <DataField
-                            label={'Frontend Cycles Balance:'}
-                            text={`${round2Decimals(inTrillions(homePageState.canistersCyclesBalances.currentCyclesBalance_frontend))} T`}
-                            isCycles={true}
-                            disabled={true}
-                        />
-                        <DataField
-                            label={'Backend Cycles Balance:'}
-                            text={`${round2Decimals(inTrillions(homePageState.canistersCyclesBalances.currentCyclesBalance_backend))} T`}
-                            isCycles={true}
-                            disabled={true}
-                        />
+                        <Grid xs={12} display="flex" justifyContent="center" alignItems="center" paddingBottom={"15px"} flexDirection={"column"}>
+                            <DataField
+                                label={'Journals Created:'}
+                                text={homePageState.canisterData[CANISTER_DATA_FIELDS.journalCount]}
+                                disabled={true}
+                            />
+                        </Grid>
+                        <Grid xs={12} display="flex" justifyContent="center" alignItems="center" paddingBottom={"15px"} paddingTop={"15px"} flexDirection={"column"}>
+                            <DataField
+                                label={'Frontend Canister Principal:'}
+                                text={`${shortenHexString(homePageState.canisterData[CANISTER_DATA_FIELDS.frontEndPrincipal])}`}
+                                buttonIcon={ContentCopyIcon}
+                                onClick={
+                                    () => copyText(
+                                        homePageState.canisterData[CANISTER_DATA_FIELDS.frontEndPrincipal]
+                                    )
+                                }
+                            />
+                            <DataField
+                                label={'Backend Canister Principal:'}
+                                text={`${shortenHexString(homePageState.canisterData[CANISTER_DATA_FIELDS.backEndPrincipal])}`}
+                                buttonIcon={ContentCopyIcon}
+                                onClick={
+                                    () => copyText(
+                                        homePageState.canisterData[CANISTER_DATA_FIELDS.backEndPrincipal]
+                                    )
+                                }
+                            />
+                            <DataField
+                                label={'Treasury Canister Principal:'}
+                                text={`${shortenHexString(homePageState.canisterData[CANISTER_DATA_FIELDS.treasuryCanisterPrincipal])}`}
+                                buttonIcon={ContentCopyIcon}
+                                onClick={
+                                    () => copyText(
+                                        homePageState.canisterData[CANISTER_DATA_FIELDS.treasuryCanisterPrincipal]
+                                    )
+                                }
+                            />
+                            <DataField
+                                label={'Manager Canister Principal:'}
+                                text={`${shortenHexString(homePageState.canisterData[CANISTER_DATA_FIELDS.managerCanisterPrincipal])}`}
+                                buttonIcon={ContentCopyIcon}
+                                onClick={
+                                    () => copyText(
+                                        homePageState.canisterData[CANISTER_DATA_FIELDS.managerCanisterPrincipal]
+                                    )
+                                }
+                            />
+                        </Grid>
+                        <Grid xs={12} display="flex" justifyContent="center" alignItems="center" paddingBottom={"15px"} paddingTop={"15px"} flexDirection={"column"}>
+                            <DataField
+                                label={'Frontend Cycles Balance:'}
+                                text={`${round2Decimals(inTrillions(homePageState.canistersCyclesBalances.currentCyclesBalance_frontend))} T`}
+                                isCycles={true}
+                                disabled={true}
+                            />
+                            <DataField
+                                label={'Backend Cycles Balance:'}
+                                text={`${round2Decimals(inTrillions(homePageState.canistersCyclesBalances.currentCyclesBalance_backend))} T`}
+                                isCycles={true}
+                                disabled={true}
+                            />
+                            <DataField
+                                label={'Treasury Cycles Balance:'}
+                                text={`${round2Decimals(inTrillions(homePageState.canistersCyclesBalances.currentCyclesBalance_treasury))} T`}
+                                isCycles={true}
+                                disabled={true}
+                            />
+                            <DataField
+                                label={'Manager Cycles Balance:'}
+                                text={`${round2Decimals(inTrillions(homePageState.canistersCyclesBalances.currentCyclesBalance_manager))} T`}
+                                isCycles={true}
+                                disabled={true}
+                            />
+                        </Grid>
+                        <Grid xs={12} display="flex" justifyContent="center" alignItems="center" paddingBottom={"15px"} paddingTop={"15px"} flexDirection={"column"}>
+                            <DataField
+                                label={'Cycles Burned Per Day:'}
+                                text={`${round2Decimals(inTrillions(homePageState.canisterData[CANISTER_DATA_FIELDS.backEndCyclesBurnRatePerDay]))} T`}
+                                isCycles={true}
+                                disabled={true}
+                            />
+                        </Grid>
+                        <Grid xs={12} display="flex" justifyContent="center" alignItems="center" paddingBottom={"15px"} paddingTop={"15px"} flexDirection={"column"}>
+                            <DataField
+                                label={'Release Version Downloaded:'}
+                                text={`${homePageState.canisterData[CANISTER_DATA_FIELDS.releaseVersionLoaded]}`}
+                                isCycles={true}
+                                disabled={true}
+                            />
+                            <DataField
+                                label={'Release Version Installed:'}
+                                text={`${homePageState.canisterData[CANISTER_DATA_FIELDS.releaseVersionInstalled]}`}
+                                isCycles={true}
+                                disabled={true}
+                            />
+                        </Grid>
                     </Paper>
                 </Grid>
                 <Grid 
@@ -263,29 +341,26 @@ const Analytics = () => {
                     alignItems="center" 
                     flexDirection={"column"}
                 >
-                    {homePageState?.canisterData?.proposals.length > 0 && 
+                <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
+
+                </Grid>
+
                     <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
                         <AccordionField>
-                            {homePageState?.canisterData?.proposals?.map(([proposalId, proposal]) => {
-                                let id = parseInt(proposalId);
-                                let {action, payload, proposer, timeExecuted, timeInitiated, voteTally, votes} = proposal;
-                                return (
-                                    <div 
-                                        context={UI_CONTEXTS.HOME_PAGE}
-                                        title={`Propsoal #${id}`}
-                                        proposalId={id}
-                                        proposer={proposer}
-                                        action={action}
-                                        timeInitiated={timeInitiated}
-                                        timeExecuted={timeExecuted}
-                                        votes={votes}
-                                        voteTally={voteTally}
-                                        CustomComponent={Proposal}
-                                    />
-                                )
-                            })}
+                        <div 
+                            title={"Active Proposals"} 
+                            proposals={activeProposal}
+                            CustomComponent={DisplayProposals}
+                        ></div>
+                        <div 
+                            title={"Inactive Proposals"} 
+                            proposals={inactiveProposals}
+                            CustomComponent={DisplayProposals}
+                        ></div>
                         </AccordionField>
-                    </Grid>}
+                    </Grid>
+                    
+
                     <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
                         <AccordionField>
                         <div 
@@ -295,6 +370,7 @@ const Analytics = () => {
                             onClick_button_2={onDenyAccess}
                             text_1={'Approve'}
                             text_2={'Deny'}
+                            onCellClick={(e) => { if(e === "yes" || e === "no") return; else copyText(e)}}
                             transparent={true}
                             checkboxSelection={true}
                             disabled={!homePageState.canisterData.isAdmin}
@@ -310,6 +386,7 @@ const Analytics = () => {
                             iconSize={"medium"}
                             onClick_button_1={subsidize}
                             onClick_button_2={Unsubsidize}
+                            onCellClick={(e) => { if(e === "yes" || e === "no") return; else copyText(e)}}
                             text_1={'Subsidize'}
                             text_2={'Unsubsidize'}
                             transparent={true}
@@ -373,8 +450,17 @@ const Analytics = () => {
                                 <ButtonField
                                     Icon={UpgradeIcon}
                                     active={homePageState.canisterData.isAdmin}
-                                    text={'Upgrade'}
-                                    onClick={handleUpgrade}
+                                    text={'Load Upgrade'}
+                                    onClick={handleLoadUpgrade}
+                                    disabled={!homePageState.canisterData.isAdmin}
+                                />
+                            </Grid>
+                            <Grid xs={6} width={"110px"}>
+                                <ButtonField
+                                    Icon={UpgradeIcon}
+                                    active={homePageState.canisterData.isAdmin}
+                                    text={'Install Upgrade'}
+                                    onClick={handleInstallUpgrade}
                                     disabled={!homePageState.canisterData.isAdmin}
                                 />
                             </Grid>

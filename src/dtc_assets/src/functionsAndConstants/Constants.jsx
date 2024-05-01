@@ -52,7 +52,18 @@ export const CANISTER_DATA_FIELDS = {
     lastRecordedBackEndCyclesBalance: "lastRecordedBackEndCyclesBalance",
     RequestsForAccess: "RequestsForAccess",
     users: "users",
-    journalCount: "journalCount"
+    journalCount: "journalCount",
+    profilesMetaData: "profilesMetaData",
+    treasuryCanisterPrincipal: "treasuryCanisterPrincipal",
+    managerCanisterPrincipal: "managerCanisterPrincipal",
+    releaseVersionLoaded: "releaseVersionLoaded",
+    releaseVersionInstalled: "releaseVersionInstalled",
+    nftId: "nftId",
+    proposals: "proposals",
+    isAdmin: "isAdmin",
+    supportMode: "supportMode",
+    acceptingRequests: "acceptingRequests",
+    canistersCyclesBalances: "canistersCyclesBalances",
 };
 
 export const PAGES = {
@@ -82,22 +93,6 @@ export const WALLET_TABS={
     ckBtcTab:'ckBtc_tab'
 }
 
-export const DEFAULT_APP_CONTEXTS={
-    journalState:{},
-    journalDispatch: () => {},
-    walletState:{},
-    walletDispatch:()=>{},
-    accountState:{},
-    accountDispatch:()=>{},
-    homePageDispatch:()=>{},
-    homePageState:{},
-    actorState:{},
-    actorDispatch:()=>{},
-    notificationsState:{},
-    notificationsDispatch: () => {},
-    treasuryState:{},
-    treasuryDispatch: () => {}
-}
 export const MASTER_COPY_FRONTEND_CANISTER_ID = "fkkq7-siaaa-aaaap-qaaya-cai";
 
 export const forbiddenFileTypes = [

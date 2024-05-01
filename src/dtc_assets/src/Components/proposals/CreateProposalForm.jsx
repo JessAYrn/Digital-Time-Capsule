@@ -1,16 +1,9 @@
 import React, {useState, useContext} from "react";
 import MenuField from "../Fields/MenuField";
-import { AppContext as TreasuryContext } from "../../Routes/Treasury";
-import { AppContext as HomePageContext } from "../../Routes/HomePage";
-import { AppContext as  WalletContext } from "../../Routes/Wallet";
-import { AppContext as GroupJournalContext } from "../../Routes/GroupJournal";
-import { AppContext as AccountContext } from "../../Routes/Account";
-import { AppContext as JournalContext } from "../../Routes/App";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import { PAYLOAD_DATA_TYPES, PROPOSAL_ACTIONS } from "./utils";
-import { isANumber, principalHasProperFormat, toE8s  } from "../../functionsAndConstants/Utils";
+import { daysToMonths, hoursToDays, isANumber, principalHasProperFormat, round2Decimals, secondsToHours, toE8s  } from "../../functionsAndConstants/Utils";
 import { homePageTypes } from "../../reducers/homePageReducer";
-import { retrieveContext } from "../../functionsAndConstants/Contexts";
 import InputBox from "../Fields/InputBox";
 import { Typography } from "@mui/material";
 import ButtonField from "../Fields/Button";
@@ -19,6 +12,7 @@ import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import DoneIcon from '@mui/icons-material/Done';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { INPUT_BOX_FORMATS } from "../../functionsAndConstants/Constants";
+import { AppContext } from "../../Context";
 
 export const NEURON_TOPICS = {
         // The `Unspecified` topic is used as a fallback when
@@ -145,65 +139,85 @@ const actionReadyToSubmit = (proposalAction, proposalPayload) => {
 
 const CreateProposalForm = (props) => {
     const {
-        context, 
         setModalIsOpen, 
         setModalProps, 
         setIsLoadingModal,
         proposalAction,
-        neuronId,
-        payloadRequired,
+        proposalPayload,
     } = props;
 
-    let contexts = {
-        WalletContext,
-        JournalContext,
-        HomePageContext,
-        AccountContext,
-        TreasuryContext,
-        GroupJournalContext
-    };
+    const {  actorState, homePageDispatch, treasuryState, homePageState } = useContext(AppContext);
 
-    let AppContext = retrieveContext(contexts, context);
-
-
-    const {  actorState, homePageDispatch, treasuryState } = useContext(AppContext);
+    let selectedAction = proposalAction;
+    let selectedNeuronId = proposalPayload?.neuronId;
 
     const [proposalAction_, setProposalAction] = useState(proposalAction);
-    const [proposalPayload, setProposalPayload] = useState(null);
+    const [proposalPayload_, setProposalPayload] = useState(proposalPayload);
     const [hasError_1, setHasError_1] = useState(false);
 
-    console.log("proposalPayload ", proposalPayload)
     const onMenuItemClick = (proposalAction) => {
         setProposalPayload({});
         setProposalAction(proposalAction);
     };
 
-    const neuronMenuItemProps = treasuryState.treasuryData.neurons.icp.map(([neuronId, neuronData]) => {
-        return {text: neuronId,  onClick: () => setProposalPayload({ ...proposalPayload, neuronId: neuronId }) }
+    const neuronMenuItemProps = treasuryState.neurons.icp.map(([neuronId, neuronData]) => {
+        return {
+            text: neuronId,  
+            onClick: () => setProposalPayload({ ...proposalPayload_, neuronId: neuronId }),
+            selected: neuronId === selectedNeuronId
+        }
+    });
+
+    const getIncreaseDissolveDelayMenuItemProps = (neuronId) => {
+        let neuronData = treasuryState.neurons.icp.find(([neuronId_, neuronData]) => {
+            return neuronId_ === neuronId;
+        });
+        const { neuronInfo } = neuronData[1];
+        const {dissolve_delay_seconds} = neuronInfo;
+        const secondsInAMonth = 60 * 60 * 24 * 30;
+        const maxDissolveDelayInSeconds = secondsInAMonth * 96;
+        const maxAdditionalDissolveDelayInSeconds = maxDissolveDelayInSeconds - parseInt(dissolve_delay_seconds);
+        
+        let increaseDissolveDelayMenuItemProps = [];
+        for(let i = 1; i * secondsInAMonth <= maxAdditionalDissolveDelayInSeconds; i++){
+            increaseDissolveDelayMenuItemProps.push({
+                text: `${ round2Decimals(daysToMonths(hoursToDays(secondsToHours(i * secondsInAMonth)))) } months`,
+                onClick: () => setProposalPayload({ ...proposalPayload_, additionalDissolveDelaySeconds: i * secondsInAMonth }),
+            });
+        };
+        return increaseDissolveDelayMenuItemProps;
+    };
+
+    const principalsMenuItemProps = homePageState?.canisterData?.profilesMetaData?.map(({userPrincipal}) => {
+        return {
+            text: userPrincipal,  
+            onClick: () => setProposalPayload({ ...proposalPayload_, principal: userPrincipal }),
+        }
     });
 
     const neuronTopicItemProps = Object.keys(NEURON_TOPICS).map((topic) => {
-        return {text: topic,  onClick: () => setProposalPayload({...proposalPayload, topicName: topic, topic: NEURON_TOPICS[topic]})};
+        return {text: topic,  onClick: () => setProposalPayload({...proposalPayload_, topicName: topic, topic: NEURON_TOPICS[topic]})};
     });
 
     const mainMenuItemProps = [
-        { text: PROPOSAL_ACTIONS.PurchaseCycles, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.PurchaseCycles)},
-        { text: PROPOSAL_ACTIONS.UpgradeApp, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.UpgradeApp)},
-        { text: PROPOSAL_ACTIONS.AddAdmin, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.AddAdmin)},
-        { text: PROPOSAL_ACTIONS.RemoveAdmin, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.RemoveAdmin)},
-        { text: PROPOSAL_ACTIONS.DisburseNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.DisburseNeuron)},
-        { text: PROPOSAL_ACTIONS.DissolveNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.DissolveNeuron)},
-        { text: PROPOSAL_ACTIONS.SpawnNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.SpawnNeuron)},
-        { text: PROPOSAL_ACTIONS.SplitNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.SplitNeuron)},
-        { text: PROPOSAL_ACTIONS.FollowNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.FollowNeuron)},
-        { text: PROPOSAL_ACTIONS.IncreaseDissolveDelay, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.IncreaseDissolveDelay)},
-        { text: PROPOSAL_ACTIONS.CreateNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.CreateNeuron)},
-        { text: PROPOSAL_ACTIONS.IncreaseNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.IncreaseNeuron)},
-        { text: PROPOSAL_ACTIONS.ToggleSupportMode, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.ToggleSupportMode)},
+        { text: PROPOSAL_ACTIONS.PurchaseCycles, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.PurchaseCycles), selected: selectedAction === PROPOSAL_ACTIONS.PurchaseCycles},
+        { text: PROPOSAL_ACTIONS.LoadUpgrades, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.LoadUpgrades), selected: selectedAction === PROPOSAL_ACTIONS.LoadUpgrades},
+        { text: PROPOSAL_ACTIONS.InstallUpgrades, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.InstallUpgrades), selected: selectedAction === PROPOSAL_ACTIONS.InstallUpgrades},
+        { text: PROPOSAL_ACTIONS.AddAdmin, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.AddAdmin), selected: selectedAction === PROPOSAL_ACTIONS.AddAdmin},
+        { text: PROPOSAL_ACTIONS.RemoveAdmin, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.RemoveAdmin), selected: selectedAction === PROPOSAL_ACTIONS.RemoveAdmin},
+        { text: PROPOSAL_ACTIONS.DisburseNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.DisburseNeuron), selected: selectedAction === PROPOSAL_ACTIONS.DisburseNeuron},
+        { text: PROPOSAL_ACTIONS.DissolveNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.DissolveNeuron), selected: selectedAction === PROPOSAL_ACTIONS.DissolveNeuron},
+        { text: PROPOSAL_ACTIONS.SpawnNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.SpawnNeuron), selected: selectedAction === PROPOSAL_ACTIONS.SpawnNeuron},
+        { text: PROPOSAL_ACTIONS.SplitNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.SplitNeuron), selected: selectedAction === PROPOSAL_ACTIONS.SplitNeuron},
+        { text: PROPOSAL_ACTIONS.FollowNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.FollowNeuron), selected: selectedAction === PROPOSAL_ACTIONS.FollowNeuron},
+        { text: PROPOSAL_ACTIONS.IncreaseDissolveDelay, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.IncreaseDissolveDelay), selected: selectedAction === PROPOSAL_ACTIONS.IncreaseDissolveDelay},
+        { text: PROPOSAL_ACTIONS.CreateNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.CreateNeuron), selected: selectedAction === PROPOSAL_ACTIONS.CreateNeuron},
+        { text: PROPOSAL_ACTIONS.IncreaseNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.IncreaseNeuron), selected: selectedAction === PROPOSAL_ACTIONS.IncreaseNeuron},
+        { text: PROPOSAL_ACTIONS.ToggleSupportMode, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.ToggleSupportMode), selected: selectedAction === PROPOSAL_ACTIONS.ToggleSupportMode},
     ];
 
     const onChange_payload = (payload_, property, format) => {
-        setProposalPayload({...proposalPayload, ...payload_});
+        setProposalPayload({...proposalPayload_, ...payload_});
         if(format === PAYLOAD_DATA_TYPES.principal) setHasError_1(!principalHasProperFormat(payload_[property]));
         if(format === PAYLOAD_DATA_TYPES.nat) setHasError_1(!isANumber(payload_[property][0] || payload_[property]));
     };
@@ -220,7 +234,7 @@ const CreateProposalForm = (props) => {
 
     const onSubmitProposal = async () => {
         setIsLoadingModal(true);
-        let payload = {...proposalPayload};
+        let payload = {...proposalPayload_};
         if(payload.amount) payload.amount = toE8s(payload.amount);
         if(payload.percentage_to_spawn) payload.percentage_to_spawn = parseInt(payload.percentage_to_spawn);
         if(payload.additionalDissolveDelaySeconds) payload.additionalDissolveDelaySeconds = parseInt(payload.additionalDissolveDelaySeconds);
@@ -287,7 +301,7 @@ const CreateProposalForm = (props) => {
                         MenuIcon={KeyboardArrowDownIcon}
                         menuItemProps={neuronMenuItemProps}
                     />
-                    {proposalPayload?.neuronId && <Typography varient={"h6"} color={"#bdbdbd"}> {proposalPayload.neuronId} </Typography>}
+                    {proposalPayload_?.neuronId && <Typography varient={"h6"} color={"#bdbdbd"}> {proposalPayload_.neuronId} </Typography>}
                 </>
             }
             { 
@@ -304,7 +318,7 @@ const CreateProposalForm = (props) => {
                         MenuIcon={KeyboardArrowDownIcon}
                         menuItemProps={neuronTopicItemProps}
                     />
-                    {proposalPayload?.topicName && <Typography varient={"h6"} color={"#bdbdbd"}> {proposalPayload?.topicName} </Typography>}
+                    {proposalPayload_?.topicName && <Typography varient={"h6"} color={"#bdbdbd"}> {proposalPayload_?.topicName} </Typography>}
                 </>
             }
             {
@@ -314,20 +328,26 @@ const CreateProposalForm = (props) => {
                     label={"Neuron Id to Follow"}
                     rows={"1"}
                     onChange={(neuronId) => onChange_payload({followee: neuronId}, "followee", PAYLOAD_DATA_TYPES.nat)}
-                    value={proposalPayload?.followee}
+                    value={proposalPayload_?.followee}
                     format={INPUT_BOX_FORMATS.numberFormat}
                 />
             }
             {
                 proposalAction_ && PRINCIPAL_REQUIRED_ACTIONS.includes(proposalAction_) &&
-                <InputBox
-                    hasError={hasError_1}
-                    label={"Input Principal"}
-                    rows={"1"}
-                    onChange={(principal) => onChange_payload({principal}, "principal", PAYLOAD_DATA_TYPES.principal)}
-                    value={proposalPayload?.principal}
-                    format={INPUT_BOX_FORMATS.noFormat}
-                />
+                <>
+                    <MenuField
+                        xs={8}
+                        display={"flex"}
+                        alignItems={"center"}
+                        justifyContent={"left"}
+                        active={true}
+                        color={"custom"}
+                        label={`Principal to ${proposalAction_ === PROPOSAL_ACTIONS.AddAdmin ? "Add" : "Remove"}`}
+                        MenuIcon={KeyboardArrowDownIcon}
+                        menuItemProps={principalsMenuItemProps}
+                    />
+                    {proposalPayload_?.principal && <Typography varient={"h6"} color={"#bdbdbd"}> {proposalPayload_?.principal} </Typography>}
+                </>
             }
             {
                 proposalAction_ && AMOUNT_PAYLOAD_REQUIRED_ACTIONS.includes(proposalAction_) &&
@@ -336,7 +356,7 @@ const CreateProposalForm = (props) => {
                     label={"Amount "}
                     rows={"1"}
                     onChange={(amount) => onChange_payload({amount}, "amount", PAYLOAD_DATA_TYPES.nat)}
-                    value={proposalPayload?.amount}
+                    value={proposalPayload_?.amount}
                     format={INPUT_BOX_FORMATS.numberFormat}
                 />
             }
@@ -347,22 +367,32 @@ const CreateProposalForm = (props) => {
                     label={"Percent to Spawn"}
                     rows={"1"}
                     onChange={(percentage_to_spawn) => onChange_payload({percentage_to_spawn},"percentage_to_spawn", PAYLOAD_DATA_TYPES.nat)}
-                    value={proposalPayload?.percentage_to_spawn}
+                    value={proposalPayload_?.percentage_to_spawn}
                     format={INPUT_BOX_FORMATS.numberFormat}
                 />
             }
             {
-                proposalAction_ && SECONDS_PAYLOAD_REQUIRED_ACTIONS.includes(proposalAction_) &&
-                <InputBox
-                    hasError={hasError_1}
-                    label={"Seconds "}
-                    rows={"1"}
-                    onChange={(additionalDissolveDelaySeconds) => onChange_payload({additionalDissolveDelaySeconds},"additionalDissolveDelaySeconds", PAYLOAD_DATA_TYPES.nat)}
-                    value={proposalPayload?.additionalDissolveDelaySeconds}
-                    format={INPUT_BOX_FORMATS.numberFormat}
-                />
+                proposalAction_ && SECONDS_PAYLOAD_REQUIRED_ACTIONS.includes(proposalAction_) && proposalPayload_.neuronId &&
+
+                <>
+                    <MenuField
+                        xs={8}
+                        display={"flex"}
+                        alignItems={"center"}
+                        justifyContent={"left"}
+                        active={true}
+                        color={"custom"}
+                        label={"Increase Dissolve Delay By"}
+                        MenuIcon={KeyboardArrowDownIcon}
+                        menuItemProps={getIncreaseDissolveDelayMenuItemProps(proposalPayload_.neuronId)}
+                    />
+                    {proposalPayload_?.additionalDissolveDelaySeconds && 
+                    <Typography varient={"h6"} color={"#bdbdbd"}> 
+                        { daysToMonths(hoursToDays(secondsToHours(proposalPayload_?.additionalDissolveDelaySeconds))) } months
+                    </Typography>}
+                </>
             }
-            { proposalAction_ && actionReadyToSubmit(proposalAction_, proposalPayload) && !hasError_1 &&
+            { proposalAction_ && actionReadyToSubmit(proposalAction_, proposalPayload_) && !hasError_1 &&
                 <ButtonField
                     Icon={DoneIcon}
                     active={true}

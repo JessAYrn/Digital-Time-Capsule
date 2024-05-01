@@ -21,29 +21,27 @@ module{
     
     type XDRs = Float;
 
-    public func tallyVotes({ neuronsDataArray : TreasuryTypes.NeuronsDataArray; proposal: MainTypes.Proposal;}):
+    public func tallyVotes({ neuronsDataArray: TreasuryTypes.NeuronsDataArray; proposal: MainTypes.Proposal; }):
     MainTypes.VotingResults {
         var yay: Nat64 = 0;
         var nay: Nat64 = 0;
-        let proposalVotesHashMap = HashMap.fromIter<Text, MainTypes.Vote>(
-            Iter.fromArray(proposal.votes), 
-            Iter.size(Iter.fromArray(proposal.votes)), 
-            Text.equal,
-            Text.hash
-        );
-        let neuronsDataIter = Iter.fromArray<(TreasuryTypes.NeuronIdAsText, TreasuryTypes.NeuronData)>(neuronsDataArray);
-        for((neuronId, neuronData) in neuronsDataIter){
-            let {contributions} = neuronData;
-            let neuronsStakesInfoIter = Iter.fromArray<(TreasuryTypes.PrincipalAsText, TreasuryTypes.NeuronStakeInfo)>(contributions);
-            for((contributor, stakesInfo) in neuronsStakesInfoIter){
-                let {voting_power} = stakesInfo;
-                let vote = proposalVotesHashMap.get(contributor);
-                switch(vote){
-                    case null {};
-                    case(? v){ let {adopt} = v; if(adopt) yay += voting_power else nay += voting_power; };
-                };
+
+        for(vote in Iter.fromArray(proposal.votes)){
+            let (principalId, {adopt}) = vote;
+            var votingPower: Nat64 = 1;
+            label innerLoop for((neuronId, {contributions}) in Iter.fromArray(neuronsDataArray)){
+                let contributionsMap = HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.NeuronStakeInfo>(
+                    Iter.fromArray(contributions), 
+                    Iter.size(Iter.fromArray(contributions)), 
+                    Text.equal,
+                    Text.hash
+                );
+                let ?{voting_power} = contributionsMap.get(principalId) else continue innerLoop;
+                votingPower += voting_power;
             };
+            if(adopt) yay += votingPower else nay += votingPower;
         };
+        
         let total = yay + nay;
         return {yay; nay; total};
     };
@@ -51,13 +49,10 @@ module{
     public func tallyAllProposalVotes({ neuronsDataArray : TreasuryTypes.NeuronsDataArray; proposals: MainTypes.ProposalsMap;}): 
     MainTypes.Proposals{
 
-        Iter.iterate<(Nat,MainTypes.Proposal)>(
-            proposals.entries(), 
-            func((key, proposal) : (Nat,MainTypes.Proposal), _index) {
-            let voteTally =  tallyVotes({neuronsDataArray; proposal});
-            let updatedProposal = {proposal with voteTally = voteTally};
-            proposals.put(key, updatedProposal);
-        });
+        for((key, proposal) in proposals.entries()){
+            let voteTally = tallyVotes({neuronsDataArray; proposal});
+            proposals.put(key, {proposal with voteTally;});
+        };
         return Iter.toArray(proposals.entries());
     };
 }

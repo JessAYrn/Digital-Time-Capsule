@@ -1,15 +1,8 @@
 import React, { useContext, useEffect, useState} from 'react';
 import "./FileUpload.scss";
 import { mapAndSendFileToApi, getIsWithinProperFormat, updateFileMetadataInStore, createFileId } from './FileManagementTools';
-import { AppContext as AccountContext} from '../../../Routes/Account';
-import { AppContext as HomePageContext} from '../../../Routes/HomePage';
-import { AppContext as JournalContext} from '../../../Routes/App';
-import { AppContext as WalletContext} from '../../../Routes/Wallet';
-import { AppContext as TreasuryContext} from '../../../Routes/Treasury';
-import { AppContext as GroupJournalContext} from '../../../Routes/GroupJournal';
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { retrieveContext } from '../../../functionsAndConstants/Contexts';
 import { Card, CardMedia } from '@mui/material';
 import ButtonField from '../Button';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
@@ -18,6 +11,7 @@ import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import WarningIcon from '@mui/icons-material/Warning';
 import { fileLoaderHelper } from '../../../functionsAndConstants/loadingFunctions';
+import { AppContext } from '../../../Context';
 
 
 const FileUpload = (props) => {
@@ -27,7 +21,6 @@ const FileUpload = (props) => {
         elementId,
         setChangesWereMade,
         fileIndex,
-        context,
         disabled,
         dispatchActionToChangeFileMetaData,
         dispatchActionToChangeFileLoadStatus,
@@ -38,17 +31,6 @@ const FileUpload = (props) => {
         onChange,
         revokeDataURL
     } = props;
-            
-    let contexts = {
-        WalletContext,
-        JournalContext,
-        HomePageContext,
-        AccountContext,
-        TreasuryContext,
-        GroupJournalContext
-    };
-
-    let AppContext = retrieveContext(contexts, context);
 
     const { actorState } = useContext(AppContext);
     const [modalProps, setModalProps] = useState({});

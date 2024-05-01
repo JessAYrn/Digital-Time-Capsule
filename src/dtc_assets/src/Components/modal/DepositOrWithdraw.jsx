@@ -1,7 +1,7 @@
 import React, {useState, useContext} from "react";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import { Typography } from "@mui/material";
-import { AppContext } from "../../Routes/Treasury";
+import { AppContext } from "../../Context";
 import InputBox from "../Fields/InputBox";
 import {TREASURY_ACTIONS } from "../proposals/utils";
 import DoneIcon from '@mui/icons-material/Done';
@@ -12,7 +12,6 @@ import { INPUT_BOX_FORMATS } from "../../functionsAndConstants/Constants";
 const DepositOrWithdrawModal = (props) => {
     const {
         action,
-        context,
         setModalIsOpen, 
         setModalProps, 
         setIsLoadingModal

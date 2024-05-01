@@ -15,6 +15,7 @@ const DataTable = (props) => {
         onCellEditStop, 
         isLoading, 
         onRowClick,
+        onCellClick,
         Icon_1, 
         Icon_2,
         text_1, 
@@ -69,11 +70,11 @@ const DataTable = (props) => {
                             color: 'white.main'
                         }
                     }}
-                    disableRowSelectionOnClick={disabled}
-                    onCellEditStop={rowState => {}}
+                    disableRowSelectionOnClick={true}
                     onStateChange={ (state) => onStateChange_(state) }
                     columns={columns}
-                    onRowClick={(e) => onRowClick(e.row)}
+                    onCellClick={ (e) => { if(onCellClick){onCellClick(e.formattedValue)}} }
+                    onRowClick={ (e) => { if(onRowClick) onRowClick(e.row)} }
                     rows={rows}
                     getRowId={(row) => row.id}
                     rowsPerPageOptions={[5,10,20]}

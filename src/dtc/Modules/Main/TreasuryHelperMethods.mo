@@ -14,7 +14,7 @@ import Account "../../Serializers/Account";
 module{
 
     public func depositIcpToTreasury(
-        daoMetaData: MainTypes.DaoMetaData_V2,
+        daoMetaData: MainTypes.DaoMetaData_V3,
         profiles: MainTypes.UserProfilesMap,
         caller: Principal,
         amount: Nat64
@@ -30,7 +30,7 @@ module{
     };
 
     public func withdrawIcpFromTreasury(
-        daoMetaData: MainTypes.DaoMetaData_V2,
+        daoMetaData: MainTypes.DaoMetaData_V3,
         profiles: MainTypes.UserProfilesMap,
         caller: Principal,
         amount: Nat64

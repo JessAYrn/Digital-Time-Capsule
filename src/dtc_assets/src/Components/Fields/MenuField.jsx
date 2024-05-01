@@ -17,7 +17,8 @@ const MenuField = (props) => {
         disabled,
         MenuIcon,
         label,
-        color
+        color,
+        selected
     } = props;
 
     const [anchorEl, setAnchorEl] = useState(null);
@@ -48,6 +49,7 @@ const MenuField = (props) => {
                 id="basic-menu"
                 anchorEl={anchorEl}
                 open={open}
+                autoFocus={true}
                 onClose={handleClose}
                 MenuListProps={{
                 'aria-labelledby': 'basic-button',
@@ -55,7 +57,11 @@ const MenuField = (props) => {
             >
                 { menuItemProps.map( 
                     ({onClick, text}) => { 
-                    return( <MenuItem onClick={ (e) => { onClick(e); handleClose(e); }}> {text} </MenuItem> )
+                    return( 
+                    <MenuItem 
+                    selected={text === selected ? true: false }
+                    onClick={ (e) => { onClick(e); handleClose(e); }}
+                    > {text} </MenuItem> )
                 })}
             </Menu>
         </Grid>

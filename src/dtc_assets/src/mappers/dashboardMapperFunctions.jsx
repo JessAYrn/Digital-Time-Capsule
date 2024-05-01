@@ -32,13 +32,13 @@ export const usersTableColumns = [
     },
     {
       field: 'userPrincipal',
-      headerName: 'User Principal',
+      headerName: 'User Identity',
       width: 150,
       editable: false,
     },
     {
         field: 'canisterId',
-        headerName: 'Canisrer Principal',
+        headerName: 'Root Canister',
         width: 150,
         editable: false,
     },
@@ -92,7 +92,12 @@ export const mapBackendCanisterDataToFrontEndObj = (props) => {
         supportMode,
         acceptingRequests,
         journalCount,
-        requestsForAccess
+        requestsForAccess,
+        treasuryCanisterPrincipal,
+        releaseVersionLoaded,
+        releaseVersionInstalled,
+        nftId,
+        managerCanisterPrincipal,
     } = props;
 
     const requestsForAccess_ = mapRequestsForAccessToTableRows(requestsForAccess);
@@ -103,12 +108,17 @@ export const mapBackendCanisterDataToFrontEndObj = (props) => {
         backEndCyclesBurnRatePerDay: parseInt(backEndCyclesBurnRatePerDay),
         backEndPrincipal: backEndPrincipal,
         frontEndPrincipal: frontEndPrincipal,
+        treasuryCanisterPrincipal: treasuryCanisterPrincipal,
+        managerCanisterPrincipal: managerCanisterPrincipal,
         lastRecordedBackEndCyclesBalance: parseInt(lastRecordedBackEndCyclesBalance),
         isAdmin: isAdmin,
         proposals: proposals,
         supportMode: supportMode,
         acceptingRequests: acceptingRequests,
         journalCount: parseInt(journalCount),
-        requestsForAccess: requestsForAccess_
+        requestsForAccess: requestsForAccess_,
+        releaseVersionLoaded: parseInt(releaseVersionLoaded),
+        releaseVersionInstalled: parseInt(releaseVersionInstalled),
+        nftId: parseInt(nftId)
     }
 }; 

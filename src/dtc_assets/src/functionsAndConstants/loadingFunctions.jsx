@@ -1,5 +1,5 @@
 import { mapApiObjectToFrontEndJournalEntriesObject } from "../mappers/journalPageMappers";
-import { delay, backendActor, toHexString, nanoSecondsToMiliSeconds } from "./Utils";
+import { toHexString, nanoSecondsToMiliSeconds } from "./Utils";
 import { generateQrCode } from "./walletFunctions/GenerateQrCode";
 import { mapBackendCanisterDataToFrontEndObj } from "../mappers/dashboardMapperFunctions";
 import { mapBalancesDataFromApiToFrontend, mapBackendTreasuryDataToFrontEndObj } from "../mappers/treasuryPageMapperFunctions";
@@ -205,80 +205,6 @@ export const loadTreasuryData = async (actorState, dispatch, types) => {
         payload: true,
     });
     return treasuryData;
-};
-
-export const handleErrorOnFirstLoad = async (fnForLoadingData, fnForRefiringAuthentication, props_ ) => {
-    const {
-        journalState, 
-        dispatch, 
-        types
-    } = props_;
-    try{
-        let data = await fnForLoadingData();
-        return data;
-    } catch (e){
-        console.error(e)
-        await delay(5000);
-        fnForRefiringAuthentication(journalState, dispatch, types);
-        return null
-    }
-}
-
-export const recoverState = async ( location, dispatchMethods, types, connectionResult, setStateHasBeenRecovered ) => {
-
-    // dispatch state from previous route to redux store if that state exists
-    if(!location.state) return;
-    setStateHasBeenRecovered(true);
-    const{journal,wallet,homePage, account, notifications, treasury}=location.state;
-    if(dispatchMethods.journalDispatch){
-        dispatchMethods.journalDispatch({
-            actionType: types.journalTypes.SET_ENTIRE_REDUX_STATE,
-            payload: journal
-        });
-    }
-
-    if(dispatchMethods.walletDispatch){
-        dispatchMethods.walletDispatch({
-            actionType: types.walletTypes.SET_ENTIRE_WALLET_REDUX_STATE,
-            payload: wallet
-        })
-    }
-
-    if(dispatchMethods.homePageDispatch){
-        dispatchMethods.homePageDispatch({
-            actionType: types.homePageTypes.SET_ENTIRE_DASHBOARD_REDUX_STATE,
-            payload: homePage
-        })
-    }
-
-    if(dispatchMethods.accountDispatch){
-        dispatchMethods.accountDispatch({
-            actionType: types.accountTypes.SET_ENTIRE_ACCOUNT_REDUX_STATE,
-            payload: account
-        })
-    }
-
-    if(dispatchMethods.notificationsDispatch){
-        dispatchMethods.notificationsDispatch({
-            actionType: types.notificationsTypes.SET_ENTIRE_NOTIFICATIONS_REDUX_STATE,
-            payload: notifications
-        })
-    }
-
-    if(dispatchMethods.treasuryDispatch){
-        dispatchMethods.treasuryDispatch({
-            actionType: types.treasuryTypes.SET_ENTIRE_TREASURY_REDUX_STATE,
-            payload: treasury
-        })
-    }
-
-    //wipe previous location state to prevent infinite loop
-    location.state = null;
-    const backendActor_ = await backendActor(connectionResult.activeProvider);
-    dispatchMethods.actorDispatch({
-        actionType: types.actorTypes.SET_BACKEND_ACTOR,
-        payload: backendActor_
-    })
 };
 
 export const fileLoaderHelper = async (props) => {

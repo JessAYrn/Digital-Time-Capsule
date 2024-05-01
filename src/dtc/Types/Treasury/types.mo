@@ -10,14 +10,19 @@ module{
 
     public type Deposits = {
         icp: {e8s : Nat64;};
-        icp_staked: {e8s : Nat64};
+        eth: {e8s : Nat64};
+        btc: {e8s : Nat64};
+    };
+
+    public type DepositsExport = {
+        icp: {e8s : Nat64;};
+        icp_staked: {e8s : Nat64;};
         eth: {e8s : Nat64};
         btc: {e8s : Nat64};
     };
 
     public type SupportedCurrencies = {
         #Icp;
-        #Icp_staked;
         #Eth;
         #Btc;
     };
@@ -38,13 +43,18 @@ module{
     };
 
     public type UserTreasuryData = {
-        neurons : { icp: [(NeuronIdAsText, {neuronId: NeuronIdAsText})]; };
         deposits : Deposits;
+    };
+
+    public type UserTreasuryDataExport = {
+        deposits : DepositsExport;
     };
 
     public type PrincipalAsText = Text;
 
     public type UsersTreasuryDataArray = [(PrincipalAsText, UserTreasuryData)];
+
+    public type UsersTreasuryDataArrayExport = [(PrincipalAsText, UserTreasuryDataExport)];
 
     public type UsersTreasuryDataMap = HashMap.HashMap<PrincipalAsText, UserTreasuryData>;
 
@@ -55,7 +65,7 @@ module{
 
     public type TreasuryDataExport = {
         neurons : { icp: NeuronsDataArray; };
-        usersTreasuryDataArray : UsersTreasuryDataArray;
+        usersTreasuryDataArray : UsersTreasuryDataArrayExport;
         balance_icp: {e8s : Nat64};
         accountId_icp: [Nat8];
         userPrincipal: Text;

@@ -2,6 +2,7 @@ import Account "../../Serializers/Account";
 import Trie "mo:base/Trie";
 import Principal "mo:base/Principal";
 import HashMap "mo:base/HashMap";
+import Nat "mo:base/Nat";
 import JournalTypes "../Journal/types";
 import TreasuryTypes "../Treasury/types";
 import NotificationTypes "../Notifications/types";
@@ -94,12 +95,14 @@ module{
         lastRecordedTime: Int;
         profilesMetaData: ProfilesMetaData;
         isAdmin: Bool;
+        nftId: Nat;
         supportMode: Bool;
-        releaseVersion: Nat;
+        releaseVersionLoaded: Nat;
+        releaseVersionInstalled: Nat;
         requestsForAccess: RequestsForAccess;
     };
 
-    public type DaoMetaData_V2 = {
+    public type DaoMetaData_V3 = {
         managerCanisterPrincipal: Text; 
         treasuryCanisterPrincipal: Text;
         frontEndPrincipal: Text;
@@ -109,6 +112,7 @@ module{
         admin: [(Text, AdminData)];
         acceptingRequests: Bool;
         lastRecordedTime: Int;
+        nftId: Nat;
         supportMode: Bool;
         requestsForAccess: RequestsForAccess;
         defaultControllers: [Principal];
@@ -122,6 +126,7 @@ module{
         currentCyclesBalance_backend: Nat;
         currentCyclesBalance_frontend: Nat;
         currentCyclesBalance_manager: Nat;
+        currentCyclesBalance_treasury: Nat;
     };
 
 
@@ -151,7 +156,8 @@ module{
     public type ProposalActions = {
         #AddAdmin: {principal: Text};
         #RemoveAdmin: {principal: Text};
-        #UpgradeApp: {};
+        #LoadUpgrades:{};
+        #InstallUpgrades: {};
         #CreateNeuron: {amount: Nat64; };
         #IncreaseNeuron: {amount: Nat64; neuronId: Nat64; };
         #PurchaseCycles: {amount : Nat64;};
@@ -167,7 +173,7 @@ module{
     public type Vote = { adopt: Bool };
 
 
-    public let DEFAULT_DAO_METADATA_V2: DaoMetaData_V2 = {
+    public let DEFAULT_DAO_METADATA_V3: DaoMetaData_V3 = {
         managerCanisterPrincipal = "Null";
         treasuryCanisterPrincipal = "Null";
         frontEndPrincipal = "Null";
@@ -177,9 +183,10 @@ module{
         admin = [];
         acceptingRequests = true;
         lastRecordedTime = 0;
-        supportMode = false;
+        supportMode = true;
         requestsForAccess = [];
         defaultControllers = [];
+        nftId = 0;
     };
 
     public type Interface = actor {

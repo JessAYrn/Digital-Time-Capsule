@@ -19,6 +19,8 @@ export const homePageInitialState={
     canistersCyclesBalances: {
         currentCyclesBalance_backend: 1,
         currentCyclesBalance_frontend: 1,
+        currentCyclesBalance_treasury: 1,
+        currentCyclesBalance_manager: 1,
     },
     canisterData: {
         profilesMetaData: [],
@@ -26,6 +28,11 @@ export const homePageInitialState={
         backEndCyclesBurnRatePerDay: 1,
         backEndPrincipal: NULL_STRING_CAPITALIZED,
         frontEndPrincipal: NULL_STRING_CAPITALIZED,
+        treasuryCanisterPrincipal: NULL_STRING_CAPITALIZED,
+        managerCanisterPrincipal: NULL_STRING_CAPITALIZED,
+        releaseVersionLoaded: 0,
+        releaseVersionInstalled: 0,
+        nftId: 0,
         lastRecordedBackEndCyclesBalance: 1,
         proposals: [],
         isAdmin: false,
