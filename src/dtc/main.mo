@@ -432,11 +432,6 @@ shared actor class User() = this {
         ignore managerCanister.scheduleBackendCanisterToBeUpdated();
     };
 
-    public shared({caller}) func installCode_managerCanister(): async (){
-        let managerCanister: Manager.Manager = actor(daoMetaData_v3.managerCanisterPrincipal);
-        await CanisterManagementMethods.installCode_managerCanister(daoMetaData_v3);
-    };
-
     private func updateCanistersExceptBackend(): async (){
         let managerCanister: Manager.Manager = actor(daoMetaData_v3.managerCanisterPrincipal);
         await CanisterManagementMethods.installCode_managerCanister(daoMetaData_v3);
