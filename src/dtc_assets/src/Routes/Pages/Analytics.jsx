@@ -20,7 +20,7 @@ import '../../SCSS/container.scss';
 import '../../SCSS/contentContainer.scss'
 import '../../SCSS/section.scss'
 import {homePageTypes} from '../../reducers/homePageReducer';
-import { inTrillions, isANumber, round2Decimals, shortenHexString } from '../../functionsAndConstants/Utils';
+import { inTrillions, nanoSecondsToMiliSeconds, round2Decimals, shortenHexString } from '../../functionsAndConstants/Utils';
 import { copyText } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
 import DataTable from '../../Components/Fields/Table';
 import { mapRequestsForAccessToTableRows, mapUsersProfileDataToTableRows, requestsForAccessTableColumns, usersTableColumns } from '../../mappers/dashboardMapperFunctions';
@@ -40,8 +40,8 @@ const Analytics = (props) => {
     const [requestsTableIsLoading, setRequestsTableIsLoading] = useState(false);
     const [usersTableIsLoading, setUsersTableIsLoading] = useState(false);
 
-    let activeProposal = homePageState?.canisterData?.proposals?.filter(proposal => BigInt(proposal[1].timeExecuted) === BigInt(0) );
-    let inactiveProposals = homePageState?.canisterData?.proposals?.filter(proposal => { return BigInt(proposal[1].timeExecuted) !== BigInt(0)});
+    let activeProposal = homePageState?.canisterData?.proposals?.filter(proposal => nanoSecondsToMiliSeconds(parseInt(proposal[1].timeVotingPeriodEnds)) > Date.now());
+    let inactiveProposals = homePageState?.canisterData?.proposals?.filter(proposal => nanoSecondsToMiliSeconds(parseInt(proposal[1].timeVotingPeriodEnds)) < Date.now());
 
     const modalButton_close = [
         {

@@ -24,8 +24,8 @@ module{
         let profilesSize = profilesArray.size();
         var index = 0;
         while(index < profilesSize){
-            let (principal, profile) = profilesArray[index];
-            ignore installCode_(?principal, wasmModule, profile.canisterId, mode);
+            let (_, profile) = profilesArray[index];
+            ignore installCode_(null, wasmModule, profile.canisterId, mode);
             index += 1;
         };
     };

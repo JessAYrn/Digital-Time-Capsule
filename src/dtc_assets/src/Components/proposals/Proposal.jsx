@@ -2,7 +2,7 @@ import React, {useState, useContext} from "react";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import DataField from "../Fields/DataField";
 import Typography from "@mui/material/Typography";
-import { nanoSecondsToMiliSeconds, getDateAsStringMMDDYYY, shortenHexString, fromE8s, round2Decimals, secondsToHours, hoursToDays, daysToMonths } from "../../functionsAndConstants/Utils";
+import { nanoSecondsToMiliSeconds, getDateAsStringMMDDYYY, shortenHexString, fromE8s, round2Decimals, secondsToHours, hoursToDays, daysToMonths, milisecondsToNanoSeconds } from "../../functionsAndConstants/Utils";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
@@ -14,6 +14,7 @@ import ModalComponent from "../modal/Modal";
 import { copyText } from "../../functionsAndConstants/walletFunctions/CopyWalletAddress";
 import { NEURON_TOPICS } from "./CreateProposalForm";
 import { AppContext } from "../../Context";
+import { homePageTypes } from "../../reducers/homePageReducer";
 
 const Proposal = (props) => {
 
@@ -23,7 +24,8 @@ const Proposal = (props) => {
         proposer,
         action,
         timeInitiated,
-        timeExecuted,
+        executed,
+        timeVotingPeriodEnds,
         votes,
         voteTally
     } = props;
@@ -37,7 +39,11 @@ const Proposal = (props) => {
     let numberOfYays = votes.filter(vote => vote[1].adopt === true).length;
     let totalVotes = votes.length;
 
-    const { actorState } = useContext(AppContext);
+    const { actorState, homePageDispatch } = useContext(AppContext);
+
+    const timeRemainingInNanoseconds = parseInt(timeVotingPeriodEnds) - milisecondsToNanoSeconds(Date.now());
+    const timeRemainingInSeconds = timeRemainingInNanoseconds / 1000000000;
+    const timeRemainingInHours = timeRemainingInSeconds / 3600;
 
     let actionType = getProposalType(action);
     let payload = action[actionType];
@@ -60,6 +66,11 @@ const Proposal = (props) => {
                 onClick: async () => {
                     setIsLoading(true);
                     let result = await actorState.backendActor.voteOnProposal(proposalId, bool);
+                    let updatedProposals = result.ok;
+                    homePageDispatch({
+                        actionType: homePageTypes.SET_PROPOSALS_DATA,
+                        payload: updatedProposals
+                    });
                     setIsLoading(false);
                     setModalIsOpen(false);
                 }
@@ -95,6 +106,11 @@ const Proposal = (props) => {
                 alignItems="center" 
                 flexDirection={"column"} 
             >
+                { timeRemainingInNanoseconds > 0 && <DataField
+                    label={'Voting Ends in: '}
+                    text={`${round2Decimals(timeRemainingInHours)} hours`}
+                    disabled={true}
+                />}
                 <DataField
                     label={'Action: '}
                     text={`${getProposalType(action)}`}
@@ -106,18 +122,48 @@ const Proposal = (props) => {
                             Object.keys(payload).map((key, index) => {
                                 let text = payload[key];
                                 let key_ = key;
-                                if(key === "additionalDissolveDelaySeconds") {text = `${ daysToMonths(hoursToDays(secondsToHours(payload[key]))) } months`; key_ = "additionalDissolveDelay";};
-                                if(key === "amount") text = fromE8s(parseInt(payload[key])) + ' ICP';
-                                if(key === "percentage_to_spawn") text = `${payload[key]}%`;
-                                if(key === "neuronId") text = BigInt(payload[key]).toString();
-                                if(key === "followees") {text = BigInt(payload[key][0]).toString(); key_ = "followee";}
-                                if(key === "topic") {text = Object.keys(NEURON_TOPICS).find(thisKey => NEURON_TOPICS[thisKey] === payload[key])}
-
+                                let onClick = () => {};
+                                let isDisabled = true;
+                                switch(key){
+                                    case "principal":
+                                        text = shortenHexString(payload[key]);
+                                        onClick = () => copyText(payload[key]);
+                                        isDisabled = false;
+                                        break;
+                                    case "neuronId":
+                                        text = BigInt(payload[key]).toString();
+                                        onClick = () => copyText(text);
+                                        isDisabled = false;
+                                        break;
+                                    case "followees":
+                                        text = BigInt(payload[key][0]).toString();
+                                        onClick = () => copyText(text);
+                                        isDisabled = false;
+                                        break;
+                                    case "topic":
+                                        text = Object.keys(NEURON_TOPICS).find(thisKey => NEURON_TOPICS[thisKey] === payload[key]);
+                                        break;
+                                    case "additionalDissolveDelaySeconds":
+                                        text = `${ daysToMonths(hoursToDays(secondsToHours(payload[key]))) } months`; 
+                                        key_ = "additionalDissolveDelay";
+                                        break;
+                                    case "amount":
+                                        text = fromE8s(parseInt(payload[key])) + ' ICP';
+                                        break;
+                                    case "percentage_to_spawn":
+                                        text = `${payload[key]}%`;
+                                        break;
+                                    default:
+                                        break;
+                                }
+                                
                                 return(
                                     <DataField
                                         label={key_}
                                         text={`${text}`}
-                                        disabled={true}
+                                        disabled={isDisabled}
+                                        onClick={onClick}
+                                        buttonIcon={!isDisabled ? ContentCopyIcon : null}
                                     />
                                 )
                             })
@@ -136,8 +182,8 @@ const Proposal = (props) => {
                     disabled={true}
                 />
                 <DataField
-                    label={'Time Executed: '}
-                    text={`${timeExecuted[0] ? getDateAsStringMMDDYYY(nanoSecondsToMiliSeconds(parseInt(timeExecuted[0]))) : "null"}`}
+                    label={'Time Voting Concludes: '}
+                    text={`${getDateAsStringMMDDYYY(nanoSecondsToMiliSeconds(parseInt(timeVotingPeriodEnds)))}`}
                     disabled={true}
                 />
             </Grid>
@@ -193,7 +239,7 @@ const Proposal = (props) => {
                         disabled={true}
                     />
                 </Grid>
-                { !timeExecuted[0] && 
+                { timeRemainingInNanoseconds > 0 && 
                     <Grid xs={12} width={"97%"} display={"flex"} justifyContent={"center"} alignItems={"center"}>
                         <Grid xs={6} width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>
                             <ButtonField
@@ -212,6 +258,14 @@ const Proposal = (props) => {
                             />
                         </Grid>
                     </Grid>
+                }
+                { timeRemainingInNanoseconds < 0 && 
+                    <DataField
+                        label={'Executed: '}
+                        text={`${executed ? "True" : "False"}`}
+                        onClick={() => {}}
+                        disabled={true}
+                    /> 
                 }
             </Grid>
             <ModalComponent

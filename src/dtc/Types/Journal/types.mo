@@ -20,6 +20,7 @@ module {
         icp: {e8s : Nat64};
         eth: {e8s: Nat64};
         btc: {e8s: Nat64};
+        icp_staked: {e8s: Nat64};
     };
 
     public type Files = Trie.Trie2D<Text,Nat,Blob>;

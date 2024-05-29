@@ -15,9 +15,10 @@ module{
         var index = 0;
         while(index < userProfilesArray.size()){
             let (principal, profile) = userProfilesArray[index];
+            let userTreasuryDeposits = await treasuryCanister.getUserTreasuryData(principal);
             let{canisterId} = profile;
             let userCansiter : Journal.Journal = actor(Principal.toText(canisterId));
-            ignore userCansiter.saveCurrentBalances();
+            ignore userCansiter.saveCurrentBalances(userTreasuryDeposits.deposits);
             index += 1;
         }
     };

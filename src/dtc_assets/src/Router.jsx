@@ -7,6 +7,10 @@ import accountReducer, { accountInitialState, accountTypes } from './reducers/ac
 import homePageReducer, { homePageInitialState, homePageTypes } from './reducers/homePageReducer';
 import treasuryReducer, { treasuryPageInitialState, treasuryTypes } from './reducers/treasuryReducer';
 import actorReducer, { actorInitialState, actorTypes } from './reducers/actorReducer';
+import DoNotDisturbOnIcon from '@mui/icons-material/DoNotDisturbOn';
+import { copyText } from './functionsAndConstants/walletFunctions/CopyWalletAddress';
+import ButtonField from './Components/Fields/Button';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import Analytics from './Routes/Pages/Analytics';
 import Journal from './Routes/Pages/Journal';
 import Notes from './Routes/Pages/Notes';
@@ -20,6 +24,7 @@ import AccountSection from './Routes/Pages/AccountPage';
 import WalletPage from './Routes/Pages/WalletPage';
 import TreasuryPage from './Routes/Pages/TreasuryPage';
 import GroupJournalPage from './Routes/Pages/GroupJournalPage';
+import { Typography } from '@mui/material';
 
 const Router = (props) => {
 
@@ -93,14 +98,41 @@ const Router = (props) => {
         try{
             setIsLoadingModal(true);
             setModalIsOpen(true);
-            let response = await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes);
-            setModalIsOpen(response?.openModal);
-            setModalProps(response)
-            setIsLoadingModal(false);    
-        } catch(e){ 
-            // disconnect the user if there is an error
-            document.location.reload(); 
-        }
+            const loadSuccessful = await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes);
+            if(loadSuccessful) setModalIsOpen(false);
+            else {
+                actorState.backendActor.requestApproval();
+                let {userObject} = actorState;
+                let {principal} = userObject;
+                setModalProps({
+                    bigText: "Request For Access Has Been Sent To The DAO Admin", 
+                    Icon: DoNotDisturbOnIcon,
+                    flexDirection: "column",
+                    smallText: "If you are the owner of this application, attempting to log in for the first time, you must log in using the wallet that owns the Utility NFT that corresponds to this server.",
+                    components: [
+                        {
+                            Component: Typography,
+                            props: {
+                                children: "Below is your Principal ID. Share it with the DAO admin so they know who to admit: ",
+                            }
+                        },
+                        {
+                            Component: ButtonField,
+                            props: {
+                                text: `${principal}`,
+                                Icon: ContentCopyIcon,
+                                onClick: async () => { 
+                                    const promise = new Promise ((res, rej) => {setModalIsOpen(false); res()});
+                                    promise.then(() => { copyText(principal); });
+                                }
+                            }
+                        },
+                    ]
+                    
+                })
+            };  
+            setIsLoadingModal(false);
+        } catch(e){ document.location.reload(); }
     }, [actorState.backendActor]);
 
     const displayComponent = useMemo(() => {

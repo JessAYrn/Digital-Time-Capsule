@@ -54,7 +54,7 @@ module{
         switch(existing) {
             case null {
                 Cycles.add(1_000_000_000_000);
-                let newUserJournal = await Journal.Journal(callerId);
+                let newUserJournal = await Journal.Journal();
                 let amountAccepted = await newUserJournal.wallet_receive();
                 ignore CanisterManagementMethods.addControllers(
                     [daoMetaData.managerCanisterPrincipal],

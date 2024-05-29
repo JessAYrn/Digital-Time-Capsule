@@ -150,7 +150,8 @@ module{
         action: ProposalActions;
         proposer: Text;
         timeInitiated: Int;
-        timeExecuted: ?Int;
+        executed: Bool;
+        timeVotingPeriodEnds: Int;
     };
 
     public type ProposalActions = {

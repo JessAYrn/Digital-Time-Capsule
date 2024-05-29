@@ -13,7 +13,7 @@ const DisplayProposals = (props) => {
                     <AccordionField>
                         {proposals?.map(([proposalId, proposal]) => {
                             let id = parseInt(proposalId);
-                            let {action, payload, proposer, timeExecuted, timeInitiated, voteTally, votes} = proposal;
+                            let {action, payload, proposer, executed, timeVotingPeriodEnds, timeInitiated, voteTally, votes} = proposal;
                             return (
                                 <div 
                                     title={`Propsoal #${id}`}
@@ -21,7 +21,8 @@ const DisplayProposals = (props) => {
                                     proposer={proposer}
                                     action={action}
                                     timeInitiated={timeInitiated}
-                                    timeExecuted={timeExecuted}
+                                    timeVotingPeriodEnds={timeVotingPeriodEnds}
+                                    executed={executed}
                                     votes={votes}
                                     voteTally={voteTally}
                                     CustomComponent={Proposal}

@@ -1,16 +1,13 @@
 import { mapApiObjectToFrontEndJournalEntriesObject } from "../mappers/journalPageMappers";
-import { toHexString, nanoSecondsToMiliSeconds } from "./Utils";
+import { toHexString, nanoSecondsToMiliSeconds, shortenHexString } from "./Utils";
 import { generateQrCode } from "./walletFunctions/GenerateQrCode";
 import { mapBackendCanisterDataToFrontEndObj } from "../mappers/dashboardMapperFunctions";
 import { mapBalancesDataFromApiToFrontend, mapBackendTreasuryDataToFrontEndObj } from "../mappers/treasuryPageMapperFunctions";
 import { getFileUrl_fromApi } from "../Components/Fields/fileManger/FileManagementTools";
-import DoNotDisturbOnIcon from '@mui/icons-material/DoNotDisturbOn';
-import ButtonField from "../Components/Fields/Button";
 
 
-export const loadAllDataIntoReduxStores = async (states, dispatchFunctions, types, stateHasBeenRecovered) => {
-    //doesn't reload data if the data has already been recovered
-    if(stateHasBeenRecovered) return; 
+export const loadAllDataIntoReduxStores = async (states, dispatchFunctions, types) => {
+    let loadSuccessful = true;
 
     let {walletState, homePageState, journalState, actorState, accountState, notificationsState, treasuryState} = states;
     let {journalDispatch, walletDispatch, homePageDispatch, accountDispatch, notificationsDispatch, treasuryDispatch} = dispatchFunctions;
@@ -20,26 +17,7 @@ export const loadAllDataIntoReduxStores = async (states, dispatchFunctions, type
     //the account creation is unsuccessful, then it returns
     let hasAccount = await actorState.backendActor.hasAccount();
     if(!hasAccount) accountCreationAttemptResults = await actorState.backendActor.create();
-    if(accountCreationAttemptResults && "err" in accountCreationAttemptResults){
-        return {
-            openModal: true, 
-            bigText: "Not Authorized To Enter", 
-            Icon: DoNotDisturbOnIcon,
-            displayConnectButton: true,
-            smallText: "If you are the owner of this application, attempting to log in for the first time, you must log in using the wallet that owns the Utility NFT that corresponds to this server.",
-            components: [{
-                Component: ButtonField,
-                props: {
-                    active: true,
-                    text: "Request Access",
-                    onClick: () => {
-                        actorState.backendActor.requestApproval();
-                        alert("Your request for access has been sent.");
-                    }
-                }
-            }]
-        }
-    }
+    if(accountCreationAttemptResults && "err" in accountCreationAttemptResults){ loadSuccessful = false; return loadSuccessful;}
 
     //calls the backend and loads the retrieved data into the appropriate redux stores.
     let promises = [];
@@ -50,7 +28,7 @@ export const loadAllDataIntoReduxStores = async (states, dispatchFunctions, type
     if(!notificationsState.dataHasBeenLoaded) promises.push(loadNotificationsData(actorState, notificationsDispatch, notificationsTypes));
     if(!treasuryState.dataHasBeenLoaded) promises.push(loadTreasuryData(actorState, treasuryDispatch, treasuryTypes));
     await Promise.all(promises);
-    return {}
+    return loadSuccessful
 };
 
 export const loadNotificationsData = async (actorState, notificationsDispatch, notificationsTypes) => {

@@ -60,10 +60,6 @@ const LoginPage = (props) => {
             payload: actor
         });
         setIsLoading(false);
-        console.log({userObject: {...userObject}, actor: {...actor}} );
-        // const actor = getBackendActor(userObject);
-        // console.log(result);
-        // Handle code will go here...
     };
 
     const mainMenuItemProps = [

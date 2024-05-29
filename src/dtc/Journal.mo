@@ -26,7 +26,7 @@ import AnalyticsTypes "Types/Analytics/types";
 import GovernanceHelperMethods "Modules/Main/GovernanceHelperMethods";
 import NnsCyclesMinting "NNS/NnsCyclesMinting";
 
-shared(msg) actor class Journal (principal : Principal) = this {
+shared(msg) actor class Journal () = this {
 
     private stable var journalArray : [(Nat, JournalTypes.JournalEntry)] = [];
 
@@ -77,6 +77,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         icp = {e8s = 0};
         eth = {e8s = 0};
         btc = {e8s = 0};
+        icp_staked = {e8s = 0};
     };
 
     private stable var dataUsageInBytes = 0;
@@ -89,7 +90,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
 
     private var txFee : Nat64 = 10_000;
 
-    private var capacity = 1000000000000;
+    private var capacity = 1_500_000_000_000;
 
     private var nanosecondsInADay = 86400000000000;
 
@@ -344,14 +345,18 @@ shared(msg) actor class Journal (principal : Principal) = this {
         };
     };
 
-    public shared({caller}) func saveCurrentBalances() : async () {
+    public shared({caller}) func saveCurrentBalances(treasuryBalances: JournalTypes.Balances) : async () {
         if( Principal.toText(caller) != mainCanisterId_) { throw Error.reject("Unauthorized access."); };
-        let icp = await ledger.account_balance({ account = userAccountId() });
+        let thisCanisterIcpBalance = await ledger.account_balance({ account = userAccountId() });
         //will need to retreive the proper balances of the other currencies once they've been integrated
-        let icp_staked = {e8s: Nat64 = 0};
-        let btc = {e8s: Nat64 = 0};
-        let eth = {e8s: Nat64 = 0};
-        let balances = {icp; icp_staked; btc; eth;};
+        let thisCanisterBtcBalance = {e8s: Nat64 = 0};
+        let thisCanisterEth = {e8s: Nat64 = 0};
+        let balances = {
+            icp = {e8s: Nat64 = thisCanisterIcpBalance.e8s + treasuryBalances.icp.e8s}; 
+            icp_staked = treasuryBalances.icp_staked;
+            btc = {e8s: Nat64 = thisCanisterBtcBalance.e8s + treasuryBalances.btc.e8s}; 
+            eth = {e8s: Nat64 = thisCanisterEth.e8s + treasuryBalances.eth.e8s;};
+        };
         balancesMap.put(Int.toText(Time.now()), balances);
     };
 

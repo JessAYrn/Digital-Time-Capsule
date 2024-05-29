@@ -114,6 +114,33 @@ shared actor class Treasury (principal : Principal) = this {
         return Iter.toArray(usersDataExport);
     };
 
+    public query({caller}) func getUserTreasuryData(userPrincipal: Principal): async TreasuryTypes.UserTreasuryDataExport {
+        if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
+        let userPrincipalAsText = Principal.toText(userPrincipal);
+        let ?{deposits} = usersTreasuryDataMap.get(userPrincipalAsText) else return {
+            deposits = {
+                icp = {e8s : Nat64 = 0;};
+                icp_staked = {e8s : Nat64 = 0;};
+                eth = {e8s : Nat64 = 0};
+                btc = {e8s : Nat64 = 0};
+            };
+        };
+        let e8s = SyncronousHelperMethods.computeTotalStakeDeposit(neuronDataMap, userPrincipalAsText);
+        return {deposits = {deposits with icp_staked = {e8s}}};
+    };
+
+    public query({caller}) func getDaoTotalStakeAndVotingPower(): async {totalVotingPower: Nat64; totalStake: Nat64} {
+        if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
+        var totalVotingPower: Nat64 = 0;
+        var totalStake: Nat64 = 0;
+        label loop_ for((neuronIdAsText, neuronData) in neuronDataMap.entries()){
+            let ?neuronInfo = neuronData.neuronInfo else continue loop_;
+            totalVotingPower += neuronInfo.voting_power;
+            totalStake += neuronInfo.stake_e8s;
+        };
+        return {totalVotingPower; totalStake};
+    }; 
+
     public shared({caller})func creditUserIcpDeposits(userPrincipal: Principal, amount: Nat64): async () {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         SyncronousHelperMethods.creditUserIcpDeposits(usersTreasuryDataMap, updateTokenBalances, {userPrincipal = Principal.toText(userPrincipal); amount});
@@ -127,8 +154,9 @@ shared actor class Treasury (principal : Principal) = this {
     public shared({caller}) func saveCurrentBalances() : async () {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         let icp = await ledger.account_balance({ account = tresasuryAccountId() });
+        let {totalStake} = await getDaoTotalStakeAndVotingPower();
         //will need to retreive the proper balances of the other currencies once they've been integrated
-        let icp_staked = {e8s: Nat64 = 0};
+        let icp_staked = {e8s: Nat64 = totalStake};
         let btc = {e8s: Nat64 = 0};
         let eth = {e8s: Nat64 = 0};
         let balances = {icp; icp_staked; btc; eth;};
