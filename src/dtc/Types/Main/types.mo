@@ -29,10 +29,10 @@ module{
 
     public type JournalData = {
         userJournalData : ([JournalTypes.JournalEntryExportKeyValuePair], JournalTypes.Bio,); 
-        email: ?Text; 
         userName: ?Text;
         rootCanisterPrincipal: Text;
         userPrincipal: Text;
+        cyclesBalance: Nat;
     };
 
     public type Error = {

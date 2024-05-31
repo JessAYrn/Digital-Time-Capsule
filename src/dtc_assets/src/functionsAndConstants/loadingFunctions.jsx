@@ -9,9 +9,9 @@ import { getFileUrl_fromApi } from "../Components/Fields/fileManger/FileManageme
 export const loadAllDataIntoReduxStores = async (states, dispatchFunctions, types) => {
     let loadSuccessful = true;
 
-    let {walletState, homePageState, journalState, actorState, accountState, notificationsState, treasuryState} = states;
-    let {journalDispatch, walletDispatch, homePageDispatch, accountDispatch, notificationsDispatch, treasuryDispatch} = dispatchFunctions;
-    let {journalTypes, walletTypes, homePageTypes, accountTypes, notificationsTypes, treasuryTypes } = types;
+    let {walletState, homePageState, journalState, actorState, notificationsState, treasuryState} = states;
+    let {journalDispatch, walletDispatch, homePageDispatch, notificationsDispatch, treasuryDispatch} = dispatchFunctions;
+    let {journalTypes, walletTypes, homePageTypes, notificationsTypes, treasuryTypes } = types;
     let accountCreationAttemptResults;
     //checks to see if user has an account. If not, then it attemptes to make an account, if 
     //the account creation is unsuccessful, then it returns
@@ -24,7 +24,6 @@ export const loadAllDataIntoReduxStores = async (states, dispatchFunctions, type
     if(!walletState.dataHasBeenLoaded) promises.push(loadWalletData(actorState, walletDispatch, walletTypes));
     if(!homePageState.dataHasBeenLoaded) promises.push(loadCanisterData(actorState, homePageDispatch, homePageTypes));
     if(!journalState.dataHasBeenLoaded) promises.push(loadJournalData(actorState, journalDispatch, journalTypes));
-    if(!accountState. dataHasBeenLoaded) promises.push(loadAccountData(actorState, accountDispatch, accountTypes));
     if(!notificationsState.dataHasBeenLoaded) promises.push(loadNotificationsData(actorState, notificationsDispatch, notificationsTypes));
     if(!treasuryState.dataHasBeenLoaded) promises.push(loadTreasuryData(actorState, treasuryDispatch, treasuryTypes));
     await Promise.all(promises);
@@ -40,25 +39,6 @@ export const loadNotificationsData = async (actorState, notificationsDispatch, n
     notificationsDispatch({
         actionType: notificationsTypes.SET_DATA_HAS_BEEN_LOADED,
         payload: true
-    });
-};
-
-export const loadAccountData = async (actorState, accountDispatch, accountTypes) => {
-    let accountData = await actorState.backendActor.readJournal();
-    accountData = accountData.ok;
-    let {email, userName} = accountData;
-    let metaData = {};
-    if(email) metaData.email = email;
-    if(userName) metaData.userName = userName;
-    if(Object.keys(metaData).length) {
-        accountDispatch({
-            payload: metaData,
-            actionType: accountTypes.SET_METADATA
-        });
-    };
-    accountDispatch({
-        actionType: accountTypes.SET_DATA_HAS_BEEN_LOADED,
-        payload: true,
     });
 };
 
@@ -169,7 +149,6 @@ export const loadTreasuryData = async (actorState, dispatch, types) => {
     treasuryBalances = mapBalancesDataFromApiToFrontend(treasuryBalances);
     treasuryData = treasuryData.ok;
     treasuryData = mapBackendTreasuryDataToFrontEndObj(treasuryData);
-    console.log(treasuryData);
     dispatch({
         actionType: types.SET_TREASURY_DATA,
         payload: treasuryData

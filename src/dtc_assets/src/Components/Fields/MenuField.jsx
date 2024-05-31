@@ -8,6 +8,7 @@ const MenuField = (props) => {
     const {
         isLoading,
         menuItemProps,
+        Component,
         xs,
         md,
         display,
@@ -55,7 +56,7 @@ const MenuField = (props) => {
                 'aria-labelledby': 'basic-button',
                 }}
             >
-                { menuItemProps.map( 
+                { !Component &&  menuItemProps.map( 
                     ({onClick, text}) => { 
                     return( 
                     <MenuItem 
@@ -63,6 +64,7 @@ const MenuField = (props) => {
                     onClick={ (e) => { onClick(e); handleClose(e); }}
                     > {text} </MenuItem> )
                 })}
+                { Component && <Component/> }
             </Menu>
         </Grid>
     )

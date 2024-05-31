@@ -3,7 +3,6 @@ import notificationsReducer, { notificationsInitialState, notificationsTypes } f
 import journalReducer, { initialState, types } from './reducers/journalReducer';
 import { allStatesLoaded, loadAllDataIntoReduxStores } from './functionsAndConstants/loadingFunctions';
 import walletReducer, { walletInitialState, walletTypes } from './reducers/walletReducer';
-import accountReducer, { accountInitialState, accountTypes } from './reducers/accountReducer';
 import homePageReducer, { homePageInitialState, homePageTypes } from './reducers/homePageReducer';
 import treasuryReducer, { treasuryPageInitialState, treasuryTypes } from './reducers/treasuryReducer';
 import actorReducer, { actorInitialState, actorTypes } from './reducers/actorReducer';
@@ -20,7 +19,6 @@ import { NAV_LINKS, JOURNAL_TABS } from './functionsAndConstants/Constants';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from './Theme';
 import { AppContext } from './Context';
-import AccountSection from './Routes/Pages/AccountPage';
 import WalletPage from './Routes/Pages/WalletPage';
 import TreasuryPage from './Routes/Pages/TreasuryPage';
 import GroupJournalPage from './Routes/Pages/GroupJournalPage';
@@ -33,7 +31,6 @@ const Router = (props) => {
     const [journalState, journalDispatch] = useReducer(journalReducer, initialState);
     const [notificationsState, notificationsDispatch] = useReducer(notificationsReducer, notificationsInitialState);
     const [walletState, walletDispatch] = useReducer(walletReducer, walletInitialState);
-    const [accountState, accountDispatch] = useReducer(accountReducer, accountInitialState);
     const [homePageState, homePageDispatch] = useReducer(homePageReducer, homePageInitialState);
     const [treasuryState, treasuryDispatch] = useReducer(treasuryReducer, treasuryPageInitialState);
     const [actorState, actorDispatch] = useReducer(actorReducer, actorInitialState);
@@ -45,7 +42,6 @@ const Router = (props) => {
     const ReducerDispatches={
         walletDispatch,
         journalDispatch,
-        accountDispatch,
         homePageDispatch,
         actorDispatch,
         notificationsDispatch,
@@ -55,7 +51,6 @@ const Router = (props) => {
     const ReducerTypes={
         journalTypes:types,
         walletTypes,
-        accountTypes,
         homePageTypes,
         actorTypes,
         notificationsTypes,
@@ -65,7 +60,6 @@ const Router = (props) => {
     const ReducerStates = {
         journalState,
         walletState,
-        accountState,
         homePageState,
         actorState,
         notificationsState,
@@ -75,8 +69,6 @@ const Router = (props) => {
     const context = {
         journalState,
         journalDispatch,
-        accountState,
-        accountDispatch,
         walletDispatch,
         walletState,
         homePageDispatch,
@@ -140,13 +132,11 @@ const Router = (props) => {
             journalState,
             notificationsState,
             walletState,
-            accountState,
             homePageState,
             treasuryState
         });
     },[
         actorState.userObject.principal, 
-        accountState.dataHasBeenLoaded,
         treasuryState.dataHasBeenLoaded,
         journalState.dataHasBeenLoaded,
         walletState.dataHasBeenLoaded,
@@ -167,7 +157,6 @@ const Router = (props) => {
                     <>
                         {route === NAV_LINKS.dashboard && <Analytics/>}
                         {route === NAV_LINKS.journal && <JournalComponent />}
-                        {route === NAV_LINKS.account && <AccountSection />}
                         {route === NAV_LINKS.wallet && <WalletPage />}
                         {route === NAV_LINKS.treasury && <TreasuryPage />}
                         {route === NAV_LINKS.groupJournal && <GroupJournalPage />}

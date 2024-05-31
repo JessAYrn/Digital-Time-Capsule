@@ -40,8 +40,6 @@ const LoginPage = (props) => {
         actorDispatch,
         walletState,
         walletDispatch,
-        accountState,
-        accountDispatch,
         homePageState,
         homePageDispatch 
     } = useContext(AppContext);

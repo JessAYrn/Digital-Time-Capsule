@@ -165,13 +165,23 @@ shared(msg) actor class Journal () = this {
     };
 
     public query({caller}) func readJournal() : 
-    async ([JournalTypes.JournalEntryExportKeyValuePair], JournalTypes.Bio, Text) {
+    async {
+        journalAsArrayExport: [JournalTypes.JournalEntryExportKeyValuePair];  
+        biography: JournalTypes.Bio;  
+        canisterPrincipal: Text;
+        cyclesBalance: Nat;
+    } {
         if( Principal.toText(caller) != mainCanisterId_ ) { throw Error.reject("Unauthorized access."); };
         let journalAsArray = Iter.toArray(journalMap.entries());
-        let currentTime = Time.now();
         let journalAsArrayExport = mapJournalEntriesArrayToExport(journalAsArray);
         let journalCanisterPrincipal = Principal.fromActor(this); 
-        return (journalAsArrayExport, biography, Principal.toText(journalCanisterPrincipal));
+        balance := Cycles.balance();
+        return {
+            journalAsArrayExport; 
+            biography; 
+            canisterPrincipal = Principal.toText(journalCanisterPrincipal);
+            cyclesBalance = balance;
+        };
     };
 
     public shared({caller}) func updateNotifications(): async (){

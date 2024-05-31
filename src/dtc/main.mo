@@ -112,8 +112,14 @@ shared actor class User() = this {
             case null{ return #err(#NotFound); };
             case(? v){
                 let journal: Journal.Journal = actor(Principal.toText(v.canisterId)); 
-                let (entriesArray, bio, canisterPrincipal) = await journal.readJournal();
-                return #ok({ userJournalData = (entriesArray, bio); email = v.email; userName = v.userName; userPrincipal = Principal.toText(caller) ; rootCanisterPrincipal = canisterPrincipal; });
+                let {journalAsArrayExport; biography; canisterPrincipal; cyclesBalance;} = await journal.readJournal();
+                return #ok({ 
+                    userJournalData = (journalAsArrayExport, biography); 
+                    userName = v.userName; 
+                    userPrincipal = Principal.toText(caller); 
+                    rootCanisterPrincipal = canisterPrincipal; 
+                    cyclesBalance;
+                });
             };
         };   
     };

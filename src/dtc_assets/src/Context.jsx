@@ -14,8 +14,6 @@ const APP_CONTEXTS={
     journalDispatch: () => {},
     walletState:{},
     walletDispatch:()=>{},
-    accountState:{},
-    accountDispatch:()=>{},
     homePageDispatch:()=>{},
     homePageState:{},
     actorState:{},
