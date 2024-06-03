@@ -64,7 +64,7 @@ const MenuField = (props) => {
                     onClick={ (e) => { onClick(e); handleClose(e); }}
                     > {text} </MenuItem> )
                 })}
-                { Component && <Component/> }
+                { Component && <Component setAnchorEl={setAnchorEl}/> }
             </Menu>
         </Grid>
     )

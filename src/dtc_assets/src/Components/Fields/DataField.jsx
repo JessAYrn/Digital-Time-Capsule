@@ -12,7 +12,9 @@ const DataField = (props) => {
         onClick,
         isLoading,
         buttonIcon,
-        disabled
+        disabled,
+        labelColor,
+        buttonColor,
     } = props;
     
 
@@ -21,10 +23,11 @@ const DataField = (props) => {
             <Paper className={` dataField`} color={'secondary'}>
                 <Grid container columns={12} display="flex" justifyContent="center" alignItems="center">
                     <Grid xs={6} display="flex" justifyContent="center" alignItems="center">
-                        <Typography style={{width: "100%", display:"flex", justifyContent:"left", alignItems:"center"}}>{label}</Typography>
+                        <Typography style={{width: "100%", display:"flex", justifyContent:"left", alignItems:"center", color: labelColor }}>{label}</Typography>
                     </Grid>
                     <Grid xs={6} display="flex" justifyContent="right" alignItems="center">
                         <ButtonField
+                            color={buttonColor}
                             transparentBackground={true}
                             elevation={0}
                             isLoading={isLoading}

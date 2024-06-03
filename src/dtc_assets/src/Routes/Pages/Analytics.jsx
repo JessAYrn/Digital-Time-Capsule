@@ -15,10 +15,6 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import Grid from '@mui/material/Unstable_Grid2';
 import AccordionField from '../../Components/Fields/Accordion';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import "../../SCSS/scrollable.scss";
-import '../../SCSS/container.scss';
-import '../../SCSS/contentContainer.scss'
-import '../../SCSS/section.scss'
 import {homePageTypes} from '../../reducers/homePageReducer';
 import { inTrillions, nanoSecondsToMiliSeconds, round2Decimals, shortenHexString } from '../../functionsAndConstants/Utils';
 import { copyText } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';

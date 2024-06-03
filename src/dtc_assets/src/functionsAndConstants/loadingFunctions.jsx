@@ -45,7 +45,7 @@ export const loadNotificationsData = async (actorState, notificationsDispatch, n
 export const loadJournalData = async (actorState, journalDispatch, types) => {
     let journal = await actorState.backendActor.readJournal();
     journal = journal.ok;
-    let { userJournalData, userPrincipal } = journal;
+    let { userJournalData, userPrincipal, cyclesBalance, rootCanisterPrincipal } = journal;
     let [journalEntries, journalBio] = userJournalData;
     const filesMetaData = journalBio.photos.map(fileData => {
         return { ...fileData, lastModified : parseInt(fileData.lastModified), isLoading: true };
@@ -60,6 +60,15 @@ export const loadJournalData = async (actorState, journalDispatch, types) => {
         payload: journalBio,
         actionType: types.SET_BIO
     })
+    journalDispatch({
+        payload: {
+            userPrincipal,
+            cyclesBalance: parseInt(cyclesBalance),
+            rootCanisterPrincipal
+        
+        },
+        actionType: types.SET_USER_META_DATA
+    });
     journalDispatch({
         payload: journalEntries,
         actionType: types.SET_JOURNAL
