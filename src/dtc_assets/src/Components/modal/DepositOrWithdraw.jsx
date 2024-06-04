@@ -6,8 +6,9 @@ import InputBox from "../Fields/InputBox";
 import {TREASURY_ACTIONS } from "../proposals/utils";
 import DoneIcon from '@mui/icons-material/Done';
 import ButtonField from "../Fields/Button";
-import { isANumber, toE8s } from "../../functionsAndConstants/Utils";
+import { fromE8s, isANumber, toE8s } from "../../functionsAndConstants/Utils";
 import { INPUT_BOX_FORMATS } from "../../functionsAndConstants/Constants";
+import DataField from "../Fields/DataField";
 
 const DepositOrWithdrawModal = (props) => {
     const {
@@ -17,7 +18,7 @@ const DepositOrWithdrawModal = (props) => {
         setIsLoadingModal
     } = props;
 
-    const {actorState} = useContext(AppContext);
+    const {actorState, walletState, treasuryState} = useContext(AppContext);
 
     const [amount, setAmount] = useState(null);
     const [hasError, setHasError] = useState(true);
@@ -48,6 +49,28 @@ const DepositOrWithdrawModal = (props) => {
         alignItems="center" 
         flexDirection={"column"}
         >
+            {
+                action === TREASURY_ACTIONS.WithdrawIcpFromTreasury && 
+                <Grid xs={12} display="flex" justifyContent="center" alignItems="center">
+                    <DataField
+                        label={'Total Liquid Treasury Deposits: '}
+                        text={`${fromE8s(treasuryState.userTreasuryData?.deposits.icp || 0) } ICP`}
+                        isLoading={!treasuryState.dataHasBeenLoaded}
+                        disabled={true}
+                    />
+                </Grid>
+            }
+            {
+                action === TREASURY_ACTIONS.DepositIcpToTreasury && 
+                <Grid xs={12} display="flex" justifyContent="center" alignItems="center">
+                    <DataField
+                        label={'Wallet Balance: '}
+                        text={`${fromE8s(walletState.walletData.balance)} ICP`}
+                        isLoading={!walletState.dataHasBeenLoaded}
+                        disabled={true}
+                    />
+                </Grid>
+            }
             <InputBox
             width={"100%"}
             label={`Amount To ${action_}: `}

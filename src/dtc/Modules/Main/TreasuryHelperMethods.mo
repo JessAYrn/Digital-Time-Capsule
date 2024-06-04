@@ -40,6 +40,8 @@ module{
         let userCanister: Journal.Journal = actor(Principal.toText(userCanisterId));
         let userAccountId = await userCanister.canisterAccount();
         let treasury: Treasury.Treasury = actor(daoMetaData.treasuryCanisterPrincipal);
+        let {icp = userIcpDeposits} = await treasury.getUserTreasuryData(caller);
+        if(userIcpDeposits.e8s < amount) {throw Error.reject("Insufficient funds");};
         let withdrawelamount = Int64.toNat64(Float.toInt64(Float.trunc(Float.fromInt64(Int64.fromNat64(amount)) * 0.995)));
         let {blockIndex} = await treasury.transferICP(withdrawelamount,userAccountId);
         await treasury.debitUserIcpDeposits(caller, amount);

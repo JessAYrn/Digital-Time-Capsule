@@ -16,7 +16,6 @@ import AccountBalanceWalletOutlinedIcon from '@mui/icons-material/AccountBalance
 import CreateProposalForm from "../../Components/proposals/CreateProposalForm";
 import DepositOrWithdrawModal from "../../Components/modal/DepositOrWithdraw";
 import Graph from "../../Components/Fields/Chart";
-import './TreasuryPage.scss'
 import { CHART_TYPES, GRAPH_DATA_SETS, GRAPH_DISPLAY_LABELS } from "../../functionsAndConstants/Constants";
 import { TREASURY_ACTIONS } from "../../Components/proposals/utils";
 import AccordionField from "../../Components/Fields/Accordion";

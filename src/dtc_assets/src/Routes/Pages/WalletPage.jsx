@@ -1,7 +1,6 @@
 import React, { useContext, useState} from 'react';
 import { AppContext } from '../../Context';
 import { NavBar } from '../../Components/navigation/NavBar';
-import './WalletPage.scss';
 import { e8sInOneICP, CHART_TYPES, GRAPH_DISPLAY_LABELS, GRAPH_DATA_SETS } from '../../functionsAndConstants/Constants';
 import { copyText } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
 import { loadWalletData } from '../../functionsAndConstants/loadingFunctions';
@@ -100,7 +99,15 @@ const WalletPage = (props) => {
                     defaultLabel={GRAPH_DISPLAY_LABELS.icp}
                     defaultDataSetName={GRAPH_DATA_SETS.week}
                 />
-                <Paper elevation={24} className={'walletDataPaperComponent'}>
+                <Paper elevation={24} className={''} sx={{
+                    backgroundColor: "rgba(52, 52, 52, 0.8)",
+                    width: "100%",
+                    height: "auto",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    flexDirection: "column",
+                }}>
                     <DataField
                         label={'Balance: '}
                         text={`${walletState.walletData.balance /  e8sInOneICP} ICP`}

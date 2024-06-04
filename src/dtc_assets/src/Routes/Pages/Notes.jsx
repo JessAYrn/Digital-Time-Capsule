@@ -1,7 +1,6 @@
 import { NavBar } from "../../Components/navigation/NavBar";
 import React, { useContext } from 'react';
 import { AppContext } from "../../Context";
-import './Notes.scss';
 
 const Notes = (props) => {
   const { journalState, journalDispatch} = useContext(AppContext);

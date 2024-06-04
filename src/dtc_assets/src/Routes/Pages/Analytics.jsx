@@ -1,6 +1,5 @@
 import React, { useContext, useState} from 'react';
 import { NavBar } from '../../Components/navigation/NavBar';
-import "./Analytics.scss"
 import DataField from '../../Components/Fields/DataField';
 import Switch from '../../Components/Fields/Switch';
 import { CANISTER_DATA_FIELDS } from '../../functionsAndConstants/Constants';
@@ -227,7 +226,7 @@ const Analytics = (props) => {
                 flexDirection={"column"}
                 marginTop={"60px"}
                 >
-                    <Paper className='analytics paper'>
+                    <Paper sx={{ width: "100%", backgroundColor: "rgba(52,52,52, 0.8)" }}>
                         <Grid xs={12} display="flex" justifyContent="center" alignItems="center" paddingBottom={"15px"} flexDirection={"column"}>
                             <DataField
                                 label={'Journals Created:'}
