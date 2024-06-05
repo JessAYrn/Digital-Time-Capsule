@@ -66,6 +66,7 @@ module{
     public type TreasuryDataExport = {
         neurons : { icp: NeuronsDataArray; };
         usersTreasuryDataArray : UsersTreasuryDataArrayExport;
+        totalDeposits : {e8s : Nat64};
         balance_icp: {e8s : Nat64};
         accountId_icp: [Nat8];
         userPrincipal: Text;

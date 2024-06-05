@@ -189,6 +189,7 @@ export const mapBackendTreasuryDataToFrontEndObj = (props) => {
     const {
         usersTreasuryDataArray,
         userPrincipal,
+        totalDeposits,
         accountId_icp,
         balance_icp,
         neurons
@@ -196,6 +197,8 @@ export const mapBackendTreasuryDataToFrontEndObj = (props) => {
     
     const accountId_icp_ = toHexString(new Uint8Array( [...accountId_icp]));
     const balance_icp_ = parseInt(balance_icp.e8s);
+    const totalDeposits_ = parseInt(totalDeposits.e8s);
+    const daoTotalProfit = balance_icp_ - totalDeposits_;
     const usersTreasuryDataArray_ = usersTreasuryDataArray.map(([principal, treasuryData ]) => {
         let {deposits} = treasuryData;
         let {icp, icp_staked, eth, btc} = deposits;
@@ -236,6 +239,8 @@ export const mapBackendTreasuryDataToFrontEndObj = (props) => {
     return {
         usersTreasuryDataArray: usersTreasuryDataArray_, 
         balance_icp: balance_icp_, 
+        totalDeposits: totalDeposits_,
+        daoTotalProfit,
         accountId_icp: accountId_icp_,
         neurons: {...neurons, icp: icpNeurons},
         balance_icpStaked,

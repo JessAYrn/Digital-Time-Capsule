@@ -2,7 +2,7 @@ import React, {useState, useContext} from "react";
 import MenuField from "../Fields/MenuField";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import { PAYLOAD_DATA_TYPES, PROPOSAL_ACTIONS } from "./utils";
-import { daysToMonths, hoursToDays, isANumber, principalHasProperFormat, round2Decimals, secondsToHours, toE8s  } from "../../functionsAndConstants/Utils";
+import { daysToMonths, hoursToDays, isANumber, principalHasProperFormat, round2Decimals, secondsToHours, toE8s, fromE8s  } from "../../functionsAndConstants/Utils";
 import { homePageTypes } from "../../reducers/homePageReducer";
 import InputBox from "../Fields/InputBox";
 import { Typography } from "@mui/material";
@@ -13,6 +13,7 @@ import DoneIcon from '@mui/icons-material/Done';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { INPUT_BOX_FORMATS } from "../../functionsAndConstants/Constants";
 import { AppContext } from "../../Context";
+import DataField from "../Fields/DataField";
 
 export const NEURON_TOPICS = {
         // The `Unspecified` topic is used as a fallback when
@@ -220,8 +221,8 @@ const CreateProposalForm = (props) => {
         setProposalPayload({...proposalPayload_, ...payload_});
         if(format === PAYLOAD_DATA_TYPES.principal) setHasError_1(!principalHasProperFormat(payload_[property]));
         if(format === PAYLOAD_DATA_TYPES.nat) setHasError_1(!isANumber(payload_[property][0] || payload_[property]));
+        if(proposalAction_ === PROPOSAL_ACTIONS.PurchaseCycles) setHasError_1(payload_[property] > fromE8s(treasuryState.daoTotalProfit) || payload_[property] < 0);
     };
-
     const modalButton_close = [
         {Component: ButtonField,
         props: {
@@ -287,6 +288,24 @@ const CreateProposalForm = (props) => {
                 menuItemProps={mainMenuItemProps}
             />
             <Typography varient={"h6"} color={"#bdbdbd"}> {proposalAction_} </Typography>
+            {
+                (proposalAction_ ===  PROPOSAL_ACTIONS.IncreaseNeuron || proposalAction_ === PROPOSAL_ACTIONS.CreateNeuron) &&
+                <DataField 
+                label={"Available Balance: "}
+                text={`${fromE8s(treasuryState.userTreasuryData?.deposits.icp || 0) } ICP`}
+                isLoading={!treasuryState.dataHasBeenLoaded}
+                disabled={true}
+                />
+            }
+            {
+                proposalAction_ ===  PROPOSAL_ACTIONS.PurchaseCycles &&
+                <DataField 
+                label={"Available Balance: "}
+                text={`${fromE8s(treasuryState.daoTotalProfit)} ICP`}
+                isLoading={!treasuryState.dataHasBeenLoaded}
+                disabled={true}
+                />
+            }
             { 
                 proposalAction_ && NEURON_ID_REQUIRED_ACTIONS.includes(proposalAction_) && 
                 <>
@@ -351,14 +370,14 @@ const CreateProposalForm = (props) => {
             }
             {
                 proposalAction_ && AMOUNT_PAYLOAD_REQUIRED_ACTIONS.includes(proposalAction_) &&
-                <InputBox
-                    hasError={hasError_1}
-                    label={"Amount "}
-                    rows={"1"}
-                    onChange={(amount) => onChange_payload({amount}, "amount", PAYLOAD_DATA_TYPES.nat)}
-                    value={proposalPayload_?.amount}
-                    format={INPUT_BOX_FORMATS.numberFormat}
-                />
+                    <InputBox
+                        hasError={hasError_1}
+                        label={"Amount "}
+                        rows={"1"}
+                        onChange={(amount) => onChange_payload({amount}, "amount", PAYLOAD_DATA_TYPES.nat)}
+                        value={proposalPayload_?.amount}
+                        format={INPUT_BOX_FORMATS.numberFormat}
+                    />
             }
             {
                 proposalAction_ && PERCENTAGE_PAYLOAD_REQUIRED_ACTIONS.includes(proposalAction_) &&

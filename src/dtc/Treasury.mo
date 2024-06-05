@@ -21,6 +21,7 @@ import IC "Types/IC/types";
 import EcdsaHelperMethods "Modules/ECDSA/ECDSAHelperMethods";
 import Hex "Serializers/Hex";
 import Debug "mo:base/Debug";
+import Int64 "mo:base/Int64";
 import AnalyticsTypes "Types/Analytics/types";
 import AsyncronousHelperMethods "Modules/Treasury/AsyncronousHelperMethods";
 import SyncronousHelperMethods "Modules/Treasury/SyncronousHelperMethods";
@@ -140,6 +141,15 @@ shared actor class Treasury (principal : Principal) = this {
         };
         return {totalVotingPower; totalStake};
     }; 
+
+    public query({caller}) func getDaoTotalDeposits(): async {totalDeposits: {e8s: Nat64};} {
+        if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
+        var total: Nat64 = 0;
+        label loop_ for((userPrincipal, userDeposits) in usersTreasuryDataMap.entries()){
+            total += userDeposits.deposits.icp.e8s
+        };
+        return {totalDeposits = {e8s = total};};
+    };
 
     public shared({caller})func creditUserIcpDeposits(userPrincipal: Principal, amount: Nat64): async () {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");

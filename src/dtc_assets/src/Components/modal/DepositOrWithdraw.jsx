@@ -38,6 +38,9 @@ const DepositOrWithdrawModal = (props) => {
     };
 
     let action_ = action === TREASURY_ACTIONS.DepositIcpToTreasury ? "Deposit" : "Withdraw";
+    let text = action === TREASURY_ACTIONS.DepositIcpToTreasury ? 
+    `${fromE8s(walletState.walletData.balance)} ICP` : 
+    `${fromE8s(treasuryState.userTreasuryData?.deposits.icp || 0) } ICP`;
 
     return (
         <Grid
@@ -49,28 +52,14 @@ const DepositOrWithdrawModal = (props) => {
         alignItems="center" 
         flexDirection={"column"}
         >
-            {
-                action === TREASURY_ACTIONS.WithdrawIcpFromTreasury && 
-                <Grid xs={12} display="flex" justifyContent="center" alignItems="center">
-                    <DataField
-                        label={'Total Liquid Treasury Deposits: '}
-                        text={`${fromE8s(treasuryState.userTreasuryData?.deposits.icp || 0) } ICP`}
-                        isLoading={!treasuryState.dataHasBeenLoaded}
-                        disabled={true}
-                    />
-                </Grid>
-            }
-            {
-                action === TREASURY_ACTIONS.DepositIcpToTreasury && 
-                <Grid xs={12} display="flex" justifyContent="center" alignItems="center">
-                    <DataField
-                        label={'Wallet Balance: '}
-                        text={`${fromE8s(walletState.walletData.balance)} ICP`}
-                        isLoading={!walletState.dataHasBeenLoaded}
-                        disabled={true}
-                    />
-                </Grid>
-            }
+            <Grid xs={12} display="flex" justifyContent="center" alignItems="center">
+                <DataField
+                    label={'Available Balance: '}
+                    text={text}
+                    isLoading={!treasuryState.dataHasBeenLoaded}
+                    disabled={true}
+                />
+            </Grid>
             <InputBox
             width={"100%"}
             label={`Amount To ${action_}: `}

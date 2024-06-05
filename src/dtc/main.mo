@@ -389,9 +389,10 @@ shared actor class User() = this {
         let neurons = {icp = await treasuryCanister.getNeuronsDataArray()};
         let balance_icp = await treasuryCanister.canisterBalance();
         let accountId_icp_blob = await treasuryCanister.canisterAccountId();
+        let {totalDeposits} = await treasuryCanister.getDaoTotalDeposits();
         let accountId_icp = Blob.toArray(accountId_icp_blob);
         let userPrincipal = Principal.toText(caller);
-        return #ok({usersTreasuryDataArray; balance_icp; accountId_icp; neurons; userPrincipal});
+        return #ok({usersTreasuryDataArray; balance_icp; accountId_icp; neurons; userPrincipal; totalDeposits});
     };
 
     public shared({caller}) func depositIcpToTreasury(amount: Nat64) : async {blockIndex: Nat64} {
