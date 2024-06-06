@@ -5,7 +5,7 @@ import { e8sInOneICP, CHART_TYPES, GRAPH_DISPLAY_LABELS, GRAPH_DATA_SETS } from 
 import { copyText } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
 import { loadWalletData } from '../../functionsAndConstants/loadingFunctions';
 import { walletTypes } from '../../reducers/walletReducer';
-import { nanoSecondsToMiliSeconds, shortenHexString } from '../../functionsAndConstants/Utils';
+import { nanoSecondsToMiliSeconds, shortenHexString, round2Decimals, fromE8s } from '../../functionsAndConstants/Utils';
 import QrCodeIcon from '@mui/icons-material/QrCode';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import SendIcon from '@mui/icons-material/Send';
@@ -20,11 +20,12 @@ import SendCryptoModal from '../../Components/modal/SendCryptoModal';
 import ButtonField from '../../Components/Fields/Button';
 import DisplayQrCode from '../../Components/modal/DisplayQrCode';
 import Graph from '../../Components/Fields/Chart';
+import Typography from '@mui/material/Typography';
 
 
 const WalletPage = (props) => {
 
-    const { walletState, walletDispatch, actorState, actorDispatch } = useContext(AppContext);
+    const { walletState, walletDispatch, actorState, treasuryState } = useContext(AppContext);
 
     const [loadingTx, setIsLoadingTx] = useState(false);
     const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -70,6 +71,28 @@ const WalletPage = (props) => {
         {name: "New Transaction", icon: SendIcon , onClick: onSend}
     ]
 
+    const DisplayTxAddresses = (props) => {
+        const {addresses} = props;
+        return (
+            <Grid 
+            xs={12} 
+            display="flex" 
+            justifyContent="left" 
+            alignItems="center" 
+            flexDirection={"column"}
+            >
+                {addresses.map((address) => {
+                    return (<DataField
+                        label={`${address[0]}`}
+                        text={`${shortenHexString(address[1])}`}
+                        buttonIcon={ContentCopyIcon}
+                        onClick={() => copyText(address[1])}
+                    />)
+                })}
+            </Grid>
+        )
+    };
+
     return (
         <Grid 
             container 
@@ -93,6 +116,26 @@ const WalletPage = (props) => {
                 flexDirection={"column"} 
                 marginTop={"80px"}
             >
+                <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"}>
+                    <Grid xs={5}  width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"left"} flexDirection={"column"}>
+                        <Typography display={"flex"} justifyContent={"left"} width={"100%"}>Wallet Balance:</Typography>
+                        <Typography display={"flex"} justifyContent={"left"} width={"100%"} variant="h6" color={"custom"}>
+                        {`${round2Decimals(fromE8s(walletState.walletData.balance))}`} ICP
+                        </Typography>
+                    </Grid>
+                    <Grid xs={2}  width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
+                        <Typography display={"flex"} justifyContent={"center"} width={"100%"}>Treasury Deposits:</Typography>
+                        <Typography display={"flex"} justifyContent={"center"} width={"100%"} variant="h6" color={"custom"}>
+                        {`${round2Decimals(fromE8s(treasuryState.userTreasuryData?.deposits.icp || 0))}`} ICP
+                        </Typography>
+                    </Grid>
+                    <Grid xs={5}  width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"right"} flexDirection={"column"}>
+                        <Typography display={"flex"} justifyContent={"right"} width={"100%"}>Treasury Stake:</Typography>
+                        <Typography display={"flex"} justifyContent={"right"} width={"100%"} variant="h6" color={"custom"}>
+                        {`${round2Decimals(fromE8s(treasuryState.userTreasuryData?.deposits.icp_staked || 0))}`} ICP
+                        </Typography>
+                    </Grid>
+                </Grid>
                 <Graph 
                     type={CHART_TYPES.line} 
                     inputData={walletState.balancesData} 
@@ -108,12 +151,6 @@ const WalletPage = (props) => {
                     alignItems: "center",
                     flexDirection: "column",
                 }}>
-                    <DataField
-                        label={'Balance: '}
-                        text={`${walletState.walletData.balance /  e8sInOneICP} ICP`}
-                        isLoading={!walletState.dataHasBeenLoaded}
-                        disabled={true}
-                    />
                     <Grid width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} padding={"0"}>
                         <DataField
                             label={'Address: '}
@@ -145,10 +182,11 @@ const WalletPage = (props) => {
                         const {balanceDelta, increase, recipient, timeStamp, source} = tx;
                         const date = new Date(nanoSecondsToMiliSeconds(parseInt(timeStamp))).toString()
                         const title = `${date} `;
-                        const subtitle = `${increase ? "+":"-"} ${balanceDelta / e8sInOneICP} ICP`
-                        const text_1 = `source: ${shortenHexString(source)}`;
-                        const text_2 = `Recipient: ${shortenHexString(recipient)}`;
-                        return (<div title={title} subtitle={subtitle} texts={[text_1, text_2]}></div>)
+                        const subtitle = `${increase ? "+":"-"} ${fromE8s(balanceDelta)} ICP`
+                        const source_ = ["source", source];
+                        const recipient_ = ["recipient", recipient];
+        
+                        return (<div title={title} subtitle={subtitle} CustomComponent={DisplayTxAddresses} addresses={[source_, recipient_]}></div>)
                     })}
                 </AccordionField>}
 
