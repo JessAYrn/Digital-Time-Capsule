@@ -157,7 +157,7 @@ const TreasuryPage = (props) => {
               {`${round2Decimals(fromE8s(treasuryState.balance_icp))}`} ICP
             </Typography>
             <Typography width={"100%"} style={{color: '#bdbdbd'}}>
-              {`${round2Decimals(fromE8s(treasuryState.userTreasuryData?.deposits.icp || 0))}`} ICP
+              {`${round2Decimals(fromE8s(treasuryState.userTreasuryData?.balances.icp || 0))}`} ICP
             </Typography>
           </Grid>
           <Grid xs={2} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
@@ -166,7 +166,7 @@ const TreasuryPage = (props) => {
               {`${round2Decimals(fromE8s(treasuryState.balance_icpStaked))}`} ICP
             </Typography>
             <Typography width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} style={{color: '#bdbdbd'}}>
-              {`${round2Decimals(fromE8s(treasuryState.userTreasuryData?.deposits.icp_staked || 0))}`} ICP
+              {`${round2Decimals(fromE8s(treasuryState.userTreasuryData?.balances.icp_staked || 0))}`} ICP
             </Typography>
           </Grid>
           <Grid xs={5} width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"} flexDirection={"column"}>

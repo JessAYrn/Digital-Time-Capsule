@@ -40,7 +40,7 @@ const DepositOrWithdrawModal = (props) => {
     let action_ = action === TREASURY_ACTIONS.DepositIcpToTreasury ? "Deposit" : "Withdraw";
     let text = action === TREASURY_ACTIONS.DepositIcpToTreasury ? 
     `${fromE8s(walletState.walletData.balance)} ICP` : 
-    `${fromE8s(treasuryState.userTreasuryData?.deposits.icp || 0) } ICP`;
+    `${fromE8s(treasuryState.userTreasuryData?.balances.icp || 0) } ICP`;
 
     return (
         <Grid

@@ -6,40 +6,20 @@ import Principal "mo:base/Principal";
 import Timer "mo:base/Timer";
 import Debug "mo:base/Debug";
 import TreasuryTypes "../../Types/Treasury/types";
+import Blob "mo:base/Blob";
+import Array "mo:base/Array";
+import Time "mo:base/Time";
+import Int "mo:base/Int";
+import Account "../../Serializers/Account";
+import Ledger "../../NNS/Ledger";
 
 module{
+
+    private let ledger : Ledger.Interface  = actor(Ledger.CANISTER_ID);
 
     let {setTimer} = Timer;
 
     let txFee: Nat64 = 10_000; 
-
-    public func updateUserTreasruyDeposits(
-        usersTreasuryData: TreasuryTypes.UsersTreasuryDataMap, 
-        updateTokenBalances: shared () -> async (),
-        {userPrincipal: Text; currency : TreasuryTypes.SupportedCurrencies; newAmount: Nat64;}): 
-    () {
-        let treasuryData = usersTreasuryData.get(userPrincipal);
-        var updatedTreasuryData = switch(treasuryData){
-            case null { 
-                {
-                    deposits = {
-                        icp = {e8s: Nat64 = 0 }; 
-                        eth = {e8s: Nat64 = 0 };
-                        btc = {e8s: Nat64 = 0 };
-                    }; 
-                };
-            };
-            case(?treasuryData_){ treasuryData_ };
-        };
-        switch(currency) {
-            case(#Icp){ updatedTreasuryData := {updatedTreasuryData with deposits = {updatedTreasuryData.deposits with icp = {e8s = newAmount}}}};
-            case(#Eth){ updatedTreasuryData := {updatedTreasuryData with deposits = {updatedTreasuryData.deposits with eth = {e8s = newAmount}}}};
-            case(#Btc){ updatedTreasuryData := {updatedTreasuryData with deposits = {updatedTreasuryData.deposits with btc = {e8s = newAmount}}}};
-        };
-
-        usersTreasuryData.put(userPrincipal, updatedTreasuryData);
-        let timerId = setTimer(#seconds(1), func () : async () { await updateTokenBalances()});
-    };
 
     public func computeNeuronStakeInfosVotingPowers(
         neuronDataMap:TreasuryTypes.NeuronsDataMap, 
@@ -110,26 +90,6 @@ module{
     ): () {
         let userNeuronStakeInfo = getUserNeuronStakeInfo(userPrincipal, neuronDataMap, neuronId);
         updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount = userNeuronStakeInfo.stake_e8s + delta; neuronId;});
-    };
-
-    public func creditUserIcpDeposits(
-        usersTreasuryData: TreasuryTypes.UsersTreasuryDataMap,
-        updateTokenBalances: shared () -> async (),
-        {userPrincipal: Text; amount: Nat64}): () {
-        let treasuryData = switch(usersTreasuryData.get(userPrincipal)){
-            case null { { deposits ={ icp = {e8s: Nat64 = 0}; eth = {e8s: Nat64 = 0}; btc = {e8s: Nat64 = 0}; }; }; };
-            case(?treasuryData_){ treasuryData_ };
-        };
-        updateUserTreasruyDeposits(usersTreasuryData,updateTokenBalances, {userPrincipal; currency = #Icp; newAmount = treasuryData.deposits.icp.e8s + amount});
-    };
-
-    public func debitUserIcpDeposits(
-        usersTreasuryData: TreasuryTypes.UsersTreasuryDataMap,
-        updateTokenBalances: shared () -> async (),
-        {userPrincipal: Text; amount: Nat64}): () {
-        let ?treasuryData = usersTreasuryData.get(userPrincipal) else Debug.trap("No deposits for contributor");
-        if(treasuryData.deposits.icp.e8s < amount) { Debug.trap("Insufficient deposit amount."); };
-        updateUserTreasruyDeposits(usersTreasuryData, updateTokenBalances, {userPrincipal; currency = #Icp; newAmount = treasuryData.deposits.icp.e8s - amount});
     };
 
     public func finalizeNewlyCreatedNeuronStakeInfo(
@@ -244,22 +204,21 @@ module{
         return neuronStakeInfo;
     };
 
-    public func creditUsersForDispursedNeuron(
-        neuronDataMap: TreasuryTypes.NeuronsDataMap, 
-        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap, 
-        updateTokenBalances: shared () -> async (), 
-        neuronId: Text,
-        proposer: Text
-    ): () {
-        let ?neuronData = neuronDataMap.get(neuronId) else { return };
-        let {contributions} = neuronData;
-        
-        label loop_ for((userPrincipal, neuronStakeInfo) in Iter.fromArray(contributions)){
-            var userStake = neuronStakeInfo.stake_e8s;
-            if(userPrincipal == proposer) { userStake -= txFee; };
-            creditUserIcpDeposits(usersTreasuryDataMap, updateTokenBalances, {userPrincipal; amount = userStake});
+    public func getPrincipalAndSubaccount(
+        identifier: TreasuryTypes.Identifier,
+        subaccountRegistryMap: TreasuryTypes.SubaccountRegistryMap,
+        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap
+    ) : (Text, Account.Subaccount) {
+        switch(identifier){
+            case(#SubaccountId(subaccount)) {
+                let ?{owner} = subaccountRegistryMap.get(subaccount) else Debug.trap("Subaccount not found.");
+                return (owner, subaccount)
+            };
+            case(#Principal(principal)) { 
+                let ?{subaccountId} = usersTreasuryDataMap.get(principal) else Debug.trap("User not found.");
+                return (principal, subaccountId);
+            };
         };
-        let ?neuronData_ = neuronDataMap.remove(neuronId) else { return };
     };
 
 

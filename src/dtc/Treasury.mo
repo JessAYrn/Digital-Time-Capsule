@@ -32,7 +32,7 @@ shared actor class Treasury (principal : Principal) = this {
 
     private stable var minimalRequiredVotingPower : Nat64 = 0;
 
-    private stable var tokenBalances : AnalyticsTypes.Balances = {
+    private stable var sumOfAllTokenBalances : AnalyticsTypes.Balances = {
         icp = {e8s = 0};
         icp_staked = {e8s = 0};
         eth = {e8s = 0};
@@ -61,6 +61,15 @@ shared actor class Treasury (principal : Principal) = this {
         Iter.size(Iter.fromArray(usersTreasuryDataArray)), 
         Text.equal,
         Text.hash
+    );
+
+    private stable var subaccountRegistryArray : TreasuryTypes.SubaccountRegistryArray = [];
+
+    private var subaccountRegistryMap : TreasuryTypes.SubaccountRegistryMap = HashMap.fromIter<Blob, TreasuryTypes.SubaccountsMetaData>(
+        Iter.fromArray(subaccountRegistryArray), 
+        Iter.size(Iter.fromArray(subaccountRegistryArray)), 
+        Blob.equal,
+        Blob.hash
     );
 
     private stable var balancesHistoryArray : AnalyticsTypes.BalancesArray = [];
@@ -98,8 +107,34 @@ shared actor class Treasury (principal : Principal) = this {
 
     private stable var neuronMemo : Nat64 = 0;
 
-    let {recurringTimer; setTimer} = Timer;
+    let {recurringTimer;} = Timer;
 
+    // need to complete this function. it should create a new subaccount for a given principal only if that principal does not already have a subaccount.
+    private func createUserTreasuryData_(principal: Principal) : async () {
+        var newSubaccount: Account.Subaccount = await Account.getRandomSubaccount();
+        while(subaccountRegistryMap.get(newSubaccount) != null){ newSubaccount := await Account.getRandomSubaccount(); };
+
+        subaccountRegistryMap.put(newSubaccount, {owner = Principal.toText(principal)});
+        let newUserTreasuryData = {
+            balances = {
+                icp = {e8s: Nat64 = 0};
+                icp_staked = {e8s: Nat64 = 0};
+                eth = {e8s: Nat64 = 0};
+                btc = {e8s: Nat64 = 0};
+            };
+            subaccountId = newSubaccount;
+        };
+        usersTreasuryDataMap.put(Principal.toText(principal), newUserTreasuryData);
+    };
+
+    public shared({caller}) func createUserTreasuryData(principal: Principal) : async () {
+        // if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
+        let principalAsText = Principal.toText(principal);
+        if(usersTreasuryDataMap.get(principalAsText) != null) throw Error.reject("User already has treasury data.");
+        await createUserTreasuryData_(principal);
+    };
+    
+    // revised to conform to new data structure
     public query({caller}) func getUsersTreasuryDataArray(): async TreasuryTypes.UsersTreasuryDataArrayExport {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         let usersDataExport = Iter.map<
@@ -107,27 +142,24 @@ shared actor class Treasury (principal : Principal) = this {
             (TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryDataExport)
         >(
             usersTreasuryDataMap.entries(),
-            func((userPrincipal, {deposits}): (TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryData)): (TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryDataExport) {
+            func((userPrincipal, userTreasuryData): (TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryData)): (TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryDataExport) {
+                let {balances} = userTreasuryData;
                 let e8s = SyncronousHelperMethods.computeTotalStakeDeposit(neuronDataMap, userPrincipal);
-                return (userPrincipal, {deposits = {deposits with icp_staked = {e8s}}} );          
+                return (userPrincipal, {userTreasuryData with balances = {balances with icp_staked = {e8s}}} );          
             }
         );
         return Iter.toArray(usersDataExport);
     };
-
+    
     public query({caller}) func getUserTreasuryData(userPrincipal: Principal): async TreasuryTypes.UserTreasuryDataExport {
-        if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
+        // if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         let userPrincipalAsText = Principal.toText(userPrincipal);
-        let ?{deposits} = usersTreasuryDataMap.get(userPrincipalAsText) else return {
-            deposits = {
-                icp = {e8s : Nat64 = 0;};
-                icp_staked = {e8s : Nat64 = 0;};
-                eth = {e8s : Nat64 = 0};
-                btc = {e8s : Nat64 = 0};
-            };
+        let userTreasuryData = switch(usersTreasuryDataMap.get(userPrincipalAsText)){
+            case (?userTreasuryData) { userTreasuryData };
+            case (null) { throw Error.reject("User not found."); };
         };
         let e8s = SyncronousHelperMethods.computeTotalStakeDeposit(neuronDataMap, userPrincipalAsText);
-        return {deposits = {deposits with icp_staked = {e8s}}};
+        return {userTreasuryData with balances = {userTreasuryData.balances with icp_staked = {e8s}}};
     };
 
     public query({caller}) func getDaoTotalStakeAndVotingPower(): async {totalVotingPower: Nat64; totalStake: Nat64} {
@@ -146,24 +178,15 @@ shared actor class Treasury (principal : Principal) = this {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         var total: Nat64 = 0;
         label loop_ for((userPrincipal, userDeposits) in usersTreasuryDataMap.entries()){
-            total += userDeposits.deposits.icp.e8s
+            total += userDeposits.balances.icp.e8s
         };
         return {totalDeposits = {e8s = total};};
     };
 
-    public shared({caller})func creditUserIcpDeposits(userPrincipal: Principal, amount: Nat64): async () {
-        if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
-        SyncronousHelperMethods.creditUserIcpDeposits(usersTreasuryDataMap, updateTokenBalances, {userPrincipal = Principal.toText(userPrincipal); amount});
-    };
-
-    public shared({caller}) func debitUserIcpDeposits(userPrincipal: Principal, amount: Nat64): async () {
-        if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
-        SyncronousHelperMethods.debitUserIcpDeposits(usersTreasuryDataMap, updateTokenBalances, {userPrincipal = Principal.toText(userPrincipal); amount});
-    };
-
+    // need to update this function to save the sum of all subaccounts as the total balance for icp.
     public shared({caller}) func saveCurrentBalances() : async () {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
-        let icp = await ledger.account_balance({ account = tresasuryAccountId() });
+        let icp = await ledger.account_balance({ account = tresasuryIcpAccountId(null) });
         let {totalStake} = await getDaoTotalStakeAndVotingPower();
         //will need to retreive the proper balances of the other currencies once they've been integrated
         let icp_staked = {e8s: Nat64 = totalStake};
@@ -173,20 +196,23 @@ shared actor class Treasury (principal : Principal) = this {
         balancesHistoryMap.put(Int.toText(Time.now()), balances);
     };
 
+    // no need to change this
     public query({caller}) func readBalancesHistory() : async AnalyticsTypes.BalancesArray{
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         return Iter.toArray(balancesHistoryMap.entries());
     };
 
-    private func tresasuryAccountId() : Account.AccountIdentifier {
-        Account.accountIdentifier(Principal.fromActor(this), Account.defaultSubaccount())
+    private func tresasuryIcpAccountId(subaccount: ?Account.Subaccount) : Account.AccountIdentifier {
+        let subaccount_ = switch(subaccount){case (?subaccountId) { subaccountId }; case(null) {Account.defaultSubaccount()}};
+        Account.accountIdentifier(Principal.fromActor(this), subaccount_);
     };
 
-    public query({caller}) func canisterAccountId() : async Account.AccountIdentifier {
+    public query({caller}) func canisterIcpAccountId(subaccount: ?Account.Subaccount) : async Account.AccountIdentifier {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
-        tresasuryAccountId()
+        tresasuryIcpAccountId(subaccount);
     };
 
+    // no need to change this
     public shared({caller}) func getSelfAuthenticatingPrincipal(): async Text {
          if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         let {public_key} = await EcdsaHelperMethods.getPublicKey(null);
@@ -202,11 +228,9 @@ shared actor class Treasury (principal : Principal) = this {
         Hex.encode(Blob.toArray(treasuryNeuronSubaccount));
     };
 
-
     public shared({caller}) func createNeuron({amount: Nat64; contributor: Principal}) : async Result.Result<(), TreasuryTypes.Error> {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         actionLogsMap.put(Int.toText(Time.now()),"Creating Neuron, amount: " # Nat64.toText(amount) # ", contributor: " # Principal.toText(contributor));
-        let usersTreasuryDataArrayUnaltered = Iter.toArray(usersTreasuryDataMap.entries());
 
         let response = await AsyncronousHelperMethods.createNeuron(
             neuronDataMap,
@@ -225,12 +249,6 @@ shared actor class Treasury (principal : Principal) = this {
             };
             case(#err(#TxFailed)) {
                 actionLogsMap.put(Int.toText(Time.now()),"Error creating neuron: Transaction failed.");
-                usersTreasuryDataMap := HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryData>(
-                    Iter.fromArray(usersTreasuryDataArrayUnaltered), 
-                    Array.size(usersTreasuryDataArrayUnaltered), 
-                    Text.equal,
-                    Text.hash
-                );
                 throw Error.reject("Error creating neuron.");
             };
             case(#err(#InsufficientFunds)) {
@@ -243,8 +261,6 @@ shared actor class Treasury (principal : Principal) = this {
 
     public shared({caller}) func increaseNeuron({amount: Nat64; neuronId: Nat64; contributor: Principal}) : async Result.Result<() , TreasuryTypes.Error>{
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
-
-        let usersTreasuryDataArrayUnaltered = Iter.toArray(usersTreasuryDataMap.entries());
 
         let response = await AsyncronousHelperMethods.increaseNeuron(
             neuronDataMap,
@@ -260,12 +276,6 @@ shared actor class Treasury (principal : Principal) = this {
             case(#ok()) return #ok(());
             case(#err(#TxFailed)) {
                 actionLogsMap.put(Int.toText(Time.now()),"Error increasing neuron: Transaction failed.");
-                usersTreasuryDataMap := HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryData>(
-                    Iter.fromArray(usersTreasuryDataArrayUnaltered), 
-                    Array.size(usersTreasuryDataArrayUnaltered), 
-                    Text.equal,
-                    Text.hash
-                );
                 throw Error.reject("Error increasing neuron.");
             };
             case(#err(_)) { throw Error.reject("Error increasing neuron."); };
@@ -284,7 +294,8 @@ shared actor class Treasury (principal : Principal) = this {
             updateTokenBalances,
             transformFn,
             args,
-            proposer
+            proposer,
+            Principal.fromActor(this)
         );
         switch(response){
             case(#ok()) return #ok(());
@@ -312,24 +323,30 @@ shared actor class Treasury (principal : Principal) = this {
         pendingActionsMap := HashMap.HashMap<Text, TreasuryTypes.PendingAction>(1, Text.equal, Text.hash);
     };
 
+    // need to revise this to retrieve the balance of a given subaccount or principal
     public query({caller}) func canisterBalance() : async Ledger.ICP {
         let canisterId =  Principal.fromActor(this);
         if(  
             Principal.toText(caller) !=  Principal.toText(canisterId)
             and Principal.toText(caller) != ownerCanisterId
         ) { throw Error.reject("Unauthorized access."); };
-        return tokenBalances.icp;
+        return sumOfAllTokenBalances.icp;
     };
-
-    public shared({caller}) func updateTokenBalances() : async () {
-        let canisterId =  Principal.fromActor(this);
-        if(  
-            Principal.toText(caller) !=  Principal.toText(canisterId)
-            and Principal.toText(caller) != ownerCanisterId
-        ) { throw Error.reject("Unauthorized access."); };
-        let icp = await ledger.account_balance({ account = tresasuryAccountId() });
-        //will have to do the same for the btc and eth ledgers
-        tokenBalances := {tokenBalances with icp };
+    
+    public shared({caller}) func updateTokenBalances( identifier: TreasuryTypes.Identifier, currency: TreasuryTypes.SupportedCurrencies) 
+    : async () {
+        if( Principal.toText(caller) !=  Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) { throw Error.reject("Unauthorized access."); };
+        let (userPrincipal, subaccountID) = SyncronousHelperMethods.getPrincipalAndSubaccount(identifier, subaccountRegistryMap, usersTreasuryDataMap);
+        let ?userTreasuryData = usersTreasuryDataMap.get(userPrincipal) else throw Error.reject("User not found.");
+        let updatedUserTreasuryData = switch(currency){
+            case(#Icp){ 
+                let e8s: Nat64 = Nat64.fromNat(await ledger.icrc1_balance_of({ owner = Principal.fromActor(this); subaccount = ?subaccountID })); 
+                {userTreasuryData with balances = { userTreasuryData.balances with icp = {e8s}}; };
+            };
+            case(#Eth) { throw Error.reject("Eth not yet supported."); };
+            case(#Btc) { throw Error.reject("Btc not yet supported."); };
+        };
+        usersTreasuryDataMap.put(userPrincipal, updatedUserTreasuryData);
     };
 
     public query ({caller}) func getCyclesBalance(): async Nat {
@@ -371,15 +388,22 @@ shared actor class Treasury (principal : Principal) = this {
         );
     };
 
-    public shared({caller}) func transferICP(amount: Nat64, recipientAccountId: Account.AccountIdentifier) : async {blockIndex: Nat64} {
+    public shared({caller}) func transferICP(
+        amount: Nat64, 
+        sender: TreasuryTypes.Identifier,
+        recipient: Principal
+    ) : async {blockIndex: Nat} {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
-        let res = await ledger.transfer({
-          memo = Nat64.fromNat(0);
-          from_subaccount = null;
-          to = recipientAccountId;
-          amount = { e8s = amount };
-          fee = { e8s = txFee };
-          created_at_time = ?{ timestamp_nanos = Nat64.fromNat(Int.abs(Time.now())) };
+        let (sourcePrincipal, _) = SyncronousHelperMethods.getPrincipalAndSubaccount(sender, subaccountRegistryMap, usersTreasuryDataMap);
+        let ?{subaccountId = sendersubaccountId} = usersTreasuryDataMap.get(sourcePrincipal) else throw Error.reject("Sender not found."); 
+
+        let res = await ledger.icrc1_transfer({
+            to = { owner = recipient; subaccount = null };
+            fee = ?Nat64.toNat(txFee);
+            memo = null;
+            from_subaccount = ?sendersubaccountId;
+            created_at_time =?Nat64.fromNat(Int.abs(Time.now()));
+            amount = Nat64.toNat(amount);
         });
 
         switch (res) {
@@ -403,6 +427,7 @@ shared actor class Treasury (principal : Principal) = this {
         memoToNeuronIdArray := Iter.toArray(memoToNeuronIdMap.entries());
         pendingActionsArray := Iter.toArray(pendingActionsMap.entries());
         actionLogsArray := Iter.toArray(actionLogsMap.entries());
+        subaccountRegistryArray := Iter.toArray(subaccountRegistryMap.entries());
     };
 
     system func postupgrade() { 
@@ -412,6 +437,7 @@ shared actor class Treasury (principal : Principal) = this {
         memoToNeuronIdArray := [];
         pendingActionsArray := [];
         actionLogsArray := [];
+        subaccountRegistryArray := [];
 
         let timerId = recurringTimer(#seconds(24 * 60 * 60), func (): async () { 
             await AsyncronousHelperMethods.refreshNeuronsData(

@@ -40,7 +40,7 @@ module {
 
     public type TransformFnSignature = query { response : IC.http_response; context: Blob } -> async IC.http_response;
 
-    public func transferIcpToNeuronWithMemo(amount: Nat64, memo: Nat64): 
+    public func transferIcpToNeuronWithMemo(amount: Nat64, memo: Nat64, senderSubaccount: Account.Subaccount): 
     async TreasuryTypes.TransferIcpToNeuronResponse {
         let {public_key} = await EcdsaHelperMethods.getPublicKey(null);
         let {principalAsBlob} = Account.getSelfAuthenticatingPrincipal(public_key);
@@ -50,7 +50,7 @@ module {
 
         let res = await ledger.transfer({
           memo = memo;
-          from_subaccount = null;
+          from_subaccount = ?senderSubaccount;
           to = treasuryNeuronAccountId;
           amount = { e8s = amount };
           fee = { e8s = txFee };
@@ -63,16 +63,16 @@ module {
         };
     };
 
-    public func transferIcpToNeuronWithSubaccount(amount: Nat64, subaccount: Blob): 
+    public func transferIcpToNeuronWithSubaccount(amount: Nat64, neuronSubaccount: Blob, senderSubaccount: Account.Subaccount): 
     async TreasuryTypes.TransferIcpToNeuronResponse {
         let {public_key} = await EcdsaHelperMethods.getPublicKey(null);
         let {principalAsBlob} = Account.getSelfAuthenticatingPrincipal(public_key);
         let principal = Principal.fromBlob(principalAsBlob);
-        let treasuryNeuronAccountId = Account.accountIdentifier(Principal.fromText(Governance.CANISTER_ID), subaccount);
+        let treasuryNeuronAccountId = Account.accountIdentifier(Principal.fromText(Governance.CANISTER_ID), neuronSubaccount);
 
         let res = await ledger.transfer({
           memo = 0;
-          from_subaccount = null;
+          from_subaccount = ?senderSubaccount;
           to = treasuryNeuronAccountId;
           amount = { e8s = amount };
           fee = { e8s = txFee };
@@ -198,11 +198,11 @@ module {
                                     case(_) { return throw Error.reject("Unexpected command type") };
                                 };
                             };
-                            case(#Disburse({neuronId; proposer})){ 
+                            case(#Disburse({neuronId; proposer; treasuryCanisterId})){ 
                                 let ?reply: ?Governance.ManageNeuronResponse = from_candid(replyEncoded) else { return throw Error.reject("Response candid decoding took unexpected form") };
                                 let ?command = reply.command else { return throw Error.reject("Response candid decoding took unexpected form") };
                                 switch(command){
-                                    case(#Disburse(response)) { return #Disburse({response; neuronId; proposer}) };
+                                    case(#Disburse(response)) { return #Disburse({response; neuronId; proposer; treasuryCanisterId}) };
                                     case(#Error(response)) { return #Error({response; neuronId;}) };
                                     case(_) { return throw Error.reject("Unexpected command type") };
                                 };

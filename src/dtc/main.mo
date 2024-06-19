@@ -57,7 +57,7 @@ shared actor class User() = this {
 
     private stable var frontEndCanisterBalance: Nat = 1;
 
-    private stable var quorum: Float = 0.125;
+    private stable var quorum: Float = 0;
 
     private var userProfilesMap : MainTypes.UserProfilesMap = HashMap.fromIter<Principal, MainTypes.UserProfile>(
         Iter.fromArray(userProfilesArray), 
@@ -388,7 +388,7 @@ shared actor class User() = this {
         let usersTreasuryDataArray = await treasuryCanister.getUsersTreasuryDataArray();
         let neurons = {icp = await treasuryCanister.getNeuronsDataArray()};
         let balance_icp = await treasuryCanister.canisterBalance();
-        let accountId_icp_blob = await treasuryCanister.canisterAccountId();
+        let accountId_icp_blob = await treasuryCanister.canisterIcpAccountId(null);
         let {totalDeposits} = await treasuryCanister.getDaoTotalDeposits();
         let accountId_icp = Blob.toArray(accountId_icp_blob);
         let userPrincipal = Principal.toText(caller);
@@ -539,7 +539,7 @@ shared actor class User() = this {
         let neuronsDataArray = await treasuryCanister.getNeuronsDataArray();
         let proposer = Principal.toText(caller); let votes = [(proposer, {adopt = true})];
         let timeInitiated = Time.now(); 
-        let votingWindowInNanoseconds = 60 * 6 * 1_000_000_000;
+        let votingWindowInNanoseconds = 20 * 1_000_000_000;
         let timeVotingPeriodEnds = timeInitiated + votingWindowInNanoseconds;
         let executed = false;
         var voteTally = {yay = Nat64.fromNat(0); nay = Nat64.fromNat(0); total = Nat64.fromNat(0);};
@@ -626,7 +626,7 @@ shared actor class User() = this {
                 let response_2 = await treasuryCanister.increaseNeuron({amount; neuronId; contributor = Principal.fromText(proposer);});
             };
             case(#DisburseNeuron({neuronId;})){
-                let treasuryAccountId = await treasuryCanister.canisterAccountId();
+                let treasuryAccountId = await treasuryCanister.canisterIcpAccountId(null);
                 let neuronsDataArray: TreasuryTypes.NeuronsDataArray = await treasuryCanister.getNeuronsDataArray();
                 let neuronsDataMap: TreasuryTypes.NeuronsDataMap = HashMap.fromIter<TreasuryTypes.NeuronIdAsText, TreasuryTypes.NeuronData>(
                     Iter.fromArray(neuronsDataArray), 

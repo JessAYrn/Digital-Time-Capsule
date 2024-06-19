@@ -15,12 +15,15 @@ import Array "mo:base/Array";
 import Int "mo:base/Int";
 import Time "mo:base/Time";
 import SyncronousHelperMethods "SyncronousHelperMethods";
+import Ledger "../../NNS/Ledger";
 
 module{
 
     let {setTimer} = Timer;
 
     let txFee: Nat64 = 10_000;
+
+    private let ledger : Ledger.Interface  = actor(Ledger.CANISTER_ID);
 
     public let PENDING_NEURON_SUFFIX = "_pendingNeuron";
 
@@ -30,7 +33,7 @@ module{
         pendingActionsMap: TreasuryTypes.PendingActionsMap,
         activityLogsMap: TreasuryTypes.ActionLogsMap,
         memoToNeuronIdMap: TreasuryTypes.MemoToNeuronIdMap,
-        updateTokenBalances: shared () -> async (),
+        updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies ) -> async (),
         transformFn: NeuronManager.TransformFnSignature
     ) : async () {
 
@@ -53,7 +56,15 @@ module{
             pendingActionsMap.put("claimOrRefresh_"#Nat64.toText(neuronId.id), newPendingAction);
         };
 
-        ignore resolvePendingActions( neuronDataMap, usersTreasuryDataMap, pendingActionsMap, activityLogsMap, memoToNeuronIdMap, updateTokenBalances, transformFn );
+        ignore resolvePendingActions( 
+            neuronDataMap, 
+            usersTreasuryDataMap, 
+            pendingActionsMap, 
+            activityLogsMap, 
+            memoToNeuronIdMap, 
+            updateTokenBalances, 
+            transformFn 
+        );
     };
 
     public func getNeuronData(
@@ -62,7 +73,7 @@ module{
         pendingActionsMap: TreasuryTypes.PendingActionsMap,
         activityLogsMap: TreasuryTypes.ActionLogsMap,
         memoToNeuronIdMap: TreasuryTypes.MemoToNeuronIdMap,
-        updateTokenBalances: shared () -> async (),
+        updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies ) -> async (),
         transformFn: NeuronManager.TransformFnSignature,
         methodType: TreasuryTypes.NeuronDataMethodTypes
     ) : async () {
@@ -84,7 +95,14 @@ module{
         activityLogsMap.put(Int.toText(Time.now()), "Refreshing Neuron Data for neuron with Id: "#Nat64.toText(neuronId));
         activityLogsMap.put(Int.toText(Time.now()), "New Action Pending: "#pendingActionId);
         pendingActionsMap.put(pendingActionId, newPendingAction);
-        ignore resolvePendingActions(neuronDataMap, usersTreasuryDataMap, pendingActionsMap, activityLogsMap, memoToNeuronIdMap, updateTokenBalances, transformFn);
+        ignore resolvePendingActions(
+            neuronDataMap, 
+            usersTreasuryDataMap, 
+            pendingActionsMap, 
+            activityLogsMap, 
+            memoToNeuronIdMap, 
+            updateTokenBalances, 
+            transformFn);
     };
 
     public func readRequestResponse(
@@ -93,10 +111,10 @@ module{
         pendingActionsMap: TreasuryTypes.PendingActionsMap,
         activityLogsMap: TreasuryTypes.ActionLogsMap,
         memoToNeuronIdMap: TreasuryTypes.MemoToNeuronIdMap,
-        updateTokenBalances: shared () -> async (),
+        updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies ) -> async (),
         transformFn: NeuronManager.TransformFnSignature,
         input: TreasuryTypes.ReadRequestInput
-    ): async TreasuryTypes.RequestResponses  {
+    ): async TreasuryTypes.RequestResponses {
         if(input.numberOfFailedAttempts == 3){
             activityLogsMap.put(Int.toText(Time.now()),"Failed to read response to HTTPS request after 3 attempts. No further attempts will be made.");
             throw Error.reject("Failed to read request response after 3 attempts.")
@@ -111,13 +129,31 @@ module{
                         Debug.trap("No neuronId in response");
                     };
                     memoToNeuronIdMap.put(Nat64.toNat(memo), neuronId.id);
-                    ignore getNeuronData( neuronDataMap, usersTreasuryDataMap, pendingActionsMap, activityLogsMap,  memoToNeuronIdMap, updateTokenBalances, transformFn, #GetFullNeuronResponse({neuronId = neuronId.id;}));
+                    ignore getNeuronData( 
+                        neuronDataMap, 
+                        usersTreasuryDataMap, 
+                        pendingActionsMap, 
+                        activityLogsMap,  
+                        memoToNeuronIdMap, 
+                        updateTokenBalances, 
+                        transformFn, 
+                        #GetFullNeuronResponse({neuronId = neuronId.id;})
+                    );
                     SyncronousHelperMethods.finalizeNewlyCreatedNeuronStakeInfo(newNeuronIdPlaceholderKey, neuronId.id, neuronDataMap);
                     let _ = pendingActionsMap.remove("createNeuronResponse_"#Nat64.toText(memo));
                     activityLogsMap.put(Int.toText(Time.now()),"successfully completed action: createNeuronResponse_"#Nat64.toText(memo));
                 };
                 case(#ClaimOrRefresh({response; neuronId;})){
-                    ignore getNeuronData( neuronDataMap, usersTreasuryDataMap, pendingActionsMap, activityLogsMap, memoToNeuronIdMap, updateTokenBalances, transformFn, #GetFullNeuronResponse({neuronId;}) );
+                    ignore getNeuronData( 
+                        neuronDataMap, 
+                        usersTreasuryDataMap, 
+                        pendingActionsMap, 
+                        activityLogsMap, 
+                        memoToNeuronIdMap, 
+                        updateTokenBalances, 
+                        transformFn, 
+                        #GetFullNeuronResponse({neuronId;}) 
+                    );
                     let _ = pendingActionsMap.remove("claimOrRefresh_"#Nat64.toText(neuronId));
                     activityLogsMap.put(Int.toText(Time.now()),"successfully completed action: claimOrRefresh_"#Nat64.toText(neuronId));
                 };
@@ -133,8 +169,26 @@ module{
                     };
                     let parentNeuronContributions = ?parentNeuron.contributions;
                     neuronDataMap.put(Nat64.toText(created_neuron_id.id), {neuron = null; neuronInfo = null; parentNeuronContributions; contributions = []; });
-                    ignore getNeuronData( neuronDataMap, usersTreasuryDataMap, pendingActionsMap, activityLogsMap, memoToNeuronIdMap, updateTokenBalances, transformFn, #GetFullNeuronResponse({neuronId;}) );
-                    ignore getNeuronData( neuronDataMap, usersTreasuryDataMap, pendingActionsMap, activityLogsMap ,memoToNeuronIdMap, updateTokenBalances, transformFn, #GetFullNeuronResponse({neuronId = created_neuron_id.id;}) );
+                    ignore getNeuronData( 
+                        neuronDataMap, 
+                        usersTreasuryDataMap, 
+                        pendingActionsMap, 
+                        activityLogsMap, 
+                        memoToNeuronIdMap, 
+                        updateTokenBalances, 
+                        transformFn, 
+                        #GetFullNeuronResponse({neuronId;}) 
+                    );
+                    ignore getNeuronData( 
+                        neuronDataMap, 
+                        usersTreasuryDataMap, 
+                        pendingActionsMap, 
+                        activityLogsMap, 
+                        memoToNeuronIdMap, 
+                        updateTokenBalances, 
+                        transformFn, 
+                        #GetFullNeuronResponse({neuronId = created_neuron_id.id;}) 
+                    );
                     let _ = pendingActionsMap.remove("spawn_"#Nat64.toText(neuronId));
                     activityLogsMap.put(Int.toText(Time.now()),"successfully completed action: spawn_"#Nat64.toText(neuronId));
                 };
@@ -143,29 +197,91 @@ module{
                         activityLogsMap.put(Int.toText(Time.now()),"Failed to complete action: No new created_neuron_id in response");
                         Debug.trap("No new created_neuron_id in response");
                     };
-                    ignore getNeuronData( neuronDataMap, usersTreasuryDataMap, pendingActionsMap, activityLogsMap, memoToNeuronIdMap, updateTokenBalances, transformFn, #GetFullNeuronResponse({neuronId;}) );
-                    ignore getNeuronData( neuronDataMap, usersTreasuryDataMap, pendingActionsMap, activityLogsMap, memoToNeuronIdMap, updateTokenBalances, transformFn, #GetFullNeuronResponse({neuronId = created_neuron_id.id;}));
+                    ignore getNeuronData( 
+                        neuronDataMap, 
+                        usersTreasuryDataMap, 
+                        pendingActionsMap, 
+                        activityLogsMap, 
+                        memoToNeuronIdMap, 
+                        updateTokenBalances, 
+                        transformFn, 
+                        #GetFullNeuronResponse({neuronId;}) 
+                    );
+                    ignore getNeuronData( 
+                        neuronDataMap, 
+                        usersTreasuryDataMap, 
+                        pendingActionsMap, 
+                        activityLogsMap, 
+                        memoToNeuronIdMap, 
+                        updateTokenBalances, 
+                        transformFn, 
+                        #GetFullNeuronResponse({neuronId = created_neuron_id.id;})
+                    );
                     SyncronousHelperMethods.splitNeuronStakeInfo(neuronId, created_neuron_id.id,amount_e8s, Principal.toText(proposer), usersTreasuryDataMap, neuronDataMap);
                     let _ = pendingActionsMap.remove("split_"#Nat64.toText(neuronId));
                     activityLogsMap.put(Int.toText(Time.now()),"successfully completed action: split_"#Nat64.toText(neuronId));
                 };
                 case(#Follow({response; neuronId;})){
-                    ignore getNeuronData( neuronDataMap, usersTreasuryDataMap, pendingActionsMap, activityLogsMap, memoToNeuronIdMap, updateTokenBalances, transformFn, #GetFullNeuronResponse({neuronId;}) );
+                    ignore getNeuronData( 
+                        neuronDataMap, 
+                        usersTreasuryDataMap, 
+                        pendingActionsMap, 
+                        activityLogsMap, 
+                        memoToNeuronIdMap, 
+                        updateTokenBalances, 
+                        transformFn, 
+                        #GetFullNeuronResponse({neuronId;}) 
+                    );
                     let _ = pendingActionsMap.remove("follow_"#Nat64.toText(neuronId));
                     activityLogsMap.put(Int.toText(Time.now()),"successfully completed action: follow_"#Nat64.toText(neuronId));
                 };
                 case(#Configure({response; neuronId;})){
-                    ignore getNeuronData( neuronDataMap, usersTreasuryDataMap, pendingActionsMap, activityLogsMap, memoToNeuronIdMap, updateTokenBalances, transformFn, #GetFullNeuronResponse({neuronId;}) );
+                    ignore getNeuronData( 
+                        neuronDataMap, 
+                        usersTreasuryDataMap, 
+                        pendingActionsMap, 
+                        activityLogsMap, 
+                        memoToNeuronIdMap, 
+                        updateTokenBalances, 
+                        transformFn, 
+                        #GetFullNeuronResponse({neuronId;}) 
+                    );
                     let _ = pendingActionsMap.remove("configure_"#Nat64.toText(neuronId));
                     activityLogsMap.put(Int.toText(Time.now()),"successfully completed action: configure_"#Nat64.toText(neuronId));
                 };
-                case(#Disburse({response; neuronId; proposer;})){
+                case(#Disburse({response; neuronId; proposer; treasuryCanisterId})){
+                    ignore getNeuronData( 
+                        neuronDataMap, 
+                        usersTreasuryDataMap, 
+                        pendingActionsMap, 
+                        activityLogsMap, 
+                        memoToNeuronIdMap, 
+                        updateTokenBalances, 
+                        transformFn, 
+                        #GetFullNeuronResponse({neuronId;}) 
+                    );
                     let _ = pendingActionsMap.remove("disburse_"#Nat64.toText(neuronId));
-                    SyncronousHelperMethods.creditUsersForDispursedNeuron(neuronDataMap, usersTreasuryDataMap, updateTokenBalances, Nat64.toText(neuronId), Principal.toText(proposer));
+                    ignore distributeRewardsFromDisbursedNeuron(
+                        neuronDataMap, 
+                        usersTreasuryDataMap, 
+                        updateTokenBalances,
+                        Nat64.toText(neuronId), 
+                        Principal.toText(proposer),
+                        treasuryCanisterId
+                    );
                     activityLogsMap.put(Int.toText(Time.now()),"successfully completed action: disburse_"#Nat64.toText(neuronId));
                 };
                 case(#RegisterVote({response; neuronId;})){
-                    ignore getNeuronData( neuronDataMap, usersTreasuryDataMap, pendingActionsMap, activityLogsMap, memoToNeuronIdMap, updateTokenBalances, transformFn, #GetFullNeuronResponse({neuronId;}) );
+                    ignore getNeuronData( 
+                        neuronDataMap, 
+                        usersTreasuryDataMap, 
+                        pendingActionsMap, 
+                        activityLogsMap, 
+                        memoToNeuronIdMap, 
+                        updateTokenBalances, 
+                        transformFn, 
+                        #GetFullNeuronResponse({neuronId;}) 
+                    );
                     let _ = pendingActionsMap.remove("registerVote_"#Nat64.toText(neuronId));
                     activityLogsMap.put(Int.toText(Time.now()),"successfully completed action: registerVote_"#Nat64.toText(neuronId));
                 };
@@ -182,7 +298,16 @@ module{
                                 };
                                 case(?neuronData){ neuronDataMap.put(Nat64.toText(neuronId), {neuronData with neuron = ?neuron }); };
                             };
-                            ignore getNeuronData( neuronDataMap, usersTreasuryDataMap, pendingActionsMap, activityLogsMap, memoToNeuronIdMap, updateTokenBalances, transformFn, #GetNeuronInfoResponse({neuronId;}) );
+                            ignore getNeuronData( 
+                                neuronDataMap, 
+                                usersTreasuryDataMap, 
+                                pendingActionsMap, 
+                                activityLogsMap, 
+                                memoToNeuronIdMap, 
+                                updateTokenBalances, 
+                                transformFn, 
+                                #GetNeuronInfoResponse({neuronId;}) 
+                            );
                             let _ = pendingActionsMap.remove("getFullNeuronResponse_"#Nat64.toText(neuronId));
                             activityLogsMap.put(Int.toText(Time.now()),"successfully completed action: getFullNeuronResponse_"#Nat64.toText(neuronId));
                         }; 
@@ -239,10 +364,11 @@ module{
         pendingActionsMap: TreasuryTypes.PendingActionsMap,
         activityLogsMap: TreasuryTypes.ActionLogsMap,
         memoToNeuronIdMap: TreasuryTypes.MemoToNeuronIdMap,
-        updateTokenBalances: shared () -> async (),
+        updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies ) -> async (),
         transformFn: NeuronManager.TransformFnSignature,
         args: Governance.ManageNeuron,
-        proposer: Principal
+        proposer: Principal,
+        treasuryCanisterId: Principal
     ): async Result.Result<(), TreasuryTypes.Error> {
         
         let ?neuronId = args.id else {
@@ -282,7 +408,7 @@ module{
                     activityLogsMap.put(Int.toText(Time.now()), "Proposer has insufficient stake to cover transaction fee.");
                     return #err(#InsufficientFunds);
                 };
-                (#Disburse({neuronId = neuronId.id; proposer}), "disburse_"#Nat64.toText(neuronId.id)); 
+                (#Disburse({neuronId = neuronId.id; proposer; treasuryCanisterId}), "disburse_"#Nat64.toText(neuronId.id)); 
             };
             case(#ClaimOrRefresh(_)) { (#ClaimOrRefresh({neuronId = neuronId.id; }), "claimOrRefresh_"#Nat64.toText(neuronId.id));};
             case(#RegisterVote(_)) { (#RegisterVote({neuronId = neuronId.id; }), "registerVote_"#Nat64.toText(neuronId.id));};
@@ -296,7 +422,15 @@ module{
         };
         pendingActionsMap.put(pendingActionId, newPendingAction);
         activityLogsMap.put(Int.toText(Time.now()),"New Action Pending: "#pendingActionId);
-        ignore resolvePendingActions( neuronDataMap, usersTreasuryDataMap, pendingActionsMap, activityLogsMap, memoToNeuronIdMap, updateTokenBalances, transformFn );
+        ignore resolvePendingActions( 
+            neuronDataMap, 
+            usersTreasuryDataMap, 
+            pendingActionsMap, 
+            activityLogsMap, 
+            memoToNeuronIdMap, 
+            updateTokenBalances, 
+            transformFn 
+        );
         return #ok(());
     };
 
@@ -306,7 +440,7 @@ module{
         pendingActionsMap: TreasuryTypes.PendingActionsMap,
         activityLogsMap: TreasuryTypes.ActionLogsMap,
         memoToNeuronIdMap: TreasuryTypes.MemoToNeuronIdMap,
-        updateTokenBalances: shared () -> async (),
+        updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies ) -> async (),
         transformFn: NeuronManager.TransformFnSignature,
         {amount: Nat64; neuronId: Nat64; contributor: Principal}
     ) : async Result.Result<(), TreasuryTypes.Error>  {
@@ -315,14 +449,13 @@ module{
         let ?neuron = neuronData.neuron else Debug.trap("No neuron for neuronId");
         let {account} = neuron;
         
-        try{ SyncronousHelperMethods.debitUserIcpDeposits( usersTreasuryDataMap, updateTokenBalances, {userPrincipal = Principal.toText(contributor); amount = amount + txFee});} 
-        catch(e){ return #err(#InsufficientFunds)};
         
-        let txResult = await NeuronManager.transferIcpToNeuronWithSubaccount(amount, account);
+        let ?{subaccountId} = usersTreasuryDataMap.get(Principal.toText(contributor)) else Debug.trap("No subaccount for contributor");
+        let txResult = await NeuronManager.transferIcpToNeuronWithSubaccount(amount, account, subaccountId);
         switch(txResult){
             case(#err(e)){ return #err(e)};
             case(#ok({public_key; selfAuthPrincipal})) { 
-                ignore updateTokenBalances();
+                ignore updateTokenBalances(#Principal(Principal.toText(contributor)), #Icp);
                 SyncronousHelperMethods.creditUserNeuronStake( neuronDataMap,{ userPrincipal = Principal.toText(contributor);  delta = amount; neuronId = Nat64.toText(neuronId); });
                 let newPendingAction: TreasuryTypes.PendingAction = {
                     args = ?{ id = null; command = ?#ClaimOrRefresh( {by = ?#NeuronIdOrSubaccount( {} )} );neuron_id_or_subaccount = ?#Subaccount(account); };
@@ -332,7 +465,15 @@ module{
                 };
                 pendingActionsMap.put("claimOrRefresh_"#Nat64.toText(neuronId), newPendingAction);
                 activityLogsMap.put(Int.toText(Time.now()),"New Action Pending: claimOrRefresh_"#Nat64.toText(neuronId));
-                ignore resolvePendingActions( neuronDataMap, usersTreasuryDataMap, pendingActionsMap, activityLogsMap, memoToNeuronIdMap, updateTokenBalances, transformFn );
+                ignore resolvePendingActions( 
+                    neuronDataMap, 
+                    usersTreasuryDataMap, 
+                    pendingActionsMap, 
+                    activityLogsMap, 
+                    memoToNeuronIdMap, 
+                    updateTokenBalances, 
+                    transformFn 
+                );
                 return #ok(());
             };
         };
@@ -344,20 +485,18 @@ module{
         pendingActionsMap: TreasuryTypes.PendingActionsMap,
         activityLogsMap: TreasuryTypes.ActionLogsMap,
         memoToNeuronIdMap: TreasuryTypes.MemoToNeuronIdMap,
-        updateTokenBalances: shared () -> async (),
+        updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies ) -> async (),
         transformFn: NeuronManager.TransformFnSignature,
         {amount: Nat64; contributor: Principal; neuronMemo: Nat64}
     ) : async Result.Result<(), TreasuryTypes.Error>  {
 
-        try{ SyncronousHelperMethods.debitUserIcpDeposits( usersTreasuryDataMap, updateTokenBalances, {userPrincipal = Principal.toText(contributor); amount = amount + txFee});} 
-        catch(e){ return #err(#InsufficientFunds)};
-
-        let txResult = await NeuronManager.transferIcpToNeuronWithMemo(amount, neuronMemo);
+        let ?{subaccountId} = usersTreasuryDataMap.get(Principal.toText(contributor)) else Debug.trap("No subaccount for contributor");
+        let txResult = await NeuronManager.transferIcpToNeuronWithMemo(amount, neuronMemo, subaccountId);
 
         switch(txResult){
             case(#err(e)){ return #err(e)};
             case(#ok({public_key; selfAuthPrincipal})) { 
-                ignore updateTokenBalances();
+                ignore updateTokenBalances(#Principal(Principal.toText(contributor)), #Icp);
                 let newNeuronIdPlaceholderKey : Text = Nat64.toText(neuronMemo)#PENDING_NEURON_SUFFIX;
                 SyncronousHelperMethods.creditUserNeuronStake( neuronDataMap,{ userPrincipal = Principal.toText(contributor);  delta = amount; neuronId = newNeuronIdPlaceholderKey; });
                 let newPendingAction: TreasuryTypes.PendingAction = {
@@ -368,7 +507,15 @@ module{
                 };
                 pendingActionsMap.put("createNeuronResponse_"#Nat64.toText(neuronMemo), newPendingAction);
                 activityLogsMap.put(Int.toText(Time.now()),"New Action Pending: createNeuronResponse_"#Nat64.toText(neuronMemo));
-                ignore resolvePendingActions( neuronDataMap, usersTreasuryDataMap, pendingActionsMap, activityLogsMap, memoToNeuronIdMap, updateTokenBalances, transformFn );
+                ignore resolvePendingActions( 
+                    neuronDataMap, 
+                    usersTreasuryDataMap, 
+                    pendingActionsMap, 
+                    activityLogsMap, 
+                    memoToNeuronIdMap, 
+                    updateTokenBalances, 
+                    transformFn 
+                );
                 return #ok(());
             };
         };
@@ -380,7 +527,7 @@ module{
         pendingActionsMap: TreasuryTypes.PendingActionsMap,
         activityLogsMap: TreasuryTypes.ActionLogsMap,
         memoToNeuronIdMap: TreasuryTypes.MemoToNeuronIdMap,
-        updateTokenBalances: shared () -> async (),
+        updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies ) -> async (),
         transformFn: NeuronManager.TransformFnSignature
     ): async () {
 
@@ -469,5 +616,36 @@ module{
             ignore resolvePendingActions_(identifier, action);
             index += 1;
         };
+    };
+
+    public func distributeRewardsFromDisbursedNeuron(
+        neuronDataMap: TreasuryTypes.NeuronsDataMap, 
+        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap, 
+        updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies ) -> async (), 
+        neuronId: Text,
+        proposer: Text,
+        treasuryCanisterId: Principal,
+    ): async () {
+        let ?neuronData = neuronDataMap.get(neuronId) else { return };
+        let {contributions} = neuronData;
+        
+        label loop_ for((userPrincipal, neuronStakeInfo) in Iter.fromArray(contributions)){
+            let ?{subaccountId} = usersTreasuryDataMap.get(userPrincipal) else { continue loop_ };
+            let userStake = neuronStakeInfo.stake_e8s;
+
+            func performTransfer() : async () {
+                let res = await ledger.icrc1_transfer({
+                    to = { owner = treasuryCanisterId; subaccount = ?subaccountId; };
+                    fee = ?Nat64.toNat(txFee);
+                    memo = null;
+                    from_subaccount = null;
+                    created_at_time = ?Nat64.fromNat(Int.abs(Time.now()));
+                    amount = Nat64.toNat(userStake);
+                });
+                await updateTokenBalances(#Principal(userPrincipal), #Icp);
+            };
+            ignore performTransfer();
+        };
+        let ?neuronData_ = neuronDataMap.remove(neuronId) else { return };
     };
 };

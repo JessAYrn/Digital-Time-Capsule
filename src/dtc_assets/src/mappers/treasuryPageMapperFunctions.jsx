@@ -200,15 +200,15 @@ export const mapBackendTreasuryDataToFrontEndObj = (props) => {
     const totalDeposits_ = parseInt(totalDeposits.e8s);
     const daoTotalProfit = balance_icp_ - totalDeposits_;
     const usersTreasuryDataArray_ = usersTreasuryDataArray.map(([principal, treasuryData ]) => {
-        let {deposits} = treasuryData;
-        let {icp, icp_staked, eth, btc} = deposits;
-        deposits = {
+        let {balances} = treasuryData;
+        let {icp, icp_staked, eth, btc} = balances;
+        balances = {
             icp: parseInt(icp.e8s), 
             icp_staked: parseInt(icp_staked.e8s), 
             eth: parseInt(eth.e8s), 
             btc: parseInt(btc.e8s)
         }; 
-        return [ principal, { ...treasuryData, deposits} ];
+        return [ principal, { ...treasuryData, balances} ];
     });
     let balance_icpStaked = 0;
     let votingPower = 0;

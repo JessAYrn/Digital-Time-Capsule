@@ -1,5 +1,4 @@
 import Ledger "NNS/Ledger";
-import Debug "mo:base/Debug";
 import Error "mo:base/Error";
 import Trie "mo:base/Trie";
 import Hash "mo:base/Hash";

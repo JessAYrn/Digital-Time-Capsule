@@ -126,13 +126,13 @@ const WalletPage = (props) => {
                     <Grid xs={2}  width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
                         <Typography display={"flex"} justifyContent={"center"} width={"100%"}>Treasury Deposits:</Typography>
                         <Typography display={"flex"} justifyContent={"center"} width={"100%"} variant="h6" color={"custom"}>
-                        {`${round2Decimals(fromE8s(treasuryState.userTreasuryData?.deposits.icp || 0))}`} ICP
+                        {`${round2Decimals(fromE8s(treasuryState.userTreasuryData?.balances.icp || 0))}`} ICP
                         </Typography>
                     </Grid>
                     <Grid xs={5}  width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"right"} flexDirection={"column"}>
                         <Typography display={"flex"} justifyContent={"right"} width={"100%"}>Treasury Stake:</Typography>
                         <Typography display={"flex"} justifyContent={"right"} width={"100%"} variant="h6" color={"custom"}>
-                        {`${round2Decimals(fromE8s(treasuryState.userTreasuryData?.deposits.icp_staked || 0))}`} ICP
+                        {`${round2Decimals(fromE8s(treasuryState.userTreasuryData?.balances.icp_staked || 0))}`} ICP
                         </Typography>
                     </Grid>
                 </Grid>

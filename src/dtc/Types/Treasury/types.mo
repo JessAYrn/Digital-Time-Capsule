@@ -4,17 +4,26 @@ import Nat64 "mo:base/Nat64";
 import Blob "mo:base/Blob";
 import Governance "../../NNS/Governance";
 import Buffer "mo:base/Buffer";
+import Account "../../Serializers/Account";
 
 
 module{
 
-    public type Deposits = {
+    public type SubaccountsMetaData = { owner: Text; };
+
+    public type SubaccountRegistryArray = [(Blob, SubaccountsMetaData)];
+
+    public type SubaccountRegistryMap = HashMap.HashMap<Blob, SubaccountsMetaData>;
+
+    public type Identifier = {#Principal: Text; #SubaccountId: Account.Subaccount};
+
+    public type Balances = {
         icp: {e8s : Nat64;};
         eth: {e8s : Nat64};
         btc: {e8s : Nat64};
     };
 
-    public type DepositsExport = {
+    public type BalancesExport = {
         icp: {e8s : Nat64;};
         icp_staked: {e8s : Nat64;};
         eth: {e8s : Nat64};
@@ -35,6 +44,7 @@ module{
         #NeuronClaimFailed;
         #NoNeuronIdRetreived;
         #UnexpectedResponse : {response : Governance.Command_1};
+        #NoTreasuryCanisterId;
     };
 
     public type NeuronStakeInfo = {
@@ -43,11 +53,13 @@ module{
     };
 
     public type UserTreasuryData = {
-        deposits : Deposits;
+        balances : Balances;
+        subaccountId : Account.Subaccount;
     };
 
     public type UserTreasuryDataExport = {
-        deposits : DepositsExport;
+        balances : BalancesExport;
+        subaccountId : Account.Subaccount;
     };
 
     public type PrincipalAsText = Text;
@@ -109,7 +121,7 @@ module{
         #ClaimOrRefresh: {neuronId: Nat64;};
         #Configure: {neuronId: Nat64; };
         #RegisterVote: {neuronId: Nat64; };
-        #Disburse: {neuronId: Nat64; proposer: Principal;};
+        #Disburse: {neuronId: Nat64; proposer: Principal; treasuryCanisterId: Principal;};
     };
 
     public type RequestResponses = {
@@ -123,7 +135,7 @@ module{
         #ClaimOrRefresh : { response: Governance.ClaimOrRefreshResponse; neuronId: Nat64;};
         #Configure : {response: {}; neuronId: Nat64; };
         #RegisterVote : {response: {}; neuronId: Nat64; };
-        #Disburse : { response: Governance.DisburseResponse; neuronId: Nat64; proposer: Principal;};
+        #Disburse : { response: Governance.DisburseResponse; neuronId: Nat64; proposer: Principal; treasuryCanisterId: Principal;};
     };
 
     public type ReadRequestInput = {

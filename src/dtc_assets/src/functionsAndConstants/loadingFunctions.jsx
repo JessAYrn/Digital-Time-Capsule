@@ -158,6 +158,7 @@ export const loadTreasuryData = async (actorState, dispatch, types) => {
     treasuryBalances = mapBalancesDataFromApiToFrontend(treasuryBalances);
     treasuryData = treasuryData.ok;
     treasuryData = mapBackendTreasuryDataToFrontEndObj(treasuryData);
+    console.log(treasuryData);
     dispatch({
         actionType: types.SET_TREASURY_DATA,
         payload: treasuryData

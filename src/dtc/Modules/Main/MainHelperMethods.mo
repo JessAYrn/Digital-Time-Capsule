@@ -16,6 +16,7 @@ import HashMap "mo:base/HashMap";
 import AssetCanister "../../Types/AssetCanister/types";
 import Manager "../../Manager";
 import IC "../../Types/IC/types";
+import Treasury "../../Treasury";
 
 module{
 
@@ -56,6 +57,8 @@ module{
                 Cycles.add(1_000_000_000_000);
                 let newUserJournal = await Journal.Journal();
                 let amountAccepted = await newUserJournal.wallet_receive();
+                let treasuryCanister: Treasury.Treasury = actor(daoMetaData.treasuryCanisterPrincipal);
+                ignore treasuryCanister.createUserTreasuryData(callerId);
                 ignore CanisterManagementMethods.addControllers(
                     [daoMetaData.managerCanisterPrincipal],
                     Principal.fromActor(newUserJournal)

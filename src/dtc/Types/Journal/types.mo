@@ -7,6 +7,11 @@ module {
         entryKey: Nat;
     };
 
+    public type RecipientIdentifier = {
+        #PrincipalAndSubaccount: (Principal, ?Account.Subaccount);
+        #AccountIdentifier: Account.AccountIdentifier;
+    };
+
     public type Bio = {
         name : Text;
         dob: ?Int;

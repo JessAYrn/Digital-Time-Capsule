@@ -13,7 +13,7 @@
     "prebuild": "npm run generate",
     "start": "webpack serve --mode development --env development",
     "prestart": "npm run generate",
-    "generate": "dfx generate dtc_assets --network ic"
+    "generate": "dfx generate dtc --network ic"
   },
   "devDependencies": {
     "@dfinity/agent": "^0.10.4",

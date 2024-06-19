@@ -18,7 +18,7 @@ module{
             let userTreasuryDeposits = await treasuryCanister.getUserTreasuryData(principal);
             let{canisterId} = profile;
             let userCansiter : Journal.Journal = actor(Principal.toText(canisterId));
-            ignore userCansiter.saveCurrentBalances(userTreasuryDeposits.deposits);
+            ignore userCansiter.saveCurrentBalances(userTreasuryDeposits.balances);
             index += 1;
         }
     };

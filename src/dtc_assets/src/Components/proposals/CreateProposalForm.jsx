@@ -292,7 +292,7 @@ const CreateProposalForm = (props) => {
                 (proposalAction_ ===  PROPOSAL_ACTIONS.IncreaseNeuron || proposalAction_ === PROPOSAL_ACTIONS.CreateNeuron) &&
                 <DataField 
                 label={"Available Balance: "}
-                text={`${fromE8s(treasuryState.userTreasuryData?.deposits.icp || 0) } ICP`}
+                text={`${fromE8s(treasuryState.userTreasuryData?.balances.icp || 0) } ICP`}
                 isLoading={!treasuryState.dataHasBeenLoaded}
                 disabled={true}
                 />
