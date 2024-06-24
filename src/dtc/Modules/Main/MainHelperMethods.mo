@@ -58,7 +58,7 @@ module{
                 let newUserJournal = await Journal.Journal();
                 let amountAccepted = await newUserJournal.wallet_receive();
                 let treasuryCanister: Treasury.Treasury = actor(daoMetaData.treasuryCanisterPrincipal);
-                ignore treasuryCanister.createUserTreasuryData(callerId);
+                ignore treasuryCanister.createTreasuryData(callerId);
                 ignore CanisterManagementMethods.addControllers(
                     [daoMetaData.managerCanisterPrincipal],
                     Principal.fromActor(newUserJournal)

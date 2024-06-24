@@ -76,7 +76,7 @@ module{
                     let treasuryAccountId = await treasuryCanister.canisterIcpAccountId(null);
                     let treasuryAccountIdAsText = Hex.encode(Blob.toArray(treasuryAccountId));
                     if(recipientAsText == treasuryAccountIdAsText or sourceAsText == treasuryAccountIdAsText){
-                        await treasuryCanister.updateTokenBalances(
+                        ignore treasuryCanister.updateTokenBalances(
                             #Principal(metaData.treasuryCanisterPrincipal),
                             #Icp
                         );

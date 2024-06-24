@@ -190,15 +190,14 @@ export const mapBackendTreasuryDataToFrontEndObj = (props) => {
         usersTreasuryDataArray,
         userPrincipal,
         totalDeposits,
-        accountId_icp,
-        balance_icp,
+        daoIcpAccountId,
+        daoWalletBalance,
         neurons
     } = props;
     
-    const accountId_icp_ = toHexString(new Uint8Array( [...accountId_icp]));
-    const balance_icp_ = parseInt(balance_icp.e8s);
+    const daoIcpAccountId_ = toHexString(new Uint8Array( [...daoIcpAccountId]));
+    const daoWalletBalance_ = parseInt(daoWalletBalance.e8s);
     const totalDeposits_ = parseInt(totalDeposits.e8s);
-    const daoTotalProfit = balance_icp_ - totalDeposits_;
     const usersTreasuryDataArray_ = usersTreasuryDataArray.map(([principal, treasuryData ]) => {
         let {balances} = treasuryData;
         let {icp, icp_staked, eth, btc} = balances;
@@ -210,7 +209,7 @@ export const mapBackendTreasuryDataToFrontEndObj = (props) => {
         }; 
         return [ principal, { ...treasuryData, balances} ];
     });
-    let balance_icpStaked = 0;
+    let daoTotalIcpStaked = 0;
     let votingPower = 0;
     let userVotingPower = 0;
 
@@ -222,7 +221,7 @@ export const mapBackendTreasuryDataToFrontEndObj = (props) => {
         let stake_e8s = neuronInfo[0]?.stake_e8s;
 
         votingPower += parseInt(voting_power || 0);
-        balance_icpStaked += parseInt(stake_e8s || 0);
+        daoTotalIcpStaked += parseInt(stake_e8s || 0);
         let userContribution = contributions.find(([contributor, _]) => {
             return contributor === userPrincipal
         });
@@ -238,12 +237,11 @@ export const mapBackendTreasuryDataToFrontEndObj = (props) => {
 
     return {
         usersTreasuryDataArray: usersTreasuryDataArray_, 
-        balance_icp: balance_icp_, 
+        daoWalletBalance: daoWalletBalance_, 
         totalDeposits: totalDeposits_,
-        daoTotalProfit,
-        accountId_icp: accountId_icp_,
+        daoIcpAccountId: daoIcpAccountId_,
         neurons: {...neurons, icp: icpNeurons},
-        balance_icpStaked,
+        daoTotalIcpStaked,
         userNeurons: {icp: userIcpNeurons},
         votingPower,
         userVotingPower,

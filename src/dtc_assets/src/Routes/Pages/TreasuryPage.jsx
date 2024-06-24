@@ -63,7 +63,7 @@ const TreasuryPage = (props) => {
     setModalProps({
         flexDirection: "column",
         bigText: "Treasury ICP Account ID:",
-        smallText: `${shortenHexString(treasuryState.accountId_icp)}`,
+        smallText: `${shortenHexString(treasuryState.daoIcpAccountId)}`,
         components: [
           {
             Component: ButtonField,
@@ -71,7 +71,7 @@ const TreasuryPage = (props) => {
               text: "Copy To Clipboard",
               onClick: () => {
                 const promise = new Promise ((res, rej) => {setModalIsOpen(false); res()});
-                promise.then(() => { copyText(treasuryState.accountId_icp); });
+                promise.then(() => { copyText(treasuryState.daoIcpAccountId); });
               },
               iconSize: 'small',
               Icon: ContentCopyIcon,
@@ -154,7 +154,7 @@ const TreasuryPage = (props) => {
           <Grid xs={5}  width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"} flexDirection={"column"}>
             <Typography width={"100%"}>Liquid:</Typography>
             <Typography width={"100%"} variant="h6" color={"custom"}>
-              {`${round2Decimals(fromE8s(treasuryState.balance_icp))}`} ICP
+              {`${round2Decimals(fromE8s(treasuryState.daoWalletBalance))}`} ICP
             </Typography>
             <Typography width={"100%"} style={{color: '#bdbdbd'}}>
               {`${round2Decimals(fromE8s(treasuryState.userTreasuryData?.balances.icp || 0))}`} ICP
@@ -163,7 +163,7 @@ const TreasuryPage = (props) => {
           <Grid xs={2} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
             <Typography width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"}>Staked:</Typography>
             <Typography width={"100%"} variant="h6" display={"flex"} justifyContent={"center"} alignItems={"center"}>
-              {`${round2Decimals(fromE8s(treasuryState.balance_icpStaked))}`} ICP
+              {`${round2Decimals(fromE8s(treasuryState.daoTotalIcpStaked))}`} ICP
             </Typography>
             <Typography width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} style={{color: '#bdbdbd'}}>
               {`${round2Decimals(fromE8s(treasuryState.userTreasuryData?.balances.icp_staked || 0))}`} ICP

@@ -57,7 +57,7 @@ shared actor class User() = this {
 
     private stable var frontEndCanisterBalance: Nat = 1;
 
-    private stable var quorum: Float = 0;
+    private stable var quorum: Float = 0.125;
 
     private var userProfilesMap : MainTypes.UserProfilesMap = HashMap.fromIter<Principal, MainTypes.UserProfile>(
         Iter.fromArray(userProfilesArray), 
@@ -273,12 +273,14 @@ shared actor class User() = this {
         daoMetaData_v3 := {daoMetaData_v3 with managerCanisterPrincipal};
     };
 
-    private func createTreasuryCanister(backEndPrincipal: Text, managerCanisterPrincipal: Text): async () {
+    private func createTreasuryCanister(): async () {
         let {treasuryCanisterPrincipal} = await CanisterManagementMethods.createTreasuryCanister(daoMetaData_v3);
+        let treasuryCanister : Treasury.Treasury = actor(treasuryCanisterPrincipal);
+        ignore treasuryCanister.createTreasuryData(Principal.fromActor(treasuryCanister));
         daoMetaData_v3 := {daoMetaData_v3 with treasuryCanisterPrincipal};
     };
     
-    private func createFrontEndCanister(backEndPrincipal: Text, managerCanisterPrincipal: Text): async () {
+    private func createFrontEndCanister(): async () {
         let {frontEndPrincipal} = await CanisterManagementMethods.createUiCanister(daoMetaData_v3);
         daoMetaData_v3 := {daoMetaData_v3 with frontEndPrincipal};
     };
@@ -303,8 +305,8 @@ shared actor class User() = this {
         };
         daoMetaData_v3 := updatedMetaData;
 
-        ignore createTreasuryCanister(backEndPrincipal,managerCanisterPrincipal);
-        ignore createFrontEndCanister(backEndPrincipal,managerCanisterPrincipal);
+        ignore createTreasuryCanister();
+        ignore createFrontEndCanister();
         return #ok(());
     };
 
@@ -387,12 +389,12 @@ shared actor class User() = this {
         let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v3.treasuryCanisterPrincipal);
         let usersTreasuryDataArray = await treasuryCanister.getUsersTreasuryDataArray();
         let neurons = {icp = await treasuryCanister.getNeuronsDataArray()};
-        let balance_icp = await treasuryCanister.canisterBalance();
-        let accountId_icp_blob = await treasuryCanister.canisterIcpAccountId(null);
+        let daoWalletBalance = await treasuryCanister.daoWalletIcpBalance();
+        let daoIcpAccountId_blob = await treasuryCanister.canisterIcpAccountId(null);
         let {totalDeposits} = await treasuryCanister.getDaoTotalDeposits();
-        let accountId_icp = Blob.toArray(accountId_icp_blob);
+        let daoIcpAccountId = Blob.toArray(daoIcpAccountId_blob);
         let userPrincipal = Principal.toText(caller);
-        return #ok({usersTreasuryDataArray; balance_icp; accountId_icp; neurons; userPrincipal; totalDeposits});
+        return #ok({usersTreasuryDataArray; daoWalletBalance; daoIcpAccountId; neurons; userPrincipal; totalDeposits});
     };
 
     public shared({caller}) func depositIcpToTreasury(amount: Nat64) : async {blockIndex: Nat64} {
@@ -709,6 +711,14 @@ shared actor class User() = this {
         proposalsArray := Iter.toArray(proposalsMap.entries());
     };
 
+    private func createTreasuryDataForAllUsers() : async () {
+        let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v3.treasuryCanisterPrincipal);
+        ignore treasuryCanister.createTreasuryData(Principal.fromActor(treasuryCanister));
+        label loop_ for((principal, _) in userProfilesMap.entries()){
+            ignore treasuryCanister.createTreasuryData(principal);
+        };
+    };
+
     system func postupgrade() { 
         userProfilesArray:= []; 
         proposalsArray := [];
@@ -716,5 +726,7 @@ shared actor class User() = this {
         let timerId_daily = recurringTimer(#seconds (24 * 60 * 60), heartBeat_unshared);
         let timerId_hourly = recurringTimer(#seconds (60 * 60), heartBeat_hourly);
         let timerId_everyThirtySeconds = recurringTimer(#seconds (30), updateUsersTxHistory);
+
+        let timeer_id_temperary = setTimer(#seconds(1), createTreasuryDataForAllUsers);
     };
 }

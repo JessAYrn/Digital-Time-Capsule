@@ -221,7 +221,7 @@ const CreateProposalForm = (props) => {
         setProposalPayload({...proposalPayload_, ...payload_});
         if(format === PAYLOAD_DATA_TYPES.principal) setHasError_1(!principalHasProperFormat(payload_[property]));
         if(format === PAYLOAD_DATA_TYPES.nat) setHasError_1(!isANumber(payload_[property][0] || payload_[property]));
-        if(proposalAction_ === PROPOSAL_ACTIONS.PurchaseCycles) setHasError_1(payload_[property] > fromE8s(treasuryState.daoTotalProfit) || payload_[property] < 0);
+        if(proposalAction_ === PROPOSAL_ACTIONS.PurchaseCycles) setHasError_1(payload_[property] > fromE8s(treasuryState.daoWalletBalance) || payload_[property] < 0);
     };
     const modalButton_close = [
         {Component: ButtonField,
@@ -301,7 +301,7 @@ const CreateProposalForm = (props) => {
                 proposalAction_ ===  PROPOSAL_ACTIONS.PurchaseCycles &&
                 <DataField 
                 label={"Available Balance: "}
-                text={`${fromE8s(treasuryState.daoTotalProfit)} ICP`}
+                text={`${fromE8s(treasuryState.daoWalletBalance)} ICP`}
                 isLoading={!treasuryState.dataHasBeenLoaded}
                 disabled={true}
                 />

@@ -110,9 +110,12 @@ shared actor class Treasury (principal : Principal) = this {
     let {recurringTimer;} = Timer;
 
     // need to complete this function. it should create a new subaccount for a given principal only if that principal does not already have a subaccount.
-    private func createUserTreasuryData_(principal: Principal) : async () {
-        var newSubaccount: Account.Subaccount = await Account.getRandomSubaccount();
-        while(subaccountRegistryMap.get(newSubaccount) != null){ newSubaccount := await Account.getRandomSubaccount(); };
+    private func createTreasuryData_(principal: Principal) : async () {
+        var newSubaccount: Account.Subaccount = Account.defaultSubaccount();
+        if(not Principal.equal(principal, Principal.fromActor(this))){
+            newSubaccount := await Account.getRandomSubaccount();
+            while(subaccountRegistryMap.get(newSubaccount) != null){ newSubaccount := await Account.getRandomSubaccount(); };
+        };
 
         subaccountRegistryMap.put(newSubaccount, {owner = Principal.toText(principal)});
         let newUserTreasuryData = {
@@ -127,11 +130,11 @@ shared actor class Treasury (principal : Principal) = this {
         usersTreasuryDataMap.put(Principal.toText(principal), newUserTreasuryData);
     };
 
-    public shared({caller}) func createUserTreasuryData(principal: Principal) : async () {
-        // if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
+    public shared({caller}) func createTreasuryData(principal: Principal) : async () {
+        if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         let principalAsText = Principal.toText(principal);
         if(usersTreasuryDataMap.get(principalAsText) != null) throw Error.reject("User already has treasury data.");
-        await createUserTreasuryData_(principal);
+        await createTreasuryData_(principal);
     };
     
     // revised to conform to new data structure
@@ -152,7 +155,7 @@ shared actor class Treasury (principal : Principal) = this {
     };
     
     public query({caller}) func getUserTreasuryData(userPrincipal: Principal): async TreasuryTypes.UserTreasuryDataExport {
-        // if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
+        if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         let userPrincipalAsText = Principal.toText(userPrincipal);
         let userTreasuryData = switch(usersTreasuryDataMap.get(userPrincipalAsText)){
             case (?userTreasuryData) { userTreasuryData };
@@ -176,24 +179,14 @@ shared actor class Treasury (principal : Principal) = this {
 
     public query({caller}) func getDaoTotalDeposits(): async {totalDeposits: {e8s: Nat64};} {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
-        var total: Nat64 = 0;
-        label loop_ for((userPrincipal, userDeposits) in usersTreasuryDataMap.entries()){
-            total += userDeposits.balances.icp.e8s
-        };
-        return {totalDeposits = {e8s = total};};
+        return {totalDeposits = {e8s = sumOfAllTokenBalances.icp.e8s};};
     };
 
     // need to update this function to save the sum of all subaccounts as the total balance for icp.
     public shared({caller}) func saveCurrentBalances() : async () {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
-        let icp = await ledger.account_balance({ account = tresasuryIcpAccountId(null) });
-        let {totalStake} = await getDaoTotalStakeAndVotingPower();
-        //will need to retreive the proper balances of the other currencies once they've been integrated
-        let icp_staked = {e8s: Nat64 = totalStake};
-        let btc = {e8s: Nat64 = 0};
-        let eth = {e8s: Nat64 = 0};
-        let balances = {icp; icp_staked; btc; eth;};
-        balancesHistoryMap.put(Int.toText(Time.now()), balances);
+        let currentTime = Int.toText(Time.now());
+        balancesHistoryMap.put(currentTime, sumOfAllTokenBalances);
     };
 
     // no need to change this
@@ -324,13 +317,14 @@ shared actor class Treasury (principal : Principal) = this {
     };
 
     // need to revise this to retrieve the balance of a given subaccount or principal
-    public query({caller}) func canisterBalance() : async Ledger.ICP {
+    public query({caller}) func daoWalletIcpBalance() : async Ledger.ICP {
         let canisterId =  Principal.fromActor(this);
         if(  
             Principal.toText(caller) !=  Principal.toText(canisterId)
             and Principal.toText(caller) != ownerCanisterId
         ) { throw Error.reject("Unauthorized access."); };
-        return sumOfAllTokenBalances.icp;
+        let ?treasuryData = usersTreasuryDataMap.get(Principal.toText(Principal.fromActor(this))) else throw Error.reject("User not found.");
+        return treasuryData.balances.icp;
     };
     
     public shared({caller}) func updateTokenBalances( identifier: TreasuryTypes.Identifier, currency: TreasuryTypes.SupportedCurrencies) 
@@ -347,6 +341,19 @@ shared actor class Treasury (principal : Principal) = this {
             case(#Btc) { throw Error.reject("Btc not yet supported."); };
         };
         usersTreasuryDataMap.put(userPrincipal, updatedUserTreasuryData);
+        let {totalStake} = await getDaoTotalStakeAndVotingPower();
+        var icp_e8s: Nat64 = 0;
+
+        label loop_ for((principal, treasuryData) in usersTreasuryDataMap.entries()){
+            icp_e8s += treasuryData.balances.icp.e8s;
+        };
+
+        sumOfAllTokenBalances := {
+            eth = {e8s: Nat64 = 0};
+            btc = {e8s: Nat64 = 0}; 
+            icp = {e8s = icp_e8s}; 
+            icp_staked = {e8s = totalStake};
+        };
     };
 
     public query ({caller}) func getCyclesBalance(): async Nat {

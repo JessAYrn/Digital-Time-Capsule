@@ -79,8 +79,8 @@ module{
         neurons : { icp: NeuronsDataArray; };
         usersTreasuryDataArray : UsersTreasuryDataArrayExport;
         totalDeposits : {e8s : Nat64};
-        balance_icp: {e8s : Nat64};
-        accountId_icp: [Nat8];
+        daoWalletBalance: {e8s : Nat64};
+        daoIcpAccountId: [Nat8];
         userPrincipal: Text;
     };
 
