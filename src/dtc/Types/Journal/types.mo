@@ -111,13 +111,6 @@ module {
         #NoRemainingStorage;
     };
 
-    public type ReadJournalResult = {
-        userJournalData : ([JournalEntryExportKeyValuePair], Bio); 
-        email: ?Text; 
-        userName: ?Text;
-        principal: Text;
-    };
-
     public let DEFAULT_BIO: Bio = {
         name = "";
         dob = null;

@@ -20,7 +20,7 @@ module{
 
     
 
-    public func updatePhotos(callerId: Principal, profilesMap: MainTypes.UserProfilesMap, photos: [JournalTypes.FileMetaData]) : 
+    public func updatePhotos(callerId: Principal, profilesMap: MainTypes.UserProfilesMap_V2, photos: [JournalTypes.FileMetaData]) : 
     async Result.Result<(JournalTypes.Bio), JournalTypes.Error> {
 
         let result = profilesMap.get(callerId);
@@ -35,7 +35,7 @@ module{
         };
     };
 
-    public func updateBio(callerId: Principal, profilesMap: MainTypes.UserProfilesMap, bio: JournalTypes.Bio) : 
+    public func updateBio(callerId: Principal, profilesMap: MainTypes.UserProfilesMap_V2, bio: JournalTypes.Bio) : 
     async Result.Result<(JournalTypes.Bio), JournalTypes.Error> {
         
         let result = profilesMap.get(callerId);
@@ -52,7 +52,7 @@ module{
 
     public func createJournalEntry(
         callerId: Principal, 
-        profilesMap: MainTypes.UserProfilesMap
+        profilesMap: MainTypes.UserProfilesMap_V2
     ) : async Result.Result<([JournalTypes.JournalEntryExportKeyValuePair]), JournalTypes.Error> {
         let result = profilesMap.get(callerId);
         switch(result){
@@ -67,7 +67,7 @@ module{
 
     public func markJournalEntryAsRead(
         callerId: Principal, 
-        profilesMap: MainTypes.UserProfilesMap, 
+        profilesMap: MainTypes.UserProfilesMap_V2, 
         entryKey: JournalTypes.EntryKey
     ) : async Result.Result<(), JournalTypes.Error> {
 
@@ -85,7 +85,7 @@ module{
 
     public func updateJournalEntry(
         callerId: Principal, 
-        profilesMap: MainTypes.UserProfilesMap, 
+        profilesMap: MainTypes.UserProfilesMap_V2, 
         entry : JournalTypes.JournalEntry,
         entryKey : JournalTypes.EntryKey, 
     ) : async Result.Result<([JournalTypes.JournalEntryExportKeyValuePair]), JournalTypes.Error> {
@@ -102,7 +102,7 @@ module{
 
     public func submitJournalEntry(
         callerId: Principal, 
-        profilesMap: MainTypes.UserProfilesMap, 
+        profilesMap: MainTypes.UserProfilesMap_V2, 
         entryKey : JournalTypes.EntryKey, 
     ) : async Result.Result<[JournalTypes.JournalEntryExportKeyValuePair], JournalTypes.Error> {
         let result = profilesMap.get(callerId);
@@ -118,7 +118,7 @@ module{
 
     public func deleteJournalEntry(
         callerId: Principal, 
-        profilesMap: MainTypes.UserProfilesMap, 
+        profilesMap: MainTypes.UserProfilesMap_V2, 
         entryKey : JournalTypes.EntryKey, 
     ) : async Result.Result<(), JournalTypes.Error> {
         let result = profilesMap.get(callerId);
@@ -132,7 +132,7 @@ module{
         };
     };
 
-    public func deleteFile(callerId: Principal, profilesMap: MainTypes.UserProfilesMap, fileId: Text) :
+    public func deleteFile(callerId: Principal, profilesMap: MainTypes.UserProfilesMap_V2, fileId: Text) :
     async Result.Result<(), JournalTypes.Error> {
 
         let result = profilesMap.get(callerId);
@@ -146,7 +146,7 @@ module{
         };
     };
 
-    public func uploadJournalEntryFile(callerId: Principal, profilesMap: MainTypes.UserProfilesMap, fileId: Text, chunkId: Nat, blobChunk: Blob): 
+    public func uploadJournalEntryFile(callerId: Principal, profilesMap: MainTypes.UserProfilesMap_V2, fileId: Text, chunkId: Nat, blobChunk: Blob): 
     async Result.Result<(Text), JournalTypes.Error>{
 
         let result = profilesMap.get(callerId);

@@ -16,9 +16,7 @@ export const loadAllDataIntoReduxStores = async (states, dispatchFunctions, type
     //checks to see if user has an account. If not, then it attemptes to make an account, if 
     //the account creation is unsuccessful, then it returns
     let hasAccount = await actorState.backendActor.hasAccount();
-    if(!hasAccount) accountCreationAttemptResults = await actorState.backendActor.create();
-    if(accountCreationAttemptResults && "err" in accountCreationAttemptResults){ loadSuccessful = false; return loadSuccessful;}
-
+    if(!hasAccount) { loadSuccessful = false; return loadSuccessful;}
     //calls the backend and loads the retrieved data into the appropriate redux stores.
     let promises = [];
     if(!walletState.dataHasBeenLoaded) promises.push(loadWalletData(actorState, walletDispatch, walletTypes));
@@ -26,7 +24,7 @@ export const loadAllDataIntoReduxStores = async (states, dispatchFunctions, type
     if(!journalState.dataHasBeenLoaded) promises.push(loadJournalData(actorState, journalDispatch, journalTypes));
     if(!notificationsState.dataHasBeenLoaded) promises.push(loadNotificationsData(actorState, notificationsDispatch, notificationsTypes));
     if(!treasuryState.dataHasBeenLoaded) promises.push(loadTreasuryData(actorState, treasuryDispatch, treasuryTypes));
-    await Promise.all(promises);
+    const response = await Promise.all(promises);
     return loadSuccessful
 };
 

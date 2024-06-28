@@ -13,6 +13,7 @@ import Array "mo:base/Array";
 import Journal "../../Journal";
 import CanisterManagementMethods "../Main/CanisterManagementMethods";
 import HashMap "mo:base/HashMap";
+import Debug "mo:base/Debug";
 import AssetCanister "../../Types/AssetCanister/types";
 import Manager "../../Manager";
 import IC "../../Types/IC/types";
@@ -24,11 +25,13 @@ module{
 
     public func create (
         callerId: Principal, 
-        profilesMap: MainTypes.UserProfilesMap, 
+        userName: Text,
+        profilesMap: MainTypes.UserProfilesMap_V2, 
         daoMetaData: MainTypes.DaoMetaData_V3
     ) : async Result.Result<MainTypes.AmountAccepted, JournalTypes.Error> {
 
         if(Principal.toText(callerId) == "2vxsx-fae"){ return #err(#NotAuthorized);};
+        if(not isUserNameAvailable(userName, profilesMap)){ return #err(#UserNameTaken);};
 
         let callerIdAsText = Principal.toText(callerId);
         let requestForAccessMap = HashMap.fromIter<Text, MainTypes.Approved>(
@@ -65,106 +68,35 @@ module{
                 );
                 let settingMainCanister = await newUserJournal.setMainCanisterPrincipalId();
                 let userAccountId = await newUserJournal.canisterAccount();
-                let userProfile: MainTypes.UserProfile = {
+                let userProfile: MainTypes.UserProfile_V2 = {
                     canisterId = Principal.fromActor(newUserJournal);
                     email = null;
-                    userName = null;
+                    userName;
                     userPrincipal = callerId;
                     accountId = ?userAccountId;
                     approved = ?true;
-                    treasuryMember = ?false;
-                    treasuryContribution = ?0;
-                    monthsSpentAsTreasuryMember = ?0;
                 };
                 profilesMap.put(callerId, userProfile);
                 
                 return #ok(amountAccepted);
             };
-            case ( ? v) { return #err(#AlreadyExists); }
+            case ( ? existingProfile) { return #err(#AlreadyExists); }
         };
     };
 
-    public func updateProfile(callerId: Principal, profilesMap: MainTypes.UserProfilesMap, profile: MainTypes.ProfileInput) : 
-    async Result.Result<(), JournalTypes.Error> {
-        let result = profilesMap.get(callerId);
-        switch (result){
-            case null { return #err(#NotFound); };
-            case(? v) {
-                let userNameAvailable = isUserNameAvailable(profile.userName, callerId, profilesMap);
-                if(not userNameAvailable){ return #err(#UserNameTaken); };
-                let userProfile : MainTypes.UserProfile = {
-                    canisterId = v.canisterId;
-                    email = profile.email;
-                    userName = profile.userName;
-                    userPrincipal = callerId;
-                    accountId = v.accountId;
-                    approved = ?true;
-                    treasuryMember = ?false;
-                    treasuryContribution = ?0;
-                    monthsSpentAsTreasuryMember = ?0;
-                };
-                let newProfile = profilesMap.replace(callerId, userProfile);            
-                return #ok(());
-            };
+    public func delete(callerId: Principal, profilesMap: MainTypes.UserProfilesMap_V2) : 
+    async Result.Result<(), JournalTypes.Error> { let newProfile = profilesMap.delete(callerId); #ok(()); };
+
+    public func isUserNameAvailable(userName: Text, profilesMap: MainTypes.UserProfilesMap_V2) : Bool {
+        label lopp_ for((_, userProfile) in profilesMap.entries()){ 
+            let inputUserName_ = Text.toLowercase(userName) else continue lopp_;
+            let userProfileUserName_ = Text.toLowercase(userProfile.userName) else continue lopp_;
+            if((inputUserName_ == userProfileUserName_)){ return false; }; 
         };
+        return true;
     };
 
+    private  func key(x: Principal) : Trie.Key<Principal> { return {key = x; hash = Principal.hash(x)}; };
 
-    public func delete(callerId: Principal, profilesMap: MainTypes.UserProfilesMap) : 
-    async Result.Result<(), JournalTypes.Error> {
-        let result = profilesMap.get(callerId);
-        switch (result){
-            case null { #err(#NotFound); };
-            case(? v) {
-                let newProfile = profilesMap.delete(callerId);
-                #ok(());
-            };
-        };
-    };
-
-    public func isUserNameAvailable(userName: ?Text, callerId: Principal, profilesMap: MainTypes.UserProfilesMap) : Bool {
-        switch(userName){
-            case null{
-                true
-            };
-            case (? userNameValue){
-                var index = 0;
-                let numberOfProfiles = profilesMap.size();
-                let profilesIter = profilesMap.entries();
-                let profilesArray = Iter.toArray(profilesIter);
-                let ArrayBuffer = Buffer.Buffer<(Principal,MainTypes.UserProfile)>(1);
-
-                while(index < numberOfProfiles){
-                    let userProfile = profilesArray[index];
-                    switch(userProfile.1.userName){
-                        case null{
-                            index += 1;
-                        };
-                        case (? username){
-                            if((username == userNameValue)){
-                                if(userProfile.1.userPrincipal != callerId){
-                                    ArrayBuffer.add(userProfile);
-                                };
-                            };
-                            index += 1;
-                        };
-                    };
-                };
-
-                if(ArrayBuffer.size() > 0){
-                    false
-                } else {
-                    true
-                }
-            };
-        };
-    };
-
-    private  func key(x: Principal) : Trie.Key<Principal> {
-        return {key = x; hash = Principal.hash(x)};
-    };
-
-    private func textKey(x: Text) : Trie.Key<Text> {
-        return {key = x; hash = Text.hash(x)}
-    };
+    private func textKey(x: Text) : Trie.Key<Text> { return {key = x; hash = Text.hash(x)} };
 }

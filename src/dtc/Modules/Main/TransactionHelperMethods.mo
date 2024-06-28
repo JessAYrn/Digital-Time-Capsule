@@ -19,7 +19,7 @@ module{
 
     private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
 
-    public func transferICP(callerId: Principal, profilesMap: MainTypes.UserProfilesMap ,amount: Nat64, canisterAccountId: Account.AccountIdentifier) : 
+    public func transferICP(callerId: Principal, profilesMap: MainTypes.UserProfilesMap_V2 ,amount: Nat64, canisterAccountId: Account.AccountIdentifier) : 
     async Result.Result<({blockIndex: Nat64}), JournalTypes.Error> {
 
         let userProfile = profilesMap.get(callerId);
@@ -34,7 +34,7 @@ module{
     };
 
     public func updateUsersTxHistory(
-        profilesMap: MainTypes.UserProfilesMap,
+        profilesMap: MainTypes.UserProfilesMap_V2,
         startIndexForBlockChainQuery: Nat64,
         metaData : {treasuryCanisterPrincipal : Text}
     ) : async (Nat64) {
@@ -91,12 +91,12 @@ module{
         return newStartIndexForNextQuery;
     };
 
-    private func findProfileWithGivenAccountId(profilesMap: MainTypes.UserProfilesMap, accountId: Account.AccountIdentifier)
-    : ?(Principal, MainTypes.UserProfile){
+    private func findProfileWithGivenAccountId(profilesMap: MainTypes.UserProfilesMap_V2, accountId: Account.AccountIdentifier)
+    : ?(Principal, MainTypes.UserProfile_V2){
         let profilesArray = Iter.toArray(profilesMap.entries());
-        let userProfile = Array.find<(Principal, MainTypes.UserProfile)>(
+        let userProfile = Array.find<(Principal, MainTypes.UserProfile_V2)>(
             profilesArray, 
-            func ((princpal: Principal, profile: MainTypes.UserProfile)): Bool {
+            func ((princpal: Principal, profile: MainTypes.UserProfile_V2)): Bool {
                 let ?accountId_ = profile.accountId else { return false; };
                 return Blob.equal(accountId_, accountId);
             }

@@ -8,7 +8,7 @@ import Treasury "../../Treasury";
 import AnalyticsTypes "../../Types/Analytics/types";
 
 module{
-    public func saveCurrentBalances(userProfilesMap: MainTypes.UserProfilesMap, daoMetaData: MainTypes.DaoMetaData_V3): async (){
+    public func saveCurrentBalances(userProfilesMap: MainTypes.UserProfilesMap_V2, daoMetaData: MainTypes.DaoMetaData_V3): async (){
         let treasuryCanister : Treasury.Treasury = actor(daoMetaData.treasuryCanisterPrincipal);
         ignore treasuryCanister.saveCurrentBalances();
         let userProfilesArray = Iter.toArray(userProfilesMap.entries());

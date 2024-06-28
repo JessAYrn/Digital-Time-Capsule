@@ -16,7 +16,7 @@ module{
 
     public func depositIcpToTreasury(
         daoMetaData: MainTypes.DaoMetaData_V3,
-        profiles: MainTypes.UserProfilesMap,
+        profiles: MainTypes.UserProfilesMap_V2,
         caller: Principal,
         amount: Nat64
     ) : async {blockIndex: Nat64} {
@@ -38,7 +38,7 @@ module{
 
     public func withdrawIcpFromTreasury(
         daoMetaData: MainTypes.DaoMetaData_V3,
-        profiles: MainTypes.UserProfilesMap,
+        profiles: MainTypes.UserProfilesMap_V2,
         caller: Principal,
         amount: Nat64
     ) : async {blockIndex: Nat64} {

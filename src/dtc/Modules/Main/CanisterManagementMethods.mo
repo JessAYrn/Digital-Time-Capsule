@@ -45,7 +45,7 @@ module{
 
     private let nanosecondsInAMinute: Float = 60000000000;
 
-    public func getPrincipalsList( profilesMap : MainTypes.UserProfilesMap): 
+    public func getPrincipalsList( profilesMap : MainTypes.UserProfilesMap_V2): 
     async [Principal] {
         var index = 0;
         let numberOfProfiles = profilesMap.size();
@@ -83,7 +83,7 @@ module{
         return #ok(updatedDaoMetaData);
     };
 
-    public func updateApprovalStatus( principals: [Text], profilesMap: MainTypes.UserProfilesMap, newApprovalStatuse: Bool) : (){
+    public func updateApprovalStatus( principals: [Text], profilesMap: MainTypes.UserProfilesMap_V2, newApprovalStatuse: Bool) : (){
 
         var index = 0;
         while(index < principals.size()){
@@ -92,16 +92,9 @@ module{
             switch(userProfile){
                 case null{};
                 case(?profile){
-                    let updatedProfile : MainTypes.UserProfile = {
-                        canisterId = profile.canisterId;
-                        email = profile.email;
-                        userName = profile.userName;
-                        userPrincipal = profile.userPrincipal;
-                        accountId = profile.accountId;
+                    let updatedProfile : MainTypes.UserProfile_V2 = {
+                        profile with 
                         approved = ?newApprovalStatuse;
-                        treasuryMember = profile.treasuryMember;
-                        treasuryContribution = profile.treasuryContribution;
-                        monthsSpentAsTreasuryMember = profile.monthsSpentAsTreasuryMember;
                     };
                     profilesMap.put(principal, updatedProfile);
                 };
@@ -227,7 +220,7 @@ module{
         callerId: Principal, 
         daoMetaData: MainTypes.DaoMetaData_V3, 
         cyclesBalance_backend: Nat, 
-        profilesMap : MainTypes.UserProfilesMap,
+        profilesMap : MainTypes.UserProfilesMap_V2,
         proposals : MainTypes.ProposalsMap
     ) : async Result.Result<(MainTypes.CanisterDataExport), JournalTypes.Error> {
 
@@ -263,7 +256,7 @@ module{
         }
     };
 
-    private func refillCanisterCycles(daoMetaData: MainTypes.DaoMetaData_V3, profilesMap : MainTypes.UserProfilesMap) : async () {
+    private func refillCanisterCycles(daoMetaData: MainTypes.DaoMetaData_V3, profilesMap : MainTypes.UserProfilesMap_V2) : async () {
         let numberOfProfiles = profilesMap.size();
         let profilesIter = profilesMap.entries();
         let profilesArray = Iter.toArray(profilesIter);
@@ -295,7 +288,7 @@ module{
         };
     };
 
-    public func heartBeat(currentCylcesBalance: Nat, daoMetaData : MainTypes.DaoMetaData_V3, profilesMap: MainTypes.UserProfilesMap): 
+    public func heartBeat(currentCylcesBalance: Nat, daoMetaData : MainTypes.DaoMetaData_V3, profilesMap: MainTypes.UserProfilesMap_V2): 
     async MainTypes.DaoMetaData_V3{
         let managerCanister : Manager.Manager = actor(daoMetaData.managerCanisterPrincipal);
         ignore managerCanister.notifyNextStableRelease();
@@ -348,12 +341,12 @@ module{
         return cyclesBalance;
     };
 
-    public func getProfilesMetaData(profilesMap: MainTypes.UserProfilesMap) : MainTypes.ProfilesMetaData {
+    public func getProfilesMetaData(profilesMap: MainTypes.UserProfilesMap_V2) : MainTypes.ProfilesMetaData {
         let profilesMapEntries = profilesMap.entries();
         let profilesMapEntriesArray = Iter.toArray(profilesMapEntries);
-        let profilesApprovalStatus = Array.map<(Principal, MainTypes.UserProfile), MainTypes.ProfileMetaData>(
+        let profilesApprovalStatus = Array.map<(Principal, MainTypes.UserProfile_V2), MainTypes.ProfileMetaData>(
             profilesMapEntriesArray, 
-            func (x: (Principal, MainTypes.UserProfile)) : MainTypes.ProfileMetaData {
+            func (x: (Principal, MainTypes.UserProfile_V2)) : MainTypes.ProfileMetaData {
                 let (principal, {canisterId; approved}) = x;
                 let isApproved = Option.get(approved, false);
                 return {

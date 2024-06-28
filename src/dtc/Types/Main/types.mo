@@ -29,7 +29,7 @@ module{
 
     public type JournalData = {
         userJournalData : ([JournalTypes.JournalEntryExportKeyValuePair], JournalTypes.Bio,); 
-        userName: ?Text;
+        userName: Text;
         rootCanisterPrincipal: Text;
         userPrincipal: Text;
         cyclesBalance: Nat;
@@ -53,9 +53,15 @@ module{
         userPrincipal: Principal;
         accountId: ?Account.AccountIdentifier;
         approved: ?Bool;
-        treasuryMember: ?Bool;
-        treasuryContribution: ?Nat64;
-        monthsSpentAsTreasuryMember: ?Nat;
+    };
+
+    public type UserProfile_V2 = {
+        canisterId : Principal;
+        email: ? Text;
+        userName : Text;
+        userPrincipal: Principal;
+        accountId: ?Account.AccountIdentifier;
+        approved: ?Bool;
     };
 
     public type ProfileInput = {
@@ -65,13 +71,6 @@ module{
 
     public type AmountAccepted = {
         accepted: Nat64
-    };
-
-    public type UserPermissions = {
-        approved: Bool;
-        treasuryMember: Bool;
-        treasuryContribution: Nat64;
-        monthsSpentAsTreasuryMember: Nat;
     };
     
 
@@ -132,7 +131,11 @@ module{
 
     public type UserProfilesMap = HashMap.HashMap<Principal, UserProfile>;
 
+    public type UserProfilesMap_V2 = HashMap.HashMap<Principal, UserProfile_V2>;
+
     public type UserProfilesArray = [(Principal, UserProfile)];
+
+    public type UserProfilesArray_V2 = [(Principal, UserProfile_V2)];
 
     public type Proposals = [(Nat,Proposal)];
 

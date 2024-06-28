@@ -23,6 +23,7 @@ import WalletPage from './Routes/Pages/WalletPage';
 import TreasuryPage from './Routes/Pages/TreasuryPage';
 import GroupJournalPage from './Routes/Pages/GroupJournalPage';
 import { Typography } from '@mui/material';
+import CreateAccount from './Components/modal/CreateAccount';
 
 const Router = (props) => {
 
@@ -91,38 +92,52 @@ const Router = (props) => {
             setIsLoadingModal(true);
             setModalIsOpen(true);
             const loadSuccessful = await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes);
-            if(loadSuccessful) setModalIsOpen(false);
-            else {
-                actorState.backendActor.requestApproval();
-                let {userObject} = actorState;
-                let {principal} = userObject;
-                setModalProps({
-                    bigText: "Request For Access Has Been Sent To The DAO Admin", 
-                    Icon: DoNotDisturbOnIcon,
-                    flexDirection: "column",
-                    smallText: "If you are the owner of this application, attempting to log in for the first time, you must log in using the wallet that owns the Utility NFT that corresponds to this server.",
-                    components: [
-                        {
-                            Component: Typography,
-                            props: {
-                                children: "Below is your Principal ID. Share it with the DAO admin so they know who to admit: ",
-                            }
-                        },
-                        {
-                            Component: ButtonField,
-                            props: {
-                                text: `${principal}`,
-                                Icon: ContentCopyIcon,
-                                onClick: async () => { 
-                                    const promise = new Promise ((res, rej) => {setModalIsOpen(false); res()});
-                                    promise.then(() => { copyText(principal); });
+            if(!loadSuccessful) {
+                let hasAccessGranted = await actorState.backendActor.hasAccessGranted();
+                const reloadDataIntoReduxStores = async () => { await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes) };
+                if(hasAccessGranted){
+                    setModalProps({
+                        components: [
+                            {
+                                Component: CreateAccount,
+                                props: { setModalIsOpen, reloadDataIntoReduxStores }
+                            },
+                        ]
+                        
+                    });
+                } else {
+                    actorState.backendActor.requestApproval();
+                    let {userObject} = actorState;
+                    let {principal} = userObject;
+                    setModalProps({
+                        bigText: "Request For Access Has Been Sent To The DAO Admin", 
+                        Icon: DoNotDisturbOnIcon,
+                        flexDirection: "column",
+                        smallText: "If you are the owner of this application, attempting to log in for the first time, you must log in using the wallet that owns the Utility NFT that corresponds to this server.",
+                        components: [
+                            {
+                                Component: Typography,
+                                props: {
+                                    children: "Below is your Principal ID. Share it with the DAO admin so they know who to admit: ",
                                 }
-                            }
-                        },
-                    ]
-                    
-                })
+                            },
+                            {
+                                Component: ButtonField,
+                                props: {
+                                    text: `${principal}`,
+                                    Icon: ContentCopyIcon,
+                                    onClick: async () => { 
+                                        const promise = new Promise ((res, rej) => {setModalIsOpen(false); res()});
+                                        promise.then(() => { copyText(principal); });
+                                    }
+                                }
+                            },
+                        ]
+                        
+                    })
+                }
             };  
+            setModalIsOpen(false);
             setIsLoadingModal(false);
         } catch(e){ document.location.reload(); }
     }, [actorState.backendActor]);

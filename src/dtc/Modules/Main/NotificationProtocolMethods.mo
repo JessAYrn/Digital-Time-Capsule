@@ -13,7 +13,7 @@ import NotificationTypes "../../Types/Notifications/types";
 
 module{
 
-    public func updateUserCanisterNotifications(userProfilesMap: MainTypes.UserProfilesMap):
+    public func updateUserCanisterNotifications(userProfilesMap: MainTypes.UserProfilesMap_V2):
     async (){
         let profilesArray = Iter.toArray(userProfilesMap.entries());
         let length = profilesArray.size();
@@ -27,7 +27,7 @@ module{
         };
     };
 
-    public func clearJournalNotifications(caller: Principal, userProfilesMap: MainTypes.UserProfilesMap): async () {
+    public func clearJournalNotifications(caller: Principal, userProfilesMap: MainTypes.UserProfilesMap_V2): async () {
         let result =  userProfilesMap.get(caller);
         switch(result){
             case null { throw Error.reject("Profile Not Found")};
