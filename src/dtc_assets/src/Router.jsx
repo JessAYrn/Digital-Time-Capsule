@@ -92,7 +92,8 @@ const Router = (props) => {
             setIsLoadingModal(true);
             setModalIsOpen(true);
             const loadSuccessful = await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes);
-            if(!loadSuccessful) {
+            if(loadSuccessful) setModalIsOpen(false);
+            else {
                 let hasAccessGranted = await actorState.backendActor.hasAccessGranted();
                 const reloadDataIntoReduxStores = async () => { await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes) };
                 if(hasAccessGranted){
@@ -106,19 +107,25 @@ const Router = (props) => {
                         
                     });
                 } else {
-                    actorState.backendActor.requestApproval();
+                    let bigTextmsg = "Request For Access Has Been Sent To The DAO Admin";
+                    let smallTextMsg =  "If you are the owner of this application, attempting to log in for the first time, you must log in using the wallet that owns the Utility NFT that corresponds to this server.";
+                    let response = await actorState.backendActor.requestApproval();
+                    if(response.err) { 
+                        bigTextmsg = Object.keys(response.err)[0];
+                        smallTextMsg = "Your request for could not be submitted. Please try again later."
+                    };
                     let {userObject} = actorState;
                     let {principal} = userObject;
                     setModalProps({
-                        bigText: "Request For Access Has Been Sent To The DAO Admin", 
+                        bigText: bigTextmsg, 
                         Icon: DoNotDisturbOnIcon,
                         flexDirection: "column",
-                        smallText: "If you are the owner of this application, attempting to log in for the first time, you must log in using the wallet that owns the Utility NFT that corresponds to this server.",
+                        smallText: smallTextMsg,
                         components: [
                             {
                                 Component: Typography,
                                 props: {
-                                    children: "Below is your Principal ID. Share it with the DAO admin so they know who to admit: ",
+                                    children: "Below is your Principal ID. Share it with the DAO admin so they know who it belongs to: ",
                                 }
                             },
                             {
@@ -137,7 +144,6 @@ const Router = (props) => {
                     })
                 }
             };  
-            setModalIsOpen(false);
             setIsLoadingModal(false);
         } catch(e){ document.location.reload(); }
     }, [actorState.backendActor]);

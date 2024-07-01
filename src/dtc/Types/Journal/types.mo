@@ -99,7 +99,7 @@ module {
 
     public type Error ={
         #NotFound;
-        #AlreadyExists;
+        #AccountAlreadyExists;
         #NotAuthorized;
         #NoInputGiven;
         #InsufficientFunds;
@@ -109,6 +109,7 @@ module {
         #ZeroAddress;
         #NotAcceptingRequests;
         #NoRemainingStorage;
+        #MaxNumberOfDaoMembersReached;
     };
 
     public let DEFAULT_BIO: Bio = {

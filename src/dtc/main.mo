@@ -59,6 +59,8 @@ shared actor class User() = this {
 
     private stable var quorum: Float = 0.125;
 
+    private var maxNumberDaoMembers : Nat = 250;
+
     private var userProfilesMap_v2 : MainTypes.UserProfilesMap_V2 = HashMap.fromIter<Principal, MainTypes.UserProfile_V2>(
         Iter.fromArray(userProfilesArray_v2), 
         Iter.size(Iter.fromArray(userProfilesArray_v2)), 
@@ -335,6 +337,7 @@ shared actor class User() = this {
     };
 
     public shared({caller}) func requestApproval() : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error>{
+        if(userProfilesMap_v2.size() >= maxNumberDaoMembers){ return #err(#MaxNumberOfDaoMembersReached); };
         let result = CanisterManagementMethods.requestApproval(caller, daoMetaData_v3);
         switch(result){
             case (#err(e)){ return #err(e)};

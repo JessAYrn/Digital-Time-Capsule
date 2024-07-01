@@ -80,7 +80,7 @@ module{
                 
                 return #ok(amountAccepted);
             };
-            case ( ? existingProfile) { return #err(#AlreadyExists); }
+            case ( ? existingProfile) { return #err(#AccountAlreadyExists); }
         };
     };
 

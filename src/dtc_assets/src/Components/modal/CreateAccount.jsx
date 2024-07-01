@@ -26,7 +26,7 @@ const CreateAccount = (props) => {
             await reloadDataIntoReduxStores();
             setModalIsOpen(false);
         } else {
-            setTypography ("Username already exists, please try another one");
+            setTypography (`${Object.keys(response.err)[0]}`);
             setUsername("");
             setHasError(true);
         }
