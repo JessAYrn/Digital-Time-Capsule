@@ -15,7 +15,7 @@ import Nat64 "mo:base/Nat64";
 module{
 
     public func depositIcpToTreasury(
-        daoMetaData: MainTypes.DaoMetaData_V3,
+        daoMetaData: MainTypes.DaoMetaData_V4,
         profiles: MainTypes.UserProfilesMap_V2,
         caller: Principal,
         amount: Nat64
@@ -37,7 +37,7 @@ module{
     };
 
     public func withdrawIcpFromTreasury(
-        daoMetaData: MainTypes.DaoMetaData_V3,
+        daoMetaData: MainTypes.DaoMetaData_V4,
         profiles: MainTypes.UserProfilesMap_V2,
         caller: Principal,
         amount: Nat64

@@ -27,7 +27,7 @@ module{
         callerId: Principal, 
         userName: Text,
         profilesMap: MainTypes.UserProfilesMap_V2, 
-        daoMetaData: MainTypes.DaoMetaData_V3
+        daoMetaData: MainTypes.DaoMetaData_V4
     ) : async Result.Result<MainTypes.AmountAccepted, JournalTypes.Error> {
 
         if(Principal.toText(callerId) == "2vxsx-fae"){ return #err(#NotAuthorized);};

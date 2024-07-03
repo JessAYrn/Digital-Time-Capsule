@@ -21,38 +21,71 @@ module{
     
     type XDRs = Float;
 
-    public func tallyVotes({ neuronsDataArray: TreasuryTypes.NeuronsDataArray; proposal: MainTypes.Proposal; }):
-    MainTypes.VotingResults {
+    public func tallyVotes({ 
+        neuronsDataArray: TreasuryTypes.NeuronsDataArray; 
+        proposal: MainTypes.Proposal; 
+        founder: Text; 
+        userProfilesMap: MainTypes.UserProfilesMap_V2;
+    }) : MainTypes.VotingResults {
         var yay: Nat64 = 0;
         var nay: Nat64 = 0;
 
-        for(vote in Iter.fromArray(proposal.votes)){
-            let (principalId, {adopt}) = vote;
-            var votingPower: Nat64 = 1;
-            label innerLoop for((neuronId, {contributions}) in Iter.fromArray(neuronsDataArray)){
-                let contributionsMap = HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.NeuronStakeInfo>(
-                    Iter.fromArray(contributions), 
-                    Iter.size(Iter.fromArray(contributions)), 
-                    Text.equal,
-                    Text.hash
-                );
-                let ?{voting_power} = contributionsMap.get(principalId) else continue innerLoop;
-                votingPower += voting_power;
+        let proposalVotesMap = HashMap.fromIter<Text, MainTypes.Vote>( Iter.fromArray(proposal.votes), Iter.size(Iter.fromArray(proposal.votes)), Text.equal, Text.hash );
+        let foundersVoteChoice = proposalVotesMap.get(founder);
+
+        label loop_ for ((userPrincipal, userProfile) in userProfilesMap.entries()){
+            let {votingPower = userVotingPower} = tallyVotingPower({neuronsDataArray; userPrincipal = Principal.toText(userPrincipal)});
+            let userVoteChoice = proposalVotesMap.get(Principal.toText(userPrincipal));
+            switch(userVoteChoice){
+                case null {
+                    switch(foundersVoteChoice){ 
+                        case null { continue loop_ }; 
+                        case (?foundersVoteChoice_){ 
+                            if(foundersVoteChoice_.adopt) yay += userVotingPower else nay += userVotingPower; 
+                        };
+                    };
+                };
+                case(?userVoteChoice_){ if(userVoteChoice_.adopt) yay += userVotingPower else nay += userVotingPower; };
             };
-            if(adopt) yay += votingPower else nay += votingPower;
         };
         
         let total = yay + nay;
         return {yay; nay; total};
     };
 
-    public func tallyAllProposalVotes({ neuronsDataArray : TreasuryTypes.NeuronsDataArray; proposals: MainTypes.ProposalsMap;}): 
-    MainTypes.Proposals{
+    public func tallyAllProposalVotes({ 
+        neuronsDataArray : TreasuryTypes.NeuronsDataArray; 
+        proposals: MainTypes.ProposalsMap;
+        founder: Text; 
+        userProfilesMap: MainTypes.UserProfilesMap_V2;
+    }) : MainTypes.Proposals{
 
-        for((key, proposal) in proposals.entries()){
-            let voteTally = tallyVotes({neuronsDataArray; proposal});
+        label loop_ for((key, proposal) in proposals.entries()){
+            let {timeVotingPeriodEnds} = proposal;
+            if(Time.now() > timeVotingPeriodEnds + nanosecondsInADay) continue loop_;
+            let voteTally = tallyVotes({neuronsDataArray; proposal; founder; userProfilesMap});
             proposals.put(key, {proposal with voteTally;});
         };
         return Iter.toArray(proposals.entries());
+    };
+
+    public func tallyVotingPower({ 
+        neuronsDataArray : TreasuryTypes.NeuronsDataArray;
+        userPrincipal: TreasuryTypes.PrincipalAsText;
+    }): {votingPower: Nat64} {
+        var votingPower: Nat64 = 1;
+
+        label loop_ for((neuronId, {contributions}) in Iter.fromArray(neuronsDataArray)){
+            let contributionsMap = HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.NeuronStakeInfo>(
+                Iter.fromArray(contributions), 
+                Iter.size(Iter.fromArray(contributions)), 
+                Text.equal,
+                Text.hash
+            );
+            let ?{voting_power} = contributionsMap.get(userPrincipal) else continue loop_;
+            votingPower += voting_power;
+        };
+
+        return {votingPower};
     };
 }

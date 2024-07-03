@@ -46,15 +46,6 @@ module{
         #InsufficientFunds;
     };
 
-    public type UserProfile = {
-        canisterId : Principal;
-        email: ? Text;
-        userName : ? Text;
-        userPrincipal: Principal;
-        accountId: ?Account.AccountIdentifier;
-        approved: ?Bool;
-    };
-
     public type UserProfile_V2 = {
         canisterId : Principal;
         email: ? Text;
@@ -94,7 +85,8 @@ module{
         lastRecordedTime: Int;
         profilesMetaData: ProfilesMetaData;
         isAdmin: Bool;
-        nftId: Nat;
+        nftId: ?Nat;
+        founder: Text;
         supportMode: Bool;
         releaseVersionLoaded: Nat;
         releaseVersionInstalled: Nat;
@@ -111,7 +103,25 @@ module{
         admin: [(Text, AdminData)];
         acceptingRequests: Bool;
         lastRecordedTime: Int;
-        nftId: Nat;
+        nftId: ?Nat;
+        founder: ?Text;
+        supportMode: Bool;
+        requestsForAccess: RequestsForAccess;
+        defaultControllers: [Principal];
+    };
+
+    public type DaoMetaData_V4 = {
+        managerCanisterPrincipal: Text; 
+        treasuryCanisterPrincipal: Text;
+        frontEndPrincipal: Text;
+        backEndPrincipal: Text;
+        lastRecordedBackEndCyclesBalance: Nat;
+        backEndCyclesBurnRatePerDay: Nat;
+        admin: [(Text, AdminData)];
+        acceptingRequests: Bool;
+        lastRecordedTime: Int;
+        nftId: ?Nat;
+        founder: Text;
         supportMode: Bool;
         requestsForAccess: RequestsForAccess;
         defaultControllers: [Principal];
@@ -129,11 +139,7 @@ module{
     };
 
 
-    public type UserProfilesMap = HashMap.HashMap<Principal, UserProfile>;
-
     public type UserProfilesMap_V2 = HashMap.HashMap<Principal, UserProfile_V2>;
-
-    public type UserProfilesArray = [(Principal, UserProfile)];
 
     public type UserProfilesArray_V2 = [(Principal, UserProfile_V2)];
 
@@ -176,7 +182,6 @@ module{
 
     public type Vote = { adopt: Bool };
 
-
     public let DEFAULT_DAO_METADATA_V3: DaoMetaData_V3 = {
         managerCanisterPrincipal = "Null";
         treasuryCanisterPrincipal = "Null";
@@ -190,7 +195,26 @@ module{
         supportMode = true;
         requestsForAccess = [];
         defaultControllers = [];
-        nftId = 0;
+        nftId = null;
+        founder = null;
+    };
+
+
+    public let DEFAULT_DAO_METADATA_V4: DaoMetaData_V4 = {
+        managerCanisterPrincipal = "Null";
+        treasuryCanisterPrincipal = "Null";
+        frontEndPrincipal = "Null";
+        backEndPrincipal = "Null";
+        lastRecordedBackEndCyclesBalance = 0;
+        backEndCyclesBurnRatePerDay = 0;
+        admin = [];
+        acceptingRequests = true;
+        lastRecordedTime = 0;
+        supportMode = true;
+        requestsForAccess = [];
+        defaultControllers = [];
+        nftId = null;
+        founder = "Null";
     };
 
     public type Interface = actor {
