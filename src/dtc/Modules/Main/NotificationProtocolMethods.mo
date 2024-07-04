@@ -1,15 +1,8 @@
 import MainTypes "../../Types/Main/types";
-import Manager "../../Manager";
-import WasmStore "../../Types/WasmStore/types";
-import Buffer "mo:base/Buffer";
-import Nat "mo:base/Nat";
-import Text "mo:base/Text";
 import Error "mo:base/Error";
 import Journal "../../Journal";
 import Principal "mo:base/Principal";
-import Array "mo:base/Array";
 import Iter "mo:base/Iter";
-import NotificationTypes "../../Types/Notifications/types";
 
 module{
 
@@ -19,7 +12,7 @@ module{
         let length = profilesArray.size();
         var index_ = 0;
         while(index_ < length){
-            let (principal, userProfile) = profilesArray[index_];
+            let (_, userProfile) = profilesArray[index_];
             let {canisterId} = userProfile;
             let userCanister: Journal.Journal = actor(Principal.toText(canisterId));
             ignore userCanister.updateNotifications();

@@ -1,17 +1,12 @@
 import Buffer "mo:base/Buffer";
-import Debug "mo:base/Debug";
-import Float "mo:base/Float";
 import Int "mo:base/Int";
-import Int64 "mo:base/Int64";
 import Text "mo:base/Text";
 import Iter "mo:base/Iter";
-import List "mo:base/List";
 import Nat "mo:base/Nat";
 import Nat16 "mo:base/Nat16";
 import Nat32 "mo:base/Nat32";
 import Nat64 "mo:base/Nat64";
 import Nat8 "mo:base/Nat8";
-import Result "mo:base/Result";
 import Util "./Util";
 import Prelude "mo:base/Prelude";
 
@@ -234,7 +229,7 @@ module {
     encodeNatX(buffer, value, encoding, #b64);
   };
 
-  public func decodeNat(bytes : Iter.Iter<Nat8>, encoding : { #unsignedLEB128 }) : ?Nat {
+  public func decodeNat(bytes : Iter.Iter<Nat8>, _ : { #unsignedLEB128 }) : ?Nat {
     do ? {
       var v : Nat = 0;
       var i : Nat = 0;
@@ -251,7 +246,7 @@ module {
     };
   };
 
-  public func decodeNat8(bytes : Iter.Iter<Nat8>, encoding : { #lsb; #msb }) : ?Nat8 {
+  public func decodeNat8(bytes : Iter.Iter<Nat8>, _ : { #lsb; #msb }) : ?Nat8 {
     bytes.next();
   };
 
@@ -277,7 +272,6 @@ module {
     do ? {
       let byteLength : Nat64 = getByteLength(size);
       var nat64 : Nat64 = 0;
-      let lastIndex : Nat64 = byteLength - 1;
       for (i in Iter.range(0, Nat64.toNat(byteLength) - 1)) {
         let b = from8To64(bytes.next()!);
         let byteOffset : Nat64 = switch (encoding) {

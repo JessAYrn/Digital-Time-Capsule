@@ -217,7 +217,7 @@ module{
                         transformFn, 
                         #GetFullNeuronResponse({neuronId = created_neuron_id.id;})
                     );
-                    SyncronousHelperMethods.splitNeuronStakeInfo(neuronId, created_neuron_id.id,amount_e8s, Principal.toText(proposer), usersTreasuryDataMap, neuronDataMap);
+                    SyncronousHelperMethods.splitNeuronStakeInfo(neuronId, created_neuron_id.id,amount_e8s, Principal.toText(proposer), neuronDataMap);
                     let _ = pendingActionsMap.remove("split_"#Nat64.toText(neuronId));
                     activityLogsMap.put(Int.toText(Time.now()),"successfully completed action: split_"#Nat64.toText(neuronId));
                 };
@@ -343,7 +343,7 @@ module{
             };
             return result;
         } catch(e){
-            let timerId = setTimer(#seconds(20), func (): async () {let result = await readRequestResponse(
+            ignore setTimer<system>(#seconds(20), func (): async () { ignore await readRequestResponse(
                 neuronDataMap,
                 usersTreasuryDataMap,
                 pendingActionsMap,
@@ -547,7 +547,7 @@ module{
                         expectedResponseType = #GetFullNeuronResponse({neuronId;});
                         numberOfFailedAttempts = 0;
                     };
-                    let timerId = setTimer(#seconds(10), func (): async () {let result = await readRequestResponse(
+                    ignore setTimer<system>(#seconds(10), func (): async () {ignore await readRequestResponse(
                         neuronDataMap,
                         usersTreasuryDataMap,
                         pendingActionsMap,
@@ -570,7 +570,7 @@ module{
                         expectedResponseType = #GetNeuronInfoResponse({neuronId;});
                         numberOfFailedAttempts = 0;
                     };
-                    let timerId = setTimer(#seconds(10), func (): async () {let result = await readRequestResponse(
+                    ignore setTimer<system>(#seconds(10), func (): async () {ignore await readRequestResponse(
                         neuronDataMap,
                         usersTreasuryDataMap,
                         pendingActionsMap,
@@ -594,7 +594,7 @@ module{
                         expectedResponseType;
                         numberOfFailedAttempts = 0;
                     };
-                    let timerId_1 = setTimer(#seconds(10), func (): async () {let result = await readRequestResponse(
+                    ignore setTimer<system>(#seconds(10), func (): async () {ignore await readRequestResponse(
                         neuronDataMap,
                         usersTreasuryDataMap,
                         pendingActionsMap,
@@ -634,7 +634,7 @@ module{
             let userStake = neuronStakeInfo.stake_e8s;
 
             func performTransfer() : async () {
-                let res = await ledger.icrc1_transfer({
+                ignore await ledger.icrc1_transfer({
                     to = { owner = treasuryCanisterId; subaccount = ?subaccountId; };
                     fee = ?Nat64.toNat(txFee);
                     memo = null;
@@ -646,6 +646,6 @@ module{
             };
             ignore performTransfer();
         };
-        let ?neuronData_ = neuronDataMap.remove(neuronId) else { return };
+        ignore neuronDataMap.remove(neuronId);
     };
 };

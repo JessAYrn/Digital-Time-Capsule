@@ -1,20 +1,16 @@
 import Buffer "mo:base/Buffer";
-import Float "mo:base/Float";
 import Int "mo:base/Int";
 import Int16 "mo:base/Int16";
 import Int32 "mo:base/Int32";
 import Int64 "mo:base/Int64";
 import Int8 "mo:base/Int8";
 import Iter "mo:base/Iter";
-import List "mo:base/List";
 import Nat64 "mo:base/Nat64";
 import Nat8 "mo:base/Nat8";
 import Nat "mo:base/Nat";
 import Array "mo:base/Array";
 import NatX "./NatX";
 import Util "./Util";
-import Result "mo:base/Result";
-import Debug "mo:base/Debug";
 import Text "mo:base/Text";
 
 module {
@@ -222,7 +218,6 @@ module {
     do ? {
       let byteLength : Nat64 = getByteLength(size);
       var nat64 : Nat64 = 0;
-      let lastIndex : Nat64 = byteLength - 1;
       for (i in Iter.range(0, Nat64.toNat(byteLength) - 1)) {
         let b : Nat8 = bytes.next()!;
         let byteOffset : Nat64 = switch (encoding) {

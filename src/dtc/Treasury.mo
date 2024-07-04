@@ -16,12 +16,10 @@ import Time "mo:base/Time";
 import Blob "mo:base/Blob";
 import Nat "mo:base/Nat";
 import Timer "mo:base/Timer";
-import Array "mo:base/Array";
 import IC "Types/IC/types";
 import EcdsaHelperMethods "Modules/ECDSA/ECDSAHelperMethods";
 import Hex "Serializers/Hex";
 import Debug "mo:base/Debug";
-import Int64 "mo:base/Int64";
 import AnalyticsTypes "Types/Analytics/types";
 import AsyncronousHelperMethods "Modules/Treasury/AsyncronousHelperMethods";
 import SyncronousHelperMethods "Modules/Treasury/SyncronousHelperMethods";
@@ -29,8 +27,6 @@ import SyncronousHelperMethods "Modules/Treasury/SyncronousHelperMethods";
 shared actor class Treasury (principal : Principal) = this {
 
     private stable let ownerCanisterId : Text = Principal.toText(principal);
-
-    private stable var minimalRequiredVotingPower : Nat64 = 0;
 
     private stable var sumOfAllTokenBalances : AnalyticsTypes.Balances = {
         icp = {e8s = 0};
@@ -213,7 +209,7 @@ shared actor class Treasury (principal : Principal) = this {
         Principal.toText(Principal.fromBlob(principalAsBlob));
     };
 
-    public shared(msg) func getNeuronSubAccountId(): async Text {
+    public shared func getNeuronSubAccountId(): async Text {
         let {public_key} = await EcdsaHelperMethods.getPublicKey(null);
         let {principalAsBlob} = Account.getSelfAuthenticatingPrincipal(public_key);
         let principal = Principal.fromBlob(principalAsBlob);
@@ -368,12 +364,12 @@ shared actor class Treasury (principal : Principal) = this {
         let accepted = 
             if (amount <= limit) amount
             else limit;
-        let deposit = Cycles.accept(accepted);
+        let deposit = Cycles.accept<system>(accepted);
         assert (deposit == accepted);
         { accepted = Nat64.fromNat(accepted) };
     };
 
-    public query func transformFn({ response : IC.http_response; context: Blob }) : async IC.http_response {
+    public query func transformFn({ response : IC.http_response; }) : async IC.http_response {
         let transformed : IC.http_response = {
             status = response.status;
             body = response.body;
@@ -446,7 +442,7 @@ shared actor class Treasury (principal : Principal) = this {
         actionLogsArray := [];
         subaccountRegistryArray := [];
 
-        let timerId = recurringTimer(#seconds(24 * 60 * 60), func (): async () { 
+        ignore recurringTimer<system>(#seconds(24 * 60 * 60), func (): async () { 
             await AsyncronousHelperMethods.refreshNeuronsData(
                 neuronDataMap,
                 usersTreasuryDataMap,

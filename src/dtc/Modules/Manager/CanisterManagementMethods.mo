@@ -1,4 +1,3 @@
-import MainTypes "../../Types/Main/types";
 import AssetCanister "../../Types/AssetCanister/types";
 import Buffer "mo:base/Buffer";
 import HashMap "mo:base/HashMap";
@@ -7,8 +6,6 @@ import AssetManagementFunctions "../../Modules/AssetCanister/AssetManagementFunc
 import Text "mo:base/Text";
 import Principal "mo:base/Principal";
 import IC "../../Types/IC/types";
-import Error "mo:base/Error";
-import Journal "../../Journal";
 import WasmStore "../../Types/WasmStore/types";
 
 module{
@@ -103,7 +100,7 @@ module{
             let chunksHashMap = HashMap.HashMap<AssetCanister.Content_encoding, (AssetCanister.Sha256, [AssetCanister.ChunkId])>(1, Text.equal, Text.hash);
 
             while(index__ < numberOfChunks){
-                let (chunkIndex, (content_encoding, sha256, content)) = chunks[index__];
+                let (_, (content_encoding, sha256, content)) = chunks[index__];
                 let {chunk_id} = await frontendCanister.create_chunk({content; batch_id;});
                 let chunkIdsArray = chunksHashMap.get(content_encoding);
                 switch(chunkIdsArray){
@@ -111,7 +108,7 @@ module{
                     case(?(sha256, chunk_ids_array)){
                         let buffer = Buffer.fromArray<AssetCanister.ChunkId>(chunk_ids_array);
                         buffer.add(chunk_id);
-                        chunksHashMap.put(content_encoding,(sha256, buffer.toArray()));
+                        chunksHashMap.put(content_encoding,(sha256, Buffer.toArray(buffer)));
                     };
                 };
                 index__ += 1;
@@ -138,9 +135,9 @@ module{
 
             index_ += 1;
         };
-        let operations = batchOperationsBuffer.toArray();
+        let operations = Buffer.toArray(batchOperationsBuffer);
 
-        let result = await frontendCanister.commit_batch({
+        await frontendCanister.commit_batch({
             batch_id;
             operations;
         });

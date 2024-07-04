@@ -1,6 +1,5 @@
 import Sha256 "../Hash/SHA256";
 import Text "mo:base/Text";
-import Array "mo:base/Array";
 import Nat8 "mo:base/Nat8";
 import Blob "mo:base/Blob";
 import Int "mo:base/Int";
@@ -63,9 +62,9 @@ module {
     Buffer.toArray(aBuf);
   };
 
-  func h(b1 : Blob) : Blob {
-    Blob.toArray(b1) |> Sha256.sha256(_) |> Blob.fromArray(_);
-  };
+  // func h(b1 : Blob) : Blob {
+  //   Blob.toArray(b1) |> Sha256.sha256(_) |> Blob.fromArray(_);
+  // };
 
   // Array concat
   func arrayConcat<X>(as : Iter.Iter<[X]>) : [X] {

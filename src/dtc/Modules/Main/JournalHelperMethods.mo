@@ -1,25 +1,13 @@
-import Trie "mo:base/Trie";
-import Iter "mo:base/Iter";
-import Buffer "mo:base/Buffer";
 import Result "mo:base/Result";
-import Account "../../Serializers/Account";
 import JournalTypes "../../Types/Journal/types";
 import Principal "mo:base/Principal";
-import Cycles "mo:base/ExperimentalCycles";
 import MainTypes "../../Types/Main/types";
 import Journal "../../Journal";
-import Ledger "../../NNS/Ledger";
 import Blob "mo:base/Blob";
-import HashMap "mo:base/HashMap";
-import NotificationTypes "../../Types/Main/types";
 
 
 module{
-
-    private let oneICP : Nat64 = 100_000_000;
-
     
-
     public func updatePhotos(callerId: Principal, profilesMap: MainTypes.UserProfilesMap_V2, photos: [JournalTypes.FileMetaData]) : 
     async Result.Result<(JournalTypes.Bio), JournalTypes.Error> {
 
@@ -77,7 +65,7 @@ module{
             case null{ #err(#NotAuthorized) };
             case(? v){
                 let journal: Journal.Journal = actor(Principal.toText(v.canisterId));
-                let entry = await journal.markJournalEntryAsRead(entryKey.entryKey);
+                ignore journal.markJournalEntryAsRead(entryKey.entryKey);
                 return #ok(());
             };
         };
@@ -161,10 +149,4 @@ module{
         };
         
     };
-
-
-    private  func key(x: Principal) : Trie.Key<Principal> {
-        return {key = x; hash = Principal.hash(x)};
-    };
-
 }

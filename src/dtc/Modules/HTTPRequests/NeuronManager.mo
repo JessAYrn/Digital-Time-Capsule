@@ -7,19 +7,15 @@ import Blob "mo:base/Blob";
 import Cycles "mo:base/ExperimentalCycles";
 import Nat64 "mo:base/Nat64";
 import Error "mo:base/Error";
-import Hex "../../Serializers/Hex";
 import Ledger "../../NNS/Ledger";
 import Time "mo:base/Time";
 import Int "mo:base/Int";
 import Result "mo:base/Result";
-import Iter "mo:base/Iter";
 import Buffer "mo:base/Buffer";
 import Text "mo:base/Text";
 import Debug "mo:base/Debug";
-import Array "mo:base/Array";
 import RepresentationIndependentHash "../../Hash/RepresentationIndependentHash";
 import Value "../../Serializers/CBOR/Value";
-import Errors "../../Serializers/CBOR/Errors";
 import TreasuryTypes "../../Types/Treasury/types";
 import Decoder "../../Serializers/CBOR/Decoder";
 
@@ -29,7 +25,6 @@ module {
     let FORK : Nat64 = 1;
     let LABELED : Nat64 = 2;
     let LEAF : Nat64 = 3;
-    let PRUNED : Nat64 = 4;
 
     public type Path = [Blob];
 
@@ -101,7 +96,7 @@ module {
         let transform = ?{ function = transformFn; context = Blob.fromArray([]); };
         let ic : IC.Self = actor("aaaaa-aa");
         let http_request = {body; url; headers; transform; method; max_response_bytes};
-        Cycles.add(20_949_972_000);
+        Cycles.add<system>(20_949_972_000);
         let {status; body = responseBody; headers = headers_;} : IC.http_response = await ic.http_request(http_request);
         let response = { status; body = responseBody; headers = headers_; };
         let envelopeContentInMajorType5Format = EcdsaHelperMethods.formatEnvelopeContentForRepIndHash(envelope_content);
@@ -131,7 +126,7 @@ module {
         let transform = ?{ function = transformFn; context = Blob.fromArray([]); };
         let ic : IC.Self = actor("aaaaa-aa");
         let http_request = {body; url; headers; transform; method; max_response_bytes};
-        Cycles.add(20_949_972_000);
+        Cycles.add<system>(20_949_972_000);
         let {status; body = responseBody; headers = headers_;} : IC.http_response = await ic.http_request(http_request);
         let response = { status; body = responseBody; headers = headers_; };
         let envelopeContentInMajorType5Format = EcdsaHelperMethods.formatEnvelopeContentForRepIndHash(envelope_content);
@@ -148,7 +143,7 @@ module {
         let request = EcdsaHelperMethods.prepareCanisterReadStateCallViaEcdsa({sender; canister_id; paths; public_key;});
         let {envelopeCborEncoded} = await EcdsaHelperMethods.getSignedEnvelopeReadState(request);
         let headers = [ {name = "content-type"; value= "application/cbor"}];
-        let {request_url = url; envelope_content} = request;
+        let {request_url = url; } = request;
         let body = ?Blob.fromArray(envelopeCborEncoded);
         let method = #post;
         let max_response_bytes: ?Nat64 = ?Nat64.fromNat(1024 * 1024);
@@ -156,8 +151,9 @@ module {
         let transform = ?transform_context;
         let ic : IC.Self = actor("aaaaa-aa");
         let http_request = {body; url; headers; transform; method; max_response_bytes};
-        Cycles.add(20_949_972_000);
-        let {status; body = responseBody; headers = headers_;} : IC.http_response = await ic.http_request(http_request);
+        Cycles.add<system>(20_949_972_000);
+        let response : IC.http_response = await ic.http_request(http_request);
+        return response;
     };
 
     public func readRequestResponse(cachedRequestInfo: TreasuryTypes.ReadRequestInput, transformFn: TransformFnSignature): 

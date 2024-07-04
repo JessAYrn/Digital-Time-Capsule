@@ -2,22 +2,11 @@ import Iter "mo:base/Iter";
 import HashMap "mo:base/HashMap";
 import Text "mo:base/Text";
 import Nat64 "mo:base/Nat64";
-import Principal "mo:base/Principal";
-import Timer "mo:base/Timer";
 import Debug "mo:base/Debug";
 import TreasuryTypes "../../Types/Treasury/types";
-import Blob "mo:base/Blob";
-import Array "mo:base/Array";
-import Time "mo:base/Time";
-import Int "mo:base/Int";
 import Account "../../Serializers/Account";
-import Ledger "../../NNS/Ledger";
 
 module{
-
-    private let ledger : Ledger.Interface  = actor(Ledger.CANISTER_ID);
-
-    let {setTimer} = Timer;
 
     let txFee: Nat64 = 10_000; 
 
@@ -106,7 +95,6 @@ module{
         targetNeuronId: Nat64, 
         splitAmount: Nat64,
         proposer: Text,
-        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap, 
         neuronDataMap: TreasuryTypes.NeuronsDataMap,
     ): () {
         let ?neuronData = neuronDataMap.get(Nat64.toText(sourceNeuronId)) else { Debug.trap("No neuronData for neuronId") };

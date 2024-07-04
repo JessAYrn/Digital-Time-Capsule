@@ -3,7 +3,6 @@ import Principal "mo:base/Principal";
 import Nat64 "mo:base/Nat64";
 import Blob "mo:base/Blob";
 import Governance "../../NNS/Governance";
-import Buffer "mo:base/Buffer";
 import Account "../../Serializers/Account";
 
 

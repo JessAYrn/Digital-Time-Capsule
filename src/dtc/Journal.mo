@@ -15,16 +15,12 @@ import Iter "mo:base/Iter";
 import Buffer "mo:base/Buffer";
 import Int "mo:base/Int";
 import Account "Serializers/Account";
-import Bool "mo:base/Bool";
 import Option "mo:base/Option";
 import JournalTypes "Types/Journal/types";
 import HashMap "mo:base/HashMap";
-import MainTypes "Types/Main/types";
 import NotificationsTypes "Types/Notifications/types";
-import IC "Types/IC/types";
 import AnalyticsTypes "Types/Analytics/types";
-import GovernanceHelperMethods "Modules/Main/GovernanceHelperMethods";
-import NnsCyclesMinting "NNS/NnsCyclesMinting";
+
 
 shared(msg) actor class Journal () = this {
 
@@ -90,17 +86,9 @@ shared(msg) actor class Journal () = this {
 
     private var capacity = 1_500_000_000_000;
 
-    private var nanosecondsInADay = 86400000000000;
-
-    private var daysInAMonth = 30;
-
     private var balance = Cycles.balance();
 
     private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
-
-    private let oneICP : Nat64 = 100_000_000;
-
-    private let ic : IC.Self = actor "aaaaa-aa";
 
     public shared({caller}) func wallet_balance() : async Nat {
         if( Principal.toText(caller) != mainCanisterId_ ) { throw Error.reject("Unauthorized access."); };
@@ -114,7 +102,7 @@ shared(msg) actor class Journal () = this {
         let accepted = 
             if (amount <= limit) amount
             else limit;
-        let deposit = Cycles.accept(accepted);
+        let deposit = Cycles.accept<system>(accepted);
         assert (deposit == accepted);
         balance += accepted;
         { accepted = Nat64.fromNat(accepted) };
@@ -146,7 +134,7 @@ shared(msg) actor class Journal () = this {
         if( Principal.toText(caller) != mainCanisterId_ ) { return #err(#NotAuthorized); };
         let fileOption = filesMap.get(fileId);
         let fileTrie = Option.get(fileOption, Trie.empty());
-        let (newTrie, oldValue) = Trie.put(
+        let (newTrie, _) = Trie.put(
             fileTrie,
             natKey(chunkId),
             Nat.equal,
@@ -317,9 +305,9 @@ shared(msg) actor class Journal () = this {
         switch(entry){
             case null{ #err(#NotFound); };
             case (? v){
-                let updatedJournal = journalMap.delete(key);
+                journalMap.delete(key);
                 let journalAsArray = Iter.toArray(journalMap.entries());
-                let journalAsArrayExport = mapJournalEntriesArrayToExport(journalAsArray);
+                ignore mapJournalEntriesArrayToExport(journalAsArray);
                 #ok(());
             };
         };
