@@ -27,6 +27,7 @@ module{
         icp_staked: {e8s : Nat64;};
         eth: {e8s : Nat64};
         btc: {e8s : Nat64};
+        voting_power: {e8s: Nat64};
     };
 
     public type SupportedCurrencies = {

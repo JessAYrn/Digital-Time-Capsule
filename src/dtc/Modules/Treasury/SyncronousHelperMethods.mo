@@ -32,11 +32,14 @@ module{
         };
     };
 
-    public func computeTotalStakeDeposit(
+    public func computeTotalStakeDepositAndVotingPower(
         neuronDataMap: TreasuryTypes.NeuronsDataMap,
         pincipal: Text
-    ): Nat64 {
+    ): {icp_staked: {e8s: Nat64}; voting_power: {e8s: Nat64};} {
+        
         var totalStake: Nat64 = 0;
+        var totalVotingPower: Nat64 = 0;
+
         label loop_ for((neuronId, {contributions}) in neuronDataMap.entries()){
             let contributionsMap = HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.NeuronStakeInfo>(
                 Iter.fromArray(contributions), 
@@ -44,10 +47,10 @@ module{
                 Text.equal,
                 Text.hash
             );
-            let ?{stake_e8s} = contributionsMap.get(pincipal) else { continue loop_};
-            totalStake += stake_e8s;
+            let ?{stake_e8s = userNeuronStake; voting_power = userVotingPower} = contributionsMap.get(pincipal) else { continue loop_};
+            totalStake += userNeuronStake; totalVotingPower += userVotingPower;
         };
-        return totalStake;
+        return {icp_staked = {e8s = totalStake}; voting_power = {e8s = totalVotingPower};};
     };
 
     public func updateUserNeuronStakeInfo(

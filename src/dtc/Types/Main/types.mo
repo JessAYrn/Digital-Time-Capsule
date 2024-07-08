@@ -65,7 +65,7 @@ module{
     };
     
 
-    public type ProfileMetaData = {userPrincipal : Text; canisterId : Text; approvalStatus: Bool;};
+    public type ProfileMetaData = {userPrincipal : Text; canisterId : Text; approvalStatus: Bool; userName: Text;};
 
     public type ProfilesMetaData = [ProfileMetaData];
 

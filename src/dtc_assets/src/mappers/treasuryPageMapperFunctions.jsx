@@ -34,34 +34,66 @@ export const dummyDataSets = {
     allTime: dummyDataset
 };
 
-const parseBigIntsFromBalances = (balances) => {
-    let currencies = Object.keys(balances);
-    currencies.forEach(currency => {
-        let balance = (balances[currency]?.e8s !== undefined) ?  balances[currency]?.e8s : balances[currency];
-        balances[currency] = fromE8s(parseInt(balance));
-    });
-    return balances;
-}
-
-const getLabels = (data) => {return data.map(([date, balances]) => {return date})};
-const getDataSet = (data_, currency) => {
-    const data = data_.map(([date, balances]) => {
-        return balances[currency]?.e8s || balances[currency]
-    });
-    const label = currency.toUpperCase();
-    const radius = 2;
-    const boarderWidth = 0.5;
-    const pointHoverRadius = 5;
-    return {data, label, radius, boarderWidth, pointHoverRadius};
-};
-const getDataSets = (data_) => {
-    let currencies = Object.keys(data_[0][1]);
+const getDataSetsForChartFromDataMap = (data, radius) => {
+    let keys = Object.keys(data[0][1]);
     let datasets = [];
-    currencies.forEach(currency => { 
-        const set = getDataSet(data_, currency);
+
+    const getDataSetForChart = (data_, property) => {
+        const data = data_.map(([date, balances]) => { return fromE8s(parseInt(balances[property]?.e8s || balances[property])) });
+        const label = GRAPH_DISPLAY_LABELS[property];
+        const boarderWidth = 0.5;
+        const pointHoverRadius = 5;
+        return {data, label, boarderWidth, radius, pointHoverRadius};
+    };
+
+    keys.forEach(key => { 
+        const set = getDataSetForChart(data, key);
         datasets.push(set);
     });
     return datasets;
+};
+
+const getLabels_balancesHistory = (data) => {return data.map(([date, balances]) => {return date})};
+
+const getLabels_neuronContributions = (data) => {return data.map(([contributor, contributions]) => {
+    return contributor.length > 15 ? shortenHexString(contributor) : contributor
+})};
+
+export const mapDataMapToChartFormat = (data, nameOfDataSet) => {
+    let labels;
+    let radius;
+    switch(nameOfDataSet){
+        case GRAPH_DATA_SETS.balancesHistory.week: labels = getLabels_balancesHistory(data); radius = 2; break;
+        case GRAPH_DATA_SETS.balancesHistory.month: labels = getLabels_balancesHistory(data); radius = 2; break;
+        case GRAPH_DATA_SETS.balancesHistory.year: labels = getLabels_balancesHistory(data); radius = 2; break;
+        case GRAPH_DATA_SETS.balancesHistory.allTime: labels = getLabels_balancesHistory(data); radius = 2; break;
+        case GRAPH_DATA_SETS.neuronContributions: labels = getLabels_neuronContributions(data); radius = 125; break;
+        case GRAPH_DATA_SETS.usersTotalStakesAndVotingPowers: labels = getLabels_neuronContributions(data); radius = 125; break;
+    };
+    const data_ = { labels, datasets: getDataSetsForChartFromDataMap(data, radius) };
+    return { [nameOfDataSet]: data_};
+};
+
+export const mapUsersTotalTreasuryStakesAndVotingPowersDataToChartFormat = (usersTreasuryDataArray) => {
+    const usersTreasuryDataArraySorted = usersTreasuryDataArray.sort(function(a, b){
+        const [principal_a, data_a] = a;
+        const [principal_b, data_b] = b;
+        if(data_a?.balances?.voting_power > data_b?.balances?.voting_power) return -11;
+        else return 1;
+    });
+    const allUsersTotalIcpStakesAndVotingPowerSorted = [];
+    let theRestOfTheUsersVotingPower = 0;
+    for(let i = 0; i < usersTreasuryDataArraySorted.length; i++){
+        const [principal, {balances}] = usersTreasuryDataArraySorted[i];
+        if(i < 10) allUsersTotalIcpStakesAndVotingPowerSorted.push([principal, balances]);
+        else theRestOfTheUsersVotingPower += balances.voting_power;
+    };
+    allUsersTotalIcpStakesAndVotingPowerSorted.push(["Everyone Else", {voting_power: theRestOfTheUsersVotingPower}]);
+    console.log(allUsersTotalIcpStakesAndVotingPowerSorted);
+    return mapDataMapToChartFormat(
+        allUsersTotalIcpStakesAndVotingPowerSorted,
+        GRAPH_DATA_SETS.usersTotalStakesAndVotingPowers
+    );
 };
 
 export const mapBalancesDataFromApiToFrontend = (data) => {
@@ -83,58 +115,18 @@ export const mapBalancesDataFromApiToFrontend = (data) => {
         date = parseFloat(date);
         date = nanoSecondsToMiliSeconds(date);
         date = getDateAsStringMMDDYYY(date);
-        let coordinate = [date, parseBigIntsFromBalances(balances)];
+        let coordinate = [date, balances];
         if(length - index < 365) year_dataset.push(coordinate);
         if(length - index < 30) month_dataset.push(coordinate);
         if(length - index < 7) week_dataset.push(coordinate);
         allTime_dataset.push(coordinate);
-        
     });
-    const week = {labels: getLabels(week_dataset), datasets: getDataSets(week_dataset)};
-    const month = {labels: getLabels(month_dataset), datasets: getDataSets(month_dataset) };
-    const year = {labels: getLabels(year_dataset), datasets: getDataSets(year_dataset)};
-    const allTime = {labels: getLabels(allTime_dataset), datasets: getDataSets(allTime_dataset)}
 
-    return {week, month, year, allTime};
-};
-
-const getLabels_neuronContributions = (data) => {return data.map(([contributor, contributions]) => {return shortenHexString(contributor)})};
-
-const getDataSet_neuronContributionsStake = (data_) => {
-    const data_stake_e8s = data_.map(([contributor, contributions]) => {
-        return fromE8s(parseInt(contributions.stake_e8s));
-    });
-    const label = "Stake";
-    const radius = 125;
-    const boarderWidth = 0.5;
-    const pointHoverRadius = 5;
-    return {data: data_stake_e8s, label, boarderWidth, pointHoverRadius, radius};
-};
-
-const getDataSet_neuronContributionsVotingPower = (data_) => {
-    const data_voting_power = data_.map(([contributor, contributions]) => {
-        return fromE8s(parseInt(contributions.voting_power));
-    });
-    const label = "Voting Power";
-    const radius = 125;
-    const boarderWidth = 0.5;
-    const pointHoverRadius = 5;
-    return {data: data_voting_power, label, boarderWidth, pointHoverRadius, radius};
-};
-
-export const mapNeuronContributionsDataToChartFormat = (data) => {
-
-    const neuronStakeData = {
-        labels: getLabels_neuronContributions(data), 
-        datasets: [
-            getDataSet_neuronContributionsVotingPower(data),
-            getDataSet_neuronContributionsStake(data)
-        ], 
-        circumference: 2, 
-        radius: 2
-    };
     return {
-        [GRAPH_DATA_SETS.neuronContributions]: neuronStakeData,
+        ...mapDataMapToChartFormat(week_dataset, GRAPH_DATA_SETS.balancesHistory.week), 
+        ...mapDataMapToChartFormat(month_dataset, GRAPH_DATA_SETS.balancesHistory.month),
+        ...mapDataMapToChartFormat(year_dataset, GRAPH_DATA_SETS.balancesHistory.year),
+        ...mapDataMapToChartFormat(allTime_dataset, GRAPH_DATA_SETS.balancesHistory.allTime),
     };
 };
 
@@ -200,12 +192,13 @@ export const mapBackendTreasuryDataToFrontEndObj = (props) => {
     const totalDeposits_ = parseInt(totalDeposits.e8s);
     const usersTreasuryDataArray_ = usersTreasuryDataArray.map(([principal, treasuryData ]) => {
         let {balances} = treasuryData;
-        let {icp, icp_staked, eth, btc} = balances;
+        let {icp, icp_staked, eth, btc, voting_power} = balances;
         balances = {
             icp: parseInt(icp.e8s), 
             icp_staked: parseInt(icp_staked.e8s), 
             eth: parseInt(eth.e8s), 
-            btc: parseInt(btc.e8s)
+            btc: parseInt(btc.e8s),
+            voting_power: parseInt(voting_power.e8s)
         }; 
         return [ principal, { ...treasuryData, balances} ];
     });
@@ -216,7 +209,6 @@ export const mapBackendTreasuryDataToFrontEndObj = (props) => {
     const userIcpNeurons = [];
 
     const icpNeurons = neurons.icp.map(([neuronId, {contributions, neuron, neuronInfo}]) => {
-        console.log(neuronInfo);
         let voting_power = neuronInfo[0]?.voting_power
         let stake_e8s = neuronInfo[0]?.stake_e8s;
 

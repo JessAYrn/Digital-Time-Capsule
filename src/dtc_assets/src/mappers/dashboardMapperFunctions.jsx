@@ -7,19 +7,13 @@ export const requestsForAccessTableColumns = [
     {
       field: 'userPrincipal',
       headerName: 'User Principal',
-      width: 150,
+      width: 200,
       editable: false,
-    },
-    {
-        field: 'userName',
-        headerName: 'User Name',
-        width: 150,
-        editable: false,
     },
     {
         field: 'approvalStatus',
         headerName: 'Approved',
-        width: 90,
+        width: 200,
         type: 'boolean'
     }
 ];
@@ -33,25 +27,25 @@ export const usersTableColumns = [
     {
       field: 'userPrincipal',
       headerName: 'User Identity',
-      width: 150,
+      width: 200,
       editable: false,
     },
     {
         field: 'canisterId',
         headerName: 'Root Canister',
-        width: 150,
+        width: 200,
         editable: false,
     },
     {
         field: 'userName',
         headerName: 'User Name',
-        width: 150,
+        width: 200,
         editable: false,
     },
     {
         field: 'approvalStatus',
         headerName: 'Subsidized',
-        width: 90,
+        width: 200,
         type: 'boolean'
     }
 ];
@@ -61,7 +55,6 @@ export const mapRequestsForAccessToTableRows = (requestsForAccess) => {
         return {
             id: index,
             userPrincipal: userPrincipal,
-            userName: "null",
             approvalStatus: approvalStatus
         }
     });
@@ -72,7 +65,6 @@ export const mapUsersProfileDataToTableRows = (usersProfileData) => {
     const profileMetaData = usersProfileData.map((metaData, index) => {
         return {
             id: index,
-            userName: "null",
             ...metaData
         }
     });

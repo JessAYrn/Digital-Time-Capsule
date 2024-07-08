@@ -2,7 +2,7 @@ import React, { useContext, useState} from 'react';
 import { NavBar } from '../../Components/navigation/NavBar';
 import DataField from '../../Components/Fields/DataField';
 import Switch from '../../Components/Fields/Switch';
-import { CANISTER_DATA_FIELDS } from '../../functionsAndConstants/Constants';
+import { CANISTER_DATA_FIELDS, GRAPH_DISPLAY_LABELS, GRAPH_DATA_SETS, CHART_TYPES } from '../../functionsAndConstants/Constants';
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
 import Paper from '@mui/material/Paper';
@@ -25,10 +25,12 @@ import SpeedDialField from '../../Components/Fields/SpeedDialField';
 import CreateProposalForm from '../../Components/proposals/CreateProposalForm';
 import DisplayProposals from '../../Components/proposals/DisplayProposal';
 import { AppContext } from '../../Context';
+import { mapUsersTotalTreasuryStakesAndVotingPowersDataToChartFormat } from '../../mappers/treasuryPageMapperFunctions';
+import Graph from '../../Components/Fields/Chart';
 
 const Analytics = (props) => {
 
-    const { homePageDispatch, homePageState, actorState } = useContext(AppContext);
+    const { homePageDispatch, homePageState, actorState, treasuryState } = useContext(AppContext);
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [isLoadingModal, setIsLoadingModal] = useState(false);
     const [modalProps, setModalProps] = useState({});
@@ -326,6 +328,20 @@ const Analytics = (props) => {
                         </Grid>
                     </Paper>
                 </Grid>
+
+                <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} xs={11} md={9} padding={0} >
+                    <Graph
+                        type={CHART_TYPES.pie}
+                        defaultLabel={GRAPH_DISPLAY_LABELS.votingPower}
+                        inputData={mapUsersTotalTreasuryStakesAndVotingPowersDataToChartFormat(treasuryState.usersTreasuryDataArray)}
+                        defaultDataSetName={GRAPH_DATA_SETS.usersTotalStakesAndVotingPowers}
+                        height={"500px"}
+                        maintainAspectRatio={false}
+                        hideButton1={true}
+                        hideButton2={true}
+                    />  
+                </Grid>
+
                 <Grid 
                     columns={12}
                     xs={11} 
@@ -336,9 +352,6 @@ const Analytics = (props) => {
                     alignItems="center" 
                     flexDirection={"column"}
                 >
-                <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
-
-                </Grid>
 
                     <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
                         <AccordionField>
@@ -358,42 +371,42 @@ const Analytics = (props) => {
 
                     <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
                         <AccordionField>
-                        <div 
-                            title={"Principals Requesting Access"} 
-                            iconSize={"medium"}
-                            onClick_button_1={onGrantAccess}
-                            onClick_button_2={onDenyAccess}
-                            text_1={'Approve'}
-                            text_2={'Deny'}
-                            onCellClick={(e) => { if(e === "yes" || e === "no") return; else copyText(e)}}
-                            transparent={true}
-                            checkboxSelection={true}
-                            disabled={!homePageState.canisterData.isAdmin}
-                            isLoading={requestsTableIsLoading}
-                            columns={requestsForAccessTableColumns}
-                            rows={homePageState.canisterData.requestsForAccess}
-                            Icon_1={CheckIcon}
-                            Icon_2={ClearIcon}
-                            CustomComponent={DataTable}
-                        ></div>
-                        <div 
-                            title={"DAO Participants"} 
-                            iconSize={"medium"}
-                            onClick_button_1={subsidize}
-                            onClick_button_2={Unsubsidize}
-                            onCellClick={(e) => { if(e === "yes" || e === "no") return; else copyText(e)}}
-                            text_1={'Subsidize'}
-                            text_2={'Unsubsidize'}
-                            transparent={true}
-                            checkboxSelection={true}
-                            disabled={!homePageState.canisterData.isAdmin}
-                            isLoading={usersTableIsLoading}
-                            columns={usersTableColumns}
-                            rows={homePageState.canisterData.profilesMetaData}
-                            Icon_1={CheckIcon}
-                            Icon_2={ClearIcon}
-                            CustomComponent={DataTable}
-                        ></div>
+                            <div 
+                                title={"Principals Requesting Access"} 
+                                iconSize={"medium"}
+                                onClick_button_1={onGrantAccess}
+                                onClick_button_2={onDenyAccess}
+                                text_1={'Approve'}
+                                text_2={'Deny'}
+                                onCellClick={(e) => { if(e === "yes" || e === "no") return; else copyText(e)}}
+                                transparent={true}
+                                checkboxSelection={true}
+                                disabled={!homePageState.canisterData.isAdmin}
+                                isLoading={requestsTableIsLoading}
+                                columns={requestsForAccessTableColumns}
+                                rows={homePageState.canisterData.requestsForAccess}
+                                Icon_1={CheckIcon}
+                                Icon_2={ClearIcon}
+                                CustomComponent={DataTable}
+                            ></div>
+                            <div 
+                                title={"DAO Participants"} 
+                                iconSize={"medium"}
+                                onClick_button_1={subsidize}
+                                onClick_button_2={Unsubsidize}
+                                onCellClick={(e) => { if(e === "yes" || e === "no") return; else copyText(e)}}
+                                text_1={'Subsidize'}
+                                text_2={'Unsubsidize'}
+                                transparent={true}
+                                checkboxSelection={true}
+                                disabled={!homePageState.canisterData.isAdmin}
+                                isLoading={usersTableIsLoading}
+                                columns={usersTableColumns}
+                                rows={homePageState.canisterData.profilesMetaData}
+                                Icon_1={CheckIcon}
+                                Icon_2={ClearIcon}
+                                CustomComponent={DataTable}
+                            ></div>
                         </AccordionField>
                     </Grid>
                 </Grid> 

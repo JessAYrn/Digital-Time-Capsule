@@ -140,7 +140,10 @@ const WalletPage = (props) => {
                     type={CHART_TYPES.line} 
                     inputData={walletState.balancesData} 
                     defaultLabel={GRAPH_DISPLAY_LABELS.icp}
-                    defaultDataSetName={GRAPH_DATA_SETS.week}
+                    defaultDataSetName={GRAPH_DATA_SETS.balancesHistory.week}
+                    maintainAspectRatio={false}
+                    height={"500px"}
+                    width={"100%"}
                 />
                 <Paper elevation={24} className={''} sx={{
                     backgroundColor: "rgba(52, 52, 52, 0.8)",

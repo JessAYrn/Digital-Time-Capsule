@@ -296,12 +296,13 @@ module{
         let profilesApprovalStatus = Array.map<(Principal, MainTypes.UserProfile_V2), MainTypes.ProfileMetaData>(
             profilesMapEntriesArray, 
             func (x: (Principal, MainTypes.UserProfile_V2)) : MainTypes.ProfileMetaData {
-                let (principal, {canisterId; approved}) = x;
+                let (principal, {canisterId; approved; userName}) = x;
                 let isApproved = Option.get(approved, false);
                 return {
                     approvalStatus = isApproved; 
                     userPrincipal = Principal.toText(principal); 
-                    canisterId = Principal.toText(canisterId) 
+                    canisterId = Principal.toText(canisterId);
+                    userName;
                 };
             }
         );

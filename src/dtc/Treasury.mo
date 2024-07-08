@@ -143,8 +143,8 @@ shared actor class Treasury (principal : Principal) = this {
             usersTreasuryDataMap.entries(),
             func((userPrincipal, userTreasuryData): (TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryData)): (TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryDataExport) {
                 let {balances} = userTreasuryData;
-                let e8s = SyncronousHelperMethods.computeTotalStakeDeposit(neuronDataMap, userPrincipal);
-                return (userPrincipal, {userTreasuryData with balances = {balances with icp_staked = {e8s}}} );          
+                let {icp_staked; voting_power} = SyncronousHelperMethods.computeTotalStakeDepositAndVotingPower(neuronDataMap, userPrincipal);
+                return (userPrincipal, {userTreasuryData with balances = {balances with icp_staked; voting_power}} );          
             }
         );
         return Iter.toArray(usersDataExport);
@@ -157,8 +157,8 @@ shared actor class Treasury (principal : Principal) = this {
             case (?userTreasuryData) { userTreasuryData };
             case (null) { throw Error.reject("User not found."); };
         };
-        let e8s = SyncronousHelperMethods.computeTotalStakeDeposit(neuronDataMap, userPrincipalAsText);
-        return {userTreasuryData with balances = {userTreasuryData.balances with icp_staked = {e8s}}};
+        let {icp_staked; voting_power} = SyncronousHelperMethods.computeTotalStakeDepositAndVotingPower(neuronDataMap, userPrincipalAsText);
+        return {userTreasuryData with balances = {userTreasuryData.balances with icp_staked; voting_power}};
     };
 
     public query({caller}) func getDaoTotalStakeAndVotingPower(): async {totalVotingPower: Nat64; totalStake: Nat64} {

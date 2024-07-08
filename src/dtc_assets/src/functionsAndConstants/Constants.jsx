@@ -119,11 +119,14 @@ export const CHART_TYPES = {
 }; 
 
 export const GRAPH_DATA_SETS = {
-    week: "week",
-    month: "month",
-    year: "year",
-    allTime: "allTime",
+    usersTotalStakesAndVotingPowers: "usersTotalStakesAndVotingPowers",
     neuronContributions: "neuronContributions",
+    balancesHistory: {
+        week: "week",
+        month: "month",
+        year: "year",
+        allTime: "allTime",
+    }
 }
 
 export const GRAPH_DISPLAY_LABELS = {
@@ -132,8 +135,10 @@ export const GRAPH_DISPLAY_LABELS = {
     btc: "BTC",
     eth: "ETH",
     xdrs: "XDRS",
-    stake: "Stake",
-    votingPower: "Voting Power"
+    stake: "ICP_STAKED",
+    stake_e8s: "ICP_STAKED",
+    votingPower: "VOTING_POWER",
+    voting_power: "VOTING_POWER",
 
 }
 

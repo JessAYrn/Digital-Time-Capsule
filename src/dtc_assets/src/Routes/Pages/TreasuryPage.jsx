@@ -183,7 +183,10 @@ const TreasuryPage = (props) => {
           type={CHART_TYPES.line} 
           inputData={treasuryState.balancesData} 
           defaultLabel={GRAPH_DISPLAY_LABELS.icp} 
-          defaultDataSetName={GRAPH_DATA_SETS.week}
+          defaultDataSetName={GRAPH_DATA_SETS.balancesHistory.week}
+          maintainAspectRatio={false}
+          height={"500px"}
+          width={"100%"}
         />
         {
           treasuryState?.neurons?.icp && treasuryState?.neurons?.icp.length > 0 &&
