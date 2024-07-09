@@ -1,7 +1,6 @@
 import Account "../../Serializers/Account";
 import Trie "mo:base/Trie";
 import HashMap "mo:base/HashMap";
-import NotificationsTypes "../Notifications/types";
 module {
     public type EntryKey = {
         entryKey: Nat;

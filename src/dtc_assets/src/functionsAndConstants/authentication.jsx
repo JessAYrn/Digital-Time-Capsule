@@ -1,26 +1,26 @@
-import { PlugLogin, StoicLogin, NFIDLogin, IdentityLogin, CreateActor, CreateAnonAgent } from 'ic-auth';
 import { getCurrentURL, extractCanisterIdFromURL } from './Utils';
+import { AuthClient }  from '@dfinity/auth-client';
+import { Actor, HttpAgent } from "@dfinity/agent";
 import * as canisterIds from "../../../../canister_ids.json";
-import * as dtcFiles from "../../../declarations/dtc"
+import * as dtcFiles from "../../../declarations/dtc";
 import * as dtcAssetsFiles from "../../../declarations/dtc_assets";
 
-
-export const IDENTITY_PROVIDERS = {
-    plug: "Plug",
-    stoic: "Stoic",
-    nfid: "NFID",
-    identity: "Identity"    
+export const getLoginCredentials = async (anon) => {
+  const authClient = await AuthClient.create();
+  if(!anon)await new Promise((resolve, reject) => {
+    authClient.login({
+      onSuccess: resolve,
+      onError: reject,
+    });
+  });
+  const identity = authClient.getIdentity();
+  const agent = new HttpAgent({ identity });
+  return {agent};
 };
 
-export const getUserObject = async (provider, canisterId) => {
-    if(provider === IDENTITY_PROVIDERS.plug) return await PlugLogin([canisterId]);
-    else if(provider === IDENTITY_PROVIDERS.stoic) return await StoicLogin();
-    else if(provider === IDENTITY_PROVIDERS.nfid) return await NFIDLogin();
-    else if(provider === IDENTITY_PROVIDERS.identity) return await IdentityLogin();
-};
 
-
-export const getBackendActor = async (provider = null) => {
+export const getBackendActor = async ({anon = false}) => {
+    const {agent} = await getLoginCredentials(anon);
     let dtc_canisterId;
     if(process.env.NODE_ENV === "development") dtc_canisterId = canisterIds.dtc.ic;
     else {
@@ -30,10 +30,6 @@ export const getBackendActor = async (provider = null) => {
       let authorizedPrincipals = await dtcAssetsCanister.list_authorized();
       dtc_canisterId = authorizedPrincipals[0];
     }
-    let userObject_;
-    if(!provider) userObject_ = {principal: "2vxsx-fae" , agent: await CreateAnonAgent()};
-    else  userObject_ = await getUserObject(provider, dtc_canisterId);
-    const dtc_idlFactory = dtcFiles.idlFactory;
-    let actor = await CreateActor(userObject_.agent, dtc_idlFactory, dtc_canisterId);
-    return {actor, userObject: userObject_};
+    let actor = Actor.createActor(dtcFiles.idlFactory, { agent, canisterId: dtc_canisterId} );
+    return {actor, agent};
   };

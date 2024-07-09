@@ -114,8 +114,8 @@ const Router = (props) => {
                         bigTextmsg = Object.keys(response.err)[0];
                         smallTextMsg = "Your request for could not be submitted. Please try again later."
                     };
-                    let {userObject} = actorState;
-                    let {principal} = userObject;
+                    let {userCredentials} = actorState;
+                    let {principal} = userCredentials;
                     setModalProps({
                         bigText: bigTextmsg, 
                         Icon: DoNotDisturbOnIcon,
@@ -149,7 +149,7 @@ const Router = (props) => {
     }, [actorState.backendActor]);
 
     const displayComponent = useMemo(() => {
-        return actorState?.userObject?.agent && allStatesLoaded({
+        return actorState?.userCredentials?.agent && allStatesLoaded({
             journalState,
             notificationsState,
             walletState,
@@ -157,7 +157,7 @@ const Router = (props) => {
             treasuryState
         });
     },[
-        actorState.userObject.principal, 
+        actorState.userCredentials.principal, 
         treasuryState.dataHasBeenLoaded,
         journalState.dataHasBeenLoaded,
         walletState.dataHasBeenLoaded,

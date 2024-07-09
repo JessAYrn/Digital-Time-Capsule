@@ -4,12 +4,12 @@ import { homePageTypes } from "../../reducers/homePageReducer";
 import { round2Decimals, inTrillions } from "../../functionsAndConstants/Utils";
 import AccordionField from "../../Components/Fields/Accordion";
 import Grid from '@mui/material/Unstable_Grid2';
-import { getBackendActor, IDENTITY_PROVIDERS } from "../../functionsAndConstants/authentication";
+import { getBackendActor } from "../../functionsAndConstants/authentication";
 import { actorTypes } from "../../reducers/actorReducer";
-import MenuField from "../../Components/Fields/MenuField";
 import LoginIcon from '@mui/icons-material/Login';
 import { AppContext } from "../../Context";
 import { Paper } from "@mui/material";
+import ButtonField from "../../Components/Fields/Button";
 
 export const accordionContent=[    
     {
@@ -46,12 +46,13 @@ const LoginPage = (props) => {
     
     const [isLoading, setIsLoading] = useState(false);
     
-    const handleLogin = async(provider) => {
+    const handleLogin = async() => {
         setIsLoading(true);
-        const {userObject, actor} = await getBackendActor(provider);
+        const {agent, actor} = await getBackendActor({anon: false});
+        const principal = await agent.getPrincipal();
         actorDispatch({
-            actionType: actorTypes.SET_USER_OBJECT,
-            payload: userObject
+            actionType: actorTypes.SET_USER_CREDENTIALS,
+            payload: {agent, principal : principal.toText()}
         })
         actorDispatch({
             actionType: actorTypes.SET_BACKEND_ACTOR,
@@ -60,16 +61,10 @@ const LoginPage = (props) => {
         setIsLoading(false);
     };
 
-    const mainMenuItemProps = [
-        {text: "Internet Idenity", onClick: () => handleLogin(IDENTITY_PROVIDERS.identity)},
-        {text: "Plug", onClick: () => handleLogin(IDENTITY_PROVIDERS.plug)},
-        {text: "Stoic", onClick: () => handleLogin(IDENTITY_PROVIDERS.stoic)},
-        {text: "NFID", onClick: () => handleLogin(IDENTITY_PROVIDERS.nfid)}
-    ];
-
     useEffect(async () => {
-        const {userObject, actor: anonActor} = await getBackendActor();
-        let promises = [anonActor.getCanisterCyclesBalances(), anonActor.heartBeat()];
+        setIsLoading(true);
+        const {actor} = await getBackendActor({anon: true});
+        let promises = [actor.getCanisterCyclesBalances(), actor.heartBeat()];
         let [result_0, result_1] = await Promise.all(promises);
         const {
             currentCyclesBalance_backend, 
@@ -139,24 +134,18 @@ const LoginPage = (props) => {
             </Grid>
             <Grid xs={11} md={9} display="flex" justifyContent="center" alignItems="center" paddingBottom={0} paddingTop={0}>
                 <Paper color={'secondary'} sx={{
-                    width: "200px", 
+                    width: "90px", 
                     backgroundColor: 
                     "#343434", 
                     display:"flex", 
                     justifyContent:"center",
                     alignItems:"center",
                 }} >
-                    <MenuField
-                        MenuIcon={LoginIcon}
-                        xs={6}
-                        display={"flex"}
-                        alignItems={"center"}
-                        justifyContent={"center"}
-                        active={true}
-                        label={"Log In"}
-                        disabled={isLoading}
-                        color={"custom"}
-                        menuItemProps={mainMenuItemProps}
+                    <ButtonField
+                    text={"Login"}
+                    onClick={handleLogin}
+                    Icon={LoginIcon}
+                    iconSize={'medium'}
                     />
                 </Paper>
             </Grid>

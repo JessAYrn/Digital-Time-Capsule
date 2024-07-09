@@ -1,14 +1,10 @@
 import Account "../../Serializers/Account";
-import Trie "mo:base/Trie";
 import Principal "mo:base/Principal";
 import HashMap "mo:base/HashMap";
 import Nat "mo:base/Nat";
 import JournalTypes "../Journal/types";
-import TreasuryTypes "../Treasury/types";
-import NotificationTypes "../Notifications/types";
 import IC "../IC/types";
 import Ledger "../../NNS/Ledger";
-import Governance "../../NNS/Governance";
 
 
 module{
