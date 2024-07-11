@@ -213,15 +213,15 @@ module{
         let frontendCanisterStatus = await ic.canister_status({ canister_id = Principal.fromText(daoMetaData.frontEndPrincipal) });
         let managerCanisterStatus = await ic.canister_status({ canister_id = Principal.fromText(daoMetaData.managerCanisterPrincipal)});
         let treasuryCanisterStatus = await ic.canister_status({ canister_id = Principal.fromText(daoMetaData.treasuryCanisterPrincipal)});
-        if(frontendCanisterStatus.cycles < 2_000_000_000_000){
+        if(frontendCanisterStatus.cycles < 5_000_000_000_000){
             Cycles.add<system>(1_000_000_000_000);
             ignore ic.deposit_cycles({ canister_id = Principal.fromText(daoMetaData.frontEndPrincipal); });
         };
-        if(managerCanisterStatus.cycles < 2_000_000_000_000) {
+        if(managerCanisterStatus.cycles < 10_000_000_000_000) {
             Cycles.add<system>(1_000_000_000_000);
             ignore ic.deposit_cycles({ canister_id = Principal.fromText(daoMetaData.managerCanisterPrincipal); });
         };
-        if(treasuryCanisterStatus.cycles < 2_000_000_000_000) {
+        if(treasuryCanisterStatus.cycles < 20_000_000_000_000) {
             Cycles.add<system>(1_000_000_000_000);
             ignore ic.deposit_cycles({ canister_id = Principal.fromText(daoMetaData.treasuryCanisterPrincipal); });
         };

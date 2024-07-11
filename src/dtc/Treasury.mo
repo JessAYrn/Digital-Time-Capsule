@@ -406,7 +406,7 @@ shared actor class Treasury (principal : Principal) = this {
             memo = null;
             from_subaccount = ?sendersubaccountId;
             created_at_time =?Nat64.fromNat(Int.abs(Time.now()));
-            amount = Nat64.toNat(amount);
+            amount = Nat64.toNat(amount - txFee);
         });
 
         switch (res) {

@@ -47,7 +47,7 @@ module {
           memo = memo;
           from_subaccount = ?senderSubaccount;
           to = treasuryNeuronAccountId;
-          amount = { e8s = amount };
+          amount = { e8s = amount - txFee };
           fee = { e8s = txFee };
           created_at_time = ?{ timestamp_nanos = Nat64.fromNat(Int.abs(Time.now())) };
         });
@@ -69,7 +69,7 @@ module {
           memo = 0;
           from_subaccount = ?senderSubaccount;
           to = treasuryNeuronAccountId;
-          amount = { e8s = amount };
+          amount = { e8s = amount - txFee };
           fee = { e8s = txFee };
           created_at_time = ?{ timestamp_nanos = Nat64.fromNat(Int.abs(Time.now())) };
         });
@@ -208,15 +208,6 @@ module {
                                 let ?command = reply.command else { return throw Error.reject("Response candid decoding took unexpected form") };
                                 switch(command){
                                     case(#Spawn(response)) { return #Spawn({response; neuronId;}) };
-                                    case(#Error(response)) { return #Error({response; neuronId;}) };
-                                    case(_) { return throw Error.reject("Unexpected command type") };
-                                };
-                            };
-                            case(#Split({neuronId; amount_e8s; proposer;})){ 
-                                let ?reply: ?Governance.ManageNeuronResponse = from_candid(replyEncoded) else { return throw Error.reject("Response candid decoding took unexpected form") };
-                                let ?command = reply.command else { return throw Error.reject("Response candid decoding took unexpected form") };
-                                switch(command){
-                                    case(#Split(response)) { return #Split({response; neuronId; amount_e8s; proposer;}) };
                                     case(#Error(response)) { return #Error({response; neuronId;}) };
                                     case(_) { return throw Error.reject("Unexpected command type") };
                                 };

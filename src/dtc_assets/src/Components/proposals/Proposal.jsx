@@ -33,7 +33,6 @@ const Proposal = (props) => {
     const [modalProps, setModalProps] = useState({});
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [isLoadingModal, setIsLoading] = useState(false);
-    const [adoptProposal, setAdoptProposal] = useState(null);
 
     let numberOfNays = votes.filter(vote => vote[1].adopt === false).length;
     let numberOfYays = votes.filter(vote => vote[1].adopt === true).length;
@@ -49,6 +48,34 @@ const Proposal = (props) => {
     let payload = action[actionType];
     let {yay, nay, total} = voteTally;
 
+    const onConfirmVote = async (bool) => {
+        setIsLoading(true);
+        let result = await actorState.backendActor.voteOnProposal(proposalId, bool);
+        setIsLoading(false);
+        if(result.err){
+            setModalProps({
+                smallText: `Your vote could not be successfully submitted.`,
+                components: [{
+                    Component: ButtonField,
+                    props: {
+                        active: true,
+                        text: "Close",
+                        Icon: CloseIcon,
+                        onClick: () => setModalIsOpen(false)
+                    }
+                }]
+            });
+            return;
+        } else if(result.ok) {
+            let updatedProposals = result.ok;
+            homePageDispatch({
+                actionType: homePageTypes.SET_PROPOSALS_DATA,
+                payload: updatedProposals
+            });
+        }
+        setModalIsOpen(false);
+    };
+
     const getModalButtonsComponents = (bool) => {
         return [
             {Component: ButtonField,
@@ -63,23 +90,12 @@ const Proposal = (props) => {
                 active: true,
                 text: "Confirm",
                 Icon: CheckIcon,
-                onClick: async () => {
-                    setIsLoading(true);
-                    let result = await actorState.backendActor.voteOnProposal(proposalId, bool);
-                    let updatedProposals = result.ok;
-                    homePageDispatch({
-                        actionType: homePageTypes.SET_PROPOSALS_DATA,
-                        payload: updatedProposals
-                    });
-                    setIsLoading(false);
-                    setModalIsOpen(false);
-                }
+                onClick: () => onConfirmVote(bool)
             }}
         ]
     };
 
     const onVote = (bool) => {
-        setAdoptProposal(bool);
         const decision = bool ? "ADOPT" : "REJECT";
         setModalIsOpen(true);
         setModalProps({

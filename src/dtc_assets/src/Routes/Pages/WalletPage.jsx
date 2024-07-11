@@ -1,7 +1,7 @@
 import React, { useContext, useState} from 'react';
 import { AppContext } from '../../Context';
 import { NavBar } from '../../Components/navigation/NavBar';
-import { e8sInOneICP, CHART_TYPES, GRAPH_DISPLAY_LABELS, GRAPH_DATA_SETS } from '../../functionsAndConstants/Constants';
+import { CHART_TYPES, GRAPH_DISPLAY_LABELS, GRAPH_DATA_SETS } from '../../functionsAndConstants/Constants';
 import { copyText } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
 import { loadWalletData } from '../../functionsAndConstants/loadingFunctions';
 import { walletTypes } from '../../reducers/walletReducer';

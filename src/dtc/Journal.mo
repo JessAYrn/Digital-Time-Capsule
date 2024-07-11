@@ -358,7 +358,7 @@ shared(msg) actor class Journal () = this {
                     memo = null;
                     from_subaccount = null;
                     to = {owner = recipient; subaccount};
-                    amount = Nat64.toNat(amount);
+                    amount = Nat64.toNat(amount - txFee);
                     fee = ?Nat64.toNat(txFee);
                     created_at_time = ?Nat64.fromNat(Int.abs(Time.now()));
                 });
@@ -369,7 +369,7 @@ shared(msg) actor class Journal () = this {
                     memo = Nat64.fromNat(0);
                     from_subaccount = null;
                     to = accountId;
-                    amount = { e8s = amount };
+                    amount = { e8s = amount - txFee};
                     fee = { e8s = txFee };
                     created_at_time = ?{ timestamp_nanos = Nat64.fromNat(Int.abs(Time.now())) };
                 });

@@ -167,7 +167,6 @@ module{
         #CreateNeuron: {amount: Nat64; };
         #IncreaseNeuron: {amount: Nat64; neuronId: Nat64; };
         #PurchaseCycles: {amount : Nat64;};
-        #SplitNeuron: {neuronId: Nat64; amount: Nat64; };
         #SpawnNeuron: {neuronId: Nat64; percentage_to_spawn : Nat32;};
         #DisburseNeuron: {neuronId: Nat64; };
         #DissolveNeuron: {neuronId: Nat64; };
@@ -206,7 +205,7 @@ module{
         admin = [];
         acceptingRequests = true;
         lastRecordedTime = 0;
-        supportMode = true;
+        supportMode = false;
         requestsForAccess = [];
         defaultControllers = [];
         nftId = null;

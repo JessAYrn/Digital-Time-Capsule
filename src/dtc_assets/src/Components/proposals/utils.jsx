@@ -6,7 +6,6 @@ export const PROPOSAL_ACTIONS = {
     CreateNeuron: "CreateNeuron",
     IncreaseNeuron: "IncreaseNeuron",
     PurchaseCycles: "PurchaseCycles",
-    SplitNeuron: "SplitNeuron",
     SpawnNeuron: "SpawnNeuron",
     DisburseNeuron: "DisburseNeuron",
     DissolveNeuron: "DissolveNeuron",

@@ -92,7 +92,6 @@ const NEURON_ID_REQUIRED_ACTIONS =[
     PROPOSAL_ACTIONS.SpawnNeuron,
     PROPOSAL_ACTIONS.DisburseNeuron,
     PROPOSAL_ACTIONS.DissolveNeuron,
-    PROPOSAL_ACTIONS.SplitNeuron,
     PROPOSAL_ACTIONS.FollowNeuron,
     PROPOSAL_ACTIONS.IncreaseDissolveDelay,
     PROPOSAL_ACTIONS.IncreaseNeuron
@@ -107,7 +106,6 @@ const AMOUNT_PAYLOAD_REQUIRED_ACTIONS = [
     PROPOSAL_ACTIONS.PurchaseCycles,
     PROPOSAL_ACTIONS.CreateNeuron,
     PROPOSAL_ACTIONS.IncreaseNeuron,
-    PROPOSAL_ACTIONS.SplitNeuron,
 ];
 
 const PERCENTAGE_PAYLOAD_REQUIRED_ACTIONS = [
@@ -209,7 +207,6 @@ const CreateProposalForm = (props) => {
         { text: PROPOSAL_ACTIONS.DisburseNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.DisburseNeuron), selected: selectedAction === PROPOSAL_ACTIONS.DisburseNeuron},
         { text: PROPOSAL_ACTIONS.DissolveNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.DissolveNeuron), selected: selectedAction === PROPOSAL_ACTIONS.DissolveNeuron},
         { text: PROPOSAL_ACTIONS.SpawnNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.SpawnNeuron), selected: selectedAction === PROPOSAL_ACTIONS.SpawnNeuron},
-        { text: PROPOSAL_ACTIONS.SplitNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.SplitNeuron), selected: selectedAction === PROPOSAL_ACTIONS.SplitNeuron},
         { text: PROPOSAL_ACTIONS.FollowNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.FollowNeuron), selected: selectedAction === PROPOSAL_ACTIONS.FollowNeuron},
         { text: PROPOSAL_ACTIONS.IncreaseDissolveDelay, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.IncreaseDissolveDelay), selected: selectedAction === PROPOSAL_ACTIONS.IncreaseDissolveDelay},
         { text: PROPOSAL_ACTIONS.CreateNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.CreateNeuron), selected: selectedAction === PROPOSAL_ACTIONS.CreateNeuron},

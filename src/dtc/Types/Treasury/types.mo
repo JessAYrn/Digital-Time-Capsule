@@ -116,7 +116,6 @@ module{
         #GetFullNeuronResponse: {neuronId: Nat64;};
         #GetNeuronInfoResponse: {neuronId: Nat64;};
         #Spawn: {neuronId: Nat64; };
-        #Split: {neuronId: Nat64; amount_e8s: Nat64; proposer: Principal;};
         #Follow: {neuronId: Nat64; };
         #ClaimOrRefresh: {neuronId: Nat64;};
         #Configure: {neuronId: Nat64; };
@@ -130,7 +129,6 @@ module{
         #GetNeuronInfoResponse : {response: Governance.Result_5; neuronId: Nat64; };
         #Error : {response: Governance.GovernanceError;};
         #Spawn : { response: Governance.SpawnResponse; neuronId: Nat64;};
-        #Split : {response: Governance.SpawnResponse; neuronId: Nat64; amount_e8s: Nat64; proposer: Principal;};
         #Follow : {response: {}; neuronId: Nat64;};
         #ClaimOrRefresh : { response: Governance.ClaimOrRefreshResponse; neuronId: Nat64;};
         #Configure : {response: {}; neuronId: Nat64; };

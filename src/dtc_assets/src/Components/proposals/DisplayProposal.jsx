@@ -8,7 +8,7 @@ const DisplayProposals = (props) => {
     return (
         <>
             {
-                proposals.length > 0 && 
+                proposals?.length > 0 && 
                 <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
                     <AccordionField>
                         {proposals?.map(([proposalId, proposal]) => {
