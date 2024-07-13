@@ -371,14 +371,6 @@ shared actor class User() = this {
         let result = await TreasuryHelperMethods.withdrawIcpFromTreasury(daoMetaData_v4, userProfilesMap_v2, caller, amount); return result;
     };
 
-    public shared func loadUpgrades(): async (){
-        await loadUpgrades_();
-    };
-
-    public shared func installUpgrades(): async (){
-        await installUpgrades_();
-    };
-
     private func loadUpgrades_(): async (){
         let managerCanister: Manager.Manager = actor(daoMetaData_v4.managerCanisterPrincipal);
         await managerCanister.resetLoadProgress();
@@ -497,7 +489,7 @@ shared actor class User() = this {
         let neuronsDataArray = await treasuryCanister.getNeuronsDataArray();
         let proposer = Principal.toText(caller); let votes = [(proposer, {adopt = true})];
         let timeInitiated = Time.now(); 
-        let votingWindowInNanoseconds = 3 * 60 * 1_000_000_000;
+        let votingWindowInNanoseconds = 60 * 1_000_000_000;
         let timeVotingPeriodEnds = timeInitiated + votingWindowInNanoseconds;
         let executed = false;
         var voteTally = {yay = Nat64.fromNat(0); nay = Nat64.fromNat(0); total = Nat64.fromNat(0);};

@@ -5,6 +5,12 @@ import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import { Typography } from "@mui/material";
 import { copyText } from "../../functionsAndConstants/walletFunctions/CopyWalletAddress";
 import { fromE8s, shortenHexString, round2Decimals } from "../../functionsAndConstants/Utils";
+import { treasuryTypes } from "../../reducers/treasuryReducer";
+import { walletTypes } from "../../reducers/walletReducer";
+import { homePageTypes } from "../../reducers/homePageReducer";
+import { types as journalTypes } from "../../reducers/journalReducer";
+import { notificationsTypes } from "../../reducers/notificationsReducer";
+import { loadAllDataIntoReduxStores } from "../../functionsAndConstants/loadingFunctions";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import SpeedDialField from "../../Components/Fields/SpeedDialField";
@@ -13,6 +19,7 @@ import ModalComponent from "../../Components/modal/Modal";
 import ButtonField from "../../Components/Fields/Button";
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import AccountBalanceWalletOutlinedIcon from '@mui/icons-material/AccountBalanceWalletOutlined';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import CreateProposalForm from "../../Components/proposals/CreateProposalForm";
 import DepositOrWithdrawModal from "../../Components/modal/DepositOrWithdraw";
 import Graph from "../../Components/Fields/Chart";
@@ -22,7 +29,23 @@ import AccordionField from "../../Components/Fields/Accordion";
 import DisplayNeuron from "../../Components/Neurons/DisplayNeuron";
 
 const TreasuryPage = (props) => {
-  const { treasuryState } = useContext(AppContext);
+  const { 
+    treasuryState, 
+    treasuryDispatch,
+    walletState, 
+    walletDispatch, 
+    homePageState,
+    homePageDispatch,
+    journalState,
+    journalDispatch,
+    notificationsState,
+    notificationsDispatch,
+    actorState, 
+  } = useContext(AppContext);
+
+  const states = {homePageState, actorState, treasuryState, walletState, notificationsState, journalState,};
+  const dispatches = { homePageDispatch, treasuryDispatch, walletDispatch, notificationsDispatch, journalDispatch};
+  const types = { journalTypes, walletTypes, homePageTypes, notificationsTypes, treasuryTypes};
 
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [isLoadingModal, setIsLoadingModal] = useState(false);
@@ -119,7 +142,16 @@ const TreasuryPage = (props) => {
     });
   };
 
+  const reloadData = async () => {
+    setIsLoadingModal(true);
+    setModalIsOpen(true);
+    await loadAllDataIntoReduxStores(states, dispatches, types);
+    setModalIsOpen(false);
+    setIsLoadingModal(false);
+  };
+
   const speedDialActions = [
+    {name: "Refresh", icon: RefreshIcon , onClick: reloadData},
     {name: "Create Proposal", icon: HowToVoteIcon , onClick: openProposalForm},
     {name: "Withdraw To Wallet", icon: AccountBalanceWalletOutlinedIcon , onClick: () => openDepositOrWithdrawForm(TREASURY_ACTIONS.WithdrawIcpFromTreasury)},
     {name: "Deposit To Treasury", icon: AccountBalanceIcon , onClick: () => openDepositOrWithdrawForm(TREASURY_ACTIONS.DepositIcpToTreasury)}

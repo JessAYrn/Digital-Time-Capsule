@@ -89,7 +89,6 @@ export const mapUsersTotalTreasuryStakesAndVotingPowersDataToChartFormat = (user
         else theRestOfTheUsersVotingPower += balances.voting_power;
     };
     allUsersTotalIcpStakesAndVotingPowerSorted.push(["Everyone Else", {voting_power: theRestOfTheUsersVotingPower}]);
-    console.log(allUsersTotalIcpStakesAndVotingPowerSorted);
     return mapDataMapToChartFormat(
         allUsersTotalIcpStakesAndVotingPowerSorted,
         GRAPH_DATA_SETS.usersTotalStakesAndVotingPowers

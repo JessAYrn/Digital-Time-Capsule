@@ -12,18 +12,18 @@ export const loadAllDataIntoReduxStores = async (states, dispatchFunctions, type
     let {walletState, homePageState, journalState, actorState, notificationsState, treasuryState} = states;
     let {journalDispatch, walletDispatch, homePageDispatch, notificationsDispatch, treasuryDispatch} = dispatchFunctions;
     let {journalTypes, walletTypes, homePageTypes, notificationsTypes, treasuryTypes } = types;
-    let accountCreationAttemptResults;
     //checks to see if user has an account. If not, then it attemptes to make an account, if 
     //the account creation is unsuccessful, then it returns
     let hasAccount = await actorState.backendActor.hasAccount();
     if(!hasAccount) { loadSuccessful = false; return loadSuccessful;}
     //calls the backend and loads the retrieved data into the appropriate redux stores.
-    let promises = [];
-    if(!walletState.dataHasBeenLoaded) promises.push(loadWalletData(actorState, walletDispatch, walletTypes));
-    if(!homePageState.dataHasBeenLoaded) promises.push(loadCanisterData(actorState, homePageDispatch, homePageTypes));
-    if(!journalState.dataHasBeenLoaded) promises.push(loadJournalData(actorState, journalDispatch, journalTypes));
-    if(!notificationsState.dataHasBeenLoaded) promises.push(loadNotificationsData(actorState, notificationsDispatch, notificationsTypes));
-    if(!treasuryState.dataHasBeenLoaded) promises.push(loadTreasuryData(actorState, treasuryDispatch, treasuryTypes));
+    let promises = [
+        loadWalletData(actorState, walletDispatch, walletTypes),
+        loadCanisterData(actorState, homePageDispatch, homePageTypes),
+        loadJournalData(actorState, journalDispatch, journalTypes),
+        loadNotificationsData(actorState, notificationsDispatch, notificationsTypes),
+        loadTreasuryData(actorState, treasuryDispatch, treasuryTypes)
+    ];
     const response = await Promise.all(promises);
     return loadSuccessful
 };
@@ -108,6 +108,7 @@ export const loadWalletData = async (actorState, walletDispatch, types ) => {
         actionType: types.SET_DATA_HAS_BEEN_LOADED,
         payload: true,
     });
+    return walletData;
 };
 
 export const loadTxHistory = async (actorState, walletDispatch, types) => {
@@ -156,7 +157,6 @@ export const loadTreasuryData = async (actorState, dispatch, types) => {
     treasuryBalances = mapBalancesDataFromApiToFrontend(treasuryBalances);
     treasuryData = treasuryData.ok;
     treasuryData = mapBackendTreasuryDataToFrontEndObj(treasuryData);
-    console.log(treasuryData);
     dispatch({
         actionType: types.SET_TREASURY_DATA,
         payload: treasuryData

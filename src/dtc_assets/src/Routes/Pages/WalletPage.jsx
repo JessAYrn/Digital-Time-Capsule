@@ -3,8 +3,13 @@ import { AppContext } from '../../Context';
 import { NavBar } from '../../Components/navigation/NavBar';
 import { CHART_TYPES, GRAPH_DISPLAY_LABELS, GRAPH_DATA_SETS } from '../../functionsAndConstants/Constants';
 import { copyText } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
-import { loadWalletData } from '../../functionsAndConstants/loadingFunctions';
-import { walletTypes } from '../../reducers/walletReducer';
+import { loadAllDataIntoReduxStores } from '../../functionsAndConstants/loadingFunctions';
+import { walletTypes  } from '../../reducers/walletReducer';
+import { treasuryTypes } from '../../reducers/treasuryReducer';
+import { notificationsTypes } from '../../reducers/notificationsReducer';
+import { homePageTypes } from '../../reducers/homePageReducer';
+import { types as journalTypes } from '../../reducers/journalReducer';
+
 import { nanoSecondsToMiliSeconds, shortenHexString, round2Decimals, fromE8s } from '../../functionsAndConstants/Utils';
 import QrCodeIcon from '@mui/icons-material/QrCode';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
@@ -25,9 +30,25 @@ import Typography from '@mui/material/Typography';
 
 const WalletPage = (props) => {
 
-    const { walletState, walletDispatch, actorState, treasuryState } = useContext(AppContext);
+    const { 
+        walletState, 
+        walletDispatch, 
+        actorState, 
+        treasuryState, 
+        treasuryDispatch,
+        notificationsState,
+        notificationsDispatch,
+        homePageState,
+        homePageDispatch,
+        journalState,
+        journalDispatch
+    } = useContext(AppContext);
 
-    const [loadingTx, setIsLoadingTx] = useState(false);
+    const states = {homePageState, actorState, treasuryState, walletState, notificationsState, journalState,};
+    const dispatches = { homePageDispatch, treasuryDispatch, walletDispatch, notificationsDispatch, journalDispatch};
+    const types = { journalTypes, walletTypes, homePageTypes, notificationsTypes, treasuryTypes};
+
+    const [loadingWalletData, setIsLoadingWalletData] = useState(false);
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [modalProps, setModalProps] = useState({});
 
@@ -39,7 +60,7 @@ const WalletPage = (props) => {
                     onClickCancel: () => {setModalIsOpen(false); () => setModalProps({})},
                     setModalProps,
                     setModalIsOpen,
-                    setIsLoadingTx
+                    setIsLoadingWalletData
                 }
             }]
         });
@@ -58,16 +79,16 @@ const WalletPage = (props) => {
         });
     };
 
-    const loadTxs = async () => {
-        setIsLoadingTx(true);
+    const reloadData = async () => {
+        setIsLoadingWalletData(true);
         setModalIsOpen(true);
-        await loadWalletData(actorState, walletDispatch, walletTypes);
+        await loadAllDataIntoReduxStores(states, dispatches, types);
         setModalIsOpen(false);
-        setIsLoadingTx(false);
+        setIsLoadingWalletData(false);
     };
 
     const speedDialActions = [
-        {name: "Refresh", icon: RefreshIcon, onClick: loadTxs},
+        {name: "Refresh", icon: RefreshIcon, onClick: reloadData},
         {name: "New Transaction", icon: SendIcon , onClick: onSend}
     ]
 
@@ -197,7 +218,7 @@ const WalletPage = (props) => {
             <SpeedDialField actions={speedDialActions} position={"right"}/>
             <ModalComponent
                 open={modalIsOpen}
-                isLoading={loadingTx}
+                isLoading={loadingWalletData}
                 handleClose={() => setModalIsOpen(false)}
                 {...modalProps}
             />

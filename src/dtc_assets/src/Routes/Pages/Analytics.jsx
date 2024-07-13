@@ -12,9 +12,14 @@ import HowToVoteIcon from '@mui/icons-material/HowToVote';
 import ButtonField from '../../Components/Fields/Button';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import Grid from '@mui/material/Unstable_Grid2';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import AccordionField from '../../Components/Fields/Accordion';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import {homePageTypes} from '../../reducers/homePageReducer';
+import {types as journalTypes} from '../../reducers/journalReducer';
+import {walletTypes} from '../../reducers/walletReducer';
+import {notificationsTypes} from '../../reducers/notificationsReducer';
+import {treasuryTypes} from '../../reducers/treasuryReducer';
 import { inTrillions, nanoSecondsToMiliSeconds, round2Decimals, shortenHexString } from '../../functionsAndConstants/Utils';
 import { copyText } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
 import DataTable from '../../Components/Fields/Table';
@@ -27,10 +32,28 @@ import DisplayProposals from '../../Components/proposals/DisplayProposal';
 import { AppContext } from '../../Context';
 import { mapUsersTotalTreasuryStakesAndVotingPowersDataToChartFormat } from '../../mappers/treasuryPageMapperFunctions';
 import Graph from '../../Components/Fields/Chart';
+import { loadAllDataIntoReduxStores } from '../../functionsAndConstants/loadingFunctions';
 
 const Analytics = (props) => {
 
-    const { homePageDispatch, homePageState, actorState, treasuryState } = useContext(AppContext);
+    const { 
+        homePageDispatch, 
+        homePageState, 
+        actorState, 
+        treasuryState, 
+        treasuryDispatch,
+        walletState,
+        walletDispatch,
+        notificationsState,
+        notificationsDispatch,
+        journalState,
+        journalDispatch,
+    } = useContext(AppContext);
+
+    const states = {homePageState, actorState, treasuryState, walletState, notificationsState, journalState,};
+    const dispatches = { homePageDispatch, treasuryDispatch, walletDispatch, notificationsDispatch, journalDispatch};
+    const types = { journalTypes, walletTypes, homePageTypes, notificationsTypes, treasuryTypes};
+
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [isLoadingModal, setIsLoadingModal] = useState(false);
     const [modalProps, setModalProps] = useState({});
@@ -200,7 +223,16 @@ const Analytics = (props) => {
         });
     };
 
+    const reloadData = async () => {
+        setIsLoadingModal(true);
+        setModalIsOpen(true);
+        await loadAllDataIntoReduxStores(states, dispatches, types);
+        setModalIsOpen(false);
+        setIsLoadingModal(false);
+    };
+
     const speedDialActions = [
+        {name: "Refresh", icon: RefreshIcon , onClick: reloadData},
         {name: "Create Proposal", icon: HowToVoteIcon , onClick: openProposalForm}
     ]
 
@@ -328,7 +360,6 @@ const Analytics = (props) => {
                         </Grid>
                     </Paper>
                 </Grid>
-
                 <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} xs={11} md={9} padding={0} >
                     <Graph
                         type={CHART_TYPES.pie}
@@ -341,7 +372,6 @@ const Analytics = (props) => {
                         hideButton2={true}
                     />  
                 </Grid>
-
                 <Grid 
                     columns={12}
                     xs={11} 
@@ -352,7 +382,6 @@ const Analytics = (props) => {
                     alignItems="center" 
                     flexDirection={"column"}
                 >
-
                     <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
                         <AccordionField>
                         <div 
@@ -367,8 +396,6 @@ const Analytics = (props) => {
                         ></div>
                         </AccordionField>
                     </Grid>
-                    
-
                     <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
                         <AccordionField>
                             <div 
@@ -410,69 +437,14 @@ const Analytics = (props) => {
                         </AccordionField>
                     </Grid>
                 </Grid> 
-                <Grid 
-                    columns={12}
-                    xs={11} 
-                    md={9}
-                    rowSpacing={0} 
-                >
-                    <Grid
-                        columns={12}
-                        xs={12} 
-                        rowSpacing={0} 
-                        display="flex" 
-                        justifyContent="center" 
-                        alignItems="center" 
-                        flexDirection={"column"}
-                    >
-                        <Switch
-                            labelLeft={"Activate Support Mode: "}
-                            disabled={!homePageState.canisterData.isAdmin}
-                            checked={homePageState.canisterData.supportMode}
-                            onClick={toggleSupportMode}
-                        />
+                <Grid columns={12} xs={11} md={9} rowSpacing={0}>
+                    <Grid columns={12} xs={12} rowSpacing={0} display="flex" justifyContent="center" alignItems="center" flexDirection={"column"}>
                         <Switch
                             checked={homePageState.canisterData.acceptingRequests}
                             onClick={toggleAcceptRequest}
                             disabled={!homePageState.canisterData.isAdmin}
                             labelLeft={"Receive Requests:  "}
                         />
-                    </Grid>
-                    <Grid
-                        columns={12}
-                        xs={12} 
-                        rowSpacing={0} 
-                        display="flex" 
-                        justifyContent="center" 
-                        alignItems="center" 
-                    >
-                        <Grid 
-                            columns={12} 
-                            xs={6} 
-                            width={"100%"} 
-                            display={"flex"} 
-                            justifyContent={"right"} 
-                            alignItems={"center"}
-                        >
-                            <Grid xs={6} width={"110px"}>
-                                <ButtonField
-                                    Icon={UpgradeIcon}
-                                    active={homePageState.canisterData.isAdmin}
-                                    text={'Load Upgrade'}
-                                    onClick={handleLoadUpgrade}
-                                    disabled={!homePageState.canisterData.isAdmin}
-                                />
-                            </Grid>
-                            <Grid xs={6} width={"110px"}>
-                                <ButtonField
-                                    Icon={UpgradeIcon}
-                                    active={homePageState.canisterData.isAdmin}
-                                    text={'Install Upgrade'}
-                                    onClick={handleInstallUpgrade}
-                                    disabled={!homePageState.canisterData.isAdmin}
-                                />
-                            </Grid>
-                        </Grid>
                     </Grid>
                 </Grid>
                 <SpeedDialField actions={speedDialActions} position={"right"}/>

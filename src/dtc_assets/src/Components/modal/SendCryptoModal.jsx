@@ -14,7 +14,7 @@ const SendCrypto = (props) => {
     const { 
         onClickCancel,
         setModalIsOpen,
-        setIsLoadingTx
+        setIsLoadingWalletData
     } = props
 
     const [hasError_1, setHasError_1] = useState(false);
@@ -39,11 +39,11 @@ const SendCrypto = (props) => {
 
     const onSendICP = async () => {
         setModalIsOpen,
-        setIsLoadingTx(true);
+        setIsLoadingWalletData(true);
         const e8s = round8Decimals(parseFloat(numberInput) * e8sInOneICP);
         const accountId = fromHexString(recipientAddress);
         const result = await actorState.backendActor.transferICP(e8s, accountId);
-        setIsLoadingTx(false);
+        setIsLoadingWalletData(false);
         setModalIsOpen(false);
         if("err" in result){
             alert("Error: " + Object.keys(result.err)[0]);
