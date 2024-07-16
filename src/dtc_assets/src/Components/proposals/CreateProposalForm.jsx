@@ -124,10 +124,21 @@ const SECONDS_PAYLOAD_REQUIRED_ACTIONS = [
     PROPOSAL_ACTIONS.IncreaseDissolveDelay
 ];
 
+const CYCLES_COSTS_ASSOCIATED_WITH_ACTIONS = [
+    PROPOSAL_ACTIONS.FollowNeuron,
+    PROPOSAL_ACTIONS.IncreaseNeuron,
+    PROPOSAL_ACTIONS.SpawnNeuron,
+    PROPOSAL_ACTIONS.DisburseNeuron,
+    PROPOSAL_ACTIONS.DissolveNeuron,
+    PROPOSAL_ACTIONS.IncreaseDissolveDelay,
+    PROPOSAL_ACTIONS.FollowNeuron,
+    PROPOSAL_ACTIONS.CreateNeuron,
+];
+
 const actionReadyToSubmit = (proposalAction, proposalPayload) => {
     let ready = true;
     if(NEURON_ID_REQUIRED_ACTIONS.includes(proposalAction) && !proposalPayload?.neuronId) ready = false;
-    if(TOPIC_PAYLOAD_REQUIRED_ACTIONS.includes(proposalAction) && !proposalPayload?.topic) ready = false;
+    if(TOPIC_PAYLOAD_REQUIRED_ACTIONS.includes(proposalAction) && !proposalPayload?.topic && proposalPayload?.topic !== NEURON_TOPICS.unspecificed ) ready = false;
     if(FOLLOWEE_PAYLOAD_REQUIRED_ACTIONS.includes(proposalAction) && !proposalPayload?.followee) ready = false;
     if(PRINCIPAL_REQUIRED_ACTIONS.includes(proposalAction) && !proposalPayload?.principal) ready = false;
     if(AMOUNT_PAYLOAD_REQUIRED_ACTIONS.includes(proposalAction) && !proposalPayload?.amount) ready = false;
@@ -194,8 +205,8 @@ const CreateProposalForm = (props) => {
         }
     });
 
-    const neuronTopicItemProps = Object.keys(NEURON_TOPICS).map((topic) => {
-        return {text: topic,  onClick: () => setProposalPayload({...proposalPayload_, topicName: topic, topic: NEURON_TOPICS[topic]})};
+    const neuronTopicItemProps = Object.keys(NEURON_TOPICS).map((topicName) => {
+        return {text: topicName,  onClick: () => setProposalPayload({...proposalPayload_, topicName, topic: NEURON_TOPICS[topicName]})};
     });
 
     const mainMenuItemProps = [
@@ -292,6 +303,15 @@ const CreateProposalForm = (props) => {
                 text={`${fromE8s(treasuryState.userTreasuryData?.balances.icp || 0) } ICP`}
                 isLoading={!treasuryState.dataHasBeenLoaded}
                 disabled={true}
+                />
+            }
+            {
+                CYCLES_COSTS_ASSOCIATED_WITH_ACTIONS.includes(proposalAction_) &&
+                <DataField
+                    label={"Cycles Consumption: "}
+                    text={"~ 0.25 T"}
+                    isLoading={!treasuryState.dataHasBeenLoaded}
+                    disabled={true}
                 />
             }
             {

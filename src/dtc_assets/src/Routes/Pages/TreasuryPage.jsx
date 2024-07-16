@@ -204,10 +204,10 @@ const TreasuryPage = (props) => {
           <Grid xs={5} width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"} flexDirection={"column"}>
             <Typography width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"} >Voting Power:</Typography>
             <Typography width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"} variant="h6">
-              {`${round2Decimals(fromE8s(treasuryState.votingPower))}`} ICP 
+              {`${round2Decimals(fromE8s(treasuryState.votingPower))}`}
             </Typography>
             <Typography width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"} style={{color: '#bdbdbd'}}>
-              {`${round2Decimals(fromE8s(treasuryState.userVotingPower))}`} ICP 
+              {`${round2Decimals(fromE8s(treasuryState.userVotingPower))}`} 
             </Typography>
           </Grid>
         </Grid>

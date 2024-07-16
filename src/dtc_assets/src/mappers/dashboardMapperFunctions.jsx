@@ -95,6 +95,10 @@ export const mapBackendCanisterDataToFrontEndObj = (props) => {
 
     const requestsForAccess_ = mapRequestsForAccessToTableRows(requestsForAccess);
     const profilesMetaData_ = mapUsersProfileDataToTableRows(profilesMetaData);
+    const proposals_ = proposals.sort(([proposalId_a], [proposalId_b]) => {
+        if(parseInt(proposalId_a) > parseInt(proposalId_b)) return -1
+        else return 1
+    });
 
     return {
         profilesMetaData: profilesMetaData_,
@@ -105,7 +109,7 @@ export const mapBackendCanisterDataToFrontEndObj = (props) => {
         managerCanisterPrincipal: managerCanisterPrincipal,
         lastRecordedBackEndCyclesBalance: parseInt(lastRecordedBackEndCyclesBalance),
         isAdmin: isAdmin,
-        proposals: proposals,
+        proposals: proposals_,
         supportMode: supportMode,
         acceptingRequests: acceptingRequests,
         journalCount: parseInt(journalCount),

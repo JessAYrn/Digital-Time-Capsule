@@ -159,7 +159,11 @@ export const mapNeuronContributionsToTableRows = (neuronContributions) => {
             voting_power: round8Decimals(fromE8s(parseInt(voting_power)))
         }
     });
-    return neuronContributions_;
+    const sortedNeuronContributions = neuronContributions_.sort(function({stake_e8s: stake_e8s_a}, {stake_e8s: stake_e8s_b}){
+        if(stake_e8s_a > stake_e8s_b) return -1;
+        else return 1;
+    });
+    return sortedNeuronContributions;
 }
 
 export const getUserTreasuryData = (userPrincipal, usersTreasuryDataArray) => {

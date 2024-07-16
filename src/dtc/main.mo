@@ -325,28 +325,23 @@ shared actor class User() = this {
     };
 
     public composite query({caller}) func getCanisterData() : async Result.Result<(MainTypes.CanisterDataExport), JournalTypes.Error> {
-        let profile = userProfilesMap_v2.get(caller);
-        switch(profile){
-            case null{ return #err(#NotAuthorized); };
-            case (? existingProfile){
-                let managerCanister : Manager.Manager = actor(daoMetaData_v4.managerCanisterPrincipal);
-                let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v4.treasuryCanisterPrincipal);
-                let neuronsDataArray = await treasuryCanister.getNeuronsDataArray();
-                let profilesMetaData = CanisterManagementMethods.getProfilesMetaData(userProfilesMap_v2);
-                let currentVersions = await managerCanister.getCurrentVersions();
-                let canisterDataPackagedForExport = {
-                    daoMetaData_v4 with 
-                    proposals = GovernanceHelperMethods.tallyAllProposalVotes({proposals = proposalsMap; neuronsDataArray; founder = daoMetaData_v4.founder; userProfilesMap = userProfilesMap_v2;});
-                    isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v4);
-                    currentCyclesBalance_backend = Cycles.balance();
-                    journalCount = userProfilesMap_v2.size();
-                    profilesMetaData;
-                    releaseVersionInstalled = currentVersions.currentVersionInstalled.number;
-                    releaseVersionLoaded = currentVersions.currentVersionLoaded.number;
-                };
-                return #ok(canisterDataPackagedForExport);
-            };
+        let ?profile = userProfilesMap_v2.get(caller) else { return #err(#NotAuthorized) };
+        let managerCanister : Manager.Manager = actor(daoMetaData_v4.managerCanisterPrincipal);
+        let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v4.treasuryCanisterPrincipal);
+        let neuronsDataArray = await treasuryCanister.getNeuronsDataArray();
+        let profilesMetaData = CanisterManagementMethods.getProfilesMetaData(userProfilesMap_v2);
+        let currentVersions = await managerCanister.getCurrentVersions();
+        let canisterDataPackagedForExport = {
+            daoMetaData_v4 with 
+            proposals = GovernanceHelperMethods.tallyAllProposalVotes({proposals = proposalsMap; neuronsDataArray; founder = daoMetaData_v4.founder; userProfilesMap = userProfilesMap_v2;});
+            isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v4);
+            currentCyclesBalance_backend = Cycles.balance();
+            journalCount = userProfilesMap_v2.size();
+            profilesMetaData;
+            releaseVersionInstalled = currentVersions.currentVersionInstalled.number;
+            releaseVersionLoaded = currentVersions.currentVersionLoaded.number;
         };
+        return #ok(canisterDataPackagedForExport);
     };
 
     public composite query({caller}) func getTreasuryData() : async Result.Result<TreasuryTypes.TreasuryDataExport, MainTypes.Error> {
@@ -489,7 +484,7 @@ shared actor class User() = this {
         let neuronsDataArray = await treasuryCanister.getNeuronsDataArray();
         let proposer = Principal.toText(caller); let votes = [(proposer, {adopt = true})];
         let timeInitiated = Time.now(); 
-        let votingWindowInNanoseconds = 60 * 1_000_000_000;
+        let votingWindowInNanoseconds = 3 * 24 * 60 * 60 * 1_000_000_000;
         let timeVotingPeriodEnds = timeInitiated + votingWindowInNanoseconds;
         let executed = false;
         var voteTally = {yay = Nat64.fromNat(0); nay = Nat64.fromNat(0); total = Nat64.fromNat(0);};

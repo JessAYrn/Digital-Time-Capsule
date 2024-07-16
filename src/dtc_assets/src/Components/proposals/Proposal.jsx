@@ -15,6 +15,17 @@ import { copyText } from "../../functionsAndConstants/walletFunctions/CopyWallet
 import { NEURON_TOPICS } from "./CreateProposalForm";
 import { AppContext } from "../../Context";
 import { homePageTypes } from "../../reducers/homePageReducer";
+import { PROPOSAL_ACTIONS } from "./utils";
+const CYCLES_COSTS_ASSOCIATED_WITH_ACTIONS = [
+    PROPOSAL_ACTIONS.FollowNeuron,
+    PROPOSAL_ACTIONS.IncreaseNeuron,
+    PROPOSAL_ACTIONS.SpawnNeuron,
+    PROPOSAL_ACTIONS.DisburseNeuron,
+    PROPOSAL_ACTIONS.DissolveNeuron,
+    PROPOSAL_ACTIONS.IncreaseDissolveDelay,
+    PROPOSAL_ACTIONS.FollowNeuron,
+    PROPOSAL_ACTIONS.CreateNeuron,
+];
 
 const Proposal = (props) => {
 
@@ -275,13 +286,18 @@ const Proposal = (props) => {
                         </Grid>
                     </Grid>
                 }
-                { timeRemainingInNanoseconds < 0 && 
+                { timeRemainingInNanoseconds < 0 ? 
                     <DataField
                         label={'Executed: '}
                         text={`${executed ? "True" : "False"}`}
                         onClick={() => {}}
                         disabled={true}
-                    /> 
+                    /> :
+                    <>
+                        { CYCLES_COSTS_ASSOCIATED_WITH_ACTIONS.includes(actionType) &&
+                            <Typography marginTop={"30px"} variant="h6">NOTE: This action consumes ~ 0.25 T cycles from the treasury canister</Typography>
+                        }
+                    </>
                 }
             </Grid>
             <ModalComponent
