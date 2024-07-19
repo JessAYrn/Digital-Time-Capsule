@@ -108,7 +108,6 @@ const Router = (props) => {
                     });
                 } else {
                     let bigTextmsg = "Request For Access Has Been Sent To The DAO Admin";
-                    let smallTextMsg =  "If you are the owner of this application, attempting to log in for the first time, you must log in using the wallet that owns the Utility NFT that corresponds to this server.";
                     let response = await actorState.backendActor.requestApproval();
                     if(response.err) { 
                         bigTextmsg = Object.keys(response.err)[0];
@@ -120,7 +119,6 @@ const Router = (props) => {
                         bigText: bigTextmsg, 
                         Icon: DoNotDisturbOnIcon,
                         flexDirection: "column",
-                        smallText: smallTextMsg,
                         components: [
                             {
                                 Component: Typography,
@@ -133,10 +131,7 @@ const Router = (props) => {
                                 props: {
                                     text: `${principal}`,
                                     Icon: ContentCopyIcon,
-                                    onClick: async () => { 
-                                        const promise = new Promise ((res, rej) => {setModalIsOpen(false); res()});
-                                        promise.then(() => { copyText(principal); });
-                                    }
+                                    onClick: () => copyText(principal)
                                 }
                             },
                         ]

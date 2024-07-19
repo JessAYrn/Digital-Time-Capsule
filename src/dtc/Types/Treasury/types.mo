@@ -70,11 +70,6 @@ module{
 
     public type UsersTreasuryDataMap = HashMap.HashMap<PrincipalAsText, UserTreasuryData>;
 
-    public type TransferIcpToNeuronResponse = {
-        #ok : {public_key: Blob; selfAuthPrincipal: Principal;};
-        #err: Error;
-    };
-
     public type TreasuryDataExport = {
         neurons : { icp: NeuronsDataArray; };
         usersTreasuryDataArray : UsersTreasuryDataArrayExport;
@@ -147,7 +142,7 @@ module{
         args: ?Governance.ManageNeuron;
         expectedResponseType: ExpectedRequestResponses;
         selfAuthPrincipal: Principal;
-        public_key: Blob;
+        publicKey: Blob;
     };
 
     public type PendingActionsMap = HashMap.HashMap<Text, PendingAction>;

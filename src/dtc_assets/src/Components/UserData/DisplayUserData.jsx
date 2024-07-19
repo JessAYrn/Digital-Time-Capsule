@@ -48,10 +48,7 @@ const DisplayUserData = (props) => {
                     buttonIcon={ContentCopyIcon}
                     buttonColor="secondary"
                     labelColor="#343434"
-                    onClick={() => {
-                        const promise = new Promise ((res, rej) => {setAnchorEl(null); res()});
-                        promise.then(() => { copyText(userPrincipal); });
-                    }}
+                    onClick={() => copyText(userPrincipal)}
                 />
             </Grid>
             <Grid
@@ -71,10 +68,7 @@ const DisplayUserData = (props) => {
                     buttonIcon={ContentCopyIcon}
                     buttonColor="secondary"
                     labelColor="#343434"
-                    onClick={() => {
-                        const promise = new Promise ((res, rej) => {setAnchorEl(null); res()});
-                        promise.then(() => { copyText(rootCanisterPrincipal); });
-                    }}
+                    onClick={() => copyText(rootCanisterPrincipal)}
                 />
             </Grid>
         </Grid>

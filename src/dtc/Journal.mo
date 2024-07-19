@@ -25,69 +25,21 @@ import AnalyticsTypes "Types/Analytics/types";
 shared(msg) actor class Journal () = this {
 
     private stable var journalArray : [(Nat, JournalTypes.JournalEntry)] = [];
-
-    private var journalMap : JournalTypes.JournalMap = HashMap.fromIter<Nat, JournalTypes.JournalEntry>(
-        Iter.fromArray(journalArray), 
-        Iter.size(Iter.fromArray(journalArray)), 
-        Nat.equal,
-        Hash.hash
-    );
-
+    private var journalMap : JournalTypes.JournalMap = HashMap.fromIter<Nat, JournalTypes.JournalEntry>(Iter.fromArray(journalArray), Iter.size(Iter.fromArray(journalArray)), Nat.equal, Hash.hash);
     private stable var filesArray : [(Text, JournalTypes.File)] = [];
-
-    private var filesMap : JournalTypes.FileMap = HashMap.fromIter<Text, JournalTypes.File>(
-        Iter.fromArray(filesArray), 
-        Iter.size(Iter.fromArray(filesArray)), 
-        Text.equal,
-        Text.hash
-    );
-
+    private var filesMap : JournalTypes.FileMap = HashMap.fromIter<Text, JournalTypes.File>(Iter.fromArray(filesArray), Iter.size(Iter.fromArray(filesArray)), Text.equal, Text.hash);
     private stable var txHistoryArray : [(Nat, JournalTypes.Transaction)] = [];
-
-    private var txHistoryMap : JournalTypes.TxHistoryMap = HashMap.fromIter<Nat, JournalTypes.Transaction>(
-        Iter.fromArray(txHistoryArray), 
-        Iter.size(Iter.fromArray(txHistoryArray)), 
-        Nat.equal,
-        Hash.hash
-    );
-
+    private var txHistoryMap : JournalTypes.TxHistoryMap = HashMap.fromIter<Nat, JournalTypes.Transaction>(Iter.fromArray(txHistoryArray), Iter.size(Iter.fromArray(txHistoryArray)), Nat.equal, Hash.hash);
     private stable var balancesArray : AnalyticsTypes.BalancesArray = [];
-
-    private var balancesMap : AnalyticsTypes.BalancesMap = HashMap.fromIter<Text, AnalyticsTypes.Balances>(
-        Iter.fromArray(balancesArray), 
-        Iter.size(Iter.fromArray(balancesArray)), 
-        Text.equal,
-        Text.hash
-    );
-    
-    private stable var biography : JournalTypes.Bio = {
-        name = "";
-        dob = null;
-        pob = "";
-        dedications = "";
-        preface = "";
-        photos = [];
-    };
-
-    private stable var tokenBalances : JournalTypes.Balances = {
-        icp = {e8s = 0};
-        eth = {e8s = 0};
-        btc = {e8s = 0};
-        icp_staked = {e8s = 0};
-    };
-
+    private var balancesMap : AnalyticsTypes.BalancesMap = HashMap.fromIter<Text, AnalyticsTypes.Balances>(Iter.fromArray(balancesArray), Iter.size(Iter.fromArray(balancesArray)), Text.equal, Text.hash);
+    private stable var biography : JournalTypes.Bio = { name = ""; dob = null; pob = ""; dedications = ""; preface = ""; photos = []; };
+    private stable var tokenBalances : JournalTypes.Balances = { icp = {e8s = 0}; eth = {e8s = 0}; btc = {e8s = 0}; icp_staked = {e8s = 0}; };
     private stable var notifications : NotificationsTypes.Notifications = [];
-
     private stable var mainCanisterId_ : Text = "null"; 
-
     private stable var journalEntryIndex : Nat = 0;
-
     private var txFee : Nat64 = 10_000;
-
     private var capacity = 1_500_000_000_000;
-
     private var balance = Cycles.balance();
-
     private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
 
     public shared({caller}) func wallet_balance() : async Nat {

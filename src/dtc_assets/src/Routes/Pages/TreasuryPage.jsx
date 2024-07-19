@@ -92,10 +92,7 @@ const TreasuryPage = (props) => {
             Component: ButtonField,
             props: {
               text: "Copy To Clipboard",
-              onClick: () => {
-                const promise = new Promise ((res, rej) => {setModalIsOpen(false); res()});
-                promise.then(() => { copyText(treasuryState.daoIcpAccountId); });
-              },
+              onClick: () => copyText(treasuryState.daoIcpAccountId),
               iconSize: 'small',
               Icon: ContentCopyIcon,
             }

@@ -40,37 +40,16 @@ import Governance "NNS/Governance";
 shared actor class User() = this {
 
     private stable var daoMetaData_v4 : MainTypes.DaoMetaData_V4 = MainTypes.DEFAULT_DAO_METADATA_V4;
-
     private stable var userProfilesArray_v2 : [(Principal, MainTypes.UserProfile_V2)] = [];
-
     private stable var proposalIndex: Nat = 0;
-
     private stable var proposalsArray: MainTypes.Proposals = [];
-
     private stable var xdr_permyriad_per_icp: Nat64 = 1;
-
     private stable var frontEndCanisterBalance: Nat = 1;
-
     private stable var quorum: Float = 0.125;
-
     private var maxNumberDaoMembers : Nat = 250;
-
-    private var userProfilesMap_v2 : MainTypes.UserProfilesMap_V2 = HashMap.fromIter<Principal, MainTypes.UserProfile_V2>(
-        Iter.fromArray(userProfilesArray_v2), 
-        Iter.size(Iter.fromArray(userProfilesArray_v2)), 
-        Principal.equal,
-        Principal.hash
-    );
-
-    private var proposalsMap : MainTypes.ProposalsMap = HashMap.fromIter<Nat, MainTypes.Proposal>(
-        Iter.fromArray(proposalsArray), 
-        Iter.size(Iter.fromArray(proposalsArray)), 
-        Nat.equal,
-        Hash.hash
-    );
-
+    private var userProfilesMap_v2 : MainTypes.UserProfilesMap_V2 = HashMap.fromIter<Principal, MainTypes.UserProfile_V2>(Iter.fromArray(userProfilesArray_v2), Iter.size(Iter.fromArray(userProfilesArray_v2)), Principal.equal, Principal.hash);
+    private var proposalsMap : MainTypes.ProposalsMap = HashMap.fromIter<Nat, MainTypes.Proposal>(Iter.fromArray(proposalsArray), Iter.size(Iter.fromArray(proposalsArray)), Nat.equal, Hash.hash);
     private stable var startIndexForBlockChainQuery : Nat64 = 7_356_011;
-
     private let ic : IC.Self = actor "aaaaa-aa";
 
     let {recurringTimer; setTimer} = Timer;
@@ -246,8 +225,6 @@ shared actor class User() = this {
 
     private func createTreasuryCanister(): async () {
         let {treasuryCanisterPrincipal} = await CanisterManagementMethods.createTreasuryCanister(daoMetaData_v4);
-        let treasuryCanister : Treasury.Treasury = actor(treasuryCanisterPrincipal);
-        ignore treasuryCanister.createTreasuryData(Principal.fromActor(treasuryCanister));
         daoMetaData_v4 := {daoMetaData_v4 with treasuryCanisterPrincipal};
     };
     
@@ -607,10 +584,10 @@ shared actor class User() = this {
                 ignore await treasuryCanister.manageNeuron(args, Principal.fromText(proposer));
             };
             case(#SpawnNeuron({neuronId; percentage_to_spawn;})){
-                let treasurySelfAuthPrincipal = await treasuryCanister.getSelfAuthenticatingPrincipal();
+                let {selfAuthPrincipal = treasurySelfAuthPrincipal} = await treasuryCanister.getSelfAuthenticatingPrincipalAndPublicKey();
                 let spawnArgs : Governance.Spawn = {
                     percentage_to_spawn : ?Nat32 = ?percentage_to_spawn;
-                    new_controller : ?Principal = ?Principal.fromText(treasurySelfAuthPrincipal);
+                    new_controller : ?Principal = ?treasurySelfAuthPrincipal;
                     nonce : ?Nat64 = ?Nat64.fromNat(0);
                 };
                 let args : Governance.ManageNeuron = {

@@ -26,86 +26,50 @@ import SyncronousHelperMethods "Modules/Treasury/SyncronousHelperMethods";
 
 shared actor class Treasury (principal : Principal) = this {
 
+    private stable var selfAuthenticatingPrincipal : ?Principal = null;
+    private stable var public_key : ?Blob = null;
     private stable let ownerCanisterId : Text = Principal.toText(principal);
-
-    private stable var sumOfAllTokenBalances : AnalyticsTypes.Balances = {
-        icp = {e8s = 0};
-        icp_staked = {e8s = 0};
-        eth = {e8s = 0};
-        btc = {e8s = 0};
-    };
-
+    private stable var sumOfAllTokenBalances : AnalyticsTypes.Balances = { icp = {e8s = 0}; icp_staked = {e8s = 0}; eth = {e8s = 0}; btc = {e8s = 0}; };
     private stable var actionLogsArray : TreasuryTypes.ActionLogsArray = [];
-
     private var actionLogsMap : TreasuryTypes.ActionLogsMap = HashMap.HashMap<Text, Text>(1, Text.equal, Text.hash);
-
     private stable var pendingActionsArray : TreasuryTypes.PendingActionArray = [];
-
-    private var pendingActionsMap : TreasuryTypes.PendingActionsMap = 
-    HashMap.fromIter<Text, TreasuryTypes.PendingAction>(
-        Iter.fromArray(pendingActionsArray), 
-        Iter.size(Iter.fromArray(pendingActionsArray)), 
-        Text.equal,
-        Text.hash
-    );
-
+    private var pendingActionsMap : TreasuryTypes.PendingActionsMap = HashMap.fromIter<Text, TreasuryTypes.PendingAction>( Iter.fromArray(pendingActionsArray), Iter.size(Iter.fromArray(pendingActionsArray)), Text.equal, Text.hash );
     private stable var usersTreasuryDataArray : TreasuryTypes.UsersTreasuryDataArray = [];
-
-    private var usersTreasuryDataMap : TreasuryTypes.UsersTreasuryDataMap = 
-    HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryData>(
-        Iter.fromArray(usersTreasuryDataArray), 
-        Iter.size(Iter.fromArray(usersTreasuryDataArray)), 
-        Text.equal,
-        Text.hash
-    );
-
+    private var usersTreasuryDataMap : TreasuryTypes.UsersTreasuryDataMap = HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryData>(Iter.fromArray(usersTreasuryDataArray), Iter.size(Iter.fromArray(usersTreasuryDataArray)), Text.equal, Text.hash);
     private stable var subaccountRegistryArray : TreasuryTypes.SubaccountRegistryArray = [];
-
-    private var subaccountRegistryMap : TreasuryTypes.SubaccountRegistryMap = HashMap.fromIter<Blob, TreasuryTypes.SubaccountsMetaData>(
-        Iter.fromArray(subaccountRegistryArray), 
-        Iter.size(Iter.fromArray(subaccountRegistryArray)), 
-        Blob.equal,
-        Blob.hash
-    );
-
+    private var subaccountRegistryMap : TreasuryTypes.SubaccountRegistryMap = HashMap.fromIter<Blob, TreasuryTypes.SubaccountsMetaData>( Iter.fromArray(subaccountRegistryArray), Iter.size(Iter.fromArray(subaccountRegistryArray)), Blob.equal, Blob.hash );
     private stable var balancesHistoryArray : AnalyticsTypes.BalancesArray = [];
-
-    private var balancesHistoryMap : AnalyticsTypes.BalancesMap = HashMap.fromIter<Text, AnalyticsTypes.Balances>(
-        Iter.fromArray(balancesHistoryArray), 
-        Iter.size(Iter.fromArray(balancesHistoryArray)), 
-        Text.equal,
-        Text.hash
-    );
-
+    private var balancesHistoryMap : AnalyticsTypes.BalancesMap = HashMap.fromIter<Text, AnalyticsTypes.Balances>(Iter.fromArray(balancesHistoryArray), Iter.size(Iter.fromArray(balancesHistoryArray)), Text.equal, Text.hash);
     private stable var memoToNeuronIdArray : TreasuryTypes.MemoToNeuronIdArray = [];
-
-    private var memoToNeuronIdMap : TreasuryTypes.MemoToNeuronIdMap = HashMap.fromIter<TreasuryTypes.Memo, TreasuryTypes.NeuronId>(
-        Iter.fromArray(memoToNeuronIdArray), 
-        Iter.size(Iter.fromArray(memoToNeuronIdArray)), 
-        Nat.equal,
-        Hash.hash
-    );
-
+    private var memoToNeuronIdMap : TreasuryTypes.MemoToNeuronIdMap = HashMap.fromIter<TreasuryTypes.Memo, TreasuryTypes.NeuronId>(Iter.fromArray(memoToNeuronIdArray), Iter.size(Iter.fromArray(memoToNeuronIdArray)), Nat.equal, Hash.hash);
     private stable var neuronDataArray : TreasuryTypes.NeuronsDataArray = [];
-
-    private var neuronDataMap : TreasuryTypes.NeuronsDataMap = HashMap.fromIter<TreasuryTypes.NeuronIdAsText, TreasuryTypes.NeuronData>(
-        Iter.fromArray(neuronDataArray), 
-        Iter.size(Iter.fromArray(neuronDataArray)), 
-        Text.equal,
-        Text.hash
-    );
-
+    private var neuronDataMap : TreasuryTypes.NeuronsDataMap = HashMap.fromIter<TreasuryTypes.NeuronIdAsText, TreasuryTypes.NeuronData>(Iter.fromArray(neuronDataArray), Iter.size(Iter.fromArray(neuronDataArray)), Text.equal, Text.hash);
     private var capacity = 1000000000000;
-
     private let txFee : Nat64 = 10_000;
-
     private let ledger : Ledger.Interface  = actor(Ledger.CANISTER_ID);
-
     private stable var neuronMemo : Nat64 = 0;
 
-    let {recurringTimer;} = Timer;
+    let {recurringTimer; setTimer} = Timer;
 
-    // need to complete this function. it should create a new subaccount for a given principal only if that principal does not already have a subaccount.
+    private func getSelfAuthenticatingPrincipalAndPublicKey_(): {selfAuthPrincipal: Principal; publicKey: Blob;} {
+        let ?publicKey = public_key else { Debug.trap("Public key not populated."); };
+        let ?selfAuthPrincipal = selfAuthenticatingPrincipal else Debug.trap("Self authenticating principal not populated.");
+        return {selfAuthPrincipal; publicKey};
+    };
+
+    public query({caller}) func getSelfAuthenticatingPrincipalAndPublicKey(): async {selfAuthPrincipal: Principal; publicKey: Blob;} {
+        if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
+        getSelfAuthenticatingPrincipalAndPublicKey_();
+    };
+
+    public shared({caller}) func populateSelfAuthenticatingPrincipalAndPublicKey(): async () {
+        if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
+        let {public_key = publicKey} = await EcdsaHelperMethods.getPublicKey(null);
+        let {principalAsBlob} = Account.getSelfAuthenticatingPrincipal(publicKey);
+        public_key := ?publicKey;
+        selfAuthenticatingPrincipal := ?Principal.fromBlob(principalAsBlob);
+    };
+
     private func createTreasuryData_(principal: Principal) : async () {
         var newSubaccount: Account.Subaccount = Account.defaultSubaccount();
         if(not Principal.equal(principal, Principal.fromActor(this))){
@@ -185,7 +149,6 @@ shared actor class Treasury (principal : Principal) = this {
         balancesHistoryMap.put(currentTime, sumOfAllTokenBalances);
     };
 
-    // no need to change this
     public query({caller}) func readBalancesHistory() : async AnalyticsTypes.BalancesArray{
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         return Iter.toArray(balancesHistoryMap.entries());
@@ -201,26 +164,16 @@ shared actor class Treasury (principal : Principal) = this {
         tresasuryIcpAccountId(subaccount);
     };
 
-    // no need to change this
-    public shared({caller}) func getSelfAuthenticatingPrincipal(): async Text {
-         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
-        let {public_key} = await EcdsaHelperMethods.getPublicKey(null);
-        let {principalAsBlob} = Account.getSelfAuthenticatingPrincipal(public_key);
-        Principal.toText(Principal.fromBlob(principalAsBlob));
-    };
-
     public shared func getNeuronSubAccountId(): async Text {
-        let {public_key} = await EcdsaHelperMethods.getPublicKey(null);
-        let {principalAsBlob} = Account.getSelfAuthenticatingPrincipal(public_key);
-        let principal = Principal.fromBlob(principalAsBlob);
-        let treasuryNeuronSubaccount = Account.neuronSubaccount(principal, 0);
+        let {selfAuthPrincipal} = getSelfAuthenticatingPrincipalAndPublicKey_();
+        let treasuryNeuronSubaccount = Account.neuronSubaccount(selfAuthPrincipal, 0);
         Hex.encode(Blob.toArray(treasuryNeuronSubaccount));
     };
 
     public shared({caller}) func createNeuron({amount: Nat64; contributor: Principal}) : async Result.Result<(), TreasuryTypes.Error> {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         actionLogsMap.put(Int.toText(Time.now()),"Creating Neuron, amount: " # Nat64.toText(amount) # ", contributor: " # Principal.toText(contributor));
-
+        let {selfAuthPrincipal; publicKey} = getSelfAuthenticatingPrincipalAndPublicKey_();
         let response = await AsyncronousHelperMethods.createNeuron(
             neuronDataMap,
             usersTreasuryDataMap,
@@ -229,7 +182,7 @@ shared actor class Treasury (principal : Principal) = this {
             memoToNeuronIdMap,
             updateTokenBalances,
             transformFn,
-            {amount; contributor; neuronMemo;}
+            {amount; contributor; neuronMemo; selfAuthPrincipal; publicKey; },
         );
         switch(response){
             case(#ok()) { 
@@ -250,7 +203,7 @@ shared actor class Treasury (principal : Principal) = this {
 
     public shared({caller}) func increaseNeuron({amount: Nat64; neuronId: Nat64; contributor: Principal}) : async Result.Result<() , TreasuryTypes.Error>{
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
-
+        let {selfAuthPrincipal; publicKey} = getSelfAuthenticatingPrincipalAndPublicKey_();
         let response = await AsyncronousHelperMethods.increaseNeuron(
             neuronDataMap,
             usersTreasuryDataMap,
@@ -259,7 +212,7 @@ shared actor class Treasury (principal : Principal) = this {
             memoToNeuronIdMap,
             updateTokenBalances,
             transformFn,
-            {amount; neuronId; contributor;}
+            {amount; neuronId; contributor; selfAuthPrincipal; publicKey;}
         );
         switch(response){
             case(#ok()) return #ok(());
@@ -274,6 +227,7 @@ shared actor class Treasury (principal : Principal) = this {
     public shared({caller}) func manageNeuron( args: Governance.ManageNeuron, proposer: Principal): async Result.Result<() , TreasuryTypes.Error>{
         let canisterId =  Principal.fromActor(this);
         if(Principal.toText(caller) != Principal.toText(canisterId) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
+        let {selfAuthPrincipal; publicKey} = getSelfAuthenticatingPrincipalAndPublicKey_();
         let response = await AsyncronousHelperMethods.manageNeuron(
             neuronDataMap,
             usersTreasuryDataMap,
@@ -284,7 +238,9 @@ shared actor class Treasury (principal : Principal) = this {
             transformFn,
             args,
             proposer,
-            Principal.fromActor(this)
+            Principal.fromActor(this),
+            selfAuthPrincipal,
+            publicKey
         );
         switch(response){
             case(#ok()) return #ok(());
@@ -442,7 +398,12 @@ shared actor class Treasury (principal : Principal) = this {
         actionLogsArray := [];
         subaccountRegistryArray := [];
 
+        ignore setTimer<system>(#nanoseconds(1), func (): async () {
+            await populateSelfAuthenticatingPrincipalAndPublicKey();
+        });
+
         ignore recurringTimer<system>(#seconds(24 * 60 * 60), func (): async () { 
+            let {selfAuthPrincipal; publicKey} = getSelfAuthenticatingPrincipalAndPublicKey_();
             await AsyncronousHelperMethods.refreshNeuronsData(
                 neuronDataMap,
                 usersTreasuryDataMap,
@@ -450,7 +411,9 @@ shared actor class Treasury (principal : Principal) = this {
                 actionLogsMap,
                 memoToNeuronIdMap,
                 updateTokenBalances,
-                transformFn
+                transformFn,
+                selfAuthPrincipal,
+                publicKey
             )
         });
     };    

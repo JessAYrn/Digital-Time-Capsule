@@ -19,47 +19,16 @@ import CanisterManagementMethods "/Modules/Manager/CanisterManagementMethods";
 shared(msg) actor class Manager (principal : Principal) = this {
 
     private stable var currentVersionLoaded : {number: Nat; isStable: Bool} = {number = 170; isStable = true;};
-
     private stable var currentVersionInstalled : {number: Nat; isStable: Bool} = currentVersionLoaded;
-
     private stable var nextStableVersion : {number: Nat; isStable: Bool} = currentVersionLoaded;
-
     private stable var previousVersionInstalled : {number: Nat; isStable: Bool} = currentVersionLoaded;
-
     private stable var mainCanisterId : Text = Principal.toText(principal); 
-
     private var capacity = 1000000000000;
-
     private let dummyPrincipal : Principal = Principal.fromText("2vxsx-fae");
-
     private let dummyBlob = Principal.toBlob(dummyPrincipal);
-
-    private let dummyWasmData : WasmStore.WasmData = {
-        dev = dummyPrincipal;
-        wasmModule = dummyBlob;
-    };
-
-    private stable var release : WasmStore.Release = {
-        assets = [];
-        frontend = dummyWasmData;
-        backend = dummyWasmData;
-        journal = dummyWasmData;
-        manager = dummyWasmData;
-        treasury = dummyWasmData;
-    };
-
-    private stable var loadProgress : {
-        totalNumberOfAssets : Nat;
-        numberOfAssetsLoaded : Nat;
-        totalNumberOfModules : Nat;
-        numberOfModulesLoaded : Nat;
-    } = {
-        totalNumberOfAssets = 0;
-        numberOfAssetsLoaded = 0;
-        totalNumberOfModules = 5;
-        numberOfModulesLoaded = 0;
-    };
-
+    private let dummyWasmData : WasmStore.WasmData = { dev = dummyPrincipal; wasmModule = dummyBlob; };
+    private stable var release : WasmStore.Release = { assets = []; frontend = dummyWasmData; backend = dummyWasmData; journal = dummyWasmData; manager = dummyWasmData; treasury = dummyWasmData; };
+    private stable var loadProgress : { totalNumberOfAssets : Nat; numberOfAssetsLoaded : Nat; totalNumberOfModules : Nat; numberOfModulesLoaded : Nat; } = { totalNumberOfAssets = 0; numberOfAssetsLoaded = 0; totalNumberOfModules = 5; numberOfModulesLoaded = 0; };
     private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
 
     public shared({caller}) func wallet_balance() : async Nat {

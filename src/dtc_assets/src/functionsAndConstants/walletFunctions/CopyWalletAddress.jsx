@@ -4,13 +4,13 @@ export const copyText = (address) => {
     document.body.appendChild(addressTextArea);
 
     addressTextArea.setAttribute("id", "addressTextArea_id");
+    addressTextArea.setAttribute("value", address);
 
-    document.getElementById("addressTextArea_id").value = address;
-
+    const copyText = document.getElementById("addressTextArea_id");
 
     addressTextArea.select();
 
-    document.execCommand("copy");
+    navigator.clipboard.writeText(copyText.value);
 
     document.body.removeChild(addressTextArea);
 

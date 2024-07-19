@@ -25,64 +25,48 @@ module {
     let FORK : Nat64 = 1;
     let LABELED : Nat64 = 2;
     let LEAF : Nat64 = 3;
-
     public type Path = [Blob];
-
     public type Tree = [Value.Value];
-
     let ledger : Ledger.Interface = actor (Ledger.CANISTER_ID);
     let txFee : Nat64 = 10_000;
-
     public type TransformFnSignature = query { response : IC.http_response; context: Blob } -> async IC.http_response;
 
-    public func transferIcpToNeuronWithMemo(amount: Nat64, memo: Nat64, senderSubaccount: Account.Subaccount): 
-    async TreasuryTypes.TransferIcpToNeuronResponse {
-        let {public_key} = await EcdsaHelperMethods.getPublicKey(null);
-        let {principalAsBlob} = Account.getSelfAuthenticatingPrincipal(public_key);
-        let principal = Principal.fromBlob(principalAsBlob);
-        let treasuryNeuronSubaccount = Account.neuronSubaccount(principal, memo);
+    public func transferIcpToNeuronWithMemo( amount: Nat64, memo: Nat64, senderSubaccount: Account.Subaccount, selfAuthPrincipal: Principal): async {amountSent: Nat64} {
+        let treasuryNeuronSubaccount = Account.neuronSubaccount(selfAuthPrincipal, memo);
         let treasuryNeuronAccountId = Account.accountIdentifier(Principal.fromText(Governance.CANISTER_ID), treasuryNeuronSubaccount);
-
+        let amountSent = amount - txFee;
         let res = await ledger.transfer({
           memo = memo;
           from_subaccount = ?senderSubaccount;
           to = treasuryNeuronAccountId;
-          amount = { e8s = amount - txFee };
+          amount = { e8s = amountSent };
           fee = { e8s = txFee };
           created_at_time = ?{ timestamp_nanos = Nat64.fromNat(Int.abs(Time.now())) };
         });
-
         switch(res){
-            case(#Ok(_)) { return #ok({public_key; selfAuthPrincipal = principal}); };
-            case(#Err(_)) { return #err (#TxFailed)};
+            case(#Ok(_)) { return {amountSent} };
+            case(#Err(_)) { throw Error.reject("Transfer failed") };
         };
     };
 
-    public func transferIcpToNeuronWithSubaccount(amount: Nat64, neuronSubaccount: Blob, senderSubaccount: Account.Subaccount): 
-    async TreasuryTypes.TransferIcpToNeuronResponse {
-        let {public_key} = await EcdsaHelperMethods.getPublicKey(null);
-        let {principalAsBlob} = Account.getSelfAuthenticatingPrincipal(public_key);
-        let principal = Principal.fromBlob(principalAsBlob);
+    public func transferIcpToNeuronWithSubaccount(amount: Nat64, neuronSubaccount: Blob, senderSubaccount: Account.Subaccount): async {amountSent: Nat64} {
         let treasuryNeuronAccountId = Account.accountIdentifier(Principal.fromText(Governance.CANISTER_ID), neuronSubaccount);
-
+        let amountSent = amount - txFee;
         let res = await ledger.transfer({
           memo = 0;
           from_subaccount = ?senderSubaccount;
           to = treasuryNeuronAccountId;
-          amount = { e8s = amount - txFee };
+          amount = { e8s = amountSent };
           fee = { e8s = txFee };
           created_at_time = ?{ timestamp_nanos = Nat64.fromNat(Int.abs(Time.now())) };
         });
-
         switch(res){
-            case(#Ok(_)) { return #ok({public_key; selfAuthPrincipal = principal}); };
-            case(#Err(_)) { return #err (#TxFailed)};
+            case(#Ok(_)) { return {amountSent}};
+            case(#Err(_)) { throw Error.reject("Transfer failed") };
         };
     };
 
-    public func manageNeuron( args: Governance.ManageNeuron, selfAuthPrincipal: Principal, public_key: Blob, transformFn: TransformFnSignature): 
-    async {response: IC.http_response; requestId: Blob; ingress_expiry: Nat64;}{
-    
+    public func manageNeuron( args: Governance.ManageNeuron, selfAuthPrincipal: Principal, public_key: Blob, transformFn: TransformFnSignature): async {response: IC.http_response; requestId: Blob; ingress_expiry: Nat64;}{
         let sender = selfAuthPrincipal;
         let canister_id: Principal = Principal.fromText(Governance.CANISTER_ID);
         let method_name: Text = "manage_neuron";
@@ -105,15 +89,8 @@ module {
         return {response; requestId; ingress_expiry;};
     };
 
-    public func getNeuronData(
-        args: TreasuryTypes.NeuronId, 
-        transformFn: TransformFnSignature, 
-        methodType: TreasuryTypes.NeuronDataMethodTypes
-    ):
-    async {response: IC.http_response; requestId: Blob; ingress_expiry: Nat64;}{
-        let {public_key} = await EcdsaHelperMethods.getPublicKey(null);
-        let {principalAsBlob} = Account.getSelfAuthenticatingPrincipal(public_key);
-        let sender = Principal.fromBlob(principalAsBlob);
+    public func getNeuronData(args: TreasuryTypes.NeuronId, selfAuthPrincipal: Principal, public_key: Blob, transformFn: TransformFnSignature, methodType: TreasuryTypes.NeuronDataMethodTypes): async {response: IC.http_response; requestId: Blob; ingress_expiry: Nat64;}{
+        let sender = selfAuthPrincipal;
         let canister_id: Principal = Principal.fromText(Governance.CANISTER_ID);
         let method_name = switch(methodType){ case(#GetFullNeuronResponse(_)) { "get_full_neuron" }; case(#GetNeuronInfoResponse(_)) { "get_neuron_info" };};
         let request = EcdsaHelperMethods.prepareCanisterCallViaEcdsa({sender; public_key; canister_id; args = to_candid(args); method_name;});
@@ -135,10 +112,8 @@ module {
         return {response; requestId; ingress_expiry;};
     };
 
-    public func readRequestState(paths: [[Blob]], transformFn: TransformFnSignature): async IC.http_response {
-        let {public_key} = await EcdsaHelperMethods.getPublicKey(null);
-        let {principalAsBlob} =  Account.getSelfAuthenticatingPrincipal(public_key);
-        let sender = Principal.fromBlob(principalAsBlob);
+    public func readRequestState(paths: [[Blob]], selfAuthPrincipal: Principal, public_key: Blob, transformFn: TransformFnSignature): async IC.http_response {
+        let sender = selfAuthPrincipal;
         let canister_id: Principal = Principal.fromText(Governance.CANISTER_ID);
         let request = EcdsaHelperMethods.prepareCanisterReadStateCallViaEcdsa({sender; canister_id; paths; public_key;});
         let {envelopeCborEncoded} = await EcdsaHelperMethods.getSignedEnvelopeReadState(request);
@@ -156,12 +131,11 @@ module {
         return response;
     };
 
-    public func readRequestResponse(cachedRequestInfo: TreasuryTypes.ReadRequestInput, transformFn: TransformFnSignature): 
-    async TreasuryTypes.RequestResponses {
+    public func readRequestResponse(cachedRequestInfo: TreasuryTypes.ReadRequestInput, selfAuthPrincipal: Principal, public_key: Blob, transformFn: TransformFnSignature): async TreasuryTypes.RequestResponses {
         let {requestId; expiry; expectedResponseType} = cachedRequestInfo;
         if(Nat64.toNat(expiry) < Time.now()) { throw Error.reject("Request expired") };
         let path = [Text.encodeUtf8("request_status"),requestId, Text.encodeUtf8("reply")];
-        let {body} = await readRequestState([path], transformFn);
+        let {body} = await readRequestState([path], selfAuthPrincipal, public_key, transformFn);
         switch(from_response_blob(body)){
             case (#err(e)) { return throw Error.reject("Certificate retrieval unsuccessful") };
             case(#ok(cert)){
@@ -278,9 +252,7 @@ module {
     };
 
     public class Certificate(tree: Tree) = {
-
         public func lookup(path: Path) : ?Blob = lookup_path(path, tree, 0, path.size());
-
         func lookup_path(path: Path, tree: Tree, offset: Nat, size: Nat): ?Blob {
             let #majorType0( tag ) = tree[0] else { Debug.trap("error in lookup_path() function at position: 0") };
             if ( size == 0 ){
@@ -294,7 +266,6 @@ module {
                 case null Debug.trap("error in lookup_path() function at position: 3")
             }
         };
-
         func flatten_forks(t: Tree): [Tree] {
             let #majorType0( tag ) = t[0] else { return [] };
             if( tag == EMPTY ) []
@@ -307,7 +278,6 @@ module {
             }
             else [t]
         };
-
         func find_label(key: Blob, trees: [Tree]): ?Tree {
             if ( trees.size() == 0 ) return null;
             for ( tree in trees.vals() ){
