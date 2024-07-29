@@ -2,7 +2,9 @@ import Iter "mo:base/Iter";
 import HashMap "mo:base/HashMap";
 import Text "mo:base/Text";
 import Nat64 "mo:base/Nat64";
+import Int64 "mo:base/Int64";
 import Debug "mo:base/Debug";
+import Float "mo:base/Float";
 import TreasuryTypes "../../Types/Treasury/types";
 import Account "../../Serializers/Account";
 
@@ -22,12 +24,16 @@ module{
             Text.equal,
             Text.hash
         );
-        for((contributor, neuronStakeInfo) in contributionsMap.entries()){
+        for((contributor, neuronStakeInfo) in Iter.fromArray(contributions)){
             let {stake_e8s = userTotalStake} = neuronStakeInfo;
-            let userVotingPower = (userTotalStake * neuronTotalVotingPower) / neuronTotalStake;
+            let userTotalStakeAsFloat = Float.fromInt64(Int64.fromNat64(userTotalStake));
+            let neuronTotalStakeAsFloat = Float.fromInt64(Int64.fromNat64(neuronTotalStake));
+            let neuronTotalVotingPowerAsFloat = Float.fromInt64(Int64.fromNat64(neuronTotalVotingPower));
+            let userVotingPowerAsFloat = Float.floor(userTotalStakeAsFloat * (neuronTotalVotingPowerAsFloat / neuronTotalStakeAsFloat));
+            let userVotingPower = Int64.toNat64(Float.toInt64(userVotingPowerAsFloat));
             contributionsMap.put(contributor, {neuronStakeInfo with voting_power = userVotingPower});
-            neuronDataMap.put(neuronId, {neuronData with contributions = Iter.toArray(contributionsMap.entries())});
         };
+        neuronDataMap.put(neuronId, {neuronData with contributions = Iter.toArray(contributionsMap.entries())});
     };
 
     public func computeTotalStakeDepositAndVotingPower(
@@ -82,11 +88,7 @@ module{
         updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount = userNeuronStakeInfo.stake_e8s + delta; neuronId;});
     };
 
-    public func finalizeNewlyCreatedNeuronStakeInfo(
-        placeHolderKey: Text,  
-        newNeuronId: Nat64,
-        neuronDataMap: TreasuryTypes.NeuronsDataMap
-    ): () {
+    public func finalizeNewlyCreatedNeuronStakeInfo( placeHolderKey: Text, newNeuronId: Nat64, neuronDataMap: TreasuryTypes.NeuronsDataMap): () {
         let ?neuronData = neuronDataMap.remove(placeHolderKey) else { return };
         neuronDataMap.put(Nat64.toText(newNeuronId), neuronData);
     };

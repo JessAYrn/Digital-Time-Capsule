@@ -223,7 +223,7 @@ module{
             Cycles.add<system>(1_000_000_000_000);
             ignore ic.deposit_cycles({ canister_id = Principal.fromText(daoMetaData.managerCanisterPrincipal); });
         };
-        if(treasuryCanisterStatus.cycles < 20_000_000_000_000) {
+        if(treasuryCanisterStatus.cycles < 10_000_000_000_000) {
             Cycles.add<system>(1_000_000_000_000);
             ignore ic.deposit_cycles({ canister_id = Principal.fromText(daoMetaData.treasuryCanisterPrincipal); });
         };
