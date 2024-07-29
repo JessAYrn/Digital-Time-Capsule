@@ -4,7 +4,7 @@ import { Typography } from "@mui/material";
 import { fromE8s, round2Decimals, secondsToHours, hoursToDays, daysToMonths } from "../../functionsAndConstants/Utils";
 import Graph from "../Fields/Chart";
 import { CHART_TYPES, GRAPH_DATA_SETS, GRAPH_DISPLAY_LABELS } from "../../functionsAndConstants/Constants";
-import { getUserNeuronContribution, mapNeuronContributionsDataToChartFormat, neuronContributionsTableColumns, mapNeuronContributionsToTableRows } from "../../mappers/treasuryPageMapperFunctions";
+import { getUserNeuronContribution, mapDataMapToChartFormat, neuronContributionsTableColumns, mapNeuronContributionsToTableRows } from "../../mappers/treasuryPageMapperFunctions";
 import ButtonField from "../Fields/Button";
 import AddIcon from '@mui/icons-material/Add';
 import HourglassTopIcon from '@mui/icons-material/HourglassTop';
@@ -203,11 +203,13 @@ const DisplayNeuron = (props) => {
                         <Graph
                             withoutPaper={true}
                             width={"25%"}
+                            height={"400px"}
                             hideButton2={true}
                             type={CHART_TYPES.pie}
-                            defaultLabel={GRAPH_DISPLAY_LABELS.stake}
-                            inputData={mapNeuronContributionsDataToChartFormat(contributions)}
+                            defaultLabel={GRAPH_DISPLAY_LABELS.stake_e8s}
+                            inputData={mapDataMapToChartFormat(contributions, GRAPH_DATA_SETS.neuronContributions)}
                             defaultDataSetName={GRAPH_DATA_SETS.neuronContributions}
+                            maintainAspectRatio={false}
                         />  
                     </Grid>
                     <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} xs={12} padding={0} flexDirection={"column"} width={"100%"}>

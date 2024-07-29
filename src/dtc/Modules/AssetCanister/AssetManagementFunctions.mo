@@ -1,7 +1,6 @@
 import Result "mo:base/Result";
 import Option "mo:base/Option";
 import AssetCanister "../../Types/AssetCanister/types";
-import MainTypes "../../Types/Main/types";
 import Buffer "mo:base/Buffer";
 import HashMap "mo:base/HashMap";
 import Iter "mo:base/Iter";
@@ -56,7 +55,7 @@ module{
             };
             index += 1;
         };
-        return buffer.toArray();
+        return Buffer.toArray(buffer);
     };
 
     public func getAssetMetaDataFromListArray(inputKey: AssetCanister.Key, list: [AssetCanister.ListResultObject]): 

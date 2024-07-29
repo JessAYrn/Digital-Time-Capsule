@@ -1,14 +1,13 @@
 export const actorTypes={
     SET_BACKEND_ACTOR: "SET_BACKEND_ACTOR",
-    SET_USER_OBJECT: "SET_USER_OBJECT" 
+    SET_USER_CREDENTIALS: "SET_USER_CREDENTIALS" 
 }
 
 
 export const actorInitialState={
-    userObject :{
+    userCredentials :{
         principal: null,
-        agent: undefined,
-        provider: null
+        agent: undefined
     },
     backendActor: undefined,
 }
@@ -22,8 +21,8 @@ const changeValue=(state = actorInitialState, action)=>{
         return {
             ...state
         }
-    case actorTypes.SET_USER_OBJECT:
-        state.userObject = payload;
+    case actorTypes.SET_USER_CREDENTIALS:
+        state.userCredentials = payload;
         return {
             ...state
         }

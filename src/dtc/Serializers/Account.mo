@@ -8,6 +8,9 @@ import Nat64 "mo:base/Nat64";
 import SHA224 "../Hash/SHA224";
 import SHA256 "../Hash/SHA256";
 import CRC32 "./CRC32";
+import Buffer "mo:base/Buffer";
+import Debug "mo:base/Debug";
+import Random "mo:base/Random";
 
 module {
   // 32-byte array.
@@ -31,6 +34,18 @@ module {
 
   public func defaultSubaccount() : Subaccount {
     Blob.fromArrayMut(Array.init(32, 0 : Nat8))
+  };
+
+  public func getRandomSubaccount() : async Subaccount {
+    let random = Random.Finite(await Random.blob());
+
+    let ArrayBuffer = Buffer.Buffer<Nat8>(32);
+    while (ArrayBuffer.size() < 32) {
+      let ?byte: ?Nat8 = random.byte() else { Debug.trap("Failed to get random byte") };
+      ArrayBuffer.add(byte);
+    };
+
+    Blob.fromArray(Buffer.toArray(ArrayBuffer))
   };
 
   public func accountIdentifier(principal: Principal, subaccount: Subaccount) : AccountIdentifier {

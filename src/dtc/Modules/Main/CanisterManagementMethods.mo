@@ -1,4 +1,3 @@
-import Trie "mo:base/Trie";
 import Iter "mo:base/Iter";
 import Buffer "mo:base/Buffer";
 import Result "mo:base/Result";
@@ -7,20 +6,15 @@ import JournalTypes "../../Types/Journal/types";
 import Principal "mo:base/Principal";
 import Cycles "mo:base/ExperimentalCycles";
 import MainTypes "../../Types/Main/types";
-import Journal "../../Journal";
-import Ledger "../../NNS/Ledger";
 import Blob "mo:base/Blob";
 import Text "mo:base/Text";
-import Hash "mo:base/Hash";
 import Array "mo:base/Array";
 import Nat "mo:base/Nat";
 import Option "mo:base/Option";
-import Error "mo:base/Error";
 import IC "../../Types/IC/types";
 import Manager "../../Manager";
 import AssetCanister "../../Types/AssetCanister/types";
 import HashMap "mo:base/HashMap";
-import AssetManagementFunctions "../../Modules/AssetCanister/AssetManagementFunctions";
 import WasmStore "../../Types/WasmStore/types";
 import Hex "../../Serializers/Hex";
 import NftCollection "../../Types/NftCollection/types";
@@ -31,9 +25,6 @@ import Float "mo:base/Float";
 import Int "mo:base/Int";
 import Timer "mo:base/Timer";
 import Treasury "../../Treasury";
-import GovernanceHelperMethods "GovernanceHelperMethods";
-import TreasuryTypes "../../Types/Treasury/types";
-import NnsCyclesMinting "../../NNS/NnsCyclesMinting";
 
 module{
 
@@ -43,25 +34,23 @@ module{
 
     private let nanosecondsInADay: Float = 86400000000000;
 
-    private let nanosecondsInAMinute: Float = 60000000000;
-
-    public func getPrincipalsList( profilesMap : MainTypes.UserProfilesMap): 
+    public func getPrincipalsList( profilesMap : MainTypes.UserProfilesMap_V2): 
     async [Principal] {
         var index = 0;
         let numberOfProfiles = profilesMap.size();
         let profilesIter = profilesMap.entries();
         let profilesArray = Iter.toArray(profilesIter);
-        let ArrayBuffer = Buffer.Buffer<(Principal)>(1);
+        let arrayBuffer = Buffer.Buffer<(Principal)>(1);
         while(index < numberOfProfiles){
-            let (userPrincipal, profile) = profilesArray[index];
-            ArrayBuffer.add(userPrincipal);
+            let (userPrincipal, _) = profilesArray[index];
+            arrayBuffer.add(userPrincipal);
             index += 1;
         };
-        return ArrayBuffer.toArray();
+        return Buffer.toArray(arrayBuffer);
     };
 
-    public func grantAccess( principals: [Text], daoMetaData: MainTypes.DaoMetaData_V3) : 
-    async Result.Result<(MainTypes.DaoMetaData_V3), JournalTypes.Error> {
+    public func grantAccess( principals: [Text], daoMetaData: MainTypes.DaoMetaData_V4) : 
+    async Result.Result<(MainTypes.DaoMetaData_V4), JournalTypes.Error> {
         let { requestsForAccess; } = daoMetaData;
 
         var index = 0;
@@ -79,11 +68,11 @@ module{
             index += 1;
         };
         let newRequestsArray = Iter.toArray(requestsHashMap.entries());
-        let updatedDaoMetaData: MainTypes.DaoMetaData_V3 = { daoMetaData with requestsForAccess = newRequestsArray; }; 
+        let updatedDaoMetaData: MainTypes.DaoMetaData_V4 = { daoMetaData with requestsForAccess = newRequestsArray; }; 
         return #ok(updatedDaoMetaData);
     };
 
-    public func updateApprovalStatus( principals: [Text], profilesMap: MainTypes.UserProfilesMap, newApprovalStatuse: Bool) : (){
+    public func updateApprovalStatus( principals: [Text], profilesMap: MainTypes.UserProfilesMap_V2, newApprovalStatuse: Bool) : (){
 
         var index = 0;
         while(index < principals.size()){
@@ -92,16 +81,9 @@ module{
             switch(userProfile){
                 case null{};
                 case(?profile){
-                    let updatedProfile : MainTypes.UserProfile = {
-                        canisterId = profile.canisterId;
-                        email = profile.email;
-                        userName = profile.userName;
-                        userPrincipal = profile.userPrincipal;
-                        accountId = profile.accountId;
+                    let updatedProfile : MainTypes.UserProfile_V2 = {
+                        profile with 
                         approved = ?newApprovalStatuse;
-                        treasuryMember = profile.treasuryMember;
-                        treasuryContribution = profile.treasuryContribution;
-                        monthsSpentAsTreasuryMember = profile.monthsSpentAsTreasuryMember;
                     };
                     profilesMap.put(principal, updatedProfile);
                 };
@@ -110,8 +92,8 @@ module{
         };
     };
 
-    public func requestApproval (caller: Principal, daoMetaData:  MainTypes.DaoMetaData_V3) : 
-    Result.Result<MainTypes.DaoMetaData_V3, JournalTypes.Error>{
+    public func requestApproval (caller: Principal, daoMetaData:  MainTypes.DaoMetaData_V4) : 
+    Result.Result<MainTypes.DaoMetaData_V4, JournalTypes.Error>{
         if(daoMetaData.acceptingRequests == false){ return #err(#NotAcceptingRequests); };
         let{ requestsForAccess; } = daoMetaData;
         let callerIdAsText = Principal.toText(caller);
@@ -125,12 +107,12 @@ module{
 
         requestsHashMap.put(callerIdAsText, false);
         let newRequestsArray = Iter.toArray(requestsHashMap.entries());
-        let updatedDaoMetaData : MainTypes.DaoMetaData_V3 = { daoMetaData with requestsForAccess = newRequestsArray;};
+        let updatedDaoMetaData : MainTypes.DaoMetaData_V4 = { daoMetaData with requestsForAccess = newRequestsArray;};
         return #ok(updatedDaoMetaData);
     };
 
-    public func removeFromRequestsList( principals: [Text], daoMetaData: MainTypes.DaoMetaData_V3) : 
-    async MainTypes.DaoMetaData_V3 {
+    public func removeFromRequestsList( principals: [Text], daoMetaData: MainTypes.DaoMetaData_V4) : 
+    async MainTypes.DaoMetaData_V4 {
         let { requestsForAccess; } = daoMetaData;
         
         var index = 0;
@@ -148,26 +130,26 @@ module{
             index += 1;
         };
         let newRequestsArray = Iter.toArray(requestsHashMap.entries());
-        let updatedDaoMetaData: MainTypes.DaoMetaData_V3 = { daoMetaData with requestsForAccess = newRequestsArray; }; 
+        let updatedDaoMetaData: MainTypes.DaoMetaData_V4 = { daoMetaData with requestsForAccess = newRequestsArray; }; 
         return updatedDaoMetaData;
     };
 
-    public func canConfigureApp(daoMetaData: MainTypes.DaoMetaData_V3) : Bool {
+    public func canConfigureApp(daoMetaData: MainTypes.DaoMetaData_V4) : Bool {
         if(
             daoMetaData.backEndPrincipal == "Null" or
             daoMetaData.frontEndPrincipal == "Null" or 
             daoMetaData.managerCanisterPrincipal == "Null" or 
-            daoMetaData.treasuryCanisterPrincipal == "Null" 
-            or (daoMetaData.admin.size() == 0 and daoMetaData.nftId == 0)
+            daoMetaData.treasuryCanisterPrincipal == "Null" or 
+            (daoMetaData.founder == "Null" and daoMetaData.nftId == null)
         ) return true;
         return false;
     };
 
-    public func createManagerCanister(daoMetaData: MainTypes.DaoMetaData_V3) : async {managerCanisterPrincipal: Text} {
+    public func createManagerCanister(daoMetaData: MainTypes.DaoMetaData_V4) : async {managerCanisterPrincipal: Text} {
         if(daoMetaData.managerCanisterPrincipal == "Null"){ 
-            Cycles.add(1_000_000_000_000);
+            Cycles.add<system>(1_000_000_000_000);
             let managerCanister = await Manager.Manager(Principal.fromText(daoMetaData.backEndPrincipal));
-            let amountAccepted = await managerCanister.wallet_receive();
+            ignore await managerCanister.wallet_receive();
             ignore addControllers([Principal.toText(Principal.fromActor(managerCanister))], Principal.fromActor(managerCanister));
             let managerCanisterPrincipal = Principal.toText(Principal.fromActor(managerCanister));
             return {managerCanisterPrincipal};
@@ -175,11 +157,13 @@ module{
         return {managerCanisterPrincipal = daoMetaData.managerCanisterPrincipal};
     };
     
-    public func createTreasuryCanister(daoMetaData: MainTypes.DaoMetaData_V3 ) : async {treasuryCanisterPrincipal: Text} {
+    public func createTreasuryCanister(daoMetaData: MainTypes.DaoMetaData_V4 ) : async {treasuryCanisterPrincipal: Text} {
         if(daoMetaData.treasuryCanisterPrincipal == "Null"){
-            Cycles.add(1_000_000_000_000);
+            Cycles.add<system>(1_000_000_000_000);
             let treasuryCanister = await Treasury.Treasury(Principal.fromText(daoMetaData.backEndPrincipal));
-            let amountAccepted = await treasuryCanister.wallet_receive();
+            ignore await treasuryCanister.wallet_receive();
+            ignore treasuryCanister.populateSelfAuthenticatingPrincipalAndPublicKey();
+            ignore treasuryCanister.createTreasuryData(Principal.fromActor(treasuryCanister));
             let treasuryCanisterPrincipal_ = Principal.fromActor(treasuryCanister);
             ignore addControllers([daoMetaData.managerCanisterPrincipal], treasuryCanisterPrincipal_);
             let treasuryCanisterPrincipal = Principal.toText(treasuryCanisterPrincipal_);
@@ -188,7 +172,7 @@ module{
         return {treasuryCanisterPrincipal = daoMetaData.treasuryCanisterPrincipal};
     };
 
-    public func createUiCanister(daoMetaData: MainTypes.DaoMetaData_V3): async {frontEndPrincipal: Text} {
+    public func createUiCanister(daoMetaData: MainTypes.DaoMetaData_V4): async {frontEndPrincipal: Text} {
         if(daoMetaData.frontEndPrincipal == "Null"){
             let settings = ?{
                 controllers = ?[
@@ -199,20 +183,20 @@ module{
                 memory_allocation = ?0;
                 compute_allocation = ?0;
             };
-            Cycles.add(1_000_000_000_000);
+            Cycles.add<system>(1_000_000_000_000);
             let {canister_id} = await ic.create_canister({settings = settings; sender_canister_version = null;});
             let {setTimer} = Timer;
-            let timerId = setTimer(#seconds(60 * 3), func (): async (){ await installUiModuleAndAssets({daoMetaData with frontEndPrincipal = Principal.toText(canister_id)}); });
+            ignore setTimer<system>(#seconds(60 * 3), func (): async (){ await installUiModuleAndAssets({daoMetaData with frontEndPrincipal = Principal.toText(canister_id)}); });
             return {frontEndPrincipal = Principal.toText(canister_id)};
         };
         return {frontEndPrincipal = daoMetaData.frontEndPrincipal};
     };
 
-    private func installUiModuleAndAssets(daoMetaData: MainTypes.DaoMetaData_V3): async () {
+    private func installUiModuleAndAssets(daoMetaData: MainTypes.DaoMetaData_V4): async () {
         let backendCanisterId = Principal.fromText(daoMetaData.backEndPrincipal);
         let managerCanisterId = Principal.fromText(daoMetaData.managerCanisterPrincipal);
         let managerCanister: Manager.Manager = actor(daoMetaData.managerCanisterPrincipal);
-        let operations = await managerCanister.installCode_frontendCanister(daoMetaData, #install);
+        ignore await managerCanister.installCode_frontendCanister(daoMetaData, #install);
         let uiCanister: AssetCanister.Interface = actor(daoMetaData.frontEndPrincipal);
         ignore uiCanister.authorize(backendCanisterId);
         ignore uiCanister.grant_permission({ to_principal = backendCanisterId; permission = #Commit; });
@@ -223,47 +207,7 @@ module{
         ignore uiCanister.grant_permission({ to_principal = managerCanisterId; permission = #Prepare; });
     };
 
-    public func getCanisterData(
-        callerId: Principal, 
-        daoMetaData: MainTypes.DaoMetaData_V3, 
-        cyclesBalance_backend: Nat, 
-        profilesMap : MainTypes.UserProfilesMap,
-        proposals : MainTypes.ProposalsMap
-    ) : async Result.Result<(MainTypes.CanisterDataExport), JournalTypes.Error> {
-
-        let profile = profilesMap.get(callerId);
-        
-        switch(profile){
-            case null{ return #err(#NotAuthorized); };
-            case ( ? existingProfile){
-                let treasuryCanister: Treasury.Treasury = actor(daoMetaData.treasuryCanisterPrincipal);
-                let neuronsDataArray = await treasuryCanister.getNeuronsDataArray();
-                let managerCanister : Manager.Manager = actor(daoMetaData.managerCanisterPrincipal);
-                let profilesApprovalStatus = getProfilesMetaData(profilesMap);
-                let frontendPrincipal = Principal.fromText(daoMetaData.frontEndPrincipal);
-                let managerPrincipal = Principal.fromText(daoMetaData.managerCanisterPrincipal);
-                let cyclesBalance_frontend = await getCyclesBalance(frontendPrincipal);
-                let currentCyclesBalance_manager = await getCyclesBalance(managerPrincipal);
-                let isAdmin = getIsAdmin(callerId, daoMetaData);
-                let currentVersion = await managerCanister.getCurrentVersions();
-                let canisterDataPackagedForExport = {
-                    daoMetaData with 
-                    proposals = GovernanceHelperMethods.tallyAllProposalVotes({proposals; neuronsDataArray});
-                    journalCount = profilesMap.size();
-                    currentCyclesBalance_frontend = cyclesBalance_frontend;
-                    currentCyclesBalance_backend = cyclesBalance_backend;
-                    currentCyclesBalance_manager = currentCyclesBalance_manager;
-                    profilesMetaData = profilesApprovalStatus;
-                    isAdmin;
-                    releaseVersionInstalled = currentVersion.currentVersionInstalled.number;
-                    releaseVersionLoaded = currentVersion.currentVersionLoaded.number;
-                };
-                return #ok(canisterDataPackagedForExport);
-            }
-        }
-    };
-
-    private func refillCanisterCycles(daoMetaData: MainTypes.DaoMetaData_V3, profilesMap : MainTypes.UserProfilesMap) : async () {
+    private func refillCanisterCycles(daoMetaData: MainTypes.DaoMetaData_V4, profilesMap : MainTypes.UserProfilesMap_V2) : async () {
         let numberOfProfiles = profilesMap.size();
         let profilesIter = profilesMap.entries();
         let profilesArray = Iter.toArray(profilesIter);
@@ -271,32 +215,32 @@ module{
         let frontendCanisterStatus = await ic.canister_status({ canister_id = Principal.fromText(daoMetaData.frontEndPrincipal) });
         let managerCanisterStatus = await ic.canister_status({ canister_id = Principal.fromText(daoMetaData.managerCanisterPrincipal)});
         let treasuryCanisterStatus = await ic.canister_status({ canister_id = Principal.fromText(daoMetaData.treasuryCanisterPrincipal)});
-        if(frontendCanisterStatus.cycles < 2_000_000_000_000){
-            Cycles.add(1_000_000_000_000);
+        if(frontendCanisterStatus.cycles < 5_000_000_000_000){
+            Cycles.add<system>(1_000_000_000_000);
             ignore ic.deposit_cycles({ canister_id = Principal.fromText(daoMetaData.frontEndPrincipal); });
         };
-        if(managerCanisterStatus.cycles < 2_000_000_000_000) {
-            Cycles.add(1_000_000_000_000);
+        if(managerCanisterStatus.cycles < 10_000_000_000_000) {
+            Cycles.add<system>(1_000_000_000_000);
             ignore ic.deposit_cycles({ canister_id = Principal.fromText(daoMetaData.managerCanisterPrincipal); });
         };
-        if(treasuryCanisterStatus.cycles < 2_000_000_000_000) {
-            Cycles.add(1_000_000_000_000);
+        if(treasuryCanisterStatus.cycles < 10_000_000_000_000) {
+            Cycles.add<system>(1_000_000_000_000);
             ignore ic.deposit_cycles({ canister_id = Principal.fromText(daoMetaData.treasuryCanisterPrincipal); });
         };
         while(index < numberOfProfiles){
-            let (principal, {canisterId; approved; }) = profilesArray[index];
+            let (_, {canisterId; approved; }) = profilesArray[index];
             let approved_ = Option.get(approved, false);
             let {cycles;} = await ic.canister_status({ canister_id = canisterId });
             if(approved_ and cycles < 1_000_000_000_000){
-                Cycles.add(250_000_000_000);
+                Cycles.add<system>(250_000_000_000);
                 ignore ic.deposit_cycles({ canister_id = canisterId });
             };
             index += 1;
         };
     };
 
-    public func heartBeat(currentCylcesBalance: Nat, daoMetaData : MainTypes.DaoMetaData_V3, profilesMap: MainTypes.UserProfilesMap): 
-    async MainTypes.DaoMetaData_V3{
+    public func heartBeat(currentCylcesBalance: Nat, daoMetaData : MainTypes.DaoMetaData_V4, profilesMap: MainTypes.UserProfilesMap_V2): 
+    async MainTypes.DaoMetaData_V4{
         let managerCanister : Manager.Manager = actor(daoMetaData.managerCanisterPrincipal);
         ignore managerCanister.notifyNextStableRelease();
         ignore refillCanisterCycles(daoMetaData, profilesMap);
@@ -348,18 +292,19 @@ module{
         return cyclesBalance;
     };
 
-    public func getProfilesMetaData(profilesMap: MainTypes.UserProfilesMap) : MainTypes.ProfilesMetaData {
+    public func getProfilesMetaData(profilesMap: MainTypes.UserProfilesMap_V2) : MainTypes.ProfilesMetaData {
         let profilesMapEntries = profilesMap.entries();
         let profilesMapEntriesArray = Iter.toArray(profilesMapEntries);
-        let profilesApprovalStatus = Array.map<(Principal, MainTypes.UserProfile), MainTypes.ProfileMetaData>(
+        let profilesApprovalStatus = Array.map<(Principal, MainTypes.UserProfile_V2), MainTypes.ProfileMetaData>(
             profilesMapEntriesArray, 
-            func (x: (Principal, MainTypes.UserProfile)) : MainTypes.ProfileMetaData {
-                let (principal, {canisterId; approved}) = x;
+            func (x: (Principal, MainTypes.UserProfile_V2)) : MainTypes.ProfileMetaData {
+                let (principal, {canisterId; approved; userName}) = x;
                 let isApproved = Option.get(approved, false);
                 return {
                     approvalStatus = isApproved; 
                     userPrincipal = Principal.toText(principal); 
-                    canisterId = Principal.toText(canisterId) 
+                    canisterId = Principal.toText(canisterId);
+                    userName;
                 };
             }
         );
@@ -376,7 +321,7 @@ module{
             memory_allocation = ?settings.memory_allocation;
             compute_allocation = ?settings.compute_allocation;
         };
-        let result = await ic.update_settings({
+        await ic.update_settings({
             canister_id = canisterPrincipal;
             settings = updatedSettings;
             sender_canister_version = null;
@@ -406,11 +351,11 @@ module{
             memory_allocation = ?settings.memory_allocation;
             compute_allocation = ?settings.compute_allocation;
         };
-        let result = await ic.update_settings({ canister_id = canisterPrincipal; settings = updatedSettings; sender_canister_version = null;});
+        await ic.update_settings({ canister_id = canisterPrincipal; settings = updatedSettings; sender_canister_version = null;});
     };
 
-    public func toggleSupportMode(daoMetaData: MainTypes.DaoMetaData_V3) : 
-    async MainTypes.DaoMetaData_V3{
+    public func toggleSupportMode(daoMetaData: MainTypes.DaoMetaData_V4) : 
+    async MainTypes.DaoMetaData_V4{
 
         let { 
             supportMode; backEndPrincipal; defaultControllers; managerCanisterPrincipal; frontEndPrincipal; treasuryCanisterPrincipal
@@ -418,21 +363,21 @@ module{
         let supportMode_updated = not supportMode;
         if(supportMode_updated){
             let techSupportPrincipals = [ Support.TechSupportPrincipal1, Support.TechSupportPrincipal2 ];
-            let result1 = ignore addControllers( techSupportPrincipals, Principal.fromText(backEndPrincipal) );
-            let result2 = ignore addControllers( techSupportPrincipals, Principal.fromText(managerCanisterPrincipal) );
-            let result3 = ignore addControllers( techSupportPrincipals, Principal.fromText(treasuryCanisterPrincipal) );
-            let result4 = ignore addControllers( techSupportPrincipals, Principal.fromText(frontEndPrincipal) );
+            ignore addControllers( techSupportPrincipals, Principal.fromText(backEndPrincipal) );
+            ignore addControllers( techSupportPrincipals, Principal.fromText(managerCanisterPrincipal) );
+            ignore addControllers( techSupportPrincipals, Principal.fromText(treasuryCanisterPrincipal) );
+            ignore addControllers( techSupportPrincipals, Principal.fromText(frontEndPrincipal) );
         } else {
-            let result1 = ignore setToDefualtControllerSettings( Principal.fromText(backEndPrincipal), defaultControllers );
-            let result2 = ignore setToDefualtControllerSettings( Principal.fromText(managerCanisterPrincipal), defaultControllers );
-            let result3 = ignore setToDefualtControllerSettings( Principal.fromText(treasuryCanisterPrincipal), defaultControllers );
-            let result4 = ignore setToDefualtControllerSettings( Principal.fromText(frontEndPrincipal), defaultControllers );
+            ignore setToDefualtControllerSettings( Principal.fromText(backEndPrincipal), defaultControllers );
+            ignore setToDefualtControllerSettings( Principal.fromText(managerCanisterPrincipal), defaultControllers );
+            ignore setToDefualtControllerSettings( Principal.fromText(treasuryCanisterPrincipal), defaultControllers );
+            ignore setToDefualtControllerSettings( Principal.fromText(frontEndPrincipal), defaultControllers );
         };
-        let updatedDaoMetaData: MainTypes.DaoMetaData_V3 = { daoMetaData with supportMode = supportMode_updated; };
+        let updatedDaoMetaData: MainTypes.DaoMetaData_V4 = { daoMetaData with supportMode = supportMode_updated; };
         return updatedDaoMetaData;
     };
 
-    public func getAdminMap(daoMetaData: MainTypes.DaoMetaData_V3) : HashMap.HashMap<Text, MainTypes.AdminData>{
+    public func getAdminMap(daoMetaData: MainTypes.DaoMetaData_V4) : HashMap.HashMap<Text, MainTypes.AdminData>{
         let adminList = HashMap.fromIter<Text, MainTypes.AdminData>(
             Iter.fromArray(daoMetaData.admin), 
             Iter.size(Iter.fromArray(daoMetaData.admin)), 
@@ -442,7 +387,7 @@ module{
         return adminList;
     };
 
-    public func addAdmin(principal: Principal, daoMetaData: MainTypes.DaoMetaData_V3) : MainTypes.DaoMetaData_V3 {
+    public func addAdmin(principal: Principal, daoMetaData: MainTypes.DaoMetaData_V4) : MainTypes.DaoMetaData_V4 {
         let {admin} = daoMetaData;
         let adminHashMap = HashMap.fromIter<Text, MainTypes.AdminData>(
             Iter.fromArray(admin), 
@@ -454,7 +399,7 @@ module{
         return {daoMetaData with admin = Iter.toArray(adminHashMap.entries())};
     };
 
-    public func removeAdmin(principal: Principal, daoMetaData: MainTypes.DaoMetaData_V3) : MainTypes.DaoMetaData_V3 {
+    public func removeAdmin(principal: Principal, daoMetaData: MainTypes.DaoMetaData_V4) : MainTypes.DaoMetaData_V4 {
         let {admin} = daoMetaData;
         let adminHashMap = HashMap.fromIter<Text, MainTypes.AdminData>(
             Iter.fromArray(admin), 
@@ -466,14 +411,15 @@ module{
         return {daoMetaData with admin = Iter.toArray(adminHashMap.entries())};
     };
 
-    public func getIsAdmin(princiapl: Principal, daoMetaData: MainTypes.DaoMetaData_V3) : Bool {
+    public func getIsAdmin(princiapl: Principal, daoMetaData: MainTypes.DaoMetaData_V4) : Bool {
         let adminMap = getAdminMap(daoMetaData);
         let adminData = adminMap.get(Principal.toText(princiapl));
         if(adminData == null){ return false; };
         return true;
     };
 
-    public func verifyUserHasAdminNft( principal: Principal, daoMetaData: MainTypes.DaoMetaData_V3 ): async Bool {
+    public func verifyUserHasAdminNft( principal: Principal, daoMetaData: MainTypes.DaoMetaData_V4 ): async Bool {
+        let ?nftId_ = daoMetaData.nftId else { return false; };
         let accountIdBlob = Account.accountIdentifier(principal, Account.defaultSubaccount());
         let accountIdArray = Blob.toArray(accountIdBlob);
         let accountIdText = Hex.encode(accountIdArray);
@@ -488,7 +434,7 @@ module{
                     let (tokenIndex, _, _) = tokenData;
                     var tokenIndexAsNat = Nat32.toNat(tokenIndex);
                     tokenIndexAsNat += 1;
-                    if(tokenIndexAsNat == daoMetaData.nftId){
+                    if(tokenIndexAsNat == nftId_){
                         return true;
                     };
                     index += 1;
@@ -497,17 +443,5 @@ module{
             };
             case(#err(e)){ return false; };
         };  
-    };
-
-    private  func key(x: Principal) : Trie.Key<Principal> {
-        return {key = x; hash = Principal.hash(x)};
-    };
-
-    private func natKey(x: Nat) : Trie.Key<Nat> {
-        return {key = x; hash = Hash.hash(x)}
-    };
-
-    private func textKey(x: Text) : Trie.Key<Text> {
-        return {key = x; hash = Text.hash(x)}
     };
 }

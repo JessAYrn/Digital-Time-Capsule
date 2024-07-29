@@ -10,6 +10,8 @@ import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { AppContext } from "../../Context";
+import DisplayUserData from '../UserData/DisplayUserData';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 
 
@@ -22,8 +24,6 @@ export const NavBar = (props) => {
         journalDispatch,
         walletState,
         walletDispatch,
-        accountState,
-        accountDispatch,
         homePageState,
         homePageDispatch,
         notificationsState,
@@ -65,7 +65,6 @@ export const NavBar = (props) => {
         { text: "Treasury", onClick: () => changeRoute(NAV_LINKS.treasury) },
         { text: "Dashboard", onClick: () => changeRoute(NAV_LINKS.dashboard) },
         // { text: "Community", onClick: () => changeRoute(NAV_LINKS.groupJournal) },
-        // { text: "Account", onClick: () => changeRoute(NAV_LINKS.account) }
     ];
 
     const journalTabMenuItemProps=[
@@ -122,6 +121,18 @@ export const NavBar = (props) => {
                     menuItemProps={journalTabMenuItemProps}
                 />
             }
+            <MenuField
+                MenuIcon={AccountCircleIcon}
+                xs={2}
+                md={1}
+                display={"flex"}
+                alignItems={"center"}
+                justifyContent={"center"}
+                disabled={isLoading}
+                active={true}
+                color={"custom"}
+                Component={DisplayUserData}
+            />
             <MenuField
                 MenuIcon={NotificationIcon}
                 xs={2}

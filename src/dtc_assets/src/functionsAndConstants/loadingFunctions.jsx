@@ -1,56 +1,31 @@
 import { mapApiObjectToFrontEndJournalEntriesObject } from "../mappers/journalPageMappers";
-import { toHexString, nanoSecondsToMiliSeconds } from "./Utils";
+import { toHexString, nanoSecondsToMiliSeconds, shortenHexString } from "./Utils";
 import { generateQrCode } from "./walletFunctions/GenerateQrCode";
 import { mapBackendCanisterDataToFrontEndObj } from "../mappers/dashboardMapperFunctions";
 import { mapBalancesDataFromApiToFrontend, mapBackendTreasuryDataToFrontEndObj } from "../mappers/treasuryPageMapperFunctions";
 import { getFileUrl_fromApi } from "../Components/Fields/fileManger/FileManagementTools";
-import DoNotDisturbOnIcon from '@mui/icons-material/DoNotDisturbOn';
-import ButtonField from "../Components/Fields/Button";
 
 
-export const loadAllDataIntoReduxStores = async (states, dispatchFunctions, types, stateHasBeenRecovered) => {
-    //doesn't reload data if the data has already been recovered
-    if(stateHasBeenRecovered) return; 
+export const loadAllDataIntoReduxStores = async (states, dispatchFunctions, types) => {
+    let loadSuccessful = true;
 
-    let {walletState, homePageState, journalState, actorState, accountState, notificationsState, treasuryState} = states;
-    let {journalDispatch, walletDispatch, homePageDispatch, accountDispatch, notificationsDispatch, treasuryDispatch} = dispatchFunctions;
-    let {journalTypes, walletTypes, homePageTypes, accountTypes, notificationsTypes, treasuryTypes } = types;
-    let accountCreationAttemptResults;
+    let {walletState, homePageState, journalState, actorState, notificationsState, treasuryState} = states;
+    let {journalDispatch, walletDispatch, homePageDispatch, notificationsDispatch, treasuryDispatch} = dispatchFunctions;
+    let {journalTypes, walletTypes, homePageTypes, notificationsTypes, treasuryTypes } = types;
     //checks to see if user has an account. If not, then it attemptes to make an account, if 
     //the account creation is unsuccessful, then it returns
     let hasAccount = await actorState.backendActor.hasAccount();
-    if(!hasAccount) accountCreationAttemptResults = await actorState.backendActor.create();
-    if(accountCreationAttemptResults && "err" in accountCreationAttemptResults){
-        return {
-            openModal: true, 
-            bigText: "Not Authorized To Enter", 
-            Icon: DoNotDisturbOnIcon,
-            displayConnectButton: true,
-            smallText: "If you are the owner of this application, attempting to log in for the first time, you must log in using the wallet that owns the Utility NFT that corresponds to this server.",
-            components: [{
-                Component: ButtonField,
-                props: {
-                    active: true,
-                    text: "Request Access",
-                    onClick: () => {
-                        actorState.backendActor.requestApproval();
-                        alert("Your request for access has been sent.");
-                    }
-                }
-            }]
-        }
-    }
-
+    if(!hasAccount) { loadSuccessful = false; return loadSuccessful;}
     //calls the backend and loads the retrieved data into the appropriate redux stores.
-    let promises = [];
-    if(!walletState.dataHasBeenLoaded) promises.push(loadWalletData(actorState, walletDispatch, walletTypes));
-    if(!homePageState.dataHasBeenLoaded) promises.push(loadCanisterData(actorState, homePageDispatch, homePageTypes));
-    if(!journalState.dataHasBeenLoaded) promises.push(loadJournalData(actorState, journalDispatch, journalTypes));
-    if(!accountState. dataHasBeenLoaded) promises.push(loadAccountData(actorState, accountDispatch, accountTypes));
-    if(!notificationsState.dataHasBeenLoaded) promises.push(loadNotificationsData(actorState, notificationsDispatch, notificationsTypes));
-    if(!treasuryState.dataHasBeenLoaded) promises.push(loadTreasuryData(actorState, treasuryDispatch, treasuryTypes));
-    await Promise.all(promises);
-    return {}
+    let promises = [
+        loadWalletData(actorState, walletDispatch, walletTypes),
+        loadCanisterData(actorState, homePageDispatch, homePageTypes),
+        loadJournalData(actorState, journalDispatch, journalTypes),
+        loadNotificationsData(actorState, notificationsDispatch, notificationsTypes),
+        loadTreasuryData(actorState, treasuryDispatch, treasuryTypes)
+    ];
+    const response = await Promise.all(promises);
+    return loadSuccessful
 };
 
 export const loadNotificationsData = async (actorState, notificationsDispatch, notificationsTypes) => {
@@ -65,29 +40,10 @@ export const loadNotificationsData = async (actorState, notificationsDispatch, n
     });
 };
 
-export const loadAccountData = async (actorState, accountDispatch, accountTypes) => {
-    let accountData = await actorState.backendActor.readJournal();
-    accountData = accountData.ok;
-    let {email, userName} = accountData;
-    let metaData = {};
-    if(email) metaData.email = email;
-    if(userName) metaData.userName = userName;
-    if(Object.keys(metaData).length) {
-        accountDispatch({
-            payload: metaData,
-            actionType: accountTypes.SET_METADATA
-        });
-    };
-    accountDispatch({
-        actionType: accountTypes.SET_DATA_HAS_BEEN_LOADED,
-        payload: true,
-    });
-};
-
 export const loadJournalData = async (actorState, journalDispatch, types) => {
     let journal = await actorState.backendActor.readJournal();
     journal = journal.ok;
-    let { userJournalData, userPrincipal } = journal;
+    let { userJournalData, userPrincipal, cyclesBalance, rootCanisterPrincipal } = journal;
     let [journalEntries, journalBio] = userJournalData;
     const filesMetaData = journalBio.photos.map(fileData => {
         return { ...fileData, lastModified : parseInt(fileData.lastModified), isLoading: true };
@@ -102,6 +58,15 @@ export const loadJournalData = async (actorState, journalDispatch, types) => {
         payload: journalBio,
         actionType: types.SET_BIO
     })
+    journalDispatch({
+        payload: {
+            userPrincipal,
+            cyclesBalance: parseInt(cyclesBalance),
+            rootCanisterPrincipal
+        
+        },
+        actionType: types.SET_USER_META_DATA
+    });
     journalDispatch({
         payload: journalEntries,
         actionType: types.SET_JOURNAL
@@ -143,6 +108,7 @@ export const loadWalletData = async (actorState, walletDispatch, types ) => {
         actionType: types.SET_DATA_HAS_BEEN_LOADED,
         payload: true,
     });
+    return walletData;
 };
 
 export const loadTxHistory = async (actorState, walletDispatch, types) => {
@@ -191,7 +157,6 @@ export const loadTreasuryData = async (actorState, dispatch, types) => {
     treasuryBalances = mapBalancesDataFromApiToFrontend(treasuryBalances);
     treasuryData = treasuryData.ok;
     treasuryData = mapBackendTreasuryDataToFrontEndObj(treasuryData);
-    console.log(treasuryData);
     dispatch({
         actionType: types.SET_TREASURY_DATA,
         payload: treasuryData

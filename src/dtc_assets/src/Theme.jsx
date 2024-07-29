@@ -142,12 +142,49 @@ const theme = createTheme({
           }
         }
       },
+      MuiSwitch:{
+        styleOverrides:{
+          track:{
+            backgroundColor: '#F7931A'
+          }
+        }
+      },
       MuiStack: {
         styleOverrides: {
           root: {
             width: "100%",
             "& .MuiInputLabel-root": {
               left: "12px"
+            }
+          }
+        }
+      },
+      MuiSpeedDial: {
+        styleOverrides: {
+          root: {
+            ".MuiButtonBase-root": {
+              ".MuiTouchRipple-root":{
+                backgroundColor: "#343434",
+                color: grey[50]
+              }
+            }
+          }
+        },
+      },
+      MuiSpeedDialIcon: {
+        styleOverrides: {
+          root: {
+            color: grey[50],
+            zIndex: 1
+          }
+        }
+      },
+      MuiSpeedDialAction: {
+        styleOverrides: {
+          fab: {
+            ".MuiSvgIcon-root": {
+              zIndex: 1,
+              color: grey[50]
             }
           }
         }

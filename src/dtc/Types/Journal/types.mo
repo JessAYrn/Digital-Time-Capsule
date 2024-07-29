@@ -1,10 +1,14 @@
 import Account "../../Serializers/Account";
 import Trie "mo:base/Trie";
 import HashMap "mo:base/HashMap";
-import NotificationsTypes "../Notifications/types";
 module {
     public type EntryKey = {
         entryKey: Nat;
+    };
+
+    public type RecipientIdentifier = {
+        #PrincipalAndSubaccount: (Principal, ?Account.Subaccount);
+        #AccountIdentifier: Account.AccountIdentifier;
     };
 
     public type Bio = {
@@ -20,6 +24,7 @@ module {
         icp: {e8s : Nat64};
         eth: {e8s: Nat64};
         btc: {e8s: Nat64};
+        icp_staked: {e8s: Nat64};
     };
 
     public type Files = Trie.Trie2D<Text,Nat,Blob>;
@@ -93,7 +98,7 @@ module {
 
     public type Error ={
         #NotFound;
-        #AlreadyExists;
+        #AccountAlreadyExists;
         #NotAuthorized;
         #NoInputGiven;
         #InsufficientFunds;
@@ -103,13 +108,7 @@ module {
         #ZeroAddress;
         #NotAcceptingRequests;
         #NoRemainingStorage;
-    };
-
-    public type ReadJournalResult = {
-        userJournalData : ([JournalEntryExportKeyValuePair], Bio); 
-        email: ?Text; 
-        userName: ?Text;
-        principal: Text;
+        #MaxNumberOfDaoMembersReached;
     };
 
     public let DEFAULT_BIO: Bio = {

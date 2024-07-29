@@ -1,7 +1,7 @@
 import * as canisterIds from "../../../../canister_ids.json";
 import * as dtcFiles from "../../../declarations/dtc"
 import * as dtcAssetsFiles from "../../../declarations/dtc_assets";
-import { e8sInOneICP, MASTER_COPY_FRONTEND_CANISTER_ID } from "./Constants";
+import { e8sInOneICP, MASTER_COPY_FRONTEND_CANISTER_ID, PERMITTED_USERNAME_CHARACTERS } from "./Constants";
 
 
 export const toHexString = (byteArray)  =>{
@@ -348,5 +348,13 @@ export const icpWalletAddressHasProperFormat = (address) => {
   };
   return true;
 };
+
+export const userNamePermitted = (userName) => {
+  for(let i = 0; i < userName.length; i++){
+    let char = userName[i];
+    if(!PERMITTED_USERNAME_CHARACTERS.includes(char)) return false;
+  };
+  return true;
+}
 
 

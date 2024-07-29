@@ -8,16 +8,17 @@ import Treasury "../../Treasury";
 import AnalyticsTypes "../../Types/Analytics/types";
 
 module{
-    public func saveCurrentBalances(userProfilesMap: MainTypes.UserProfilesMap, daoMetaData: MainTypes.DaoMetaData_V3): async (){
+    public func saveCurrentBalances(userProfilesMap: MainTypes.UserProfilesMap_V2, daoMetaData: MainTypes.DaoMetaData_V4): async (){
         let treasuryCanister : Treasury.Treasury = actor(daoMetaData.treasuryCanisterPrincipal);
         ignore treasuryCanister.saveCurrentBalances();
         let userProfilesArray = Iter.toArray(userProfilesMap.entries());
         var index = 0;
         while(index < userProfilesArray.size()){
             let (principal, profile) = userProfilesArray[index];
+            let userTreasuryDeposits = await treasuryCanister.getUserTreasuryData(principal);
             let{canisterId} = profile;
             let userCansiter : Journal.Journal = actor(Principal.toText(canisterId));
-            ignore userCansiter.saveCurrentBalances();
+            ignore userCansiter.saveCurrentBalances(userTreasuryDeposits.balances);
             index += 1;
         }
     };

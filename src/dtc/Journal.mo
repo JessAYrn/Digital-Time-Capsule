@@ -15,93 +15,32 @@ import Iter "mo:base/Iter";
 import Buffer "mo:base/Buffer";
 import Int "mo:base/Int";
 import Account "Serializers/Account";
-import Bool "mo:base/Bool";
 import Option "mo:base/Option";
 import JournalTypes "Types/Journal/types";
 import HashMap "mo:base/HashMap";
-import MainTypes "Types/Main/types";
 import NotificationsTypes "Types/Notifications/types";
-import IC "Types/IC/types";
 import AnalyticsTypes "Types/Analytics/types";
-import GovernanceHelperMethods "Modules/Main/GovernanceHelperMethods";
-import NnsCyclesMinting "NNS/NnsCyclesMinting";
 
-shared(msg) actor class Journal (principal : Principal) = this {
+
+shared(msg) actor class Journal () = this {
 
     private stable var journalArray : [(Nat, JournalTypes.JournalEntry)] = [];
-
-    private var journalMap : JournalTypes.JournalMap = HashMap.fromIter<Nat, JournalTypes.JournalEntry>(
-        Iter.fromArray(journalArray), 
-        Iter.size(Iter.fromArray(journalArray)), 
-        Nat.equal,
-        Hash.hash
-    );
-
+    private var journalMap : JournalTypes.JournalMap = HashMap.fromIter<Nat, JournalTypes.JournalEntry>(Iter.fromArray(journalArray), Iter.size(Iter.fromArray(journalArray)), Nat.equal, Hash.hash);
     private stable var filesArray : [(Text, JournalTypes.File)] = [];
-
-    private var filesMap : JournalTypes.FileMap = HashMap.fromIter<Text, JournalTypes.File>(
-        Iter.fromArray(filesArray), 
-        Iter.size(Iter.fromArray(filesArray)), 
-        Text.equal,
-        Text.hash
-    );
-
+    private var filesMap : JournalTypes.FileMap = HashMap.fromIter<Text, JournalTypes.File>(Iter.fromArray(filesArray), Iter.size(Iter.fromArray(filesArray)), Text.equal, Text.hash);
     private stable var txHistoryArray : [(Nat, JournalTypes.Transaction)] = [];
-
-    private var txHistoryMap : JournalTypes.TxHistoryMap = HashMap.fromIter<Nat, JournalTypes.Transaction>(
-        Iter.fromArray(txHistoryArray), 
-        Iter.size(Iter.fromArray(txHistoryArray)), 
-        Nat.equal,
-        Hash.hash
-    );
-
+    private var txHistoryMap : JournalTypes.TxHistoryMap = HashMap.fromIter<Nat, JournalTypes.Transaction>(Iter.fromArray(txHistoryArray), Iter.size(Iter.fromArray(txHistoryArray)), Nat.equal, Hash.hash);
     private stable var balancesArray : AnalyticsTypes.BalancesArray = [];
-
-    private var balancesMap : AnalyticsTypes.BalancesMap = HashMap.fromIter<Text, AnalyticsTypes.Balances>(
-        Iter.fromArray(balancesArray), 
-        Iter.size(Iter.fromArray(balancesArray)), 
-        Text.equal,
-        Text.hash
-    );
-    
-    private stable var biography : JournalTypes.Bio = {
-        name = "";
-        dob = null;
-        pob = "";
-        dedications = "";
-        preface = "";
-        photos = [];
-    };
-
-    private stable var tokenBalances : JournalTypes.Balances = {
-        icp = {e8s = 0};
-        eth = {e8s = 0};
-        btc = {e8s = 0};
-    };
-
-    private stable var dataUsageInBytes = 0;
-
+    private var balancesMap : AnalyticsTypes.BalancesMap = HashMap.fromIter<Text, AnalyticsTypes.Balances>(Iter.fromArray(balancesArray), Iter.size(Iter.fromArray(balancesArray)), Text.equal, Text.hash);
+    private stable var biography : JournalTypes.Bio = { name = ""; dob = null; pob = ""; dedications = ""; preface = ""; photos = []; };
+    private stable var tokenBalances : JournalTypes.Balances = { icp = {e8s = 0}; eth = {e8s = 0}; btc = {e8s = 0}; icp_staked = {e8s = 0}; };
     private stable var notifications : NotificationsTypes.Notifications = [];
-
     private stable var mainCanisterId_ : Text = "null"; 
-
     private stable var journalEntryIndex : Nat = 0;
-
     private var txFee : Nat64 = 10_000;
-
-    private var capacity = 1000000000000;
-
-    private var nanosecondsInADay = 86400000000000;
-
-    private var daysInAMonth = 30;
-
+    private var capacity = 1_500_000_000_000;
     private var balance = Cycles.balance();
-
     private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
-
-    private let oneICP : Nat64 = 100_000_000;
-
-    private let ic : IC.Self = actor "aaaaa-aa";
 
     public shared({caller}) func wallet_balance() : async Nat {
         if( Principal.toText(caller) != mainCanisterId_ ) { throw Error.reject("Unauthorized access."); };
@@ -115,7 +54,7 @@ shared(msg) actor class Journal (principal : Principal) = this {
         let accepted = 
             if (amount <= limit) amount
             else limit;
-        let deposit = Cycles.accept(accepted);
+        let deposit = Cycles.accept<system>(accepted);
         assert (deposit == accepted);
         balance += accepted;
         { accepted = Nat64.fromNat(accepted) };
@@ -124,53 +63,57 @@ shared(msg) actor class Journal (principal : Principal) = this {
     public shared({caller}) func setMainCanisterPrincipalId() : async Result.Result<(),JournalTypes.Error> {
         if(mainCanisterId_ != "null"){ return #err(#NotAuthorized); };
         mainCanisterId_ := Principal.toText(caller);
-        ignore updateDataUsageInMegaBytes();
         return #ok(());
     };
 
     public shared({caller}) func createEntry() : 
     async Result.Result<([JournalTypes.JournalEntryExportKeyValuePair]), JournalTypes.Error> {
         if( Principal.toText(caller) != mainCanisterId_ ) { return #err(#NotAuthorized); };
-        if( not isStorageSpaceAvailable()) return #err(#NoRemainingStorage);
         journalMap.put(journalEntryIndex, { JournalTypes.JournalEntryDefault with timeStarted = Time.now(); });
         journalEntryIndex += 1;
         let journalAsArray = Iter.toArray(journalMap.entries());
         let journalAsArrayExport = mapJournalEntriesArrayToExport(journalAsArray);
-        ignore updateDataUsageInMegaBytes();
         #ok(journalAsArrayExport);
     };
 
     public shared({caller}) func deleteFile(fileId: Text): async Result.Result<(), JournalTypes.Error>{
         if( Principal.toText(caller) != mainCanisterId_ ) { return #err(#NotAuthorized); };
         filesMap.delete(fileId);
-        ignore updateDataUsageInMegaBytes();
         return #ok(());
     };
 
     public shared({caller}) func uploadFileChunk(fileId: Text, chunkId : Nat, blobChunk : Blob) : async Result.Result<(Text), JournalTypes.Error> {
         if( Principal.toText(caller) != mainCanisterId_ ) { return #err(#NotAuthorized); };
-        if( not isStorageSpaceAvailable()) return #err(#NoRemainingStorage);
         let fileOption = filesMap.get(fileId);
         let fileTrie = Option.get(fileOption, Trie.empty());
-        let (newTrie, oldValue) = Trie.put(
+        let (newTrie, _) = Trie.put(
             fileTrie,
             natKey(chunkId),
             Nat.equal,
             blobChunk
         );
         filesMap.put(fileId, newTrie);
-        ignore updateDataUsageInMegaBytes();
         return #ok(fileId); 
     };
 
     public query({caller}) func readJournal() : 
-    async ([JournalTypes.JournalEntryExportKeyValuePair], JournalTypes.Bio, Text) {
+    async {
+        journalAsArrayExport: [JournalTypes.JournalEntryExportKeyValuePair];  
+        biography: JournalTypes.Bio;  
+        canisterPrincipal: Text;
+        cyclesBalance: Nat;
+    } {
         if( Principal.toText(caller) != mainCanisterId_ ) { throw Error.reject("Unauthorized access."); };
         let journalAsArray = Iter.toArray(journalMap.entries());
-        let currentTime = Time.now();
         let journalAsArrayExport = mapJournalEntriesArrayToExport(journalAsArray);
         let journalCanisterPrincipal = Principal.fromActor(this); 
-        return (journalAsArrayExport, biography, Principal.toText(journalCanisterPrincipal));
+        balance := Cycles.balance();
+        return {
+            journalAsArrayExport; 
+            biography; 
+            canisterPrincipal = Principal.toText(journalCanisterPrincipal);
+            cyclesBalance = balance;
+        };
     };
 
     public shared({caller}) func updateNotifications(): async (){
@@ -191,7 +134,6 @@ shared(msg) actor class Journal (principal : Principal) = this {
             };
         });
         notifications := Buffer.toArray(notificationsBuffer);
-        ignore updateDataUsageInMegaBytes();
     };
 
     public query({caller}) func getNotifications(): async NotificationsTypes.Notifications{
@@ -202,7 +144,6 @@ shared(msg) actor class Journal (principal : Principal) = this {
     public shared({caller}) func clearNotifications(): async (){
         if( Principal.toText(caller) != mainCanisterId_) { throw Error.reject("Unauthorized access."); };
         notifications := [];
-        ignore updateDataUsageInMegaBytes();
     };
 
     public shared({caller}) func markJournalEntryAsRead(key : Nat): 
@@ -214,7 +155,6 @@ shared(msg) actor class Journal (principal : Principal) = this {
             case(? entryValue){
                 let updatedEntryValue : JournalTypes.JournalEntry = { entryValue with notified = true; read = true; };
                 journalMap.put(key,updatedEntryValue);
-                ignore updateDataUsageInMegaBytes();
                 #ok(());
             };
         }
@@ -256,7 +196,6 @@ shared(msg) actor class Journal (principal : Principal) = this {
     public shared({caller}) func updateBio(bio: JournalTypes.Bio) : async Result.Result<(JournalTypes.Bio), JournalTypes.Error>{
         if( Principal.toText(caller) != mainCanisterId_) { return #err(#NotAuthorized); };
         biography := bio;
-        ignore updateDataUsageInMegaBytes();
         #ok(biography);
     };
 
@@ -271,7 +210,6 @@ shared(msg) actor class Journal (principal : Principal) = this {
             photos = photos;
         };
         biography := updatedBiography;
-        ignore updateDataUsageInMegaBytes();
         #ok(biography);
     };
 
@@ -289,7 +227,6 @@ shared(msg) actor class Journal (principal : Principal) = this {
                 journalMap.put(key,completeEntry);
                 let journalAsArray = Iter.toArray(journalMap.entries());
                 let journalAsArrayExport = mapJournalEntriesArrayToExport(journalAsArray);
-                ignore updateDataUsageInMegaBytes();
                 #ok(journalAsArrayExport);
             }
         }
@@ -307,7 +244,6 @@ shared(msg) actor class Journal (principal : Principal) = this {
                 journalMap.put(key,updatedEntry);
                 let journalAsArray = Iter.toArray(journalMap.entries());
                 let journalAsArrayExport = mapJournalEntriesArrayToExport(journalAsArray);
-                ignore updateDataUsageInMegaBytes();
                 #ok(journalAsArrayExport);
             }
         }
@@ -321,10 +257,9 @@ shared(msg) actor class Journal (principal : Principal) = this {
         switch(entry){
             case null{ #err(#NotFound); };
             case (? v){
-                let updatedJournal = journalMap.delete(key);
+                journalMap.delete(key);
                 let journalAsArray = Iter.toArray(journalMap.entries());
-                let journalAsArrayExport = mapJournalEntriesArrayToExport(journalAsArray);
-                ignore updateDataUsageInMegaBytes();
+                ignore mapJournalEntriesArrayToExport(journalAsArray);
                 #ok(());
             };
         };
@@ -338,20 +273,23 @@ shared(msg) actor class Journal (principal : Principal) = this {
             case null{ #err(#NotFound); };
             case (? v){
                 filesMap.delete(fileId);
-                ignore updateDataUsageInMegaBytes();
                 #ok(());
             };
         };
     };
 
-    public shared({caller}) func saveCurrentBalances() : async () {
+    public shared({caller}) func saveCurrentBalances(treasuryBalances: JournalTypes.Balances) : async () {
         if( Principal.toText(caller) != mainCanisterId_) { throw Error.reject("Unauthorized access."); };
-        let icp = await ledger.account_balance({ account = userAccountId() });
+        let thisCanisterIcpBalance = await ledger.account_balance({ account = userAccountId() });
         //will need to retreive the proper balances of the other currencies once they've been integrated
-        let icp_staked = {e8s: Nat64 = 0};
-        let btc = {e8s: Nat64 = 0};
-        let eth = {e8s: Nat64 = 0};
-        let balances = {icp; icp_staked; btc; eth;};
+        let thisCanisterBtcBalance = {e8s: Nat64 = 0};
+        let thisCanisterEth = {e8s: Nat64 = 0};
+        let balances = {
+            icp = {e8s: Nat64 = thisCanisterIcpBalance.e8s + treasuryBalances.icp.e8s}; 
+            icp_staked = treasuryBalances.icp_staked;
+            btc = {e8s: Nat64 = thisCanisterBtcBalance.e8s + treasuryBalances.btc.e8s}; 
+            eth = {e8s: Nat64 = thisCanisterEth.e8s + treasuryBalances.eth.e8s;};
+        };
         balancesMap.put(Int.toText(Time.now()), balances);
     };
 
@@ -360,27 +298,65 @@ shared(msg) actor class Journal (principal : Principal) = this {
         return Iter.toArray(balancesMap.entries());
     };
 
-    public shared({caller}) func transferICP(amount: Nat64, recipientAccountId: Account.AccountIdentifier) : async {blockIndex: Nat64} {
+    public shared({caller}) func transferICP(
+        amount: Nat64, 
+        recipientIdentifier: JournalTypes.RecipientIdentifier
+    ) : async {blockIndex: Nat64} {
         if( Principal.toText(caller) != mainCanisterId_) { throw Error.reject("Unauthorized access."); };
-        let res = await ledger.transfer({
-          memo = Nat64.fromNat(10);
-          from_subaccount = null;
-          to = recipientAccountId;
-          amount = { e8s = amount };
-          fee = { e8s = txFee };
-          created_at_time = ?{ timestamp_nanos = Nat64.fromNat(Int.abs(Time.now())) };
-        });
+
+        let res: {#icrc1_transfer: Ledger.Result; #transfer: Ledger.Result_5} = switch(recipientIdentifier) {
+            case(#PrincipalAndSubaccount(recipient, subaccount)) {
+                let res_ = await ledger.icrc1_transfer({
+                    memo = null;
+                    from_subaccount = null;
+                    to = {owner = recipient; subaccount};
+                    amount = Nat64.toNat(amount - txFee);
+                    fee = ?Nat64.toNat(txFee);
+                    created_at_time = ?Nat64.fromNat(Int.abs(Time.now()));
+                });
+                #icrc1_transfer(res_);
+            };
+            case(#AccountIdentifier(accountId)) {
+                let res_ = await ledger.transfer({
+                    memo = Nat64.fromNat(0);
+                    from_subaccount = null;
+                    to = accountId;
+                    amount = { e8s = amount - txFee};
+                    fee = { e8s = txFee };
+                    created_at_time = ?{ timestamp_nanos = Nat64.fromNat(Int.abs(Time.now())) };
+                });
+                #transfer(res_);
+            };
+        };
 
         switch (res) {
-            case (#Ok(blockIndex)) {
-                Debug.print("Paid reward to " # debug_show Principal.fromActor(this) # " in block " # debug_show blockIndex);
-                return {blockIndex};
+            case(#icrc1_transfer(res_)){
+                switch(res_) {
+                    case(#Ok(blockIndex)) {
+                        Debug.print("Paid reward to " # debug_show Principal.fromActor(this) # " in block " # debug_show blockIndex);
+                        return {blockIndex = Nat64.fromNat(blockIndex)};
+                    };
+                    case(#Err(#InsufficientFunds { balance })) {
+                        throw Error.reject("Top me up! The balance is only " # debug_show balance # " e8s");    
+                    };
+                    case(#Err(other)) {
+                        throw Error.reject("Unexpected error: " # debug_show other);
+                    };
+                };
             };
-            case (#Err(#InsufficientFunds { balance })) {
-                throw Error.reject("Top me up! The balance is only " # debug_show balance # " e8s");    
-            };
-            case (#Err(other)) {
-                throw Error.reject("Unexpected error: " # debug_show other);
+            case(#transfer(res_)){
+                switch(res_) {
+                    case(#Ok(blockIndex)) {
+                        Debug.print("Paid reward to " # debug_show Principal.fromActor(this) # " in block " # debug_show blockIndex);
+                        return {blockIndex};
+                    };
+                    case(#Err(#InsufficientFunds { balance })) {
+                        throw Error.reject("Top me up! The balance is only " # debug_show balance # " e8s");    
+                    };
+                    case(#Err(other)) {
+                        throw Error.reject("Unexpected error: " # debug_show other);
+                    };
+                };
             };
         };
     };
@@ -393,7 +369,6 @@ shared(msg) actor class Journal (principal : Principal) = this {
     public shared({caller}) func updateTxHistory(timeStamp: Nat64, tx : JournalTypes.Transaction) : async () {
         if( Principal.toText(caller) != mainCanisterId_) { throw Error.reject("Unauthorized access."); };
         txHistoryMap.put(Nat64.toNat(timeStamp), tx);
-        ignore updateDataUsageInMegaBytes();
         ignore updateTokenBalances_();
     };
 
@@ -432,16 +407,6 @@ shared(msg) actor class Journal (principal : Principal) = this {
                 return (key, entryExport);
         });
         return journalAsArrayExport;
-    };
-
-    private func updateDataUsageInMegaBytes(): async (){
-        let {memory_size} = await ic.canister_status({canister_id = Principal.fromActor(this)});
-        dataUsageInBytes := memory_size;
-    };
-
-    private func isStorageSpaceAvailable(): Bool{
-        let threshold : Int = 2 * JournalTypes.ONE_GIGA_BYTE - 2 * JournalTypes.ONE_MEGA_BYTE;
-        return dataUsageInBytes < threshold;
     };
 
     private func natKey(x: Nat) : Trie.Key<Nat> {

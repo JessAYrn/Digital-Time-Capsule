@@ -59,7 +59,7 @@ const ButtonField = (props) => {
                     loading={isLoading}
                     loadingIndicatorCenter
                 >
-                    {text && !isLoading && <span style={{color:"white"}}>{text}</span>}
+                    {text && !isLoading && <span style={{color: color ? color :"white"}}>{text}</span>}
                     {!text && Icon && <Icon/>}
                     {upload && <input type="file" hidden onChange={onChange} ref={ref}/>}
                 </ButtonType>

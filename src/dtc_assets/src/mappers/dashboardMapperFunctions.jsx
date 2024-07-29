@@ -7,19 +7,13 @@ export const requestsForAccessTableColumns = [
     {
       field: 'userPrincipal',
       headerName: 'User Principal',
-      width: 150,
+      width: 200,
       editable: false,
-    },
-    {
-        field: 'userName',
-        headerName: 'User Name',
-        width: 150,
-        editable: false,
     },
     {
         field: 'approvalStatus',
         headerName: 'Approved',
-        width: 90,
+        width: 200,
         type: 'boolean'
     }
 ];
@@ -33,25 +27,25 @@ export const usersTableColumns = [
     {
       field: 'userPrincipal',
       headerName: 'User Identity',
-      width: 150,
+      width: 200,
       editable: false,
     },
     {
         field: 'canisterId',
         headerName: 'Root Canister',
-        width: 150,
+        width: 200,
         editable: false,
     },
     {
         field: 'userName',
         headerName: 'User Name',
-        width: 150,
+        width: 200,
         editable: false,
     },
     {
         field: 'approvalStatus',
         headerName: 'Subsidized',
-        width: 90,
+        width: 200,
         type: 'boolean'
     }
 ];
@@ -61,7 +55,6 @@ export const mapRequestsForAccessToTableRows = (requestsForAccess) => {
         return {
             id: index,
             userPrincipal: userPrincipal,
-            userName: "null",
             approvalStatus: approvalStatus
         }
     });
@@ -72,7 +65,6 @@ export const mapUsersProfileDataToTableRows = (usersProfileData) => {
     const profileMetaData = usersProfileData.map((metaData, index) => {
         return {
             id: index,
-            userName: "null",
             ...metaData
         }
     });
@@ -97,11 +89,16 @@ export const mapBackendCanisterDataToFrontEndObj = (props) => {
         releaseVersionLoaded,
         releaseVersionInstalled,
         nftId,
+        founder,
         managerCanisterPrincipal,
     } = props;
 
     const requestsForAccess_ = mapRequestsForAccessToTableRows(requestsForAccess);
     const profilesMetaData_ = mapUsersProfileDataToTableRows(profilesMetaData);
+    const proposals_ = proposals.sort(([proposalId_a], [proposalId_b]) => {
+        if(parseInt(proposalId_a) > parseInt(proposalId_b)) return -1
+        else return 1
+    });
 
     return {
         profilesMetaData: profilesMetaData_,
@@ -112,13 +109,14 @@ export const mapBackendCanisterDataToFrontEndObj = (props) => {
         managerCanisterPrincipal: managerCanisterPrincipal,
         lastRecordedBackEndCyclesBalance: parseInt(lastRecordedBackEndCyclesBalance),
         isAdmin: isAdmin,
-        proposals: proposals,
+        proposals: proposals_,
         supportMode: supportMode,
         acceptingRequests: acceptingRequests,
         journalCount: parseInt(journalCount),
         requestsForAccess: requestsForAccess_,
         releaseVersionLoaded: parseInt(releaseVersionLoaded),
         releaseVersionInstalled: parseInt(releaseVersionInstalled),
-        nftId: parseInt(nftId)
+        nftId: nftId[0] ? parseInt(nftId[0]) : null,
+        founder
     }
 }; 

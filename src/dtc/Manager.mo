@@ -1,80 +1,34 @@
 import Ledger "NNS/Ledger";
-import Debug "mo:base/Debug";
 import Error "mo:base/Error";
-import Trie "mo:base/Trie";
-import Hash "mo:base/Hash";
 import Nat "mo:base/Nat";
-import Result "mo:base/Result";
 import Principal "mo:base/Principal";
-import Array "mo:base/Array";
 import Text "mo:base/Text";
 import Cycles "mo:base/ExperimentalCycles";
 import Nat64 "mo:base/Nat64";
-import Time "mo:base/Time";
 import Timer "mo:base/Timer";
 import Iter "mo:base/Iter";
 import Buffer "mo:base/Buffer";
-import Int "mo:base/Int";
 import Account "Serializers/Account";
 import Bool "mo:base/Bool";
-import Option "mo:base/Option";
-import IC "Types/IC/types";
 import AssetCanister "Types/AssetCanister/types";
 import WasmStore "Types/WasmStore/types";
 import HashMap "mo:base/HashMap";
 import MainTypes "Types/Main/types";
 import CanisterManagementMethods "/Modules/Manager/CanisterManagementMethods";
-import AssetManagementFunctions "Modules/AssetCanister/AssetManagementFunctions";
-import JournalTypes "Types/Journal/types";
 
 shared(msg) actor class Manager (principal : Principal) = this {
 
-    private let ic : IC.Self = actor "aaaaa-aa";
-
     private stable var currentVersionLoaded : {number: Nat; isStable: Bool} = {number = 170; isStable = true;};
-
     private stable var currentVersionInstalled : {number: Nat; isStable: Bool} = currentVersionLoaded;
-
     private stable var nextStableVersion : {number: Nat; isStable: Bool} = currentVersionLoaded;
-
     private stable var previousVersionInstalled : {number: Nat; isStable: Bool} = currentVersionLoaded;
-
     private stable var mainCanisterId : Text = Principal.toText(principal); 
-
     private var capacity = 1000000000000;
-
-    private let oneICP : Nat64 = 100_000_000;
-
     private let dummyPrincipal : Principal = Principal.fromText("2vxsx-fae");
-
     private let dummyBlob = Principal.toBlob(dummyPrincipal);
-
-    private let dummyWasmData : WasmStore.WasmData = {
-        dev = dummyPrincipal;
-        wasmModule = dummyBlob;
-    };
-
-    private stable var release : WasmStore.Release = {
-        assets = [];
-        frontend = dummyWasmData;
-        backend = dummyWasmData;
-        journal = dummyWasmData;
-        manager = dummyWasmData;
-        treasury = dummyWasmData;
-    };
-
-    private stable var loadProgress : {
-        totalNumberOfAssets : Nat;
-        numberOfAssetsLoaded : Nat;
-        totalNumberOfModules : Nat;
-        numberOfModulesLoaded : Nat;
-    } = {
-        totalNumberOfAssets = 0;
-        numberOfAssetsLoaded = 0;
-        totalNumberOfModules = 5;
-        numberOfModulesLoaded = 0;
-    };
-
+    private let dummyWasmData : WasmStore.WasmData = { dev = dummyPrincipal; wasmModule = dummyBlob; };
+    private stable var release : WasmStore.Release = { assets = []; frontend = dummyWasmData; backend = dummyWasmData; journal = dummyWasmData; manager = dummyWasmData; treasury = dummyWasmData; };
+    private stable var loadProgress : { totalNumberOfAssets : Nat; numberOfAssetsLoaded : Nat; totalNumberOfModules : Nat; numberOfModulesLoaded : Nat; } = { totalNumberOfAssets = 0; numberOfAssetsLoaded = 0; totalNumberOfModules = 5; numberOfModulesLoaded = 0; };
     private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
 
     public shared({caller}) func wallet_balance() : async Nat {
@@ -145,7 +99,7 @@ shared(msg) actor class Manager (principal : Principal) = this {
             Principal.toText(caller) != Principal.toText(Principal.fromActor(this))
         ){ throw Error.reject("Unauthorized access.");};
         let {setTimer} = Timer;
-        let timerId = setTimer(#nanoseconds(1), func (): async (){ await installCode_backendCanister(#upgrade(?{skip_pre_upgrade = ?false})); });
+        ignore setTimer<system>(#nanoseconds(1), func (): async (){ await installCode_backendCanister(#upgrade(?{skip_pre_upgrade = ?false})); });
     };
 
 
@@ -319,7 +273,7 @@ shared(msg) actor class Manager (principal : Principal) = this {
         let accepted = 
             if (amount <= limit) amount
             else limit;
-        let deposit = Cycles.accept(accepted);
+        let deposit = Cycles.accept<system>(accepted);
         assert (deposit == accepted);
         { accepted = Nat64.fromNat(accepted) };
     };
@@ -345,17 +299,4 @@ shared(msg) actor class Manager (principal : Principal) = this {
         ){ throw Error.reject("Unauthorized access.");};
         await ledger.account_balance({ account = canisterAccountId() })
     };
-   
-    private  func key(x: Principal) : Trie.Key<Principal> {
-        return {key = x; hash = Principal.hash(x)}
-    };
-
-    private func natKey(x: Nat) : Trie.Key<Nat> {
-        return {key = x; hash = Hash.hash(x)}
-    };
-
-    private func textKey(x: Text) : Trie.Key<Text> {
-        return {key = x; hash = Text.hash(x)}
-    };
-
 }

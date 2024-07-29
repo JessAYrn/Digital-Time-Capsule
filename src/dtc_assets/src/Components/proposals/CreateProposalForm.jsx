@@ -2,7 +2,7 @@ import React, {useState, useContext} from "react";
 import MenuField from "../Fields/MenuField";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import { PAYLOAD_DATA_TYPES, PROPOSAL_ACTIONS } from "./utils";
-import { daysToMonths, hoursToDays, isANumber, principalHasProperFormat, round2Decimals, secondsToHours, toE8s  } from "../../functionsAndConstants/Utils";
+import { daysToMonths, hoursToDays, isANumber, principalHasProperFormat, round2Decimals, secondsToHours, toE8s, fromE8s  } from "../../functionsAndConstants/Utils";
 import { homePageTypes } from "../../reducers/homePageReducer";
 import InputBox from "../Fields/InputBox";
 import { Typography } from "@mui/material";
@@ -13,6 +13,7 @@ import DoneIcon from '@mui/icons-material/Done';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { INPUT_BOX_FORMATS } from "../../functionsAndConstants/Constants";
 import { AppContext } from "../../Context";
+import DataField from "../Fields/DataField";
 
 export const NEURON_TOPICS = {
         // The `Unspecified` topic is used as a fallback when
@@ -91,7 +92,6 @@ const NEURON_ID_REQUIRED_ACTIONS =[
     PROPOSAL_ACTIONS.SpawnNeuron,
     PROPOSAL_ACTIONS.DisburseNeuron,
     PROPOSAL_ACTIONS.DissolveNeuron,
-    PROPOSAL_ACTIONS.SplitNeuron,
     PROPOSAL_ACTIONS.FollowNeuron,
     PROPOSAL_ACTIONS.IncreaseDissolveDelay,
     PROPOSAL_ACTIONS.IncreaseNeuron
@@ -106,7 +106,6 @@ const AMOUNT_PAYLOAD_REQUIRED_ACTIONS = [
     PROPOSAL_ACTIONS.PurchaseCycles,
     PROPOSAL_ACTIONS.CreateNeuron,
     PROPOSAL_ACTIONS.IncreaseNeuron,
-    PROPOSAL_ACTIONS.SplitNeuron,
 ];
 
 const PERCENTAGE_PAYLOAD_REQUIRED_ACTIONS = [
@@ -125,10 +124,21 @@ const SECONDS_PAYLOAD_REQUIRED_ACTIONS = [
     PROPOSAL_ACTIONS.IncreaseDissolveDelay
 ];
 
+const CYCLES_COSTS_ASSOCIATED_WITH_ACTIONS = [
+    PROPOSAL_ACTIONS.FollowNeuron,
+    PROPOSAL_ACTIONS.IncreaseNeuron,
+    PROPOSAL_ACTIONS.SpawnNeuron,
+    PROPOSAL_ACTIONS.DisburseNeuron,
+    PROPOSAL_ACTIONS.DissolveNeuron,
+    PROPOSAL_ACTIONS.IncreaseDissolveDelay,
+    PROPOSAL_ACTIONS.FollowNeuron,
+    PROPOSAL_ACTIONS.CreateNeuron,
+];
+
 const actionReadyToSubmit = (proposalAction, proposalPayload) => {
     let ready = true;
     if(NEURON_ID_REQUIRED_ACTIONS.includes(proposalAction) && !proposalPayload?.neuronId) ready = false;
-    if(TOPIC_PAYLOAD_REQUIRED_ACTIONS.includes(proposalAction) && !proposalPayload?.topic) ready = false;
+    if(TOPIC_PAYLOAD_REQUIRED_ACTIONS.includes(proposalAction) && !proposalPayload?.topic && proposalPayload?.topic !== NEURON_TOPICS.unspecificed ) ready = false;
     if(FOLLOWEE_PAYLOAD_REQUIRED_ACTIONS.includes(proposalAction) && !proposalPayload?.followee) ready = false;
     if(PRINCIPAL_REQUIRED_ACTIONS.includes(proposalAction) && !proposalPayload?.principal) ready = false;
     if(AMOUNT_PAYLOAD_REQUIRED_ACTIONS.includes(proposalAction) && !proposalPayload?.amount) ready = false;
@@ -195,8 +205,8 @@ const CreateProposalForm = (props) => {
         }
     });
 
-    const neuronTopicItemProps = Object.keys(NEURON_TOPICS).map((topic) => {
-        return {text: topic,  onClick: () => setProposalPayload({...proposalPayload_, topicName: topic, topic: NEURON_TOPICS[topic]})};
+    const neuronTopicItemProps = Object.keys(NEURON_TOPICS).map((topicName) => {
+        return {text: topicName,  onClick: () => setProposalPayload({...proposalPayload_, topicName, topic: NEURON_TOPICS[topicName]})};
     });
 
     const mainMenuItemProps = [
@@ -208,7 +218,6 @@ const CreateProposalForm = (props) => {
         { text: PROPOSAL_ACTIONS.DisburseNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.DisburseNeuron), selected: selectedAction === PROPOSAL_ACTIONS.DisburseNeuron},
         { text: PROPOSAL_ACTIONS.DissolveNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.DissolveNeuron), selected: selectedAction === PROPOSAL_ACTIONS.DissolveNeuron},
         { text: PROPOSAL_ACTIONS.SpawnNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.SpawnNeuron), selected: selectedAction === PROPOSAL_ACTIONS.SpawnNeuron},
-        { text: PROPOSAL_ACTIONS.SplitNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.SplitNeuron), selected: selectedAction === PROPOSAL_ACTIONS.SplitNeuron},
         { text: PROPOSAL_ACTIONS.FollowNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.FollowNeuron), selected: selectedAction === PROPOSAL_ACTIONS.FollowNeuron},
         { text: PROPOSAL_ACTIONS.IncreaseDissolveDelay, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.IncreaseDissolveDelay), selected: selectedAction === PROPOSAL_ACTIONS.IncreaseDissolveDelay},
         { text: PROPOSAL_ACTIONS.CreateNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.CreateNeuron), selected: selectedAction === PROPOSAL_ACTIONS.CreateNeuron},
@@ -220,8 +229,8 @@ const CreateProposalForm = (props) => {
         setProposalPayload({...proposalPayload_, ...payload_});
         if(format === PAYLOAD_DATA_TYPES.principal) setHasError_1(!principalHasProperFormat(payload_[property]));
         if(format === PAYLOAD_DATA_TYPES.nat) setHasError_1(!isANumber(payload_[property][0] || payload_[property]));
+        if(proposalAction_ === PROPOSAL_ACTIONS.PurchaseCycles) setHasError_1(payload_[property] > fromE8s(treasuryState.daoWalletBalance) || payload_[property] < 0);
     };
-
     const modalButton_close = [
         {Component: ButtonField,
         props: {
@@ -287,6 +296,33 @@ const CreateProposalForm = (props) => {
                 menuItemProps={mainMenuItemProps}
             />
             <Typography varient={"h6"} color={"#bdbdbd"}> {proposalAction_} </Typography>
+            {
+                (proposalAction_ ===  PROPOSAL_ACTIONS.IncreaseNeuron || proposalAction_ === PROPOSAL_ACTIONS.CreateNeuron) &&
+                <DataField 
+                label={"Available Balance: "}
+                text={`${fromE8s(treasuryState.userTreasuryData?.balances.icp || 0) } ICP`}
+                isLoading={!treasuryState.dataHasBeenLoaded}
+                disabled={true}
+                />
+            }
+            {
+                CYCLES_COSTS_ASSOCIATED_WITH_ACTIONS.includes(proposalAction_) &&
+                <DataField
+                    label={"Cycles Consumption: "}
+                    text={"~ 0.25 T"}
+                    isLoading={!treasuryState.dataHasBeenLoaded}
+                    disabled={true}
+                />
+            }
+            {
+                proposalAction_ ===  PROPOSAL_ACTIONS.PurchaseCycles &&
+                <DataField 
+                label={"Available Balance: "}
+                text={`${fromE8s(treasuryState.daoWalletBalance)} ICP`}
+                isLoading={!treasuryState.dataHasBeenLoaded}
+                disabled={true}
+                />
+            }
             { 
                 proposalAction_ && NEURON_ID_REQUIRED_ACTIONS.includes(proposalAction_) && 
                 <>
@@ -351,14 +387,14 @@ const CreateProposalForm = (props) => {
             }
             {
                 proposalAction_ && AMOUNT_PAYLOAD_REQUIRED_ACTIONS.includes(proposalAction_) &&
-                <InputBox
-                    hasError={hasError_1}
-                    label={"Amount "}
-                    rows={"1"}
-                    onChange={(amount) => onChange_payload({amount}, "amount", PAYLOAD_DATA_TYPES.nat)}
-                    value={proposalPayload_?.amount}
-                    format={INPUT_BOX_FORMATS.numberFormat}
-                />
+                    <InputBox
+                        hasError={hasError_1}
+                        label={"Amount "}
+                        rows={"1"}
+                        onChange={(amount) => onChange_payload({amount}, "amount", PAYLOAD_DATA_TYPES.nat)}
+                        value={proposalPayload_?.amount}
+                        format={INPUT_BOX_FORMATS.numberFormat}
+                    />
             }
             {
                 proposalAction_ && PERCENTAGE_PAYLOAD_REQUIRED_ACTIONS.includes(proposalAction_) &&

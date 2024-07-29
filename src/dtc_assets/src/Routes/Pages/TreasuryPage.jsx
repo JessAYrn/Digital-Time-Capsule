@@ -5,6 +5,12 @@ import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import { Typography } from "@mui/material";
 import { copyText } from "../../functionsAndConstants/walletFunctions/CopyWalletAddress";
 import { fromE8s, shortenHexString, round2Decimals } from "../../functionsAndConstants/Utils";
+import { treasuryTypes } from "../../reducers/treasuryReducer";
+import { walletTypes } from "../../reducers/walletReducer";
+import { homePageTypes } from "../../reducers/homePageReducer";
+import { types as journalTypes } from "../../reducers/journalReducer";
+import { notificationsTypes } from "../../reducers/notificationsReducer";
+import { loadAllDataIntoReduxStores } from "../../functionsAndConstants/loadingFunctions";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import SpeedDialField from "../../Components/Fields/SpeedDialField";
@@ -13,17 +19,33 @@ import ModalComponent from "../../Components/modal/Modal";
 import ButtonField from "../../Components/Fields/Button";
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import AccountBalanceWalletOutlinedIcon from '@mui/icons-material/AccountBalanceWalletOutlined';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import CreateProposalForm from "../../Components/proposals/CreateProposalForm";
 import DepositOrWithdrawModal from "../../Components/modal/DepositOrWithdraw";
 import Graph from "../../Components/Fields/Chart";
-import './TreasuryPage.scss'
 import { CHART_TYPES, GRAPH_DATA_SETS, GRAPH_DISPLAY_LABELS } from "../../functionsAndConstants/Constants";
 import { TREASURY_ACTIONS } from "../../Components/proposals/utils";
 import AccordionField from "../../Components/Fields/Accordion";
 import DisplayNeuron from "../../Components/Neurons/DisplayNeuron";
 
 const TreasuryPage = (props) => {
-  const { treasuryState } = useContext(AppContext);
+  const { 
+    treasuryState, 
+    treasuryDispatch,
+    walletState, 
+    walletDispatch, 
+    homePageState,
+    homePageDispatch,
+    journalState,
+    journalDispatch,
+    notificationsState,
+    notificationsDispatch,
+    actorState, 
+  } = useContext(AppContext);
+
+  const states = {homePageState, actorState, treasuryState, walletState, notificationsState, journalState,};
+  const dispatches = { homePageDispatch, treasuryDispatch, walletDispatch, notificationsDispatch, journalDispatch};
+  const types = { journalTypes, walletTypes, homePageTypes, notificationsTypes, treasuryTypes};
 
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [isLoadingModal, setIsLoadingModal] = useState(false);
@@ -64,16 +86,13 @@ const TreasuryPage = (props) => {
     setModalProps({
         flexDirection: "column",
         bigText: "Treasury ICP Account ID:",
-        smallText: `${shortenHexString(treasuryState.accountId_icp)}`,
+        smallText: `${shortenHexString(treasuryState.daoIcpAccountId)}`,
         components: [
           {
             Component: ButtonField,
             props: {
               text: "Copy To Clipboard",
-              onClick: () => {
-                const promise = new Promise ((res, rej) => {setModalIsOpen(false); res()});
-                promise.then(() => { copyText(treasuryState.accountId_icp); });
-              },
+              onClick: () => copyText(treasuryState.daoIcpAccountId),
               iconSize: 'small',
               Icon: ContentCopyIcon,
             }
@@ -120,7 +139,16 @@ const TreasuryPage = (props) => {
     });
   };
 
+  const reloadData = async () => {
+    setIsLoadingModal(true);
+    setModalIsOpen(true);
+    await loadAllDataIntoReduxStores(states, dispatches, types);
+    setModalIsOpen(false);
+    setIsLoadingModal(false);
+  };
+
   const speedDialActions = [
+    {name: "Refresh", icon: RefreshIcon , onClick: reloadData},
     {name: "Create Proposal", icon: HowToVoteIcon , onClick: openProposalForm},
     {name: "Withdraw To Wallet", icon: AccountBalanceWalletOutlinedIcon , onClick: () => openDepositOrWithdrawForm(TREASURY_ACTIONS.WithdrawIcpFromTreasury)},
     {name: "Deposit To Treasury", icon: AccountBalanceIcon , onClick: () => openDepositOrWithdrawForm(TREASURY_ACTIONS.DepositIcpToTreasury)}
@@ -155,28 +183,28 @@ const TreasuryPage = (props) => {
           <Grid xs={5}  width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"} flexDirection={"column"}>
             <Typography width={"100%"}>Liquid:</Typography>
             <Typography width={"100%"} variant="h6" color={"custom"}>
-              {`${round2Decimals(fromE8s(treasuryState.balance_icp))}`} ICP
+              {`${round2Decimals(fromE8s(treasuryState.daoWalletBalance))}`} ICP
             </Typography>
             <Typography width={"100%"} style={{color: '#bdbdbd'}}>
-              {`${round2Decimals(fromE8s(treasuryState.userTreasuryData?.deposits.icp || 0))}`} ICP
+              {`${round2Decimals(fromE8s(treasuryState.userTreasuryData?.balances.icp || 0))}`} ICP
             </Typography>
           </Grid>
           <Grid xs={2} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
             <Typography width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"}>Staked:</Typography>
             <Typography width={"100%"} variant="h6" display={"flex"} justifyContent={"center"} alignItems={"center"}>
-              {`${round2Decimals(fromE8s(treasuryState.balance_icpStaked))}`} ICP
+              {`${round2Decimals(fromE8s(treasuryState.daoTotalIcpStaked))}`} ICP
             </Typography>
             <Typography width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} style={{color: '#bdbdbd'}}>
-              {`${round2Decimals(fromE8s(treasuryState.userTreasuryData?.deposits.icp_staked || 0))}`} ICP
+              {`${round2Decimals(fromE8s(treasuryState.userTreasuryData?.balances.icp_staked || 0))}`} ICP
             </Typography>
           </Grid>
           <Grid xs={5} width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"} flexDirection={"column"}>
             <Typography width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"} >Voting Power:</Typography>
             <Typography width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"} variant="h6">
-              {`${round2Decimals(fromE8s(treasuryState.votingPower))}`} ICP 
+              {`${round2Decimals(fromE8s(treasuryState.votingPower))}`}
             </Typography>
             <Typography width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"} style={{color: '#bdbdbd'}}>
-              {`${round2Decimals(fromE8s(treasuryState.userVotingPower))}`} ICP 
+              {`${round2Decimals(fromE8s(treasuryState.userVotingPower))}`} 
             </Typography>
           </Grid>
         </Grid>
@@ -184,7 +212,10 @@ const TreasuryPage = (props) => {
           type={CHART_TYPES.line} 
           inputData={treasuryState.balancesData} 
           defaultLabel={GRAPH_DISPLAY_LABELS.icp} 
-          defaultDataSetName={GRAPH_DATA_SETS.week}
+          defaultDataSetName={GRAPH_DATA_SETS.balancesHistory.week}
+          maintainAspectRatio={false}
+          height={"500px"}
+          width={"100%"}
         />
         {
           treasuryState?.neurons?.icp && treasuryState?.neurons?.icp.length > 0 &&

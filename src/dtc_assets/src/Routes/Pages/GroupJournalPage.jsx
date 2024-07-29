@@ -1,7 +1,6 @@
 import { NavBar } from "../../Components/navigation/NavBar";
 import React, { useContext } from 'react';
 import { AppContext } from "../../Context";
-import './GroupJournalPage.scss'
 
 const GroupJournalPage = (props) => {
   const { homePageState} = useContext(AppContext);
@@ -9,7 +8,7 @@ const GroupJournalPage = (props) => {
   return (
     <div>
       <NavBar />
-      <div className='GroupJournalPage_container'>
+      <div className=''>
         coming soon
       </div>
     </div> 

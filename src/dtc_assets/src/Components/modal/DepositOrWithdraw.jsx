@@ -6,8 +6,9 @@ import InputBox from "../Fields/InputBox";
 import {TREASURY_ACTIONS } from "../proposals/utils";
 import DoneIcon from '@mui/icons-material/Done';
 import ButtonField from "../Fields/Button";
-import { isANumber, toE8s } from "../../functionsAndConstants/Utils";
+import { fromE8s, isANumber, toE8s } from "../../functionsAndConstants/Utils";
 import { INPUT_BOX_FORMATS } from "../../functionsAndConstants/Constants";
+import DataField from "../Fields/DataField";
 
 const DepositOrWithdrawModal = (props) => {
     const {
@@ -17,7 +18,7 @@ const DepositOrWithdrawModal = (props) => {
         setIsLoadingModal
     } = props;
 
-    const {actorState} = useContext(AppContext);
+    const {actorState, walletState, treasuryState} = useContext(AppContext);
 
     const [amount, setAmount] = useState(null);
     const [hasError, setHasError] = useState(true);
@@ -37,6 +38,9 @@ const DepositOrWithdrawModal = (props) => {
     };
 
     let action_ = action === TREASURY_ACTIONS.DepositIcpToTreasury ? "Deposit" : "Withdraw";
+    let text = action === TREASURY_ACTIONS.DepositIcpToTreasury ? 
+    `${fromE8s(walletState.walletData.balance)} ICP` : 
+    `${fromE8s(treasuryState.userTreasuryData?.balances.icp || 0) } ICP`;
 
     return (
         <Grid
@@ -48,6 +52,14 @@ const DepositOrWithdrawModal = (props) => {
         alignItems="center" 
         flexDirection={"column"}
         >
+            <Grid xs={12} display="flex" justifyContent="center" alignItems="center">
+                <DataField
+                    label={'Available Balance: '}
+                    text={text}
+                    isLoading={!treasuryState.dataHasBeenLoaded}
+                    disabled={true}
+                />
+            </Grid>
             <InputBox
             width={"100%"}
             label={`Amount To ${action_}: `}

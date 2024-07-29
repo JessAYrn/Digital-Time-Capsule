@@ -14,8 +14,8 @@ export const treasuryPageInitialState={
     isLoading: false,
     deposits: [],
     stakes: [],
-    balance_icp: 0,
-    accountId_icp: "" ,
+    daoWalletBalance: 0,
+    daoIcpAccountId: "" ,
     balancesData: dummyDataSets
 }
 

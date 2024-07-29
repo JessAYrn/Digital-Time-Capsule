@@ -1,4 +1,3 @@
-import Nat64 "mo:base/Nat64";
 import Cycles "mo:base/ExperimentalCycles";
 import Blob "mo:base/Blob";
 import IC "../../Types/IC/types";
@@ -9,8 +8,7 @@ module{
 
     public func getCurrencyExchangeRate(
         unitCurrency: Text, 
-        otherCurrency: Text, 
-        transformFn: query ({context: Blob; response: IC.http_response}) -> async IC.http_response
+        transformFn: query ({response: IC.http_response}) -> async IC.http_response
         ) : async IC.http_response {
     
         let host : Text = "api.coinbase.com";
@@ -26,7 +24,8 @@ module{
             method = #get;
             transform = ?transform_context;
         };
-        Cycles.add(20_949_972_000);
+        Cycles.add<system>(20_949_972_000);
         let http_response : IC.http_response = await ic.http_request(http_request);
+        return http_response;
     };
 };

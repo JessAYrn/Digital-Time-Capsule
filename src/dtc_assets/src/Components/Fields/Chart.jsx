@@ -16,12 +16,13 @@ const Graph = (props) => {
         inputData,
         defaultLabel,
         defaultDataSetName,
-        height,
         width,
+        height,
         paperWidth,
         hideButton1,
         hideButton2,
-        withoutPaper
+        withoutPaper,
+        maintainAspectRatio
     } = props
 
     const [dataSetName, setDataSetName] = useState(defaultDataSetName);
@@ -62,13 +63,33 @@ const Graph = (props) => {
                 justifyContent: "center",
                 alignItems: "center",
             }} >
-                <Grid xs={12} minWidth={"325px"} width={width} display="flex" justifyContent="center" alignItems="center" flexDirection={"column"} >
-                <Chart_ data={data} height={height || "175px"} />
+                <Grid 
+                xs={12} 
+                minWidth={"325px"} 
+                width={width} 
+                height={height}
+                display="flex" 
+                justifyContent="center" 
+                alignItems="center" 
+                flexDirection={"column"} 
+                position={"relative"}
+                >
+                <Chart_ data={data} options={ {responsive: true, maintainAspectRatio, } }/>
                 </Grid> 
             </Paper>}
             { withoutPaper &&
-                <Grid xs={12} minWidth={"325px"} width={width} display="flex" justifyContent="center" alignItems="center" flexDirection={"column"} >
-                    <Chart_ data={data} height={height || "175px"} />
+                <Grid 
+                xs={12} 
+                minWidth={"325px"} 
+                width={width} 
+                height={height}
+                display="flex" 
+                justifyContent="center" 
+                alignItems="center" 
+                flexDirection={"column"} 
+                position={"relative"}
+                >
+                    <Chart_ data={data} options={ {responsive: true, maintainAspectRatio, } }/>
                 </Grid> 
             }
 

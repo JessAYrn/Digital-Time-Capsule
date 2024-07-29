@@ -15,23 +15,12 @@ const SpeedDialField = (props) => {
     const { actions, position  } = props;    
 
     return (
-        <Box sx={{ 
-            transform: 'translateZ(0px)', 
-            flexGrow: 1, 
-            position: "fixed", 
-            bottom: 10, 
-            [position]: 10, 
-            zIndex: 10 
-            }}
-        >
+        <>
             <SpeedDial
-                sx={{
-                    "& .css-1ervdh7-MuiButtonBase-root-MuiFab-root-MuiSpeedDial-fab" : {
-                        backgroundColor: "#343434"
-                    }
-                }}
+                sx={{ bottom: 10, [position]: 10, position: "fixed" }}
+                color="secondary"
                 ariaLabel="SpeedDial basic example"
-                icon={<SpeedDialIcon />}
+                icon={<SpeedDialIcon color="white"/>}
             >
                 {actions.map((action) => {
                     const Icon = action.icon;
@@ -45,7 +34,7 @@ const SpeedDialField = (props) => {
                     );
                 })}
             </SpeedDial>
-        </Box>
+        </>
     );
 
 };

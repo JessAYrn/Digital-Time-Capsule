@@ -59,6 +59,7 @@ export const CANISTER_DATA_FIELDS = {
     releaseVersionLoaded: "releaseVersionLoaded",
     releaseVersionInstalled: "releaseVersionInstalled",
     nftId: "nftId",
+    founder: "founder",
     proposals: "proposals",
     isAdmin: "isAdmin",
     supportMode: "supportMode",
@@ -118,11 +119,14 @@ export const CHART_TYPES = {
 }; 
 
 export const GRAPH_DATA_SETS = {
-    week: "week",
-    month: "month",
-    year: "year",
-    allTime: "allTime",
+    usersTotalStakesAndVotingPowers: "usersTotalStakesAndVotingPowers",
     neuronContributions: "neuronContributions",
+    balancesHistory: {
+        week: "week",
+        month: "month",
+        year: "year",
+        allTime: "allTime",
+    }
 }
 
 export const GRAPH_DISPLAY_LABELS = {
@@ -131,7 +135,16 @@ export const GRAPH_DISPLAY_LABELS = {
     btc: "BTC",
     eth: "ETH",
     xdrs: "XDRS",
-    stake: "Stake",
-    votingPower: "Voting Power"
+    stake: "ICP_STAKED",
+    stake_e8s: "ICP_STAKED",
+    votingPower: "VOTING_POWER",
+    voting_power: "VOTING_POWER",
 
 }
+
+export const PERMITTED_USERNAME_CHARACTERS = [
+    'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
+    'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
+    '0','1','2','3','4','5','6','7','8','9',
+    '_','-'
+];

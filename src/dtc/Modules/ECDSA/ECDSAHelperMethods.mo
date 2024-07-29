@@ -6,23 +6,18 @@ import Nat8 "mo:base/Nat8";
 import Time "mo:base/Time";
 import Int "mo:base/Int";
 import Blob "mo:base/Blob";
-import Account "../../Serializers/Account";
-import Governance "../../NNS/Governance";
 import Cycles "mo:base/ExperimentalCycles";
 import Text "mo:base/Text";
 import Array "mo:base/Array";
 import Iter "mo:base/Iter";
 import Char "mo:base/Char";
-import Float "mo:base/Float";
 import Buffer "mo:base/Buffer";
 import Sha256 "../../Hash/SHA256";
 import Value "../../Serializers/CBOR/Value";
 import Encoder "../../Serializers/CBOR/Encoder";
 import RepresentationIndependentHash "../../Hash/RepresentationIndependentHash";
-import Decoder "../../Serializers/CBOR/Decoder";
 import Hex "../../Serializers/Hex";
 import NatX "../../MotokoNumbers/NatX";
-import IntX "../../MotokoNumbers/IntX";
 
 module{
 
@@ -152,7 +147,7 @@ module{
         let {envelope_content; key_id; public_key} = request;
         let envelopeContentInMajorType5Format = formatEnvelopeContentForCborEncoding(envelope_content);
         let {message_hash;} = getMessageHashForEcdsaSignature(formatEnvelopeContentForRepIndHash(envelope_content));
-        Cycles.add(25_000_000_000);
+        Cycles.add<system>(25_000_000_000);
         let { signature } = await ic.sign_with_ecdsa({ message_hash; derivation_path = []; key_id;});
         let envelopeAsMajorType : Value.Value = #majorType5([
             (#majorType3("content"), #majorType5(envelopeContentInMajorType5Format)),
@@ -171,7 +166,7 @@ module{
         let {envelope_content; key_id; public_key} = request;
         let envelopeContentInMajorType5Format = formatEnvelopeContentReadStateForCborEncoding(envelope_content);
         let {message_hash;} = getMessageHashForEcdsaSignature(formatEnvelopeContentReadStateForRepIndHash(envelope_content));
-        Cycles.add(25_000_000_000);
+        Cycles.add<system>(25_000_000_000);
         let { signature } = await ic.sign_with_ecdsa({ message_hash; derivation_path = []; key_id; });
         let envelopeAsMajorType : Value.Value = #majorType5([
             (#majorType3("content"), #majorType5(envelopeContentInMajorType5Format)),
@@ -196,6 +191,7 @@ module{
             (#majorType3("canister_id"), #majorType2(Blob.toArray(Principal.toBlob(canister_id)))),
             (#majorType3("arg"), #majorType2(arg))
         ]);
+        return envelopeContentInMajorType5Format;
     };
 
     public func formatEnvelopeContentReadStateForCborEncoding(envelope_content: EnvelopeContentReadState) : [(Value.Value, Value.Value)] {
@@ -217,6 +213,7 @@ module{
             (#majorType3("sender"), #majorType2(Blob.toArray(Principal.toBlob(sender)))),
             (#majorType3("paths"), #majorType4(pathsInMajorFormat))
         ]);
+        return envelopeContentInMajorType5Format;
     };
 
     public func formatEnvelopeContentForRepIndHash(envelope_content: EnvelopeContent) : RepresentationIndependentHash.Value {

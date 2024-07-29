@@ -8,6 +8,7 @@ export const types = {
     SET_BIO: "SET_BIO",
     SET_DATA_HAS_BEEN_LOADED: "SET_DATA_HAS_BEEN_LOADED",
     SET_IS_LOADING:"SET_IS_LOADING",
+    SET_USER_META_DATA: "SET_USER_META_DATA",
     CHANGE_LOCATION: "CHANGE_LOCATION",
     CHANGE_TEXT: "CHANGE_TEXT",
     CHANGE_UNLOCK_TIME: "CHANGE_UNLOCK_TIME",
@@ -41,6 +42,11 @@ export const initialState = {
         preface:'',
         email: '',
         photos: []
+    },
+    userMetaData: {
+        userPrincipal: "",
+        cyclesBalance: 0,
+        rootCanisterPrincipal: ""
     },
     journal: [],
     notifications:[],
@@ -98,6 +104,11 @@ const changeValue = (state = initialState, action) => {
             }
         case types.SET_DATA_HAS_BEEN_LOADED:
         state.dataHasBeenLoaded = payload
+        return {
+            ...state
+        }
+        case types.SET_USER_META_DATA:
+        state.userMetaData = payload;
         return {
             ...state
         }

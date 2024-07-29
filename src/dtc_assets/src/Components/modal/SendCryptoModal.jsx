@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react";
 import { AppContext } from "../../Context";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import InputBox from "../Fields/InputBox";
-import { icpWalletAddressHasProperFormat, isANumber, round8Decimals, shortenHexString, fromHexString  } from "../../functionsAndConstants/Utils";
+import { icpWalletAddressHasProperFormat, isANumber, round8Decimals, shortenHexString, fromHexString, fromE8s  } from "../../functionsAndConstants/Utils";
 import ButtonField from "../Fields/Button";
 import CenterFocusWeakIcon from '@mui/icons-material/CenterFocusWeak';
 import QrReaderContent  from "./ScanQrCodeModal";
@@ -14,7 +14,7 @@ const SendCrypto = (props) => {
     const { 
         onClickCancel,
         setModalIsOpen,
-        setIsLoadingTx
+        setIsLoadingWalletData
     } = props
 
     const [hasError_1, setHasError_1] = useState(false);
@@ -39,11 +39,11 @@ const SendCrypto = (props) => {
 
     const onSendICP = async () => {
         setModalIsOpen,
-        setIsLoadingTx(true);
+        setIsLoadingWalletData(true);
         const e8s = round8Decimals(parseFloat(numberInput) * e8sInOneICP);
         const accountId = fromHexString(recipientAddress);
         const result = await actorState.backendActor.transferICP(e8s, accountId);
-        setIsLoadingTx(false);
+        setIsLoadingWalletData(false);
         setModalIsOpen(false);
         if("err" in result){
             alert("Error: " + Object.keys(result.err)[0]);
@@ -112,7 +112,7 @@ const SendCrypto = (props) => {
                                     onChange={onChangeAmount}
                                     value={numberInput}
                                     format={INPUT_BOX_FORMATS.numberFormat}
-                                    maxValue={ round8Decimals( parseFloat(walletState.walletData.balance) /  e8sInOneICP - 0.0001) }
+                                    maxValue={ round8Decimals( fromE8s(parseFloat(walletState.walletData.balance))) }
                                     width={"100%"}
                                 />
                             </Grid>}
@@ -152,7 +152,7 @@ const SendCrypto = (props) => {
                     />
                     <DataField
                         label={'Amount: '}
-                        text={`${round8Decimals(parseFloat(numberInput))} ICP`}
+                        text={`${round8Decimals(parseFloat(numberInput)) - 0.0001} ICP`}
                         disabled={true}
                     />
                     <DataField
@@ -162,7 +162,7 @@ const SendCrypto = (props) => {
                     />
                     <DataField
                         label={'Total: '}
-                        text={`${round8Decimals(parseFloat(numberInput) + 0.0001)} ICP`}
+                        text={`${round8Decimals(parseFloat(numberInput))} ICP`}
                         disabled={true}
                     />
                     <Grid

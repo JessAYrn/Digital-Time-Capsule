@@ -2,23 +2,34 @@ import HashMap "mo:base/HashMap";
 import Principal "mo:base/Principal";
 import Nat64 "mo:base/Nat64";
 import Blob "mo:base/Blob";
-import Governance "../../NNS/Governance";
 import Buffer "mo:base/Buffer";
+import Governance "../../NNS/Governance";
+import Account "../../Serializers/Account";
+import IC "../../Types/IC/types";
 
 
 module{
 
-    public type Deposits = {
+    public type SubaccountsMetaData = { owner: Text; };
+
+    public type SubaccountRegistryArray = [(Blob, SubaccountsMetaData)];
+
+    public type SubaccountRegistryMap = HashMap.HashMap<Blob, SubaccountsMetaData>;
+
+    public type Identifier = {#Principal: Text; #SubaccountId: Account.Subaccount};
+
+    public type Balances = {
         icp: {e8s : Nat64;};
         eth: {e8s : Nat64};
         btc: {e8s : Nat64};
     };
 
-    public type DepositsExport = {
+    public type BalancesExport = {
         icp: {e8s : Nat64;};
         icp_staked: {e8s : Nat64;};
         eth: {e8s : Nat64};
         btc: {e8s : Nat64};
+        voting_power: {e8s: Nat64};
     };
 
     public type SupportedCurrencies = {
@@ -35,6 +46,7 @@ module{
         #NeuronClaimFailed;
         #NoNeuronIdRetreived;
         #UnexpectedResponse : {response : Governance.Command_1};
+        #NoTreasuryCanisterId;
     };
 
     public type NeuronStakeInfo = {
@@ -43,11 +55,13 @@ module{
     };
 
     public type UserTreasuryData = {
-        deposits : Deposits;
+        balances : Balances;
+        subaccountId : Account.Subaccount;
     };
 
     public type UserTreasuryDataExport = {
-        deposits : DepositsExport;
+        balances : BalancesExport;
+        subaccountId : Account.Subaccount;
     };
 
     public type PrincipalAsText = Text;
@@ -58,16 +72,12 @@ module{
 
     public type UsersTreasuryDataMap = HashMap.HashMap<PrincipalAsText, UserTreasuryData>;
 
-    public type TransferIcpToNeuronResponse = {
-        #ok : {public_key: Blob; selfAuthPrincipal: Principal;};
-        #err: Error;
-    };
-
     public type TreasuryDataExport = {
         neurons : { icp: NeuronsDataArray; };
         usersTreasuryDataArray : UsersTreasuryDataArrayExport;
-        balance_icp: {e8s : Nat64};
-        accountId_icp: [Nat8];
+        totalDeposits : {e8s : Nat64};
+        daoWalletBalance: {e8s : Nat64};
+        daoIcpAccountId: [Nat8];
         userPrincipal: Text;
     };
 
@@ -99,52 +109,89 @@ module{
     public type Expiry = Nat64;
 
     public type ExpectedRequestResponses = {
-        #CreateNeuronResponse: {memo: Nat64; newNeuronIdPlaceholderKey: Text;};
-        #GetFullNeuronResponse: {neuronId: Nat64;};
-        #GetNeuronInfoResponse: {neuronId: Nat64;};
-        #Spawn: {neuronId: Nat64; };
-        #Split: {neuronId: Nat64; amount_e8s: Nat64; proposer: Principal;};
-        #Follow: {neuronId: Nat64; };
-        #ClaimOrRefresh: {neuronId: Nat64;};
-        #Configure: {neuronId: Nat64; };
-        #RegisterVote: {neuronId: Nat64; };
-        #Disburse: {neuronId: Nat64; proposer: Principal;};
+        #GovernanceManageNeuronResponse: { neuronId: ?Nat64; memo: ?Nat64; proposer: ?Principal; treasuryCanisterId: ?Principal; };
+        #GovernanceResult_2: {neuronId: Nat64;};
+        #GovernanceResult_5: {neuronId: Nat64;};
     };
 
-    public type RequestResponses = {
-        #CreateNeuronResponse: {response: Governance.ClaimOrRefreshResponse; memo: Nat64; newNeuronIdPlaceholderKey: Text; };
-        #GetFullNeuronResponse : {response: Governance.Result_2; neuronId: Nat64; };
-        #GetNeuronInfoResponse : {response: Governance.Result_5; neuronId: Nat64; };
-        #Error : {response: Governance.GovernanceError;};
-        #Spawn : { response: Governance.SpawnResponse; neuronId: Nat64;};
-        #Split : {response: Governance.SpawnResponse; neuronId: Nat64; amount_e8s: Nat64; proposer: Principal;};
-        #Follow : {response: {}; neuronId: Nat64;};
-        #ClaimOrRefresh : { response: Governance.ClaimOrRefreshResponse; neuronId: Nat64;};
-        #Configure : {response: {}; neuronId: Nat64; };
-        #RegisterVote : {response: {}; neuronId: Nat64; };
-        #Disburse : { response: Governance.DisburseResponse; neuronId: Nat64; proposer: Principal;};
+    public type ReadRequestResponseOutput = {
+        #GovernanceResult_2 : {response: Governance.Result_2; neuronId: Nat64; };
+        #GovernanceResult_5 : {response: Governance.Result_5; neuronId: Nat64; };
+        #Error : Governance.GovernanceError;
+        #Spawn : { created_neuron_id: Nat64; neuronId: Nat64;};
+        #Follow : { neuronId: Nat64;};
+        #ClaimOrRefresh : { neuronId: Nat64; memo: ?Nat64;};
+        #Configure : { neuronId: Nat64; };
+        #Disburse : { transfer_block_height: Nat64; neuronId: Nat64; proposer: Principal; treasuryCanisterId: Principal;};
     };
 
     public type ReadRequestInput = {
         requestId: RequestId;
         expiry: Expiry;
         expectedResponseType: ExpectedRequestResponses;
-        numberOfFailedAttempts: Nat;
+    };
+
+    public type TransformFnSignature = query { response : IC.http_response; context: Blob } -> async IC.http_response;
+
+    public let GetNeuronDataMethodNames = {
+        getFullNeuron = "get_full_neuron";
+        getNeuronInfo = "get_neuron_info";
+    };
+
+    public type GetNeuronDataInput = {
+        args: NeuronId;
+        selfAuthPrincipal: Principal; 
+        public_key: Blob; 
+        transformFn: TransformFnSignature;
+        method_name: Text;
+    };
+
+
+    public type ManageNeuronInput = {
+        args: Governance.ManageNeuron;
+        selfAuthPrincipal: Principal;
+        public_key: Blob; 
+        transformFn: TransformFnSignature
+    };
+
+    public type UnprocessedHttpResponseAndRequestId = {
+        response: IC.http_response; 
+        requestId: RequestId; 
+        ingress_expiry: Expiry;
+    };
+
+    public type ProcessResponseInput = {
+        neuronDataMap: NeuronsDataMap;
+        usersTreasuryDataMap: UsersTreasuryDataMap;
+        pendingActionsMap: PendingActionsMap;
+        actionLogsArrayBuffer: ActionLogsArrayBuffer;
+        memoToNeuronIdMap: MemoToNeuronIdMap;
+        updateTokenBalances: shared ( Identifier, SupportedCurrencies ) -> async ();
+        readRequestResponseOutput: ReadRequestResponseOutput;
+        selfAuthPrincipal: Principal;
+        publicKey: Blob;
+        transformFn: TransformFnSignature
     };
 
     public type PendingAction = {
-        args: ?Governance.ManageNeuron;
-        expectedResponseType: ExpectedRequestResponses;
-        selfAuthPrincipal: Principal;
-        public_key: Blob;
+        expectedHttpResponseType: ?ExpectedRequestResponses;
+        function: { #GetNeuronData: {input: GetNeuronDataInput; }; #ManageNeuron: {input: ManageNeuronInput;}; };
+    };
+
+    public type PendingActionExport = {
+        #GetNeuronData: {args: NeuronId};
+        #ManageNeuron: {args: Governance.ManageNeuron};
+        #ProcessResponse: {args: ReadRequestResponseOutput};
     };
 
     public type PendingActionsMap = HashMap.HashMap<Text, PendingAction>;
 
     public type PendingActionArray = [(Text, PendingAction)];
 
+    public type PendingActionArrayExport = [(Text, PendingActionExport)];
+
     public type ActionLogsArray = [(Text, Text)];
 
-    public type ActionLogsMap = HashMap.HashMap<Text,Text>;
+    public type ActionLogsArrayBuffer = Buffer.Buffer<(Text, Text)>; 
 
 }
