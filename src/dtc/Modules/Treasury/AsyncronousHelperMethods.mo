@@ -84,13 +84,13 @@ module{
         updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies ) -> async (),
         transformFn: NeuronManager.TransformFnSignature,
         {amount: Nat64; neuronId: Nat64; contributor: Principal; selfAuthPrincipal: Principal; publicKey: Blob}
-    ) : async Result.Result<(), TreasuryTypes.Error>  {
+    ) : async Result.Result<({amountSent: Nat64}), TreasuryTypes.Error>  {
 
         let ?neuronData = neuronDataMap.get(Nat64.toText(neuronId)) else Debug.trap("No neuron data for neuronId");
         let ?neuron = neuronData.neuron else Debug.trap("No neuron for neuronId");
         let {account = neuronSubaccount} = neuron;
         let ?{subaccountId} = usersTreasuryDataMap.get(Principal.toText(contributor)) else Debug.trap("No subaccount for contributor");
-        let {amountSent} = await NeuronManager.transferIcpToNeuronWithSubaccount(amount, neuronSubaccount, subaccountId);
+        let {amountSent} = await NeuronManager.transferIcpToNeuron(amount, #NeuronSubaccountId(neuronSubaccount), subaccountId, selfAuthPrincipal);
         ignore updateTokenBalances(#Principal(Principal.toText(contributor)), #Icp);
         SyncronousHelperMethods.creditUserNeuronStake( neuronDataMap,{ userPrincipal = Principal.toText(contributor);  delta = amountSent; neuronId = Nat64.toText(neuronId); });
         let args = { id = null; command = ?#ClaimOrRefresh( {by = ?#NeuronIdOrSubaccount( {} )} );neuron_id_or_subaccount = ?#Subaccount(neuronSubaccount); };
@@ -110,7 +110,7 @@ module{
             updateTokenBalances, 
             transformFn
         );
-        return #ok(());
+        return #ok({amountSent});
     };
 
     public func createNeuron(
@@ -122,10 +122,10 @@ module{
         updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies ) -> async (),
         transformFn: NeuronManager.TransformFnSignature,
         {amount: Nat64; contributor: Principal; neuronMemo: Nat64; selfAuthPrincipal: Principal; publicKey: Blob}
-    ) : async Result.Result<(), TreasuryTypes.Error>  {
+    ) : async Result.Result<({amountSent: Nat64}), TreasuryTypes.Error>  {
 
         let ?{subaccountId} = usersTreasuryDataMap.get(Principal.toText(contributor)) else Debug.trap("No subaccount for contributor");
-        let {amountSent} = await NeuronManager.transferIcpToNeuronWithMemo(amount, neuronMemo, subaccountId, selfAuthPrincipal);
+        let {amountSent} = await NeuronManager.transferIcpToNeuron(amount, #Memo(neuronMemo), subaccountId, selfAuthPrincipal);
         ignore updateTokenBalances(#Principal(Principal.toText(contributor)), #Icp);
         let newNeuronIdPlaceholderKey : Text = Nat64.toText(neuronMemo)#PENDING_NEURON_SUFFIX;
         SyncronousHelperMethods.creditUserNeuronStake( neuronDataMap,{ userPrincipal = Principal.toText(contributor);  delta = amountSent; neuronId = newNeuronIdPlaceholderKey; });
@@ -146,7 +146,7 @@ module{
             updateTokenBalances, 
             transformFn
         );
-        return #ok(());
+        return #ok({amountSent});
         
     };
 

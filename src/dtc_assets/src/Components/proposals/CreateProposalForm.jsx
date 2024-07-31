@@ -256,7 +256,6 @@ const CreateProposalForm = (props) => {
             let errorMessage = errorMessagArray[0];
             setModalProps({
                 bigText: `Error: ${errorMessage}`,
-                smallText: "You must make a contribution to the treasury before being able to create proposals",
                 Icon: ErrorOutlineIcon,
                 components: modalButton_close
             });
@@ -268,7 +267,6 @@ const CreateProposalForm = (props) => {
             });
             setModalIsOpen(false);
         }
-        setModalIsOpen(false);
         setIsLoadingModal(false);
     };
 

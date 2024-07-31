@@ -40,6 +40,7 @@ module{
         #NotAuthorizedToAccessData;
         #NoProfileFound;
         #InsufficientFunds;
+        #InstallUpgradeProposalIsActive
     };
 
     public type UserProfile_V2 = {

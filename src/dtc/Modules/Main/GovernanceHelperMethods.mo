@@ -4,14 +4,9 @@ import HashMap "mo:base/HashMap";
 import Iter "mo:base/Iter";
 import Principal "mo:base/Principal";
 import Text "mo:base/Text";
-import Array "mo:base/Array";
 import Time "mo:base/Time";
 import Float "mo:base/Float";
 import Nat64 "mo:base/Nat64";
-import Int64 "mo:base/Int64";
-import NnsCyclesMinting "../../NNS/NnsCyclesMinting";
-import Nat "mo:base/Nat";
-import Hash "mo:base/Hash";
 
 
 module{    
@@ -87,5 +82,15 @@ module{
         };
 
         return {votingPower};
+    };
+
+    public func isInstallUpgradeProposalIsActive( proposals: MainTypes.ProposalsMap ): Bool {
+        label loop_ for((_, proposal) in proposals.entries()){
+            let {timeVotingPeriodEnds} = proposal;
+            if(Time.now() > timeVotingPeriodEnds) continue loop_;
+            let {action} = proposal;
+            switch(action){ case (#InstallUpgrades(_)) { return true; }; case(_) { continue loop_; }; };
+        };
+        return false;
     };
 }

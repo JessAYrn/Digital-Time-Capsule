@@ -457,6 +457,7 @@ shared actor class User() = this {
     async Result.Result<(MainTypes.Proposals),MainTypes.Error>{
         let callerProfile = userProfilesMap_v2.get(caller);
         if(callerProfile == null) return #err(#NotAuthorizedToCreateProposals);
+        if(GovernanceHelperMethods.isInstallUpgradeProposalIsActive(proposalsMap)) return #err(#InstallUpgradeProposalIsActive);
         let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v4.treasuryCanisterPrincipal);
         let neuronsDataArray = await treasuryCanister.getNeuronsDataArray();
         let proposer = Principal.toText(caller); let votes = [(proposer, {adopt = true})];
@@ -506,8 +507,18 @@ shared actor class User() = this {
         let {yay; nay; total } = GovernanceHelperMethods.tallyVotes({ neuronsDataArray; proposal; founder = daoMetaData_v4.founder; userProfilesMap = userProfilesMap_v2;});
         let participationRate = Float.fromInt(Nat64.toNat(total)) / Float.fromInt(Nat64.toNat(totalVotingPower));
         var executed = false;
-        if( yay > nay and participationRate >= quorum) { executed := true; await executeProposal(proposal); };
-        let updatedProposal = {proposal with voteTally = {yay; nay; total }; executed;};
+        var action = proposal.action;
+        if( yay > nay and participationRate >= quorum) { 
+            executed := true;  switch(await executeProposal(proposal)){
+                case null {};
+                case(?{amountSent}){ 
+                    switch(action){
+                        case(#CreateNeuron(_)){ action := #CreateNeuron({amount = amountSent;}); };
+                        case(#IncreaseNeuron(args)){ action := #IncreaseNeuron({args with amount = amountSent;}); };
+                        case(_){};
+                }};
+            }; };
+        let updatedProposal = {proposal with voteTally = {yay; nay; total }; executed; action;};
         proposalsMap.put(proposalId, updatedProposal);
     };
 
@@ -526,26 +537,37 @@ shared actor class User() = this {
         );
     };
 
-    private func executeProposal(proposal: MainTypes.Proposal) : async () {
+    private func executeProposal(proposal: MainTypes.Proposal) : async ?{amountSent: Nat64} {
         let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v4.treasuryCanisterPrincipal);
         let {action; proposer;} = proposal;
         switch(action){
             case(#AddAdmin({principal})){
                 let updatedDaoMetaData = CanisterManagementMethods.addAdmin(Principal.fromText(principal), daoMetaData_v4);
-                daoMetaData_v4 := updatedDaoMetaData;               
+                daoMetaData_v4 := updatedDaoMetaData;     
+                return null;         
             };
             case(#RemoveAdmin({principal})){
                 let updatedDaoMetaData = CanisterManagementMethods.removeAdmin(Principal.fromText(principal), daoMetaData_v4);
                 daoMetaData_v4 := updatedDaoMetaData;
+                return null;    
             };
             //still need to delete the public upgradeApp method once the frontend has been updated
-            case(#LoadUpgrades({})){ ignore loadUpgrades_(); };
-            case (#InstallUpgrades({})){ ignore installUpgrades_(); };
+            case(#LoadUpgrades({})){ ignore loadUpgrades_(); return null; };
+            case (#InstallUpgrades({})){ ignore installUpgrades_(); return null; };
             case (#CreateNeuron({amount;})){
-                ignore await treasuryCanister.createNeuron({amount; contributor = Principal.fromText(proposer);});
+                let result =  await treasuryCanister.createNeuron({amount; contributor = Principal.fromText(proposer);});
+                switch(result){
+                    case(#ok({amountSent})){ ?{amountSent} };
+                    case(#err(e)){ let amountSent: Nat64 = 0; ?{amountSent} };
+                };
+                
             };
             case(#IncreaseNeuron({amount; neuronId;})){
-                ignore await treasuryCanister.increaseNeuron({amount; neuronId; contributor = Principal.fromText(proposer);});
+                let result = await treasuryCanister.increaseNeuron({amount; neuronId; contributor = Principal.fromText(proposer);});
+                switch(result){
+                    case(#ok({amountSent})){ ?{amountSent} };
+                    case(#err(e)){ let amountSent: Nat64 = 0; ?{amountSent} };
+                };
             };
             case(#DisburseNeuron({neuronId;})){
                 let treasuryAccountId = await treasuryCanister.canisterIcpAccountId(null);
@@ -555,6 +577,7 @@ shared actor class User() = this {
                     neuron_id_or_subaccount = null;
                 };
                 ignore await treasuryCanister.manageNeuron(args, Principal.fromText(proposer));
+                return null;
             };
             case(#DissolveNeuron({neuronId;})){
                 let args : Governance.ManageNeuron = {
@@ -563,6 +586,7 @@ shared actor class User() = this {
                     neuron_id_or_subaccount = null;
                 };
                 ignore await treasuryCanister.manageNeuron(args, Principal.fromText(proposer));
+                return null;
 
             };
             case(#FollowNeuron({neuronId; topic; followee;})){
@@ -573,6 +597,7 @@ shared actor class User() = this {
                     neuron_id_or_subaccount = null;
                 };
                 ignore await treasuryCanister.manageNeuron(args, Principal.fromText(proposer));
+                return null;
             };
             case(#IncreaseDissolveDelay({neuronId; additionalDissolveDelaySeconds;})){
                 let additional_dissolve_delay_seconds = additionalDissolveDelaySeconds;
@@ -582,6 +607,7 @@ shared actor class User() = this {
                     neuron_id_or_subaccount = null;
                 };
                 ignore await treasuryCanister.manageNeuron(args, Principal.fromText(proposer));
+                return null;
             };
             case(#SpawnNeuron({neuronId; percentage_to_spawn;})){
                 let {selfAuthPrincipal = treasurySelfAuthPrincipal} = await treasuryCanister.getSelfAuthenticatingPrincipalAndPublicKey();
@@ -596,11 +622,13 @@ shared actor class User() = this {
                     neuron_id_or_subaccount = null;
                 };
                 ignore await treasuryCanister.manageNeuron(args, Principal.fromText(proposer));
+                return null;
             };
             case(#PurchaseCycles({amount})){
                 //call function to purchase more cycles
+                return null;
             };
-            case(#ToggleSupportMode({})){ ignore toggleSupportMode(); };
+            case(#ToggleSupportMode({})){ ignore toggleSupportMode(); return null; };
         };
     };
 

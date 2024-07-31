@@ -171,7 +171,7 @@ shared actor class Treasury (principal : Principal) = this {
         Hex.encode(Blob.toArray(treasuryNeuronSubaccount));
     };
 
-    public shared({caller}) func createNeuron({amount: Nat64; contributor: Principal}) : async Result.Result<(), TreasuryTypes.Error> {
+    public shared({caller}) func createNeuron({amount: Nat64; contributor: Principal}) : async Result.Result<({amountSent: Nat64}), TreasuryTypes.Error> {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         actionLogsArrayBuffer.add(Int.toText(Time.now()),"Creating Neuron, amount: " # Nat64.toText(amount) # ", contributor: " # Principal.toText(contributor));
         let {selfAuthPrincipal; publicKey} = getSelfAuthenticatingPrincipalAndPublicKey_();
@@ -186,9 +186,9 @@ shared actor class Treasury (principal : Principal) = this {
             {amount; contributor; neuronMemo; selfAuthPrincipal; publicKey; },
         );
         switch(response){
-            case(#ok()) { 
+            case(#ok({amountSent})) { 
                 neuronMemo += 1; 
-                return #ok(()); 
+                return #ok({amountSent}); 
             };
             case(#err(#TxFailed)) {
                 actionLogsArrayBuffer.add(Int.toText(Time.now()),"Error creating neuron: Transaction failed.");
@@ -202,7 +202,7 @@ shared actor class Treasury (principal : Principal) = this {
         };
     };
 
-    public shared({caller}) func increaseNeuron({amount: Nat64; neuronId: Nat64; contributor: Principal}) : async Result.Result<() , TreasuryTypes.Error>{
+    public shared({caller}) func increaseNeuron({amount: Nat64; neuronId: Nat64; contributor: Principal}) : async Result.Result<({amountSent: Nat64}) , TreasuryTypes.Error>{
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         let {selfAuthPrincipal; publicKey} = getSelfAuthenticatingPrincipalAndPublicKey_();
         let response = await AsyncronousHelperMethods.increaseNeuron(
@@ -216,7 +216,7 @@ shared actor class Treasury (principal : Principal) = this {
             {amount; neuronId; contributor; selfAuthPrincipal; publicKey;}
         );
         switch(response){
-            case(#ok()) return #ok(());
+            case(#ok({amountSent})) return #ok({amountSent});
             case(#err(#TxFailed)) {
                 actionLogsArrayBuffer.add(Int.toText(Time.now()),"Error increasing neuron: Transaction failed.");
                 throw Error.reject("Error increasing neuron.");

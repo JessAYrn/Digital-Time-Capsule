@@ -31,37 +31,31 @@ module {
     let txFee : Nat64 = 10_000;
     public type TransformFnSignature = query { response : IC.http_response; context: Blob } -> async IC.http_response;
 
-    public func transferIcpToNeuronWithMemo( amount: Nat64, memo: Nat64, senderSubaccount: Account.Subaccount, selfAuthPrincipal: Principal): async {amountSent: Nat64} {
-        let treasuryNeuronSubaccount = Account.neuronSubaccount(selfAuthPrincipal, memo);
-        let treasuryNeuronAccountId = Account.accountIdentifier(Principal.fromText(Governance.CANISTER_ID), treasuryNeuronSubaccount);
-        let amountSent = amount - txFee;
-        let res = await ledger.transfer({
-          memo = memo;
+    public func transferIcpToNeuron( amount: Nat64, memoOrNeuronSubaccountId: {#Memo: Nat64; #NeuronSubaccountId: Blob}, senderSubaccount: Account.Subaccount, selfAuthPrincipal: Principal): async {amountSent: Nat64} {
+        let (memo, treasuryNeuronSubaccountId) = switch(memoOrNeuronSubaccountId){
+            case(#Memo(memo)) { (memo, Account.neuronSubaccount(selfAuthPrincipal, memo)); };
+            case(#NeuronSubaccountId(subaccount)) { let memo: Nat64 = 0; (memo, subaccount) };
+        };
+        let treasuryNeuronAccountId = Account.accountIdentifier(Principal.fromText(Governance.CANISTER_ID), treasuryNeuronSubaccountId);
+        var amountSent = amount - txFee;
+        var transferInput = {memo;
           from_subaccount = ?senderSubaccount;
           to = treasuryNeuronAccountId;
           amount = { e8s = amountSent };
           fee = { e8s = txFee };
           created_at_time = ?{ timestamp_nanos = Nat64.fromNat(Int.abs(Time.now())) };
-        });
+        };
+        let res = await ledger.transfer(transferInput);
         switch(res){
             case(#Ok(_)) { return {amountSent} };
-            case(#Err(_)) { throw Error.reject("Transfer failed") };
-        };
-    };
-
-    public func transferIcpToNeuronWithSubaccount(amount: Nat64, neuronSubaccount: Blob, senderSubaccount: Account.Subaccount): async {amountSent: Nat64} {
-        let treasuryNeuronAccountId = Account.accountIdentifier(Principal.fromText(Governance.CANISTER_ID), neuronSubaccount);
-        let amountSent = amount - txFee;
-        let res = await ledger.transfer({
-          memo = 0;
-          from_subaccount = ?senderSubaccount;
-          to = treasuryNeuronAccountId;
-          amount = { e8s = amountSent };
-          fee = { e8s = txFee };
-          created_at_time = ?{ timestamp_nanos = Nat64.fromNat(Int.abs(Time.now())) };
-        });
-        switch(res){
-            case(#Ok(_)) { return {amountSent}};
+            case(#Err(#InsufficientFunds { balance })) { 
+                var amountSent = balance.e8s - txFee;
+                let res = await ledger.transfer({transferInput with amount = { e8s = amountSent }}); 
+                switch(res){
+                    case(#Ok(_)) { return {amountSent} };
+                    case(#Err(_)) { throw Error.reject("Transfer failed") };
+                };
+            };
             case(#Err(_)) { throw Error.reject("Transfer failed") };
         };
     };
