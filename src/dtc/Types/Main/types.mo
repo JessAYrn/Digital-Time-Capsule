@@ -36,11 +36,11 @@ module{
         #NotAuthorizedToVoteOnThisProposal;
         #VoteHasAlreadyBeenSubmitted;
         #NotAuthorized;
+        #ProposalNotFound;
         #PorposalHasExpired;
         #NotAuthorizedToAccessData;
         #NoProfileFound;
         #InsufficientFunds;
-        #InstallUpgradeProposalIsActive
     };
 
     public type UserProfile_V2 = {
@@ -77,7 +77,7 @@ module{
         lastRecordedBackEndCyclesBalance: Nat;
         backEndCyclesBurnRatePerDay: Nat;
         admin: [(Text, AdminData)];
-        proposals: Proposals;
+        proposals: Proposals_V2;
         acceptingRequests: Bool;
         lastRecordedTime: Int;
         profilesMetaData: ProfilesMetaData;
@@ -142,12 +142,22 @@ module{
 
     public type Proposals = [(Nat,Proposal)];
 
+    public type Proposals_V2 = [(Nat,Proposal_V2)];
+
     public type ProposalsMap = HashMap.HashMap<Nat, Proposal>;
+
+    public type ProposalsMap_V2 = HashMap.HashMap<Nat, Proposal_V2>;
     
     public type VotingResults = {
         yay: Nat64;
         nay: Nat64;
         total: Nat64;
+    };
+
+    public type VotingResults_V2 = {
+        yay: Nat64;
+        nay: Nat64;
+        totalParticipated: Nat64;
     };
 
     public type Proposal = {
@@ -157,6 +167,17 @@ module{
         proposer: Text;
         timeInitiated: Int;
         executed: Bool;
+        timeVotingPeriodEnds: Int;
+    };
+
+    public type Proposal_V2 = {
+        votes: [(Text, Vote)];
+        voteTally: VotingResults_V2;
+        action: ProposalActions;
+        proposer: Text;
+        timeInitiated: Int;
+        executed: Bool;
+        finalized: Bool;
         timeVotingPeriodEnds: Int;
     };
 

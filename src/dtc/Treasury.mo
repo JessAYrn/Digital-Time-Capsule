@@ -128,8 +128,8 @@ shared actor class Treasury (principal : Principal) = this {
 
     public query({caller}) func getDaoTotalStakeAndVotingPower(): async {totalVotingPower: Nat64; totalStake: Nat64} {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
-        var totalVotingPower: Nat64 = 0;
-        var totalStake: Nat64 = 0;
+        var totalVotingPower: Nat64 = 1;
+        var totalStake: Nat64 = 1;
         label loop_ for((neuronIdAsText, neuronData) in neuronDataMap.entries()){
             let ?neuronInfo = neuronData.neuronInfo else continue loop_;
             totalVotingPower += neuronInfo.voting_power;
@@ -175,7 +175,7 @@ shared actor class Treasury (principal : Principal) = this {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         actionLogsArrayBuffer.add(Int.toText(Time.now()),"Creating Neuron, amount: " # Nat64.toText(amount) # ", contributor: " # Principal.toText(contributor));
         let {selfAuthPrincipal; publicKey} = getSelfAuthenticatingPrincipalAndPublicKey_();
-        let response = await AsyncronousHelperMethods.createNeuron(
+        let response = try { await AsyncronousHelperMethods.createNeuron(
             neuronDataMap,
             usersTreasuryDataMap,
             pendingActionsMap,
@@ -184,7 +184,10 @@ shared actor class Treasury (principal : Principal) = this {
             updateTokenBalances,
             transformFn,
             {amount; contributor; neuronMemo; selfAuthPrincipal; publicKey; },
-        );
+        ); } catch (e) { 
+            actionLogsArrayBuffer.add(Int.toText(Time.now()),"Error creating neuron: " # Error.message(e)); 
+            throw Error.reject("Error creating neuron.");   
+        };
         switch(response){
             case(#ok({amountSent})) { 
                 neuronMemo += 1; 
@@ -205,7 +208,7 @@ shared actor class Treasury (principal : Principal) = this {
     public shared({caller}) func increaseNeuron({amount: Nat64; neuronId: Nat64; contributor: Principal}) : async Result.Result<({amountSent: Nat64}) , TreasuryTypes.Error>{
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         let {selfAuthPrincipal; publicKey} = getSelfAuthenticatingPrincipalAndPublicKey_();
-        let response = await AsyncronousHelperMethods.increaseNeuron(
+        let response = try { await AsyncronousHelperMethods.increaseNeuron(
             neuronDataMap,
             usersTreasuryDataMap,
             pendingActionsMap,
@@ -214,7 +217,10 @@ shared actor class Treasury (principal : Principal) = this {
             updateTokenBalances,
             transformFn,
             {amount; neuronId; contributor; selfAuthPrincipal; publicKey;}
-        );
+        ); } catch (e) { 
+            actionLogsArrayBuffer.add(Int.toText(Time.now()),"Error creating neuron: " # Error.message(e)); 
+            throw Error.reject("Error creating neuron.");   
+        };
         switch(response){
             case(#ok({amountSent})) return #ok({amountSent});
             case(#err(#TxFailed)) {

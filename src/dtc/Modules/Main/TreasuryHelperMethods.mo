@@ -18,13 +18,7 @@ module{
         let userCanister: Journal.Journal = actor(Principal.toText(userCanisterId));
         let treasury: Treasury.Treasury = actor(daoMetaData.treasuryCanisterPrincipal);
         let {subaccountId = userTreasurySubaccountId} = await treasury.getUserTreasuryData(caller);
-        let {blockIndex} = await userCanister.transferICP(
-            amount, 
-            #PrincipalAndSubaccount(
-                Principal.fromText(daoMetaData.treasuryCanisterPrincipal), 
-                ?userTreasurySubaccountId
-            )
-        );
+        let {blockIndex} = await userCanister.transferICP( amount, #PrincipalAndSubaccount(Principal.fromText(daoMetaData.treasuryCanisterPrincipal), ?userTreasurySubaccountId ));
         ignore treasury.updateTokenBalances(#SubaccountId(userTreasurySubaccountId), #Icp);
         return {blockIndex};
     };
@@ -45,6 +39,5 @@ module{
         let {blockIndex = blockIndex_2} = await treasury.transferICP(withdrawelamount,#SubaccountId(userTreasurySubaccountId), userCanisterId);
         ignore treasury.updateTokenBalances(#SubaccountId(userTreasurySubaccountId), #Icp);
         return {blockIndex = Nat64.fromNat(blockIndex_2)};
-    };
-    
+    };    
 }

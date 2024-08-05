@@ -25,6 +25,7 @@ import Nat "mo:base/Nat";
 import Time "mo:base/Time";
 import Float "mo:base/Float";
 import Blob "mo:base/Blob";
+import Int64 "mo:base/Int64";
 import GovernanceHelperMethods "Modules/Main/GovernanceHelperMethods";
 import Treasury "Treasury";
 import TreasuryTypes "Types/Treasury/types";
@@ -43,12 +44,14 @@ shared actor class User() = this {
     private stable var userProfilesArray_v2 : [(Principal, MainTypes.UserProfile_V2)] = [];
     private stable var proposalIndex: Nat = 0;
     private stable var proposalsArray: MainTypes.Proposals = [];
+    private stable var proposalsArray_v2: MainTypes.Proposals_V2 = [];
     private stable var xdr_permyriad_per_icp: Nat64 = 1;
     private stable var frontEndCanisterBalance: Nat = 1;
     private stable var quorum: Float = 0.125;
     private var maxNumberDaoMembers : Nat = 250;
     private var userProfilesMap_v2 : MainTypes.UserProfilesMap_V2 = HashMap.fromIter<Principal, MainTypes.UserProfile_V2>(Iter.fromArray(userProfilesArray_v2), Iter.size(Iter.fromArray(userProfilesArray_v2)), Principal.equal, Principal.hash);
     private var proposalsMap : MainTypes.ProposalsMap = HashMap.fromIter<Nat, MainTypes.Proposal>(Iter.fromArray(proposalsArray), Iter.size(Iter.fromArray(proposalsArray)), Nat.equal, Hash.hash);
+    private var proposalsMap_v2 : MainTypes.ProposalsMap_V2 = HashMap.fromIter<Nat, MainTypes.Proposal_V2>(Iter.fromArray(proposalsArray_v2), Iter.size(Iter.fromArray(proposalsArray_v2)), Nat.equal, Hash.hash);
     private stable var startIndexForBlockChainQuery : Nat64 = 7_356_011;
     private let ic : IC.Self = actor "aaaaa-aa";
 
@@ -310,7 +313,7 @@ shared actor class User() = this {
         let currentVersions = await managerCanister.getCurrentVersions();
         let canisterDataPackagedForExport = {
             daoMetaData_v4 with 
-            proposals = GovernanceHelperMethods.tallyAllProposalVotes({proposals = proposalsMap; neuronsDataArray; founder = daoMetaData_v4.founder; userProfilesMap = userProfilesMap_v2;});
+            proposals = GovernanceHelperMethods.tallyAllProposalVotes({proposals = proposalsMap_v2; neuronsDataArray; founder = daoMetaData_v4.founder; userProfilesMap = userProfilesMap_v2; includeNonVoters = true});
             isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v4);
             currentCyclesBalance_backend = Cycles.balance();
             journalCount = userProfilesMap_v2.size();
@@ -454,34 +457,33 @@ shared actor class User() = this {
     };
 
     public shared({caller}) func createProposal(action: MainTypes.ProposalActions): 
-    async Result.Result<(MainTypes.Proposals),MainTypes.Error>{
+    async Result.Result<(MainTypes.Proposals_V2),MainTypes.Error>{
         let callerProfile = userProfilesMap_v2.get(caller);
         if(callerProfile == null) return #err(#NotAuthorizedToCreateProposals);
-        if(GovernanceHelperMethods.isInstallUpgradeProposalIsActive(proposalsMap)) return #err(#InstallUpgradeProposalIsActive);
         let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v4.treasuryCanisterPrincipal);
+        switch(action){
+            case(#CreateNeuron({amount})){ ignore TreasuryHelperMethods.depositIcpToTreasury(daoMetaData_v4, userProfilesMap_v2, caller, amount); };
+            case(#IncreaseNeuron({amount})){ ignore TreasuryHelperMethods.depositIcpToTreasury(daoMetaData_v4, userProfilesMap_v2, caller, amount); };
+            case(_){};
+        };
         let neuronsDataArray = await treasuryCanister.getNeuronsDataArray();
         let proposer = Principal.toText(caller); let votes = [(proposer, {adopt = true})];
         let timeInitiated = Time.now(); 
         let votingWindowInNanoseconds = 3 * 24 * 60 * 60 * 1_000_000_000;
         let timeVotingPeriodEnds = timeInitiated + votingWindowInNanoseconds;
-        let executed = false;
-        var voteTally = {yay = Nat64.fromNat(0); nay = Nat64.fromNat(0); total = Nat64.fromNat(0);};
-        let proposal = {votes; action; proposer; timeInitiated; executed; voteTally; timeVotingPeriodEnds;};
-        let votingResults = GovernanceHelperMethods.tallyVotes({ neuronsDataArray; proposal; founder = daoMetaData_v4.founder; userProfilesMap = userProfilesMap_v2; });
-        proposalsMap.put(proposalIndex, {proposal with voteTally = votingResults} );
-        let proposalId = proposalIndex;
-        ignore setTimer<system>(#nanoseconds(votingWindowInNanoseconds), func(): async (){await finalizeProposalVotingPeriod(proposalId);});
+        var voteTally = {yay = Nat64.fromNat(0); nay = Nat64.fromNat(0); totalParticipated = Nat64.fromNat(0);};
+        let proposal = {votes; action; proposer; timeInitiated; executed = false; voteTally; timeVotingPeriodEnds; finalized = false};
+        let votingResults = GovernanceHelperMethods.tallyVotes({ neuronsDataArray; proposal; founder = daoMetaData_v4.founder; userProfilesMap = userProfilesMap_v2; includeNonVoters = true});
+        proposalsMap_v2.put(proposalIndex, {proposal with voteTally = votingResults} );
         proposalIndex += 1;
-        let updatedProposalsArray = Iter.toArray(proposalsMap.entries());
+        let updatedProposalsArray = Iter.toArray(proposalsMap_v2.entries());
         return #ok(updatedProposalsArray);
     };
 
     public shared({caller}) func voteOnProposal(proposalIndex: Nat, adopt: Bool): 
-    async Result.Result<(MainTypes.Proposals), MainTypes.Error> {
+    async Result.Result<(MainTypes.Proposals_V2), MainTypes.Error> {
         let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v4.treasuryCanisterPrincipal);
-        let proposal_ = proposalsMap.get(proposalIndex);
-        if(proposal_ == null) return #err(#PorposalHasExpired);
-        let ?proposal = proposal_ else { return #err(#PorposalHasExpired) };
+        let ?proposal = proposalsMap_v2.get(proposalIndex) else { return #err(#ProposalNotFound) };
         let {votes} = proposal;
         let votesMap = HashMap.fromIter<Text, MainTypes.Vote>( Iter.fromArray(votes), Iter.size(Iter.fromArray(votes)), Text.equal, Text.hash );
         let previousVote = votesMap.get(Principal.toText(caller));
@@ -490,54 +492,63 @@ shared actor class User() = this {
                 let neuronsDataArray = await treasuryCanister.getNeuronsDataArray();
                 votesMap.put(Principal.toText(caller), {adopt});
                 var updatedProposal = {proposal with votes = Iter.toArray(votesMap.entries()); };
-                let voteTally = GovernanceHelperMethods.tallyVotes({ neuronsDataArray; proposal = updatedProposal; founder = daoMetaData_v4.founder; userProfilesMap = userProfilesMap_v2; });
+                let voteTally = GovernanceHelperMethods.tallyVotes({ neuronsDataArray; proposal = updatedProposal; founder = daoMetaData_v4.founder; userProfilesMap = userProfilesMap_v2; includeNonVoters = true});
                 updatedProposal := {updatedProposal with voteTally};
-                proposalsMap.put(proposalIndex, updatedProposal);
-                return #ok(Iter.toArray(proposalsMap.entries()));
+                proposalsMap_v2.put(proposalIndex, updatedProposal);
+                return #ok(Iter.toArray(proposalsMap_v2.entries()));
             };
             case (?previousVote_){ return #err(#VoteHasAlreadyBeenSubmitted)};
         };
     };
 
-    private func finalizeProposalVotingPeriod(proposalId: Nat) : async () {
-        let ?proposal = proposalsMap.get(proposalId) else return;
-        let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v4.treasuryCanisterPrincipal);
-        let neuronsDataArray = await treasuryCanister.getNeuronsDataArray();
-        let {totalVotingPower} = await treasuryCanister.getDaoTotalStakeAndVotingPower();
-        let {yay; nay; total } = GovernanceHelperMethods.tallyVotes({ neuronsDataArray; proposal; founder = daoMetaData_v4.founder; userProfilesMap = userProfilesMap_v2;});
-        let participationRate = Float.fromInt(Nat64.toNat(total)) / Float.fromInt(Nat64.toNat(totalVotingPower));
-        var executed = false;
-        var action = proposal.action;
-        if( yay > nay and participationRate >= quorum) { 
-            executed := true;  switch(await executeProposal(proposal)){
-                case null {};
-                case(?{amountSent}){ 
-                    switch(action){
-                        case(#CreateNeuron(_)){ action := #CreateNeuron({amount = amountSent;}); };
-                        case(#IncreaseNeuron(args)){ action := #IncreaseNeuron({args with amount = amountSent;}); };
-                        case(_){};
-                }};
-            }; };
-        let updatedProposal = {proposal with voteTally = {yay; nay; total }; executed; action;};
-        proposalsMap.put(proposalId, updatedProposal);
-    };
+    private func finalizeAllEligibleProposals() : async () {
 
-    private func discardPendingProposals() : () {
-        let prunedProposalsArray = Buffer.Buffer<(Nat, MainTypes.Proposal)>(1);
-        for((proposalId, proposal) in proposalsMap.entries()){
-            let {timeVotingPeriodEnds} = proposal;
-            if(timeVotingPeriodEnds < Time.now() ) { prunedProposalsArray.add((proposalId, proposal)); };
+        func attemptFinalizeProposalVotingPeriod(proposalId: Nat) : async () {
+            let ?proposal = proposalsMap_v2.get(proposalId) else return;
+            let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v4.treasuryCanisterPrincipal);
+            let neuronsDataArray = await treasuryCanister.getNeuronsDataArray();
+            let {totalVotingPower} = await treasuryCanister.getDaoTotalStakeAndVotingPower();
+            let votingPeriodHasEnded = proposal.timeVotingPeriodEnds < Time.now();
+            let {yay; nay; totalParticipated } = switch(votingPeriodHasEnded) { 
+                case true { GovernanceHelperMethods.tallyVotes({ neuronsDataArray; proposal; founder = daoMetaData_v4.founder; userProfilesMap = userProfilesMap_v2; includeNonVoters = true}); };
+                case false { GovernanceHelperMethods.tallyVotes({ neuronsDataArray; proposal; founder = daoMetaData_v4.founder; userProfilesMap = userProfilesMap_v2; includeNonVoters = false}); };
+            };
+            let participationRate = Float.fromInt(Nat64.toNat(totalParticipated)) / Float.fromInt(Nat64.toNat(totalVotingPower));
+            let quorumHasBeenReached = participationRate >= quorum;
+            let percentageOfTotalVotingPowerVotingYes = Float.fromInt64(Int64.fromNat64(yay) / Int64.fromNat64(totalVotingPower));
+            let percentageOfTotalVotingPowerVotingNo = Float.fromInt64(Int64.fromNat64(nay) / Int64.fromNat64(totalVotingPower));
+            let canFinalize = percentageOfTotalVotingPowerVotingYes > 0.5 or percentageOfTotalVotingPowerVotingNo > 0.5 or (votingPeriodHasEnded and quorumHasBeenReached);
+            var executed: Bool = false;
+            var finalized: Bool = false;
+            var action = proposal.action;
+            var timeVotingPeriodEnds = proposal.timeVotingPeriodEnds;
+            if(canFinalize){
+                finalized := true;
+                timeVotingPeriodEnds := Time.now();
+                if( yay > nay){
+                        switch(await executeProposal(proposal)){
+                            case null {};
+                            case(?{amountSent}){ 
+                                switch(action){
+                                    case(#CreateNeuron(_)){ action := #CreateNeuron({amount = amountSent;}); };
+                                    case(#IncreaseNeuron(args)){ action := #IncreaseNeuron({args with amount = amountSent;}); };
+                                    case(_){};
+                            }};
+                        }; 
+                        executed := true; 
+                };
+            };
+            let updatedProposal = {proposal with voteTally = {yay; nay; totalParticipated }; executed; action; finalized; timeVotingPeriodEnds};
+            proposalsMap_v2.put(proposalId, updatedProposal);
         };
 
-        proposalsMap := HashMap.fromIter<Nat, MainTypes.Proposal>(
-            Iter.fromArray(Buffer.toArray(prunedProposalsArray)), 
-            prunedProposalsArray.size(), 
-            Nat.equal, 
-            Hash.hash
-        );
+        for((proposalId, proposal) in proposalsMap_v2.entries()){
+            let {finalized} = proposal;
+            if(finalized == false) { ignore attemptFinalizeProposalVotingPeriod(proposalId); };
+        };
     };
 
-    private func executeProposal(proposal: MainTypes.Proposal) : async ?{amountSent: Nat64} {
+    private func executeProposal(proposal: MainTypes.Proposal_V2) : async ?{amountSent: Nat64} {
         let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v4.treasuryCanisterPrincipal);
         let {action; proposer;} = proposal;
         switch(action){
@@ -633,15 +644,24 @@ shared actor class User() = this {
     };
 
     system func preupgrade() { 
-        discardPendingProposals();
         userProfilesArray_v2 := Iter.toArray(userProfilesMap_v2.entries()); 
         proposalsArray := Iter.toArray(proposalsMap.entries());
+        if(Iter.size(proposalsMap_v2.vals()) == 0) { 
+            let newArrayBuffer = Buffer.Buffer<(Nat, MainTypes.Proposal_V2)>(1);
+            for((proposalId, proposal) in proposalsMap.entries()){
+                let {timeVotingPeriodEnds; voteTally} = proposal;
+                let newVoteTalley = {voteTally with totalParticipated = voteTally.total};
+                newArrayBuffer.add((proposalId, {proposal with finalized = timeVotingPeriodEnds < Time.now(); voteTally = newVoteTalley;}));
+            };
+            proposalsArray_v2 :=  Buffer.toArray(newArrayBuffer);
+        } else { proposalsArray_v2 := Iter.toArray(proposalsMap_v2.entries()); };
     };
 
     system func postupgrade() { 
         userProfilesArray_v2 := []; 
-        proposalsArray := [];
+        proposalsArray_v2 := [];
         ignore recurringTimer<system>(#seconds (24 * 60 * 60), heartBeat_unshared);
+        ignore recurringTimer<system>(#seconds (60 * 60), finalizeAllEligibleProposals);
         ignore recurringTimer<system>(#seconds (60 * 60), heartBeat_hourly);
         ignore recurringTimer<system>(#seconds (30), updateUsersTxHistory);
 

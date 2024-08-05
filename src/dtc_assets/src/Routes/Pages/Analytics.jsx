@@ -60,8 +60,8 @@ const Analytics = (props) => {
     const [requestsTableIsLoading, setRequestsTableIsLoading] = useState(false);
     const [usersTableIsLoading, setUsersTableIsLoading] = useState(false);
 
-    let activeProposal = homePageState?.canisterData?.proposals?.filter(proposal => nanoSecondsToMiliSeconds(parseInt(proposal[1].timeVotingPeriodEnds)) > Date.now());
-    let inactiveProposals = homePageState?.canisterData?.proposals?.filter(proposal => nanoSecondsToMiliSeconds(parseInt(proposal[1].timeVotingPeriodEnds)) < Date.now());
+    let activeProposal = homePageState?.canisterData?.proposals?.filter(proposal => !proposal[1].finalized);
+    let inactiveProposals = homePageState?.canisterData?.proposals?.filter(proposal => proposal[1].finalized);
 
     const modalButton_close = [
         {

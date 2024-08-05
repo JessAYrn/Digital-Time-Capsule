@@ -95,8 +95,8 @@ export const mapBackendCanisterDataToFrontEndObj = (props) => {
 
     const requestsForAccess_ = mapRequestsForAccessToTableRows(requestsForAccess);
     const profilesMetaData_ = mapUsersProfileDataToTableRows(profilesMetaData);
-    const proposals_ = proposals.sort(([proposalId_a], [proposalId_b]) => {
-        if(parseInt(proposalId_a) > parseInt(proposalId_b)) return -1
+    const proposals_ = proposals.sort(([proposalId_a, {timeInitiated: timeInitiated_a}], [proposalId_b, {timeInitiated: timeInitiated_b}]) => {
+        if(BigInt(timeInitiated_a) > BigInt(timeInitiated_b)) return -1
         else return 1
     });
 

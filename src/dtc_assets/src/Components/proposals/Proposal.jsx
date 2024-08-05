@@ -38,6 +38,7 @@ const Proposal = (props) => {
         executed,
         timeVotingPeriodEnds,
         votes,
+        finalized,
         voteTally
     } = props;
 
@@ -57,7 +58,7 @@ const Proposal = (props) => {
 
     let actionType = getProposalType(action);
     let payload = action[actionType];
-    let {yay, nay, total} = voteTally;
+    let {yay, nay, totalParticipated} = voteTally;
 
     const onConfirmVote = async (bool) => {
         setIsLoading(true);
@@ -261,7 +262,7 @@ const Proposal = (props) => {
                     />
                     <DataField
                         label={'Total Voting Power: '}
-                        text={`${round2Decimals(fromE8s(parseInt(total)))}`}
+                        text={`${round2Decimals(fromE8s(parseInt(totalParticipated)))}`}
                         onClick={() => {}}
                         disabled={true}
                     />
@@ -286,7 +287,7 @@ const Proposal = (props) => {
                         </Grid>
                     </Grid>
                 }
-                { timeRemainingInNanoseconds < 0 ? 
+                { finalized ? 
                     <DataField
                         label={'Executed: '}
                         text={`${executed ? "True" : "False"}`}
@@ -295,7 +296,7 @@ const Proposal = (props) => {
                     /> :
                     <>
                         { CYCLES_COSTS_ASSOCIATED_WITH_ACTIONS.includes(actionType) &&
-                            <Typography marginTop={"30px"} variant="h6">NOTE: This action consumes ~ 0.25 T cycles from the treasury canister</Typography>
+                            <Typography marginTop={"30px"} variant="h6">NOTE: This proposal consumes ~ 0.25 T cycles if approved by the DAO</Typography>
                         }
                     </>
                 }
