@@ -45,12 +45,7 @@ module{
         var totalVotingPower: Nat64 = 0;
 
         label loop_ for((neuronId, {contributions}) in neuronDataMap.entries()){
-            let contributionsMap = HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.NeuronStakeInfo>(
-                Iter.fromArray(contributions), 
-                Iter.size(Iter.fromArray(contributions)), 
-                Text.equal,
-                Text.hash
-            );
+            let contributionsMap = HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.NeuronStakeInfo>( Iter.fromArray(contributions), Iter.size(Iter.fromArray(contributions)), Text.equal, Text.hash );
             let ?{stake_e8s = userNeuronStake; voting_power = userVotingPower} = contributionsMap.get(pincipal) else { continue loop_};
             totalStake += userNeuronStake; totalVotingPower += userVotingPower;
         };

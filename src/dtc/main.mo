@@ -329,13 +329,14 @@ shared actor class User() = this {
         if(userProfile == null) return #err(#NotAuthorizedToAccessData);
         let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v4.treasuryCanisterPrincipal);
         let usersTreasuryDataArray = await treasuryCanister.getUsersTreasuryDataArray();
+        let userTreasuryData = await treasuryCanister.getUserTreasuryData(caller);
         let neurons = {icp = await treasuryCanister.getNeuronsDataArray()};
         let daoWalletBalance = await treasuryCanister.daoWalletIcpBalance();
         let daoIcpAccountId_blob = await treasuryCanister.canisterIcpAccountId(null);
         let {totalDeposits} = await treasuryCanister.getDaoTotalDeposits();
         let daoIcpAccountId = Blob.toArray(daoIcpAccountId_blob);
         let userPrincipal = Principal.toText(caller);
-        return #ok({usersTreasuryDataArray; daoWalletBalance; daoIcpAccountId; neurons; userPrincipal; totalDeposits});
+        return #ok({usersTreasuryDataArray; daoWalletBalance; daoIcpAccountId; neurons; userPrincipal; totalDeposits; userTreasuryData});
     };
 
     public shared({caller}) func depositIcpToTreasury(amount: Nat64) : async {blockIndex: Nat64} {
@@ -460,19 +461,19 @@ shared actor class User() = this {
     async Result.Result<(MainTypes.Proposals_V2),MainTypes.Error>{
         let callerProfile = userProfilesMap_v2.get(caller);
         if(callerProfile == null) return #err(#NotAuthorizedToCreateProposals);
-        let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v4.treasuryCanisterPrincipal);
-        switch(action){
-            case(#CreateNeuron({amount})){ ignore TreasuryHelperMethods.depositIcpToTreasury(daoMetaData_v4, userProfilesMap_v2, caller, amount); };
-            case(#IncreaseNeuron({amount})){ ignore TreasuryHelperMethods.depositIcpToTreasury(daoMetaData_v4, userProfilesMap_v2, caller, amount); };
-            case(_){};
-        };
-        let neuronsDataArray = await treasuryCanister.getNeuronsDataArray();
         let proposer = Principal.toText(caller); let votes = [(proposer, {adopt = true})];
         let timeInitiated = Time.now(); 
         let votingWindowInNanoseconds = 3 * 24 * 60 * 60 * 1_000_000_000;
         let timeVotingPeriodEnds = timeInitiated + votingWindowInNanoseconds;
         var voteTally = {yay = Nat64.fromNat(0); nay = Nat64.fromNat(0); totalParticipated = Nat64.fromNat(0);};
-        let proposal = {votes; action; proposer; timeInitiated; executed = false; voteTally; timeVotingPeriodEnds; finalized = false};
+        switch(action){
+            case(#CreateNeuron({amount})){ ignore TreasuryHelperMethods.depositIcpToTreasury(daoMetaData_v4, userProfilesMap_v2, caller, amount); };
+            case(#IncreaseNeuron({amount; neuronId;})){ ignore TreasuryHelperMethods.depositIcpToTreasury(daoMetaData_v4, userProfilesMap_v2, caller, amount); };
+            case(_){};
+        };
+        let proposal = {votes; action; proposer; timeInitiated; executed = false; voteTally; timeVotingPeriodEnds; finalized = false;};
+        let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v4.treasuryCanisterPrincipal);
+        let neuronsDataArray = await treasuryCanister.getNeuronsDataArray();
         let votingResults = GovernanceHelperMethods.tallyVotes({ neuronsDataArray; proposal; founder = daoMetaData_v4.founder; userProfilesMap = userProfilesMap_v2; includeNonVoters = true});
         proposalsMap_v2.put(proposalIndex, {proposal with voteTally = votingResults} );
         proposalIndex += 1;
@@ -507,7 +508,8 @@ shared actor class User() = this {
             let ?proposal = proposalsMap_v2.get(proposalId) else return;
             let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v4.treasuryCanisterPrincipal);
             let neuronsDataArray = await treasuryCanister.getNeuronsDataArray();
-            let {totalVotingPower} = await treasuryCanister.getDaoTotalStakeAndVotingPower();
+            let totalStakeAndVotingPower = await treasuryCanister.getDaoTotalStakeAndVotingPower();
+            let totalVotingPower: Nat64 = if(totalStakeAndVotingPower.totalVotingPower == 0){  1; } else { totalStakeAndVotingPower.totalVotingPower; };
             let votingPeriodHasEnded = proposal.timeVotingPeriodEnds < Time.now();
             let {yay; nay; totalParticipated } = switch(votingPeriodHasEnded) { 
                 case true { GovernanceHelperMethods.tallyVotes({ neuronsDataArray; proposal; founder = daoMetaData_v4.founder; userProfilesMap = userProfilesMap_v2; includeNonVoters = true}); };

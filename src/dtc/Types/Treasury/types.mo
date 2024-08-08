@@ -75,6 +75,7 @@ module{
     public type TreasuryDataExport = {
         neurons : { icp: NeuronsDataArray; };
         usersTreasuryDataArray : UsersTreasuryDataArrayExport;
+        userTreasuryData : UserTreasuryDataExport;
         totalDeposits : {e8s : Nat64};
         daoWalletBalance: {e8s : Nat64};
         daoIcpAccountId: [Nat8];
@@ -87,7 +88,9 @@ module{
 
     public type NeuronIdAsText = Text;
 
-    public type NeuronContributions = [(PrincipalAsText, NeuronStakeInfo)];
+    public type NeuronContribution = (PrincipalAsText, NeuronStakeInfo);
+
+    public type NeuronContributions = [NeuronContribution];
 
     public type NeuronData = { contributions: NeuronContributions; neuron: ?Governance.Neuron; neuronInfo: ?Governance.NeuronInfo; parentNeuronContributions: ?NeuronContributions; };
 

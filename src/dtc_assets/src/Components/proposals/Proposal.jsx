@@ -16,6 +16,12 @@ import { NEURON_TOPICS } from "./CreateProposalForm";
 import { AppContext } from "../../Context";
 import { homePageTypes } from "../../reducers/homePageReducer";
 import { PROPOSAL_ACTIONS } from "./utils";
+import Graph from "../Fields/Chart";
+import { CHART_TYPES, GRAPH_DATA_SETS, GRAPH_DISPLAY_LABELS } from "../../functionsAndConstants/Constants";
+import { mapUsersTotalTreasuryStakesAndVotingPowersDataToChartFormat } from "../../mappers/treasuryPageMapperFunctions";
+import Grid from "@mui/material/Unstable_Grid2/Grid2";
+
+
 const CYCLES_COSTS_ASSOCIATED_WITH_ACTIONS = [
     PROPOSAL_ACTIONS.FollowNeuron,
     PROPOSAL_ACTIONS.IncreaseNeuron,
@@ -50,7 +56,7 @@ const Proposal = (props) => {
     let numberOfYays = votes.filter(vote => vote[1].adopt === true).length;
     let totalVotes = votes.length;
 
-    const { actorState, homePageDispatch } = useContext(AppContext);
+    const { actorState, homePageDispatch, treasuryState } = useContext(AppContext);
 
     const timeRemainingInNanoseconds = parseInt(timeVotingPeriodEnds) - milisecondsToNanoSeconds(Date.now());
     const timeRemainingInSeconds = timeRemainingInNanoseconds / 1000000000;
@@ -59,6 +65,47 @@ const Proposal = (props) => {
     let actionType = getProposalType(action);
     let payload = action[actionType];
     let {yay, nay, totalParticipated} = voteTally;
+
+    const displayHypotheticalTreasuryData = () => {
+        if(finalized) return;
+        let { amount: amountToIncreaseNeuron, neuronId } = payload;
+        let {neurons} = treasuryState;  
+        let neuronData = neurons.icp.find(([neuronId_, _]) => neuronId_ === BigInt(neuronId).toString());
+        if(!neuronData) return;
+        let {neuronInfo} = neuronData[1];
+        let {stake_e8s: neuronTotalStake, voting_power: neuronTotalVotingPower} = neuronInfo;
+        let votingPowerBonusMultipllier = neuronTotalVotingPower / neuronTotalStake;
+        let proposerTreasuryData = treasuryState?.usersTreasuryDataArray.find(([principal, _]) => { return principal === proposer; });
+        if(!proposerTreasuryData) proposerTreasuryData = [proposer, {balances: {icp_staked: 0, voting_power: 0}}];
+        proposerTreasuryData[1] = {
+            ...proposerTreasuryData[1], 
+            balances: {
+                ...proposerTreasuryData[1].balances,
+                icp_staked: proposerTreasuryData[1].balances.icp_staked + parseInt(amountToIncreaseNeuron), 
+                voting_power: proposerTreasuryData[1].balances.voting_power + (parseInt(amountToIncreaseNeuron) * parseInt(votingPowerBonusMultipllier))
+            }
+        };
+        const hypotheticalUsersTreasuryDataArray = treasuryState?.usersTreasuryDataArray.map(([principal, userTreasuryData]) => {
+            if(principal === proposer) return proposerTreasuryData;
+            return [principal, userTreasuryData];
+        });
+
+        return (
+            <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
+                <Typography variant="h6">Voting Power Distribution If Approved: </Typography>
+                <Graph
+                    type={CHART_TYPES.pie}
+                    defaultLabel={GRAPH_DISPLAY_LABELS.votingPower}
+                    inputData={mapUsersTotalTreasuryStakesAndVotingPowersDataToChartFormat(hypotheticalUsersTreasuryDataArray)}
+                    defaultDataSetName={GRAPH_DATA_SETS.usersTotalStakesAndVotingPowers}
+                    height={"400px"}
+                    maintainAspectRatio={false}
+                    hideButton1={true}
+                    hideButton2={true}
+                />
+            </Grid>
+        );
+    }
 
     const onConfirmVote = async (bool) => {
         setIsLoading(true);
@@ -215,6 +262,7 @@ const Proposal = (props) => {
                     disabled={true}
                 />
             </Grid>
+            { actionType === PROPOSAL_ACTIONS.IncreaseNeuron && displayHypotheticalTreasuryData() }
             <Grid 
                 columns={12}
                 xs={12} 

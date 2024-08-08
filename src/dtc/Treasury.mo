@@ -128,8 +128,8 @@ shared actor class Treasury (principal : Principal) = this {
 
     public query({caller}) func getDaoTotalStakeAndVotingPower(): async {totalVotingPower: Nat64; totalStake: Nat64} {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
-        var totalVotingPower: Nat64 = 1;
-        var totalStake: Nat64 = 1;
+        var totalVotingPower: Nat64 = 0;
+        var totalStake: Nat64 = 0;
         label loop_ for((neuronIdAsText, neuronData) in neuronDataMap.entries()){
             let ?neuronInfo = neuronData.neuronInfo else continue loop_;
             totalVotingPower += neuronInfo.voting_power;
