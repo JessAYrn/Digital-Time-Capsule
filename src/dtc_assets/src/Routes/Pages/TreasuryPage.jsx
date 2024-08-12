@@ -27,6 +27,7 @@ import { CHART_TYPES, GRAPH_DATA_SETS, GRAPH_DISPLAY_LABELS } from "../../functi
 import { TREASURY_ACTIONS } from "../../Components/proposals/utils";
 import AccordionField from "../../Components/Fields/Accordion";
 import DisplayNeuron from "../../Components/Neurons/DisplayNeuron";
+import InfoToolTip from "../../Components/Fields/InfoToolTip";
 
 const TreasuryPage = (props) => {
   const { 
@@ -179,33 +180,57 @@ const TreasuryPage = (props) => {
         flexDirection={"column"}
         marginTop={"60px"}
       >
-        <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"}>
-          <Grid xs={5}  width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"} flexDirection={"column"}>
+        <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"flex-start"} alignItems={"flex-start"}>
+          <Grid xs={4}  width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"} flexDirection={"column"}>
             <Typography width={"100%"}>Liquid:</Typography>
-            <Typography width={"100%"} variant="h6" color={"custom"}>
-              {`${round2Decimals(fromE8s(treasuryState.daoWalletBalance))}`} ICP
-            </Typography>
-            <Typography width={"100%"} style={{color: '#bdbdbd'}}>
-              {`${round2Decimals(fromE8s(treasuryState.userTreasuryData?.balances.icp || 0))}`} ICP
-            </Typography>
+              <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>
+                <Typography variant="h6" color={"custom"}>
+                  {`${round2Decimals(fromE8s(treasuryState.totalDeposits))}`} ICP
+                </Typography>
+                <InfoToolTip text="The sum of all ICP deposited into the treasury by all users." placement="top-end" color="white"/>
+              </Grid>
+              <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>
+                <Typography style={{color: '#bdbdbd'}}>
+                  {`${round2Decimals(fromE8s(treasuryState.userTreasuryData?.balances.icp || 0))}`} ICP
+                </Typography>
+                <InfoToolTip text="YOUR ICP deposited within the treasury. Available for you to use or withdraw." placement="bottom-end" color="white"/>
+              </Grid>
+              <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>
+                <Typography variant="h6" color={'#bdbdbd'}>
+                  {`${round2Decimals(fromE8s(treasuryState.daoWalletBalance))}`} ICP
+                </Typography>
+                <InfoToolTip text="The amount of ICP within the treasury's multi-sig wallet." placement="bottom-end" color="white"/>
+              </Grid>
           </Grid>
-          <Grid xs={2} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
+          <Grid xs={4} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
             <Typography width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"}>Staked:</Typography>
-            <Typography width={"100%"} variant="h6" display={"flex"} justifyContent={"center"} alignItems={"center"}>
-              {`${round2Decimals(fromE8s(treasuryState.daoTotalIcpStaked))}`} ICP
-            </Typography>
-            <Typography width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} style={{color: '#bdbdbd'}}>
-              {`${round2Decimals(fromE8s(treasuryState.userTreasuryData?.balances.icp_staked || 0))}`} ICP
-            </Typography>
+            <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"}>
+              <Typography variant="h6" display={"flex"} justifyContent={"center"} alignItems={"center"}>
+                {`${round2Decimals(fromE8s(treasuryState.daoTotalIcpStaked))}`} ICP
+              </Typography>
+              <InfoToolTip text="The sum of all ICP staked across all of the DAO's neurons" placement="top" color="white"/>
+            </Grid>
+            <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"}>
+              <Typography display={"flex"} justifyContent={"center"} alignItems={"center"} style={{color: '#bdbdbd'}}>
+                {`${round2Decimals(fromE8s(treasuryState.userTreasuryData?.balances.icp_staked || 0))}`} ICP
+              </Typography>
+              <InfoToolTip text="The sum of all YOUR ICP staked across all of the DAO's neurons" placement="bottom" color="white"/>
+            </Grid>
           </Grid>
-          <Grid xs={5} width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"} flexDirection={"column"}>
+          <Grid xs={4} width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"} flexDirection={"column"}>
             <Typography width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"} >Voting Power:</Typography>
-            <Typography width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"} variant="h6">
-              {`${round2Decimals(fromE8s(treasuryState.votingPower))}`}
-            </Typography>
-            <Typography width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"} style={{color: '#bdbdbd'}}>
-              {`${round2Decimals(fromE8s(treasuryState.userVotingPower))}`} 
-            </Typography>
+            <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"}>
+              <Typography width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"} variant="h6">
+                {`${round2Decimals(fromE8s(treasuryState.votingPower))}`}
+              </Typography>
+              <InfoToolTip text="The sum of all voting power yielded by all of the DAO's neurons" placement="top-start" color="white"/>
+            </Grid>
+            <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"}>
+              <Typography width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"} style={{color: '#bdbdbd'}}>
+                {`${round2Decimals(fromE8s(treasuryState.userVotingPower))}`} 
+              </Typography>
+              <InfoToolTip text="The sum of all YOUR voting power yielded by all of your contributions to the DAO's neurons" placement="bottom-start" color="white"/>
+            </Grid>
           </Grid>
         </Grid>
         <Graph 

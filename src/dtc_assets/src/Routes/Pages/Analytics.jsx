@@ -158,63 +158,6 @@ const Analytics = (props) => {
         });
     };
 
-    const toggleSupportMode = async () => {
-        setIsLoadingModal(true);
-        setModalIsOpen(true);
-        let result = await actorState.backendActor.toggleSupportMode();
-        setModalIsOpen(false);
-        setIsLoadingModal(false);
-        if('err' in result) return;
-        homePageDispatch({
-            actionType: homePageTypes.SET_CANISTER_DATA,
-            payload: { ...homePageState.canisterData, supportMode: !homePageState.canisterData.supportMode }
-        });
-    };
-
-    const handleInstallUpgrade = async () => {
-        setIsLoadingModal(true);
-        setModalIsOpen(true);
-        try{
-            await actorState.backendActor.installUpgrades();
-            setModalProps({
-                bigText: "Install Complete",
-                smallText: "Refresh page in order to have the changes take effect",
-                Icon: CheckCircleOutlineIcon,
-                components: modalButton_close
-            })
-        } catch(e){
-            console.log("Error: ", e);
-            setModalProps({
-                bigText: "Install Unsuccessfull",
-                Icon: ErrorOutlineIcon,
-                components: modalButton_close
-            })
-        };
-        setIsLoadingModal(false);
-    };
-
-    const handleLoadUpgrade = async () => {
-        setIsLoadingModal(true);
-        setModalIsOpen(true);
-        try{
-            await actorState.backendActor.loadUpgrades();
-            setModalProps({
-                bigText: "Load Complete",
-                smallText: "Refresh page in order to have the changes take effect",
-                Icon: CheckCircleOutlineIcon,
-                components: modalButton_close
-            })
-        } catch(e){
-            console.log("Error: ", e);
-            setModalProps({
-                bigText: "Load Unsuccessfull",
-                Icon: ErrorOutlineIcon,
-                components: modalButton_close
-            })
-        };
-        setIsLoadingModal(false);
-    };
-
     const openProposalForm = () => {
         setModalIsOpen(true);
         setModalProps({

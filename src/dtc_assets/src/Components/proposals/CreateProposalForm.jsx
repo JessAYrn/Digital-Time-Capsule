@@ -11,7 +11,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import DoneIcon from '@mui/icons-material/Done';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import { INPUT_BOX_FORMATS } from "../../functionsAndConstants/Constants";
+import { INPUT_BOX_FORMATS, MAX_DISSOLVE_DELAY_IN_SECONDS } from "../../functionsAndConstants/Constants";
 import { AppContext } from "../../Context";
 import DataField from "../Fields/DataField";
 
@@ -185,16 +185,23 @@ const CreateProposalForm = (props) => {
         const { neuronInfo } = neuronData[1];
         const {dissolve_delay_seconds} = neuronInfo;
         const secondsInAMonth = 60 * 60 * 24 * 30;
-        const maxDissolveDelayInSeconds = secondsInAMonth * 96;
-        const maxAdditionalDissolveDelayInSeconds = maxDissolveDelayInSeconds - parseInt(dissolve_delay_seconds);
+        const maxAdditionalDissolveDelayInSeconds = MAX_DISSOLVE_DELAY_IN_SECONDS - parseInt(dissolve_delay_seconds);
         
         let increaseDissolveDelayMenuItemProps = [];
-        for(let i = 1; i * secondsInAMonth <= maxAdditionalDissolveDelayInSeconds; i++){
-            increaseDissolveDelayMenuItemProps.push({
-                text: `${ round2Decimals(daysToMonths(hoursToDays(secondsToHours(i * secondsInAMonth)))) } months`,
-                onClick: () => setProposalPayload({ ...proposalPayload_, additionalDissolveDelaySeconds: i * secondsInAMonth }),
-            });
+        for(let i = 1; i * secondsInAMonth < maxAdditionalDissolveDelayInSeconds + secondsInAMonth; i++){
+            if(i * secondsInAMonth >= maxAdditionalDissolveDelayInSeconds){
+                increaseDissolveDelayMenuItemProps.push({
+                    text: `Max`,
+                    onClick: () => setProposalPayload({ ...proposalPayload_, additionalDissolveDelaySeconds: maxAdditionalDissolveDelayInSeconds }),
+                });
+            } else {
+                increaseDissolveDelayMenuItemProps.push({
+                    text: `${ round2Decimals(daysToMonths(hoursToDays(secondsToHours(i * secondsInAMonth)))) } months`,
+                    onClick: () => setProposalPayload({ ...proposalPayload_, additionalDissolveDelaySeconds: i * secondsInAMonth }),
+                });
+            }
         };
+
         return increaseDissolveDelayMenuItemProps;
     };
 

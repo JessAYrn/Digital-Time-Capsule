@@ -17,7 +17,7 @@ import { AppContext } from "../../Context";
 import { homePageTypes } from "../../reducers/homePageReducer";
 import { PROPOSAL_ACTIONS } from "./utils";
 import Graph from "../Fields/Chart";
-import { CHART_TYPES, GRAPH_DATA_SETS, GRAPH_DISPLAY_LABELS } from "../../functionsAndConstants/Constants";
+import { CHART_TYPES, GRAPH_DATA_SETS, GRAPH_DISPLAY_LABELS, MAX_DISSOLVE_DELAY_IN_SECONDS, MIN_DISSOLVE_DELAY_FOR_REWARDS_IN_SECONDS } from "../../functionsAndConstants/Constants";
 import { mapUsersTotalTreasuryStakesAndVotingPowersDataToChartFormat } from "../../mappers/treasuryPageMapperFunctions";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 
@@ -31,6 +31,13 @@ const CYCLES_COSTS_ASSOCIATED_WITH_ACTIONS = [
     PROPOSAL_ACTIONS.IncreaseDissolveDelay,
     PROPOSAL_ACTIONS.FollowNeuron,
     PROPOSAL_ACTIONS.CreateNeuron,
+];
+
+const VOTING_POWER_REDISTRIBUTION_ACTIONS = [
+    PROPOSAL_ACTIONS.IncreaseNeuron,
+    PROPOSAL_ACTIONS.IncreaseDissolveDelay,
+    PROPOSAL_ACTIONS.CreateNeuron
+
 ];
 
 const Proposal = (props) => {
@@ -67,28 +74,67 @@ const Proposal = (props) => {
     let {yay, nay, totalParticipated} = voteTally;
 
     const displayHypotheticalTreasuryData = () => {
+        if(!VOTING_POWER_REDISTRIBUTION_ACTIONS.includes(actionType)) return;
         if(finalized) return;
-        let { amount: amountToIncreaseNeuron, neuronId } = payload;
+        let { amount: amountToIncreaseNeuron, neuronId, additionalDissolveDelaySeconds } = payload;
         let {neurons} = treasuryState;  
-        let neuronData = neurons.icp.find(([neuronId_, _]) => neuronId_ === BigInt(neuronId).toString());
-        if(!neuronData) return;
-        let {neuronInfo} = neuronData[1];
-        let {stake_e8s: neuronTotalStake, voting_power: neuronTotalVotingPower} = neuronInfo;
-        let votingPowerBonusMultipllier = neuronTotalVotingPower / neuronTotalStake;
-        let proposerTreasuryData = treasuryState?.usersTreasuryDataArray.find(([principal, _]) => { return principal === proposer; });
-        if(!proposerTreasuryData) proposerTreasuryData = [proposer, {balances: {icp_staked: 0, voting_power: 0}}];
-        proposerTreasuryData[1] = {
-            ...proposerTreasuryData[1], 
-            balances: {
-                ...proposerTreasuryData[1].balances,
-                icp_staked: proposerTreasuryData[1].balances.icp_staked + parseInt(amountToIncreaseNeuron), 
-                voting_power: proposerTreasuryData[1].balances.voting_power + (parseInt(amountToIncreaseNeuron) * parseInt(votingPowerBonusMultipllier))
-            }
+        const getVotingPowerBonusMultiplier = () => {
+            if(actionType === PROPOSAL_ACTIONS.CreateNeuron) return 1;
+            let neuronData = neurons.icp.find(([neuronId_, _]) => neuronId_ === BigInt(neuronId).toString());
+            if(!neuronData) return 1;
+            let {neuronInfo} = neuronData[1];
+            let {stake_e8s: neuronTotalStake, voting_power: neuronTotalVotingPower, dissolve_delay_seconds} = neuronInfo;
+            if(actionType === PROPOSAL_ACTIONS.IncreaseNeuron){ 
+                let currentVotingPowerBonusMultipllier = neuronTotalVotingPower / neuronTotalStake;
+                return currentVotingPowerBonusMultipllier; 
+            };
+            if(actionType === PROPOSAL_ACTIONS.IncreaseDissolveDelay){
+                let newDissolveDelay = parseInt(dissolve_delay_seconds) + parseInt(additionalDissolveDelaySeconds);
+                let rewardsMultiplierRange = MAX_DISSOLVE_DELAY_IN_SECONDS - MIN_DISSOLVE_DELAY_FOR_REWARDS_IN_SECONDS;
+                let elibleSecondsWithinRange = newDissolveDelay - MIN_DISSOLVE_DELAY_FOR_REWARDS_IN_SECONDS;
+                if(elibleSecondsWithinRange < 0) return 1;
+                let rewardsMultiplier = 1 + elibleSecondsWithinRange / rewardsMultiplierRange;
+                return rewardsMultiplier;
+            };
         };
-        const hypotheticalUsersTreasuryDataArray = treasuryState?.usersTreasuryDataArray.map(([principal, userTreasuryData]) => {
-            if(principal === proposer) return proposerTreasuryData;
-            return [principal, userTreasuryData];
-        });
+
+        let votingPowerBonusMultipllier = getVotingPowerBonusMultiplier();
+        let hypotheticalUsersTreasuryDataArray;
+        let hypotheticalUsersTreasuryDataMap = {};
+        treasuryState?.usersTreasuryDataArray.map(([principal, userTreasuryData]) => { hypotheticalUsersTreasuryDataMap[principal] = userTreasuryData;});
+
+        if(actionType === PROPOSAL_ACTIONS.CreateNeuron || actionType === PROPOSAL_ACTIONS.IncreaseNeuron){
+            let proposerTreasuryData = hypotheticalUsersTreasuryDataMap[proposer];
+            if(!proposerTreasuryData) proposerTreasuryData =  {balances: {icp_staked: 0, voting_power: 0}};
+
+            proposerTreasuryData = {
+                ...proposerTreasuryData, 
+                balances: {
+                    ...proposerTreasuryData.balances,
+                    icp_staked: proposerTreasuryData.balances.icp_staked + parseInt(amountToIncreaseNeuron), 
+                    voting_power: proposerTreasuryData.balances.voting_power + (parseInt(amountToIncreaseNeuron) * parseInt(votingPowerBonusMultipllier))
+                }
+            };
+            hypotheticalUsersTreasuryDataMap[proposer] = proposerTreasuryData;  
+            hypotheticalUsersTreasuryDataArray = Object.entries(hypotheticalUsersTreasuryDataMap);
+        } else if(actionType === PROPOSAL_ACTIONS.IncreaseDissolveDelay){
+            let neuronData = neurons.icp.find(([neuronId_, _]) => neuronId_ === BigInt(neuronId).toString());
+            if(!neuronData) return;
+            let {contributions} = neuronData[1];
+            contributions.map(([principal, {stake_e8s, voting_power}]) => {
+                const additionalVotingPower = parseInt(stake_e8s) * votingPowerBonusMultipllier - parseInt(voting_power);
+                if(additionalVotingPower > 0) {
+                    hypotheticalUsersTreasuryDataMap[principal] = {
+                        ...hypotheticalUsersTreasuryDataMap[principal],
+                        balances: {
+                            ...hypotheticalUsersTreasuryDataMap[principal].balances,
+                            voting_power: hypotheticalUsersTreasuryDataMap[principal].balances.voting_power + additionalVotingPower
+                        }
+                    };
+                }
+            });
+            hypotheticalUsersTreasuryDataArray = Object.entries(hypotheticalUsersTreasuryDataMap);
+        };
 
         return (
             <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
@@ -262,7 +308,7 @@ const Proposal = (props) => {
                     disabled={true}
                 />
             </Grid>
-            { actionType === PROPOSAL_ACTIONS.IncreaseNeuron && displayHypotheticalTreasuryData() }
+            { displayHypotheticalTreasuryData() }
             <Grid 
                 columns={12}
                 xs={12} 
