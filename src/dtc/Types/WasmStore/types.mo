@@ -1,5 +1,4 @@
 import AssetCanister "../AssetCanister/types";
-import Result "mo:base/Result";
 
 
 module{

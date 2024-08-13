@@ -1,10 +1,7 @@
 import NatX "../../MotokoNumbers/NatX";
 import FloatX "../../MotokoNumbers/FloatX";
-import Blob "mo:base/Blob";
 import Buffer "mo:base/Buffer";
-import Debug "mo:base/Debug";
 import Int "mo:base/Int";
-import Int8 "mo:base/Int8";
 import Iter "mo:base/Iter";
 import Nat "mo:base/Nat";
 import Nat8 "mo:base/Nat8";
@@ -12,9 +9,7 @@ import Nat16 "mo:base/Nat16";
 import Nat32 "mo:base/Nat32";
 import Nat64 "mo:base/Nat64";
 import Result "mo:base/Result";
-import Array "mo:base/Array";
 import Text "mo:base/Text";
-import Util "./Util";
 import Errors "./Errors";
 import Value "./Value";
 

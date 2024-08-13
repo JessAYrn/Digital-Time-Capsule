@@ -1,11 +1,8 @@
 import MainTypes "../../Types/Main/types";
 import Iter "mo:base/Iter";
 import Principal "mo:base/Principal";
-import Result "mo:base/Result";
-import Error "mo:base/Error";
 import Journal "../../Journal";
 import Treasury "../../Treasury";
-import AnalyticsTypes "../../Types/Analytics/types";
 
 module{
     public func saveCurrentBalances(userProfilesMap: MainTypes.UserProfilesMap_V2, daoMetaData: MainTypes.DaoMetaData_V4): async (){
