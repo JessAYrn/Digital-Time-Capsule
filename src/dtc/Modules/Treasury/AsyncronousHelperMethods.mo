@@ -351,9 +351,8 @@ module{
         let ?neuronData = neuronDataMap.get(neuronId) else { return };
         let {contributions} = neuronData;
         
-        label loop_ for((userPrincipal, neuronStakeInfo) in Iter.fromArray(contributions)){
+        label loop_ for((userPrincipal, {stake_e8s = userStake}) in Iter.fromArray(contributions)){
             let ?{subaccountId} = usersTreasuryDataMap.get(userPrincipal) else { continue loop_ };
-            let userStake = neuronStakeInfo.stake_e8s;
             
             func performTransfer() : async () {
                 let res = await ledger.icrc1_transfer({
@@ -362,7 +361,7 @@ module{
                     memo = null;
                     from_subaccount = null;
                     created_at_time = ?Nat64.fromNat(Int.abs(Time.now()));
-                    amount = Nat64.toNat(userStake - txFee);
+                    amount = Nat64.toNat(userStake - ( 2 * txFee));
                 });
                 switch (res) {
                     case (#Ok(_)) { ignore updateTokenBalances(#Principal(userPrincipal), #Icp); };

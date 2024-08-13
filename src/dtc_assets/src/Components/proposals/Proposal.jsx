@@ -1,4 +1,4 @@
-import React, {useState, useContext} from "react";
+import React, {useState, useContext, useMemo} from "react";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import DataField from "../Fields/DataField";
 import Typography from "@mui/material/Typography";
@@ -58,12 +58,21 @@ const Proposal = (props) => {
     const [modalProps, setModalProps] = useState({});
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [isLoadingModal, setIsLoading] = useState(false);
-
-    let numberOfNays = votes.filter(vote => vote[1].adopt === false).length;
-    let numberOfYays = votes.filter(vote => vote[1].adopt === true).length;
-    let totalVotes = votes.length;
+    const [hasVoted, setHasVoted] = useState(false);
 
     const { actorState, homePageDispatch, treasuryState } = useContext(AppContext);
+
+    let [numberOfNays, numberOfYays, totalVotes] = useMemo(() => {
+        let numberOfNays = 0;
+        let numberOfYays = 0;
+        let totalVotes = votes.length;
+
+        for(let [userPrincipal, voteData] of votes) {
+            voteData.adopt ? numberOfYays++ : numberOfNays++;
+            if(userPrincipal === treasuryState.userPrincipal){setHasVoted(true)}
+        }
+        return [numberOfNays, numberOfYays, totalVotes];
+    },[]);
 
     const timeRemainingInNanoseconds = parseInt(timeVotingPeriodEnds) - milisecondsToNanoSeconds(Date.now());
     const timeRemainingInSeconds = timeRemainingInNanoseconds / 1000000000;
@@ -368,7 +377,8 @@ const Proposal = (props) => {
                                 text={"Adopt"}
                                 onClick={() => onVote(true)}
                                 Icon={ThumbUpIcon}
-                                active={true}
+                                active={!hasVoted}
+                                disabled={hasVoted}
                             />
                         </Grid>
                         <Grid xs={6} width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"}>
@@ -376,7 +386,8 @@ const Proposal = (props) => {
                                 text={"Reject"}
                                 onClick={() => onVote(false)}
                                 Icon={ThumbDownIcon}
-                                active={true}
+                                active={!hasVoted}
+                                disabled={hasVoted}
                             />
                         </Grid>
                     </Grid>
