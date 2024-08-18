@@ -3,6 +3,7 @@ export const PROPOSAL_ACTIONS = {
     RemoveAdmin: "RemoveAdmin" ,
     LoadUpgrades: "LoadUpgrades",
     InstallUpgrades: "InstallUpgrades",
+    CreateFundingCampaign: "CreateFundingCampaign",
     CreateNeuron: "CreateNeuron",
     IncreaseNeuron: "IncreaseNeuron",
     PurchaseCycles: "PurchaseCycles",

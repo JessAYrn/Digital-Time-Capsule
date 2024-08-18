@@ -14,11 +14,12 @@ const DatePickerField = (props) => {
     const {
         label,
         id,
+        width,
         disablePast,
         disabled,
         onChange,
         value,
-        editable,
+        showEditButton,
         minDate,
         maxDate,
         md,
@@ -35,6 +36,7 @@ const DatePickerField = (props) => {
 
     return(
         <Grid 
+            width={width}
             xs={xs ? xs : 12} 
             md={md ? md : 12} 
             display={"flex"} 
@@ -49,11 +51,11 @@ const DatePickerField = (props) => {
                         disablePast={disablePast}
                         minDate={minDate}
                         maxDate={maxDate}
-                        disabled={(editable && !editing) || disabled}
+                        disabled={disabled || (showEditButton && !editing)}
                     />
                 </LocalizationProvider>
                 {
-                        editable && 
+                        showEditButton && 
                         <ButtonField
                             className={"datePickerEditButton"}
                             transparentBackground={true}

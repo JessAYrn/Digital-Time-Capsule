@@ -637,6 +637,9 @@ shared actor class User() = this {
                 ignore await treasuryCanister.manageNeuron(args, Principal.fromText(proposer));
                 return null;
             };
+            case(#CreateFundingCampaign({fundingCampaignInput})){
+                ignore treasuryCanister.createFundingCampaign(fundingCampaignInput); null;
+            };
             case(#PurchaseCycles({amount})){
                 //call function to purchase more cycles
                 return null;

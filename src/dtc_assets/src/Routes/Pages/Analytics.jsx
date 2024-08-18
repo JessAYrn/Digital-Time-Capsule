@@ -6,7 +6,6 @@ import { CANISTER_DATA_FIELDS, GRAPH_DISPLAY_LABELS, GRAPH_DATA_SETS, CHART_TYPE
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
 import Paper from '@mui/material/Paper';
-import UpgradeIcon from '@mui/icons-material/Upgrade';
 import CloseIcon from '@mui/icons-material/Close';
 import HowToVoteIcon from '@mui/icons-material/HowToVote';
 import ButtonField from '../../Components/Fields/Button';
@@ -14,18 +13,16 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import Grid from '@mui/material/Unstable_Grid2';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import AccordionField from '../../Components/Fields/Accordion';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import {homePageTypes} from '../../reducers/homePageReducer';
 import {types as journalTypes} from '../../reducers/journalReducer';
 import {walletTypes} from '../../reducers/walletReducer';
 import {notificationsTypes} from '../../reducers/notificationsReducer';
 import {treasuryTypes} from '../../reducers/treasuryReducer';
-import { inTrillions, nanoSecondsToMiliSeconds, round2Decimals, shortenHexString } from '../../functionsAndConstants/Utils';
+import { inTrillions, round2Decimals, shortenHexString } from '../../functionsAndConstants/Utils';
 import { copyText } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
 import DataTable from '../../Components/Fields/Table';
 import { mapRequestsForAccessToTableRows, mapUsersProfileDataToTableRows, requestsForAccessTableColumns, usersTableColumns } from '../../mappers/dashboardMapperFunctions';
 import ModalComponent from '../../Components/modal/Modal';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import SpeedDialField from '../../Components/Fields/SpeedDialField';
 import CreateProposalForm from '../../Components/proposals/CreateProposalForm';
 import DisplayProposals from '../../Components/proposals/DisplayProposal';
@@ -62,13 +59,6 @@ const Analytics = (props) => {
 
     let activeProposal = homePageState?.canisterData?.proposals?.filter(proposal => !proposal[1].finalized);
     let inactiveProposals = homePageState?.canisterData?.proposals?.filter(proposal => proposal[1].finalized);
-
-    const modalButton_close = [
-        {
-            Component: ButtonField,
-            props: { active: true, text: "Close", Icon: CloseIcon, onClick: () => setModalIsOpen(false)}
-        }
-    ];
 
     const modalForm_createProposal = [
         {

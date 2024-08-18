@@ -3,6 +3,7 @@ import Principal "mo:base/Principal";
 import HashMap "mo:base/HashMap";
 import Nat "mo:base/Nat";
 import JournalTypes "../Journal/types";
+import TreasuryTypes "../Treasury/types";
 import IC "../IC/types";
 import Ledger "../../NNS/Ledger";
 
@@ -187,6 +188,7 @@ module{
         #LoadUpgrades:{};
         #InstallUpgrades: {};
         #CreateNeuron: {amount: Nat64; };
+        #CreateFundingCampaign: {fundingCampaignInput: TreasuryTypes.FundingCampaignInput};
         #IncreaseNeuron: {amount: Nat64; neuronId: Nat64; };
         #PurchaseCycles: {amount : Nat64;};
         #SpawnNeuron: {neuronId: Nat64; percentage_to_spawn : Nat32;};
