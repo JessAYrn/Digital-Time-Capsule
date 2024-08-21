@@ -12,7 +12,7 @@ import ButtonField from "../Fields/Button";
 import CheckIcon from '@mui/icons-material/Check';
 import ModalComponent from "../modal/Modal";
 import { copyText } from "../../functionsAndConstants/walletFunctions/CopyWalletAddress";
-import { NEURON_TOPICS } from "./CreateProposalForm";
+import { NEURON_TOPICS } from "./createProposalModalComponentTypes/FollowNeuron";
 import { AppContext } from "../../Context";
 import { homePageTypes } from "../../reducers/homePageReducer";
 import { PROPOSAL_ACTIONS } from "./utils";
