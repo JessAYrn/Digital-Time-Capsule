@@ -111,6 +111,7 @@ const SendCrypto = (props) => {
                                     rows={"1"}
                                     onChange={onChangeAmount}
                                     value={numberInput}
+                                    parseNumber={parseFloat}
                                     allowNegative={false}
                                     suffix={" ICP"}
                                     format={INPUT_BOX_FORMATS.numberFormat}

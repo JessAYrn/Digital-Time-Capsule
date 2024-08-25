@@ -1,6 +1,6 @@
 import React from 'react';
 import Grid from '@mui/material/Unstable_Grid2';
-import AccordionField from '../../Components/Fields/Accordion';
+import AccordionField from '../Fields/Accordion';
 import Proposal from './Proposal';
 
 const DisplayProposals = (props) => {

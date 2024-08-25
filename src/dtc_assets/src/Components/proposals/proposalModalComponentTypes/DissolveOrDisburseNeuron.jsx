@@ -8,9 +8,9 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
 
 const DissolveOrDisburseNeuron = (props) => {
-    const { onSubmitProposal, action, proposalPayload } = props;
+    const { onSubmitProposal, action, payload, disabled } = props;
     const { treasuryState } = useContext(AppContext);
-    const [selectedNeuronId, setSelectedNeuronId] = useState(proposalPayload.neuronId);
+    const [selectedNeuronId, setSelectedNeuronId] = useState(payload?.neuronId.toString());
     const [isReadyToSubmit, setIsReadyToSubmit] = useState(false);
 
     const neuronMenuItemProps = treasuryState?.neurons?.icp?.map(([neuronId, neuronData]) => {
@@ -30,10 +30,11 @@ const DissolveOrDisburseNeuron = (props) => {
     return (
         <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
             <MenuField
+                disabled={disabled}
                 xs={8}
                 display={"flex"}
                 alignItems={"center"}
-                justifyContent={"left"}
+                justifyContent={"center"}
                 active={true}
                 color={"custom"}
                 label={"Neuron To Configure"}
@@ -41,8 +42,9 @@ const DissolveOrDisburseNeuron = (props) => {
                 menuItemProps={neuronMenuItemProps}
             />
             {selectedNeuronId && <Typography varient={"h6"} color={"#bdbdbd"}> {selectedNeuronId} </Typography>}
-            { isReadyToSubmit &&
+            { isReadyToSubmit && !disabled &&
                 <ButtonField
+                    disabled={disabled}
                     Icon={DoneIcon}
                     active={true}
                     text={'Submit Proposal'}

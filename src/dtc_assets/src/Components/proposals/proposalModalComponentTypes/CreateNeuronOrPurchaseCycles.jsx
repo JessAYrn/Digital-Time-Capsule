@@ -3,14 +3,15 @@ import Grid from '@mui/material/Unstable_Grid2/Grid2';
 import ButtonField from '../../Fields/Button';
 import DoneIcon from '@mui/icons-material/Done';
 import InputBox from '../../Fields/InputBox';
+import { fromE8s } from '../../../functionsAndConstants/Utils';
 import { INPUT_BOX_FORMATS } from '../../../functionsAndConstants/Constants';
 import { toE8s } from '../../../functionsAndConstants/Utils';
 
 
 const CreateNeuronOrPurchaseCycles = (props) => {
 
-    const {onSubmitProposal, action} = props;
-    const [amount, setAmount] = useState(null);
+    const {onSubmitProposal, action, payload, disabled} = props;
+    const [amount, setAmount] = useState(payload?.amount ? fromE8s(parseInt(payload?.amount)) : null);
     const [hasError, setHasError] = useState(false);
     const [isReadyToSubmit, setIsReadyToSubmit] = useState(false);
 
@@ -21,21 +22,20 @@ const CreateNeuronOrPurchaseCycles = (props) => {
     return (
         <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
             <InputBox
+                disabled={disabled}
                 width={"100%"}
                 hasError={hasError}
                 label={"Amount"}
                 placeHolder={"Amount"}
-                onChange={(value) => {
-
-                    setAmount(value);
-                }}
+                onChange={(value) => {setAmount(value);}}
                 allowNegative={false}
                 maxDecimalPlaces={8}
+                parseNumber={parseFloat}
                 format={INPUT_BOX_FORMATS.numberFormat}
                 value={amount}
                 suffix={" ICP"}
             />
-            {isReadyToSubmit && 
+            {isReadyToSubmit && !disabled &&
             <ButtonField
                 Icon={DoneIcon}
                 active={true}

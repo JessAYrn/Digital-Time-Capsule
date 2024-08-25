@@ -12,7 +12,6 @@ import ButtonField from "../Fields/Button";
 import CheckIcon from '@mui/icons-material/Check';
 import ModalComponent from "../modal/Modal";
 import { copyText } from "../../functionsAndConstants/walletFunctions/CopyWalletAddress";
-import { NEURON_TOPICS } from "./createProposalModalComponentTypes/FollowNeuron";
 import { AppContext } from "../../Context";
 import { homePageTypes } from "../../reducers/homePageReducer";
 import { PROPOSAL_ACTIONS } from "./utils";
@@ -20,6 +19,16 @@ import Graph from "../Fields/Chart";
 import { CHART_TYPES, GRAPH_DATA_SETS, GRAPH_DISPLAY_LABELS, MAX_DISSOLVE_DELAY_IN_SECONDS, MIN_DISSOLVE_DELAY_FOR_REWARDS_IN_SECONDS } from "../../functionsAndConstants/Constants";
 import { mapUsersTotalTreasuryStakesAndVotingPowersDataToChartFormat } from "../../mappers/treasuryPageMapperFunctions";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
+import MenuField from "../Fields/MenuField";
+import { KeyboardArrowDownIcon } from "@mui/icons-material";
+import IncreaseDissolveDelay from "./proposalModalComponentTypes/IncreaseDissolveDelay";
+import IncreaseNeuron from "./proposalModalComponentTypes/IncreaseNeuron";
+import CreateNeuronOrPurchaseCycles from "./proposalModalComponentTypes/CreateNeuronOrPurchaseCycles";
+import DissolveOrDisburseNeuron from "./proposalModalComponentTypes/DissolveOrDisburseNeuron";
+import AddOrRemoveAdmin from "./proposalModalComponentTypes/AddOrRemoveAdmin";
+import FollowNeuron from "./proposalModalComponentTypes/FollowNeuron";
+import SpawnNeuron from "./proposalModalComponentTypes/SpawnNeuron";
+import NewFundingCampaign from "./proposalModalComponentTypes/NewFundingCampaign";
 
 
 const CYCLES_COSTS_ASSOCIATED_WITH_ACTIONS = [
@@ -236,70 +245,33 @@ const Proposal = (props) => {
                 alignItems="center" 
                 flexDirection={"column"} 
             >
+                <MenuField
+                    xs={8}
+                    disabled={true}
+                    display={"flex"}
+                    alignItems={"center"}
+                    justifyContent={"center"}
+                    active={true}
+                    color={"custom"}
+                    label={"Proposal Type"}
+                    MenuIcon={KeyboardArrowDownIcon}
+                    menuItemProps={[{ text: actionType, onClick: ()  => {}, selected: true},]}
+                />
+                <Typography varient={"h6"} color={"#bdbdbd"}> {actionType} </Typography>
+                { actionType === PROPOSAL_ACTIONS.IncreaseDissolveDelay && <IncreaseDissolveDelay action={actionType} payload={payload} disabled={true}/> }
+                { actionType === PROPOSAL_ACTIONS.IncreaseNeuron && <IncreaseNeuron action={actionType} payload={payload} disabled={true}/> }
+                { (actionType === PROPOSAL_ACTIONS.CreateNeuron || actionType === PROPOSAL_ACTIONS.PurchaseCycles) && <CreateNeuronOrPurchaseCycles action={actionType} payload={payload} disabled={true}/> }
+                { (actionType === PROPOSAL_ACTIONS.DisburseNeuron || actionType === PROPOSAL_ACTIONS.DissolveNeuron) && <DissolveOrDisburseNeuron action={actionType} payload={payload} disabled={true}/> }
+                { (actionType === PROPOSAL_ACTIONS.AddAdmin || actionType === PROPOSAL_ACTIONS.RemoveAdmin) && <AddOrRemoveAdmin action={actionType} payload={payload} disabled={true}/> }
+                { actionType === PROPOSAL_ACTIONS.FollowNeuron && <FollowNeuron action={actionType} payload={payload} disabled={true}/> }
+                { actionType === PROPOSAL_ACTIONS.SpawnNeuron && <SpawnNeuron action={actionType} payload={payload} disabled={true}/> }
+                { actionType === PROPOSAL_ACTIONS.CreateFundingCampaign && <NewFundingCampaign action={actionType} payload={payload} disabled={true}/> }
+
                 { timeRemainingInNanoseconds > 0 && <DataField
                     label={'Voting Ends in: '}
                     text={`${round2Decimals(timeRemainingInHours)} hours`}
                     disabled={true}
                 />}
-                <DataField
-                    label={'Action: '}
-                    text={`${getProposalType(action)}`}
-                    disabled={true}
-                />
-                { payload && 
-                    <>
-                        {
-                            Object.keys(payload).map((key, index) => {
-                                let text = payload[key];
-                                let key_ = key;
-                                let onClick = () => {};
-                                let isDisabled = true;
-                                switch(key){
-                                    case "principal":
-                                        text = shortenHexString(payload[key]);
-                                        onClick = () => copyText(payload[key]);
-                                        isDisabled = false;
-                                        break;
-                                    case "neuronId":
-                                        text = BigInt(payload[key]).toString();
-                                        onClick = () => copyText(text);
-                                        isDisabled = false;
-                                        break;
-                                    case "followees":
-                                        text = BigInt(payload[key][0]).toString();
-                                        onClick = () => copyText(text);
-                                        isDisabled = false;
-                                        break;
-                                    case "topic":
-                                        text = Object.keys(NEURON_TOPICS).find(thisKey => NEURON_TOPICS[thisKey] === payload[key]);
-                                        break;
-                                    case "additionalDissolveDelaySeconds":
-                                        text = `${ daysToMonths(hoursToDays(secondsToHours(payload[key]))) } months`; 
-                                        key_ = "additionalDissolveDelay";
-                                        break;
-                                    case "amount":
-                                        text = fromE8s(parseInt(payload[key])) + ' ICP';
-                                        break;
-                                    case "percentage_to_spawn":
-                                        text = `${payload[key]}%`;
-                                        break;
-                                    default:
-                                        break;
-                                }
-                                
-                                return(
-                                    <DataField
-                                        label={key_}
-                                        text={`${text}`}
-                                        disabled={isDisabled}
-                                        onClick={onClick}
-                                        buttonIcon={!isDisabled ? ContentCopyIcon : null}
-                                    />
-                                )
-                            })
-                        }
-                    </>
-                }
                 <DataField
                     label={'Author: '}
                     text={`${shortenHexString(proposer)}`}

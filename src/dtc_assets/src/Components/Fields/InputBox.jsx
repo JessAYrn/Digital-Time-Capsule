@@ -49,6 +49,7 @@ const InputBox = (props) => {
       prefix, 
       allowNegative,
       suffix,
+      parseNumber
     } = props;
     
     const handleChange = (eventValue) => { 
@@ -106,7 +107,7 @@ const InputBox = (props) => {
               color='white'
               label={label}    
               value={value}   
-              onChange={(e) => { handleChange(maxDecimalPlaces > 0 ? parseFloat(e.target.value) : parseInt(e.target.value)); }}
+              onChange={(e) => { parseNumber ? handleChange(parseNumber(e.target.value)): handleChange(e.target.value); }}
               placeholder={placeHolder}
               name={format}
               id={`formatted-${format}-input`}

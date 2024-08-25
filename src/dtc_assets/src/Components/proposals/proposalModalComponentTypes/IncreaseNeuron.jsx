@@ -7,15 +7,15 @@ import { INPUT_BOX_FORMATS } from '../../../functionsAndConstants/Constants';
 import MenuField from '../../Fields/MenuField';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { PROPOSAL_ACTIONS } from '../utils';
-import { toE8s } from '../../../functionsAndConstants/Utils';
+import { fromE8s, toE8s } from '../../../functionsAndConstants/Utils';
 import { AppContext } from '../../../Context';
 import { Typography } from '@mui/material';
 
 const IncreaseNeuron = (props) => {
-    const { onSubmitProposal, proposalPayload } = props;
+    const { onSubmitProposal, payload, action, disabled } = props;
     const { treasuryState } = useContext(AppContext);
-    const [selectedNeuronId, setSelectedNeuronId] = useState(proposalPayload.neuronId);
-    const [amount, setAmount] = useState(null);
+    const [selectedNeuronId, setSelectedNeuronId] = useState(payload?.neuronId.toString());
+    const [amount, setAmount] = useState(payload?.amount ? fromE8s(parseInt(payload?.amount)) : null);
     const [hasError, setHasError] = useState(false);
     const [isReadyToSubmit, setIsReadyToSubmit] = useState(false);
 
@@ -29,15 +29,16 @@ const IncreaseNeuron = (props) => {
         }
     });
 
-    const submitProposal = async () => { await onSubmitProposal({[PROPOSAL_ACTIONS.IncreaseNeuron]: {neuronId: BigInt(selectedNeuronId), amount: toE8s(amount)}}); };
+    const submitProposal = async () => { await onSubmitProposal({[action]: {neuronId: BigInt(selectedNeuronId), amount: toE8s(amount)}}); };
 
     return (
         <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
             <MenuField
                 xs={8}
+                disabled={disabled}
                 display={"flex"}
                 alignItems={"center"}
-                justifyContent={"left"}
+                justifyContent={"center"}
                 active={true}
                 color={"custom"}
                 label={"Neuron To Increase"}
@@ -48,6 +49,7 @@ const IncreaseNeuron = (props) => {
                 <>
                     <Typography varient={"h6"} color={"#bdbdbd"}> {selectedNeuronId} </Typography>
                     <InputBox
+                        disabled={disabled}
                         width={"100%"}
                         hasError={hasError}
                         label={"Amount"}
@@ -55,16 +57,18 @@ const IncreaseNeuron = (props) => {
                         onChange={(value) => { setHasError(!value); setAmount(value); }}
                         allowNegative={false}
                         maxDecimalPlaces={8}
+                        parseNumber={parseFloat}
                         format={INPUT_BOX_FORMATS.numberFormat}
                         value={amount}
                         suffix={" ICP"}
                     />
                 </>
             }
-            {isReadyToSubmit && 
+            {isReadyToSubmit && !disabled && 
             <ButtonField
             Icon={DoneIcon}
             active={true}
+            disabled={disabled}
             text={'Submit Proposal'}
             onClick={submitProposal}
             />}

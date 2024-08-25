@@ -69,6 +69,7 @@ const DepositOrWithdrawModal = (props) => {
             allowNegative={false}
             allowLeadingZeros={false}
             suffix={"ICP"}
+            parseNumber={parseFloat}
             value={amount}
             format={INPUT_BOX_FORMATS.numberFormat}
             />

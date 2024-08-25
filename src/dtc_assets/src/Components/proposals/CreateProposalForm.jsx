@@ -12,14 +12,14 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import DoneIcon from '@mui/icons-material/Done';
 import { AppContext } from "../../Context";
 import DataField from "../Fields/DataField";
-import NewFundingCampaign from "./createProposalModalComponentTypes/NewFundingCampaign";
-import SpawnNeuron from "./createProposalModalComponentTypes/SpawnNeuron";
-import FollowNeuron from "./createProposalModalComponentTypes/FollowNeuron";
-import AddOrRemoveAdmin from "./createProposalModalComponentTypes/AddOrRemoveAdmin";
-import DissolveOrDisburseNeuron from "./createProposalModalComponentTypes/DissolveOrDisburseNeuron";
-import CreateNeuronOrPurchaseCycles from "./createProposalModalComponentTypes/CreateNeuronOrPurchaseCycles";
-import IncreaseNeuron from "./createProposalModalComponentTypes/IncreaseNeuron";
-import IncreaseDissolveDelay from "./createProposalModalComponentTypes/IncreaseDissolveDelay";
+import NewFundingCampaign from "./proposalModalComponentTypes/NewFundingCampaign";
+import SpawnNeuron from "./proposalModalComponentTypes/SpawnNeuron";
+import FollowNeuron from "./proposalModalComponentTypes/FollowNeuron";
+import AddOrRemoveAdmin from "./proposalModalComponentTypes/AddOrRemoveAdmin";
+import DissolveOrDisburseNeuron from "./proposalModalComponentTypes/DissolveOrDisburseNeuron";
+import CreateNeuronOrPurchaseCycles from "./proposalModalComponentTypes/CreateNeuronOrPurchaseCycles";
+import IncreaseNeuron from "./proposalModalComponentTypes/IncreaseNeuron";
+import IncreaseDissolveDelay from "./proposalModalComponentTypes/IncreaseDissolveDelay";
 
 const CreateProposalForm = (props) => {
     const {
@@ -118,14 +118,14 @@ const CreateProposalForm = (props) => {
             { proposalAction_ === PROPOSAL_ACTIONS.PurchaseCycles && 
                 <DataField label={"Available Balance: "} text={`${fromE8s(treasuryState.daoWalletBalance || 0) } ICP`} isLoading={!treasuryState.dataHasBeenLoaded} disabled={true}/>
             }
-            { proposalAction_ === PROPOSAL_ACTIONS.IncreaseDissolveDelay && <IncreaseDissolveDelay onSubmitProposal={onSubmitProposal} proposalPayload={proposalPayload_} /> }
-            { proposalAction_ === PROPOSAL_ACTIONS.IncreaseNeuron && <IncreaseNeuron onSubmitProposal={onSubmitProposal} proposalPayload={proposalPayload_}/> }
+            { proposalAction_ === PROPOSAL_ACTIONS.IncreaseDissolveDelay && <IncreaseDissolveDelay onSubmitProposal={onSubmitProposal} action={proposalAction_} proposalPayload={proposalPayload_} /> }
+            { proposalAction_ === PROPOSAL_ACTIONS.IncreaseNeuron && <IncreaseNeuron onSubmitProposal={onSubmitProposal} action={proposalAction_} proposalPayload={proposalPayload_}/> }
             { (proposalAction_ === PROPOSAL_ACTIONS.CreateNeuron || proposalAction_ === PROPOSAL_ACTIONS.PurchaseCycles) && <CreateNeuronOrPurchaseCycles onSubmitProposal={onSubmitProposal} action={proposalAction_} proposalPayload={proposalPayload_}/> }
             { (proposalAction_ === PROPOSAL_ACTIONS.DisburseNeuron || proposalAction_ === PROPOSAL_ACTIONS.DissolveNeuron) && <DissolveOrDisburseNeuron onSubmitProposal={onSubmitProposal} action={proposalAction_} proposalPayload={proposalPayload_}/> }
             { (proposalAction_ === PROPOSAL_ACTIONS.AddAdmin || proposalAction_ === PROPOSAL_ACTIONS.RemoveAdmin) && <AddOrRemoveAdmin onSubmitProposal={onSubmitProposal} action={proposalAction_} proposalPayload={proposalPayload_}/> }
-            { proposalAction_ === PROPOSAL_ACTIONS.FollowNeuron && <FollowNeuron onSubmitProposal={onSubmitProposal} proposalPayload={proposalPayload_}/> }
-            { proposalAction_ === PROPOSAL_ACTIONS.SpawnNeuron && <SpawnNeuron onSubmitProposal={onSubmitProposal} proposalPayload={proposalPayload_}/> }
-            { proposalAction_ === PROPOSAL_ACTIONS.CreateFundingCampaign && <NewFundingCampaign onSubmitProposal={onSubmitProposal} proposalPayload={proposalPayload_}/> }
+            { proposalAction_ === PROPOSAL_ACTIONS.FollowNeuron && <FollowNeuron onSubmitProposal={onSubmitProposal} action={proposalAction_} proposalPayload={proposalPayload_}/> }
+            { proposalAction_ === PROPOSAL_ACTIONS.SpawnNeuron && <SpawnNeuron onSubmitProposal={onSubmitProposal} action={proposalAction_} proposalPayload={proposalPayload_}/> }
+            { proposalAction_ === PROPOSAL_ACTIONS.CreateFundingCampaign && <NewFundingCampaign onSubmitProposal={onSubmitProposal} action={proposalAction_} proposalPayload={proposalPayload_}/> }
             { (proposalAction_ === PROPOSAL_ACTIONS.InstallUpgrades || proposalAction_ === PROPOSAL_ACTIONS.LoadUpgrades || proposalAction_ === PROPOSAL_ACTIONS.ToggleSupportMode) 
                 && <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}> 
                     <ButtonField Icon={DoneIcon} active={true} text={'Submit Proposal'} onClick={() => onSubmitProposal({[proposalAction_]: {}})} /> 

@@ -7,15 +7,14 @@ import { Typography } from '@mui/material';
 import DoneIcon from '@mui/icons-material/Done';
 import InputBox from '../../Fields/InputBox';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
-import { PROPOSAL_ACTIONS } from '../utils';
 import { INPUT_BOX_FORMATS } from '../../../functionsAndConstants/Constants';
 
 
 const IncreaseDissolveDelay = (props) => {  
-    const { onSubmitProposal, proposalPayload} = props;
+    const { onSubmitProposal, payload, action, disabled} = props;
     const { treasuryState } = useContext(AppContext);
-    const [selectedNeuronId, setSelectedNeuronId] = useState(proposalPayload.neuronId);
-    const [additionalDissolveDelayInDays, setAdditionalDissolveDelayInDays] = useState(null);
+    const [selectedNeuronId, setSelectedNeuronId] = useState(payload?.neuronId.toString());
+    const [additionalDissolveDelayInDays, setAdditionalDissolveDelayInDays] = useState(payload?.additionalDissolveDelaySeconds ? parseInt(payload?.additionalDissolveDelaySeconds) / (24 * 60 * 60): null);
     const [hasError, setHasError] = useState(false);
     const [isReadyToSubmit, setIsReadyToSubmit] = useState(false);
 
@@ -32,7 +31,6 @@ const IncreaseDissolveDelay = (props) => {
         const neuronData_ = treasuryState?.neurons?.icp?.find(([neuronId, neuronData]) => neuronId === selectedNeuronId);
         if(!selectedNeuronId || !neuronData_) return 0;
         const [_, neuronData] = neuronData_;
-        console.log(neuronData);
         const {dissolve_delay_seconds} = neuronData.neuronInfo;
         const dissolveDelayInDays = parseInt(dissolve_delay_seconds) / (24 * 60 * 60);
         return Math.floor(maxDissolveDelayPossibleInDays - dissolveDelayInDays);
@@ -42,16 +40,17 @@ const IncreaseDissolveDelay = (props) => {
 
     const submitProposal = async () => {
         const additionalDissolveDelaySeconds = additionalDissolveDelayInDays * 24 * 60 * 60;
-        await onSubmitProposal({[PROPOSAL_ACTIONS.IncreaseDissolveDelay]: {neuronId: BigInt(selectedNeuronId), additionalDissolveDelaySeconds}});
+        await onSubmitProposal({[action]: {neuronId: BigInt(selectedNeuronId), additionalDissolveDelaySeconds}});
     };
 
     return (
         <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
             <MenuField
                 xs={8}
+                disabled={disabled}
                 display={"flex"}
                 alignItems={"center"}
-                justifyContent={"left"}
+                justifyContent={"center"}
                 active={true}
                 color={"custom"}
                 label={"Neuron To Configure"}
@@ -64,21 +63,24 @@ const IncreaseDissolveDelay = (props) => {
                 <InputBox
                     width={"100%"}
                     hasError={hasError}
+                    disabled={disabled}
                     label={"Additional Dissolve Delay Days"}
                     placeHolder={`Max: ${maxAdditionalDissolveDelayInDays} Days`}
                     onChange={(value) => { setHasError(!value || value > maxAdditionalDissolveDelayInDays); setAdditionalDissolveDelayInDays(value); }}
                     allowNegative={false}
                     maxDecimalPlaces={0}
+                    parseNumber={parseInt}
                     format={INPUT_BOX_FORMATS.numberFormat}
                     value={additionalDissolveDelayInDays}
                     suffix={" Days"}
                 />
             </>
             }
-            { isReadyToSubmit &&
+            { isReadyToSubmit && !disabled &&
                 <ButtonField
                     Icon={DoneIcon}
                     active={true}
+                    disabled={disabled}
                     text={'Submit Proposal'}
                     onClick={submitProposal}
                 />

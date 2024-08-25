@@ -3,7 +3,6 @@ import Grid from '@mui/material/Unstable_Grid2/Grid2';
 import MenuField from '../../Fields/MenuField';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { AppContext } from '../../../Context';
-import { PROPOSAL_ACTIONS } from '../utils';
 import { NEURON_TOPICS } from '../CreateProposalForm';
 import { Typography } from '@mui/material';
 import InputBox from '../../Fields/InputBox';
@@ -15,7 +14,7 @@ export const NEURON_TOPICS = {
     // The `Unspecified` topic is used as a fallback when
     // following. That is, if no followees are specified for a given
     // topic, the followees for this topic are used instead.
-    unspecificed: 0,
+    unspecified: 0,
     // A special topic by means of which a neuron can be managed by the
     // followees for this topic (in this case, there is no fallback to
     // 'unspecified'). Votes on this topic are not included in the
@@ -86,10 +85,10 @@ export const NEURON_TOPICS = {
 
 
 const FollowNeuron = (props) => {
-    const {onSubmitProposal, proposalPayload} = props;
-    const [selectedNeuronId, setSelectedNeuronId] = useState(proposalPayload.neuronId);
-    const [topicName, setTopicName] = useState(null);
-    const [followee, setFollowee] = useState(null);
+    const {onSubmitProposal, payload, action, disabled} = props;
+    const [selectedNeuronId, setSelectedNeuronId] = useState(payload?.neuronId.toString());
+    const [topicName, setTopicName] = useState(Object.keys(NEURON_TOPICS).find((key) => NEURON_TOPICS[key] === payload?.topic));
+    const [followee, setFollowee] = useState(payload?.followee?.toString());
     const [hasError, setHasError] = useState(false);
     const [isReadyToSubmit, setIsReadyToSubmit] = useState(false);
 
@@ -112,16 +111,17 @@ const FollowNeuron = (props) => {
     }, [selectedNeuronId, topicName, followee]);
 
     const submitProposal = async () => {
-        await onSubmitProposal({[PROPOSAL_ACTIONS.FollowNeuron]: {neuronId: BigInt(selectedNeuronId), topic: NEURON_TOPICS[topicName], followee: BigInt(followee)}});
+        await onSubmitProposal({[action]: {neuronId: BigInt(selectedNeuronId), topic: NEURON_TOPICS[topicName], followee: BigInt(followee)}});
     };
 
     return (
         <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
             <MenuField
+                disabled={disabled}
                 xs={8}
                 display={"flex"}
                 alignItems={"center"}
-                justifyContent={"left"}
+                justifyContent={"center"}
                 active={true}
                 color={"custom"}
                 label={"Neuron To Configure"}
@@ -132,10 +132,11 @@ const FollowNeuron = (props) => {
             <>
                 <Typography varient={"h6"} color={"#bdbdbd"}> {selectedNeuronId} </Typography>
                 <MenuField
+                    disabled={disabled}
                     xs={8}
                     display={"flex"}
                     alignItems={"center"}
-                    justifyContent={"left"}
+                    justifyContent={"center"}
                     active={true}
                     color={"custom"}
                     label={"Topic"}
@@ -146,25 +147,30 @@ const FollowNeuron = (props) => {
             }
             {
                 topicName &&
-                <InputBox
-                    xs={12}
-                    width={"100%"}
-                    hasError={hasError}
-                    label={"Neuron Id to Follow"}
-                    rows={"1"}
-                    onChange={(neuronId) => { 
-                        setHasError(!neuronId); 
-                        setFollowee(neuronId)
-                    }}
-                    value={followee}
-                    allowNegative={false}
-                    maxDecimalPlaces={0}
-                    format={INPUT_BOX_FORMATS.numberFormat}
-                />
+                <>
+                    <Typography varient={"h6"} color={"#bdbdbd"}> {topicName} </Typography>
+                    <InputBox
+                        disabled={disabled}
+                        xs={12}
+                        width={"100%"}
+                        hasError={hasError}
+                        label={"Neuron Id to Follow"}
+                        rows={"1"}
+                        onChange={(neuronId) => { 
+                            setHasError(!neuronId); 
+                            setFollowee(neuronId)
+                        }}
+                        value={followee}
+                        allowNegative={false}
+                        maxDecimalPlaces={0}
+                        format={INPUT_BOX_FORMATS.numberFormat}
+                    />
+                </>
             }
-            { isReadyToSubmit && 
+            { isReadyToSubmit && !disabled &&
                 <>
                     <ButtonField
+                        disabled={disabled}
                         Icon={DoneIcon}
                         active={true}
                         text={'Submit Proposal'}

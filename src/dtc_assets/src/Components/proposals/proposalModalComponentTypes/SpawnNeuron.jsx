@@ -8,17 +8,16 @@ import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
 import { INPUT_BOX_FORMATS } from '../../../functionsAndConstants/Constants';
 import ButtonField from '../../Fields/Button';
 import DoneIcon from '@mui/icons-material/Done';
-import { PROPOSAL_ACTIONS } from '../utils';
 
 const SpawnNeuron = (props) => {
 
-    const { onSubmitProposal, proposalPayload } = props;
+    const { onSubmitProposal, payload, action, disabled } = props;
 
 
     const { treasuryState } = useContext(AppContext);
 
-    const [selectedNeuronId, setSelectedNeuronId] = useState(proposalPayload.neuronId);
-    const [percentageOfRewardsToSpawn, setPercentageOfRewardsToSpawn] = useState(1);
+    const [selectedNeuronId, setSelectedNeuronId] = useState(payload?.neuronId.toString());
+    const [percentageOfRewardsToSpawn, setPercentageOfRewardsToSpawn] = useState(payload?.percentage_to_spawn || 1);
     const [hasError, setHasError] = useState(false);
     const [isReadyToSubmit, setIsReadyToSubmit] = useState(false);
 
@@ -34,16 +33,17 @@ const SpawnNeuron = (props) => {
     [selectedNeuronId, percentageOfRewardsToSpawn]);
 
     const submitProposal = async () => {
-        onSubmitProposal({ [PROPOSAL_ACTIONS.SpawnNeuron]: {neuronId: BigInt(selectedNeuronId), percentage_to_spawn: percentageOfRewardsToSpawn} });
+        onSubmitProposal({ [action]: {neuronId: BigInt(selectedNeuronId), percentage_to_spawn: percentageOfRewardsToSpawn} });
     };
 
     return (
         <Grid2 xs={12} display={'flex'} justifyContent={"center"} alignItems={'center'} flexDirection={'column'}>
             <MenuField
                 xs={8}
+                disabled={disabled}
                 display={"flex"}
                 alignItems={"center"}
-                justifyContent={"left"}
+                justifyContent={"center"}
                 active={true}
                 color={"custom"}
                 label={"Parent Neuron to Spawn New Neuron From"}
@@ -54,6 +54,7 @@ const SpawnNeuron = (props) => {
             <>
                 <Typography varient={"h6"} color={"#bdbdbd"}> {selectedNeuronId} </Typography>
                 <InputBox
+                    disabled={disabled}
                     label={"Percentage of Maturity to Spawn"}
                     placeHolder={"Percentage of Maturity to Spawn"}
                     onChange={(value) => {
@@ -64,6 +65,7 @@ const SpawnNeuron = (props) => {
                     hasError={hasError}
                     format={INPUT_BOX_FORMATS.numberFormat}
                     maxValue={100}
+                    parseNumber={parseInt}
                     width={"100%"}
                     omitMaxValueButton={true}
                     maxDecimalPlaces={0}
@@ -72,9 +74,10 @@ const SpawnNeuron = (props) => {
                 />
             </>
             }
-            { isReadyToSubmit && 
+            { isReadyToSubmit && !disabled &&
             <>
                 <ButtonField
+                    disabled={disabled}
                     Icon={DoneIcon}
                     active={true}
                     text={'Submit Proposal'}

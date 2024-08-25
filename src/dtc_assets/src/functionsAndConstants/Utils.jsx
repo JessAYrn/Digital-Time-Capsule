@@ -161,6 +161,10 @@ export const daysToNanoSeconds = (days) => {
   return days * 86400 * 1000000000;
 };
 
+export const nanoSecondsToDays = (nanoSeconds) => {
+  return nanoSeconds / (86400 * 1000000000);
+};
+
 export const secondsToHours = (seconds) => {
   return seconds / 3600;
 };

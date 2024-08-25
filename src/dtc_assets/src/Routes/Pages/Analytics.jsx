@@ -6,9 +6,7 @@ import { CANISTER_DATA_FIELDS, GRAPH_DISPLAY_LABELS, GRAPH_DATA_SETS, CHART_TYPE
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
 import Paper from '@mui/material/Paper';
-import CloseIcon from '@mui/icons-material/Close';
 import HowToVoteIcon from '@mui/icons-material/HowToVote';
-import ButtonField from '../../Components/Fields/Button';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import Grid from '@mui/material/Unstable_Grid2';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -25,7 +23,7 @@ import { mapRequestsForAccessToTableRows, mapUsersProfileDataToTableRows, reques
 import ModalComponent from '../../Components/modal/Modal';
 import SpeedDialField from '../../Components/Fields/SpeedDialField';
 import CreateProposalForm from '../../Components/proposals/CreateProposalForm';
-import DisplayProposals from '../../Components/proposals/DisplayProposal';
+import DisplayProposals from '../../Components/proposals/DisplayAllProposals';
 import { AppContext } from '../../Context';
 import { mapUsersTotalTreasuryStakesAndVotingPowersDataToChartFormat } from '../../mappers/treasuryPageMapperFunctions';
 import Graph from '../../Components/Fields/Chart';
