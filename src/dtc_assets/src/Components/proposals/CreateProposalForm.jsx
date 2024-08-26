@@ -118,14 +118,14 @@ const CreateProposalForm = (props) => {
             { proposalAction_ === PROPOSAL_ACTIONS.PurchaseCycles && 
                 <DataField label={"Available Balance: "} text={`${fromE8s(treasuryState.daoWalletBalance || 0) } ICP`} isLoading={!treasuryState.dataHasBeenLoaded} disabled={true}/>
             }
-            { proposalAction_ === PROPOSAL_ACTIONS.IncreaseDissolveDelay && <IncreaseDissolveDelay onSubmitProposal={onSubmitProposal} action={proposalAction_} proposalPayload={proposalPayload_} /> }
-            { proposalAction_ === PROPOSAL_ACTIONS.IncreaseNeuron && <IncreaseNeuron onSubmitProposal={onSubmitProposal} action={proposalAction_} proposalPayload={proposalPayload_}/> }
-            { (proposalAction_ === PROPOSAL_ACTIONS.CreateNeuron || proposalAction_ === PROPOSAL_ACTIONS.PurchaseCycles) && <CreateNeuronOrPurchaseCycles onSubmitProposal={onSubmitProposal} action={proposalAction_} proposalPayload={proposalPayload_}/> }
-            { (proposalAction_ === PROPOSAL_ACTIONS.DisburseNeuron || proposalAction_ === PROPOSAL_ACTIONS.DissolveNeuron) && <DissolveOrDisburseNeuron onSubmitProposal={onSubmitProposal} action={proposalAction_} proposalPayload={proposalPayload_}/> }
-            { (proposalAction_ === PROPOSAL_ACTIONS.AddAdmin || proposalAction_ === PROPOSAL_ACTIONS.RemoveAdmin) && <AddOrRemoveAdmin onSubmitProposal={onSubmitProposal} action={proposalAction_} proposalPayload={proposalPayload_}/> }
-            { proposalAction_ === PROPOSAL_ACTIONS.FollowNeuron && <FollowNeuron onSubmitProposal={onSubmitProposal} action={proposalAction_} proposalPayload={proposalPayload_}/> }
-            { proposalAction_ === PROPOSAL_ACTIONS.SpawnNeuron && <SpawnNeuron onSubmitProposal={onSubmitProposal} action={proposalAction_} proposalPayload={proposalPayload_}/> }
-            { proposalAction_ === PROPOSAL_ACTIONS.CreateFundingCampaign && <NewFundingCampaign onSubmitProposal={onSubmitProposal} action={proposalAction_} proposalPayload={proposalPayload_}/> }
+            { proposalAction_ === PROPOSAL_ACTIONS.IncreaseDissolveDelay && <IncreaseDissolveDelay onSubmitProposal={onSubmitProposal} action={proposalAction_} payload={proposalPayload_} /> }
+            { proposalAction_ === PROPOSAL_ACTIONS.IncreaseNeuron && <IncreaseNeuron onSubmitProposal={onSubmitProposal} action={proposalAction_} payload={proposalPayload_}/> }
+            { (proposalAction_ === PROPOSAL_ACTIONS.CreateNeuron || proposalAction_ === PROPOSAL_ACTIONS.PurchaseCycles) && <CreateNeuronOrPurchaseCycles onSubmitProposal={onSubmitProposal} action={proposalAction_} payload={proposalPayload_}/> }
+            { (proposalAction_ === PROPOSAL_ACTIONS.DisburseNeuron || proposalAction_ === PROPOSAL_ACTIONS.DissolveNeuron) && <DissolveOrDisburseNeuron onSubmitProposal={onSubmitProposal} action={proposalAction_} payload={proposalPayload_}/> }
+            { (proposalAction_ === PROPOSAL_ACTIONS.AddAdmin || proposalAction_ === PROPOSAL_ACTIONS.RemoveAdmin) && <AddOrRemoveAdmin onSubmitProposal={onSubmitProposal} action={proposalAction_} payload={proposalPayload_}/> }
+            { proposalAction_ === PROPOSAL_ACTIONS.FollowNeuron && <FollowNeuron onSubmitProposal={onSubmitProposal} action={proposalAction_} payload={proposalPayload_}/> }
+            { proposalAction_ === PROPOSAL_ACTIONS.SpawnNeuron && <SpawnNeuron onSubmitProposal={onSubmitProposal} action={proposalAction_} payload={proposalPayload_}/> }
+            { proposalAction_ === PROPOSAL_ACTIONS.CreateFundingCampaign && <NewFundingCampaign onSubmitProposal={onSubmitProposal} action={proposalAction_} payload={proposalPayload_}/> }
             { (proposalAction_ === PROPOSAL_ACTIONS.InstallUpgrades || proposalAction_ === PROPOSAL_ACTIONS.LoadUpgrades || proposalAction_ === PROPOSAL_ACTIONS.ToggleSupportMode) 
                 && <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}> 
                     <ButtonField Icon={DoneIcon} active={true} text={'Submit Proposal'} onClick={() => onSubmitProposal({[proposalAction_]: {}})} /> 
