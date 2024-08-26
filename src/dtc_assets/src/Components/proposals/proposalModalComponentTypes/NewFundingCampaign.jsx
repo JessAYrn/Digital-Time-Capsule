@@ -18,7 +18,6 @@ const NewFundingCampaign = (props) => {
     const fundingCampaignInput = payload?.fundingCampaignInput;
 
     const { homePageState } = useContext(AppContext);
-    console.log(payload);
     const [recipientPrincipal, setRecipientPrincipal] = useState(fundingCampaignInput?.recipient?.principalId);
     const [recipientAccountId, setRecipientAccountId] = useState(fundingCampaignInput?.recipient?.accountId);
     const [percentageOfDaoRewardsAllocated, setPercentageOfDaoRewardsAllocated] = useState(fundingCampaignInput?.percentageOfDaoRewardsAllocated ? parseInt(fundingCampaignInput?.percentageOfDaoRewardsAllocated) : null);
@@ -200,7 +199,6 @@ const NewFundingCampaign = (props) => {
                         disablePast={true}
                         onChange={(e) => {
                             const date = new Date(e);
-                            console.log(date);
                             setRepaymentStartDate(date);
                         }}
                     />
