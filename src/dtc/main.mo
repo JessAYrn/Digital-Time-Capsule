@@ -333,10 +333,11 @@ shared actor class User() = this {
         let neurons = {icp = await treasuryCanister.getNeuronsDataArray()};
         let daoWalletBalance = await treasuryCanister.daoWalletIcpBalance();
         let daoIcpAccountId_blob = await treasuryCanister.canisterIcpAccountId(null);
+        let fundingCampaigns = await treasuryCanister.getFundingCampainsArray();
         let {totalDeposits} = await treasuryCanister.getDaoTotalDeposits();
         let daoIcpAccountId = Blob.toArray(daoIcpAccountId_blob);
         let userPrincipal = Principal.toText(caller);
-        return #ok({usersTreasuryDataArray; daoWalletBalance; daoIcpAccountId; neurons; userPrincipal; totalDeposits; userTreasuryData});
+        return #ok({usersTreasuryDataArray; daoWalletBalance; daoIcpAccountId; neurons; userPrincipal; totalDeposits; userTreasuryData; fundingCampaigns});
     };
 
     public shared({caller}) func depositIcpToTreasury(amount: Nat64) : async {blockIndex: Nat64} {

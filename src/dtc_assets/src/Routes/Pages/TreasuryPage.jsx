@@ -25,9 +25,9 @@ import DepositOrWithdrawModal from "../../Components/modal/DepositOrWithdraw";
 import Graph from "../../Components/Fields/Chart";
 import { CHART_TYPES, GRAPH_DATA_SETS, GRAPH_DISPLAY_LABELS } from "../../functionsAndConstants/Constants";
 import { TREASURY_ACTIONS } from "../../Components/proposals/utils";
-import AccordionField from "../../Components/Fields/Accordion";
-import DisplayNeuron from "../../Components/Neurons/DisplayNeuron";
 import InfoToolTip from "../../Components/Fields/InfoToolTip";
+import DisplayAllFundingCampaigns from "../../Components/fundingCampaign/DisplayAllFundingCampaigns";
+import DisplayAllNeurons from "../../Components/Neurons/DisplayAllNeurons";
 
 const TreasuryPage = (props) => {
   const { 
@@ -155,7 +155,6 @@ const TreasuryPage = (props) => {
     {name: "Deposit To Treasury", icon: AccountBalanceIcon , onClick: () => openDepositOrWithdrawForm(TREASURY_ACTIONS.DepositIcpToTreasury)}
   ];
 
-
   return (
     <Grid 
       container 
@@ -242,25 +241,8 @@ const TreasuryPage = (props) => {
           height={"500px"}
           width={"100%"}
         />
-        {
-          treasuryState?.neurons?.icp && treasuryState?.neurons?.icp.length > 0 &&
-          <AccordionField>
-            {
-              treasuryState?.neurons?.icp.map(neuron => {
-                let subtitle = neuron[1]?.neuronInfo?.stake_e8s ? `${round2Decimals(fromE8s(parseInt(neuron[1].neuronInfo.stake_e8s)))} ICP` : "Retrieving...";
-                return (
-                  <div 
-                  title={`${neuron[0]}`}
-                  subtitle={subtitle}
-                  CustomComponent={DisplayNeuron} 
-                  neuronData={neuron}
-                  userPrincipal={treasuryState?.userPrincipal}
-                  ></div> 
-                )
-              })
-            }
-          </AccordionField>
-        }
+        <DisplayAllNeurons />
+        <DisplayAllFundingCampaigns />
         <ButtonField
           paperSx={{marginTop: "20px"}}
           text={"View Treasury Account ID"}

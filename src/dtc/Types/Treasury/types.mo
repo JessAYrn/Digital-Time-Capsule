@@ -116,6 +116,7 @@ module{
         daoWalletBalance: {e8s : Nat64};
         daoIcpAccountId: [Nat8];
         userPrincipal: Text;
+        fundingCampaigns: FundingCampaignsArray;
     };
 
     public type Memo = Nat;

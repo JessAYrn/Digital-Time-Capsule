@@ -182,7 +182,8 @@ export const mapBackendTreasuryDataToFrontEndObj = (props) => {
         totalDeposits,
         daoIcpAccountId,
         daoWalletBalance,
-        neurons
+        neurons, 
+        fundingCampaigns
     } = props;
     
     const daoIcpAccountId_ = toHexString(new Uint8Array( [...daoIcpAccountId]));
@@ -238,6 +239,7 @@ export const mapBackendTreasuryDataToFrontEndObj = (props) => {
         votingPower,
         userVotingPower,
         userTreasuryData: userTreasuryData_[1],
-        userPrincipal
+        userPrincipal,
+        fundingCampaigns
     };
 };
