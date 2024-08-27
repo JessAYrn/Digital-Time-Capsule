@@ -86,7 +86,7 @@ export const NEURON_TOPICS = {
 
 const FollowNeuron = (props) => {
     const {onSubmitProposal, payload, action, disabled} = props;
-    const [selectedNeuronId, setSelectedNeuronId] = useState(payload?.neuronId.toString());
+    const [selectedNeuronId, setSelectedNeuronId] = useState(payload?.neuronId?.toString());
     const [topicName, setTopicName] = useState(Object.keys(NEURON_TOPICS).find((key) => NEURON_TOPICS[key] === payload?.topic));
     const [followee, setFollowee] = useState(payload?.followee?.toString());
     const [hasError, setHasError] = useState(false);

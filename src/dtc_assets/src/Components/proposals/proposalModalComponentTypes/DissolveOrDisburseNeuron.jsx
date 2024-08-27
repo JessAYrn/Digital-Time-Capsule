@@ -10,7 +10,7 @@ import Grid from '@mui/material/Unstable_Grid2/Grid2';
 const DissolveOrDisburseNeuron = (props) => {
     const { onSubmitProposal, action, payload, disabled } = props;
     const { treasuryState } = useContext(AppContext);
-    const [selectedNeuronId, setSelectedNeuronId] = useState(payload?.neuronId.toString());
+    const [selectedNeuronId, setSelectedNeuronId] = useState(payload?.neuronId?.toString());
     const [isReadyToSubmit, setIsReadyToSubmit] = useState(false);
 
     const neuronMenuItemProps = treasuryState?.neurons?.icp?.map(([neuronId, neuronData]) => {

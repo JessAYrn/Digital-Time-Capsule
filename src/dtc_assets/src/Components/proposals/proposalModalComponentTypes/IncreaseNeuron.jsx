@@ -14,7 +14,7 @@ import { Typography } from '@mui/material';
 const IncreaseNeuron = (props) => {
     const { onSubmitProposal, payload, action, disabled } = props;
     const { treasuryState } = useContext(AppContext);
-    const [selectedNeuronId, setSelectedNeuronId] = useState(payload?.neuronId.toString());
+    const [selectedNeuronId, setSelectedNeuronId] = useState(payload?.neuronId?.toString());
     const [amount, setAmount] = useState(payload?.amount ? fromE8s(parseInt(payload?.amount)) : null);
     const [hasError, setHasError] = useState(false);
     const [isReadyToSubmit, setIsReadyToSubmit] = useState(false);

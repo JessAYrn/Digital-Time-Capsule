@@ -13,7 +13,7 @@ import { INPUT_BOX_FORMATS } from '../../../functionsAndConstants/Constants';
 const IncreaseDissolveDelay = (props) => {  
     const { onSubmitProposal, payload, action, disabled} = props;
     const { treasuryState } = useContext(AppContext);
-    const [selectedNeuronId, setSelectedNeuronId] = useState(payload?.neuronId.toString());
+    const [selectedNeuronId, setSelectedNeuronId] = useState(payload?.neuronId?.toString());
     const [additionalDissolveDelayInDays, setAdditionalDissolveDelayInDays] = useState(payload?.additionalDissolveDelaySeconds ? parseInt(payload?.additionalDissolveDelaySeconds) / (24 * 60 * 60): null);
     const [hasError, setHasError] = useState(false);
     const [isReadyToSubmit, setIsReadyToSubmit] = useState(false);

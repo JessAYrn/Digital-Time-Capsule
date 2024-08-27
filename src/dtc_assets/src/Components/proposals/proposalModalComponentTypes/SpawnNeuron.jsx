@@ -16,7 +16,7 @@ const SpawnNeuron = (props) => {
 
     const { treasuryState } = useContext(AppContext);
 
-    const [selectedNeuronId, setSelectedNeuronId] = useState(payload?.neuronId.toString());
+    const [selectedNeuronId, setSelectedNeuronId] = useState(payload?.neuronId?.toString());
     const [percentageOfRewardsToSpawn, setPercentageOfRewardsToSpawn] = useState(payload?.percentage_to_spawn || 1);
     const [hasError, setHasError] = useState(false);
     const [isReadyToSubmit, setIsReadyToSubmit] = useState(false);
