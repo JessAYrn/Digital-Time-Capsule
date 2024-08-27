@@ -141,34 +141,14 @@ module{
 
     public type UserProfilesArray_V2 = [(Principal, UserProfile_V2)];
 
-    public type Proposals = [(Nat,Proposal)];
-
     public type Proposals_V2 = [(Nat,Proposal_V2)];
 
-    public type ProposalsMap = HashMap.HashMap<Nat, Proposal>;
-
     public type ProposalsMap_V2 = HashMap.HashMap<Nat, Proposal_V2>;
-    
-    public type VotingResults = {
-        yay: Nat64;
-        nay: Nat64;
-        total: Nat64;
-    };
 
     public type VotingResults_V2 = {
         yay: Nat64;
         nay: Nat64;
         totalParticipated: Nat64;
-    };
-
-    public type Proposal = {
-        votes: [(Text, Vote)];
-        voteTally: VotingResults;
-        action: ProposalActions;
-        proposer: Text;
-        timeInitiated: Int;
-        executed: Bool;
-        timeVotingPeriodEnds: Int;
     };
 
     public type Proposal_V2 = {

@@ -43,14 +43,12 @@ shared actor class User() = this {
     private stable var daoMetaData_v4 : MainTypes.DaoMetaData_V4 = MainTypes.DEFAULT_DAO_METADATA_V4;
     private stable var userProfilesArray_v2 : [(Principal, MainTypes.UserProfile_V2)] = [];
     private stable var proposalIndex: Nat = 0;
-    private stable var proposalsArray: MainTypes.Proposals = [];
     private stable var proposalsArray_v2: MainTypes.Proposals_V2 = [];
     private stable var xdr_permyriad_per_icp: Nat64 = 1;
     private stable var frontEndCanisterBalance: Nat = 1;
     private stable var quorum: Float = 0.125;
     private var maxNumberDaoMembers : Nat = 250;
     private var userProfilesMap_v2 : MainTypes.UserProfilesMap_V2 = HashMap.fromIter<Principal, MainTypes.UserProfile_V2>(Iter.fromArray(userProfilesArray_v2), Iter.size(Iter.fromArray(userProfilesArray_v2)), Principal.equal, Principal.hash);
-    private var proposalsMap : MainTypes.ProposalsMap = HashMap.fromIter<Nat, MainTypes.Proposal>(Iter.fromArray(proposalsArray), Iter.size(Iter.fromArray(proposalsArray)), Nat.equal, Hash.hash);
     private var proposalsMap_v2 : MainTypes.ProposalsMap_V2 = HashMap.fromIter<Nat, MainTypes.Proposal_V2>(Iter.fromArray(proposalsArray_v2), Iter.size(Iter.fromArray(proposalsArray_v2)), Nat.equal, Hash.hash);
     private stable var startIndexForBlockChainQuery : Nat64 = 7_356_011;
     private let ic : IC.Self = actor "aaaaa-aa";
@@ -651,16 +649,8 @@ shared actor class User() = this {
 
     system func preupgrade() { 
         userProfilesArray_v2 := Iter.toArray(userProfilesMap_v2.entries()); 
-        proposalsArray := Iter.toArray(proposalsMap.entries());
-        if(Iter.size(proposalsMap_v2.vals()) == 0) { 
-            let newArrayBuffer = Buffer.Buffer<(Nat, MainTypes.Proposal_V2)>(1);
-            for((proposalId, proposal) in proposalsMap.entries()){
-                let {timeVotingPeriodEnds; voteTally} = proposal;
-                let newVoteTalley = {voteTally with totalParticipated = voteTally.total};
-                newArrayBuffer.add((proposalId, {proposal with finalized = timeVotingPeriodEnds < Time.now(); voteTally = newVoteTalley;}));
-            };
-            proposalsArray_v2 :=  Buffer.toArray(newArrayBuffer);
-        } else { proposalsArray_v2 := Iter.toArray(proposalsMap_v2.entries()); };
+        proposalsArray_v2 :=  Iter.toArray(proposalsMap_v2.entries());
+        
     };
 
     system func postupgrade() { 
