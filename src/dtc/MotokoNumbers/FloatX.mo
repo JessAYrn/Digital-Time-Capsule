@@ -1,12 +1,9 @@
 import Buffer "mo:base/Buffer";
-import Debug "mo:base/Debug";
 import Float "mo:base/Float";
 import Int "mo:base/Int";
 import Int64 "mo:base/Int64";
 import Iter "mo:base/Iter";
 import Nat "mo:base/Nat";
-import Nat16 "mo:base/Nat16";
-import Nat32 "mo:base/Nat32";
 import Nat64 "mo:base/Nat64";
 import NatX "./NatX";
 

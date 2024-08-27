@@ -4,29 +4,21 @@ import HashMap "mo:base/HashMap";
 import Iter "mo:base/Iter";
 import Principal "mo:base/Principal";
 import Text "mo:base/Text";
-import Array "mo:base/Array";
-import Time "mo:base/Time";
 import Float "mo:base/Float";
 import Nat64 "mo:base/Nat64";
-import Int64 "mo:base/Int64";
-import NnsCyclesMinting "../../NNS/NnsCyclesMinting";
-import Nat "mo:base/Nat";
-import Hash "mo:base/Hash";
 
 
 module{    
-
-
-    private let nanosecondsInADay = 86_400_000_000_000;
     
     type XDRs = Float;
 
     public func tallyVotes({ 
         neuronsDataArray: TreasuryTypes.NeuronsDataArray; 
-        proposal: MainTypes.Proposal; 
+        proposal: MainTypes.Proposal_V2; 
         founder: Text; 
         userProfilesMap: MainTypes.UserProfilesMap_V2;
-    }) : MainTypes.VotingResults {
+        includeNonVoters: Bool;
+    }) : MainTypes.VotingResults_V2 {
         var yay: Nat64 = 0;
         var nay: Nat64 = 0;
 
@@ -41,7 +33,10 @@ module{
                     switch(foundersVoteChoice){ 
                         case null { continue loop_ }; 
                         case (?foundersVoteChoice_){ 
-                            if(foundersVoteChoice_.adopt) yay += userVotingPower else nay += userVotingPower; 
+                            switch(includeNonVoters){
+                                case true { if(foundersVoteChoice_.adopt) yay += userVotingPower else nay += userVotingPower; };
+                                case false { continue loop_ };
+                            };  
                         };
                     };
                 };
@@ -49,21 +44,22 @@ module{
             };
         };
         
-        let total = yay + nay;
-        return {yay; nay; total};
+        let totalParticipated = yay + nay;
+        return {yay; nay; totalParticipated};
     };
 
     public func tallyAllProposalVotes({ 
         neuronsDataArray : TreasuryTypes.NeuronsDataArray; 
-        proposals: MainTypes.ProposalsMap;
+        proposals: MainTypes.ProposalsMap_V2;
         founder: Text; 
         userProfilesMap: MainTypes.UserProfilesMap_V2;
-    }) : MainTypes.Proposals{
+        includeNonVoters: Bool;
+    }) : MainTypes.Proposals_V2{
 
         label loop_ for((key, proposal) in proposals.entries()){
-            let {timeVotingPeriodEnds} = proposal;
-            if(Time.now() > timeVotingPeriodEnds + nanosecondsInADay) continue loop_;
-            let voteTally = tallyVotes({neuronsDataArray; proposal; founder; userProfilesMap});
+            let {finalized} = proposal;
+            if(finalized) continue loop_;
+            let voteTally = tallyVotes({neuronsDataArray; proposal; founder; userProfilesMap; includeNonVoters});
             proposals.put(key, {proposal with voteTally;});
         };
         return Iter.toArray(proposals.entries());

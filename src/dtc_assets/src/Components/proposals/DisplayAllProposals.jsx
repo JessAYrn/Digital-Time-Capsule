@@ -1,6 +1,6 @@
 import React from 'react';
 import Grid from '@mui/material/Unstable_Grid2';
-import AccordionField from '../../Components/Fields/Accordion';
+import AccordionField from '../Fields/Accordion';
 import Proposal from './Proposal';
 
 const DisplayProposals = (props) => {
@@ -13,7 +13,7 @@ const DisplayProposals = (props) => {
                     <AccordionField>
                         {proposals?.map(([proposalId, proposal]) => {
                             let id = parseInt(proposalId);
-                            let {action, payload, proposer, executed, timeVotingPeriodEnds, timeInitiated, voteTally, votes} = proposal;
+                            let {action, finalized, proposer, executed, timeVotingPeriodEnds, timeInitiated, voteTally, votes} = proposal;
                             return (
                                 <div 
                                     title={`Propsoal #${id}`}
@@ -22,6 +22,7 @@ const DisplayProposals = (props) => {
                                     action={action}
                                     timeInitiated={timeInitiated}
                                     timeVotingPeriodEnds={timeVotingPeriodEnds}
+                                    finalized={finalized}
                                     executed={executed}
                                     votes={votes}
                                     voteTally={voteTally}

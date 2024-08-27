@@ -6,29 +6,24 @@ import { CANISTER_DATA_FIELDS, GRAPH_DISPLAY_LABELS, GRAPH_DATA_SETS, CHART_TYPE
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
 import Paper from '@mui/material/Paper';
-import UpgradeIcon from '@mui/icons-material/Upgrade';
-import CloseIcon from '@mui/icons-material/Close';
 import HowToVoteIcon from '@mui/icons-material/HowToVote';
-import ButtonField from '../../Components/Fields/Button';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import Grid from '@mui/material/Unstable_Grid2';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import AccordionField from '../../Components/Fields/Accordion';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import {homePageTypes} from '../../reducers/homePageReducer';
 import {types as journalTypes} from '../../reducers/journalReducer';
 import {walletTypes} from '../../reducers/walletReducer';
 import {notificationsTypes} from '../../reducers/notificationsReducer';
 import {treasuryTypes} from '../../reducers/treasuryReducer';
-import { inTrillions, nanoSecondsToMiliSeconds, round2Decimals, shortenHexString } from '../../functionsAndConstants/Utils';
+import { inTrillions, round2Decimals, shortenHexString } from '../../functionsAndConstants/Utils';
 import { copyText } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
 import DataTable from '../../Components/Fields/Table';
 import { mapRequestsForAccessToTableRows, mapUsersProfileDataToTableRows, requestsForAccessTableColumns, usersTableColumns } from '../../mappers/dashboardMapperFunctions';
 import ModalComponent from '../../Components/modal/Modal';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import SpeedDialField from '../../Components/Fields/SpeedDialField';
 import CreateProposalForm from '../../Components/proposals/CreateProposalForm';
-import DisplayProposals from '../../Components/proposals/DisplayProposal';
+import DisplayProposals from '../../Components/proposals/DisplayAllProposals';
 import { AppContext } from '../../Context';
 import { mapUsersTotalTreasuryStakesAndVotingPowersDataToChartFormat } from '../../mappers/treasuryPageMapperFunctions';
 import Graph from '../../Components/Fields/Chart';
@@ -60,15 +55,8 @@ const Analytics = (props) => {
     const [requestsTableIsLoading, setRequestsTableIsLoading] = useState(false);
     const [usersTableIsLoading, setUsersTableIsLoading] = useState(false);
 
-    let activeProposal = homePageState?.canisterData?.proposals?.filter(proposal => nanoSecondsToMiliSeconds(parseInt(proposal[1].timeVotingPeriodEnds)) > Date.now());
-    let inactiveProposals = homePageState?.canisterData?.proposals?.filter(proposal => nanoSecondsToMiliSeconds(parseInt(proposal[1].timeVotingPeriodEnds)) < Date.now());
-
-    const modalButton_close = [
-        {
-            Component: ButtonField,
-            props: { active: true, text: "Close", Icon: CloseIcon, onClick: () => setModalIsOpen(false)}
-        }
-    ];
+    let activeProposal = homePageState?.canisterData?.proposals?.filter(proposal => !proposal[1].finalized);
+    let inactiveProposals = homePageState?.canisterData?.proposals?.filter(proposal => proposal[1].finalized);
 
     const modalForm_createProposal = [
         {
@@ -156,63 +144,6 @@ const Analytics = (props) => {
             actionType: homePageTypes.SET_CANISTER_DATA,
             payload: { ...homePageState.canisterData, acceptingRequests: !homePageState.canisterData.acceptingRequests }
         });
-    };
-
-    const toggleSupportMode = async () => {
-        setIsLoadingModal(true);
-        setModalIsOpen(true);
-        let result = await actorState.backendActor.toggleSupportMode();
-        setModalIsOpen(false);
-        setIsLoadingModal(false);
-        if('err' in result) return;
-        homePageDispatch({
-            actionType: homePageTypes.SET_CANISTER_DATA,
-            payload: { ...homePageState.canisterData, supportMode: !homePageState.canisterData.supportMode }
-        });
-    };
-
-    const handleInstallUpgrade = async () => {
-        setIsLoadingModal(true);
-        setModalIsOpen(true);
-        try{
-            await actorState.backendActor.installUpgrades();
-            setModalProps({
-                bigText: "Install Complete",
-                smallText: "Refresh page in order to have the changes take effect",
-                Icon: CheckCircleOutlineIcon,
-                components: modalButton_close
-            })
-        } catch(e){
-            console.log("Error: ", e);
-            setModalProps({
-                bigText: "Install Unsuccessfull",
-                Icon: ErrorOutlineIcon,
-                components: modalButton_close
-            })
-        };
-        setIsLoadingModal(false);
-    };
-
-    const handleLoadUpgrade = async () => {
-        setIsLoadingModal(true);
-        setModalIsOpen(true);
-        try{
-            await actorState.backendActor.loadUpgrades();
-            setModalProps({
-                bigText: "Load Complete",
-                smallText: "Refresh page in order to have the changes take effect",
-                Icon: CheckCircleOutlineIcon,
-                components: modalButton_close
-            })
-        } catch(e){
-            console.log("Error: ", e);
-            setModalProps({
-                bigText: "Load Unsuccessfull",
-                Icon: ErrorOutlineIcon,
-                components: modalButton_close
-            })
-        };
-        setIsLoadingModal(false);
     };
 
     const openProposalForm = () => {

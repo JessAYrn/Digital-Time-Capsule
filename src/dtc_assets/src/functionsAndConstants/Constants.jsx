@@ -8,6 +8,10 @@ export const monthInDays = 30;
 
 export const e8sInOneICP = 100000000;
 
+export const MAX_DISSOLVE_DELAY_IN_SECONDS = 252288000;
+
+export const MIN_DISSOLVE_DELAY_FOR_REWARDS_IN_SECONDS = 15768000;
+
 export const CHUNK_SIZE = 1024 * 1024;
 
 export const NAV_LINKS = {

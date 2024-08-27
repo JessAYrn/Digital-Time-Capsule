@@ -1,4 +1,3 @@
-import FloatX "../../MotokoNumbers/FloatX";
 
 module {
   public type DecodingError = {

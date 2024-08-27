@@ -1,4 +1,4 @@
-import React, {useState, useContext} from "react";
+import React, {useState, useContext, useMemo} from "react";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import DataField from "../Fields/DataField";
 import Typography from "@mui/material/Typography";
@@ -12,10 +12,25 @@ import ButtonField from "../Fields/Button";
 import CheckIcon from '@mui/icons-material/Check';
 import ModalComponent from "../modal/Modal";
 import { copyText } from "../../functionsAndConstants/walletFunctions/CopyWalletAddress";
-import { NEURON_TOPICS } from "./CreateProposalForm";
 import { AppContext } from "../../Context";
 import { homePageTypes } from "../../reducers/homePageReducer";
 import { PROPOSAL_ACTIONS } from "./utils";
+import Graph from "../Fields/Chart";
+import { CHART_TYPES, GRAPH_DATA_SETS, GRAPH_DISPLAY_LABELS, MAX_DISSOLVE_DELAY_IN_SECONDS, MIN_DISSOLVE_DELAY_FOR_REWARDS_IN_SECONDS } from "../../functionsAndConstants/Constants";
+import { mapUsersTotalTreasuryStakesAndVotingPowersDataToChartFormat } from "../../mappers/treasuryPageMapperFunctions";
+import Grid from "@mui/material/Unstable_Grid2/Grid2";
+import MenuField from "../Fields/MenuField";
+import { KeyboardArrowDownIcon } from "@mui/icons-material";
+import IncreaseDissolveDelay from "./proposalModalComponentTypes/IncreaseDissolveDelay";
+import IncreaseNeuron from "./proposalModalComponentTypes/IncreaseNeuron";
+import CreateNeuronOrPurchaseCycles from "./proposalModalComponentTypes/CreateNeuronOrPurchaseCycles";
+import DissolveOrDisburseNeuron from "./proposalModalComponentTypes/DissolveOrDisburseNeuron";
+import AddOrRemoveAdmin from "./proposalModalComponentTypes/AddOrRemoveAdmin";
+import FollowNeuron from "./proposalModalComponentTypes/FollowNeuron";
+import SpawnNeuron from "./proposalModalComponentTypes/SpawnNeuron";
+import NewFundingCampaign from "./proposalModalComponentTypes/NewFundingCampaign";
+
+
 const CYCLES_COSTS_ASSOCIATED_WITH_ACTIONS = [
     PROPOSAL_ACTIONS.FollowNeuron,
     PROPOSAL_ACTIONS.IncreaseNeuron,
@@ -25,6 +40,13 @@ const CYCLES_COSTS_ASSOCIATED_WITH_ACTIONS = [
     PROPOSAL_ACTIONS.IncreaseDissolveDelay,
     PROPOSAL_ACTIONS.FollowNeuron,
     PROPOSAL_ACTIONS.CreateNeuron,
+];
+
+const VOTING_POWER_REDISTRIBUTION_ACTIONS = [
+    PROPOSAL_ACTIONS.IncreaseNeuron,
+    PROPOSAL_ACTIONS.IncreaseDissolveDelay,
+    PROPOSAL_ACTIONS.CreateNeuron
+
 ];
 
 const Proposal = (props) => {
@@ -38,18 +60,28 @@ const Proposal = (props) => {
         executed,
         timeVotingPeriodEnds,
         votes,
+        finalized,
         voteTally
     } = props;
 
     const [modalProps, setModalProps] = useState({});
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [isLoadingModal, setIsLoading] = useState(false);
+    const [hasVoted, setHasVoted] = useState(false);
 
-    let numberOfNays = votes.filter(vote => vote[1].adopt === false).length;
-    let numberOfYays = votes.filter(vote => vote[1].adopt === true).length;
-    let totalVotes = votes.length;
+    const { actorState, homePageDispatch, treasuryState } = useContext(AppContext);
 
-    const { actorState, homePageDispatch } = useContext(AppContext);
+    let [numberOfNays, numberOfYays, totalVotes] = useMemo(() => {
+        let numberOfNays = 0;
+        let numberOfYays = 0;
+        let totalVotes = votes.length;
+
+        for(let [userPrincipal, voteData] of votes) {
+            voteData.adopt ? numberOfYays++ : numberOfNays++;
+            if(userPrincipal === treasuryState.userPrincipal){setHasVoted(true)}
+        }
+        return [numberOfNays, numberOfYays, totalVotes];
+    },[]);
 
     const timeRemainingInNanoseconds = parseInt(timeVotingPeriodEnds) - milisecondsToNanoSeconds(Date.now());
     const timeRemainingInSeconds = timeRemainingInNanoseconds / 1000000000;
@@ -57,7 +89,87 @@ const Proposal = (props) => {
 
     let actionType = getProposalType(action);
     let payload = action[actionType];
-    let {yay, nay, total} = voteTally;
+    let {yay, nay, totalParticipated} = voteTally;
+
+    const displayHypotheticalTreasuryData = () => {
+        if(!VOTING_POWER_REDISTRIBUTION_ACTIONS.includes(actionType)) return;
+        if(finalized) return;
+        let { amount: amountToIncreaseNeuron, neuronId, additionalDissolveDelaySeconds } = payload;
+        let {neurons} = treasuryState;  
+        const getVotingPowerBonusMultiplier = () => {
+            if(actionType === PROPOSAL_ACTIONS.CreateNeuron) return 1;
+            let neuronData = neurons.icp.find(([neuronId_, _]) => neuronId_ === BigInt(neuronId).toString());
+            if(!neuronData) return 1;
+            let {neuronInfo} = neuronData[1];
+            let {stake_e8s: neuronTotalStake, voting_power: neuronTotalVotingPower, dissolve_delay_seconds} = neuronInfo;
+            if(actionType === PROPOSAL_ACTIONS.IncreaseNeuron){ 
+                let currentVotingPowerBonusMultipllier = neuronTotalVotingPower / neuronTotalStake;
+                return currentVotingPowerBonusMultipllier; 
+            };
+            if(actionType === PROPOSAL_ACTIONS.IncreaseDissolveDelay){
+                let newDissolveDelay = parseInt(dissolve_delay_seconds) + parseInt(additionalDissolveDelaySeconds);
+                let rewardsMultiplierRange = MAX_DISSOLVE_DELAY_IN_SECONDS - MIN_DISSOLVE_DELAY_FOR_REWARDS_IN_SECONDS;
+                let elibleSecondsWithinRange = newDissolveDelay - MIN_DISSOLVE_DELAY_FOR_REWARDS_IN_SECONDS;
+                if(elibleSecondsWithinRange < 0) return 1;
+                let rewardsMultiplier = 1 + elibleSecondsWithinRange / rewardsMultiplierRange;
+                return rewardsMultiplier;
+            };
+        };
+
+        let votingPowerBonusMultipllier = getVotingPowerBonusMultiplier();
+        let hypotheticalUsersTreasuryDataArray;
+        let hypotheticalUsersTreasuryDataMap = {};
+        treasuryState?.usersTreasuryDataArray.map(([principal, userTreasuryData]) => { hypotheticalUsersTreasuryDataMap[principal] = userTreasuryData;});
+
+        if(actionType === PROPOSAL_ACTIONS.CreateNeuron || actionType === PROPOSAL_ACTIONS.IncreaseNeuron){
+            let proposerTreasuryData = hypotheticalUsersTreasuryDataMap[proposer];
+            if(!proposerTreasuryData) proposerTreasuryData =  {balances: {icp_staked: 0, voting_power: 0}};
+
+            proposerTreasuryData = {
+                ...proposerTreasuryData, 
+                balances: {
+                    ...proposerTreasuryData.balances,
+                    icp_staked: proposerTreasuryData.balances.icp_staked + parseInt(amountToIncreaseNeuron), 
+                    voting_power: proposerTreasuryData.balances.voting_power + (parseInt(amountToIncreaseNeuron) * parseInt(votingPowerBonusMultipllier))
+                }
+            };
+            hypotheticalUsersTreasuryDataMap[proposer] = proposerTreasuryData;  
+            hypotheticalUsersTreasuryDataArray = Object.entries(hypotheticalUsersTreasuryDataMap);
+        } else if(actionType === PROPOSAL_ACTIONS.IncreaseDissolveDelay){
+            let neuronData = neurons.icp.find(([neuronId_, _]) => neuronId_ === BigInt(neuronId).toString());
+            if(!neuronData) return;
+            let {contributions} = neuronData[1];
+            contributions.map(([principal, {stake_e8s, voting_power}]) => {
+                const additionalVotingPower = parseInt(stake_e8s) * votingPowerBonusMultipllier - parseInt(voting_power);
+                if(additionalVotingPower > 0) {
+                    hypotheticalUsersTreasuryDataMap[principal] = {
+                        ...hypotheticalUsersTreasuryDataMap[principal],
+                        balances: {
+                            ...hypotheticalUsersTreasuryDataMap[principal].balances,
+                            voting_power: hypotheticalUsersTreasuryDataMap[principal].balances.voting_power + additionalVotingPower
+                        }
+                    };
+                }
+            });
+            hypotheticalUsersTreasuryDataArray = Object.entries(hypotheticalUsersTreasuryDataMap);
+        };
+
+        return (
+            <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
+                <Typography variant="h6">Voting Power Distribution If Approved: </Typography>
+                <Graph
+                    type={CHART_TYPES.pie}
+                    defaultLabel={GRAPH_DISPLAY_LABELS.votingPower}
+                    inputData={mapUsersTotalTreasuryStakesAndVotingPowersDataToChartFormat(hypotheticalUsersTreasuryDataArray)}
+                    defaultDataSetName={GRAPH_DATA_SETS.usersTotalStakesAndVotingPowers}
+                    height={"400px"}
+                    maintainAspectRatio={false}
+                    hideButton1={true}
+                    hideButton2={true}
+                />
+            </Grid>
+        );
+    }
 
     const onConfirmVote = async (bool) => {
         setIsLoading(true);
@@ -133,70 +245,33 @@ const Proposal = (props) => {
                 alignItems="center" 
                 flexDirection={"column"} 
             >
+                <MenuField
+                    xs={8}
+                    disabled={true}
+                    display={"flex"}
+                    alignItems={"center"}
+                    justifyContent={"center"}
+                    active={true}
+                    color={"custom"}
+                    label={"Proposal Type"}
+                    MenuIcon={KeyboardArrowDownIcon}
+                    menuItemProps={[{ text: actionType, onClick: ()  => {}, selected: true},]}
+                />
+                <Typography varient={"h6"} color={"#bdbdbd"}> {actionType} </Typography>
+                { actionType === PROPOSAL_ACTIONS.IncreaseDissolveDelay && <IncreaseDissolveDelay action={actionType} payload={payload} disabled={true}/> }
+                { actionType === PROPOSAL_ACTIONS.IncreaseNeuron && <IncreaseNeuron action={actionType} payload={payload} disabled={true}/> }
+                { (actionType === PROPOSAL_ACTIONS.CreateNeuron || actionType === PROPOSAL_ACTIONS.PurchaseCycles) && <CreateNeuronOrPurchaseCycles action={actionType} payload={payload} disabled={true}/> }
+                { (actionType === PROPOSAL_ACTIONS.DisburseNeuron || actionType === PROPOSAL_ACTIONS.DissolveNeuron) && <DissolveOrDisburseNeuron action={actionType} payload={payload} disabled={true}/> }
+                { (actionType === PROPOSAL_ACTIONS.AddAdmin || actionType === PROPOSAL_ACTIONS.RemoveAdmin) && <AddOrRemoveAdmin action={actionType} payload={payload} disabled={true}/> }
+                { actionType === PROPOSAL_ACTIONS.FollowNeuron && <FollowNeuron action={actionType} payload={payload} disabled={true}/> }
+                { actionType === PROPOSAL_ACTIONS.SpawnNeuron && <SpawnNeuron action={actionType} payload={payload} disabled={true}/> }
+                { actionType === PROPOSAL_ACTIONS.CreateFundingCampaign && <NewFundingCampaign action={actionType} payload={payload} disabled={true}/> }
+
                 { timeRemainingInNanoseconds > 0 && <DataField
                     label={'Voting Ends in: '}
                     text={`${round2Decimals(timeRemainingInHours)} hours`}
                     disabled={true}
                 />}
-                <DataField
-                    label={'Action: '}
-                    text={`${getProposalType(action)}`}
-                    disabled={true}
-                />
-                { payload && 
-                    <>
-                        {
-                            Object.keys(payload).map((key, index) => {
-                                let text = payload[key];
-                                let key_ = key;
-                                let onClick = () => {};
-                                let isDisabled = true;
-                                switch(key){
-                                    case "principal":
-                                        text = shortenHexString(payload[key]);
-                                        onClick = () => copyText(payload[key]);
-                                        isDisabled = false;
-                                        break;
-                                    case "neuronId":
-                                        text = BigInt(payload[key]).toString();
-                                        onClick = () => copyText(text);
-                                        isDisabled = false;
-                                        break;
-                                    case "followees":
-                                        text = BigInt(payload[key][0]).toString();
-                                        onClick = () => copyText(text);
-                                        isDisabled = false;
-                                        break;
-                                    case "topic":
-                                        text = Object.keys(NEURON_TOPICS).find(thisKey => NEURON_TOPICS[thisKey] === payload[key]);
-                                        break;
-                                    case "additionalDissolveDelaySeconds":
-                                        text = `${ daysToMonths(hoursToDays(secondsToHours(payload[key]))) } months`; 
-                                        key_ = "additionalDissolveDelay";
-                                        break;
-                                    case "amount":
-                                        text = fromE8s(parseInt(payload[key])) + ' ICP';
-                                        break;
-                                    case "percentage_to_spawn":
-                                        text = `${payload[key]}%`;
-                                        break;
-                                    default:
-                                        break;
-                                }
-                                
-                                return(
-                                    <DataField
-                                        label={key_}
-                                        text={`${text}`}
-                                        disabled={isDisabled}
-                                        onClick={onClick}
-                                        buttonIcon={!isDisabled ? ContentCopyIcon : null}
-                                    />
-                                )
-                            })
-                        }
-                    </>
-                }
                 <DataField
                     label={'Author: '}
                     text={`${shortenHexString(proposer)}`}
@@ -214,6 +289,7 @@ const Proposal = (props) => {
                     disabled={true}
                 />
             </Grid>
+            { displayHypotheticalTreasuryData() }
             <Grid 
                 columns={12}
                 xs={12} 
@@ -261,7 +337,7 @@ const Proposal = (props) => {
                     />
                     <DataField
                         label={'Total Voting Power: '}
-                        text={`${round2Decimals(fromE8s(parseInt(total)))}`}
+                        text={`${round2Decimals(fromE8s(parseInt(totalParticipated)))}`}
                         onClick={() => {}}
                         disabled={true}
                     />
@@ -273,7 +349,8 @@ const Proposal = (props) => {
                                 text={"Adopt"}
                                 onClick={() => onVote(true)}
                                 Icon={ThumbUpIcon}
-                                active={true}
+                                active={!hasVoted}
+                                disabled={hasVoted}
                             />
                         </Grid>
                         <Grid xs={6} width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"}>
@@ -281,12 +358,13 @@ const Proposal = (props) => {
                                 text={"Reject"}
                                 onClick={() => onVote(false)}
                                 Icon={ThumbDownIcon}
-                                active={true}
+                                active={!hasVoted}
+                                disabled={hasVoted}
                             />
                         </Grid>
                     </Grid>
                 }
-                { timeRemainingInNanoseconds < 0 ? 
+                { finalized ? 
                     <DataField
                         label={'Executed: '}
                         text={`${executed ? "True" : "False"}`}
@@ -295,7 +373,7 @@ const Proposal = (props) => {
                     /> :
                     <>
                         { CYCLES_COSTS_ASSOCIATED_WITH_ACTIONS.includes(actionType) &&
-                            <Typography marginTop={"30px"} variant="h6">NOTE: This action consumes ~ 0.25 T cycles from the treasury canister</Typography>
+                            <Typography marginTop={"30px"} variant="h6">NOTE: This proposal consumes ~ 0.25 T cycles if approved by the DAO</Typography>
                         }
                     </>
                 }

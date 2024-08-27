@@ -3,6 +3,7 @@ import Principal "mo:base/Principal";
 import Nat64 "mo:base/Nat64";
 import Blob "mo:base/Blob";
 import Buffer "mo:base/Buffer";
+import Int64 "mo:base/Int64";
 import Governance "../../NNS/Governance";
 import Account "../../Serializers/Account";
 import IC "../../Types/IC/types";
@@ -17,6 +18,41 @@ module{
     public type SubaccountRegistryMap = HashMap.HashMap<Blob, SubaccountsMetaData>;
 
     public type Identifier = {#Principal: Text; #SubaccountId: Account.Subaccount};
+
+    public type CampaignId = Nat;
+
+    public type CampaignContributions = {
+        icp: {e8s : Nat64;};
+    };
+
+    public type CampaignContributionsArray = [(PrincipalAsText, CampaignContributions)];
+
+    public type FundingCampaign = {
+        contributions: CampaignContributionsArray;
+        goal: { icp: { e8s : Nat64; }; };
+        recipient: {principalId: PrincipalAsText; accountId: Text};
+        subaccountId: Account.Subaccount;
+        percentageOfDaoRewardsAllocated: Nat;
+        description: Text; 
+        finalized: Bool;
+        repaymentIntervals: ?Nat64;
+        repaymentStartDate: ?Int64;
+        simpleInterestRate: ?Nat;
+    };
+
+    public type FundingCampaignInput = {
+        goal: { icp: { e8s : Nat64; }; };
+        recipient: {principalId: PrincipalAsText; accountId: Text};
+        percentageOfDaoRewardsAllocated: Nat;
+        description: Text; 
+        repaymentIntervals: ?Nat64;
+        repaymentStartDate: ?Int64;
+        simpleInterestRate: ?Nat;
+    };
+
+    public type FundingCampaignsArray = [(CampaignId, FundingCampaign)];
+
+    public type FundingCampaignsMap = HashMap.HashMap<CampaignId, FundingCampaign>;
 
     public type Balances = {
         icp: {e8s : Nat64;};
@@ -75,10 +111,12 @@ module{
     public type TreasuryDataExport = {
         neurons : { icp: NeuronsDataArray; };
         usersTreasuryDataArray : UsersTreasuryDataArrayExport;
+        userTreasuryData : UserTreasuryDataExport;
         totalDeposits : {e8s : Nat64};
         daoWalletBalance: {e8s : Nat64};
         daoIcpAccountId: [Nat8];
         userPrincipal: Text;
+        fundingCampaigns: FundingCampaignsArray;
     };
 
     public type Memo = Nat;
@@ -87,7 +125,9 @@ module{
 
     public type NeuronIdAsText = Text;
 
-    public type NeuronContributions = [(PrincipalAsText, NeuronStakeInfo)];
+    public type NeuronContribution = (PrincipalAsText, NeuronStakeInfo);
+
+    public type NeuronContributions = [NeuronContribution];
 
     public type NeuronData = { contributions: NeuronContributions; neuron: ?Governance.Neuron; neuronInfo: ?Governance.NeuronInfo; parentNeuronContributions: ?NeuronContributions; };
 
@@ -167,6 +207,7 @@ module{
         actionLogsArrayBuffer: ActionLogsArrayBuffer;
         memoToNeuronIdMap: MemoToNeuronIdMap;
         updateTokenBalances: shared ( Identifier, SupportedCurrencies ) -> async ();
+        fundingCampaignsMap: FundingCampaignsMap;
         readRequestResponseOutput: ReadRequestResponseOutput;
         selfAuthPrincipal: Principal;
         publicKey: Blob;

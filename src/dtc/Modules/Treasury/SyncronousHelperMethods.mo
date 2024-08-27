@@ -45,12 +45,7 @@ module{
         var totalVotingPower: Nat64 = 0;
 
         label loop_ for((neuronId, {contributions}) in neuronDataMap.entries()){
-            let contributionsMap = HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.NeuronStakeInfo>(
-                Iter.fromArray(contributions), 
-                Iter.size(Iter.fromArray(contributions)), 
-                Text.equal,
-                Text.hash
-            );
+            let contributionsMap = HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.NeuronStakeInfo>( Iter.fromArray(contributions), Iter.size(Iter.fromArray(contributions)), Text.equal, Text.hash );
             let ?{stake_e8s = userNeuronStake; voting_power = userVotingPower} = contributionsMap.get(pincipal) else { continue loop_};
             totalStake += userNeuronStake; totalVotingPower += userVotingPower;
         };
@@ -108,10 +103,7 @@ module{
         );
 
         var parentNeuronTotalStake: Nat64 = 0;
-        for((contributor, neuronStakeInfo) in parentNeuronContributionsMap.entries()){
-            let {stake_e8s = userTotalStake} = neuronStakeInfo;
-            parentNeuronTotalStake += userTotalStake;
-        };
+        for((contributor, {stake_e8s}) in parentNeuronContributionsMap.entries()){ parentNeuronTotalStake += stake_e8s; };
 
         let {contributions} = neuronData;
         let newNeuronContributionsMap = HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.NeuronStakeInfo>(
@@ -122,9 +114,9 @@ module{
         );
 
         for((contributor, neuronStakeInfo) in parentNeuronContributionsMap.entries()){
-            let {stake_e8s = userTotalStakeInParentNeuron} = neuronStakeInfo;
-            let userStakeInNewNeuron = (userTotalStakeInParentNeuron * newNeuronTotalStake) / parentNeuronTotalStake;
-            newNeuronContributionsMap.put(contributor, {stake_e8s = userStakeInNewNeuron; voting_power = 0;});
+            let {stake_e8s = userStakeInParentNeuron} = neuronStakeInfo;
+            let userStakeInNewNeuron = Float.fromInt64(Int64.fromNat64(userStakeInParentNeuron)) * (Float.fromInt64(Int64.fromNat64(newNeuronTotalStake)) / Float.fromInt64(Int64.fromNat64(parentNeuronTotalStake)));
+            newNeuronContributionsMap.put(contributor, {stake_e8s = Int64.toNat64(Float.toInt64(userStakeInNewNeuron)); voting_power = 0;});
         };
 
         neuronDataMap.put(neuronId, {neuronData with contributions = Iter.toArray(newNeuronContributionsMap.entries()); parentNeuronContributions = null;});

@@ -78,7 +78,7 @@ export const mapUsersTotalTreasuryStakesAndVotingPowersDataToChartFormat = (user
     const usersTreasuryDataArraySorted = usersTreasuryDataArray.sort(function(a, b){
         const [principal_a, data_a] = a;
         const [principal_b, data_b] = b;
-        if(data_a?.balances?.voting_power > data_b?.balances?.voting_power) return -11;
+        if(data_a?.balances?.voting_power > data_b?.balances?.voting_power) return -1;
         else return 1;
     });
     const allUsersTotalIcpStakesAndVotingPowerSorted = [];
@@ -166,12 +166,6 @@ export const mapNeuronContributionsToTableRows = (neuronContributions) => {
     return sortedNeuronContributions;
 }
 
-export const getUserTreasuryData = (userPrincipal, usersTreasuryDataArray) => {
-    let userTreasuryData = usersTreasuryDataArray.find(([principal, _]) => {
-        return principal === userPrincipal;
-    });
-    return userTreasuryData ? userTreasuryData[1] : undefined;
-};
 
 export const getUserNeuronContribution = (userPrincipal, neuronContributions) => {
     let userContribution = neuronContributions.find(([contributor, _]) => {
@@ -183,17 +177,20 @@ export const getUserNeuronContribution = (userPrincipal, neuronContributions) =>
 export const mapBackendTreasuryDataToFrontEndObj = (props) => {
     const {
         usersTreasuryDataArray,
+        userTreasuryData,
         userPrincipal,
         totalDeposits,
         daoIcpAccountId,
         daoWalletBalance,
-        neurons
+        neurons, 
+        fundingCampaigns
     } = props;
     
     const daoIcpAccountId_ = toHexString(new Uint8Array( [...daoIcpAccountId]));
     const daoWalletBalance_ = parseInt(daoWalletBalance.e8s);
     const totalDeposits_ = parseInt(totalDeposits.e8s);
-    const usersTreasuryDataArray_ = usersTreasuryDataArray.map(([principal, treasuryData ]) => {
+
+    const treasuryDataToFrontendFormat = (principal, treasuryData) => {
         let {balances} = treasuryData;
         let {icp, icp_staked, eth, btc, voting_power} = balances;
         balances = {
@@ -204,7 +201,10 @@ export const mapBackendTreasuryDataToFrontEndObj = (props) => {
             voting_power: parseInt(voting_power.e8s)
         }; 
         return [ principal, { ...treasuryData, balances} ];
-    });
+    };
+
+    const usersTreasuryDataArray_ = usersTreasuryDataArray.map(([principal, treasuryData ]) => treasuryDataToFrontendFormat(principal, treasuryData));
+    const userTreasuryData_ = treasuryDataToFrontendFormat(userPrincipal, userTreasuryData);
     let daoTotalIcpStaked = 0;
     let votingPower = 0;
     let userVotingPower = 0;
@@ -228,8 +228,6 @@ export const mapBackendTreasuryDataToFrontEndObj = (props) => {
         return neuronData;
     });
 
-    let userTreasuryData = getUserTreasuryData(userPrincipal, usersTreasuryDataArray_);
-
     return {
         usersTreasuryDataArray: usersTreasuryDataArray_, 
         daoWalletBalance: daoWalletBalance_, 
@@ -240,7 +238,8 @@ export const mapBackendTreasuryDataToFrontEndObj = (props) => {
         userNeurons: {icp: userIcpNeurons},
         votingPower,
         userVotingPower,
-        userTreasuryData,
-        userPrincipal
+        userTreasuryData: userTreasuryData_[1],
+        userPrincipal,
+        fundingCampaigns
     };
 };

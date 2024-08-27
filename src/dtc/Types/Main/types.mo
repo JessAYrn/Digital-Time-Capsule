@@ -3,6 +3,7 @@ import Principal "mo:base/Principal";
 import HashMap "mo:base/HashMap";
 import Nat "mo:base/Nat";
 import JournalTypes "../Journal/types";
+import TreasuryTypes "../Treasury/types";
 import IC "../IC/types";
 import Ledger "../../NNS/Ledger";
 
@@ -36,6 +37,7 @@ module{
         #NotAuthorizedToVoteOnThisProposal;
         #VoteHasAlreadyBeenSubmitted;
         #NotAuthorized;
+        #ProposalNotFound;
         #PorposalHasExpired;
         #NotAuthorizedToAccessData;
         #NoProfileFound;
@@ -76,7 +78,7 @@ module{
         lastRecordedBackEndCyclesBalance: Nat;
         backEndCyclesBurnRatePerDay: Nat;
         admin: [(Text, AdminData)];
-        proposals: Proposals;
+        proposals: Proposals_V2;
         acceptingRequests: Bool;
         lastRecordedTime: Int;
         profilesMetaData: ProfilesMetaData;
@@ -139,23 +141,24 @@ module{
 
     public type UserProfilesArray_V2 = [(Principal, UserProfile_V2)];
 
-    public type Proposals = [(Nat,Proposal)];
+    public type Proposals_V2 = [(Nat,Proposal_V2)];
 
-    public type ProposalsMap = HashMap.HashMap<Nat, Proposal>;
-    
-    public type VotingResults = {
+    public type ProposalsMap_V2 = HashMap.HashMap<Nat, Proposal_V2>;
+
+    public type VotingResults_V2 = {
         yay: Nat64;
         nay: Nat64;
-        total: Nat64;
+        totalParticipated: Nat64;
     };
 
-    public type Proposal = {
+    public type Proposal_V2 = {
         votes: [(Text, Vote)];
-        voteTally: VotingResults;
+        voteTally: VotingResults_V2;
         action: ProposalActions;
         proposer: Text;
         timeInitiated: Int;
         executed: Bool;
+        finalized: Bool;
         timeVotingPeriodEnds: Int;
     };
 
@@ -165,6 +168,7 @@ module{
         #LoadUpgrades:{};
         #InstallUpgrades: {};
         #CreateNeuron: {amount: Nat64; };
+        #CreateFundingCampaign: {fundingCampaignInput: TreasuryTypes.FundingCampaignInput};
         #IncreaseNeuron: {amount: Nat64; neuronId: Nat64; };
         #PurchaseCycles: {amount : Nat64;};
         #SpawnNeuron: {neuronId: Nat64; percentage_to_spawn : Nat32;};

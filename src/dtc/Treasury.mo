@@ -49,8 +49,37 @@ shared actor class Treasury (principal : Principal) = this {
     private let txFee : Nat64 = 10_000;
     private let ledger : Ledger.Interface  = actor(Ledger.CANISTER_ID);
     private stable var neuronMemo : Nat64 = 0;
+    private stable var fundingCampaignsArray : TreasuryTypes.FundingCampaignsArray = [];
+    private var fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap = HashMap.fromIter<TreasuryTypes.CampaignId, TreasuryTypes.FundingCampaign>(Iter.fromArray(fundingCampaignsArray), Iter.size(Iter.fromArray(fundingCampaignsArray)), Nat.equal, Hash.hash);
+    private stable var campaignIndex : Nat = 0;
 
     let {recurringTimer; setTimer} = Timer;
+
+    public shared({caller}) func createFundingCampaign(campaign: TreasuryTypes.FundingCampaignInput) : async () {
+        if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
+        var totalAllocation: Nat = campaign.percentageOfDaoRewardsAllocated;
+        label loop_ for((campaignId_, {percentageOfDaoRewardsAllocated; finalized}) in fundingCampaignsMap.entries()){
+            if(finalized) continue loop_; 
+            totalAllocation += percentageOfDaoRewardsAllocated; 
+        };
+        if(totalAllocation > 100) throw Error.reject("Allocation percentage cannot be greater than 100.");
+        fundingCampaignsMap.put(campaignIndex, {campaign with contributions = []; subaccountId = await getUnusedSubaccountId(); finalized = false; } );
+        campaignIndex += 1;
+    };
+
+    public query({caller}) func getFundingCampainsArray() : async TreasuryTypes.FundingCampaignsArray {
+        if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
+        return Iter.toArray(fundingCampaignsMap.entries());
+    };
+
+    private func finalizeFundingCampaign(campaignId: TreasuryTypes.CampaignId) : () {
+        let ?campaign = fundingCampaignsMap.get(campaignId) else { return };
+        if(campaign.finalized) return;
+        var totalContributions: Nat64 = 0;
+        let contributionsIter = Iter.fromArray<(TreasuryTypes.PrincipalAsText, TreasuryTypes.CampaignContributions)>(campaign.contributions);
+        for((_, {icp}) in contributionsIter){ totalContributions += icp.e8s; };
+        if(totalContributions > campaign.goal.icp.e8s) fundingCampaignsMap.put(campaignId, {campaign with finalized = true});
+    };
 
     private func getSelfAuthenticatingPrincipalAndPublicKey_(): {selfAuthPrincipal: Principal; publicKey: Blob;} {
         let ?publicKey = public_key else { Debug.trap("Public key not populated."); };
@@ -71,11 +100,16 @@ shared actor class Treasury (principal : Principal) = this {
         selfAuthenticatingPrincipal := ?Principal.fromBlob(principalAsBlob);
     };
 
+    private func getUnusedSubaccountId(): async Account.Subaccount {
+        var newSubaccount = await Account.getRandomSubaccount();
+        while(subaccountRegistryMap.get(newSubaccount) != null){ newSubaccount := await Account.getRandomSubaccount(); };
+        return newSubaccount;
+    };
+
     private func createTreasuryData_(principal: Principal) : async () {
-        var newSubaccount: Account.Subaccount = Account.defaultSubaccount();
-        if(not Principal.equal(principal, Principal.fromActor(this))){
-            newSubaccount := await Account.getRandomSubaccount();
-            while(subaccountRegistryMap.get(newSubaccount) != null){ newSubaccount := await Account.getRandomSubaccount(); };
+        let newSubaccount = switch(Principal.equal(principal, Principal.fromActor(this))){
+            case true { Account.defaultSubaccount();};
+            case false { await getUnusedSubaccountId(); };
         };
 
         subaccountRegistryMap.put(newSubaccount, {owner = Principal.toText(principal)});
@@ -171,24 +205,28 @@ shared actor class Treasury (principal : Principal) = this {
         Hex.encode(Blob.toArray(treasuryNeuronSubaccount));
     };
 
-    public shared({caller}) func createNeuron({amount: Nat64; contributor: Principal}) : async Result.Result<(), TreasuryTypes.Error> {
+    public shared({caller}) func createNeuron({amount: Nat64; contributor: Principal}) : async Result.Result<({amountSent: Nat64}), TreasuryTypes.Error> {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         actionLogsArrayBuffer.add(Int.toText(Time.now()),"Creating Neuron, amount: " # Nat64.toText(amount) # ", contributor: " # Principal.toText(contributor));
         let {selfAuthPrincipal; publicKey} = getSelfAuthenticatingPrincipalAndPublicKey_();
-        let response = await AsyncronousHelperMethods.createNeuron(
+        let response = try { await AsyncronousHelperMethods.createNeuron(
             neuronDataMap,
             usersTreasuryDataMap,
             pendingActionsMap,
             actionLogsArrayBuffer,
             memoToNeuronIdMap,
             updateTokenBalances,
+            fundingCampaignsMap,
             transformFn,
             {amount; contributor; neuronMemo; selfAuthPrincipal; publicKey; },
-        );
+        ); } catch (e) { 
+            actionLogsArrayBuffer.add(Int.toText(Time.now()),"Error creating neuron: " # Error.message(e)); 
+            throw Error.reject("Error creating neuron.");   
+        };
         switch(response){
-            case(#ok()) { 
+            case(#ok({amountSent})) { 
                 neuronMemo += 1; 
-                return #ok(()); 
+                return #ok({amountSent}); 
             };
             case(#err(#TxFailed)) {
                 actionLogsArrayBuffer.add(Int.toText(Time.now()),"Error creating neuron: Transaction failed.");
@@ -202,21 +240,25 @@ shared actor class Treasury (principal : Principal) = this {
         };
     };
 
-    public shared({caller}) func increaseNeuron({amount: Nat64; neuronId: Nat64; contributor: Principal}) : async Result.Result<() , TreasuryTypes.Error>{
+    public shared({caller}) func increaseNeuron({amount: Nat64; neuronId: Nat64; contributor: Principal}) : async Result.Result<({amountSent: Nat64}) , TreasuryTypes.Error>{
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         let {selfAuthPrincipal; publicKey} = getSelfAuthenticatingPrincipalAndPublicKey_();
-        let response = await AsyncronousHelperMethods.increaseNeuron(
+        let response = try { await AsyncronousHelperMethods.increaseNeuron(
             neuronDataMap,
             usersTreasuryDataMap,
             pendingActionsMap,
             actionLogsArrayBuffer,
             memoToNeuronIdMap,
             updateTokenBalances,
+            fundingCampaignsMap,
             transformFn,
             {amount; neuronId; contributor; selfAuthPrincipal; publicKey;}
-        );
+        ); } catch (e) { 
+            actionLogsArrayBuffer.add(Int.toText(Time.now()),"Error creating neuron: " # Error.message(e)); 
+            throw Error.reject("Error creating neuron.");   
+        };
         switch(response){
-            case(#ok()) return #ok(());
+            case(#ok({amountSent})) return #ok({amountSent});
             case(#err(#TxFailed)) {
                 actionLogsArrayBuffer.add(Int.toText(Time.now()),"Error increasing neuron: Transaction failed.");
                 throw Error.reject("Error increasing neuron.");
@@ -236,6 +278,7 @@ shared actor class Treasury (principal : Principal) = this {
             actionLogsArrayBuffer,
             memoToNeuronIdMap,
             updateTokenBalances,
+            fundingCampaignsMap,
             transformFn,
             args,
             ?proposer,
@@ -264,6 +307,7 @@ shared actor class Treasury (principal : Principal) = this {
             actionLogsArrayBuffer,
             memoToNeuronIdMap,
             updateTokenBalances,
+            fundingCampaignsMap,
             transformFn,
             selfAuthPrincipal,
             publicKey
@@ -368,6 +412,7 @@ shared actor class Treasury (principal : Principal) = this {
             actionLogsArrayBuffer,
             memoToNeuronIdMap,
             updateTokenBalances,
+            fundingCampaignsMap,
             transformFn
         );
     };
@@ -411,6 +456,7 @@ shared actor class Treasury (principal : Principal) = this {
         memoToNeuronIdArray := Iter.toArray(memoToNeuronIdMap.entries());
         actionLogsArray := Buffer.toArray(actionLogsArrayBuffer);
         subaccountRegistryArray := Iter.toArray(subaccountRegistryMap.entries());
+        fundingCampaignsArray := Iter.toArray(fundingCampaignsMap.entries());
     };
 
     system func postupgrade() { 
@@ -420,6 +466,7 @@ shared actor class Treasury (principal : Principal) = this {
         memoToNeuronIdArray := [];
         actionLogsArray := [];
         subaccountRegistryArray := [];
+        fundingCampaignsArray := [];
 
         ignore setTimer<system>(#nanoseconds(1), func (): async () {
             await populateSelfAuthenticatingPrincipalAndPublicKey();
@@ -427,17 +474,20 @@ shared actor class Treasury (principal : Principal) = this {
 
         ignore recurringTimer<system>(#seconds(24 * 60 * 60), func (): async () { 
             let {selfAuthPrincipal; publicKey} = getSelfAuthenticatingPrincipalAndPublicKey_();
-            await AsyncronousHelperMethods.refreshNeuronsData(
+            ignore AsyncronousHelperMethods.refreshNeuronsData(
                 neuronDataMap,
                 usersTreasuryDataMap,
                 pendingActionsMap,
                 actionLogsArrayBuffer,
                 memoToNeuronIdMap,
                 updateTokenBalances,
+                fundingCampaignsMap,
                 transformFn,
                 selfAuthPrincipal,
                 publicKey
-            )
+            );
+
+            for((campaignId, _) in fundingCampaignsMap.entries()){ finalizeFundingCampaign(campaignId); };
         });
     };    
 };

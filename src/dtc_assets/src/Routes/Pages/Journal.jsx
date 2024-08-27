@@ -152,7 +152,7 @@ const Journal = (props) => {
                     <InputBox
                         label={"This Journal Belongs To: "}
                         rows={"1"}
-                        editable={true}
+                        showEditButton={true}
                         dispatch={journalDispatch}
                         onChange={onTextBoxChange}
                         onDisableEdit={onDisableEdit}
@@ -163,12 +163,12 @@ const Journal = (props) => {
                         value={journalState.bio.dob[0]}
                         label={"Date Of Birth"}
                         onChange={onDatePickerChange}
-                        editable={true}
+                        showEditButton={true}
                     />
                     <InputBox
                         label={"Place of Birth: "}
                         rows={"1"}
-                        editable={true}
+                        showEditButton={true}
                         onChange={onTextBoxChange}
                         onDisableEdit={onDisableEdit}
                         dispatch={journalDispatch}
@@ -188,7 +188,7 @@ const Journal = (props) => {
                     flexDirection={"column"}
                 >
                 <FileCarousel
-                    editable={true}
+                    showEditButton={true}
                     revokeDataURL={false}
                     onChange={triggerSendDataFunctionAfterReduxStateUpdate}
                     filesMetaDataArray={journalState.bio.photos}
@@ -214,7 +214,7 @@ const Journal = (props) => {
                 >
                     <InputBox
                         label={"Dedications: "}
-                        editable={true}
+                        showEditButton={true}
                         onChange={onTextBoxChange}
                         onDisableEdit={onDisableEdit}
                         rows={"8"}
@@ -224,7 +224,7 @@ const Journal = (props) => {
                     />
                     <InputBox
                         label={"Preface: "}
-                        editable={true}
+                        showEditButton={true}
                         onChange={onTextBoxChange}
                         onDisableEdit={onDisableEdit}
                         rows={"16"}

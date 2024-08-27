@@ -1,7 +1,6 @@
 import MainTypes "../../Types/Main/types";
 import Account "../../Serializers/Account";
 import Result "mo:base/Result";
-import Trie "mo:base/Trie";
 import Principal "mo:base/Principal";
 import JournalTypes "../../Types/Journal/types";
 import Ledger "../../NNS/Ledger";
@@ -9,9 +8,7 @@ import Iter "mo:base/Iter";
 import Blob "mo:base/Blob";
 import Journal "../../Journal";
 import Nat64 "mo:base/Nat64";
-import Error "mo:base/Error";
 import Array "mo:base/Array";
-import Option "mo:base/Option";
 import Hex "../../Serializers/Hex";
 import Treasury "../../Treasury";
 

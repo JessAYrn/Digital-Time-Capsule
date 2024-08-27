@@ -111,6 +111,9 @@ const SendCrypto = (props) => {
                                     rows={"1"}
                                     onChange={onChangeAmount}
                                     value={numberInput}
+                                    parseNumber={parseFloat}
+                                    allowNegative={false}
+                                    suffix={" ICP"}
                                     format={INPUT_BOX_FORMATS.numberFormat}
                                     maxValue={ round8Decimals( fromE8s(parseFloat(walletState.walletData.balance))) }
                                     width={"100%"}
