@@ -33,18 +33,14 @@ const WalletPage = (props) => {
     const { 
         walletState, 
         walletDispatch, 
-        actorState, 
+        actorState,
         treasuryState, 
         treasuryDispatch,
-        notificationsState,
         notificationsDispatch,
-        homePageState,
         homePageDispatch,
-        journalState,
         journalDispatch
     } = useContext(AppContext);
 
-    const states = {homePageState, actorState, treasuryState, walletState, notificationsState, journalState,};
     const dispatches = { homePageDispatch, treasuryDispatch, walletDispatch, notificationsDispatch, journalDispatch};
     const types = { journalTypes, walletTypes, homePageTypes, notificationsTypes, treasuryTypes};
 
@@ -82,7 +78,7 @@ const WalletPage = (props) => {
     const reloadData = async () => {
         setIsLoadingWalletData(true);
         setModalIsOpen(true);
-        await loadAllDataIntoReduxStores(states, dispatches, types);
+        await loadAllDataIntoReduxStores(actorState, dispatches, types);
         setModalIsOpen(false);
         setIsLoadingWalletData(false);
     };

@@ -12,15 +12,15 @@ module{
         profiles: MainTypes.UserProfilesMap_V2,
         caller: Principal,
         amount: Nat64
-    ) : async {blockIndex: Nat64} {
+    ) : async {amountSent: Nat64} {
         let ?userProfile = profiles.get(caller) else { throw Error.reject("User not found") };
         let userCanisterId = userProfile.canisterId;
         let userCanister: Journal.Journal = actor(Principal.toText(userCanisterId));
         let treasury: Treasury.Treasury = actor(daoMetaData.treasuryCanisterPrincipal);
         let {subaccountId = userTreasurySubaccountId} = await treasury.getUserTreasuryData(caller);
-        let {blockIndex} = await userCanister.transferICP( amount, #PrincipalAndSubaccount(Principal.fromText(daoMetaData.treasuryCanisterPrincipal), ?userTreasurySubaccountId ));
+        let {amountSent} = await userCanister.transferICP( amount, #PrincipalAndSubaccount(Principal.fromText(daoMetaData.treasuryCanisterPrincipal), ?userTreasurySubaccountId ));
         ignore treasury.updateTokenBalances(#SubaccountId(userTreasurySubaccountId), #Icp);
-        return {blockIndex};
+        return {amountSent};
     };
 
     public func withdrawIcpFromTreasury(

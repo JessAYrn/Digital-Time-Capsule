@@ -30,7 +30,9 @@ const CreateProposalForm = (props) => {
         proposalPayload,
     } = props;
 
-    const {  actorState, homePageDispatch, treasuryState } = useContext(AppContext);
+    const {  actorState, homePageDispatch, treasuryState, walletState } = useContext(AppContext);
+
+    const availableBalance = (treasuryState?.userTreasuryData?.balances?.icp || 0) + (walletState?.walletData?.balance || 0);
 
     const [proposalAction_, setProposalAction] = useState(proposalAction);
     const [proposalPayload_, setProposalPayload] = useState(proposalPayload);
@@ -113,7 +115,7 @@ const CreateProposalForm = (props) => {
             <Typography varient={"h6"} color={"#bdbdbd"}> {proposalAction_} </Typography>
             {
                 (proposalAction_ ===  PROPOSAL_ACTIONS.IncreaseNeuron || proposalAction_ === PROPOSAL_ACTIONS.CreateNeuron) &&
-                <DataField label={"Available Balance: "} text={`${fromE8s(treasuryState.userTreasuryData?.balances.icp || 0) } ICP`} isLoading={!treasuryState.dataHasBeenLoaded} disabled={true}/>
+                <DataField label={"Available Balance: "} text={`${fromE8s(availableBalance) } ICP`} isLoading={!treasuryState.dataHasBeenLoaded} disabled={true}/>
             }
             { proposalAction_ === PROPOSAL_ACTIONS.PurchaseCycles && 
                 <DataField label={"Available Balance: "} text={`${fromE8s(treasuryState.daoWalletBalance || 0) } ICP`} isLoading={!treasuryState.dataHasBeenLoaded} disabled={true}/>

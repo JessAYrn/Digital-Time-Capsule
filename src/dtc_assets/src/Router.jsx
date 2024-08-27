@@ -58,15 +58,6 @@ const Router = (props) => {
         treasuryTypes
     }
 
-    const ReducerStates = {
-        journalState,
-        walletState,
-        homePageState,
-        actorState,
-        notificationsState,
-        treasuryState
-    };
-
     const context = {
         journalState,
         journalDispatch,
@@ -91,11 +82,11 @@ const Router = (props) => {
         try{
             setIsLoadingModal(true);
             setModalIsOpen(true);
-            const loadSuccessful = await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes);
+            const loadSuccessful = await loadAllDataIntoReduxStores(actorState, ReducerDispatches, ReducerTypes);
             if(loadSuccessful) setModalIsOpen(false);
             else {
                 let hasAccessGranted = await actorState.backendActor.hasAccessGranted();
-                const reloadDataIntoReduxStores = async () => { await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes) };
+                const reloadDataIntoReduxStores = async () => { await loadAllDataIntoReduxStores(actorState, ReducerDispatches, ReducerTypes) };
                 if(hasAccessGranted){
                     setModalProps({
                         components: [
@@ -177,7 +168,7 @@ const Router = (props) => {
                         {route === NAV_LINKS.treasury && <TreasuryPage />}
                         {route === NAV_LINKS.groupJournal && <GroupJournalPage />}
                     </>  : 
-                    <LoginPage context={AppContext}/>
+                    <LoginPage />
                 }  
                 <ModalComponent 
                 {...modalProps}

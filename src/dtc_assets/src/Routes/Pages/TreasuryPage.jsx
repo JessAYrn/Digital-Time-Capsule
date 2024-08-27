@@ -31,20 +31,15 @@ import DisplayAllNeurons from "../../Components/Neurons/DisplayAllNeurons";
 
 const TreasuryPage = (props) => {
   const { 
+    actorState,
     treasuryState, 
     treasuryDispatch,
-    walletState, 
     walletDispatch, 
-    homePageState,
     homePageDispatch,
-    journalState,
     journalDispatch,
-    notificationsState,
     notificationsDispatch,
-    actorState, 
   } = useContext(AppContext);
 
-  const states = {homePageState, actorState, treasuryState, walletState, notificationsState, journalState,};
   const dispatches = { homePageDispatch, treasuryDispatch, walletDispatch, notificationsDispatch, journalDispatch};
   const types = { journalTypes, walletTypes, homePageTypes, notificationsTypes, treasuryTypes};
 
@@ -143,7 +138,7 @@ const TreasuryPage = (props) => {
   const reloadData = async () => {
     setIsLoadingModal(true);
     setModalIsOpen(true);
-    await loadAllDataIntoReduxStores(states, dispatches, types);
+    await loadAllDataIntoReduxStores(actorState, dispatches, types);
     setModalIsOpen(false);
     setIsLoadingModal(false);
   };

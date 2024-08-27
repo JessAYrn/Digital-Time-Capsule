@@ -37,15 +37,11 @@ const Analytics = (props) => {
         actorState, 
         treasuryState, 
         treasuryDispatch,
-        walletState,
         walletDispatch,
-        notificationsState,
         notificationsDispatch,
-        journalState,
         journalDispatch,
     } = useContext(AppContext);
 
-    const states = {homePageState, actorState, treasuryState, walletState, notificationsState, journalState,};
     const dispatches = { homePageDispatch, treasuryDispatch, walletDispatch, notificationsDispatch, journalDispatch};
     const types = { journalTypes, walletTypes, homePageTypes, notificationsTypes, treasuryTypes};
 
@@ -157,7 +153,7 @@ const Analytics = (props) => {
     const reloadData = async () => {
         setIsLoadingModal(true);
         setModalIsOpen(true);
-        await loadAllDataIntoReduxStores(states, dispatches, types);
+        await loadAllDataIntoReduxStores(actorState, dispatches, types);
         setModalIsOpen(false);
         setIsLoadingModal(false);
     };

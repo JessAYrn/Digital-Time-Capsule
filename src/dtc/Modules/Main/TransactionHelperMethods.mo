@@ -17,15 +17,15 @@ module{
     private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
 
     public func transferICP(callerId: Principal, profilesMap: MainTypes.UserProfilesMap_V2 ,amount: Nat64, canisterAccountId: Account.AccountIdentifier) : 
-    async Result.Result<({blockIndex: Nat64}), JournalTypes.Error> {
+    async Result.Result<({amountSent: Nat64}), JournalTypes.Error> {
 
         let userProfile = profilesMap.get(callerId);
         switch(userProfile) {
             case null{ #err(#NotFound) }; 
             case (? profile){
                 let userJournal : Journal.Journal = actor(Principal.toText(profile.canisterId));
-                try{ let {blockIndex} = await userJournal.transferICP(amount, #AccountIdentifier(canisterAccountId)); return #ok({blockIndex});
-                } catch (error) { return #err(#TxFailed); };
+                try{ let {amountSent} = await userJournal.transferICP(amount, #AccountIdentifier(canisterAccountId)); return #ok({amountSent});
+                } catch (_) { return #err(#TxFailed); };
             };
         };
     };
@@ -79,9 +79,7 @@ module{
                         );
                     };
                 };
-                case(#Approve(r)){};
-                case(#Burn(r)){};
-                case(#Mint(r)){};
+                case(_){};
             };
             index += 1;
         };

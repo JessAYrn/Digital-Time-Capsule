@@ -33,17 +33,7 @@ export const accordionContent=[
 
 const LoginPage = (props) => {
 
-    const { 
-        journalState, 
-        journalDispatch, 
-        actorState, 
-        actorDispatch,
-        walletState,
-        walletDispatch,
-        homePageState,
-        homePageDispatch 
-    } = useContext(AppContext);
-    
+    const { actorDispatch, homePageState, homePageDispatch } = useContext(AppContext);
     const [isLoading, setIsLoading] = useState(false);
     
     const handleLogin = async() => {

@@ -298,64 +298,72 @@ shared(msg) actor class Journal () = this {
         return Iter.toArray(balancesMap.entries());
     };
 
-    public shared({caller}) func transferICP(
-        amount: Nat64, 
-        recipientIdentifier: JournalTypes.RecipientIdentifier
-    ) : async {blockIndex: Nat64} {
+    public shared({caller}) func transferICP( amount: Nat64, recipientIdentifier: JournalTypes.RecipientIdentifier) : async {amountSent: Nat64} {
         if( Principal.toText(caller) != mainCanisterId_) { throw Error.reject("Unauthorized access."); };
+        var amountSent = amount - txFee;
 
-        let res: {#icrc1_transfer: Ledger.Result; #transfer: Ledger.Result_5} = switch(recipientIdentifier) {
-            case(#PrincipalAndSubaccount(recipient, subaccount)) {
-                let res_ = await ledger.icrc1_transfer({
-                    memo = null;
-                    from_subaccount = null;
-                    to = {owner = recipient; subaccount};
-                    amount = Nat64.toNat(amount - txFee);
-                    fee = ?Nat64.toNat(txFee);
-                    created_at_time = ?Nat64.fromNat(Int.abs(Time.now()));
-                });
-                #icrc1_transfer(res_);
-            };
-            case(#AccountIdentifier(accountId)) {
-                let res_ = await ledger.transfer({
-                    memo = Nat64.fromNat(0);
-                    from_subaccount = null;
-                    to = accountId;
-                    amount = { e8s = amount - txFee};
-                    fee = { e8s = txFee };
-                    created_at_time = ?{ timestamp_nanos = Nat64.fromNat(Int.abs(Time.now())) };
-                });
-                #transfer(res_);
+        func performTransfer(amountSent: Nat64, recipientIdentifier: JournalTypes.RecipientIdentifier) : 
+        async {#icrc1_transfer: Ledger.Result; #transfer: Ledger.Result_5} {
+            switch(recipientIdentifier) {
+                case(#PrincipalAndSubaccount(recipient, subaccount)) {
+                    let res_ = await ledger.icrc1_transfer({
+                        memo = null;
+                        from_subaccount = null;
+                        to = {owner = recipient; subaccount};
+                        amount = Nat64.toNat(amountSent);
+                        fee = ?Nat64.toNat(txFee);
+                        created_at_time = ?Nat64.fromNat(Int.abs(Time.now()));
+                    });
+                    #icrc1_transfer(res_);
+                };
+                case(#AccountIdentifier(accountId)) {
+                    let res_ = await ledger.transfer({
+                        memo = Nat64.fromNat(0);
+                        from_subaccount = null;
+                        to = accountId;
+                        amount = { e8s = amountSent};
+                        fee = { e8s = txFee };
+                        created_at_time = ?{ timestamp_nanos = Nat64.fromNat(Int.abs(Time.now())) };
+                    });
+                    #transfer(res_);
+                };
             };
         };
+
+        let res = await performTransfer(amountSent, recipientIdentifier);
 
         switch (res) {
             case(#icrc1_transfer(res_)){
                 switch(res_) {
-                    case(#Ok(blockIndex)) {
-                        Debug.print("Paid reward to " # debug_show Principal.fromActor(this) # " in block " # debug_show blockIndex);
-                        return {blockIndex = Nat64.fromNat(blockIndex)};
-                    };
+                    case(#Ok(_)) {return {amountSent};};
                     case(#Err(#InsufficientFunds { balance })) {
-                        throw Error.reject("Top me up! The balance is only " # debug_show balance # " e8s");    
+                        amountSent := Nat64.fromNat(balance) - txFee;
+                        let res = await performTransfer(amountSent, recipientIdentifier);
+                        switch (res) {
+                            case(#icrc1_transfer(#Err(_))){ return {amountSent: Nat64 = 0}; };
+                            case(#transfer(#Err(_))){ return {amountSent: Nat64 = 0}; };
+                            case(#icrc1_transfer(_)){ return {amountSent}; };
+                            case(#transfer(_)){ return {amountSent}; }
+                        }
+                            
                     };
-                    case(#Err(other)) {
-                        throw Error.reject("Unexpected error: " # debug_show other);
-                    };
+                    case(#Err(_)) { return {amountSent: Nat64 = 0}; };
                 };
             };
             case(#transfer(res_)){
                 switch(res_) {
-                    case(#Ok(blockIndex)) {
-                        Debug.print("Paid reward to " # debug_show Principal.fromActor(this) # " in block " # debug_show blockIndex);
-                        return {blockIndex};
-                    };
+                    case(#Ok(_)) { return {amountSent}; };
                     case(#Err(#InsufficientFunds { balance })) {
-                        throw Error.reject("Top me up! The balance is only " # debug_show balance # " e8s");    
+                        amountSent := balance.e8s - txFee;
+                        let res = await performTransfer(amountSent, recipientIdentifier);
+                        switch (res) {
+                            case(#icrc1_transfer(#Err(_))){ return {amountSent: Nat64 = 0}; };
+                            case(#transfer(#Err(_))){ return {amountSent: Nat64 = 0}; };
+                            case(#icrc1_transfer(_)){ return {amountSent}; };
+                            case(#transfer(_)){ return {amountSent}; }
+                        } 
                     };
-                    case(#Err(other)) {
-                        throw Error.reject("Unexpected error: " # debug_show other);
-                    };
+                    case(#Err(_)) { return {amountSent: Nat64 = 0}; };
                 };
             };
         };
