@@ -21,15 +21,14 @@ module{
 
     public type CampaignId = Nat;
 
-    public type CampaignContributions = {
-        icp: {e8s : Nat64;};
-    };
+    public type CampaignContributions = { icp: {e8s : Nat64;}; };
 
     public type CampaignContributionsArray = [(PrincipalAsText, CampaignContributions)];
 
     public type FundingCampaign = {
         contributions: CampaignContributionsArray;
         goal: { icp: { e8s : Nat64; }; };
+        balances: { icp: { e8s : Nat64; }; };
         recipient: {principalId: PrincipalAsText; accountId: Text};
         subaccountId: Account.Subaccount;
         percentageOfDaoRewardsAllocated: Nat;

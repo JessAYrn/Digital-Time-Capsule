@@ -380,7 +380,7 @@ module{
             });
             switch (res) {
                 case (#Ok(_)) { ignore updateTokenBalances(#Principal(userPrincipal), #Icp); ?{amountSent;}};
-                case (#Err(other)) {
+                case (#Err(_)) {
                     let icpOwed : Float = Float.fromInt64(Int64.fromNat64(amount - txFee) /100_000_000);
                     actionLogsArrayBuffer.add(
                         Int.toText(Time.now()),
@@ -399,7 +399,7 @@ module{
                 if(finalized) continue loop_;
                 let amountToAllocateToCampaign = userStake * (Nat64.fromNat(percentageOfDaoRewardsAllocated) / 100);
                 let ?{amountSent} = await performTransfer(amountToAllocateToCampaign, campaignSubaccountId, userPrincipal) else { continue loop_ };
-                creditCampaignContribution(userPrincipal, campaignId, amountSent, fundingCampaignsMap);
+                ignore creditCampaignContribution(userPrincipal, campaignId, amountSent, fundingCampaignsMap, treasuryCanisterId);
                 remainingStake -= amountToAllocateToCampaign;
             };
             let ?{subaccountId} = usersTreasuryDataMap.get(userPrincipal) else { return };
@@ -416,7 +416,7 @@ module{
         ignore neuronDataMap.remove(neuronId);
     };
 
-    public func creditCampaignContribution(userPrincipal: Text, campaignId: Nat, amount: Nat64, fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap): () {
+    public func creditCampaignContribution(userPrincipal: Text, campaignId: Nat, amount: Nat64, fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap, treasuryCanisterPrincipal: Principal ): async () {
         let ?campaign = fundingCampaignsMap.get(campaignId) else { return };
         let contributionsMap = HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.CampaignContributions>(Iter.fromArray(campaign.contributions), Array.size(campaign.contributions), Text.equal, Text.hash);
         let {icp = userIcpCampaignContribution} = switch(contributionsMap.get(userPrincipal)){
@@ -425,7 +425,8 @@ module{
         };
         let updatedCampaignContribution = {icp = { e8s = userIcpCampaignContribution.e8s + amount }};
         contributionsMap.put(userPrincipal, updatedCampaignContribution);
+        let updatedBalance = {icp = { e8s = await ledger.icrc1_balance_of({ owner = treasuryCanisterPrincipal; subaccount = ?campaign.subaccountId; }) }};
         let updatedContributions = Iter.toArray(contributionsMap.entries());
-        fundingCampaignsMap.put(campaignId, {campaign with contributions = updatedContributions});
+        fundingCampaignsMap.put(campaignId, {campaign with contributions = updatedContributions; balance = updatedBalance});
     };
 };

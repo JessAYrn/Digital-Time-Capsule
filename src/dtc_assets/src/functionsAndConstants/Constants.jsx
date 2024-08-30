@@ -123,6 +123,7 @@ export const CHART_TYPES = {
 }; 
 
 export const GRAPH_DATA_SETS = {
+    fundingCampaignContributions: "fundingCampaignContributions",
     usersTotalStakesAndVotingPowers: "usersTotalStakesAndVotingPowers",
     neuronContributions: "neuronContributions",
     balancesHistory: {

@@ -24,8 +24,7 @@ module{
             case null{ #err(#NotFound) }; 
             case (? profile){
                 let userJournal : Journal.Journal = actor(Principal.toText(profile.canisterId));
-                try{ let {amountSent} = await userJournal.transferICP(amount, #AccountIdentifier(canisterAccountId)); return #ok({amountSent});
-                } catch (_) { return #err(#TxFailed); };
+                let {amountSent} = await userJournal.transferICP(amount, #AccountIdentifier(canisterAccountId)); return #ok({amountSent});
             };
         };
     };

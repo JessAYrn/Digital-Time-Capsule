@@ -63,12 +63,22 @@ shared actor class Treasury (principal : Principal) = this {
             totalAllocation += percentageOfDaoRewardsAllocated; 
         };
         if(totalAllocation > 100) throw Error.reject("Allocation percentage cannot be greater than 100.");
-        fundingCampaignsMap.put(campaignIndex, {campaign with contributions = []; subaccountId = await getUnusedSubaccountId(); finalized = false; } );
+        fundingCampaignsMap.put(campaignIndex, {campaign with contributions = []; subaccountId = await getUnusedSubaccountId(); finalized = false; balances = { icp = { e8s: Nat64 = 0}} } );
         campaignIndex += 1;
     };
 
     public query({caller}) func getFundingCampainsArray() : async TreasuryTypes.FundingCampaignsArray {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
+        return Iter.toArray(fundingCampaignsMap.entries());
+    };
+
+    public shared({caller}) func contributeToFundingCampaign(contributor: TreasuryTypes.PrincipalAsText, campaignId: Nat, amount: Nat64) 
+    : async TreasuryTypes.FundingCampaignsArray {
+        if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
+        let ?campaign = fundingCampaignsMap.get(campaignId) else throw Error.reject("Campaign not found.");
+        let {subaccountId = fundingCampaignSubaccountId} = campaign;
+        let {amountSent} = await transferICP(amount, #Principal(contributor), {recipient = Principal.fromActor(this); subaccount = ?fundingCampaignSubaccountId});
+        await AsyncronousHelperMethods.creditCampaignContribution(contributor, campaignId, amountSent, fundingCampaignsMap, Principal.fromActor(this));
         return Iter.toArray(fundingCampaignsMap.entries());
     };
 
@@ -152,10 +162,7 @@ shared actor class Treasury (principal : Principal) = this {
     public query({caller}) func getUserTreasuryData(userPrincipal: Principal): async TreasuryTypes.UserTreasuryDataExport {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         let userPrincipalAsText = Principal.toText(userPrincipal);
-        let userTreasuryData = switch(usersTreasuryDataMap.get(userPrincipalAsText)){
-            case (?userTreasuryData) { userTreasuryData };
-            case (null) { throw Error.reject("User not found."); };
-        };
+        let userTreasuryData = switch(usersTreasuryDataMap.get(userPrincipalAsText)){ case (?userTreasuryData) { userTreasuryData }; case (null) { throw Error.reject("User not found."); }; };
         let {icp_staked; voting_power} = SyncronousHelperMethods.computeTotalStakeDepositAndVotingPower(neuronDataMap, userPrincipalAsText);
         return {userTreasuryData with balances = {userTreasuryData.balances with icp_staked; voting_power}};
     };
@@ -420,33 +427,41 @@ shared actor class Treasury (principal : Principal) = this {
     public shared({caller}) func transferICP(
         amount: Nat64, 
         sender: TreasuryTypes.Identifier,
-        recipient: Principal
-    ) : async {blockIndex: Nat} {
+        {recipient: Principal; subaccount: ?Account.Subaccount}
+    ) : async {amountSent: Nat64} {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         let (sourcePrincipal, _) = SyncronousHelperMethods.getPrincipalAndSubaccount(sender, subaccountRegistryMap, usersTreasuryDataMap);
         let ?{subaccountId = sendersubaccountId} = usersTreasuryDataMap.get(sourcePrincipal) else throw Error.reject("Sender not found."); 
-
-        let res = await ledger.icrc1_transfer({
-            to = { owner = recipient; subaccount = null };
+        var amountSent = Nat64.toNat(amount - txFee);
+        var transferInput = {
+            to = { owner = recipient; subaccount; };
             fee = ?Nat64.toNat(txFee);
             memo = null;
             from_subaccount = ?sendersubaccountId;
             created_at_time =?Nat64.fromNat(Int.abs(Time.now()));
-            amount = Nat64.toNat(amount - txFee);
-        });
+            amount = amountSent;
+        };
+
+        let res = await ledger.icrc1_transfer(transferInput);
 
         switch (res) {
-            case (#Ok(blockIndex)) {
-                Debug.print("Paid reward to " # debug_show Principal.fromActor(this) # " in block " # debug_show blockIndex);
-                return {blockIndex};
+            case (#Ok(_)) { 
+                ignore updateTokenBalances(sender, #Icp);
+                return {amountSent = Nat64.fromNat(amountSent)}; 
             };
             case (#Err(#InsufficientFunds { balance })) {
-                throw Error.reject("Top me up! The balance is only " # debug_show balance # " e8s");    
+                amountSent := balance - Nat64.toNat(txFee);
+                let res = await ledger.icrc1_transfer({transferInput with amountSent});
+                switch(res){
+                    case (#Ok(_)) { 
+                        ignore updateTokenBalances(sender, #Icp);
+                        return {amountSent = Nat64.fromNat(amountSent)} 
+                    };
+                    case (#Err(_)) { return {amountSent: Nat64 = 0} };
+                };
             };
-            case (#Err(other)) {
-                throw Error.reject("Unexpected error: " # debug_show other);
-            };
-        };
+            case (#Err(_)) { return {amountSent: Nat64 = 0} };
+        }; 
     };
 
     system func preupgrade() { 

@@ -4,6 +4,7 @@ import MainTypes "../../Types/Main/types";
 import Journal "../../Journal";
 import Treasury "../../Treasury";
 import Nat64 "mo:base/Nat64";
+import TreasuryTypes "../../Types/Treasury/types";
 
 module{
 
@@ -28,16 +29,27 @@ module{
         profiles: MainTypes.UserProfilesMap_V2,
         caller: Principal,
         amount: Nat64
-    ) : async {blockIndex: Nat64} {
+    ) : async {amountSent: Nat64} {
         let ?userProfile = profiles.get(caller) else { throw Error.reject("User not found") };
         let userCanisterId = userProfile.canisterId;
         let treasury: Treasury.Treasury = actor(daoMetaData.treasuryCanisterPrincipal);
         let {subaccountId = userTreasurySubaccountId} = await treasury.getUserTreasuryData(caller);
         let treasuryFee = amount / 200;
         let withdrawelamount = amount - treasuryFee;
-        ignore await treasury.transferICP(treasuryFee, #SubaccountId(userTreasurySubaccountId), Principal.fromText(daoMetaData.treasuryCanisterPrincipal));
-        let {blockIndex = blockIndex_2} = await treasury.transferICP(withdrawelamount,#SubaccountId(userTreasurySubaccountId), userCanisterId);
-        ignore treasury.updateTokenBalances(#SubaccountId(userTreasurySubaccountId), #Icp);
-        return {blockIndex = Nat64.fromNat(blockIndex_2)};
+        ignore await treasury.transferICP(treasuryFee, #SubaccountId(userTreasurySubaccountId), {recipient = Principal.fromText(daoMetaData.treasuryCanisterPrincipal); subaccount = null});
+        let {amountSent} = await treasury.transferICP(withdrawelamount,#SubaccountId(userTreasurySubaccountId), {recipient = userCanisterId; subaccount = null});
+        return {amountSent};
     };    
+
+    public func contributeToFundingCampaign(contributor: Principal, campaignId: Nat, amount: Nat64, daoMetaData: MainTypes.DaoMetaData_V4, profilesMap: MainTypes.UserProfilesMap_V2) 
+    : async TreasuryTypes.FundingCampaignsArray {
+        let treasury: Treasury.Treasury = actor(daoMetaData.treasuryCanisterPrincipal);
+        let {balances = userBalances} = await treasury.getUserTreasuryData(contributor);
+        if(userBalances.icp.e8s < amount) { 
+            let txFee: Nat64 = 10_000;
+            let amountToDepositToTreasury = amount - userBalances.icp.e8s + txFee;
+            ignore await depositIcpToTreasury(daoMetaData, profilesMap, contributor, amountToDepositToTreasury);
+        };
+        await treasury.contributeToFundingCampaign(Principal.toText(contributor), campaignId, amount);
+    };
 }

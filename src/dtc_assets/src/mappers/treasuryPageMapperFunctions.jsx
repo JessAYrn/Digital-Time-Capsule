@@ -55,7 +55,7 @@ const getDataSetsForChartFromDataMap = (data, radius) => {
 
 const getLabels_balancesHistory = (data) => {return data.map(([date, balances]) => {return date})};
 
-const getLabels_neuronContributions = (data) => {return data.map(([contributor, contributions]) => {
+const getLabels_contributions = (data) => {return data.map(([contributor, contributions]) => {
     return contributor.length > 15 ? shortenHexString(contributor) : contributor
 })};
 
@@ -67,8 +67,9 @@ export const mapDataMapToChartFormat = (data, nameOfDataSet) => {
         case GRAPH_DATA_SETS.balancesHistory.month: labels = getLabels_balancesHistory(data); radius = 2; break;
         case GRAPH_DATA_SETS.balancesHistory.year: labels = getLabels_balancesHistory(data); radius = 2; break;
         case GRAPH_DATA_SETS.balancesHistory.allTime: labels = getLabels_balancesHistory(data); radius = 2; break;
-        case GRAPH_DATA_SETS.neuronContributions: labels = getLabels_neuronContributions(data); radius = 125; break;
-        case GRAPH_DATA_SETS.usersTotalStakesAndVotingPowers: labels = getLabels_neuronContributions(data); radius = 125; break;
+        case GRAPH_DATA_SETS.neuronContributions: labels = getLabels_contributions(data); radius = 125; break;
+        case GRAPH_DATA_SETS.usersTotalStakesAndVotingPowers: labels = getLabels_contributions(data); radius = 125; break;
+        case GRAPH_DATA_SETS.fundingCampaignContributions: labels = getLabels_contributions(data); radius = 125; break;
     };
     const data_ = { labels, datasets: getDataSetsForChartFromDataMap(data, radius) };
     return { [nameOfDataSet]: data_};

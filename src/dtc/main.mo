@@ -342,7 +342,7 @@ shared actor class User() = this {
         let result = await TreasuryHelperMethods.depositIcpToTreasury(daoMetaData_v4, userProfilesMap_v2, caller, amount); return result;
     };
 
-    public shared({caller}) func withdrawIcpFromTreasury(amount: Nat64) : async {blockIndex: Nat64} {
+    public shared({caller}) func withdrawIcpFromTreasury(amount: Nat64) : async {amountSent: Nat64} {
         let result = await TreasuryHelperMethods.withdrawIcpFromTreasury(daoMetaData_v4, userProfilesMap_v2, caller, amount); return result;
     };
 

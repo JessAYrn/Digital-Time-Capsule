@@ -53,10 +53,10 @@ module {
                 let res = await ledger.transfer({transferInput with amount = { e8s = amountSent }}); 
                 switch(res){
                     case(#Ok(_)) { return {amountSent} };
-                    case(#Err(_)) { throw Error.reject("Transfer failed") };
+                    case(#Err(_)) { return {amountSent: Nat64 = 0} };
                 };
             };
-            case(#Err(_)) { throw Error.reject("Transfer failed") };
+            case(#Err(_)) { return {amountSent: Nat64 = 0}  };
         };
     };
 
