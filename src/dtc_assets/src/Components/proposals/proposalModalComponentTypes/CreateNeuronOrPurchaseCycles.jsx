@@ -11,7 +11,7 @@ import { toE8s } from '../../../functionsAndConstants/Utils';
 const CreateNeuronOrPurchaseCycles = (props) => {
 
     const {onSubmitProposal, action, payload, disabled} = props;
-    const [amount, setAmount] = useState(payload?.amount ? fromE8s(parseInt(payload?.amount)) : null);
+    const [amount, setAmount] = useState(payload?.amount || payload?.amount === BigInt(0) ? fromE8s(parseInt(payload?.amount)) : null);
     const [hasError, setHasError] = useState(false);
     const [isReadyToSubmit, setIsReadyToSubmit] = useState(false);
 
@@ -27,7 +27,7 @@ const CreateNeuronOrPurchaseCycles = (props) => {
                 hasError={hasError}
                 label={"Amount"}
                 placeHolder={"Amount"}
-                onChange={(value) => {setAmount(value);}}
+                onChange={(value) => {setHasError(!value); setAmount(value);}}
                 allowNegative={false}
                 maxDecimalPlaces={8}
                 parseNumber={parseFloat}

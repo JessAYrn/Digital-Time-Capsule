@@ -300,6 +300,7 @@ shared(msg) actor class Journal () = this {
 
     public shared({caller}) func transferICP( amount: Nat64, recipientIdentifier: JournalTypes.RecipientIdentifier) : async {amountSent: Nat64} {
         if( Principal.toText(caller) != mainCanisterId_) { throw Error.reject("Unauthorized access."); };
+        if(amount < txFee){ return {amountSent: Nat64 = 0}; };
         var amountSent = amount - txFee;
 
         func performTransfer(amountSent: Nat64, recipientIdentifier: JournalTypes.RecipientIdentifier) : 
@@ -337,6 +338,7 @@ shared(msg) actor class Journal () = this {
                 switch(res_) {
                     case(#Ok(_)) {return {amountSent};};
                     case(#Err(#InsufficientFunds { balance })) {
+                        if(balance < Nat64.toNat(txFee)){ return {amountSent: Nat64 = 0}; };
                         amountSent := Nat64.fromNat(balance) - txFee;
                         let res = await performTransfer(amountSent, recipientIdentifier);
                         switch (res) {
@@ -354,6 +356,7 @@ shared(msg) actor class Journal () = this {
                 switch(res_) {
                     case(#Ok(_)) { return {amountSent}; };
                     case(#Err(#InsufficientFunds { balance })) {
+                        if(balance.e8s < txFee){ return {amountSent: Nat64 = 0}; };
                         amountSent := balance.e8s - txFee;
                         let res = await performTransfer(amountSent, recipientIdentifier);
                         switch (res) {

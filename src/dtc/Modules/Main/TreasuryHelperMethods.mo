@@ -14,6 +14,7 @@ module{
         caller: Principal,
         amount: Nat64
     ) : async {amountSent: Nat64} {
+        if(amount < 10_000){ return {amountSent: Nat64 = 0}; };
         let ?userProfile = profiles.get(caller) else { throw Error.reject("User not found") };
         let userCanisterId = userProfile.canisterId;
         let userCanister: Journal.Journal = actor(Principal.toText(userCanisterId));
@@ -36,6 +37,7 @@ module{
         let {subaccountId = userTreasurySubaccountId} = await treasury.getUserTreasuryData(caller);
         let treasuryFee = amount / 200;
         let withdrawelamount = amount - treasuryFee;
+        if(treasuryFee < 10_000 or withdrawelamount < 10_000){ return {amountSent: Nat64 = 0}; };
         ignore await treasury.transferICP(treasuryFee, #SubaccountId(userTreasurySubaccountId), {recipient = Principal.fromText(daoMetaData.treasuryCanisterPrincipal); subaccount = null});
         let {amountSent} = await treasury.transferICP(withdrawelamount,#SubaccountId(userTreasurySubaccountId), {recipient = userCanisterId; subaccount = null});
         return {amountSent};

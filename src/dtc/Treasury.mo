@@ -430,6 +430,7 @@ shared actor class Treasury (principal : Principal) = this {
         {recipient: Principal; subaccount: ?Account.Subaccount}
     ) : async {amountSent: Nat64} {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
+        if(amount < txFee){ return {amountSent: Nat64 = 0}; };
         let (sourcePrincipal, _) = SyncronousHelperMethods.getPrincipalAndSubaccount(sender, subaccountRegistryMap, usersTreasuryDataMap);
         let ?{subaccountId = sendersubaccountId} = usersTreasuryDataMap.get(sourcePrincipal) else throw Error.reject("Sender not found."); 
         var amountSent = Nat64.toNat(amount - txFee);
@@ -450,6 +451,7 @@ shared actor class Treasury (principal : Principal) = this {
                 return {amountSent = Nat64.fromNat(amountSent)}; 
             };
             case (#Err(#InsufficientFunds { balance })) {
+                if(balance < Nat64.toNat(txFee)){ return {amountSent: Nat64 = 0}; };
                 amountSent := balance - Nat64.toNat(txFee);
                 let res = await ledger.icrc1_transfer({transferInput with amountSent});
                 switch(res){

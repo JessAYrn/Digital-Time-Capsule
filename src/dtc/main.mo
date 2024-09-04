@@ -566,8 +566,9 @@ shared actor class User() = this {
                 let {balances} = await treasuryCanister.getUserTreasuryData(Principal.fromText(proposer));
                 if(balances.icp.e8s < amount){ 
                     let amountToDeposit = amount - balances.icp.e8s + txFee;  
-                    ignore await TreasuryHelperMethods.depositIcpToTreasury(daoMetaData_v4, userProfilesMap_v2, Principal.fromText(proposer), amountToDeposit);
-
+                    try{
+                        ignore await TreasuryHelperMethods.depositIcpToTreasury(daoMetaData_v4, userProfilesMap_v2, Principal.fromText(proposer), amountToDeposit);
+                    } catch(_){};
                 };
                 let result =  await treasuryCanister.createNeuron({amount; contributor = Principal.fromText(proposer);});
                 switch(result){
@@ -580,7 +581,9 @@ shared actor class User() = this {
                 let {balances} = await treasuryCanister.getUserTreasuryData(Principal.fromText(proposer));
                 if(balances.icp.e8s < amount){ 
                     let amountToDeposit = amount - balances.icp.e8s + txFee;  
-                    ignore await TreasuryHelperMethods.depositIcpToTreasury(daoMetaData_v4, userProfilesMap_v2, Principal.fromText(proposer), amountToDeposit);
+                    try{
+                        ignore await TreasuryHelperMethods.depositIcpToTreasury(daoMetaData_v4, userProfilesMap_v2, Principal.fromText(proposer), amountToDeposit);
+                    } catch(_){};
 
                 };
                 let result = await treasuryCanister.increaseNeuron({amount; neuronId; contributor = Principal.fromText(proposer);});

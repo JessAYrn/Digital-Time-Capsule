@@ -15,10 +15,11 @@ import Treasury "../../Treasury";
 module{
 
     private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
+    private let txFee : Nat64 = 10_000;
 
     public func transferICP(callerId: Principal, profilesMap: MainTypes.UserProfilesMap_V2 ,amount: Nat64, canisterAccountId: Account.AccountIdentifier) : 
     async Result.Result<({amountSent: Nat64}), JournalTypes.Error> {
-
+        if(amount < txFee){ return #err(#TxFailed) };
         let userProfile = profilesMap.get(callerId);
         switch(userProfile) {
             case null{ #err(#NotFound) }; 
