@@ -633,11 +633,10 @@ shared actor class User() = this {
                 return null;
             };
             case(#SpawnNeuron({neuronId; percentage_to_spawn;})){
-                let {selfAuthPrincipal = treasurySelfAuthPrincipal} = await treasuryCanister.getSelfAuthenticatingPrincipalAndPublicKey();
                 let spawnArgs : Governance.Spawn = {
                     percentage_to_spawn : ?Nat32 = ?percentage_to_spawn;
-                    new_controller : ?Principal = ?treasurySelfAuthPrincipal;
-                    nonce : ?Nat64 = ?Nat64.fromNat(0);
+                    new_controller : ?Principal = null;
+                    nonce : ?Nat64 = null;
                 };
                 let args : Governance.ManageNeuron = {
                     id = ?{id = neuronId;};

@@ -63,6 +63,7 @@ module{
         let newPendingAction: TreasuryTypes.PendingAction = {
             expectedHttpResponseType = ?#GovernanceManageNeuronResponse({neuronId = ?neuronId.id; memo = null; proposer; treasuryCanisterId; });
             function = #ManageNeuron({  input = {args; selfAuthPrincipal; public_key = publicKey; transformFn;} });
+            attemptAfterTimestamp = null;
         };
         pendingActionsMap.put(pendingActionId, newPendingAction);
         actionLogsArrayBuffer.add(Int.toText(Time.now()),"New Action Pending: "#pendingActionId);
@@ -102,6 +103,7 @@ module{
         let newPendingAction: TreasuryTypes.PendingAction = {
             expectedHttpResponseType = ?#GovernanceManageNeuronResponse({neuronId = ?neuronId; memo = null; proposer = null; treasuryCanisterId = null; });
             function = #ManageNeuron({ input = { args; selfAuthPrincipal; public_key = publicKey; transformFn; method_name = TreasuryTypes.GetNeuronDataMethodNames.getFullNeuron }; });
+            attemptAfterTimestamp = null;
         };
         
         pendingActionsMap.put("claimOrRefresh_"#Nat64.toText(neuronId), newPendingAction);
@@ -141,6 +143,7 @@ module{
         let newPendingAction: TreasuryTypes.PendingAction = {
             expectedHttpResponseType = ?#GovernanceManageNeuronResponse({neuronId = null; memo = ?neuronMemo; proposer = null; treasuryCanisterId = null; });
             function = #ManageNeuron({ input = {args; selfAuthPrincipal; public_key = publicKey; transformFn;} });
+            attemptAfterTimestamp = null;
         };
         pendingActionsMap.put("createNeuronResponse_"#Nat64.toText(neuronMemo), newPendingAction);
         actionLogsArrayBuffer.add(Int.toText(Time.now()),"New Action Pending: createNeuronResponse_"#Nat64.toText(neuronMemo));
@@ -178,6 +181,7 @@ module{
             let newPendingAction: TreasuryTypes.PendingAction = {
                 expectedHttpResponseType = ?#GovernanceManageNeuronResponse({neuronId = ?neuronId.id; memo = null; proposer = null; treasuryCanisterId = null; });
                 function = #ManageNeuron({ input = {args; selfAuthPrincipal; public_key = publicKey; transformFn;} });
+                attemptAfterTimestamp = null;
             };                
             pendingActionsMap.put("claimOrRefresh_"#Nat64.toText(neuronId.id), newPendingAction);
         };
@@ -232,9 +236,13 @@ module{
         let length = Array.size(pendingActionsArray);
         if(length == 0) throw Error.reject("No pending actions to resolve");
         var index = 0;
-        while(index < length){
+        label loop_ while(index < length){
             let (identifier, action) = pendingActionsArray[index];
-            ignore resolvePendingAction_(identifier, action);
+            let {attemptAfterTimestamp} = action;
+            switch(attemptAfterTimestamp){ 
+                case(?timestamp){ if(Time.now() > timestamp){ ignore resolvePendingAction_(identifier, action);}; };
+                case(null) { ignore resolvePendingAction_(identifier, action); } 
+            };
             index += 1;
         };
 
@@ -255,6 +263,20 @@ module{
         transformFn: TreasuryTypes.TransformFnSignature;
     }): async {newPendingAction: Bool;} {
 
+        func createPendingActionsToUpdateNeuronData(neuronId: Nat64, {attemptAfterTimestamp_NeuronInfo: ?Int; attemptAfterTimestamp_FullNeuron: ?Int;}){
+            let newPendingAction: TreasuryTypes.PendingAction = {
+                    expectedHttpResponseType = ?#GovernanceResult_2({neuronId});
+                    function = #GetNeuronData({ input = {args = neuronId; selfAuthPrincipal; public_key = publicKey; transformFn; method_name = TreasuryTypes.GetNeuronDataMethodNames.getFullNeuron}; }); 
+                    attemptAfterTimestamp = attemptAfterTimestamp_FullNeuron;
+                };
+            let newPendingAction2: TreasuryTypes.PendingAction = {
+                attemptAfterTimestamp = attemptAfterTimestamp_NeuronInfo;
+                expectedHttpResponseType = ?#GovernanceResult_5({neuronId});
+                function = #GetNeuronData({ input = {args = neuronId; selfAuthPrincipal; public_key = publicKey; transformFn; method_name = TreasuryTypes.GetNeuronDataMethodNames.getNeuronInfo}; }); };
+            pendingActionsMap.put("getFullNeuronResponse_"#Nat64.toText(neuronId), newPendingAction);
+            pendingActionsMap.put("getNeuronInfoResponse_"#Nat64.toText(neuronId), newPendingAction2);
+        };
+
         switch(readRequestResponseOutput){
             case(#ClaimOrRefresh({memo; neuronId})){
                 if(memo != null){
@@ -262,12 +284,7 @@ module{
                     memoToNeuronIdMap.put(Nat64.toNat(memo_), neuronId);
                     SyncronousHelperMethods.finalizeNewlyCreatedNeuronStakeInfo(Nat64.toText(memo_)#PENDING_NEURON_SUFFIX, neuronId, neuronDataMap);
                 };
-                
-                let newPendingAction: TreasuryTypes.PendingAction = {
-                    expectedHttpResponseType = ?#GovernanceResult_2({neuronId});
-                    function = #GetNeuronData({ input = {args = neuronId; selfAuthPrincipal; public_key = publicKey; transformFn; method_name = TreasuryTypes.GetNeuronDataMethodNames.getFullNeuron}; }); 
-                };
-                pendingActionsMap.put("getFullNeuronResponse_"#Nat64.toText(neuronId), newPendingAction);
+                createPendingActionsToUpdateNeuronData(neuronId, {attemptAfterTimestamp_NeuronInfo = null; attemptAfterTimestamp_FullNeuron = null;});
                 return {newPendingAction = true};
             };
             case(#Spawn({created_neuron_id; neuronId;})){
@@ -276,34 +293,16 @@ module{
                 let ?parentNeuron = neuronDataMap.get(Nat64.toText(neuronId)) else { throw Error.reject("no neuron found") };
                 let parentNeuronContributions = ?parentNeuron.contributions;
                 neuronDataMap.put(Nat64.toText(created_neuron_id), {neuron = null; neuronInfo = null; parentNeuronContributions; contributions = []; });
-                
-                let newPendingAction: TreasuryTypes.PendingAction = {
-                    expectedHttpResponseType = ?#GovernanceResult_2({neuronId});
-                    function = #GetNeuronData({ 
-                    method = NeuronManager.getNeuronData; 
-                    input = {args = neuronId; selfAuthPrincipal; public_key = publicKey; transformFn; method_name = TreasuryTypes.GetNeuronDataMethodNames.getFullNeuron}; });
-                };
-                let newPendingAction2: TreasuryTypes.PendingAction = {
-                    expectedHttpResponseType = ?#GovernanceResult_2({neuronId = created_neuron_id});
-                    function = #GetNeuronData({ input = {args = created_neuron_id; selfAuthPrincipal; public_key = publicKey; transformFn; method_name = TreasuryTypes.GetNeuronDataMethodNames.getFullNeuron}; }); };
-                pendingActionsMap.put("getFullNeuronResponse_"#Nat64.toText(neuronId), newPendingAction);
-                pendingActionsMap.put("getFullNeuronResponse_"#Nat64.toText(created_neuron_id), newPendingAction2);
+                createPendingActionsToUpdateNeuronData(neuronId, {attemptAfterTimestamp_NeuronInfo = null; attemptAfterTimestamp_FullNeuron = null;});
+                createPendingActionsToUpdateNeuronData(created_neuron_id, {attemptAfterTimestamp_NeuronInfo = ?(Time.now() + (1_000_000_000 * 60 * 24 * 7)); attemptAfterTimestamp_FullNeuron = null;});
                 return {newPendingAction = true};
             };
             case(#Follow({neuronId;})){
-                
-                let newPendingAction: TreasuryTypes.PendingAction = {
-                    expectedHttpResponseType = ?#GovernanceResult_2({neuronId});
-                    function = #GetNeuronData({ input = {args = neuronId; selfAuthPrincipal; public_key = publicKey; transformFn; method_name = TreasuryTypes.GetNeuronDataMethodNames.getFullNeuron}; });};
-                pendingActionsMap.put("getFullNeuronResponse_"#Nat64.toText(neuronId), newPendingAction);
+                createPendingActionsToUpdateNeuronData(neuronId, {attemptAfterTimestamp_NeuronInfo = null; attemptAfterTimestamp_FullNeuron = null;});
                 return {newPendingAction = true};
             };
             case(#Configure({neuronId;})){
-
-                let newPendingAction: TreasuryTypes.PendingAction = {
-                    expectedHttpResponseType = ?#GovernanceResult_2({neuronId});
-                    function = #GetNeuronData({ input = {args = neuronId; selfAuthPrincipal; public_key = publicKey; transformFn; method_name = TreasuryTypes.GetNeuronDataMethodNames.getFullNeuron}; }); };
-                pendingActionsMap.put("getFullNeuronResponse_"#Nat64.toText(neuronId), newPendingAction);
+                createPendingActionsToUpdateNeuronData(neuronId, {attemptAfterTimestamp_NeuronInfo = null; attemptAfterTimestamp_FullNeuron = null;});
                 return {newPendingAction = true};
             };
             case(#Disburse({neuronId; proposer; treasuryCanisterId})){
@@ -324,13 +323,8 @@ module{
                 switch(response){
                     case(#Ok(neuron)){
                         let ?neuronData = neuronDataMap.get(Nat64.toText(neuronId)) else { throw Error.reject("neuronData Not Found") };
-                        
                         neuronDataMap.put(Nat64.toText(neuronId), {neuronData with neuron = ?neuron }); 
-                        let newPendingAction: TreasuryTypes.PendingAction = {
-                            expectedHttpResponseType = ?#GovernanceResult_5({neuronId});
-                            function = #GetNeuronData({ input = {args = neuronId; selfAuthPrincipal; public_key = publicKey; transformFn; method_name = TreasuryTypes.GetNeuronDataMethodNames.getNeuronInfo}; }); };
-                        pendingActionsMap.put("getNeuronInfoResponse_"#Nat64.toText(neuronId), newPendingAction);
-                        return {newPendingAction = true};
+                        return {newPendingAction = false};
                     }; 
                     case(#Err({error_message;})){ throw Error.reject(error_message) };
                 };

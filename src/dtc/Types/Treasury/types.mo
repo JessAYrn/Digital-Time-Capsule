@@ -216,6 +216,7 @@ module{
     public type PendingAction = {
         expectedHttpResponseType: ?ExpectedRequestResponses;
         function: { #GetNeuronData: {input: GetNeuronDataInput; }; #ManageNeuron: {input: ManageNeuronInput;}; };
+        attemptAfterTimestamp: ?Int;
     };
 
     public type PendingActionExport = {

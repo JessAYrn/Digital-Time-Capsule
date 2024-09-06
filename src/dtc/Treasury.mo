@@ -18,7 +18,6 @@ import Nat "mo:base/Nat";
 import Timer "mo:base/Timer";
 import IC "Types/IC/types";
 import EcdsaHelperMethods "Modules/ECDSA/ECDSAHelperMethods";
-import Hex "Serializers/Hex";
 import Debug "mo:base/Debug";
 import Buffer "mo:base/Buffer";
 import AnalyticsTypes "Types/Analytics/types";
@@ -204,12 +203,6 @@ shared actor class Treasury (principal : Principal) = this {
     public query({caller}) func canisterIcpAccountId(subaccount: ?Account.Subaccount) : async Account.AccountIdentifier {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         tresasuryIcpAccountId(subaccount);
-    };
-
-    public shared func getNeuronSubAccountId(): async Text {
-        let {selfAuthPrincipal} = getSelfAuthenticatingPrincipalAndPublicKey_();
-        let treasuryNeuronSubaccount = Account.neuronSubaccount(selfAuthPrincipal, 0);
-        Hex.encode(Blob.toArray(treasuryNeuronSubaccount));
     };
 
     public shared({caller}) func createNeuron({amount: Nat64; contributor: Principal}) : async Result.Result<({amountSent: Nat64}), TreasuryTypes.Error> {
