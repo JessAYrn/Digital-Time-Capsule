@@ -33,8 +33,6 @@ const DisplayNeuron = (props) => {
     const [neuronId, neuronData_] = neuronData;
     const{contributions, neuron, neuronInfo} = neuronData_;
 
-    console.log(contributions, contributions.length);
-
     let timeSpan = "hours";
     let dissolveDelay = secondsToHours(parseInt(neuronInfo?.dissolve_delay_seconds || 0));
     if(dissolveDelay > 24){ dissolveDelay = hoursToDays(dissolveDelay); timeSpan = "days";};
