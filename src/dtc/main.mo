@@ -496,6 +496,10 @@ shared actor class User() = this {
         };
     };
 
+    public shared({caller}) func contributeToFundingCampaign(campaignId: Nat, amount: Nat64): async TreasuryTypes.FundingCampaignsArray {
+        await TreasuryHelperMethods.contributeToFundingCampaign(caller, campaignId, amount, daoMetaData_v4, userProfilesMap_v2);
+    };
+
     private func finalizeAllEligibleProposals() : async () {
 
         func attemptFinalizeProposalVotingPeriod(proposalId: Nat) : async () {

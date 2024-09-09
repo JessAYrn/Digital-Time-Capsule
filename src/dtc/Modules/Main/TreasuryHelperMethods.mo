@@ -50,7 +50,8 @@ module{
         if(userBalances.icp.e8s < amount) { 
             let txFee: Nat64 = 10_000;
             let amountToDepositToTreasury = amount - userBalances.icp.e8s + txFee;
-            ignore await depositIcpToTreasury(daoMetaData, profilesMap, contributor, amountToDepositToTreasury);
+            try{ignore await depositIcpToTreasury(daoMetaData, profilesMap, contributor, amountToDepositToTreasury);}
+            catch(_){};
         };
         await treasury.contributeToFundingCampaign(Principal.toText(contributor), campaignId, amount);
     };

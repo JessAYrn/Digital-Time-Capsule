@@ -120,7 +120,7 @@ module{
             key_id = { curve = #secp256k1; name = "key_1" };
         });
         { public_key = await convertToDerFormat(public_key)};
-        } catch (err) { throw Error.reject("Public Key Retreival failed") };
+        } catch (_) { throw Error.reject("Public Key Retreival failed") };
     };
 
     public func prepareCanisterCallViaEcdsa(arguments: PrepareCanisterCallViaEcdsaArgs): CanisterEcdsaRequest {
@@ -155,7 +155,7 @@ module{
             (#majorType3("sender_sig"), #majorType2(Blob.toArray(signature)))
         ]);
         let envelopeCborEncoded : [Nat8] = switch(Encoder.encode(envelopeAsMajorType)) {
-            case (#err(e)) {throw Error.reject("envelope encoding falied") };
+            case (#err(_)) {throw Error.reject("envelope encoding falied") };
             case(#ok(encoding)) {encoding};
         };
         return {envelopeCborEncoded};
@@ -174,7 +174,7 @@ module{
             (#majorType3("sender_sig"), #majorType2(Blob.toArray(signature)))
         ]);
         let envelopeCborEncoded : [Nat8] = switch(Encoder.encode(envelopeAsMajorType)) {
-            case (#err(e)) {throw Error.reject("envelope encoding falied") };
+            case (#err(_)) {throw Error.reject("envelope encoding falied") };
             case(#ok(encoding)) {encoding};
         };
         return {envelopeCborEncoded};
