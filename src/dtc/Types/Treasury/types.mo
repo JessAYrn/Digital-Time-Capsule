@@ -24,10 +24,15 @@ module{
     public type CampaignContributions = { icp: {e8s : Nat64;}; };
 
     public type CampaignContributionsArray = [(PrincipalAsText, CampaignContributions)];
-
+    //TODO: change data structure so that principal payment amount and interest payment amount are stored explicitly
+    //TODO: replace simpleInterestRate with interestOwed field
+    //TODO: add repaymentAmounts field to store the repayment amounts for each interval
     public type FundingCampaign = {
         contributions: CampaignContributionsArray;
         goal: { icp: { e8s : Nat64; }; };
+        amountDisbursed: { icp: { e8s : Nat64; }; };
+        amountRepaid: { icp: { e8s : Nat64; }; };
+        amountOwed: { icp: { e8s : Nat64; }; };
         balances: { icp: { e8s : Nat64; }; };
         recipient: {principalId: PrincipalAsText; accountId: Text};
         subaccountId: Account.Subaccount;

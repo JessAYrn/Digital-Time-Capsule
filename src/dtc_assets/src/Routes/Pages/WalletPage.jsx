@@ -3,65 +3,31 @@ import { AppContext } from '../../Context';
 import { NavBar } from '../../Components/navigation/NavBar';
 import { CHART_TYPES, GRAPH_DISPLAY_LABELS, GRAPH_DATA_SETS } from '../../functionsAndConstants/Constants';
 import { copyText } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
-import { loadAllDataIntoReduxStores } from '../../functionsAndConstants/loadingFunctions';
-import { walletTypes  } from '../../reducers/walletReducer';
-import { treasuryTypes } from '../../reducers/treasuryReducer';
-import { notificationsTypes } from '../../reducers/notificationsReducer';
-import { homePageTypes } from '../../reducers/homePageReducer';
-import { types as journalTypes } from '../../reducers/journalReducer';
 
 import { nanoSecondsToMiliSeconds, shortenHexString, round2Decimals, fromE8s } from '../../functionsAndConstants/Utils';
 import QrCodeIcon from '@mui/icons-material/QrCode';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import SendIcon from '@mui/icons-material/Send';
-import RefreshIcon from '@mui/icons-material/Refresh';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
 import Paper  from '@mui/material/Paper';
 import DataField from '../../Components/Fields/DataField';
 import AccordionField from '../../Components/Fields/Accordion';
-import SpeedDialField from '../../Components/Fields/SpeedDialField';
 import ModalComponent from '../../Components/modal/Modal';
-import SendCryptoModal from '../../Components/modal/SendCryptoModal';
 import ButtonField from '../../Components/Fields/Button';
 import DisplayQrCode from '../../Components/modal/DisplayQrCode';
 import Graph from '../../Components/Fields/Chart';
 import Typography from '@mui/material/Typography';
+import ActionButton from '../../Components/ActionButton';
 
 
 const WalletPage = (props) => {
 
     const { 
         walletState, 
-        walletDispatch, 
-        actorState,
         treasuryState, 
-        treasuryDispatch,
-        notificationsDispatch,
-        homePageDispatch,
-        journalDispatch
     } = useContext(AppContext);
 
-    const dispatches = { homePageDispatch, treasuryDispatch, walletDispatch, notificationsDispatch, journalDispatch};
-    const types = { journalTypes, walletTypes, homePageTypes, notificationsTypes, treasuryTypes};
-
-    const [loadingWalletData, setIsLoadingWalletData] = useState(false);
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [modalProps, setModalProps] = useState({});
-
-    const onSend = () => {
-        setModalProps({
-            components: [{
-                Component: SendCryptoModal,
-                props: {
-                    onClickCancel: () => {setModalIsOpen(false); () => setModalProps({})},
-                    setModalProps,
-                    setModalIsOpen,
-                    setIsLoadingWalletData
-                }
-            }]
-        });
-        setModalIsOpen(true);
-    };
 
     const onClick_QrCode = () => {
         setModalIsOpen(true);
@@ -74,19 +40,6 @@ const WalletPage = (props) => {
             }]
         });
     };
-
-    const reloadData = async () => {
-        setIsLoadingWalletData(true);
-        setModalIsOpen(true);
-        await loadAllDataIntoReduxStores(actorState, dispatches, types);
-        setModalIsOpen(false);
-        setIsLoadingWalletData(false);
-    };
-
-    const speedDialActions = [
-        {name: "Refresh", icon: RefreshIcon, onClick: reloadData},
-        {name: "New Transaction", icon: SendIcon , onClick: onSend}
-    ]
 
     const DisplayTxAddresses = (props) => {
         const {addresses} = props;
@@ -211,10 +164,9 @@ const WalletPage = (props) => {
                 </AccordionField>}
 
             </Grid>
-            <SpeedDialField actions={speedDialActions} position={"right"}/>
+            <ActionButton/>
             <ModalComponent
                 open={modalIsOpen}
-                isLoading={loadingWalletData}
                 handleClose={() => setModalIsOpen(false)}
                 {...modalProps}
             />

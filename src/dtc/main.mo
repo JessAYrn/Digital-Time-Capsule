@@ -544,7 +544,7 @@ shared actor class User() = this {
 
         for((proposalId, proposal) in proposalsMap_v2.entries()){
             let {finalized} = proposal;
-            if(finalized == false) { ignore attemptFinalizeProposalVotingPeriod(proposalId); };
+            if(not finalized) { ignore attemptFinalizeProposalVotingPeriod(proposalId); };
         };
     };
 

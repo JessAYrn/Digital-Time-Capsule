@@ -62,7 +62,13 @@ shared actor class Treasury (principal : Principal) = this {
             totalAllocation += percentageOfDaoRewardsAllocated; 
         };
         if(totalAllocation > 100) throw Error.reject("Allocation percentage cannot be greater than 100.");
-        fundingCampaignsMap.put(campaignIndex, {campaign with contributions = []; subaccountId = await getUnusedSubaccountId(); finalized = false; balances = { icp = { e8s: Nat64 = 0}} } );
+        fundingCampaignsMap.put(campaignIndex, {
+            campaign with contributions = []; subaccountId = await getUnusedSubaccountId(); finalized = false; 
+            balances = { icp = { e8s: Nat64 = 0}}; 
+            amountDisbursed = {icp = { e8s: Nat64 = 0}}; 
+            amountRepaid = {icp = { e8s: Nat64 = 0}};
+            amountOwed = { icp = { e8s: Nat64 = 0}};
+        } );
         campaignIndex += 1;
     };
 
@@ -80,14 +86,21 @@ shared actor class Treasury (principal : Principal) = this {
         await AsyncronousHelperMethods.creditCampaignContribution(contributor, campaignId, amountSent, fundingCampaignsMap, Principal.fromActor(this));
         return Iter.toArray(fundingCampaignsMap.entries());
     };
+    // complete this function
+    // public shared({caller}) func repayFundingCampaign(campaignId: Nat, amount: Nat64) : async TreasuryTypes.FundingCampaignsArray {
+    //     if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
+    //     let ?campaign = fundingCampaignsMap.get(campaignId) else throw Error.reject("Campaign not found.");
+    //     let {subaccountId = fundingCampaignSubaccountId} = campaign;
+    //     let {amountSent} = await transferICP(amount, Principal.fromActor(this), {recipient = Principal.fromActor(this); subaccount = ?fundingCampaignSubaccountId});
+    //     await AsyncronousHelperMethods.repayCampaignLoan(campaignId, amountSent, fundingCampaignsMap, Principal.fromActor(this));
+    //     return Iter.toArray(fundingCampaignsMap.entries());
+    // };
 
+    // change this function to finalize the campaign if the amountRepaid is greater than or equal to the amountOwed
     private func finalizeFundingCampaign(campaignId: TreasuryTypes.CampaignId) : () {
         let ?campaign = fundingCampaignsMap.get(campaignId) else { return };
         if(campaign.finalized) return;
-        var totalContributions: Nat64 = 0;
-        let contributionsIter = Iter.fromArray<(TreasuryTypes.PrincipalAsText, TreasuryTypes.CampaignContributions)>(campaign.contributions);
-        for((_, {icp}) in contributionsIter){ totalContributions += icp.e8s; };
-        if(totalContributions > campaign.goal.icp.e8s) fundingCampaignsMap.put(campaignId, {campaign with finalized = true});
+        if(campaign.balances.icp.e8s > campaign.goal.icp.e8s) fundingCampaignsMap.put(campaignId, {campaign with finalized = true});
     };
 
     private func getSelfAuthenticatingPrincipalAndPublicKey_(): {selfAuthPrincipal: Principal; publicKey: Blob;} {

@@ -1,7 +1,7 @@
 import React from 'react';
 import Grid from '@mui/material/Unstable_Grid2';
 import AccordionField from '../Fields/Accordion';
-import Proposal from './Proposal';
+import DisplayProposal from './DisplayProposal';
 
 const DisplayProposals = (props) => {
     let {proposals} = props;
@@ -26,7 +26,7 @@ const DisplayProposals = (props) => {
                                     executed={executed}
                                     votes={votes}
                                     voteTally={voteTally}
-                                    CustomComponent={Proposal}
+                                    CustomComponent={DisplayProposal}
                                 />
                             )
                         })}

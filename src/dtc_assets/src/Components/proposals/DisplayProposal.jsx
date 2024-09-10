@@ -49,7 +49,7 @@ const VOTING_POWER_REDISTRIBUTION_ACTIONS = [
 
 ];
 
-const Proposal = (props) => {
+const DisplayProposal = (props) => {
 
 
     const {
@@ -387,4 +387,4 @@ const Proposal = (props) => {
     )
 };
 
-export default Proposal;
+export default DisplayProposal;

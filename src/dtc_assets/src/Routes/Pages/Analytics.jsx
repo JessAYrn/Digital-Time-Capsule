@@ -6,28 +6,20 @@ import { CANISTER_DATA_FIELDS, GRAPH_DISPLAY_LABELS, GRAPH_DATA_SETS, CHART_TYPE
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
 import Paper from '@mui/material/Paper';
-import HowToVoteIcon from '@mui/icons-material/HowToVote';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import Grid from '@mui/material/Unstable_Grid2';
-import RefreshIcon from '@mui/icons-material/Refresh';
 import AccordionField from '../../Components/Fields/Accordion';
 import {homePageTypes} from '../../reducers/homePageReducer';
-import {types as journalTypes} from '../../reducers/journalReducer';
-import {walletTypes} from '../../reducers/walletReducer';
-import {notificationsTypes} from '../../reducers/notificationsReducer';
-import {treasuryTypes} from '../../reducers/treasuryReducer';
 import { inTrillions, round2Decimals, shortenHexString } from '../../functionsAndConstants/Utils';
 import { copyText } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
 import DataTable from '../../Components/Fields/Table';
 import { mapRequestsForAccessToTableRows, mapUsersProfileDataToTableRows, requestsForAccessTableColumns, usersTableColumns } from '../../mappers/dashboardMapperFunctions';
 import ModalComponent from '../../Components/modal/Modal';
-import SpeedDialField from '../../Components/Fields/SpeedDialField';
-import CreateProposalForm from '../../Components/proposals/CreateProposalForm';
 import DisplayProposals from '../../Components/proposals/DisplayAllProposals';
 import { AppContext } from '../../Context';
 import { mapUsersTotalTreasuryStakesAndVotingPowersDataToChartFormat } from '../../mappers/treasuryPageMapperFunctions';
 import Graph from '../../Components/Fields/Chart';
-import { loadAllDataIntoReduxStores } from '../../functionsAndConstants/loadingFunctions';
+import ActionButton from '../../Components/ActionButton';
 
 const Analytics = (props) => {
 
@@ -35,31 +27,16 @@ const Analytics = (props) => {
         homePageDispatch, 
         homePageState, 
         actorState, 
-        treasuryState, 
-        treasuryDispatch,
-        walletDispatch,
-        notificationsDispatch,
-        journalDispatch,
+        treasuryState
     } = useContext(AppContext);
-
-    const dispatches = { homePageDispatch, treasuryDispatch, walletDispatch, notificationsDispatch, journalDispatch};
-    const types = { journalTypes, walletTypes, homePageTypes, notificationsTypes, treasuryTypes};
 
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [isLoadingModal, setIsLoadingModal] = useState(false);
-    const [modalProps, setModalProps] = useState({});
     const [requestsTableIsLoading, setRequestsTableIsLoading] = useState(false);
     const [usersTableIsLoading, setUsersTableIsLoading] = useState(false);
 
     let activeProposal = homePageState?.canisterData?.proposals?.filter(proposal => !proposal[1].finalized);
     let inactiveProposals = homePageState?.canisterData?.proposals?.filter(proposal => proposal[1].finalized);
-
-    const modalForm_createProposal = [
-        {
-            Component: CreateProposalForm,
-            props: { setModalIsOpen, setModalProps, setIsLoadingModal}
-        }
-    ];
 
     const onGrantAccess = async (args) => {
         setRequestsTableIsLoading(true);
@@ -141,27 +118,6 @@ const Analytics = (props) => {
             payload: { ...homePageState.canisterData, acceptingRequests: !homePageState.canisterData.acceptingRequests }
         });
     };
-
-    const openProposalForm = () => {
-        setModalIsOpen(true);
-        setModalProps({
-            components: modalForm_createProposal,
-            handleClose: () => setModalIsOpen(false)
-        });
-    };
-
-    const reloadData = async () => {
-        setIsLoadingModal(true);
-        setModalIsOpen(true);
-        await loadAllDataIntoReduxStores(actorState, dispatches, types);
-        setModalIsOpen(false);
-        setIsLoadingModal(false);
-    };
-
-    const speedDialActions = [
-        {name: "Refresh", icon: RefreshIcon , onClick: reloadData},
-        {name: "Create Proposal", icon: HowToVoteIcon , onClick: openProposalForm}
-    ]
 
     return(
         <Grid 
@@ -374,10 +330,9 @@ const Analytics = (props) => {
                         />
                     </Grid>
                 </Grid>
-                <SpeedDialField actions={speedDialActions} position={"right"}/>
             </>
+            <ActionButton />
             <ModalComponent 
-                {...modalProps}
                 open={modalIsOpen} 
                 isLoading={isLoadingModal} 
             />  

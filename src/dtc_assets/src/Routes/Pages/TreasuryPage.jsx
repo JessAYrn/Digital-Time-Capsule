@@ -13,7 +13,6 @@ import { notificationsTypes } from "../../reducers/notificationsReducer";
 import { loadAllDataIntoReduxStores } from "../../functionsAndConstants/loadingFunctions";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import SpeedDialField from "../../Components/Fields/SpeedDialField";
 import HowToVoteIcon from '@mui/icons-material/HowToVote';
 import ModalComponent from "../../Components/modal/Modal";
 import ButtonField from "../../Components/Fields/Button";
@@ -28,55 +27,13 @@ import { TREASURY_ACTIONS } from "../../Components/proposals/utils";
 import InfoToolTip from "../../Components/Fields/InfoToolTip";
 import DisplayAllFundingCampaigns from "../../Components/fundingCampaign/DisplayAllFundingCampaigns";
 import DisplayAllNeurons from "../../Components/Neurons/DisplayAllNeurons";
+import ActionButton from "../../Components/ActionButton";
 
 const TreasuryPage = (props) => {
-  const { 
-    actorState,
-    treasuryState, 
-    treasuryDispatch,
-    walletDispatch, 
-    homePageDispatch,
-    journalDispatch,
-    notificationsDispatch,
-  } = useContext(AppContext);
-
-  const dispatches = { homePageDispatch, treasuryDispatch, walletDispatch, notificationsDispatch, journalDispatch};
-  const types = { journalTypes, walletTypes, homePageTypes, notificationsTypes, treasuryTypes};
-
+  
+  const { treasuryState } = useContext(AppContext);
   const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [isLoadingModal, setIsLoadingModal] = useState(false);
   const [modalProps, setModalProps] = useState({});
-
-  const openProposalForm = () => {
-    setModalIsOpen(true);
-    setModalProps({
-        components: [
-          {
-            Component: CreateProposalForm,
-            props: { setModalIsOpen, setModalProps, setIsLoadingModal}
-          }
-        ],
-        handleClose: () => setModalIsOpen(false)
-    });
-  };
-
-  const openDepositOrWithdrawForm = (action) => {
-    setModalIsOpen(true);
-    setModalProps({
-        components: [
-          {
-            Component: DepositOrWithdrawModal,
-            props: {
-              action,
-              setModalIsOpen, 
-              setModalProps, 
-              setIsLoadingModal,
-            }
-          }
-        ],
-        handleClose: () => setModalIsOpen(false)
-    });
-  };
 
   const displayTreasuryAccountId = () => {
     setModalProps({
@@ -134,21 +91,6 @@ const TreasuryPage = (props) => {
         handleClose: () => setModalIsOpen(false)
     });
   };
-
-  const reloadData = async () => {
-    setIsLoadingModal(true);
-    setModalIsOpen(true);
-    await loadAllDataIntoReduxStores(actorState, dispatches, types);
-    setModalIsOpen(false);
-    setIsLoadingModal(false);
-  };
-
-  const speedDialActions = [
-    {name: "Refresh", icon: RefreshIcon , onClick: reloadData},
-    {name: "Create Proposal", icon: HowToVoteIcon , onClick: openProposalForm},
-    {name: "Withdraw To Wallet", icon: AccountBalanceWalletOutlinedIcon , onClick: () => openDepositOrWithdrawForm(TREASURY_ACTIONS.WithdrawIcpFromTreasury)},
-    {name: "Deposit To Treasury", icon: AccountBalanceIcon , onClick: () => openDepositOrWithdrawForm(TREASURY_ACTIONS.DepositIcpToTreasury)}
-  ];
 
   return (
     <Grid 
@@ -245,11 +187,10 @@ const TreasuryPage = (props) => {
           iconSize={'large'}
         />
       </Grid>
-      <SpeedDialField actions={speedDialActions} position={"right"}/>
+      <ActionButton/>
       <ModalComponent 
           {...modalProps}
           open={modalIsOpen} 
-          isLoading={isLoadingModal} 
       /> 
     </Grid>
     
