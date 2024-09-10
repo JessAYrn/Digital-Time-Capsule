@@ -1,5 +1,4 @@
 import Ledger "NNS/Ledger";
-import Debug "mo:base/Debug";
 import Error "mo:base/Error";
 import Trie "mo:base/Trie";
 import Hash "mo:base/Hash";
@@ -256,7 +255,7 @@ shared(msg) actor class Journal () = this {
 
         switch(entry){
             case null{ #err(#NotFound); };
-            case (? v){
+            case (? _){
                 journalMap.delete(key);
                 let journalAsArray = Iter.toArray(journalMap.entries());
                 ignore mapJournalEntriesArrayToExport(journalAsArray);
@@ -271,7 +270,7 @@ shared(msg) actor class Journal () = this {
         let entryFiles = filesMap.get(fileId);
         switch(entryFiles){
             case null{ #err(#NotFound); };
-            case (? v){
+            case (? _){
                 filesMap.delete(fileId);
                 #ok(());
             };

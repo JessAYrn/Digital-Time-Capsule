@@ -5,6 +5,7 @@ import Nat64 "mo:base/Nat64";
 import Int64 "mo:base/Int64";
 import Debug "mo:base/Debug";
 import Float "mo:base/Float";
+import Blob "mo:base/Blob";
 import TreasuryTypes "../../Types/Treasury/types";
 import Account "../../Serializers/Account";
 
@@ -138,13 +139,14 @@ module{
 
     public func getPrincipalAndSubaccount(
         identifier: TreasuryTypes.Identifier,
-        subaccountRegistryMap: TreasuryTypes.SubaccountRegistryMap,
         usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap
     ) : (Text, Account.Subaccount) {
         switch(identifier){
             case(#SubaccountId(subaccount)) {
-                let ?{owner} = subaccountRegistryMap.get(subaccount) else Debug.trap("Subaccount not found.");
-                return (owner, subaccount)
+                for((userPrincipal, {subaccountId}) in usersTreasuryDataMap.entries()){
+                    if(Blob.equal(subaccountId, subaccount)) return (userPrincipal, subaccount);
+                };
+                Debug.trap("Subaccount not found.");
             };
             case(#Principal(principal)) { 
                 let ?{subaccountId} = usersTreasuryDataMap.get(principal) else Debug.trap("User not found.");

@@ -107,7 +107,7 @@ shared(msg) actor class Manager (principal : Principal) = this {
         let {backend} = release;
         let {wasmModule} = backend;
         try{ await CanisterManagementMethods.installCodeBackendWasm(mainCanisterId, wasmModule, mode); finalizeInstall();} 
-        catch (e) {
+        catch (_) {
             await loadPreviousRelease();
             let backendCanister : MainTypes.Interface = actor(mainCanisterId);
             await CanisterManagementMethods.installCodeBackendWasm(mainCanisterId, wasmModule, mode);
@@ -215,7 +215,7 @@ shared(msg) actor class Manager (principal : Principal) = this {
                         let (chunkId, chunkData) = await wasmStore.getAssetChunk(nextVersionToUpgradeTo, key, chunkIndex);
                         ChunksBuffer.add((chunkId, chunkData));
                         chunkIndex += 1;
-                    } catch(e){ continue_ := false; };
+                    } catch(_){ continue_ := false; };
                 };
 
                 let chunks = Buffer.toArray(ChunksBuffer);

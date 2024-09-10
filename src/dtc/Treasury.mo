@@ -36,8 +36,7 @@ shared actor class Treasury (principal : Principal) = this {
     private var pendingActionsMap : TreasuryTypes.PendingActionsMap = HashMap.fromIter<Text, TreasuryTypes.PendingAction>( Iter.fromArray(pendingActionsArray), Iter.size(Iter.fromArray(pendingActionsArray)), Text.equal, Text.hash );
     private stable var usersTreasuryDataArray : TreasuryTypes.UsersTreasuryDataArray = [];
     private var usersTreasuryDataMap : TreasuryTypes.UsersTreasuryDataMap = HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryData>(Iter.fromArray(usersTreasuryDataArray), Iter.size(Iter.fromArray(usersTreasuryDataArray)), Text.equal, Text.hash);
-    private stable var subaccountRegistryArray : TreasuryTypes.SubaccountRegistryArray = [];
-    private var subaccountRegistryMap : TreasuryTypes.SubaccountRegistryMap = HashMap.fromIter<Blob, TreasuryTypes.SubaccountsMetaData>( Iter.fromArray(subaccountRegistryArray), Iter.size(Iter.fromArray(subaccountRegistryArray)), Blob.equal, Blob.hash );
+    private var subaccountIndex : Nat32 = 1;
     private stable var balancesHistoryArray : AnalyticsTypes.BalancesArray = [];
     private var balancesHistoryMap : AnalyticsTypes.BalancesMap = HashMap.fromIter<Text, AnalyticsTypes.Balances>(Iter.fromArray(balancesHistoryArray), Iter.size(Iter.fromArray(balancesHistoryArray)), Text.equal, Text.hash);
     private stable var memoToNeuronIdArray : TreasuryTypes.MemoToNeuronIdArray = [];
@@ -63,7 +62,7 @@ shared actor class Treasury (principal : Principal) = this {
         };
         if(totalAllocation > 100) throw Error.reject("Allocation percentage cannot be greater than 100.");
         fundingCampaignsMap.put(campaignIndex, {
-            campaign with contributions = []; subaccountId = await getUnusedSubaccountId(); finalized = false; 
+            campaign with contributions = []; subaccountId = getUnusedSubaccountId(); finalized = false; 
             balances = { icp = { e8s: Nat64 = 0}}; 
             amountDisbursed = {icp = { e8s: Nat64 = 0}}; 
             amountRepaid = {icp = { e8s: Nat64 = 0}};
@@ -122,19 +121,17 @@ shared actor class Treasury (principal : Principal) = this {
         selfAuthenticatingPrincipal := ?Principal.fromBlob(principalAsBlob);
     };
 
-    private func getUnusedSubaccountId(): async Account.Subaccount {
-        var newSubaccount = await Account.getRandomSubaccount();
-        while(subaccountRegistryMap.get(newSubaccount) != null){ newSubaccount := await Account.getRandomSubaccount(); };
+    private func getUnusedSubaccountId(): Account.Subaccount {
+        var newSubaccount = Account.getSubaccount(subaccountIndex);
+        subaccountIndex += 1;
         return newSubaccount;
     };
 
     private func createTreasuryData_(principal: Principal) : async () {
         let newSubaccount = switch(Principal.equal(principal, Principal.fromActor(this))){
             case true { Account.defaultSubaccount();};
-            case false { await getUnusedSubaccountId(); };
+            case false { getUnusedSubaccountId(); };
         };
-
-        subaccountRegistryMap.put(newSubaccount, {owner = Principal.toText(principal)});
         let newUserTreasuryData = {
             balances = {
                 icp = {e8s: Nat64 = 0};
@@ -364,7 +361,7 @@ shared actor class Treasury (principal : Principal) = this {
     public shared({caller}) func updateTokenBalances( identifier: TreasuryTypes.Identifier, currency: TreasuryTypes.SupportedCurrencies) 
     : async () {
         if( Principal.toText(caller) !=  Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) { throw Error.reject("Unauthorized access."); };
-        let (userPrincipal, subaccountID) = SyncronousHelperMethods.getPrincipalAndSubaccount(identifier, subaccountRegistryMap, usersTreasuryDataMap);
+        let (userPrincipal, subaccountID) = SyncronousHelperMethods.getPrincipalAndSubaccount(identifier, usersTreasuryDataMap);
         let ?userTreasuryData = usersTreasuryDataMap.get(userPrincipal) else throw Error.reject("User not found.");
         let updatedUserTreasuryData = switch(currency){
             case(#Icp){ 
@@ -437,7 +434,7 @@ shared actor class Treasury (principal : Principal) = this {
     ) : async {amountSent: Nat64} {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         if(amount < txFee){ return {amountSent: Nat64 = 0}; };
-        let (sourcePrincipal, _) = SyncronousHelperMethods.getPrincipalAndSubaccount(sender, subaccountRegistryMap, usersTreasuryDataMap);
+        let (sourcePrincipal, _) = SyncronousHelperMethods.getPrincipalAndSubaccount(sender, usersTreasuryDataMap);
         let ?{subaccountId = sendersubaccountId} = usersTreasuryDataMap.get(sourcePrincipal) else throw Error.reject("Sender not found."); 
         var amountSent = Nat64.toNat(amount - txFee);
         var transferInput = {
@@ -478,7 +475,6 @@ shared actor class Treasury (principal : Principal) = this {
         neuronDataArray := Iter.toArray(neuronDataMap.entries());
         memoToNeuronIdArray := Iter.toArray(memoToNeuronIdMap.entries());
         actionLogsArray := Buffer.toArray(actionLogsArrayBuffer);
-        subaccountRegistryArray := Iter.toArray(subaccountRegistryMap.entries());
         fundingCampaignsArray := Iter.toArray(fundingCampaignsMap.entries());
     };
 
@@ -488,7 +484,6 @@ shared actor class Treasury (principal : Principal) = this {
         neuronDataArray := [];
         memoToNeuronIdArray := [];
         actionLogsArray := [];
-        subaccountRegistryArray := [];
         fundingCampaignsArray := [];
 
         ignore setTimer<system>(#nanoseconds(1), func (): async () {
