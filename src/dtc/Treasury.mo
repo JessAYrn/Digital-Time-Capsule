@@ -32,11 +32,10 @@ shared actor class Treasury (principal : Principal) = this {
     private stable var sumOfAllTokenBalances : AnalyticsTypes.Balances = { icp = {e8s = 0}; icp_staked = {e8s = 0}; eth = {e8s = 0}; btc = {e8s = 0}; };
     private stable var actionLogsArray : TreasuryTypes.ActionLogsArray = [];
     private var actionLogsArrayBuffer : Buffer.Buffer<(Text, Text)> = Buffer.Buffer<(Text, Text)>(1); 
-    private var pendingActionsArray : TreasuryTypes.PendingActionArray = [];
+    private stable var pendingActionsArray : TreasuryTypes.PendingActionArray = [];
     private var pendingActionsMap : TreasuryTypes.PendingActionsMap = HashMap.fromIter<Text, TreasuryTypes.PendingAction>( Iter.fromArray(pendingActionsArray), Iter.size(Iter.fromArray(pendingActionsArray)), Text.equal, Text.hash );
     private stable var usersTreasuryDataArray : TreasuryTypes.UsersTreasuryDataArray = [];
     private var usersTreasuryDataMap : TreasuryTypes.UsersTreasuryDataMap = HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryData>(Iter.fromArray(usersTreasuryDataArray), Iter.size(Iter.fromArray(usersTreasuryDataArray)), Text.equal, Text.hash);
-    private var subaccountIndex : Nat32 = 1;
     private stable var balancesHistoryArray : AnalyticsTypes.BalancesArray = [];
     private var balancesHistoryMap : AnalyticsTypes.BalancesMap = HashMap.fromIter<Text, AnalyticsTypes.Balances>(Iter.fromArray(balancesHistoryArray), Iter.size(Iter.fromArray(balancesHistoryArray)), Text.equal, Text.hash);
     private stable var memoToNeuronIdArray : TreasuryTypes.MemoToNeuronIdArray = [];
