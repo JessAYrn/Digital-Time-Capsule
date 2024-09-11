@@ -48,9 +48,6 @@ module {
     Blob.fromArray(Buffer.toArray(ArrayBuffer))
   };
 
-  public func getSubaccount(nat: Nat32) : Subaccount {
-    Blob.fromArray(beBytes32to8(nat));
-  };
 
   public func accountIdentifier(principal: Principal, subaccount: Subaccount) : AccountIdentifier {
     let hash = SHA224.Digest();

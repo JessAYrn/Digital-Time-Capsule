@@ -62,7 +62,7 @@ shared actor class Treasury (principal : Principal) = this {
         };
         if(totalAllocation > 100) throw Error.reject("Allocation percentage cannot be greater than 100.");
         fundingCampaignsMap.put(campaignIndex, {
-            campaign with contributions = []; subaccountId = getUnusedSubaccountId(); finalized = false; 
+            campaign with contributions = []; subaccountId = await getUnusedSubaccountId(); finalized = false; 
             balances = { icp = { e8s: Nat64 = 0}}; 
             amountDisbursed = {icp = { e8s: Nat64 = 0}}; 
             amountRepaid = {icp = { e8s: Nat64 = 0}};
@@ -121,16 +121,20 @@ shared actor class Treasury (principal : Principal) = this {
         selfAuthenticatingPrincipal := ?Principal.fromBlob(principalAsBlob);
     };
 
-    private func getUnusedSubaccountId(): Account.Subaccount {
-        var newSubaccount = Account.getSubaccount(subaccountIndex);
-        subaccountIndex += 1;
+    private func getUnusedSubaccountId(): async Account.Subaccount {
+        var newSubaccount = await Account.getRandomSubaccount();
+        var match = false;
+        label innerLoop for((_, {subaccountId}) in usersTreasuryDataMap.entries()){
+            if(Blob.equal(subaccountId, newSubaccount) ){ match := true; break innerLoop; };
+        };
+        if(match) newSubaccount := await getUnusedSubaccountId();
         return newSubaccount;
     };
 
     private func createTreasuryData_(principal: Principal) : async () {
         let newSubaccount = switch(Principal.equal(principal, Principal.fromActor(this))){
             case true { Account.defaultSubaccount();};
-            case false { getUnusedSubaccountId(); };
+            case false { await getUnusedSubaccountId(); };
         };
         let newUserTreasuryData = {
             balances = {
