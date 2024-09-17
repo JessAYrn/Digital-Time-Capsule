@@ -145,7 +145,12 @@ export const GRAPH_DISPLAY_LABELS = {
     votingPower: "VOTING_POWER",
     voting_power: "VOTING_POWER",
 
-}
+};
+
+export const FUNDING_CAMPAIGN_ASSET_TYPES = {
+    ICP: "ICP",
+    ICP_STAKED: "ICP_STAKED",
+};
 
 export const PERMITTED_USERNAME_CHARACTERS = [
     'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',

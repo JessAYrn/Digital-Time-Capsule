@@ -26,7 +26,11 @@ module{
             Text.hash
         );
         for((contributor, neuronStakeInfo) in Iter.fromArray(contributions)){
-            let {stake_e8s = userTotalStake} = neuronStakeInfo;
+            let {stake_e8s; collateralized_stake_e8s;} = neuronStakeInfo;
+            let userTotalStake = switch(collateralized_stake_e8s){
+                case null { stake_e8s; };
+                case(?collateralized_stake_e8s_) { collateralized_stake_e8s_ + stake_e8s; };
+            };
             let userTotalStakeAsFloat = Float.fromInt64(Int64.fromNat64(userTotalStake));
             let neuronTotalStakeAsFloat = Float.fromInt64(Int64.fromNat64(neuronTotalStake));
             let neuronTotalVotingPowerAsFloat = Float.fromInt64(Int64.fromNat64(neuronTotalVotingPower));
@@ -37,25 +41,23 @@ module{
         neuronDataMap.put(neuronId, {neuronData with contributions = Iter.toArray(contributionsMap.entries())});
     };
 
-    public func computeTotalStakeDepositAndVotingPower(
-        neuronDataMap: TreasuryTypes.NeuronsDataMap,
-        pincipal: Text
-    ): {icp_staked: {e8s: Nat64}; voting_power: {e8s: Nat64};} {
+    public func computeTotalStakeDepositAndVotingPower( neuronDataMap: TreasuryTypes.NeuronsDataMap, pincipal: Text ): TreasuryTypes.NeuronStakeInfo {
         
         var totalStake: Nat64 = 0;
+        var totalCollateralizedStake: Nat64 = 0;
         var totalVotingPower: Nat64 = 0;
 
         label loop_ for((neuronId, {contributions}) in neuronDataMap.entries()){
             let contributionsMap = HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.NeuronStakeInfo>( Iter.fromArray(contributions), Iter.size(Iter.fromArray(contributions)), Text.equal, Text.hash );
-            let ?{stake_e8s = userNeuronStake; voting_power = userVotingPower} = contributionsMap.get(pincipal) else { continue loop_};
-            totalStake += userNeuronStake; totalVotingPower += userVotingPower;
+            let ?{stake_e8s; voting_power; collateralized_stake_e8s} = contributionsMap.get(pincipal) else { continue loop_};
+            totalStake += stake_e8s; totalVotingPower += voting_power; totalCollateralizedStake += switch(collateralized_stake_e8s){ case null { 0; }; case(?collateralized_stake_e8s_) { collateralized_stake_e8s_; }; };
         };
-        return {icp_staked = {e8s = totalStake}; voting_power = {e8s = totalVotingPower};};
+        return {stake_e8s = totalStake; voting_power = totalVotingPower; collateralized_stake_e8s = ?totalCollateralizedStake;};
     };
 
     public func updateUserNeuronStakeInfo(
         neuronDataMap:TreasuryTypes.NeuronsDataMap, 
-        { userPrincipal: Text; newAmount: Nat64; neuronId: Text;}
+        { userPrincipal: Text; newAmount: Nat64; neuronId: Text; property: {#Stake; #VotingPower; #CollateralizedStake} }
     ): () {
         let neuronData = switch(neuronDataMap.get(neuronId)){
             case null { {neuron = null; neuronInfo = null; parentNeuronContributions = null; contributions = []; };};
@@ -70,21 +72,46 @@ module{
         );
         var neuronStakeInfo = getUserNeuronStakeInfo(userPrincipal, neuronDataMap, neuronId);
 
-        neuronStakeInfo := {neuronStakeInfo with stake_e8s = newAmount};
+        neuronStakeInfo := switch(property){
+            case(#Stake) { {neuronStakeInfo with stake_e8s = newAmount}; };
+            case(#VotingPower) { {neuronStakeInfo with voting_power = newAmount}; };
+            case(#CollateralizedStake) { {neuronStakeInfo with collateralized_stake_e8s = ?newAmount}; };
+        };
         contributionsMap.put(userPrincipal, neuronStakeInfo);
         neuronDataMap.put(neuronId, {neuronData with contributions = Iter.toArray(contributionsMap.entries())});
         computeNeuronStakeInfosVotingPowers(neuronDataMap, neuronId);
     };
 
-    public func creditUserNeuronStake(
+    public func updateUserNeuronContribution(
         neuronDataMap: TreasuryTypes.NeuronsDataMap,
-        {userPrincipal: Text; delta: Nat64; neuronId: Text }
+        {userPrincipal: Text; delta: Nat64; neuronId: Text; operation: {#AddStake; #SubtractStake; #CollateralizeStake; #DecollateralizeStake} }
     ): () {
         let userNeuronStakeInfo = getUserNeuronStakeInfo(userPrincipal, neuronDataMap, neuronId);
-        updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount = userNeuronStakeInfo.stake_e8s + delta; neuronId;});
+        switch(operation){
+            case(#AddStake) { updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount = userNeuronStakeInfo.stake_e8s + delta; neuronId; property = #Stake}); };
+            case(#SubtractStake) {
+                if(userNeuronStakeInfo.stake_e8s < delta) Debug.trap("Insufficient funds.");
+                updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount = userNeuronStakeInfo.stake_e8s - delta; neuronId; property = #Stake});
+            };
+            case(#CollateralizeStake) { 
+                if(userNeuronStakeInfo.stake_e8s < delta) Debug.trap("Insufficient funds.");
+                let collateralized_stake_e8s : Nat64 = switch(userNeuronStakeInfo.collateralized_stake_e8s){
+                    case null { 0; };
+                    case(?collateralized_stake_e8s_) { collateralized_stake_e8s_; };
+                };
+                updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount = userNeuronStakeInfo.stake_e8s - delta; neuronId; property = #Stake});
+                updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount = collateralized_stake_e8s + delta; neuronId; property = #CollateralizedStake});
+            };
+            case(#DecollateralizeStake) { 
+                let ?collateralized_stake_e8s = userNeuronStakeInfo.collateralized_stake_e8s else Debug.trap("No collateralized stake.");
+                if(collateralized_stake_e8s < delta) Debug.trap("Insufficient funds.");
+                updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount = collateralized_stake_e8s - delta; neuronId; property = #CollateralizedStake});
+                updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount = userNeuronStakeInfo.stake_e8s + delta; neuronId; property = #Stake});
+            };
+        };
     };
 
-    public func finalizeNewlyCreatedNeuronStakeInfo( placeHolderKey: Text, newNeuronId: Nat64, neuronDataMap: TreasuryTypes.NeuronsDataMap): () {
+    public func finalizeNewlyCreatedNeuronData( placeHolderKey: Text, newNeuronId: Nat64, neuronDataMap: TreasuryTypes.NeuronsDataMap): () {
         let ?neuronData = neuronDataMap.remove(placeHolderKey) else { return };
         neuronDataMap.put(Nat64.toText(newNeuronId), neuronData);
     };
@@ -105,7 +132,6 @@ module{
 
         var parentNeuronTotalStake: Nat64 = 0;
         for((contributor, {stake_e8s}) in parentNeuronContributionsMap.entries()){ parentNeuronTotalStake += stake_e8s; };
-
         let {contributions} = neuronData;
         let newNeuronContributionsMap = HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.NeuronStakeInfo>(
             Iter.fromArray(contributions), 
@@ -117,7 +143,7 @@ module{
         for((contributor, neuronStakeInfo) in parentNeuronContributionsMap.entries()){
             let {stake_e8s = userStakeInParentNeuron} = neuronStakeInfo;
             let userStakeInNewNeuron = Float.fromInt64(Int64.fromNat64(userStakeInParentNeuron)) * (Float.fromInt64(Int64.fromNat64(newNeuronTotalStake)) / Float.fromInt64(Int64.fromNat64(parentNeuronTotalStake)));
-            newNeuronContributionsMap.put(contributor, {stake_e8s = Int64.toNat64(Float.toInt64(userStakeInNewNeuron)); voting_power = 0;});
+            newNeuronContributionsMap.put(contributor, { stake_e8s = Int64.toNat64(Float.toInt64(userStakeInNewNeuron)); voting_power = 0; collateralized_stake_e8s = null; });
         };
 
         neuronDataMap.put(neuronId, {neuronData with contributions = Iter.toArray(newNeuronContributionsMap.entries()); parentNeuronContributions = null;});
@@ -125,7 +151,7 @@ module{
     };
 
     public func getUserNeuronStakeInfo(userPrincipal: Text, neruonsDataMap: TreasuryTypes.NeuronsDataMap, neuronId: Text): TreasuryTypes.NeuronStakeInfo {
-        let ?neuronData = neruonsDataMap.get(neuronId) else { return  { stake_e8s : Nat64 = 0; voting_power : Nat64 = 0; }; };
+        let ?neuronData = neruonsDataMap.get(neuronId) else { return  { stake_e8s : Nat64 = 0; voting_power : Nat64 = 0; collateralized_stake_e8s = null }; };
         let {contributions} = neuronData;
         let contributionsMap = HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.NeuronStakeInfo>(
             Iter.fromArray(contributions), 
@@ -133,7 +159,7 @@ module{
             Text.equal,
             Text.hash
         );
-        let ?neuronStakeInfo = contributionsMap.get(userPrincipal) else { return  { stake_e8s : Nat64 = 0; voting_power : Nat64 = 0; }; };
+        let ?neuronStakeInfo = contributionsMap.get(userPrincipal) else { return  { stake_e8s : Nat64 = 0; voting_power : Nat64 = 0; collateralized_stake_e8s = null}; };
         return neuronStakeInfo;
     };
 
@@ -155,5 +181,23 @@ module{
         };
     };
 
+    public func formatUserTreasuryDataForExport(neuronDataMap: TreasuryTypes.NeuronsDataMap , (userPrincipal, userTreasuryData): (TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryData)): ((TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryDataExport)) {
+        let {balances} = userTreasuryData;
+        let {stake_e8s; voting_power; collateralized_stake_e8s} = computeTotalStakeDepositAndVotingPower(neuronDataMap, userPrincipal);
+        return (userPrincipal, {
+            userTreasuryData with 
+            balances = {
+                balances with 
+                icp_staked = {e8s = stake_e8s}; 
+                voting_power = {e8s = voting_power; }; 
+                icp_staked_collateralized = {
+                    e8s: Nat64 = switch(collateralized_stake_e8s){
+                        case null { 0 }; 
+                        case (?collateralized_stake_e8s_) {collateralized_stake_e8s_ }
+                    }
+                }
+            }
+        });          
+    };
 
 };

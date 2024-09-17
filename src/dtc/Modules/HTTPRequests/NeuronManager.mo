@@ -164,7 +164,7 @@ module {
                                             let ?neuronId_ = neuronId else { return #Error({error_message = "No neuron id found"; error_type = 0}) };
                                             let ?proposer_ = proposer else { return #Error({error_message = "No proposer found"; error_type = 0}) };
                                             let ?treasuryCanisterId_ = treasuryCanisterId else { return #Error({error_message = "No treasury canister id found"; error_type = 0}) };
-                                            #Disburse({transfer_block_height; neuronId = neuronId_; proposer = proposer_; treasuryCanisterId = treasuryCanisterId_}) 
+                                            #Disburse({transfer_block_height; neuronId = neuronId_; treasuryCanisterId = treasuryCanisterId_}) 
                                         };
                                         case(#Spawn({created_neuron_id})) { 
                                             let ?neuronId_ = neuronId else { return #Error({error_message = "No neuron id found"; error_type = 0}) };

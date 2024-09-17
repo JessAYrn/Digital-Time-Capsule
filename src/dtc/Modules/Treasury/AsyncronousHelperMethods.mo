@@ -98,7 +98,7 @@ module{
         let ?{subaccountId} = usersTreasuryDataMap.get(Principal.toText(contributor)) else Debug.trap("No subaccount for contributor");
         let {amountSent} = await NeuronManager.transferIcpToNeuron(amount, #NeuronSubaccountId(neuronSubaccount), subaccountId, selfAuthPrincipal);
         ignore updateTokenBalances(#Principal(Principal.toText(contributor)), #Icp);
-        SyncronousHelperMethods.creditUserNeuronStake( neuronDataMap,{ userPrincipal = Principal.toText(contributor);  delta = amountSent; neuronId = Nat64.toText(neuronId); });
+        SyncronousHelperMethods.updateUserNeuronContribution( neuronDataMap,{ userPrincipal = Principal.toText(contributor);  delta = amountSent; neuronId = Nat64.toText(neuronId); operation = #AddStake; });
         let args = { id = null; command = ?#ClaimOrRefresh( {by = ?#NeuronIdOrSubaccount( {} )} );neuron_id_or_subaccount = ?#Subaccount(neuronSubaccount); };
         let newPendingAction: TreasuryTypes.PendingAction = {
             expectedHttpResponseType = ?#GovernanceManageNeuronResponse({neuronId = ?neuronId; memo = null; proposer = null; treasuryCanisterId = null; });
@@ -137,8 +137,7 @@ module{
         let {amountSent} = await NeuronManager.transferIcpToNeuron(amount, #Memo(neuronMemo), subaccountId, selfAuthPrincipal);
         ignore updateTokenBalances(#Principal(Principal.toText(contributor)), #Icp);
         let newNeuronIdPlaceholderKey : Text = Nat64.toText(neuronMemo)#PENDING_NEURON_SUFFIX;
-        SyncronousHelperMethods.creditUserNeuronStake( neuronDataMap,{ userPrincipal = Principal.toText(contributor);  delta = amountSent; neuronId = newNeuronIdPlaceholderKey; });
-
+        SyncronousHelperMethods.updateUserNeuronContribution( neuronDataMap,{ userPrincipal = Principal.toText(contributor);  delta = amountSent; neuronId = newNeuronIdPlaceholderKey; operation = #AddStake;});
         let args = { id = null; command = ?#ClaimOrRefresh( {by = ?#MemoAndController( {controller = ?selfAuthPrincipal; memo = neuronMemo} )} ); neuron_id_or_subaccount = null; };
         let newPendingAction: TreasuryTypes.PendingAction = {
             expectedHttpResponseType = ?#GovernanceManageNeuronResponse({neuronId = null; memo = ?neuronMemo; proposer = null; treasuryCanisterId = null; });
@@ -282,7 +281,7 @@ module{
                 if(memo != null){
                     let ?memo_ = memo else { throw Error.reject("No memo for newly created neuron") } ;
                     memoToNeuronIdMap.put(Nat64.toNat(memo_), neuronId);
-                    SyncronousHelperMethods.finalizeNewlyCreatedNeuronStakeInfo(Nat64.toText(memo_)#PENDING_NEURON_SUFFIX, neuronId, neuronDataMap);
+                    SyncronousHelperMethods.finalizeNewlyCreatedNeuronData(Nat64.toText(memo_)#PENDING_NEURON_SUFFIX, neuronId, neuronDataMap);
                 };
                 createPendingActionsToUpdateNeuronData(neuronId, {attemptAfterTimestamp_NeuronInfo = null; attemptAfterTimestamp_FullNeuron = null;});
                 return {newPendingAction = true};
@@ -305,17 +304,10 @@ module{
                 createPendingActionsToUpdateNeuronData(neuronId, {attemptAfterTimestamp_NeuronInfo = null; attemptAfterTimestamp_FullNeuron = null;});
                 return {newPendingAction = true};
             };
-            case(#Disburse({neuronId; proposer; treasuryCanisterId})){
-                ignore distributeRewardsFromDisbursedNeuronAndDeleteNeuronData(
-                    neuronDataMap, 
-                    usersTreasuryDataMap, 
-                    actionLogsArrayBuffer,
-                    updateTokenBalances,
-                    fundingCampaignsMap,
-                    proposer,
-                    Nat64.toText(neuronId), 
-                    treasuryCanisterId
-                );
+            case(#Disburse({neuronId; treasuryCanisterId})){
+                let ?{contributions} = neuronDataMap.get(Nat64.toText(neuronId)) else { throw Error.reject("No neuron found") };
+                await distributeContributions( #Neuron(contributions), usersTreasuryDataMap, actionLogsArrayBuffer, updateTokenBalances, fundingCampaignsMap, treasuryCanisterId);
+                ignore neuronDataMap.remove(Nat64.toText(neuronId));
                 return {newPendingAction = false};
             };
             case(#Error({error_message;})){throw Error.reject(error_message) };
@@ -348,66 +340,47 @@ module{
         };
     };
 
-    public func distributeRewardsFromDisbursedNeuronAndDeleteNeuronData(
-        neuronDataMap: TreasuryTypes.NeuronsDataMap, 
+    public func distributeContributions(
+        contributions: { #Neuron: TreasuryTypes.NeuronContributions; #FundingCampaign: TreasuryTypes.CampaignContributionsArray; },
         usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap, 
         actionLogsArrayBuffer: TreasuryTypes.ActionLogsArrayBuffer,
         updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies ) -> async (), 
         fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap,
-        proposer: Principal,
-        neuronId: Text,
         treasuryCanisterId: Principal,
     ): async () {
-        let ?neuronData = neuronDataMap.get(neuronId) else { return };
-        let {contributions} = neuronData;
+        
+        func performAllUserDistributions(userPrincipal: Principal, userContributionAmount: Nat64) : async () {
+            var userRemainingContributionAmount = userContributionAmount;
+            switch(contributions){
+                case(#Neuron(_)){
+                    label loop_ for((campaignId, campaign) in fundingCampaignsMap.entries()){
+                        let {settled; subaccountId = campaignSubaccountId; percentageOfDaoRewardsAllocated} = campaign;
+                        if(settled) continue loop_;
+                        let amountToAllocateToCampaign = userContributionAmount * (Nat64.fromNat(percentageOfDaoRewardsAllocated) / 100);
+                        let {amountSent} = await performTransfer( amountToAllocateToCampaign, ?campaignSubaccountId, {owner = userPrincipal; subaccount = null}, actionLogsArrayBuffer, updateTokenBalances);
+                        ignore creditCampaignContribution(Principal.toText(userPrincipal), campaignId, amountSent, fundingCampaignsMap, treasuryCanisterId);
+                        userRemainingContributionAmount -= amountToAllocateToCampaign;
+                    };
+                };
+                case(#FundingCampaign(_)){};
+            };
+            let ?{subaccountId} = usersTreasuryDataMap.get(Principal.toText(userPrincipal)) else { return };
+            ignore performTransfer(userRemainingContributionAmount, ?subaccountId, {owner = userPrincipal; subaccount = null}, actionLogsArrayBuffer, updateTokenBalances);
+        };
 
-        func performTransfer(amount: Nat64, subaccount: Account.AccountIdentifier, userPrincipal: Text) : async ?{amountSent: Nat64;} {
-            if(amount < 10_000) return null;
-            let amountSent = amount - txFee;
-            let res = await ledger.icrc1_transfer({
-                to = { owner = treasuryCanisterId; subaccount = ?subaccount; };
-                fee = ?Nat64.toNat(txFee);
-                memo = null;
-                from_subaccount = null;
-                created_at_time = ?Nat64.fromNat(Int.abs(Time.now()));
-                amount = Nat64.toNat(amountSent);
-            });
-            switch (res) {
-                case (#Ok(_)) { ignore updateTokenBalances(#Principal(userPrincipal), #Icp); ?{amountSent;}};
-                case (#Err(_)) {
-                    let icpOwed : Float = Float.fromInt64(Int64.fromNat64(amount - txFee) /100_000_000);
-                    actionLogsArrayBuffer.add(
-                        Int.toText(Time.now()),
-                        "Failed to distribute rewards to user "#userPrincipal#" from disbursal of neuron "#neuronId#". 
-                            This user is owed: "#Float.toText(icpOwed)#" ICP from the DAO's multi-sig wallet."
-                    );
-                    null;
+        switch(contributions){
+            case(#Neuron(contributions_)){
+                label loop_ for((userPrincipal, {stake_e8s }) in Iter.fromArray(contributions_)){
+                    ignore performAllUserDistributions(Principal.fromText(userPrincipal), stake_e8s);
+                };
+            };
+            case(#FundingCampaign(contributions_)){
+                label loop_ for((userPrincipal, {icp}) in Iter.fromArray(contributions_)){
+                    ignore performAllUserDistributions(Principal.fromText(userPrincipal), icp.e8s);
+                    
                 };
             };
         };
-
-        func performAllUserDistributions(userPrincipal: Text, userStake: Nat64) : async () {
-            var remainingStake = userStake;
-            label loop_ for((campaignId, campaign) in fundingCampaignsMap.entries()){
-                let {finalized; subaccountId = campaignSubaccountId; percentageOfDaoRewardsAllocated} = campaign;
-                if(finalized) continue loop_;
-                let amountToAllocateToCampaign = userStake * (Nat64.fromNat(percentageOfDaoRewardsAllocated) / 100);
-                let ?{amountSent} = await performTransfer(amountToAllocateToCampaign, campaignSubaccountId, userPrincipal) else { continue loop_ };
-                ignore creditCampaignContribution(userPrincipal, campaignId, amountSent, fundingCampaignsMap, treasuryCanisterId);
-                remainingStake -= amountToAllocateToCampaign;
-            };
-            let ?{subaccountId} = usersTreasuryDataMap.get(userPrincipal) else { return };
-            ignore performTransfer(remainingStake, subaccountId, userPrincipal);
-        };
-        
-        label loop_ for((userPrincipal, {stake_e8s = userStake}) in Iter.fromArray(contributions)){
-            var userStake_ = userStake;
-            if(userPrincipal == Principal.toText(proposer)) userStake_ -= txFee;
-            ignore performAllUserDistributions(userPrincipal, userStake_);
-            
-        };
-
-        ignore neuronDataMap.remove(neuronId);
     };
 
     public func creditCampaignContribution(userPrincipal: Text, campaignId: Nat, amount: Nat64, fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap, treasuryCanisterPrincipal: Principal ): async () {
@@ -420,7 +393,46 @@ module{
         let updatedCampaignContribution = {icp = { e8s = userIcpCampaignContribution.e8s + amount }};
         contributionsMap.put(userPrincipal, updatedCampaignContribution);
         let updatedBalance = {icp = { e8s = await ledger.icrc1_balance_of({ owner = treasuryCanisterPrincipal; subaccount = ?campaign.subaccountId; }) }};
+        let fullyFunded = switch(campaign.amountToFund){ 
+            case (#ICP{e8s}){Nat64.fromNat(updatedBalance.icp.e8s) >= e8s};
+            case (_) { throw Error.reject("Unsupported funding asset type") };
+        };
         let updatedContributions = Iter.toArray(contributionsMap.entries());
-        fundingCampaignsMap.put(campaignId, {campaign with contributions = updatedContributions; balance = updatedBalance});
+        fundingCampaignsMap.put(campaignId, {campaign with contributions = updatedContributions; balance = updatedBalance; fullyFunded});
+    };
+
+    public func performTransfer( 
+        amount: Nat64, 
+        from_subaccount: ?Account.Subaccount, 
+        to: { owner: Principal; subaccount: ?Account.Subaccount },
+        actionLogsArrayBuffer: TreasuryTypes.ActionLogsArrayBuffer,
+        updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies ) -> async (), 
+    ) 
+    : async {amountSent: Nat64;} {
+        if(amount < 10_000) return {amountSent = 0};
+        var amountSent = amount - txFee;
+        let transferInput = { to; fee = ?Nat64.toNat(txFee); memo = null; from_subaccount; created_at_time = ?Nat64.fromNat(Int.abs(Time.now())); amount = Nat64.toNat(amountSent); };
+        let res = await ledger.icrc1_transfer(transferInput);
+        switch (res) {
+            case (#Ok(_)) {};
+            case (#Err(#InsufficientFunds { balance })) {
+                if(balance < Nat64.toNat(txFee)){ amountSent := 0; } 
+                else amountSent := Nat64.fromNat(balance) - txFee;
+                let res = await ledger.icrc1_transfer({transferInput with amountSent});
+                switch(res){ case (#Ok(_)) {}; case (#Err(_)) { amountSent:= 0} };
+            };
+            case (#Err(_)) { amountSent := 0 };
+        };
+        if(amount - txFee > amountSent){
+            let icpOwed = amount - txFee - amountSent;
+            actionLogsArrayBuffer.add(
+                Int.toText(Time.now()),
+                "Failed to distribute full payment to user "#Principal.toText(to.owner)#". 
+                This user is owed: "#Nat64.toText(icpOwed)#" ICP from the DAO's multi-sig wallet."
+            );
+        };
+        let subaccount = switch(to.subaccount){case (?subaccount_) { subaccount_ }; case (null) { Account.defaultSubaccount() }; };
+        ignore updateTokenBalances(#SubaccountId(subaccount), #Icp);
+        return {amountSent};
     };
 };

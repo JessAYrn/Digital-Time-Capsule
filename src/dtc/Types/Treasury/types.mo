@@ -24,34 +24,47 @@ module{
     public type CampaignContributions = { icp: {e8s : Nat64;}; };
 
     public type CampaignContributionsArray = [(PrincipalAsText, CampaignContributions)];
-    //TODO: change data structure so that principal payment amount and interest payment amount are stored explicitly
-    //TODO: replace simpleInterestRate with interestOwed field
-    //TODO: add repaymentAmounts field to store the repayment amounts for each interval
+
+    public type FundingCampaignAssets = {
+        #ICP: {e8s : Nat64;};
+        #ICP_STAKED: {e8s : Nat64; fromNeuron: NeuronIdAsText};
+    };
+
     public type FundingCampaign = {
         contributions: CampaignContributionsArray;
-        goal: { icp: { e8s : Nat64; }; };
-        amountDisbursed: { icp: { e8s : Nat64; }; };
-        amountRepaid: { icp: { e8s : Nat64; }; };
-        amountOwed: { icp: { e8s : Nat64; }; };
-        balances: { icp: { e8s : Nat64; }; };
-        recipient: {principalId: PrincipalAsText; accountId: Text};
+        amountToFund: FundingCampaignAssets;
+        amountDisbursedToRecipient: FundingCampaignAssets;
+        campaignWalletBalance: FundingCampaignAssets;
+        recipient: PrincipalAsText;
         subaccountId: Account.Subaccount;
         percentageOfDaoRewardsAllocated: Nat;
         description: Text; 
-        finalized: Bool;
-        repaymentIntervals: ?Nat64;
-        repaymentStartDate: ?Int64;
-        simpleInterestRate: ?Nat;
+        settled: Bool;
+        fullyFunded: Bool;
+        terms:?{
+            paymentIntervals: Nat64;
+            nextPaymentDueDate: ?Int64;
+            paymentAmounts: FundingCampaignAssets;
+            initialLoanInterestAmount: FundingCampaignAssets;
+            remainingLoanInterestAmount: FundingCampaignAssets;
+            initialCollateralLocked: FundingCampaignAssets;
+            remainingCollateralLocked: FundingCampaignAssets;
+            forfeitedCollateral: FundingCampaignAssets;
+            remainingLoanPrincipalAmount: FundingCampaignAssets;
+            amountPaidDuringCurrentPaymentInterval: FundingCampaignAssets;
+        };
     };
 
     public type FundingCampaignInput = {
-        goal: { icp: { e8s : Nat64; }; };
-        recipient: {principalId: PrincipalAsText; accountId: Text};
+        amountToFund: FundingCampaignAssets;
         percentageOfDaoRewardsAllocated: Nat;
         description: Text; 
-        repaymentIntervals: ?Nat64;
-        repaymentStartDate: ?Int64;
-        simpleInterestRate: ?Nat;
+        terms:?{
+            paymentIntervals: Nat64;
+            paymentAmounts: FundingCampaignAssets;
+            initialLoanInterestAmount: FundingCampaignAssets;
+            initialCollateralLocked: FundingCampaignAssets;
+        };
     };
 
     public type FundingCampaignsArray = [(CampaignId, FundingCampaign)];
@@ -67,6 +80,7 @@ module{
     public type BalancesExport = {
         icp: {e8s : Nat64;};
         icp_staked: {e8s : Nat64;};
+        icp_staked_collateralized: {e8s : Nat64;};
         eth: {e8s : Nat64};
         btc: {e8s : Nat64};
         voting_power: {e8s: Nat64};
@@ -92,7 +106,9 @@ module{
     public type NeuronStakeInfo = {
         stake_e8s : Nat64;
         voting_power : Nat64;
+        collateralized_stake_e8s : ?Nat64;
     };
+    
 
     public type UserTreasuryData = {
         balances : Balances;
@@ -166,7 +182,7 @@ module{
         #Follow : { neuronId: Nat64;};
         #ClaimOrRefresh : { neuronId: Nat64; memo: ?Nat64;};
         #Configure : { neuronId: Nat64; };
-        #Disburse : { transfer_block_height: Nat64; neuronId: Nat64; proposer: Principal; treasuryCanisterId: Principal;};
+        #Disburse : { transfer_block_height: Nat64; neuronId: Nat64; treasuryCanisterId: Principal;};
     };
 
     public type ReadRequestInput = {

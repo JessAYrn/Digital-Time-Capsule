@@ -57,11 +57,12 @@ const MenuField = (props) => {
                 }}
             >
                 { !Component &&  menuItemProps.map( 
-                    ({onClick, text}) => { 
+                    ({onClick, text, disabled}) => { 
                     return( 
                     <MenuItem 
                     selected={text === selected ? true: false }
                     onClick={ (e) => { onClick(e); handleClose(e); }}
+                    disabled={disabled}
                     > {text} </MenuItem> )
                 })}
                 { Component && <Component setAnchorEl={setAnchorEl}/> }

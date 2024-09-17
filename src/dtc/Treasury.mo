@@ -52,21 +52,43 @@ shared actor class Treasury (principal : Principal) = this {
 
     let {recurringTimer; setTimer} = Timer;
 
-    public shared({caller}) func createFundingCampaign(campaign: TreasuryTypes.FundingCampaignInput) : async () {
+    public shared({caller}) func createFundingCampaign(campaign: TreasuryTypes.FundingCampaignInput, userPrincipal: Text) : async () {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         var totalAllocation: Nat = campaign.percentageOfDaoRewardsAllocated;
-        label loop_ for((campaignId_, {percentageOfDaoRewardsAllocated; finalized}) in fundingCampaignsMap.entries()){
-            if(finalized) continue loop_; 
-            totalAllocation += percentageOfDaoRewardsAllocated; 
+        label loop_ for((campaignId_, {percentageOfDaoRewardsAllocated; settled}) in fundingCampaignsMap.entries()){
+            if(settled) continue loop_; totalAllocation += percentageOfDaoRewardsAllocated; 
         };
         if(totalAllocation > 100) throw Error.reject("Allocation percentage cannot be greater than 100.");
+        let terms = switch(campaign.terms){
+            case null { null };
+            case (?terms) { 
+                switch(terms.initialCollateralLocked){ 
+                    case (#ICP_STAKED({e8s; fromNeuron})){
+                        SyncronousHelperMethods.updateUserNeuronContribution(neuronDataMap, {userPrincipal; delta = e8s; neuronId = fromNeuron; operation = #CollateralizeStake});
+                        ?{  terms with 
+                            remainingLoanInterestAmount = #ICP({ e8s : Nat64 = 0 });
+                            remainingLoanPrincipalAmount = #ICP({ e8s : Nat64 = 0 });
+                            remainingCollateralLocked = terms.initialCollateralLocked;
+                            forfeitedCollateral = #ICP_STAKED({ e8s : Nat64 = 0; fromNeuron; });
+                            nextPaymentDueDate = null;
+                            amountPaidDuringCurrentPaymentInterval = #ICP({ e8s : Nat64 = 0 });
+                        };
+                    };
+                    case (_){ throw Error.reject("Collateral type not supported."); };
+                };
+            };
+        };
         fundingCampaignsMap.put(campaignIndex, {
-            campaign with contributions = []; subaccountId = await getUnusedSubaccountId(); finalized = false; 
-            balances = { icp = { e8s: Nat64 = 0}}; 
-            amountDisbursed = {icp = { e8s: Nat64 = 0}}; 
-            amountRepaid = {icp = { e8s: Nat64 = 0}};
-            amountOwed = { icp = { e8s: Nat64 = 0}};
-        } );
+            campaign with 
+            contributions = []; 
+            recipient = userPrincipal;
+            subaccountId = await getUnusedSubaccountId(); 
+            settled = false;
+            fullyFunded = false;
+            campaignWalletBalance = #ICP({ e8s: Nat64 = 0}); 
+            amountDisbursedToRecipient = #ICP({ e8s: Nat64 = 0}); 
+            terms;
+        });
         campaignIndex += 1;
     };
 
@@ -80,26 +102,40 @@ shared actor class Treasury (principal : Principal) = this {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         let ?campaign = fundingCampaignsMap.get(campaignId) else throw Error.reject("Campaign not found.");
         let {subaccountId = fundingCampaignSubaccountId} = campaign;
-        let {amountSent} = await transferICP(amount, #Principal(contributor), {recipient = Principal.fromActor(this); subaccount = ?fundingCampaignSubaccountId});
+        let {amountSent} = await transferICP(amount, #Principal(contributor), {owner = Principal.fromActor(this); subaccount = ?fundingCampaignSubaccountId});
         await AsyncronousHelperMethods.creditCampaignContribution(contributor, campaignId, amountSent, fundingCampaignsMap, Principal.fromActor(this));
         return Iter.toArray(fundingCampaignsMap.entries());
     };
-    // complete this function
-    // public shared({caller}) func repayFundingCampaign(campaignId: Nat, amount: Nat64) : async TreasuryTypes.FundingCampaignsArray {
-    //     if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
-    //     let ?campaign = fundingCampaignsMap.get(campaignId) else throw Error.reject("Campaign not found.");
-    //     let {subaccountId = fundingCampaignSubaccountId} = campaign;
-    //     let {amountSent} = await transferICP(amount, Principal.fromActor(this), {recipient = Principal.fromActor(this); subaccount = ?fundingCampaignSubaccountId});
-    //     await AsyncronousHelperMethods.repayCampaignLoan(campaignId, amountSent, fundingCampaignsMap, Principal.fromActor(this));
-    //     return Iter.toArray(fundingCampaignsMap.entries());
+
+    // public shared func decollateralizeNeuron(neuronId: TreasuryTypes.NeuronIdAsText, userPrincipal: Text) : async () {
+    //     let {contributions} = switch(neuronDataMap.get(neuronId)){
+    //         case (?neuronData) { neuronData };
+    //         case (null) { throw Error.reject("Neuron not found."); };
+    //     };
+    //     let contributionsMap = HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.NeuronStakeInfo>(Iter.fromArray(contributions), Iter.size(Iter.fromArray(contributions)), Text.equal, Text.hash);
+    //     let ?{collateralized_stake_e8s} = contributionsMap.get(userPrincipal) else throw Error.reject("Neuron not found.");
+    //     let collateral : Nat64 = switch(collateralized_stake_e8s){
+    //         case (null) { 0 };
+    //         case (?collateral) { collateral };
+    //     };
+    //     SyncronousHelperMethods.updateUserNeuronContribution(neuronDataMap, {userPrincipal; delta = collateral; neuronId; operation = #DecollateralizeStake});
     // };
+    
+    // complete this function
+    public shared({caller}) func submitPaymentToFundingCampaign(campaignId: Nat, amount: Nat64, userPrincipal: Principal) : async TreasuryTypes.FundingCampaignsArray {
+        if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
+        let ?campaign = fundingCampaignsMap.get(campaignId) else throw Error.reject("Campaign not found.");
+        let {subaccountId = fundingCampaignSubaccountId} = campaign;
+        ignore await transferICP(amount, #Principal(Principal.toText(userPrincipal)), {owner = Principal.fromActor(this); subaccount = ?fundingCampaignSubaccountId});
+        return Iter.toArray(fundingCampaignsMap.entries());
+    };
 
     // change this function to finalize the campaign if the amountRepaid is greater than or equal to the amountOwed
-    private func finalizeFundingCampaign(campaignId: TreasuryTypes.CampaignId) : () {
-        let ?campaign = fundingCampaignsMap.get(campaignId) else { return };
-        if(campaign.finalized) return;
-        if(campaign.balances.icp.e8s > campaign.goal.icp.e8s) fundingCampaignsMap.put(campaignId, {campaign with finalized = true});
-    };
+    // private func finalizeFundingCampaign(campaignId: TreasuryTypes.CampaignId) : () {
+    //     let ?campaign = fundingCampaignsMap.get(campaignId) else { return };
+    //     if(campaign.settled) return;
+    //     if(campaign.balances.icp.e8s > campaign.goal.icp.e8s) fundingCampaignsMap.put(campaignId, {campaign with settled = true});
+    // };
 
     private func getSelfAuthenticatingPrincipalAndPublicKey_(): {selfAuthPrincipal: Principal; publicKey: Blob;} {
         let ?publicKey = public_key else { Debug.trap("Public key not populated."); };
@@ -160,12 +196,10 @@ shared actor class Treasury (principal : Principal) = this {
         let usersDataExport = Iter.map<
             (TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryData),
             (TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryDataExport)
-        >(
-            usersTreasuryDataMap.entries(),
-            func((userPrincipal, userTreasuryData): (TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryData)): (TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryDataExport) {
-                let {balances} = userTreasuryData;
-                let {icp_staked; voting_power} = SyncronousHelperMethods.computeTotalStakeDepositAndVotingPower(neuronDataMap, userPrincipal);
-                return (userPrincipal, {userTreasuryData with balances = {balances with icp_staked; voting_power}} );          
+        >( usersTreasuryDataMap.entries(), func(
+            (principal, userTreasuryData): (TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryData)) : 
+            (TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryDataExport) {
+                SyncronousHelperMethods.formatUserTreasuryDataForExport(neuronDataMap, (principal, userTreasuryData));
             }
         );
         return Iter.toArray(usersDataExport);
@@ -175,8 +209,8 @@ shared actor class Treasury (principal : Principal) = this {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         let userPrincipalAsText = Principal.toText(userPrincipal);
         let userTreasuryData = switch(usersTreasuryDataMap.get(userPrincipalAsText)){ case (?userTreasuryData) { userTreasuryData }; case (null) { throw Error.reject("User not found."); }; };
-        let {icp_staked; voting_power} = SyncronousHelperMethods.computeTotalStakeDepositAndVotingPower(neuronDataMap, userPrincipalAsText);
-        return {userTreasuryData with balances = {userTreasuryData.balances with icp_staked; voting_power}};
+        let (_, userTreasuryDataExport) = SyncronousHelperMethods.formatUserTreasuryDataForExport(neuronDataMap, (userPrincipalAsText, userTreasuryData));
+        return userTreasuryDataExport;
     };
 
     public query({caller}) func getDaoTotalStakeAndVotingPower(): async {totalVotingPower: Nat64; totalStake: Nat64} {
@@ -430,46 +464,12 @@ shared actor class Treasury (principal : Principal) = this {
         );
     };
 
-    public shared({caller}) func transferICP(
-        amount: Nat64, 
-        sender: TreasuryTypes.Identifier,
-        {recipient: Principal; subaccount: ?Account.Subaccount}
-    ) : async {amountSent: Nat64} {
+    public shared({caller}) func transferICP(amount: Nat64, sender: TreasuryTypes.Identifier, recipient : {owner: Principal; subaccount: ?Account.Subaccount}) 
+    : async {amountSent: Nat64} {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         if(amount < txFee){ return {amountSent: Nat64 = 0}; };
-        let (sourcePrincipal, _) = SyncronousHelperMethods.getPrincipalAndSubaccount(sender, usersTreasuryDataMap);
-        let ?{subaccountId = sendersubaccountId} = usersTreasuryDataMap.get(sourcePrincipal) else throw Error.reject("Sender not found."); 
-        var amountSent = Nat64.toNat(amount - txFee);
-        var transferInput = {
-            to = { owner = recipient; subaccount; };
-            fee = ?Nat64.toNat(txFee);
-            memo = null;
-            from_subaccount = ?sendersubaccountId;
-            created_at_time =?Nat64.fromNat(Int.abs(Time.now()));
-            amount = amountSent;
-        };
-
-        let res = await ledger.icrc1_transfer(transferInput);
-
-        switch (res) {
-            case (#Ok(_)) { 
-                ignore updateTokenBalances(sender, #Icp);
-                return {amountSent = Nat64.fromNat(amountSent)}; 
-            };
-            case (#Err(#InsufficientFunds { balance })) {
-                if(balance < Nat64.toNat(txFee)){ return {amountSent: Nat64 = 0}; };
-                amountSent := balance - Nat64.toNat(txFee);
-                let res = await ledger.icrc1_transfer({transferInput with amountSent});
-                switch(res){
-                    case (#Ok(_)) { 
-                        ignore updateTokenBalances(sender, #Icp);
-                        return {amountSent = Nat64.fromNat(amountSent)} 
-                    };
-                    case (#Err(_)) { return {amountSent: Nat64 = 0} };
-                };
-            };
-            case (#Err(_)) { return {amountSent: Nat64 = 0} };
-        }; 
+        let (_, senderSubaccount) = SyncronousHelperMethods.getPrincipalAndSubaccount(sender, usersTreasuryDataMap);
+        await AsyncronousHelperMethods.performTransfer(amount, ?senderSubaccount, recipient, actionLogsArrayBuffer, updateTokenBalances);
     };
 
     system func preupgrade() { 
@@ -507,8 +507,6 @@ shared actor class Treasury (principal : Principal) = this {
                 selfAuthPrincipal,
                 publicKey
             );
-
-            for((campaignId, _) in fundingCampaignsMap.entries()){ finalizeFundingCampaign(campaignId); };
         });
     };    
 };
