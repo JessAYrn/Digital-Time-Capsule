@@ -2,7 +2,6 @@ import TreasuryTypes "../../Types/Treasury/types";
 import Principal "mo:base/Principal";
 import Iter "mo:base/Iter";
 import Nat64 "mo:base/Nat64";
-import Int64 "mo:base/Int64";
 import Text "mo:base/Text";
 import Debug "mo:base/Debug";
 import Error "mo:base/Error";
@@ -12,7 +11,6 @@ import Result "mo:base/Result";
 import Array "mo:base/Array";
 import Int "mo:base/Int";
 import Time "mo:base/Time";
-import Float "mo:base/Float";
 import Nat "mo:base/Nat";
 import HashMap "mo:base/HashMap";
 import SyncronousHelperMethods "SyncronousHelperMethods";
@@ -63,7 +61,6 @@ module{
         let newPendingAction: TreasuryTypes.PendingAction = {
             expectedHttpResponseType = ?#GovernanceManageNeuronResponse({neuronId = ?neuronId.id; memo = null; proposer; treasuryCanisterId; });
             function = #ManageNeuron({  input = {args; selfAuthPrincipal; public_key = publicKey; transformFn;} });
-            attemptAfterTimestamp = null;
         };
         pendingActionsMap.put(pendingActionId, newPendingAction);
         actionLogsArrayBuffer.add(Int.toText(Time.now()),"New Action Pending: "#pendingActionId);
@@ -103,7 +100,6 @@ module{
         let newPendingAction: TreasuryTypes.PendingAction = {
             expectedHttpResponseType = ?#GovernanceManageNeuronResponse({neuronId = ?neuronId; memo = null; proposer = null; treasuryCanisterId = null; });
             function = #ManageNeuron({ input = { args; selfAuthPrincipal; public_key = publicKey; transformFn; method_name = TreasuryTypes.GetNeuronDataMethodNames.getFullNeuron }; });
-            attemptAfterTimestamp = null;
         };
         
         pendingActionsMap.put("claimOrRefresh_"#Nat64.toText(neuronId), newPendingAction);
@@ -142,7 +138,6 @@ module{
         let newPendingAction: TreasuryTypes.PendingAction = {
             expectedHttpResponseType = ?#GovernanceManageNeuronResponse({neuronId = null; memo = ?neuronMemo; proposer = null; treasuryCanisterId = null; });
             function = #ManageNeuron({ input = {args; selfAuthPrincipal; public_key = publicKey; transformFn;} });
-            attemptAfterTimestamp = null;
         };
         pendingActionsMap.put("createNeuronResponse_"#Nat64.toText(neuronMemo), newPendingAction);
         actionLogsArrayBuffer.add(Int.toText(Time.now()),"New Action Pending: createNeuronResponse_"#Nat64.toText(neuronMemo));
@@ -180,7 +175,6 @@ module{
             let newPendingAction: TreasuryTypes.PendingAction = {
                 expectedHttpResponseType = ?#GovernanceManageNeuronResponse({neuronId = ?neuronId.id; memo = null; proposer = null; treasuryCanisterId = null; });
                 function = #ManageNeuron({ input = {args; selfAuthPrincipal; public_key = publicKey; transformFn;} });
-                attemptAfterTimestamp = null;
             };                
             pendingActionsMap.put("claimOrRefresh_"#Nat64.toText(neuronId.id), newPendingAction);
         };
@@ -237,11 +231,7 @@ module{
         var index = 0;
         label loop_ while(index < length){
             let (identifier, action) = pendingActionsArray[index];
-            let {attemptAfterTimestamp} = action;
-            switch(attemptAfterTimestamp){ 
-                case(?timestamp){ if(Time.now() > timestamp){ ignore resolvePendingAction_(identifier, action);}; };
-                case(null) { ignore resolvePendingAction_(identifier, action); } 
-            };
+            ignore resolvePendingAction_(identifier, action); 
             index += 1;
         };
 
@@ -262,14 +252,12 @@ module{
         transformFn: TreasuryTypes.TransformFnSignature;
     }): async {newPendingAction: Bool;} {
 
-        func createPendingActionsToUpdateNeuronData(neuronId: Nat64, {attemptAfterTimestamp_NeuronInfo: ?Int; attemptAfterTimestamp_FullNeuron: ?Int;}){
+        func createPendingActionsToUpdateNeuronData(neuronId: Nat64){
             let newPendingAction: TreasuryTypes.PendingAction = {
                     expectedHttpResponseType = ?#GovernanceResult_2({neuronId});
                     function = #GetNeuronData({ input = {args = neuronId; selfAuthPrincipal; public_key = publicKey; transformFn; method_name = TreasuryTypes.GetNeuronDataMethodNames.getFullNeuron}; }); 
-                    attemptAfterTimestamp = attemptAfterTimestamp_FullNeuron;
                 };
             let newPendingAction2: TreasuryTypes.PendingAction = {
-                attemptAfterTimestamp = attemptAfterTimestamp_NeuronInfo;
                 expectedHttpResponseType = ?#GovernanceResult_5({neuronId});
                 function = #GetNeuronData({ input = {args = neuronId; selfAuthPrincipal; public_key = publicKey; transformFn; method_name = TreasuryTypes.GetNeuronDataMethodNames.getNeuronInfo}; }); };
             pendingActionsMap.put("getFullNeuronResponse_"#Nat64.toText(neuronId), newPendingAction);
@@ -283,7 +271,7 @@ module{
                     memoToNeuronIdMap.put(Nat64.toNat(memo_), neuronId);
                     SyncronousHelperMethods.finalizeNewlyCreatedNeuronData(Nat64.toText(memo_)#PENDING_NEURON_SUFFIX, neuronId, neuronDataMap);
                 };
-                createPendingActionsToUpdateNeuronData(neuronId, {attemptAfterTimestamp_NeuronInfo = null; attemptAfterTimestamp_FullNeuron = null;});
+                createPendingActionsToUpdateNeuronData(neuronId);
                 return {newPendingAction = true};
             };
             case(#Spawn({created_neuron_id; neuronId;})){
@@ -292,21 +280,20 @@ module{
                 let ?parentNeuron = neuronDataMap.get(Nat64.toText(neuronId)) else { throw Error.reject("no neuron found") };
                 let parentNeuronContributions = ?parentNeuron.contributions;
                 neuronDataMap.put(Nat64.toText(created_neuron_id), {neuron = null; neuronInfo = null; parentNeuronContributions; contributions = []; });
-                createPendingActionsToUpdateNeuronData(neuronId, {attemptAfterTimestamp_NeuronInfo = null; attemptAfterTimestamp_FullNeuron = null;});
-                createPendingActionsToUpdateNeuronData(created_neuron_id, {attemptAfterTimestamp_NeuronInfo = ?(Time.now() + (1_000_000_000 * 60 * 24 * 7)); attemptAfterTimestamp_FullNeuron = null;});
+                createPendingActionsToUpdateNeuronData(neuronId);
+                createPendingActionsToUpdateNeuronData(created_neuron_id);
                 return {newPendingAction = true};
             };
             case(#Follow({neuronId;})){
-                createPendingActionsToUpdateNeuronData(neuronId, {attemptAfterTimestamp_NeuronInfo = null; attemptAfterTimestamp_FullNeuron = null;});
+                createPendingActionsToUpdateNeuronData(neuronId);
                 return {newPendingAction = true};
             };
             case(#Configure({neuronId;})){
-                createPendingActionsToUpdateNeuronData(neuronId, {attemptAfterTimestamp_NeuronInfo = null; attemptAfterTimestamp_FullNeuron = null;});
+                createPendingActionsToUpdateNeuronData(neuronId);
                 return {newPendingAction = true};
             };
             case(#Disburse({neuronId; treasuryCanisterId})){
-                let ?{contributions} = neuronDataMap.get(Nat64.toText(neuronId)) else { throw Error.reject("No neuron found") };
-                await distributeContributions( #Neuron(contributions), usersTreasuryDataMap, actionLogsArrayBuffer, updateTokenBalances, fundingCampaignsMap, treasuryCanisterId);
+                await distributePayoutsFromNeuron( Nat64.toText(neuronId), usersTreasuryDataMap, actionLogsArrayBuffer, updateTokenBalances, fundingCampaignsMap, neuronDataMap, treasuryCanisterId);
                 ignore neuronDataMap.remove(Nat64.toText(neuronId));
                 return {newPendingAction = false};
             };
@@ -329,7 +316,7 @@ module{
                             case(?neuronData){
                                 neuronDataMap.put(Nat64.toText(neuronId), {neuronData with neuronInfo = ?neuronInfo});
                                 SyncronousHelperMethods.computeNeuronStakeInfosVotingPowers(neuronDataMap, Nat64.toText(neuronId));
-                                if(neuronData.contributions.size() == 0) SyncronousHelperMethods.allocateNewlySpawnedNeuronStakes(neuronDataMap, Nat64.toText(neuronId));
+                                if(neuronData.contributions.size() == 0) SyncronousHelperMethods.populateContributionsArrayFromParentNeuronContributions(neuronDataMap, Nat64.toText(neuronId));
                                 {newPendingAction = false};
                             };
                         };
@@ -340,46 +327,49 @@ module{
         };
     };
 
-    public func distributeContributions(
-        contributions: { #Neuron: TreasuryTypes.NeuronContributions; #FundingCampaign: TreasuryTypes.CampaignContributionsArray; },
+    public func distributePayoutsFromNeuron(
+        neuronId: TreasuryTypes.NeuronIdAsText,
         usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap, 
         actionLogsArrayBuffer: TreasuryTypes.ActionLogsArrayBuffer,
         updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies ) -> async (), 
         fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap,
+        neuronDataMap: TreasuryTypes.NeuronsDataMap,
         treasuryCanisterId: Principal,
     ): async () {
         
-        func performAllUserDistributions(userPrincipal: Principal, userContributionAmount: Nat64) : async () {
-            var userRemainingContributionAmount = userContributionAmount;
-            switch(contributions){
-                case(#Neuron(_)){
-                    label loop_ for((campaignId, campaign) in fundingCampaignsMap.entries()){
-                        let {settled; subaccountId = campaignSubaccountId; percentageOfDaoRewardsAllocated} = campaign;
-                        if(settled) continue loop_;
-                        let amountToAllocateToCampaign = userContributionAmount * (Nat64.fromNat(percentageOfDaoRewardsAllocated) / 100);
-                        let {amountSent} = await performTransfer( amountToAllocateToCampaign, ?campaignSubaccountId, {owner = userPrincipal; subaccount = null}, actionLogsArrayBuffer, updateTokenBalances);
-                        ignore creditCampaignContribution(Principal.toText(userPrincipal), campaignId, amountSent, fundingCampaignsMap, treasuryCanisterId);
-                        userRemainingContributionAmount -= amountToAllocateToCampaign;
-                    };
-                };
-                case(#FundingCampaign(_)){};
+        func performUserPayoutFromNeuronDisbursal(userPrincipal: Principal, userTotalNeuronContributionAmount: Nat64) : async () {
+            var amountToPayoutToUser = userTotalNeuronContributionAmount;
+            label contributeRewardsToFundingCampaigns for((campaignId, campaign) in fundingCampaignsMap.entries()){
+                let {settled; funded; subaccountId = campaignSubaccountId; percentageOfDaoRewardsAllocated} = campaign;
+                if(settled or funded) continue contributeRewardsToFundingCampaigns;
+                let amountToAllocateToCampaign = userTotalNeuronContributionAmount * (Nat64.fromNat(percentageOfDaoRewardsAllocated) / 100);
+                let {amountSent} = await performTransfer( amountToAllocateToCampaign, null, {owner = treasuryCanisterId; subaccount = ?campaignSubaccountId}, actionLogsArrayBuffer, updateTokenBalances, true);
+                ignore creditCampaignContribution(Principal.toText(userPrincipal), campaignId, amountSent, fundingCampaignsMap, treasuryCanisterId);
+                amountToPayoutToUser -= amountToAllocateToCampaign;
             };
             let ?{subaccountId} = usersTreasuryDataMap.get(Principal.toText(userPrincipal)) else { return };
-            ignore performTransfer(userRemainingContributionAmount, ?subaccountId, {owner = userPrincipal; subaccount = null}, actionLogsArrayBuffer, updateTokenBalances);
+            ignore performTransfer(amountToPayoutToUser, null, {owner = treasuryCanisterId; subaccount = ?subaccountId}, actionLogsArrayBuffer, updateTokenBalances, true);
         };
+        let ?{contributions} = neuronDataMap.get(neuronId) else { throw Error.reject("No neuron found") };
+        label loop_ for((userPrincipal, {stake_e8s }) in Iter.fromArray(contributions)){
+            ignore performUserPayoutFromNeuronDisbursal(Principal.fromText(userPrincipal), stake_e8s);
+        };
+    };
 
-        switch(contributions){
-            case(#Neuron(contributions_)){
-                label loop_ for((userPrincipal, {stake_e8s }) in Iter.fromArray(contributions_)){
-                    ignore performAllUserDistributions(Principal.fromText(userPrincipal), stake_e8s);
-                };
-            };
-            case(#FundingCampaign(contributions_)){
-                label loop_ for((userPrincipal, {icp}) in Iter.fromArray(contributions_)){
-                    ignore performAllUserDistributions(Principal.fromText(userPrincipal), icp.e8s);
-                    
-                };
-            };
+    public func distributePayoutsFromLoanRepayment(
+        campaignId: TreasuryTypes.CampaignId, 
+        amountRepaid: Nat64, 
+        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap,
+        actionLogsArrayBuffer: TreasuryTypes.ActionLogsArrayBuffer,
+        updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies ) -> async (), 
+        fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap,
+        treasuryCanisterId: Principal,
+    ): async (){
+        let ?{contributions; amountDisbursedToRecipient; subaccountId = campaignSubaccountId} = fundingCampaignsMap.get(campaignId) else { throw Error.reject("No campaign found") };
+        label loop_ for((userPrincipal, {icp = userCampaignContribution}) in Iter.fromArray(contributions)){
+            var amountOwedToUser: Nat64 = amountRepaid * (userCampaignContribution.e8s / amountDisbursedToRecipient.icp.e8s);
+            let ?{subaccountId = userSubaccountId} = usersTreasuryDataMap.get(userPrincipal) else { continue loop_ };
+            ignore performTransfer(amountOwedToUser, ?campaignSubaccountId, {owner = treasuryCanisterId; subaccount = ?userSubaccountId}, actionLogsArrayBuffer, updateTokenBalances, true);
         };
     };
 
@@ -393,12 +383,9 @@ module{
         let updatedCampaignContribution = {icp = { e8s = userIcpCampaignContribution.e8s + amount }};
         contributionsMap.put(userPrincipal, updatedCampaignContribution);
         let updatedBalance = {icp = { e8s = await ledger.icrc1_balance_of({ owner = treasuryCanisterPrincipal; subaccount = ?campaign.subaccountId; }) }};
-        let fullyFunded = switch(campaign.amountToFund){ 
-            case (#ICP{e8s}){Nat64.fromNat(updatedBalance.icp.e8s) >= e8s};
-            case (_) { throw Error.reject("Unsupported funding asset type") };
-        };
+        let funded = Nat64.fromNat(updatedBalance.icp.e8s) >= campaign.amountToFund.icp.e8s;
         let updatedContributions = Iter.toArray(contributionsMap.entries());
-        fundingCampaignsMap.put(campaignId, {campaign with contributions = updatedContributions; balance = updatedBalance; fullyFunded});
+        fundingCampaignsMap.put(campaignId, {campaign with contributions = updatedContributions; balance = updatedBalance; funded});
     };
 
     public func performTransfer( 
@@ -407,6 +394,7 @@ module{
         to: { owner: Principal; subaccount: ?Account.Subaccount },
         actionLogsArrayBuffer: TreasuryTypes.ActionLogsArrayBuffer,
         updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies ) -> async (), 
+        refreshRecipientBalance: Bool,
     ) 
     : async {amountSent: Nat64;} {
         if(amount < 10_000) return {amountSent = 0};
@@ -431,8 +419,8 @@ module{
                 This user is owed: "#Nat64.toText(icpOwed)#" ICP from the DAO's multi-sig wallet."
             );
         };
-        let subaccount = switch(to.subaccount){case (?subaccount_) { subaccount_ }; case (null) { Account.defaultSubaccount() }; };
-        ignore updateTokenBalances(#SubaccountId(subaccount), #Icp);
+        switch(from_subaccount){case (?subaccount_) { ignore updateTokenBalances(#SubaccountId(subaccount_), #Icp); }; case (null) {}; };
+        switch(to.subaccount){case (?subaccount_) { if(refreshRecipientBalance) ignore updateTokenBalances(#SubaccountId(subaccount_), #Icp); }; case (null) {}; };
         return {amountSent};
     };
 };

@@ -26,44 +26,44 @@ module{
     public type CampaignContributionsArray = [(PrincipalAsText, CampaignContributions)];
 
     public type FundingCampaignAssets = {
-        #ICP: {e8s : Nat64;};
-        #ICP_STAKED: {e8s : Nat64; fromNeuron: NeuronIdAsText};
+        icp: {e8s : Nat64;};
+        icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText};
     };
 
     public type FundingCampaign = {
         contributions: CampaignContributionsArray;
-        amountToFund: FundingCampaignAssets;
-        amountDisbursedToRecipient: FundingCampaignAssets;
-        campaignWalletBalance: FundingCampaignAssets;
+        amountToFund: {icp: {e8s : Nat64;}; };
+        amountDisbursedToRecipient: {icp: {e8s : Nat64;}; };
+        campaignWalletBalance: {icp: {e8s : Nat64;}; };
         recipient: PrincipalAsText;
         subaccountId: Account.Subaccount;
         percentageOfDaoRewardsAllocated: Nat;
         description: Text; 
         settled: Bool;
-        fullyFunded: Bool;
+        funded: Bool;
         terms:?{
             paymentIntervals: Nat64;
-            nextPaymentDueDate: ?Int64;
-            paymentAmounts: FundingCampaignAssets;
-            initialLoanInterestAmount: FundingCampaignAssets;
-            remainingLoanInterestAmount: FundingCampaignAssets;
-            initialCollateralLocked: FundingCampaignAssets;
-            remainingCollateralLocked: FundingCampaignAssets;
-            forfeitedCollateral: FundingCampaignAssets;
-            remainingLoanPrincipalAmount: FundingCampaignAssets;
-            amountPaidDuringCurrentPaymentInterval: FundingCampaignAssets;
+            nextPaymentDueDate: ?Int;
+            paymentAmounts: {icp: {e8s : Nat64;}; };
+            initialLoanInterestAmount: {icp: {e8s : Nat64;}; };
+            remainingLoanInterestAmount: {icp: {e8s : Nat64;}; };
+            initialCollateralLocked: {icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText}};
+            remainingCollateralLocked: {icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText}};
+            forfeitedCollateral: {icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText}};
+            remainingLoanPrincipalAmount: {icp: {e8s : Nat64;}; };
+            amountRepaidDuringCurrentPaymentInterval: {icp: {e8s : Nat64;}; };
         };
     };
 
     public type FundingCampaignInput = {
-        amountToFund: FundingCampaignAssets;
+        amountToFund: {icp: {e8s : Nat64;}; };
         percentageOfDaoRewardsAllocated: Nat;
         description: Text; 
         terms:?{
             paymentIntervals: Nat64;
-            paymentAmounts: FundingCampaignAssets;
-            initialLoanInterestAmount: FundingCampaignAssets;
-            initialCollateralLocked: FundingCampaignAssets;
+            paymentAmounts: {icp: {e8s : Nat64;}; };
+            initialLoanInterestAmount: {icp: {e8s : Nat64;}; };
+            initialCollateralLocked: {icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText}};
         };
     };
 
@@ -237,7 +237,6 @@ module{
     public type PendingAction = {
         expectedHttpResponseType: ?ExpectedRequestResponses;
         function: { #GetNeuronData: {input: GetNeuronDataInput; }; #ManageNeuron: {input: ManageNeuronInput;}; };
-        attemptAfterTimestamp: ?Int;
     };
 
     public type PendingActionExport = {

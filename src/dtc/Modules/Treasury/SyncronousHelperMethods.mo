@@ -90,23 +90,26 @@ module{
         switch(operation){
             case(#AddStake) { updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount = userNeuronStakeInfo.stake_e8s + delta; neuronId; property = #Stake}); };
             case(#SubtractStake) {
-                if(userNeuronStakeInfo.stake_e8s < delta) Debug.trap("Insufficient funds.");
-                updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount = userNeuronStakeInfo.stake_e8s - delta; neuronId; property = #Stake});
+                let delta_ = Nat64.min(userNeuronStakeInfo.stake_e8s, delta);
+                updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount = userNeuronStakeInfo.stake_e8s - delta_; neuronId; property = #Stake});
             };
             case(#CollateralizeStake) { 
-                if(userNeuronStakeInfo.stake_e8s < delta) Debug.trap("Insufficient funds.");
                 let collateralized_stake_e8s : Nat64 = switch(userNeuronStakeInfo.collateralized_stake_e8s){
                     case null { 0; };
                     case(?collateralized_stake_e8s_) { collateralized_stake_e8s_; };
                 };
-                updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount = userNeuronStakeInfo.stake_e8s - delta; neuronId; property = #Stake});
-                updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount = collateralized_stake_e8s + delta; neuronId; property = #CollateralizedStake});
+                let delta_ =  Nat64.min(userNeuronStakeInfo.stake_e8s, delta);
+                updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount = userNeuronStakeInfo.stake_e8s - delta_; neuronId; property = #Stake});
+                updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount = collateralized_stake_e8s + delta_; neuronId; property = #CollateralizedStake});
             };
             case(#DecollateralizeStake) { 
-                let ?collateralized_stake_e8s = userNeuronStakeInfo.collateralized_stake_e8s else Debug.trap("No collateralized stake.");
-                if(collateralized_stake_e8s < delta) Debug.trap("Insufficient funds.");
-                updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount = collateralized_stake_e8s - delta; neuronId; property = #CollateralizedStake});
-                updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount = userNeuronStakeInfo.stake_e8s + delta; neuronId; property = #Stake});
+                let collateralized_stake_e8s: Nat64 = switch(userNeuronStakeInfo.collateralized_stake_e8s){
+                    case null { 0; };
+                    case(?collateralized_stake_e8s_) { collateralized_stake_e8s_; };
+                };
+                let delta_: Nat64 = Nat64.min(collateralized_stake_e8s, delta);
+                updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount = collateralized_stake_e8s - delta_; neuronId; property = #CollateralizedStake});
+                updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount = userNeuronStakeInfo.stake_e8s + delta_; neuronId; property = #Stake});
             };
         };
     };
@@ -116,7 +119,7 @@ module{
         neuronDataMap.put(Nat64.toText(newNeuronId), neuronData);
     };
 
-    public func allocateNewlySpawnedNeuronStakes(neuronDataMap: TreasuryTypes.NeuronsDataMap, neuronId: Text): () {
+    public func populateContributionsArrayFromParentNeuronContributions(neuronDataMap: TreasuryTypes.NeuronsDataMap, neuronId: Text): () {
         let ?neuronData = neuronDataMap.get(neuronId) else { return };
 
         let ?neuronInfo = neuronData.neuronInfo else { return };

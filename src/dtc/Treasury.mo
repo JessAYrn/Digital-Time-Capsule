@@ -62,19 +62,16 @@ shared actor class Treasury (principal : Principal) = this {
         let terms = switch(campaign.terms){
             case null { null };
             case (?terms) { 
-                switch(terms.initialCollateralLocked){ 
-                    case (#ICP_STAKED({e8s; fromNeuron})){
-                        SyncronousHelperMethods.updateUserNeuronContribution(neuronDataMap, {userPrincipal; delta = e8s; neuronId = fromNeuron; operation = #CollateralizeStake});
-                        ?{  terms with 
-                            remainingLoanInterestAmount = #ICP({ e8s : Nat64 = 0 });
-                            remainingLoanPrincipalAmount = #ICP({ e8s : Nat64 = 0 });
-                            remainingCollateralLocked = terms.initialCollateralLocked;
-                            forfeitedCollateral = #ICP_STAKED({ e8s : Nat64 = 0; fromNeuron; });
-                            nextPaymentDueDate = null;
-                            amountPaidDuringCurrentPaymentInterval = #ICP({ e8s : Nat64 = 0 });
-                        };
-                    };
-                    case (_){ throw Error.reject("Collateral type not supported."); };
+                let {stake_e8s = userStakedIcp;} = SyncronousHelperMethods.getUserNeuronStakeInfo(userPrincipal, neuronDataMap, terms.initialCollateralLocked.icp_staked.fromNeuron);
+                if (userStakedIcp < terms.initialCollateralLocked.icp_staked.e8s) throw Error.reject("User has insufficient staked ICP.");
+                SyncronousHelperMethods.updateUserNeuronContribution(neuronDataMap, {userPrincipal; delta = terms.initialCollateralLocked.icp_staked.e8s; neuronId = terms.initialCollateralLocked.icp_staked.fromNeuron; operation = #CollateralizeStake});
+                ?{  terms with 
+                    remainingLoanInterestAmount = {icp = { e8s : Nat64 = 0 }};
+                    remainingLoanPrincipalAmount = {icp = { e8s : Nat64 = 0 }};
+                    remainingCollateralLocked = terms.initialCollateralLocked;
+                    forfeitedCollateral = {terms.initialCollateralLocked with e8s : Nat64 = 0;};
+                    amountRepaidDuringCurrentPaymentInterval = {icp = { e8s : Nat64 = 0 }};
+                    nextPaymentDueDate = null;
                 };
             };
         };
@@ -84,9 +81,9 @@ shared actor class Treasury (principal : Principal) = this {
             recipient = userPrincipal;
             subaccountId = await getUnusedSubaccountId(); 
             settled = false;
-            fullyFunded = false;
-            campaignWalletBalance = #ICP({ e8s: Nat64 = 0}); 
-            amountDisbursedToRecipient = #ICP({ e8s: Nat64 = 0}); 
+            funded = false;
+            campaignWalletBalance = {icp = {e8s: Nat64 = 0}; }; 
+            amountDisbursedToRecipient = {icp = {e8s: Nat64 = 0}; }; 
             terms;
         });
         campaignIndex += 1;
@@ -101,41 +98,87 @@ shared actor class Treasury (principal : Principal) = this {
     : async TreasuryTypes.FundingCampaignsArray {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         let ?campaign = fundingCampaignsMap.get(campaignId) else throw Error.reject("Campaign not found.");
-        let {subaccountId = fundingCampaignSubaccountId} = campaign;
+        let {subaccountId = fundingCampaignSubaccountId; funded;} = campaign;
+        if(funded) throw Error.reject("Campaign already funded.");
         let {amountSent} = await transferICP(amount, #Principal(contributor), {owner = Principal.fromActor(this); subaccount = ?fundingCampaignSubaccountId});
         await AsyncronousHelperMethods.creditCampaignContribution(contributor, campaignId, amountSent, fundingCampaignsMap, Principal.fromActor(this));
         return Iter.toArray(fundingCampaignsMap.entries());
     };
 
-    // public shared func decollateralizeNeuron(neuronId: TreasuryTypes.NeuronIdAsText, userPrincipal: Text) : async () {
-    //     let {contributions} = switch(neuronDataMap.get(neuronId)){
-    //         case (?neuronData) { neuronData };
-    //         case (null) { throw Error.reject("Neuron not found."); };
-    //     };
-    //     let contributionsMap = HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.NeuronStakeInfo>(Iter.fromArray(contributions), Iter.size(Iter.fromArray(contributions)), Text.equal, Text.hash);
-    //     let ?{collateralized_stake_e8s} = contributionsMap.get(userPrincipal) else throw Error.reject("Neuron not found.");
-    //     let collateral : Nat64 = switch(collateralized_stake_e8s){
-    //         case (null) { 0 };
-    //         case (?collateral) { collateral };
-    //     };
-    //     SyncronousHelperMethods.updateUserNeuronContribution(neuronDataMap, {userPrincipal; delta = collateral; neuronId; operation = #DecollateralizeStake});
-    // };
-    
-    // complete this function
-    public shared({caller}) func submitPaymentToFundingCampaign(campaignId: Nat, amount: Nat64, userPrincipal: Principal) : async TreasuryTypes.FundingCampaignsArray {
+    public shared({caller}) func repayFundingCampaign(campaignId: Nat, amount: Nat64, paymentFrom: Principal) : async TreasuryTypes.FundingCampaignsArray {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         let ?campaign = fundingCampaignsMap.get(campaignId) else throw Error.reject("Campaign not found.");
-        let {subaccountId = fundingCampaignSubaccountId} = campaign;
-        ignore await transferICP(amount, #Principal(Principal.toText(userPrincipal)), {owner = Principal.fromActor(this); subaccount = ?fundingCampaignSubaccountId});
+        let {subaccountId = fundingCampaignSubaccountId; funded; recipient; amountDisbursedToRecipient} = campaign;
+        if(not funded) throw Error.reject("Campaign funds have not been disbursed yet.");
+        let ?terms = campaign.terms else throw Error.reject("Campaign terms not found.");
+        let {amountSent} = await transferICP(amount, #Principal(Principal.toText(paymentFrom)), {owner = Principal.fromActor(this); subaccount = ?fundingCampaignSubaccountId});  
+        await AsyncronousHelperMethods.distributePayoutsFromLoanRepayment(campaignId, amountSent, usersTreasuryDataMap, actionLogsArrayBuffer, updateTokenBalances, fundingCampaignsMap, Principal.fromActor(this));
+        let amountRepaidDuringCurrentPaymentInterval = {icp = { e8s: Nat64 = terms.amountRepaidDuringCurrentPaymentInterval.icp.e8s + amountSent; } };
+        var amountToDeductFromPrincipalAmount: Nat64 = 0;
+        let remainingLoanInterestAmount = if(terms.remainingLoanInterestAmount.icp.e8s >= amountSent) { 
+            {icp = {e8s: Nat64 = terms.remainingLoanInterestAmount.icp.e8s - amountSent}}; 
+        } else { 
+            amountToDeductFromPrincipalAmount := amountSent - terms.remainingLoanInterestAmount.icp.e8s; 
+            {icp = {e8s: Nat64 = 0}}; 
+        };
+        let remainingLoanPrincipalAmount = if(terms.remainingLoanPrincipalAmount.icp.e8s >= amountToDeductFromPrincipalAmount){
+            {icp = {e8s: Nat64 = terms.remainingLoanPrincipalAmount.icp.e8s - amountToDeductFromPrincipalAmount}}  
+        } else { 
+            {icp = {e8s: Nat64 = 0}}; 
+        };
+        let amountToDecollateralize: Nat64 = terms.initialCollateralLocked.icp_staked.e8s * (amountToDeductFromPrincipalAmount / amountDisbursedToRecipient.icp.e8s);
+        let collateralRemainingAfterDecollateralization: Nat64 = if(terms.initialCollateralLocked.icp_staked.e8s > amountToDecollateralize){
+            terms.initialCollateralLocked.icp_staked.e8s - amountToDecollateralize} else { 0 };
+        let remainingCollateralLocked = {icp_staked = {e8s = collateralRemainingAfterDecollateralization; fromNeuron = terms.remainingCollateralLocked.icp_staked.fromNeuron; }};
+        SyncronousHelperMethods.updateUserNeuronContribution(neuronDataMap, {userPrincipal = recipient; delta = amountToDecollateralize; neuronId = terms.initialCollateralLocked.icp_staked.fromNeuron; operation = #DecollateralizeStake});
+        fundingCampaignsMap.put(campaignId, { campaign with terms = ?{ terms with remainingLoanInterestAmount; remainingLoanPrincipalAmount; amountRepaidDuringCurrentPaymentInterval; remainingCollateralLocked;}; });   
         return Iter.toArray(fundingCampaignsMap.entries());
     };
-
-    // change this function to finalize the campaign if the amountRepaid is greater than or equal to the amountOwed
-    // private func finalizeFundingCampaign(campaignId: TreasuryTypes.CampaignId) : () {
-    //     let ?campaign = fundingCampaignsMap.get(campaignId) else { return };
-    //     if(campaign.settled) return;
-    //     if(campaign.balances.icp.e8s > campaign.goal.icp.e8s) fundingCampaignsMap.put(campaignId, {campaign with settled = true});
+    
+    // private func concludeAllEligbileBillingCycles(): async () {
+    //     func concludeBillingCycle(campaignId: Nat, campaign: TreasuryTypes.FundingCampaign): async () {
+    //         let ?{remainingLoanPrincipalAmount; forfeitedCollateral; remainingCollateralLocked; }
+    //     };
     // };
+    
+    private func disburseEligibleCampaignFundingsToRecipient() : async () {
+        func disburseCampaignFundingToRecipients(campaignId: Nat, campaign: TreasuryTypes.FundingCampaign): async () {
+            let {campaignWalletBalance; recipient; subaccountId} = campaign;
+            var updatedCampaign = campaign;
+            let {amountSent} = await transferICP(campaignWalletBalance.icp.e8s, #SubaccountId(subaccountId),{owner = Principal.fromText(recipient); subaccount = null});
+            updatedCampaign := {
+                campaign with funded = true; settled = true;
+                campaignWalletBalance = {icp = { e8s = Nat64.fromNat( await ledger.icrc1_balance_of({owner = Principal.fromActor(this); subaccount = ?subaccountId})) }};
+                amountDisbursedToRecipient = {icp = {e8s = amountSent}};
+            };
+            updatedCampaign := switch(campaign.terms){
+                case null { updatedCampaign };
+                case (?terms){
+                    { 
+                        updatedCampaign with 
+                        settled = false;
+                        terms = ?{
+                            terms with
+                            nextPaymentDueDate: ?Int = ?(Time.now() + Nat64.toNat(terms.paymentIntervals));
+                            remainingLoanInterestAmount = terms.initialLoanInterestAmount;
+                            remainingLoanPrincipalAmount = updatedCampaign.amountDisbursedToRecipient;
+                            remainingCollateralLocked = terms.initialCollateralLocked;
+                            forfeitedCollateral = { terms.initialCollateralLocked with e8s: Nat64 = 0; };
+                        }
+                    };
+                };
+            };
+            fundingCampaignsMap.put(campaignId,updatedCampaign);
+        };
+
+        label loop_ for((campaignId, campaign) in fundingCampaignsMap.entries()){
+            let {settled; funded; amountToFund; campaignWalletBalance} = campaign;
+            if(settled or funded) continue loop_;
+            if(campaignWalletBalance.icp.e8s >= amountToFund.icp.e8s){
+                ignore disburseCampaignFundingToRecipients(campaignId, campaign);
+            };
+        };
+    };
 
     private func getSelfAuthenticatingPrincipalAndPublicKey_(): {selfAuthPrincipal: Principal; publicKey: Blob;} {
         let ?publicKey = public_key else { Debug.trap("Public key not populated."); };
@@ -167,10 +210,8 @@ shared actor class Treasury (principal : Principal) = this {
     };
 
     private func createTreasuryData_(principal: Principal) : async () {
-        let newSubaccount = switch(Principal.equal(principal, Principal.fromActor(this))){
-            case true { Account.defaultSubaccount();};
-            case false { await getUnusedSubaccountId(); };
-        };
+        var newSubaccount = Account.defaultSubaccount();
+        if(not Principal.equal(principal, Principal.fromActor(this))) newSubaccount := await getUnusedSubaccountId(); 
         let newUserTreasuryData = {
             balances = {
                 icp = {e8s: Nat64 = 0};
@@ -468,8 +509,12 @@ shared actor class Treasury (principal : Principal) = this {
     : async {amountSent: Nat64} {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         if(amount < txFee){ return {amountSent: Nat64 = 0}; };
-        let (_, senderSubaccount) = SyncronousHelperMethods.getPrincipalAndSubaccount(sender, usersTreasuryDataMap);
-        await AsyncronousHelperMethods.performTransfer(amount, ?senderSubaccount, recipient, actionLogsArrayBuffer, updateTokenBalances);
+        let senderSubaccount = switch(sender){
+            case (#SubaccountId(subaccount)) { subaccount };
+            case (#Principal(_)){ let (_, subaccount) = SyncronousHelperMethods.getPrincipalAndSubaccount(sender, usersTreasuryDataMap); subaccount};
+        };
+        let refreshRecipientBalance = if(Principal.equal(recipient.owner, Principal.fromActor(this))) true else false;
+        await AsyncronousHelperMethods.performTransfer(amount, ?senderSubaccount, recipient, actionLogsArrayBuffer, updateTokenBalances, refreshRecipientBalance);
     };
 
     system func preupgrade() { 
@@ -489,9 +534,7 @@ shared actor class Treasury (principal : Principal) = this {
         actionLogsArray := [];
         fundingCampaignsArray := [];
 
-        ignore setTimer<system>(#nanoseconds(1), func (): async () {
-            await populateSelfAuthenticatingPrincipalAndPublicKey();
-        });
+        ignore setTimer<system>(#nanoseconds(1), func (): async () { await populateSelfAuthenticatingPrincipalAndPublicKey(); });
 
         ignore recurringTimer<system>(#seconds(24 * 60 * 60), func (): async () { 
             let {selfAuthPrincipal; publicKey} = getSelfAuthenticatingPrincipalAndPublicKey_();
@@ -507,6 +550,7 @@ shared actor class Treasury (principal : Principal) = this {
                 selfAuthPrincipal,
                 publicKey
             );
+            ignore disburseEligibleCampaignFundingsToRecipient();
         });
     };    
 };

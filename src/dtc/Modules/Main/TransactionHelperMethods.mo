@@ -73,10 +73,7 @@ module{
                     let treasuryAccountId = await treasuryCanister.canisterIcpAccountId(null);
                     let treasuryAccountIdAsText = Hex.encode(Blob.toArray(treasuryAccountId));
                     if(recipientAsText == treasuryAccountIdAsText or sourceAsText == treasuryAccountIdAsText){
-                        ignore treasuryCanister.updateTokenBalances(
-                            #Principal(metaData.treasuryCanisterPrincipal),
-                            #Icp
-                        );
+                        ignore treasuryCanister.updateTokenBalances(#Principal(metaData.treasuryCanisterPrincipal),#Icp);
                     };
                 };
                 case(_){};

@@ -38,8 +38,8 @@ module{
         let treasuryFee = amount / 200;
         let withdrawelamount = amount - treasuryFee;
         if(treasuryFee < 10_000 or withdrawelamount < 10_000){ return {amountSent: Nat64 = 0}; };
-        ignore await treasury.transferICP(treasuryFee, #SubaccountId(userTreasurySubaccountId), {recipient = Principal.fromText(daoMetaData.treasuryCanisterPrincipal); subaccount = null});
-        let {amountSent} = await treasury.transferICP(withdrawelamount,#SubaccountId(userTreasurySubaccountId), {recipient = userCanisterId; subaccount = null});
+        ignore await treasury.transferICP(treasuryFee, #SubaccountId(userTreasurySubaccountId), {owner = Principal.fromText(daoMetaData.treasuryCanisterPrincipal); subaccount = null});
+        let {amountSent} = await treasury.transferICP(withdrawelamount,#SubaccountId(userTreasurySubaccountId), {owner = userCanisterId; subaccount = null});
         return {amountSent};
     };    
 
