@@ -148,8 +148,8 @@ export const GRAPH_DISPLAY_LABELS = {
 };
 
 export const FUNDING_CAMPAIGN_ASSET_TYPES = {
-    ICP: "ICP",
-    ICP_STAKED: "ICP_STAKED",
+    icp: "icp",
+    icp_staked: "icp_staked",
 };
 
 export const PERMITTED_USERNAME_CHARACTERS = [

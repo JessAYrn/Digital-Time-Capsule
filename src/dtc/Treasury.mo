@@ -105,7 +105,12 @@ shared actor class Treasury (principal : Principal) = this {
         return Iter.toArray(fundingCampaignsMap.entries());
     };
 
+    public shared func decollateralizedStake(neuronId: Text, amount: Nat64, userPrincipal: Text) : async () {
+        SyncronousHelperMethods.updateUserNeuronContribution(neuronDataMap, {userPrincipal; delta = amount; neuronId; operation = #DecollateralizeStake});
+    };
+
     public shared({caller}) func repayFundingCampaign(campaignId: Nat, amount: Nat64, paymentFrom: Principal) : async TreasuryTypes.FundingCampaignsArray {
+        if(amount < 10_000_000) throw Error.reject("Minimum repayment amount is 0.1 ICP.");
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         let ?campaign = fundingCampaignsMap.get(campaignId) else throw Error.reject("Campaign not found.");
         let {subaccountId = fundingCampaignSubaccountId; funded; recipient; amountDisbursedToRecipient} = campaign;
@@ -121,25 +126,56 @@ shared actor class Treasury (principal : Principal) = this {
             amountToDeductFromPrincipalAmount := amountSent - terms.remainingLoanInterestAmount.icp.e8s; 
             {icp = {e8s: Nat64 = 0}}; 
         };
-        let remainingLoanPrincipalAmount = if(terms.remainingLoanPrincipalAmount.icp.e8s >= amountToDeductFromPrincipalAmount){
+        let graceAmount = 2 * 100 * txFee;
+        var settled = false;
+        var remainingLoanPrincipalAmount = if(terms.remainingLoanPrincipalAmount.icp.e8s >= amountToDeductFromPrincipalAmount){
             {icp = {e8s: Nat64 = terms.remainingLoanPrincipalAmount.icp.e8s - amountToDeductFromPrincipalAmount}}  
-        } else { 
-            {icp = {e8s: Nat64 = 0}}; 
+        } else { {icp = {e8s: Nat64 = 0}}; };
+
+        if(remainingLoanPrincipalAmount.icp.e8s < graceAmount){
+            settled := true; 
+            remainingLoanPrincipalAmount := {icp = {e8s: Nat64 = 0}};
+            amountToDeductFromPrincipalAmount := terms.remainingLoanPrincipalAmount.icp.e8s;
         };
+        
         let amountToDecollateralize: Nat64 = terms.initialCollateralLocked.icp_staked.e8s * (amountToDeductFromPrincipalAmount / amountDisbursedToRecipient.icp.e8s);
         let collateralRemainingAfterDecollateralization: Nat64 = if(terms.initialCollateralLocked.icp_staked.e8s > amountToDecollateralize){
             terms.initialCollateralLocked.icp_staked.e8s - amountToDecollateralize} else { 0 };
         let remainingCollateralLocked = {icp_staked = {e8s = collateralRemainingAfterDecollateralization; fromNeuron = terms.remainingCollateralLocked.icp_staked.fromNeuron; }};
         SyncronousHelperMethods.updateUserNeuronContribution(neuronDataMap, {userPrincipal = recipient; delta = amountToDecollateralize; neuronId = terms.initialCollateralLocked.icp_staked.fromNeuron; operation = #DecollateralizeStake});
-        fundingCampaignsMap.put(campaignId, { campaign with terms = ?{ terms with remainingLoanInterestAmount; remainingLoanPrincipalAmount; amountRepaidDuringCurrentPaymentInterval; remainingCollateralLocked;}; });   
+        fundingCampaignsMap.put(campaignId, { campaign with settled; terms = ?{ terms with remainingLoanInterestAmount; remainingLoanPrincipalAmount; amountRepaidDuringCurrentPaymentInterval; remainingCollateralLocked;}; });   
         return Iter.toArray(fundingCampaignsMap.entries());
     };
     
-    // private func concludeAllEligbileBillingCycles(): async () {
-    //     func concludeBillingCycle(campaignId: Nat, campaign: TreasuryTypes.FundingCampaign): async () {
-    //         let ?{remainingLoanPrincipalAmount; forfeitedCollateral; remainingCollateralLocked; }
-    //     };
-    // };
+    private func concludeAllEligbileBillingCycles(): async () {
+        func concludeBillingCycle(campaignId: Nat, campaign: TreasuryTypes.FundingCampaign): async () {
+            let {recipient; amountDisbursedToRecipient; contributions} = campaign;
+            let ?terms = campaign.terms else return;
+            let { paymentIntervals; paymentAmounts; remainingCollateralLocked; initialCollateralLocked; amountRepaidDuringCurrentPaymentInterval; forfeitedCollateral } = terms;
+
+            let (updatedAmountRepaidDuringCurrentPaymentInterval, paymentAmountMissed) : (Nat64, Nat64) = if(amountRepaidDuringCurrentPaymentInterval.icp.e8s < paymentAmounts.icp.e8s) {
+                (0, paymentAmounts.icp.e8s - amountRepaidDuringCurrentPaymentInterval.icp.e8s);
+            } else {  (amountRepaidDuringCurrentPaymentInterval.icp.e8s - paymentAmounts.icp.e8s, 0);  };
+
+            let amountOfCollateralForfeited = (paymentAmountMissed / amountDisbursedToRecipient.icp.e8s) * initialCollateralLocked.icp_staked.e8s;
+            let updatedRemainingCollateralLocked = {remainingCollateralLocked with e8s = remainingCollateralLocked.icp_staked.e8s - amountOfCollateralForfeited};
+            let updatedForfeitedCollateral = {forfeitedCollateral with e8s = forfeitedCollateral.icp_staked.e8s + amountOfCollateralForfeited};
+            let nextPaymentDueDate = ?(Time.now() + Nat64.toNat(paymentIntervals));
+
+            SyncronousHelperMethods.updateUserNeuronContribution(neuronDataMap, {userPrincipal = recipient; delta = amountOfCollateralForfeited; neuronId = initialCollateralLocked.icp_staked.fromNeuron; operation = #SubtractCollateralizedStake});
+            SyncronousHelperMethods.distributeStakeCreditToLoanContributors(amountOfCollateralForfeited, contributions,neuronDataMap, initialCollateralLocked.icp_staked.fromNeuron);
+
+            fundingCampaignsMap.put(campaignId, { campaign with terms = ?{ terms with nextPaymentDueDate; remainingCollateralLocked = updatedRemainingCollateralLocked; forfeitedCollateral = updatedForfeitedCollateral; amountRepaidDuringCurrentPaymentInterval = {icp = {e8s = updatedAmountRepaidDuringCurrentPaymentInterval}};};});
+        };
+
+        label concludeEllibleBillingCycles for((campaignId, campaign) in fundingCampaignsMap.entries()){
+            let {settled; funded; terms} = campaign;
+            if(settled or not funded) continue concludeEllibleBillingCycles;
+            let ?{nextPaymentDueDate;} = terms else continue concludeEllibleBillingCycles;
+            let ?nextPaymentDueDate_ = nextPaymentDueDate else continue concludeEllibleBillingCycles;
+            if(Time.now() >= nextPaymentDueDate_) ignore concludeBillingCycle(campaignId, campaign);
+        };
+    };
     
     private func disburseEligibleCampaignFundingsToRecipient() : async () {
         func disburseCampaignFundingToRecipients(campaignId: Nat, campaign: TreasuryTypes.FundingCampaign): async () {
@@ -550,6 +586,7 @@ shared actor class Treasury (principal : Principal) = this {
                 selfAuthPrincipal,
                 publicKey
             );
+            ignore concludeAllEligbileBillingCycles();
             ignore disburseEligibleCampaignFundingsToRecipient();
         });
     };    

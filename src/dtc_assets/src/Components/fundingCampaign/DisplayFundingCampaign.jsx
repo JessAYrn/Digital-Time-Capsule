@@ -53,8 +53,8 @@ const DisplayFundingCampaign = (props) => {
         remainingLoanInterestAmountType = getFundingCampaignAssetTypeAndValue(terms[0].remainingLoanInterestAmount).type;
         remainingLoanPrincipalAmountValue = getFundingCampaignAssetTypeAndValue(terms[0].remainingLoanPrincipalAmount).value;
         remainingLoanPrincipalAmountType = getFundingCampaignAssetTypeAndValue(terms[0].remainingLoanPrincipalAmount).type;
-        amountPaidDuringCurrentPaymentIntervalValue = getFundingCampaignAssetTypeAndValue(terms[0].amountPaidDuringCurrentPaymentInterval).value;
-        amountPaidDuringCurrentPaymentIntervalType = getFundingCampaignAssetTypeAndValue(terms[0].amountPaidDuringCurrentPaymentInterval).type;
+        amountPaidDuringCurrentPaymentIntervalValue = getFundingCampaignAssetTypeAndValue(terms[0].amountRepaidDuringCurrentPaymentInterval).value;
+        amountPaidDuringCurrentPaymentIntervalType = getFundingCampaignAssetTypeAndValue(terms[0].amountRepaidDuringCurrentPaymentInterval).type;
     };
     
     return (

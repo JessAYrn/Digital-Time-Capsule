@@ -84,7 +84,7 @@ module{
 
     public func updateUserNeuronContribution(
         neuronDataMap: TreasuryTypes.NeuronsDataMap,
-        {userPrincipal: Text; delta: Nat64; neuronId: Text; operation: {#AddStake; #SubtractStake; #CollateralizeStake; #DecollateralizeStake} }
+        {userPrincipal: Text; delta: Nat64; neuronId: Text; operation: {#AddStake; #SubtractStake; #CollateralizeStake; #DecollateralizeStake; #SubtractCollateralizedStake} }
     ): () {
         let userNeuronStakeInfo = getUserNeuronStakeInfo(userPrincipal, neuronDataMap, neuronId);
         switch(operation){
@@ -110,6 +110,14 @@ module{
                 let delta_: Nat64 = Nat64.min(collateralized_stake_e8s, delta);
                 updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount = collateralized_stake_e8s - delta_; neuronId; property = #CollateralizedStake});
                 updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount = userNeuronStakeInfo.stake_e8s + delta_; neuronId; property = #Stake});
+            };
+            case(#SubtractCollateralizedStake) {
+                let collateralized_stake_e8s: Nat64 = switch(userNeuronStakeInfo.collateralized_stake_e8s){
+                    case null { 0; };
+                    case(?collateralized_stake_e8s_) { collateralized_stake_e8s_; };
+                };
+                let delta_: Nat64 = Nat64.min(collateralized_stake_e8s, delta);
+                updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount = collateralized_stake_e8s - delta_; neuronId; property = #CollateralizedStake});
             };
         };
     };
@@ -201,6 +209,23 @@ module{
                 }
             }
         });          
+    };
+
+    public func distributeStakeCreditToLoanContributors(
+        amountToDistribute: Nat64, 
+        loanContributions: TreasuryTypes.CampaignContributionsArray, 
+        neuronDataMap: TreasuryTypes.NeuronsDataMap,
+        neuronId: TreasuryTypes.NeuronIdAsText
+    ): () {
+        var remainingAmount = amountToDistribute;
+        var totalContributedAmount: Nat64 = 0;
+        for((_, {icp = lenderContribution}) in Iter.fromArray(loanContributions)) totalContributedAmount += lenderContribution.e8s;
+        label distributionLoop for ((principal, {icp = lenderContribution}) in Iter.fromArray(loanContributions)){
+            let stakeCredit = amountToDistribute * (lenderContribution.e8s / totalContributedAmount );
+            updateUserNeuronContribution(neuronDataMap, {userPrincipal = principal; delta = stakeCredit; neuronId; operation = #AddStake});
+            remainingAmount -= stakeCredit;
+        };
+        if(remainingAmount > 0) updateUserNeuronContribution(neuronDataMap, {userPrincipal = loanContributions[0].0; delta = remainingAmount; neuronId; operation = #AddStake});
     };
 
 };

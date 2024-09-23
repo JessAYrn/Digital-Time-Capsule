@@ -5,7 +5,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { AppContext } from "../../../Context";
 import MenuField from '../../Fields/MenuField';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
-import { daysToNanoSeconds, getDateInNanoSeconds, toE8s, nanoSecondsToDays, nanoSecondsToMiliSeconds, getFundingCampaignAssetTypeAndValue } from '../../../functionsAndConstants/Utils';
+import { daysToNanoSeconds, toE8s, nanoSecondsToDays, getFundingCampaignAssetTypeAndValue } from '../../../functionsAndConstants/Utils';
 import {  FUNDING_CAMPAIGN_ASSET_TYPES, INPUT_BOX_FORMATS } from '../../../functionsAndConstants/Constants';
 import ButtonField from '../../Fields/Button';
 import DoneIcon from '@mui/icons-material/Done';
@@ -88,7 +88,7 @@ const NewFundingCampaign = (props) => {
             initialCollateralLocked?.type,
             initialCollateralLocked?.value
         );
-        if(initialCollateralLocked?.type === FUNDING_CAMPAIGN_ASSET_TYPES.ICP_STAKED) requiredFields.push(initialCollateralLocked?.fromNeuron);
+        if(initialCollateralLocked?.type === FUNDING_CAMPAIGN_ASSET_TYPES.icp_staked) requiredFields.push(initialCollateralLocked?.fromNeuron);
         if(requiredFields.includes(null)) setIsReadyToSubmit(false);
         else if(requiredFields.includes(undefined)) setIsReadyToSubmit(false);
         else if(hasError_1 || hasError_2 || hasError_3 || hasError_4 || hasError_5 || hasError_6 || hasError_7) setIsReadyToSubmit(false);
@@ -137,7 +137,7 @@ const NewFundingCampaign = (props) => {
                 color={"custom"}
                 label={"Currency To Receive"}
                 MenuIcon={KeyboardArrowDownIcon}
-                menuItemProps={amountToFundOptions([FUNDING_CAMPAIGN_ASSET_TYPES.ICP_STAKED])}
+                menuItemProps={amountToFundOptions([FUNDING_CAMPAIGN_ASSET_TYPES.icp_staked])}
             />
             { amountToFund.type && 
                 <InputBox
@@ -275,7 +275,7 @@ const NewFundingCampaign = (props) => {
                         menuItemProps={currencyToCollateralizeOptions([amountToFund.type])}
                     />
                 }
-                { initialCollateralLocked?.type === FUNDING_CAMPAIGN_ASSET_TYPES.ICP_STAKED &&
+                { initialCollateralLocked?.type === FUNDING_CAMPAIGN_ASSET_TYPES.icp_staked &&
                     <>
                         <Typography>{initialCollateralLocked.type}</Typography>
                         <MenuField
@@ -292,7 +292,7 @@ const NewFundingCampaign = (props) => {
                         />
                     </>
                 }
-                { (initialCollateralLocked?.type && initialCollateralLocked?.type !== FUNDING_CAMPAIGN_ASSET_TYPES.ICP_STAKED) 
+                { (initialCollateralLocked?.type && initialCollateralLocked?.type !== FUNDING_CAMPAIGN_ASSET_TYPES.icp_staked) 
                     || initialCollateralLocked?.fromNeuron &&
                     <>
                         <Typography>{initialCollateralLocked.fromNeuron}</Typography>

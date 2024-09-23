@@ -51,7 +51,7 @@ module{
                     let batchOperation = await getDeleteAssetBatchOperation(key);
                     buffer.add(batchOperation);
                 };
-                case(?value){};
+                case(_){};
             };
             index += 1;
         };
