@@ -13,6 +13,7 @@ import Int "mo:base/Int";
 import Time "mo:base/Time";
 import Nat "mo:base/Nat";
 import HashMap "mo:base/HashMap";
+import Float "mo:base/Float";
 import SyncronousHelperMethods "SyncronousHelperMethods";
 import Ledger "../../NNS/Ledger";
 import Account "../../Serializers/Account";
@@ -31,7 +32,7 @@ module{
         pendingActionsMap: TreasuryTypes.PendingActionsMap,
         actionLogsArrayBuffer: TreasuryTypes.ActionLogsArrayBuffer,
         memoToNeuronIdMap: TreasuryTypes.MemoToNeuronIdMap,
-        updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies ) -> async (),
+        updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async (),
         fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap,
         transformFn: NeuronManager.TransformFnSignature,
         args: Governance.ManageNeuron,
@@ -83,7 +84,7 @@ module{
         pendingActionsMap: TreasuryTypes.PendingActionsMap,
         actionLogsArrayBuffer: TreasuryTypes.ActionLogsArrayBuffer,
         memoToNeuronIdMap: TreasuryTypes.MemoToNeuronIdMap,
-        updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies ) -> async (),
+        updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async (),
         fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap,
         transformFn: NeuronManager.TransformFnSignature,
         {amount: Nat64; neuronId: Nat64; contributor: Principal; selfAuthPrincipal: Principal; publicKey: Blob}
@@ -94,7 +95,7 @@ module{
         let {account = neuronSubaccount} = neuron;
         let ?{subaccountId} = usersTreasuryDataMap.get(Principal.toText(contributor)) else Debug.trap("No subaccount for contributor");
         let {amountSent} = await NeuronManager.transferIcpToNeuron(amount, #NeuronSubaccountId(neuronSubaccount), subaccountId, selfAuthPrincipal);
-        ignore updateTokenBalances(#Principal(Principal.toText(contributor)), #Icp);
+        ignore updateTokenBalances(#Principal(Principal.toText(contributor)), #Icp, #UserTreasuryData);
         SyncronousHelperMethods.updateUserNeuronContribution( neuronDataMap,{ userPrincipal = Principal.toText(contributor);  delta = amountSent; neuronId = Nat64.toText(neuronId); operation = #AddStake; });
         let args = { id = null; command = ?#ClaimOrRefresh( {by = ?#NeuronIdOrSubaccount( {} )} );neuron_id_or_subaccount = ?#Subaccount(neuronSubaccount); };
         let newPendingAction: TreasuryTypes.PendingAction = {
@@ -123,7 +124,7 @@ module{
         pendingActionsMap: TreasuryTypes.PendingActionsMap,
         actionLogsArrayBuffer: TreasuryTypes.ActionLogsArrayBuffer,
         memoToNeuronIdMap: TreasuryTypes.MemoToNeuronIdMap,
-        updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies ) -> async (),
+        updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async (),
         fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap,
         transformFn: NeuronManager.TransformFnSignature,
         {amount: Nat64; contributor: Principal; neuronMemo: Nat64; selfAuthPrincipal: Principal; publicKey: Blob}
@@ -131,7 +132,7 @@ module{
 
         let ?{subaccountId} = usersTreasuryDataMap.get(Principal.toText(contributor)) else Debug.trap("No subaccount for contributor");
         let {amountSent} = await NeuronManager.transferIcpToNeuron(amount, #Memo(neuronMemo), subaccountId, selfAuthPrincipal);
-        ignore updateTokenBalances(#Principal(Principal.toText(contributor)), #Icp);
+        ignore updateTokenBalances(#Principal(Principal.toText(contributor)), #Icp, #UserTreasuryData);
         let newNeuronIdPlaceholderKey : Text = Nat64.toText(neuronMemo)#PENDING_NEURON_SUFFIX;
         SyncronousHelperMethods.updateUserNeuronContribution( neuronDataMap,{ userPrincipal = Principal.toText(contributor);  delta = amountSent; neuronId = newNeuronIdPlaceholderKey; operation = #AddStake;});
         let args = { id = null; command = ?#ClaimOrRefresh( {by = ?#MemoAndController( {controller = ?selfAuthPrincipal; memo = neuronMemo} )} ); neuron_id_or_subaccount = null; };
@@ -161,7 +162,7 @@ module{
         pendingActionsMap: TreasuryTypes.PendingActionsMap,
         actionLogsArrayBuffer: TreasuryTypes.ActionLogsArrayBuffer,
         memoToNeuronIdMap: TreasuryTypes.MemoToNeuronIdMap,
-        updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies ) -> async (),
+        updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async (),
         fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap,
         transformFn: NeuronManager.TransformFnSignature,
         selfAuthPrincipal: Principal,
@@ -197,7 +198,7 @@ module{
         pendingActionsMap: TreasuryTypes.PendingActionsMap,
         actionLogsArrayBuffer: TreasuryTypes.ActionLogsArrayBuffer,
         memoToNeuronIdMap: TreasuryTypes.MemoToNeuronIdMap,
-        updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies ) -> async (),
+        updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType ) -> async (),
         fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap,
         transformFn: NeuronManager.TransformFnSignature
     ): async () {
@@ -244,7 +245,7 @@ module{
         pendingActionsMap: TreasuryTypes.PendingActionsMap;
         actionLogsArrayBuffer: TreasuryTypes.ActionLogsArrayBuffer;
         memoToNeuronIdMap: TreasuryTypes.MemoToNeuronIdMap;
-        updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies ) -> async ();
+        updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async ();
         fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap;
         readRequestResponseOutput: TreasuryTypes.ReadRequestResponseOutput;
         selfAuthPrincipal: Principal;
@@ -331,7 +332,7 @@ module{
         neuronId: TreasuryTypes.NeuronIdAsText,
         usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap, 
         actionLogsArrayBuffer: TreasuryTypes.ActionLogsArrayBuffer,
-        updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies ) -> async (), 
+        updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async (), 
         fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap,
         neuronDataMap: TreasuryTypes.NeuronsDataMap,
         treasuryCanisterId: Principal,
@@ -342,13 +343,13 @@ module{
             label contributeRewardsToFundingCampaigns for((campaignId, campaign) in fundingCampaignsMap.entries()){
                 let {settled; funded; subaccountId = campaignSubaccountId; percentageOfDaoRewardsAllocated} = campaign;
                 if(settled or funded) continue contributeRewardsToFundingCampaigns;
-                let amountToAllocateToCampaign = userTotalNeuronContributionAmount * (Nat64.fromNat(percentageOfDaoRewardsAllocated) / 100);
-                let {amountSent} = await performTransfer( amountToAllocateToCampaign, null, {owner = treasuryCanisterId; subaccount = ?campaignSubaccountId}, actionLogsArrayBuffer, updateTokenBalances, true);
-                ignore creditCampaignContribution(Principal.toText(userPrincipal), campaignId, amountSent, fundingCampaignsMap, treasuryCanisterId);
+                let amountToAllocateToCampaign = Nat64.fromNat( Int.abs(Float.toInt( Float.fromInt(Nat64.toNat(userTotalNeuronContributionAmount)) * (Float.fromInt(percentageOfDaoRewardsAllocated) / Float.fromInt(100)) )) );
+                let {amountSent} = await performTransfer( amountToAllocateToCampaign, {subaccountId = null; accountType = #MultiSigAccount}, {owner = treasuryCanisterId; subaccountId = ?campaignSubaccountId; accountType = #FundingCampaign }, actionLogsArrayBuffer, updateTokenBalances);
+                ignore creditCampaignContribution(Principal.toText(userPrincipal), campaignId, amountSent, fundingCampaignsMap);
                 amountToPayoutToUser -= amountToAllocateToCampaign;
             };
-            let ?{subaccountId} = usersTreasuryDataMap.get(Principal.toText(userPrincipal)) else { return };
-            ignore performTransfer(amountToPayoutToUser, null, {owner = treasuryCanisterId; subaccount = ?subaccountId}, actionLogsArrayBuffer, updateTokenBalances, true);
+            let ?{subaccountId = userSubaccountId} = usersTreasuryDataMap.get(Principal.toText(userPrincipal)) else { return };
+            ignore performTransfer(amountToPayoutToUser, {subaccountId = null; accountType = #MultiSigAccount}, {owner = treasuryCanisterId; subaccountId = ?userSubaccountId; accountType = #UserTreasuryData }, actionLogsArrayBuffer, updateTokenBalances);
         };
         let ?{contributions} = neuronDataMap.get(neuronId) else { throw Error.reject("No neuron found") };
         label loop_ for((userPrincipal, {stake_e8s }) in Iter.fromArray(contributions)){
@@ -361,7 +362,7 @@ module{
         amountRepaid: Nat64, 
         usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap,
         actionLogsArrayBuffer: TreasuryTypes.ActionLogsArrayBuffer,
-        updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies ) -> async (), 
+        updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async (), 
         fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap,
         treasuryCanisterId: Principal,
     ): async (){
@@ -369,11 +370,11 @@ module{
         label loop_ for((userPrincipal, {icp = userCampaignContribution}) in Iter.fromArray(contributions)){
             var amountOwedToUser: Nat64 = amountRepaid * (userCampaignContribution.e8s / amountDisbursedToRecipient.icp.e8s);
             let ?{subaccountId = userSubaccountId} = usersTreasuryDataMap.get(userPrincipal) else { continue loop_ };
-            ignore performTransfer(amountOwedToUser, ?campaignSubaccountId, {owner = treasuryCanisterId; subaccount = ?userSubaccountId}, actionLogsArrayBuffer, updateTokenBalances, true);
+            ignore performTransfer(amountOwedToUser, { subaccountId = ?campaignSubaccountId; accountType = #FundingCampaign }, { owner = treasuryCanisterId; subaccountId = ?userSubaccountId; accountType = #UserTreasuryData }, actionLogsArrayBuffer, updateTokenBalances);
         };
     };
 
-    public func creditCampaignContribution(userPrincipal: Text, campaignId: Nat, amount: Nat64, fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap, treasuryCanisterPrincipal: Principal ): async () {
+    public func creditCampaignContribution(userPrincipal: Text, campaignId: Nat, amount: Nat64, fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap): async () {
         let ?campaign = fundingCampaignsMap.get(campaignId) else { return };
         let contributionsMap = HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.CampaignContributions>(Iter.fromArray(campaign.contributions), Array.size(campaign.contributions), Text.equal, Text.hash);
         let {icp = userIcpCampaignContribution} = switch(contributionsMap.get(userPrincipal)){
@@ -382,24 +383,48 @@ module{
         };
         let updatedCampaignContribution = {icp = { e8s = userIcpCampaignContribution.e8s + amount }};
         contributionsMap.put(userPrincipal, updatedCampaignContribution);
-        let updatedBalance = {icp = { e8s = await ledger.icrc1_balance_of({ owner = treasuryCanisterPrincipal; subaccount = ?campaign.subaccountId; }) }};
-        let funded = Nat64.fromNat(updatedBalance.icp.e8s) >= campaign.amountToFund.icp.e8s;
         let updatedContributions = Iter.toArray(contributionsMap.entries());
-        fundingCampaignsMap.put(campaignId, {campaign with contributions = updatedContributions; balance = updatedBalance; funded});
+        fundingCampaignsMap.put(campaignId, {campaign with contributions = updatedContributions;});
+    };
+
+    public func contributeToFundingCampaign(
+        contributor: TreasuryTypes.PrincipalAsText, 
+        campaignId: Nat, 
+        amount: Nat64, 
+        fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap, 
+        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap, 
+        treasuryCanisterId: Principal,
+        actionLogsArrayBuffer: TreasuryTypes.ActionLogsArrayBuffer,
+        updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async (),
+    ) 
+    : async TreasuryTypes.FundingCampaignsArray {
+        let ?campaign = fundingCampaignsMap.get(campaignId) else throw Error.reject("Campaign not found.");
+        let {subaccountId = fundingCampaignSubaccountId; funded;} = campaign;
+        if(funded) throw Error.reject("Campaign already funded.");
+        let (_, contributorSubaccountId) = SyncronousHelperMethods.getIdAndSubaccount(#Principal(contributor), usersTreasuryDataMap, fundingCampaignsMap);
+        let {amountSent} = await performTransfer(amount, {subaccountId = ?contributorSubaccountId; accountType = #UserTreasuryData}, {owner = treasuryCanisterId; subaccountId = ?fundingCampaignSubaccountId; accountType = #FundingCampaign}, actionLogsArrayBuffer, updateTokenBalances);
+        await creditCampaignContribution(contributor, campaignId, amountSent, fundingCampaignsMap);
+        return Iter.toArray(fundingCampaignsMap.entries());
     };
 
     public func performTransfer( 
         amount: Nat64, 
-        from_subaccount: ?Account.Subaccount, 
-        to: { owner: Principal; subaccount: ?Account.Subaccount },
+        from: {subaccountId: ?Account.Subaccount; accountType: TreasuryTypes.AccountType}, 
+        to: { owner: Principal; subaccountId: ?Account.Subaccount; accountType: TreasuryTypes.AccountType },
         actionLogsArrayBuffer: TreasuryTypes.ActionLogsArrayBuffer,
-        updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies ) -> async (), 
-        refreshRecipientBalance: Bool,
+        updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async (), 
     ) 
     : async {amountSent: Nat64;} {
         if(amount < 10_000) return {amountSent = 0};
         var amountSent = amount - txFee;
-        let transferInput = { to; fee = ?Nat64.toNat(txFee); memo = null; from_subaccount; created_at_time = ?Nat64.fromNat(Int.abs(Time.now())); amount = Nat64.toNat(amountSent); };
+        let transferInput = { 
+        to = {owner = to.owner; subaccount = switch(to.subaccountId){ case (?id){ ?id }; case (null) { null }; }; };
+        from_subaccount: ?Blob = switch(from.subaccountId){ case null { null}; case(?id){ ?id }; }; 
+        fee = ?Nat64.toNat(txFee); 
+        memo = null; 
+        created_at_time = ?Nat64.fromNat(Int.abs(Time.now())); 
+        amount = Nat64.toNat(amountSent); 
+        };
         let res = await ledger.icrc1_transfer(transferInput);
         switch (res) {
             case (#Ok(_)) {};
@@ -419,8 +444,14 @@ module{
                 This user is owed: "#Nat64.toText(icpOwed)#" ICP from the DAO's multi-sig wallet."
             );
         };
-        switch(from_subaccount){case (?subaccount_) { ignore updateTokenBalances(#SubaccountId(subaccount_), #Icp); }; case (null) {}; };
-        switch(to.subaccount){case (?subaccount_) { if(refreshRecipientBalance) ignore updateTokenBalances(#SubaccountId(subaccount_), #Icp); }; case (null) {}; };
+        switch(from.subaccountId){
+            case null { ignore updateTokenBalances(#SubaccountId(Account.defaultSubaccount()), #Icp, from.accountType); }; 
+            case(?id){ ignore updateTokenBalances(#SubaccountId(id), #Icp, from.accountType); };
+        };
+        switch(to.subaccountId){
+            case null { ignore updateTokenBalances(#SubaccountId(Account.defaultSubaccount()), #Icp, to.accountType); }; 
+            case(?id){ ignore updateTokenBalances(#SubaccountId(id), #Icp, to.accountType); };
+        };
         return {amountSent};
     };
 };

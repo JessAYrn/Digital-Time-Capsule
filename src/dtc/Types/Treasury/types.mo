@@ -16,7 +16,9 @@ module{
 
     public type SubaccountRegistryMap = HashMap.HashMap<Blob, SubaccountsMetaData>;
 
-    public type Identifier = {#Principal: Text; #SubaccountId: Account.Subaccount};
+    public type Identifier = {#Principal: Text; #SubaccountId: Account.Subaccount; #CampaignId: Nat};
+
+    public type AccountType = {#FundingCampaign; #UserTreasuryData; #ExternalAccount; #MultiSigAccount};
 
     public type CampaignId = Nat;
 
@@ -225,7 +227,7 @@ module{
         pendingActionsMap: PendingActionsMap;
         actionLogsArrayBuffer: ActionLogsArrayBuffer;
         memoToNeuronIdMap: MemoToNeuronIdMap;
-        updateTokenBalances: shared ( Identifier, SupportedCurrencies ) -> async ();
+        updateTokenBalances: shared ( Identifier, SupportedCurrencies, accountType: AccountType ) -> async ();
         fundingCampaignsMap: FundingCampaignsMap;
         readRequestResponseOutput: ReadRequestResponseOutput;
         selfAuthPrincipal: Principal;

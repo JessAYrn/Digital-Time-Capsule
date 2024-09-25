@@ -21,7 +21,7 @@ module{
         let treasury: Treasury.Treasury = actor(daoMetaData.treasuryCanisterPrincipal);
         let {subaccountId = userTreasurySubaccountId} = await treasury.getUserTreasuryData(caller);
         let {amountSent} = await userCanister.transferICP( amount, #PrincipalAndSubaccount(Principal.fromText(daoMetaData.treasuryCanisterPrincipal), ?userTreasurySubaccountId ));
-        ignore treasury.updateTokenBalances(#SubaccountId(userTreasurySubaccountId), #Icp);
+        ignore treasury.updateTokenBalances(#SubaccountId(userTreasurySubaccountId), #Icp, #UserTreasuryData);
         return {amountSent};
     };
 
@@ -38,8 +38,14 @@ module{
         let treasuryFee = amount / 200;
         let withdrawelamount = amount - treasuryFee;
         if(treasuryFee < 10_000 or withdrawelamount < 10_000){ return {amountSent: Nat64 = 0}; };
-        ignore await treasury.transferICP(treasuryFee, #SubaccountId(userTreasurySubaccountId), {owner = Principal.fromText(daoMetaData.treasuryCanisterPrincipal); subaccount = null});
-        let {amountSent} = await treasury.transferICP(withdrawelamount,#SubaccountId(userTreasurySubaccountId), {owner = userCanisterId; subaccount = null});
+        ignore await treasury.transferICP(
+            treasuryFee, {identifier = #SubaccountId(userTreasurySubaccountId); accountType = #UserTreasuryData}, 
+            {owner = Principal.fromText(daoMetaData.treasuryCanisterPrincipal); subaccount = null; accountType = #MultiSigAccount});
+        let {amountSent} = await treasury.transferICP(
+            withdrawelamount,
+            {identifier = #SubaccountId(userTreasurySubaccountId); accountType = #UserTreasuryData}, 
+            {owner = userCanisterId; subaccount = null; accountType = #ExternalAccount}
+        );
         return {amountSent};
     };    
 

@@ -5,6 +5,7 @@ import Nat64 "mo:base/Nat64";
 import Int64 "mo:base/Int64";
 import Debug "mo:base/Debug";
 import Float "mo:base/Float";
+import Nat "mo:base/Nat";
 import Blob "mo:base/Blob";
 import TreasuryTypes "../../Types/Treasury/types";
 import Account "../../Serializers/Account";
@@ -84,7 +85,7 @@ module{
 
     public func updateUserNeuronContribution(
         neuronDataMap: TreasuryTypes.NeuronsDataMap,
-        {userPrincipal: Text; delta: Nat64; neuronId: Text; operation: {#AddStake; #SubtractStake; #CollateralizeStake; #DecollateralizeStake; #SubtractCollateralizedStake} }
+        {userPrincipal: Text; delta: Nat64; neuronId: Text; operation: {#AddStake; #SubtractStake; #AddCollateralizedStake; #SubtractCollateralizedStake; } }
     ): () {
         let userNeuronStakeInfo = getUserNeuronStakeInfo(userPrincipal, neuronDataMap, neuronId);
         switch(operation){
@@ -93,25 +94,16 @@ module{
                 let delta_ = Nat64.min(userNeuronStakeInfo.stake_e8s, delta);
                 updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount = userNeuronStakeInfo.stake_e8s - delta_; neuronId; property = #Stake});
             };
-            case(#CollateralizeStake) { 
+            case(#AddCollateralizedStake) { 
                 let collateralized_stake_e8s : Nat64 = switch(userNeuronStakeInfo.collateralized_stake_e8s){
                     case null { 0; };
                     case(?collateralized_stake_e8s_) { collateralized_stake_e8s_; };
                 };
-                let delta_ =  Nat64.min(userNeuronStakeInfo.stake_e8s, delta);
-                updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount = userNeuronStakeInfo.stake_e8s - delta_; neuronId; property = #Stake});
+                let maximumIncreaseAmountToCollateralizedStake = userNeuronStakeInfo.stake_e8s - collateralized_stake_e8s;
+                let delta_ =  Nat64.min(maximumIncreaseAmountToCollateralizedStake, delta);
                 updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount = collateralized_stake_e8s + delta_; neuronId; property = #CollateralizedStake});
             };
-            case(#DecollateralizeStake) { 
-                let collateralized_stake_e8s: Nat64 = switch(userNeuronStakeInfo.collateralized_stake_e8s){
-                    case null { 0; };
-                    case(?collateralized_stake_e8s_) { collateralized_stake_e8s_; };
-                };
-                let delta_: Nat64 = Nat64.min(collateralized_stake_e8s, delta);
-                updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount = collateralized_stake_e8s - delta_; neuronId; property = #CollateralizedStake});
-                updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount = userNeuronStakeInfo.stake_e8s + delta_; neuronId; property = #Stake});
-            };
-            case(#SubtractCollateralizedStake) {
+            case(#SubtractCollateralizedStake) { 
                 let collateralized_stake_e8s: Nat64 = switch(userNeuronStakeInfo.collateralized_stake_e8s){
                     case null { 0; };
                     case(?collateralized_stake_e8s_) { collateralized_stake_e8s_; };
@@ -174,20 +166,28 @@ module{
         return neuronStakeInfo;
     };
 
-    public func getPrincipalAndSubaccount(
+    public func getIdAndSubaccount(
         identifier: TreasuryTypes.Identifier,
-        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap
+        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap,
+        fundingCampaignMap: TreasuryTypes.FundingCampaignsMap
     ) : (Text, Account.Subaccount) {
         switch(identifier){
             case(#SubaccountId(subaccount)) {
                 for((userPrincipal, {subaccountId}) in usersTreasuryDataMap.entries()){
                     if(Blob.equal(subaccountId, subaccount)) return (userPrincipal, subaccount);
                 };
+                for((campaignId, {subaccountId}) in fundingCampaignMap.entries()){
+                    if(Blob.equal(subaccountId, subaccount)) return (Nat.toText(campaignId), subaccount);
+                };
                 Debug.trap("Subaccount not found.");
             };
             case(#Principal(principal)) { 
                 let ?{subaccountId} = usersTreasuryDataMap.get(principal) else Debug.trap("User not found.");
                 return (principal, subaccountId);
+            };
+            case(#CampaignId(campaignId)) { 
+                let ?{subaccountId} = fundingCampaignMap.get(campaignId) else Debug.trap("Campaign not found.");
+                return (Nat.toText(campaignId), subaccountId);
             };
         };
     };
