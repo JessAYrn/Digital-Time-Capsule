@@ -7,8 +7,10 @@ import Nat16 "mo:base/Nat16";
 import Nat32 "mo:base/Nat32";
 import Nat64 "mo:base/Nat64";
 import Nat8 "mo:base/Nat8";
+import Float "mo:base/Float";
 import Util "./Util";
 import Prelude "mo:base/Prelude";
+import Int64 "mo:base/Int64";
 
 module {
 
@@ -322,6 +324,10 @@ module {
     var result = num % modulus;
     if(result < 0) result += modulus;
     return Int.abs(result);
+  };
+
+  public func nat64ComputePercentage({value: Nat64; numerator: Nat64; denominator: Nat64}): Nat64 {
+    Int64.toNat64(Float.toInt64(Float.fromInt64(Int64.fromNat64(value)) * (Float.fromInt64(Int64.fromNat64(numerator)) / Float.fromInt64(Int64.fromNat64(denominator))) ));
   };
 
 };

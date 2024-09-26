@@ -2,13 +2,12 @@ import Iter "mo:base/Iter";
 import HashMap "mo:base/HashMap";
 import Text "mo:base/Text";
 import Nat64 "mo:base/Nat64";
-import Int64 "mo:base/Int64";
 import Debug "mo:base/Debug";
-import Float "mo:base/Float";
 import Nat "mo:base/Nat";
 import Blob "mo:base/Blob";
 import TreasuryTypes "../../Types/Treasury/types";
 import Account "../../Serializers/Account";
+import NatX "../../MotokoNumbers/NatX";
 
 module{
 
@@ -32,11 +31,7 @@ module{
                 case null { stake_e8s; };
                 case(?collateralized_stake_e8s_) { collateralized_stake_e8s_ + stake_e8s; };
             };
-            let userTotalStakeAsFloat = Float.fromInt64(Int64.fromNat64(userTotalStake));
-            let neuronTotalStakeAsFloat = Float.fromInt64(Int64.fromNat64(neuronTotalStake));
-            let neuronTotalVotingPowerAsFloat = Float.fromInt64(Int64.fromNat64(neuronTotalVotingPower));
-            let userVotingPowerAsFloat = Float.floor(userTotalStakeAsFloat * (neuronTotalVotingPowerAsFloat / neuronTotalStakeAsFloat));
-            let userVotingPower = Int64.toNat64(Float.toInt64(userVotingPowerAsFloat));
+            let userVotingPower = NatX.nat64ComputePercentage({value = userTotalStake; numerator = neuronTotalVotingPower; denominator = neuronTotalStake});
             contributionsMap.put(contributor, {neuronStakeInfo with voting_power = userVotingPower});
         };
         neuronDataMap.put(neuronId, {neuronData with contributions = Iter.toArray(contributionsMap.entries())});
@@ -145,8 +140,8 @@ module{
 
         for((contributor, neuronStakeInfo) in parentNeuronContributionsMap.entries()){
             let {stake_e8s = userStakeInParentNeuron} = neuronStakeInfo;
-            let userStakeInNewNeuron = Float.fromInt64(Int64.fromNat64(userStakeInParentNeuron)) * (Float.fromInt64(Int64.fromNat64(newNeuronTotalStake)) / Float.fromInt64(Int64.fromNat64(parentNeuronTotalStake)));
-            newNeuronContributionsMap.put(contributor, { stake_e8s = Int64.toNat64(Float.toInt64(userStakeInNewNeuron)); voting_power = 0; collateralized_stake_e8s = null; });
+            let userStakeInNewNeuron = NatX.nat64ComputePercentage({value = newNeuronTotalStake; numerator = userStakeInParentNeuron; denominator = parentNeuronTotalStake});
+            newNeuronContributionsMap.put(contributor, { stake_e8s = userStakeInNewNeuron; voting_power = 0; collateralized_stake_e8s = null; });
         };
 
         neuronDataMap.put(neuronId, {neuronData with contributions = Iter.toArray(newNeuronContributionsMap.entries()); parentNeuronContributions = null;});
@@ -211,7 +206,7 @@ module{
         });          
     };
 
-    public func distributeStakeCreditToLoanContributors(
+    public func redistributeStakeToLoanContributors(
         amountToDistribute: Nat64, 
         loanContributions: TreasuryTypes.CampaignContributionsArray, 
         neuronDataMap: TreasuryTypes.NeuronsDataMap,
@@ -221,7 +216,7 @@ module{
         var totalContributedAmount: Nat64 = 0;
         for((_, {icp = lenderContribution}) in Iter.fromArray(loanContributions)) totalContributedAmount += lenderContribution.e8s;
         label distributionLoop for ((principal, {icp = lenderContribution}) in Iter.fromArray(loanContributions)){
-            let stakeCredit = amountToDistribute * (lenderContribution.e8s / totalContributedAmount );
+            let stakeCredit = NatX.nat64ComputePercentage({value = amountToDistribute; numerator = lenderContribution.e8s; denominator = totalContributedAmount});
             updateUserNeuronContribution(neuronDataMap, {userPrincipal = principal; delta = stakeCredit; neuronId; operation = #AddStake});
             remainingAmount -= stakeCredit;
         };

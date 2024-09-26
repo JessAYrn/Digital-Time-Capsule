@@ -25,7 +25,6 @@ import Nat "mo:base/Nat";
 import Time "mo:base/Time";
 import Float "mo:base/Float";
 import Blob "mo:base/Blob";
-import Int64 "mo:base/Int64";
 import GovernanceHelperMethods "Modules/Main/GovernanceHelperMethods";
 import Treasury "Treasury";
 import TreasuryTypes "Types/Treasury/types";
@@ -36,6 +35,7 @@ import Journal "Journal";
 import MarketData "Modules/HTTPRequests/MarketData";
 import AnalyticsTypes "Types/Analytics/types";
 import Governance "NNS/Governance";
+import FloatX "MotokoNumbers/FloatX";
 
 
 shared actor class User() = this {
@@ -513,10 +513,10 @@ shared actor class User() = this {
                 case true { GovernanceHelperMethods.tallyVotes({ neuronsDataArray; proposal; founder = daoMetaData_v4.founder; userProfilesMap = userProfilesMap_v2; includeNonVoters = true}); };
                 case false { GovernanceHelperMethods.tallyVotes({ neuronsDataArray; proposal; founder = daoMetaData_v4.founder; userProfilesMap = userProfilesMap_v2; includeNonVoters = false}); };
             };
-            let participationRate = Float.fromInt(Nat64.toNat(totalParticipated)) / Float.fromInt(Nat64.toNat(totalVotingPower));
+            let participationRate = FloatX.divideNat64(totalParticipated, totalVotingPower);
             let quorumHasBeenReached = participationRate >= quorum;
-            let percentageOfTotalVotingPowerVotingYes = Float.fromInt64(Int64.fromNat64(yay) / Int64.fromNat64(totalVotingPower));
-            let percentageOfTotalVotingPowerVotingNo = Float.fromInt64(Int64.fromNat64(nay) / Int64.fromNat64(totalVotingPower));
+            let percentageOfTotalVotingPowerVotingYes = FloatX.divideNat64(yay, totalVotingPower);
+            let percentageOfTotalVotingPowerVotingNo = FloatX.divideNat64(nay, totalVotingPower);
             let canFinalize = percentageOfTotalVotingPowerVotingYes > 0.5 or percentageOfTotalVotingPowerVotingNo > 0.5 or (votingPeriodHasEnded and quorumHasBeenReached);
             var executed: Bool = false;
             var finalized: Bool = false;

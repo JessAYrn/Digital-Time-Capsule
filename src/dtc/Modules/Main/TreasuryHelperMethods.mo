@@ -5,6 +5,7 @@ import Journal "../../Journal";
 import Treasury "../../Treasury";
 import Nat64 "mo:base/Nat64";
 import TreasuryTypes "../../Types/Treasury/types";
+import NatX "../../MotokoNumbers/NatX";
 
 module{
 
@@ -35,7 +36,7 @@ module{
         let userCanisterId = userProfile.canisterId;
         let treasury: Treasury.Treasury = actor(daoMetaData.treasuryCanisterPrincipal);
         let {subaccountId = userTreasurySubaccountId} = await treasury.getUserTreasuryData(caller);
-        let treasuryFee = amount / 200;
+        let treasuryFee = NatX.nat64ComputePercentage({value = amount; numerator = 1; denominator = 200});
         let withdrawelamount = amount - treasuryFee;
         if(treasuryFee < 10_000 or withdrawelamount < 10_000){ return {amountSent: Nat64 = 0}; };
         ignore await treasury.transferICP(

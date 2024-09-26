@@ -23,8 +23,10 @@ import Support "../../SupportCanisterIds/SupportCanisterIds";
 import Time "mo:base/Time";
 import Float "mo:base/Float";
 import Int "mo:base/Int";
+import Int64 "mo:base/Int64";
 import Timer "mo:base/Timer";
 import Treasury "../../Treasury";
+import FloatX "../../MotokoNumbers/FloatX";
 
 module{
 
@@ -32,7 +34,7 @@ module{
 
     private let nftCollection : NftCollection.Interface = actor(NftCollection.CANISTER_ID);
 
-    private let nanosecondsInADay: Float = 86400000000000;
+    private let nanosecondsInADay: Nat64 = 86400000000000;
 
     public func getPrincipalsList( profilesMap : MainTypes.UserProfilesMap_V2): 
     async [Principal] {
@@ -244,11 +246,11 @@ module{
         let managerCanister : Manager.Manager = actor(daoMetaData.managerCanisterPrincipal);
         ignore managerCanister.notifyNextStableRelease();
         ignore refillCanisterCycles(daoMetaData, profilesMap);
-        let timeLapsed : Float = Float.fromInt(Time.now() - daoMetaData.lastRecordedTime);
-        let timeLapsedInDays : Float = timeLapsed / nanosecondsInADay;
+        let timeLapsed =Time.now() - daoMetaData.lastRecordedTime;
+        let timeLapsedInDays : Float = FloatX.divideInt64(Int64.fromInt(timeLapsed), Int64.fromNat64(nanosecondsInADay));
         if(timeLapsedInDays < 1){ return daoMetaData };
         let cyclesBurned : Float = Float.fromInt(daoMetaData.lastRecordedBackEndCyclesBalance - currentCylcesBalance);
-        let dailyBurnRate : Nat = Int.abs(Float.toInt(cyclesBurned / timeLapsedInDays));
+        let dailyBurnRate : Nat = Int.abs(Int.max(Float.toInt(cyclesBurned / timeLapsedInDays), 0));
         let updatedCanisterData = {
             daoMetaData with 
             lastRecordedBackEndCyclesBalance = currentCylcesBalance;

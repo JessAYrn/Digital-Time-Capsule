@@ -13,10 +13,10 @@ import Int "mo:base/Int";
 import Time "mo:base/Time";
 import Nat "mo:base/Nat";
 import HashMap "mo:base/HashMap";
-import Float "mo:base/Float";
 import SyncronousHelperMethods "SyncronousHelperMethods";
 import Ledger "../../NNS/Ledger";
 import Account "../../Serializers/Account";
+import NatX "../../MotokoNumbers/NatX";
 
 module{
 
@@ -339,25 +339,59 @@ module{
     ): async () {
         
         func performUserPayoutFromNeuronDisbursal(userPrincipal: Principal, userTotalNeuronContributionAmount: Nat64) : async () {
-            var amountToPayoutToUser = userTotalNeuronContributionAmount;
+
+            var numberOfDebtsToRepay: Nat64 = 0;
+            var totalOutStandingPaymentOwed: Nat64 = 0;
+            label getDebtInfo for((campaignId, {terms; funded; recipient; settled}) in fundingCampaignsMap.entries()){
+                if(not funded or settled or recipient != Principal.toText(userPrincipal)) continue getDebtInfo;
+                let ?{paymentAmounts; amountRepaidDuringCurrentPaymentInterval} = terms else continue getDebtInfo;
+                if(amountRepaidDuringCurrentPaymentInterval.icp.e8s < paymentAmounts.icp.e8s){ 
+                    let outStandingPaymentOwed = paymentAmounts.icp.e8s - amountRepaidDuringCurrentPaymentInterval.icp.e8s;
+                    totalOutStandingPaymentOwed += outStandingPaymentOwed; 
+                    numberOfDebtsToRepay += 1;
+                };
+            };
+
+            let amountOfUserContributionsReservedToPayDebts: Nat64 = Nat64.min(userTotalNeuronContributionAmount, totalOutStandingPaymentOwed);
+            var amountOfUserNeuronContributionsUsedToPayDebts: Nat64 = 0;
+            if(numberOfDebtsToRepay > 0){
+                label repayDebts for ((campaignId, campaign) in fundingCampaignsMap.entries()){
+                    let {settled; funded; recipient; terms} = campaign;
+                    if(not funded or settled or recipient != Principal.toText(userPrincipal)) continue repayDebts;
+                    let ?{paymentAmounts; amountRepaidDuringCurrentPaymentInterval} = terms else continue repayDebts;
+                    if(amountRepaidDuringCurrentPaymentInterval.icp.e8s > paymentAmounts.icp.e8s) continue repayDebts;
+                    let debtRepaymentAmountOwed: Nat64 = paymentAmounts.icp.e8s - amountRepaidDuringCurrentPaymentInterval.icp.e8s;
+                    let amountToAllocateTowardsDebtRepayment = Nat64.min(
+                        debtRepaymentAmountOwed,
+                        NatX.nat64ComputePercentage({value = amountOfUserContributionsReservedToPayDebts; numerator = 1; denominator = numberOfDebtsToRepay})
+                    );
+                    ignore repayFundingCampaign( amountToAllocateTowardsDebtRepayment, {subaccountId = null; accountType = #MultiSigAccount}, campaignId, fundingCampaignsMap, usersTreasuryDataMap, neuronDataMap, actionLogsArrayBuffer, updateTokenBalances, treasuryCanisterId);
+                    amountOfUserNeuronContributionsUsedToPayDebts += amountToAllocateTowardsDebtRepayment;
+                }; 
+            };
+
+            let amountOfUserNeuronContributionsReservedToContributeToFundingCampaigns: Nat64 = userTotalNeuronContributionAmount - amountOfUserNeuronContributionsUsedToPayDebts;
+            var amountRemainingToPayoutToUser: Nat64 = amountOfUserNeuronContributionsReservedToContributeToFundingCampaigns;
+            if(amountOfUserNeuronContributionsReservedToContributeToFundingCampaigns < txFee) return;
+
             label contributeRewardsToFundingCampaigns for((campaignId, campaign) in fundingCampaignsMap.entries()){
-                let {settled; funded; subaccountId = campaignSubaccountId; percentageOfDaoRewardsAllocated} = campaign;
+                let {settled; funded; percentageOfDaoRewardsAllocated} = campaign;
                 if(settled or funded) continue contributeRewardsToFundingCampaigns;
-                let amountToAllocateToCampaign = Nat64.fromNat( Int.abs(Float.toInt( Float.fromInt(Nat64.toNat(userTotalNeuronContributionAmount)) * (Float.fromInt(percentageOfDaoRewardsAllocated) / Float.fromInt(100)) )) );
-                let {amountSent} = await performTransfer( amountToAllocateToCampaign, {subaccountId = null; accountType = #MultiSigAccount}, {owner = treasuryCanisterId; subaccountId = ?campaignSubaccountId; accountType = #FundingCampaign }, actionLogsArrayBuffer, updateTokenBalances);
-                ignore creditCampaignContribution(Principal.toText(userPrincipal), campaignId, amountSent, fundingCampaignsMap);
-                amountToPayoutToUser -= amountToAllocateToCampaign;
+                let amountToAllocateToCampaign = NatX.nat64ComputePercentage({value = amountOfUserNeuronContributionsReservedToContributeToFundingCampaigns; numerator = Nat64.fromNat(percentageOfDaoRewardsAllocated); denominator = 100});
+                ignore contributeToFundingCampaign( Principal.toText(userPrincipal), campaignId, amountToAllocateToCampaign, fundingCampaignsMap, usersTreasuryDataMap, treasuryCanisterId, actionLogsArrayBuffer, updateTokenBalances);
+                amountRemainingToPayoutToUser -= amountToAllocateToCampaign;
             };
             let ?{subaccountId = userSubaccountId} = usersTreasuryDataMap.get(Principal.toText(userPrincipal)) else { return };
-            ignore performTransfer(amountToPayoutToUser, {subaccountId = null; accountType = #MultiSigAccount}, {owner = treasuryCanisterId; subaccountId = ?userSubaccountId; accountType = #UserTreasuryData }, actionLogsArrayBuffer, updateTokenBalances);
+            ignore performTransfer(amountRemainingToPayoutToUser, {subaccountId = null; accountType = #MultiSigAccount}, {owner = treasuryCanisterId; subaccountId = ?userSubaccountId; accountType = #UserTreasuryData }, actionLogsArrayBuffer, updateTokenBalances);
         };
+
         let ?{contributions} = neuronDataMap.get(neuronId) else { throw Error.reject("No neuron found") };
         label loop_ for((userPrincipal, {stake_e8s }) in Iter.fromArray(contributions)){
             ignore performUserPayoutFromNeuronDisbursal(Principal.fromText(userPrincipal), stake_e8s);
         };
     };
 
-    public func distributePayoutsFromLoanRepayment(
+    public func distributePayoutsFromFundingCampaign(
         campaignId: TreasuryTypes.CampaignId, 
         amountRepaid: Nat64, 
         usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap,
@@ -368,7 +402,8 @@ module{
     ): async (){
         let ?{contributions; amountDisbursedToRecipient; subaccountId = campaignSubaccountId} = fundingCampaignsMap.get(campaignId) else { throw Error.reject("No campaign found") };
         label loop_ for((userPrincipal, {icp = userCampaignContribution}) in Iter.fromArray(contributions)){
-            var amountOwedToUser: Nat64 = amountRepaid * (userCampaignContribution.e8s / amountDisbursedToRecipient.icp.e8s);
+            var amountOwedToUser: Nat64 = if(amountDisbursedToRecipient.icp.e8s == 0) { userCampaignContribution.e8s }
+            else { NatX.nat64ComputePercentage({value = amountRepaid; numerator = userCampaignContribution.e8s; denominator = amountDisbursedToRecipient.icp.e8s}) };
             let ?{subaccountId = userSubaccountId} = usersTreasuryDataMap.get(userPrincipal) else { continue loop_ };
             ignore performTransfer(amountOwedToUser, { subaccountId = ?campaignSubaccountId; accountType = #FundingCampaign }, { owner = treasuryCanisterId; subaccountId = ?userSubaccountId; accountType = #UserTreasuryData }, actionLogsArrayBuffer, updateTokenBalances);
         };
@@ -404,6 +439,52 @@ module{
         let (_, contributorSubaccountId) = SyncronousHelperMethods.getIdAndSubaccount(#Principal(contributor), usersTreasuryDataMap, fundingCampaignsMap);
         let {amountSent} = await performTransfer(amount, {subaccountId = ?contributorSubaccountId; accountType = #UserTreasuryData}, {owner = treasuryCanisterId; subaccountId = ?fundingCampaignSubaccountId; accountType = #FundingCampaign}, actionLogsArrayBuffer, updateTokenBalances);
         await creditCampaignContribution(contributor, campaignId, amountSent, fundingCampaignsMap);
+        return Iter.toArray(fundingCampaignsMap.entries());
+    };
+
+    public func repayFundingCampaign(
+        amount: Nat64, 
+        paymentFrom: {subaccountId: ?Account.Subaccount; accountType: TreasuryTypes.AccountType},
+        campaignId: Nat,
+        fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap,
+        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap,
+        neuronDataMap: TreasuryTypes.NeuronsDataMap, 
+        actionLogsArrayBuffer: TreasuryTypes.ActionLogsArrayBuffer,
+        updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async (), 
+        treasuryCanisterId: Principal,
+    ) : async TreasuryTypes.FundingCampaignsArray {
+        if(amount < 10_000_000) throw Error.reject("Minimum repayment amount is 0.1 ICP.");
+        let ?campaign = fundingCampaignsMap.get(campaignId) else throw Error.reject("Campaign not found.");
+        let {subaccountId = fundingCampaignSubaccountId; funded; recipient; amountDisbursedToRecipient} = campaign;
+        if(not funded) throw Error.reject("Campaign funds have not been disbursed yet.");
+        let ?terms = campaign.terms else throw Error.reject("Campaign terms not found.");
+        let {amountSent} = await performTransfer(
+            amount, 
+            paymentFrom, 
+            {owner = treasuryCanisterId; subaccountId = ?fundingCampaignSubaccountId; accountType = #FundingCampaign},
+            actionLogsArrayBuffer,
+            updateTokenBalances
+        );  
+        await distributePayoutsFromFundingCampaign(campaignId, amountSent, usersTreasuryDataMap, actionLogsArrayBuffer, updateTokenBalances, fundingCampaignsMap, treasuryCanisterId);
+        let amountRepaidDuringCurrentPaymentInterval = {icp = { e8s: Nat64 = terms.amountRepaidDuringCurrentPaymentInterval.icp.e8s + amountSent; } };
+        var amountToDeductFromPrincipalAmount: Nat64 = 0;
+        let remainingLoanInterestAmount = if(terms.remainingLoanInterestAmount.icp.e8s > amountSent) { 
+            {icp = {e8s: Nat64 = terms.remainingLoanInterestAmount.icp.e8s - amountSent}}; 
+        } else { 
+            amountToDeductFromPrincipalAmount := amountSent - terms.remainingLoanInterestAmount.icp.e8s; 
+            {icp = {e8s: Nat64 = 0}}; 
+        };
+        var settled = false;
+        var remainingLoanPrincipalAmount = if(terms.remainingLoanPrincipalAmount.icp.e8s > amountToDeductFromPrincipalAmount){
+            {icp = {e8s: Nat64 = terms.remainingLoanPrincipalAmount.icp.e8s - amountToDeductFromPrincipalAmount}}  
+        } else { settled := true; {icp = {e8s: Nat64 = 0}}; };
+        
+        let amountToDecollateralize: Nat64 = NatX.nat64ComputePercentage({value = terms.initialCollateralLocked.icp_staked.e8s; numerator = amountToDeductFromPrincipalAmount; denominator = amountDisbursedToRecipient.icp.e8s});
+        let collateralRemainingAfterDecollateralization: Nat64 = if(terms.remainingCollateralLocked.icp_staked.e8s > amountToDecollateralize){
+            terms.remainingCollateralLocked.icp_staked.e8s - amountToDecollateralize} else { 0 };
+        let remainingCollateralLocked = {icp_staked = {e8s = collateralRemainingAfterDecollateralization; fromNeuron = terms.remainingCollateralLocked.icp_staked.fromNeuron; }};
+        SyncronousHelperMethods.updateUserNeuronContribution(neuronDataMap, {userPrincipal = recipient; delta = amountToDecollateralize; neuronId = terms.initialCollateralLocked.icp_staked.fromNeuron; operation = #SubtractCollateralizedStake});
+        fundingCampaignsMap.put(campaignId, { campaign with settled; terms = ?{ terms with remainingLoanInterestAmount; remainingLoanPrincipalAmount; amountRepaidDuringCurrentPaymentInterval; remainingCollateralLocked;}; });   
         return Iter.toArray(fundingCampaignsMap.entries());
     };
 

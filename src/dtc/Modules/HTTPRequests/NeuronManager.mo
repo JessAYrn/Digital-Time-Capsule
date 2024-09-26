@@ -6,7 +6,6 @@ import Principal "mo:base/Principal";
 import Blob "mo:base/Blob";
 import Cycles "mo:base/ExperimentalCycles";
 import Nat64 "mo:base/Nat64";
-import Error "mo:base/Error";
 import Ledger "../../NNS/Ledger";
 import Time "mo:base/Time";
 import Int "mo:base/Int";
