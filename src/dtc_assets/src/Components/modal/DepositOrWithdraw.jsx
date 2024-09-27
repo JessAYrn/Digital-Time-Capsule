@@ -3,7 +3,7 @@ import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import { Typography } from "@mui/material";
 import { AppContext } from "../../Context";
 import InputBox from "../Fields/InputBox";
-import {TREASURY_ACTIONS } from "../proposals/utils";
+import {TREASURY_ACTIONS } from "./proposals/utils";
 import DoneIcon from '@mui/icons-material/Done';
 import ButtonField from "../Fields/Button";
 import { fromE8s, isANumber, toE8s } from "../../functionsAndConstants/Utils";

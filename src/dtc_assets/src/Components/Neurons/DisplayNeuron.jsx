@@ -12,9 +12,9 @@ import LockIcon from '@mui/icons-material/Lock';
 import HistoryToggleOffIcon from '@mui/icons-material/HistoryToggleOff';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import DataTable from "../Fields/Table";
-import CreateProposalForm from "../proposals/CreateProposalForm";
+import CreateProposalForm from "../modal/proposals/CreateProposalForm";
 import ModalComponent from "../modal/Modal";
-import { PROPOSAL_ACTIONS } from "../proposals/utils";
+import { PROPOSAL_ACTIONS } from "../modal/proposals/utils";
 
 const NeuronStates = {
     locked: 1,

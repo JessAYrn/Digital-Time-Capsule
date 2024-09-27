@@ -1,11 +1,11 @@
 import React, {useState, useEffect} from 'react';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
-import ButtonField from '../../Fields/Button';
+import ButtonField from '../../../Fields/Button';
 import DoneIcon from '@mui/icons-material/Done';
-import InputBox from '../../Fields/InputBox';
-import { fromE8s } from '../../../functionsAndConstants/Utils';
-import { INPUT_BOX_FORMATS } from '../../../functionsAndConstants/Constants';
-import { toE8s } from '../../../functionsAndConstants/Utils';
+import InputBox from '../../../Fields/InputBox';
+import { fromE8s } from '../../../../functionsAndConstants/Utils';
+import { INPUT_BOX_FORMATS } from '../../../../functionsAndConstants/Constants';
+import { toE8s } from '../../../../functionsAndConstants/Utils';
 
 
 const CreateNeuronOrPurchaseCycles = (props) => {

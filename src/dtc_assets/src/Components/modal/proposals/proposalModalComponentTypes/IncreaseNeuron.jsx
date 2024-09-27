@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useContext} from 'react';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
-import ButtonField from '../../Fields/Button';
+import ButtonField from '../../../Fields/Button';
 import DoneIcon from '@mui/icons-material/Done';
-import InputBox from '../../Fields/InputBox';
-import { INPUT_BOX_FORMATS } from '../../../functionsAndConstants/Constants';
-import MenuField from '../../Fields/MenuField';
+import InputBox from '../../../Fields/InputBox';
+import { INPUT_BOX_FORMATS } from '../../../../functionsAndConstants/Constants';
+import MenuField from '../../../Fields/MenuField';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import { fromE8s, toE8s } from '../../../functionsAndConstants/Utils';
-import { AppContext } from '../../../Context';
+import { fromE8s, toE8s } from '../../../../functionsAndConstants/Utils';
+import { AppContext } from '../../../../Context';
 import { Typography } from '@mui/material';
 
 const IncreaseNeuron = (props) => {

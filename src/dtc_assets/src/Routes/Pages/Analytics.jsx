@@ -15,7 +15,7 @@ import { copyText } from '../../functionsAndConstants/walletFunctions/CopyWallet
 import DataTable from '../../Components/Fields/Table';
 import { mapRequestsForAccessToTableRows, mapUsersProfileDataToTableRows, requestsForAccessTableColumns, usersTableColumns } from '../../mappers/dashboardMapperFunctions';
 import ModalComponent from '../../Components/modal/Modal';
-import DisplayProposals from '../../Components/proposals/DisplayAllProposals';
+import DisplayProposals from '../../Components/modal/proposals/DisplayAllProposals';
 import { AppContext } from '../../Context';
 import { mapUsersTotalTreasuryStakesAndVotingPowersDataToChartFormat } from '../../mappers/treasuryPageMapperFunctions';
 import Graph from '../../Components/Fields/Chart';

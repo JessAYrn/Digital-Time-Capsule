@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import Grid from "@mui/material/Unstable_Grid2";
 import Graph from "../Fields/Chart";
 import { Typography } from "@mui/material";
@@ -14,10 +14,17 @@ import { getFundingCampaignAssetTypeAndValue } from "../../functionsAndConstants
 import { copyText } from "../../functionsAndConstants/walletFunctions/CopyWalletAddress";
 import { mapDataMapToChartFormat } from "../../mappers/treasuryPageMapperFunctions";
 import DatePickerField from "../Fields/DatePicker";
+import ModalComponent from "../modal/Modal";
+import AddLiquidityOrRepayFundingCampaign, {ACTION_TYPES} from "../modal/AddLiquidityOrRepayFundingCampaign";
 
 const DisplayFundingCampaign = (props) => {
     const { fundingCampaign, campaignId } = props;
     const { contributions, terms } = fundingCampaign;
+
+    const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [modalProps, setModalProps] = useState({});
+    const [modalIsLoading, setModalIsLoading] = useState(false);
+
     console.log(campaignId, fundingCampaign);
 
     const { value: amountToFundValue, type: amountToFundType } = getFundingCampaignAssetTypeAndValue(fundingCampaign?.amountToFund);
@@ -56,100 +63,126 @@ const DisplayFundingCampaign = (props) => {
         amountPaidDuringCurrentPaymentIntervalValue = getFundingCampaignAssetTypeAndValue(terms[0].amountRepaidDuringCurrentPaymentInterval).value;
         amountPaidDuringCurrentPaymentIntervalType = getFundingCampaignAssetTypeAndValue(terms[0].amountRepaidDuringCurrentPaymentInterval).type;
     };
+
+    const onClickAddLiquidityOrRepayFundingCampaign = () => {
+        setModalProps({
+            flexDirection: "column",
+            components: [
+              {
+                Component: AddLiquidityOrRepayFundingCampaign,
+                props: { 
+                    actionType: fundingCampaign?.funded ? ACTION_TYPES.repayFundingCampaign : ACTION_TYPES.addLiquidity,
+                    campaignId,
+                    setModalIsOpen,
+                    setModalIsLoading
+                }
+              }
+            ],
+            handleClose: () => setModalIsOpen(false)
+        });
+        setModalIsOpen(true);
+    };
     
     return (
-        <Grid display={"flex"} width={"100%"} justifyContent={"center"} alignItems={"center"} xs={12} padding={0} margin={"10px"} flexDirection={"column"}>
-            <DataField
-                label={"amount requested"}
-                text={`${amountToFundValue} ${amountToFundType}`}
-                disabled={true}
-            />
-            <DataField
-                label={"Campaign Wallet Balance"}
-                text={`${campaignWalletBalanceValue} ${campaignWalletBalanceType}`}
-                disabled={true}
-            />
-            <DataField
-                text={`${parseInt(fundingCampaign?.percentageOfDaoRewardsAllocated)}`}
-                label={"Percentage of DAO rewards allocated"}
-                disabled={true}
-            />
-            <DataField
-                label={"Amount Disbursed"}
-                text={`${amountDisbursedToRecipientValue} ${amountDisbursedToRecipientType}`}
-                disabled={true}
-            />
-            <DataField
-                text={`${shortenHexString(fundingCampaign?.recipient)}`}
-                label={"Recipient Principal ID"}
-                buttonIcon={ContentCopyIcon}
-                onClick={() => copyText(fundingCampaign?.recipient)}
-            />
-            <DataField
-                text={`${remainingCollateralLockedValue} ${remainingCollateralLockedType}`}
-                label={"Collateral Locked"}
-                disabled={true}
-            />
-            <DataField
-                text={`${forfeitedCollateralValue} ${forfeitedCollateralType}` }
-                label={"Collateral Forfeited"}
-                disabled={true}
-            />
-            {nextPaymentDueDate &&
-                <>
-                    <DataField
-                        text={`${remainingLoanPrincipalAmountValue} ${remainingLoanPrincipalAmountType}` }
-                        label={"Remaininig Principal Owed"}
-                        disabled={true}
-                    />
-                    <DataField
-                        text={`${remainingLoanInterestAmountValue} ${remainingLoanInterestAmountType}` }
-                        label={"Remaining Interest Owed"}
-                        disabled={true}
-                    />
-                    <DataField
-                        label={"Payment Due"}
-                        text={`${Math.max(paymentAmountsValue - amountPaidDuringCurrentPaymentIntervalValue, 0)} ${paymentAmountsType}`}
-                        disabled={true}
-                    />
-                    <DatePickerField
-                        disabled={true}
-                        width={"100% !important"}
-                        value={new Date(nanoSecondsToMiliSeconds(nextPaymentDueDate))}
-                        label={"Next Payment Due Date"}
-                    />
-                </>
-            }
-            <InputBox
-                value={fundingCampaign?.description }
-                label={"Description"}
-                disabled={true}
-                rows={4}
-            />
-            
-            {contributions.length > 0 &&
-            <Graph
-                withoutPaper={true}
-                width={"25%"}
-                height={"400px"}
-                hideButton2={true}
-                type={CHART_TYPES.pie}
-                defaultLabel={GRAPH_DISPLAY_LABELS.icp}
-                inputData={mapDataMapToChartFormat(contributions, GRAPH_DATA_SETS.fundingCampaignContributions)}
-                defaultDataSetName={GRAPH_DATA_SETS.fundingCampaignContributions}
-                maintainAspectRatio={false}
-            />}
-            <Grid display={"flex"} width={"100%"} justifyContent={"left"} alignItems={"left"} xs={12} padding={0} margin={"10px"} >
-                <ButtonField
-                active={true}
-                text={"Provide Liquidity"}
-                Icon={PriceCheckIcon}
-                onClick={() => { }}
-                iconSize={'small'}
+        <>
+            <Grid display={"flex"} width={"100%"} justifyContent={"center"} alignItems={"center"} xs={12} padding={0} margin={"10px"} flexDirection={"column"}>
+                <DataField
+                    label={"amount requested"}
+                    text={`${amountToFundValue} ${amountToFundType}`}
+                    disabled={true}
                 />
+                <DataField
+                    label={"Campaign Wallet Balance"}
+                    text={`${campaignWalletBalanceValue} ${campaignWalletBalanceType}`}
+                    disabled={true}
+                />
+                <DataField
+                    text={`${parseInt(fundingCampaign?.percentageOfDaoRewardsAllocated)}`}
+                    label={"Percentage of DAO rewards allocated"}
+                    disabled={true}
+                />
+                <DataField
+                    label={"Amount Disbursed"}
+                    text={`${amountDisbursedToRecipientValue} ${amountDisbursedToRecipientType}`}
+                    disabled={true}
+                />
+                <DataField
+                    text={`${shortenHexString(fundingCampaign?.recipient)}`}
+                    label={"Recipient Principal ID"}
+                    buttonIcon={ContentCopyIcon}
+                    onClick={() => copyText(fundingCampaign?.recipient)}
+                />
+                <DataField
+                    text={`${remainingCollateralLockedValue} ${remainingCollateralLockedType}`}
+                    label={"Collateral Locked"}
+                    disabled={true}
+                />
+                <DataField
+                    text={`${forfeitedCollateralValue} ${forfeitedCollateralType}` }
+                    label={"Collateral Forfeited"}
+                    disabled={true}
+                />
+                {nextPaymentDueDate &&
+                    <>
+                        <DataField
+                            text={`${remainingLoanPrincipalAmountValue} ${remainingLoanPrincipalAmountType}` }
+                            label={"Remaininig Principal Owed"}
+                            disabled={true}
+                        />
+                        <DataField
+                            text={`${remainingLoanInterestAmountValue} ${remainingLoanInterestAmountType}` }
+                            label={"Remaining Interest Owed"}
+                            disabled={true}
+                        />
+                        <DataField
+                            label={"Payment Due"}
+                            text={`${Math.max(paymentAmountsValue - amountPaidDuringCurrentPaymentIntervalValue, 0)} ${paymentAmountsType}`}
+                            disabled={true}
+                        />
+                        <DatePickerField
+                            disabled={true}
+                            width={"100% !important"}
+                            value={new Date(nanoSecondsToMiliSeconds(nextPaymentDueDate))}
+                            label={"Next Payment Due Date"}
+                        />
+                    </>
+                }
+                <InputBox
+                    value={fundingCampaign?.description }
+                    label={"Description"}
+                    disabled={true}
+                    rows={4}
+                />
+                
+                {contributions.length > 0 &&
+                <Graph
+                    withoutPaper={true}
+                    width={"25%"}
+                    height={"400px"}
+                    hideButton2={true}
+                    type={CHART_TYPES.pie}
+                    defaultLabel={GRAPH_DISPLAY_LABELS.icp}
+                    inputData={mapDataMapToChartFormat(contributions, GRAPH_DATA_SETS.fundingCampaignContributions)}
+                    defaultDataSetName={GRAPH_DATA_SETS.fundingCampaignContributions}
+                    maintainAspectRatio={false}
+                />}
+                {!fundingCampaign?.settled &&
+                    <Grid display={"flex"} width={"100%"} justifyContent={"left"} alignItems={"left"} xs={12} padding={0} margin={"10px"} >
+                        <ButtonField
+                        active={true}
+                        text={fundingCampaign?.funded ? "Repay Funding Campaign" : "Provide Liquidity"}
+                        Icon={PriceCheckIcon}
+                        onClick={onClickAddLiquidityOrRepayFundingCampaign}
+                        iconSize={'small'}
+                        />
+                    </Grid>
+                }
             </Grid>
-
-        </Grid>
+            <ModalComponent
+            open={modalIsOpen}
+            {...modalProps}
+            />
+        </>
     );
 };
 

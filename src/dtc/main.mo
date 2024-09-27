@@ -500,6 +500,10 @@ shared actor class User() = this {
         await TreasuryHelperMethods.contributeToFundingCampaign(caller, campaignId, amount, daoMetaData_v4, userProfilesMap_v2);
     };
 
+    public shared({caller}) func repayFundingCampaign(campaignId: Nat, amount: Nat64): async TreasuryTypes.FundingCampaignsArray {
+        await TreasuryHelperMethods.repayFundingCampaign(caller, campaignId, amount, daoMetaData_v4, userProfilesMap_v2);
+    };
+
     private func finalizeAllEligibleProposals() : async () {
 
         func attemptFinalizeProposalVotingPeriod(proposalId: Nat) : async () {

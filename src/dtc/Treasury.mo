@@ -113,9 +113,9 @@ shared actor class Treasury (principal : Principal) = this {
         return Iter.toArray(fundingCampaignsMap.entries());
     };
 
-    public shared({caller}) func repayFundingCampaign(campaignId: Nat, amount: Nat64, paymentFrom: Principal) : async TreasuryTypes.FundingCampaignsArray {
+    public shared({caller}) func repayFundingCampaign(contributor: TreasuryTypes.PrincipalAsText, campaignId: Nat, amount: Nat64) : async TreasuryTypes.FundingCampaignsArray {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
-        let (_, subaccountId) = SyncronousHelperMethods.getIdAndSubaccount(#Principal(Principal.toText(paymentFrom)), usersTreasuryDataMap, fundingCampaignsMap);
+        let (_, subaccountId) = SyncronousHelperMethods.getIdAndSubaccount(#Principal(contributor), usersTreasuryDataMap, fundingCampaignsMap);
         await AsyncronousHelperMethods.repayFundingCampaign(amount, {subaccountId = ?subaccountId; accountType = #UserTreasuryData}, campaignId, fundingCampaignsMap, usersTreasuryDataMap, neuronDataMap, actionLogsArrayBuffer, updateTokenBalances, Principal.fromActor(this) );
     };
     

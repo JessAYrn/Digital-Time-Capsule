@@ -62,4 +62,17 @@ module{
         };
         await treasury.contributeToFundingCampaign(Principal.toText(contributor), campaignId, amount);
     };
+
+    public func repayFundingCampaign(contributor: Principal, campaignId: Nat, amount: Nat64, daoMetaData: MainTypes.DaoMetaData_V4, profilesMap: MainTypes.UserProfilesMap_V2)
+    : async TreasuryTypes.FundingCampaignsArray {
+        let treasury: Treasury.Treasury = actor(daoMetaData.treasuryCanisterPrincipal);
+        let {balances = userBalances} = await treasury.getUserTreasuryData(contributor);
+        if(userBalances.icp.e8s < amount) { 
+            let txFee: Nat64 = 10_000;
+            let amountToDepositToTreasury = amount - userBalances.icp.e8s + txFee;
+            try{ignore await depositIcpToTreasury(daoMetaData, profilesMap, contributor, amountToDepositToTreasury);}
+            catch(_){};
+        };
+        await treasury.repayFundingCampaign(Principal.toText(contributor), campaignId, amount);
+    };
 }

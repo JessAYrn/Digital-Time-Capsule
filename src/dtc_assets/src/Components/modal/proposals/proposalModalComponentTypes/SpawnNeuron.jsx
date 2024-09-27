@@ -1,12 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react';
-import MenuField from '../../Fields/MenuField';
+import MenuField from '../../../Fields/MenuField';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import Typography from '@mui/material/Typography';
-import { AppContext } from '../../../Context';
-import InputBox from '../../Fields/InputBox';
+import { AppContext } from '../../../../Context';
+import InputBox from '../../../Fields/InputBox';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
-import { INPUT_BOX_FORMATS } from '../../../functionsAndConstants/Constants';
-import ButtonField from '../../Fields/Button';
+import { INPUT_BOX_FORMATS } from '../../../../functionsAndConstants/Constants';
+import ButtonField from '../../../Fields/Button';
 import DoneIcon from '@mui/icons-material/Done';
 
 const SpawnNeuron = (props) => {
