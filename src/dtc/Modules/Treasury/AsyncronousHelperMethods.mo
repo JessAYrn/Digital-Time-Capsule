@@ -55,7 +55,14 @@ module{
             case(#Spawn(_)) { "spawn_"#Nat64.toText(neuronId.id); };
             case(#Follow(_)) { "follow_"#Nat64.toText(neuronId.id); };
             case(#Configure(_)) { "configure_"#Nat64.toText(neuronId.id); };
-            case(#Disburse(_)) { "disburse_"#Nat64.toText(neuronId.id); };
+            case(#Disburse(_)) { 
+                let ?{contributions} = neuronDataMap.get(Nat64.toText(neuronId.id)) else { throw Error.reject("No neuron found") };
+                label isCollateralized for((userPrincipal, {collateralized_stake_e8s }) in Iter.fromArray(contributions)){
+                    let ?collateral = collateralized_stake_e8s else continue isCollateralized;
+                    if(collateral > 0) { throw Error.reject("Neuron is collateralized. Cannot disburse from collateralized neuron.") };
+                };
+                "disburse_"#Nat64.toText(neuronId.id); 
+            };
             case(#ClaimOrRefresh(_)) { "claimOrRefresh_"#Nat64.toText(neuronId.id);};
             case(_) { return #err(#ActionNotSupported) };
         };
@@ -409,7 +416,7 @@ module{
         };
     };
 
-    public func creditCampaignContribution(userPrincipal: Text, campaignId: Nat, amount: Nat64, fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap): async () {
+    public func creditCampaignContribution(userPrincipal: Text, campaignId: Nat, amount: Nat64, fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap): () {
         let ?campaign = fundingCampaignsMap.get(campaignId) else { return };
         let contributionsMap = HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.CampaignContributions>(Iter.fromArray(campaign.contributions), Array.size(campaign.contributions), Text.equal, Text.hash);
         let {icp = userIcpCampaignContribution} = switch(contributionsMap.get(userPrincipal)){
@@ -418,8 +425,7 @@ module{
         };
         let updatedCampaignContribution = {icp = { e8s = userIcpCampaignContribution.e8s + amount }};
         contributionsMap.put(userPrincipal, updatedCampaignContribution);
-        let updatedContributions = Iter.toArray(contributionsMap.entries());
-        fundingCampaignsMap.put(campaignId, {campaign with contributions = updatedContributions;});
+        fundingCampaignsMap.put(campaignId, {campaign with contributions = Iter.toArray(contributionsMap.entries());});
     };
 
     public func contributeToFundingCampaign(
@@ -438,7 +444,7 @@ module{
         if(funded) throw Error.reject("Campaign already funded.");
         let (_, contributorSubaccountId) = SyncronousHelperMethods.getIdAndSubaccount(#Principal(contributor), usersTreasuryDataMap, fundingCampaignsMap);
         let {amountSent} = await performTransfer(amount, {subaccountId = ?contributorSubaccountId; accountType = #UserTreasuryData}, {owner = treasuryCanisterId; subaccountId = ?fundingCampaignSubaccountId; accountType = #FundingCampaign}, actionLogsArrayBuffer, updateTokenBalances);
-        await creditCampaignContribution(contributor, campaignId, amountSent, fundingCampaignsMap);
+        creditCampaignContribution(contributor, campaignId, amountSent, fundingCampaignsMap);
         return Iter.toArray(fundingCampaignsMap.entries());
     };
 

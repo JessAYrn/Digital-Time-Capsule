@@ -236,7 +236,7 @@ const NewFundingCampaign = (props) => {
                         format={INPUT_BOX_FORMATS.numberFormat}
                         allowNegative={false}
                         value={initialLoanInterestAmount.value}
-                        parseNumber={parseInt}
+                        parseNumber={parseFloat}
                         suffix={` ${initialLoanInterestAmount.type}`}
                         onChange={(value) => {
                             setHasError_5(value === "NaN" || value === NaN || value === "" || value === 0);
@@ -253,7 +253,7 @@ const NewFundingCampaign = (props) => {
                         format={INPUT_BOX_FORMATS.numberFormat}
                         allowNegative={false}
                         value={paymentAmounts.value}
-                        parseNumber={parseInt}
+                        parseNumber={parseFloat}
                         suffix={` ${paymentAmounts.type}`}
                         onChange={(value) => {
                             setHasError_6(value === "NaN" || value === NaN || value === "" || value === 0);
@@ -304,7 +304,7 @@ const NewFundingCampaign = (props) => {
                             format={INPUT_BOX_FORMATS.numberFormat}
                             allowNegative={false}
                             value={initialCollateralLocked.value}
-                            parseNumber={parseInt}
+                            parseNumber={parseFloat}
                             suffix={` ${initialCollateralLocked.type}`}
                             onChange={(value) => {
                                 setHasError_7(value === "NaN" || value === NaN || value === "" || value === 0);

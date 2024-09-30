@@ -106,9 +106,13 @@ shared actor class Treasury (principal : Principal) = this {
     public shared({caller}) func cancelFundingCampaign(campaignId: Nat): async TreasuryTypes.FundingCampaignsArray {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         let ?campaign = fundingCampaignsMap.get(campaignId) else throw Error.reject("Campaign not found.");
-        let {funded; campaignWalletBalance} = campaign;
+        let {funded; campaignWalletBalance; terms;} = campaign;
         if(funded) throw Error.reject("Funding campaign has already been funded.");
         await AsyncronousHelperMethods.distributePayoutsFromFundingCampaign(campaignId, campaignWalletBalance.icp.e8s, usersTreasuryDataMap, actionLogsArrayBuffer, updateTokenBalances, fundingCampaignsMap, Principal.fromActor(this));
+        switch(terms){case null {}; case (?terms) { 
+            let {initialCollateralLocked} = terms;
+            SyncronousHelperMethods.updateUserNeuronContribution(neuronDataMap, {userPrincipal = campaign.recipient; delta = initialCollateralLocked.icp_staked.e8s; neuronId = initialCollateralLocked.icp_staked.fromNeuron; operation = #SubtractCollateralizedStake});
+        };};
         fundingCampaignsMap.delete(campaignId);
         return Iter.toArray(fundingCampaignsMap.entries());
     };

@@ -147,7 +147,7 @@ module{
         let {envelope_content; key_id; public_key} = request;
         let envelopeContentInMajorType5Format = formatEnvelopeContentForCborEncoding(envelope_content);
         let {message_hash;} = getMessageHashForEcdsaSignature(formatEnvelopeContentForRepIndHash(envelope_content));
-        Cycles.add<system>(25_000_000_000);
+        Cycles.add<system>(30_000_000_000);
         let { signature } = await ic.sign_with_ecdsa({ message_hash; derivation_path = []; key_id;});
         let envelopeAsMajorType : Value.Value = #majorType5([
             (#majorType3("content"), #majorType5(envelopeContentInMajorType5Format)),
@@ -166,7 +166,7 @@ module{
         let {envelope_content; key_id; public_key} = request;
         let envelopeContentInMajorType5Format = formatEnvelopeContentReadStateForCborEncoding(envelope_content);
         let {message_hash;} = getMessageHashForEcdsaSignature(formatEnvelopeContentReadStateForRepIndHash(envelope_content));
-        Cycles.add<system>(25_000_000_000);
+        Cycles.add<system>(30_000_000_000);
         let { signature } = await ic.sign_with_ecdsa({ message_hash; derivation_path = []; key_id; });
         let envelopeAsMajorType : Value.Value = #majorType5([
             (#majorType3("content"), #majorType5(envelopeContentInMajorType5Format)),

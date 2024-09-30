@@ -26,11 +26,7 @@ module{
             Text.hash
         );
         for((contributor, neuronStakeInfo) in Iter.fromArray(contributions)){
-            let {stake_e8s; collateralized_stake_e8s;} = neuronStakeInfo;
-            let userTotalStake = switch(collateralized_stake_e8s){
-                case null { stake_e8s; };
-                case(?collateralized_stake_e8s_) { collateralized_stake_e8s_ + stake_e8s; };
-            };
+            let {stake_e8s = userTotalStake;} = neuronStakeInfo;
             let userVotingPower = NatX.nat64ComputePercentage({value = userTotalStake; numerator = neuronTotalVotingPower; denominator = neuronTotalStake});
             contributionsMap.put(contributor, {neuronStakeInfo with voting_power = userVotingPower});
         };
