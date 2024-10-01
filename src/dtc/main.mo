@@ -456,7 +456,7 @@ shared actor class User() = this {
         xdr_permyriad_per_icp := xdr_permyriad_per_icp_;
     };
 
-    public shared({caller}) func createProposal(action: MainTypes.ProposalActions): 
+    public shared({caller}) func createProposal(action: MainTypes.ProposalActions_V2): 
     async Result.Result<(MainTypes.Proposals_V2),MainTypes.Error>{
         let callerProfile = userProfilesMap_v2.get(caller);
         if(callerProfile == null) return #err(#NotAuthorizedToCreateProposals);
@@ -657,6 +657,9 @@ shared actor class User() = this {
             case(#CreateFundingCampaign({fundingCampaignInput})){
                 ignore treasuryCanister.createFundingCampaign(fundingCampaignInput, proposer); null;
             };
+            case(#CancelFundingCampaign({fundingCampaignId})){
+                ignore treasuryCanister.cancelFundingCampaign(fundingCampaignId); null;
+            };
             case(#PurchaseCycles(_)){
                 //call function to purchase more cycles
                 return null;
@@ -668,7 +671,6 @@ shared actor class User() = this {
     system func preupgrade() { 
         userProfilesArray_v2 := Iter.toArray(userProfilesMap_v2.entries()); 
         proposalsArray_v2 :=  Iter.toArray(proposalsMap_v2.entries());
-        
     };
 
     system func postupgrade() { 

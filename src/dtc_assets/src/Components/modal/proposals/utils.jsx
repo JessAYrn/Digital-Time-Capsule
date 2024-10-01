@@ -4,6 +4,7 @@ export const PROPOSAL_ACTIONS = {
     LoadUpgrades: "LoadUpgrades",
     InstallUpgrades: "InstallUpgrades",
     CreateFundingCampaign: "CreateFundingCampaign",
+    CancelFundingCampaign: "CancelFundingCampaign",
     CreateNeuron: "CreateNeuron",
     IncreaseNeuron: "IncreaseNeuron",
     PurchaseCycles: "PurchaseCycles",

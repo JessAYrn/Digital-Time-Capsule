@@ -20,6 +20,7 @@ import DissolveOrDisburseNeuron from "./proposalModalComponentTypes/DissolveOrDi
 import CreateNeuronOrPurchaseCycles from "./proposalModalComponentTypes/CreateNeuronOrPurchaseCycles";
 import IncreaseNeuron from "./proposalModalComponentTypes/IncreaseNeuron";
 import IncreaseDissolveDelay from "./proposalModalComponentTypes/IncreaseDissolveDelay";
+import CancelFundingCampaign from "./proposalModalComponentTypes/CancelFundingCampaign";
 
 const CreateProposalForm = (props) => {
     const {
@@ -57,6 +58,7 @@ const CreateProposalForm = (props) => {
         { text: PROPOSAL_ACTIONS.IncreaseNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.IncreaseNeuron), selected: proposalAction_ === PROPOSAL_ACTIONS.IncreaseNeuron},
         { text: PROPOSAL_ACTIONS.ToggleSupportMode, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.ToggleSupportMode), selected: proposalAction_ === PROPOSAL_ACTIONS.ToggleSupportMode},
         { text: PROPOSAL_ACTIONS.CreateFundingCampaign, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.CreateFundingCampaign), selected: proposalAction_ === PROPOSAL_ACTIONS.CreateFundingCampaign},
+        { text: PROPOSAL_ACTIONS.CancelFundingCampaign, onClick: () => onMenuItemClick(PROPOSAL_ACTIONS.CancelFundingCampaign), selected: proposalAction_ === PROPOSAL_ACTIONS.CancelFundingCampaign},
     ];
 
     const modalButton_close = [
@@ -128,6 +130,7 @@ const CreateProposalForm = (props) => {
             { proposalAction_ === PROPOSAL_ACTIONS.FollowNeuron && <FollowNeuron onSubmitProposal={onSubmitProposal} action={proposalAction_} payload={proposalPayload_}/> }
             { proposalAction_ === PROPOSAL_ACTIONS.SpawnNeuron && <SpawnNeuron onSubmitProposal={onSubmitProposal} action={proposalAction_} payload={proposalPayload_}/> }
             { proposalAction_ === PROPOSAL_ACTIONS.CreateFundingCampaign && <NewFundingCampaign onSubmitProposal={onSubmitProposal} action={proposalAction_} payload={proposalPayload_}/> }
+            { proposalAction_ === PROPOSAL_ACTIONS.CancelFundingCampaign && <CancelFundingCampaign onSubmitProposal={onSubmitProposal} action={proposalAction_} payload={proposalPayload_}/> }
             { (proposalAction_ === PROPOSAL_ACTIONS.InstallUpgrades || proposalAction_ === PROPOSAL_ACTIONS.LoadUpgrades || proposalAction_ === PROPOSAL_ACTIONS.ToggleSupportMode) 
                 && <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}> 
                     <ButtonField Icon={DoneIcon} active={true} text={'Submit Proposal'} onClick={() => onSubmitProposal({[proposalAction_]: {}})} /> 

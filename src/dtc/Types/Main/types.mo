@@ -154,7 +154,7 @@ module{
     public type Proposal_V2 = {
         votes: [(Text, Vote)];
         voteTally: VotingResults_V2;
-        action: ProposalActions;
+        action: ProposalActions_V2;
         proposer: Text;
         timeInitiated: Int;
         executed: Bool;
@@ -162,13 +162,14 @@ module{
         timeVotingPeriodEnds: Int;
     };
 
-    public type ProposalActions = {
+    public type ProposalActions_V2 = {
         #AddAdmin: {principal: Text};
         #RemoveAdmin: {principal: Text};
         #LoadUpgrades:{};
         #InstallUpgrades: {};
         #CreateNeuron: {amount: Nat64; };
         #CreateFundingCampaign: {fundingCampaignInput: TreasuryTypes.FundingCampaignInput};
+        #CancelFundingCampaign: {fundingCampaignId: Nat};
         #IncreaseNeuron: {amount: Nat64; neuronId: Nat64; };
         #PurchaseCycles: {amount : Nat64;};
         #SpawnNeuron: {neuronId: Nat64; percentage_to_spawn : Nat32;};
