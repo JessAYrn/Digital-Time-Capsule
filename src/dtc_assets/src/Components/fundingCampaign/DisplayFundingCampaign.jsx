@@ -112,18 +112,18 @@ const DisplayFundingCampaign = (props) => {
                     buttonIcon={ContentCopyIcon}
                     onClick={() => copyText(fundingCampaign?.recipient)}
                 />
-                <DataField
-                    text={`${remainingCollateralLockedValue} ${remainingCollateralLockedType}`}
-                    label={"Collateral Locked"}
-                    disabled={true}
-                />
-                <DataField
-                    text={`${forfeitedCollateralValue} ${forfeitedCollateralType}` }
-                    label={"Collateral Forfeited"}
-                    disabled={true}
-                />
                 {nextPaymentDueDate &&
                     <>
+                        <DataField
+                            text={`${remainingCollateralLockedValue} ${remainingCollateralLockedType}`}
+                            label={"Collateral Locked"}
+                            disabled={true}
+                        />
+                        <DataField
+                            text={`${forfeitedCollateralValue} ${forfeitedCollateralType}` }
+                            label={"Collateral Forfeited"}
+                            disabled={true}
+                        />
                         <DataField
                             text={`${remainingLoanPrincipalAmountValue} ${remainingLoanPrincipalAmountType}` }
                             label={"Remaininig Principal Owed"}

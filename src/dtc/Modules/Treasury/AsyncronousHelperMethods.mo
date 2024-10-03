@@ -13,6 +13,7 @@ import Int "mo:base/Int";
 import Time "mo:base/Time";
 import Nat "mo:base/Nat";
 import HashMap "mo:base/HashMap";
+import Blob "mo:base/Blob";
 import SyncronousHelperMethods "SyncronousHelperMethods";
 import Ledger "../../NNS/Ledger";
 import Account "../../Serializers/Account";
@@ -368,28 +369,32 @@ module{
                     let ?{paymentAmounts; amountRepaidDuringCurrentPaymentInterval} = terms else continue repayDebts;
                     if(amountRepaidDuringCurrentPaymentInterval.icp.e8s > paymentAmounts.icp.e8s) continue repayDebts;
                     let debtRepaymentAmountOwed: Nat64 = paymentAmounts.icp.e8s - amountRepaidDuringCurrentPaymentInterval.icp.e8s;
-                    let amountToAllocateTowardsDebtRepayment = Nat64.min(
+                    let amountAllocatedTowardsDebtRepayment = Nat64.min(
                         debtRepaymentAmountOwed,
                         NatX.nat64ComputePercentage({value = amountOfUserContributionsReservedToPayDebts; numerator = 1; denominator = numberOfDebtsToRepay})
                     );
-                    ignore repayFundingCampaign( amountToAllocateTowardsDebtRepayment, {subaccountId = null; accountType = #MultiSigAccount}, campaignId, fundingCampaignsMap, usersTreasuryDataMap, neuronDataMap, actionLogsArrayBuffer, updateTokenBalances, treasuryCanisterId);
-                    amountOfUserNeuronContributionsUsedToPayDebts += amountToAllocateTowardsDebtRepayment;
+                    ignore repayFundingCampaign( amountAllocatedTowardsDebtRepayment, {subaccountId = null; accountType = #MultiSigAccount}, campaignId, fundingCampaignsMap, usersTreasuryDataMap, neuronDataMap, updateTokenBalances, treasuryCanisterId);
+                    amountOfUserNeuronContributionsUsedToPayDebts += amountAllocatedTowardsDebtRepayment;
                 }; 
             };
 
             let amountOfUserNeuronContributionsReservedToContributeToFundingCampaigns: Nat64 = userTotalNeuronContributionAmount - amountOfUserNeuronContributionsUsedToPayDebts;
-            var amountRemainingToPayoutToUser: Nat64 = amountOfUserNeuronContributionsReservedToContributeToFundingCampaigns;
+            var amountContributedToFundingCampaigns: Nat64 = 0;
+
             if(amountOfUserNeuronContributionsReservedToContributeToFundingCampaigns < txFee) return;
 
             label contributeRewardsToFundingCampaigns for((campaignId, campaign) in fundingCampaignsMap.entries()){
-                let {settled; funded; percentageOfDaoRewardsAllocated} = campaign;
+                let {settled; funded; percentageOfDaoRewardsAllocated; subaccountId = fundingCampaignSubaccountId} = campaign;
                 if(settled or funded) continue contributeRewardsToFundingCampaigns;
-                let amountToAllocateToCampaign = NatX.nat64ComputePercentage({value = amountOfUserNeuronContributionsReservedToContributeToFundingCampaigns; numerator = Nat64.fromNat(percentageOfDaoRewardsAllocated); denominator = 100});
-                ignore contributeToFundingCampaign( Principal.toText(userPrincipal), campaignId, amountToAllocateToCampaign, fundingCampaignsMap, usersTreasuryDataMap, treasuryCanisterId, actionLogsArrayBuffer, updateTokenBalances);
-                amountRemainingToPayoutToUser -= amountToAllocateToCampaign;
+                let amountAllocatedToCampaign = NatX.nat64ComputePercentage({value = amountOfUserNeuronContributionsReservedToContributeToFundingCampaigns; numerator = Nat64.fromNat(percentageOfDaoRewardsAllocated); denominator = 100});
+                let {amountSent} = await performTransfer(amountAllocatedToCampaign, {subaccountId = null; accountType = #MultiSigAccount}, {owner = treasuryCanisterId; subaccountId = ?fundingCampaignSubaccountId; accountType = #FundingCampaign}, updateTokenBalances);
+                creditCampaignContribution(Principal.toText(userPrincipal), campaignId, amountSent, fundingCampaignsMap);
+                amountContributedToFundingCampaigns += amountAllocatedToCampaign;
             };
+
+            let amountRemainingToPayoutToUser = userTotalNeuronContributionAmount - amountOfUserNeuronContributionsUsedToPayDebts - amountContributedToFundingCampaigns;
             let ?{subaccountId = userSubaccountId} = usersTreasuryDataMap.get(Principal.toText(userPrincipal)) else { return };
-            ignore performTransfer(amountRemainingToPayoutToUser, {subaccountId = null; accountType = #MultiSigAccount}, {owner = treasuryCanisterId; subaccountId = ?userSubaccountId; accountType = #UserTreasuryData }, actionLogsArrayBuffer, updateTokenBalances);
+            ignore performTransfer(amountRemainingToPayoutToUser, {subaccountId = null; accountType = #MultiSigAccount}, {owner = treasuryCanisterId; subaccountId = ?userSubaccountId; accountType = #UserTreasuryData }, updateTokenBalances);
         };
 
         let ?{contributions} = neuronDataMap.get(neuronId) else { throw Error.reject("No neuron found") };
@@ -402,7 +407,6 @@ module{
         campaignId: TreasuryTypes.CampaignId, 
         amountRepaid: Nat64, 
         usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap,
-        actionLogsArrayBuffer: TreasuryTypes.ActionLogsArrayBuffer,
         updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async (), 
         fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap,
         treasuryCanisterId: Principal,
@@ -412,7 +416,7 @@ module{
             var amountOwedToUser: Nat64 = if(amountDisbursedToRecipient.icp.e8s == 0) { userCampaignContribution.e8s }
             else { NatX.nat64ComputePercentage({value = amountRepaid; numerator = userCampaignContribution.e8s; denominator = amountDisbursedToRecipient.icp.e8s}) };
             let ?{subaccountId = userSubaccountId} = usersTreasuryDataMap.get(userPrincipal) else { continue loop_ };
-            ignore performTransfer(amountOwedToUser, { subaccountId = ?campaignSubaccountId; accountType = #FundingCampaign }, { owner = treasuryCanisterId; subaccountId = ?userSubaccountId; accountType = #UserTreasuryData }, actionLogsArrayBuffer, updateTokenBalances);
+            ignore performTransfer(amountOwedToUser, { subaccountId = ?campaignSubaccountId; accountType = #FundingCampaign }, { owner = treasuryCanisterId; subaccountId = ?userSubaccountId; accountType = #UserTreasuryData }, updateTokenBalances);
         };
     };
 
@@ -435,7 +439,6 @@ module{
         fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap, 
         usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap, 
         treasuryCanisterId: Principal,
-        actionLogsArrayBuffer: TreasuryTypes.ActionLogsArrayBuffer,
         updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async (),
     ) 
     : async TreasuryTypes.FundingCampaignsArray {
@@ -443,7 +446,7 @@ module{
         let {subaccountId = fundingCampaignSubaccountId; funded;} = campaign;
         if(funded) throw Error.reject("Campaign already funded.");
         let (_, contributorSubaccountId) = SyncronousHelperMethods.getIdAndSubaccount(#Principal(contributor), usersTreasuryDataMap, fundingCampaignsMap);
-        let {amountSent} = await performTransfer(amount, {subaccountId = ?contributorSubaccountId; accountType = #UserTreasuryData}, {owner = treasuryCanisterId; subaccountId = ?fundingCampaignSubaccountId; accountType = #FundingCampaign}, actionLogsArrayBuffer, updateTokenBalances);
+        let {amountSent} = await performTransfer(amount, {subaccountId = ?contributorSubaccountId; accountType = #UserTreasuryData}, {owner = treasuryCanisterId; subaccountId = ?fundingCampaignSubaccountId; accountType = #FundingCampaign}, updateTokenBalances);
         creditCampaignContribution(contributor, campaignId, amountSent, fundingCampaignsMap);
         return Iter.toArray(fundingCampaignsMap.entries());
     };
@@ -455,7 +458,6 @@ module{
         fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap,
         usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap,
         neuronDataMap: TreasuryTypes.NeuronsDataMap, 
-        actionLogsArrayBuffer: TreasuryTypes.ActionLogsArrayBuffer,
         updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async (), 
         treasuryCanisterId: Principal,
     ) : async TreasuryTypes.FundingCampaignsArray {
@@ -468,10 +470,9 @@ module{
             amount, 
             paymentFrom, 
             {owner = treasuryCanisterId; subaccountId = ?fundingCampaignSubaccountId; accountType = #FundingCampaign},
-            actionLogsArrayBuffer,
             updateTokenBalances
         );  
-        await distributePayoutsFromFundingCampaign(campaignId, amountSent, usersTreasuryDataMap, actionLogsArrayBuffer, updateTokenBalances, fundingCampaignsMap, treasuryCanisterId);
+        await distributePayoutsFromFundingCampaign(campaignId, amountSent, usersTreasuryDataMap, updateTokenBalances, fundingCampaignsMap, treasuryCanisterId);
         let amountRepaidDuringCurrentPaymentInterval = {icp = { e8s: Nat64 = terms.amountRepaidDuringCurrentPaymentInterval.icp.e8s + amountSent; } };
         var amountToDeductFromPrincipalAmount: Nat64 = 0;
         let remainingLoanInterestAmount = if(terms.remainingLoanInterestAmount.icp.e8s > amountSent) { 
@@ -498,7 +499,6 @@ module{
         amount: Nat64, 
         from: {subaccountId: ?Account.Subaccount; accountType: TreasuryTypes.AccountType}, 
         to: { owner: Principal; subaccountId: ?Account.Subaccount; accountType: TreasuryTypes.AccountType },
-        actionLogsArrayBuffer: TreasuryTypes.ActionLogsArrayBuffer,
         updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async (), 
     ) 
     : async {amountSent: Nat64;} {
@@ -518,18 +518,10 @@ module{
             case (#Err(#InsufficientFunds { balance })) {
                 if(balance < Nat64.toNat(txFee)){ amountSent := 0; } 
                 else amountSent := Nat64.fromNat(balance) - txFee;
-                let res = await ledger.icrc1_transfer({transferInput with amountSent});
+                let res = await ledger.icrc1_transfer({transferInput with amount = Nat64.toNat(amountSent)});
                 switch(res){ case (#Ok(_)) {}; case (#Err(_)) { amountSent:= 0} };
             };
             case (#Err(_)) { amountSent := 0 };
-        };
-        if(amount - txFee > amountSent){
-            let icpOwed = amount - txFee - amountSent;
-            actionLogsArrayBuffer.add(
-                Int.toText(Time.now()),
-                "Failed to distribute full payment to user "#Principal.toText(to.owner)#". 
-                This user is owed: "#Nat64.toText(icpOwed)#" ICP from the DAO's multi-sig wallet."
-            );
         };
         switch(from.subaccountId){
             case null { ignore updateTokenBalances(#SubaccountId(Account.defaultSubaccount()), #Icp, from.accountType); }; 
