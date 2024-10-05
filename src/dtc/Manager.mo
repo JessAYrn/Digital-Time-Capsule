@@ -18,7 +18,7 @@ import CanisterManagementMethods "/Modules/Manager/CanisterManagementMethods";
 
 shared(msg) actor class Manager (principal : Principal) = this {
 
-    private stable var currentVersionLoaded : {number: Nat; isStable: Bool} = {number = 170; isStable = true;};
+    private stable var currentVersionLoaded : {number: Nat; isStable: Bool} = {number = 192; isStable = true;};
     private stable var currentVersionInstalled : {number: Nat; isStable: Bool} = currentVersionLoaded;
     private stable var nextStableVersion : {number: Nat; isStable: Bool} = currentVersionLoaded;
     private stable var previousVersionInstalled : {number: Nat; isStable: Bool} = currentVersionLoaded;

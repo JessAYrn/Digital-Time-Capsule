@@ -28,7 +28,6 @@ import Blob "mo:base/Blob";
 import GovernanceHelperMethods "Modules/Main/GovernanceHelperMethods";
 import Treasury "Treasury";
 import TreasuryTypes "Types/Treasury/types";
-import NnsCyclesMinting "NNS/NnsCyclesMinting";
 import TreasuryHelperMethods "Modules/Main/TreasuryHelperMethods";
 import AnalyticsHelperMethods "Modules/Analytics/AnalyticsHelperMethods";
 import Journal "Journal";
@@ -44,7 +43,6 @@ shared actor class User() = this {
     private stable var userProfilesArray_v2 : [(Principal, MainTypes.UserProfile_V2)] = [];
     private stable var proposalIndex: Nat = 0;
     private stable var proposalsArray_v2: MainTypes.Proposals_V2 = [];
-    private stable var xdr_permyriad_per_icp: Nat64 = 1;
     private stable var frontEndCanisterBalance: Nat = 1;
     private stable var quorum: Float = 0.125;
     private var maxNumberDaoMembers : Nat = 250;
@@ -61,6 +59,7 @@ shared actor class User() = this {
     };
 
     public query({caller}) func hasAccessGranted() : async Bool {
+        if(Principal.equal(Principal.fromText(daoMetaData_v4.founder), caller )){ return true; };
         let requestsForAccessMap = HashMap.fromIter<Text, MainTypes.Approved>(Iter.fromArray(daoMetaData_v4.requestsForAccess), Iter.size(Iter.fromArray(daoMetaData_v4.requestsForAccess)), Text.equal,Text.hash);
         switch(requestsForAccessMap.get(Principal.toText(caller))){ case null { return false}; case(?approved){ return approved;}};
     };
@@ -188,8 +187,8 @@ shared actor class User() = this {
     };
 
     private func updateUsersTxHistory() : async () {
-            let newStartIndexForNextQuery = await TxHelperMethods.updateUsersTxHistory(userProfilesMap_v2, startIndexForBlockChainQuery, daoMetaData_v4);
-            startIndexForBlockChainQuery := newStartIndexForNextQuery;
+        let newStartIndexForNextQuery = await TxHelperMethods.updateUsersTxHistory(userProfilesMap_v2, startIndexForBlockChainQuery, daoMetaData_v4);
+        startIndexForBlockChainQuery := newStartIndexForNextQuery;
     };
 
     public shared({caller}) func grantAccess(principals : [Text]) : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error> {
@@ -234,7 +233,7 @@ shared actor class User() = this {
         daoMetaData_v4 := {daoMetaData_v4 with frontEndPrincipal};
     };
 
-    public shared func configureApp(founder: Text, nftId: ?Nat) : async Result.Result<(), JournalTypes.Error> {
+    public shared func configureApp(founder: Text) : async Result.Result<(), JournalTypes.Error> {
         let canConfigureApp = CanisterManagementMethods.canConfigureApp(daoMetaData_v4);
         if(not canConfigureApp){ return #err(#NotAuthorized); };
         daoMetaData_v4 := {daoMetaData_v4 with backEndPrincipal = Principal.toText(Principal.fromActor(this))};
@@ -245,7 +244,7 @@ shared actor class User() = this {
         let defaultControllers = [Principal.fromText(backEndPrincipal), Principal.fromText(managerCanisterPrincipal)];
         let founderPrincipal = Principal.fromText(founder);
         let admin = [(Principal.toText(founderPrincipal), {percentage = 100})];
-        daoMetaData_v4 := { daoMetaData_v4 with nftId; founder; admin; defaultControllers; };
+        daoMetaData_v4 := { daoMetaData_v4 with founder; admin; defaultControllers; };
 
         ignore createTreasuryCanister();
         ignore createFrontEndCanister();
@@ -380,9 +379,7 @@ shared actor class User() = this {
         ignore setTimer<system>(#nanoseconds(1), updateCanistersExceptBackend);
     };
 
-    public shared({caller}) func toggleSupportMode() : async Result.Result<(),JournalTypes.Error>{
-        let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v4);
-        if( not (isAdmin or Principal.equal(caller, Principal.fromActor(this))) ){ return #err(#NotAuthorized); };
+    private func toggleSupportMode() : async Result.Result<(),JournalTypes.Error>{
         let updatedMetaData = await CanisterManagementMethods.toggleSupportMode(daoMetaData_v4);
         daoMetaData_v4 := updatedMetaData;
         return #ok(());
@@ -448,12 +445,8 @@ shared actor class User() = this {
     };
 
     private func heartBeat_hourly(): async () {
-        let cyclesMintingCanister: NnsCyclesMinting.Interface = actor(NnsCyclesMinting.NnsCyclesMintingCanisterID);
-        let {data} = await cyclesMintingCanister.get_icp_xdr_conversion_rate();
-        let {xdr_permyriad_per_icp = xdr_permyriad_per_icp_} = data;
         let {cycles} = await ic.canister_status({ canister_id = Principal.fromText(daoMetaData_v4.frontEndPrincipal) });
         frontEndCanisterBalance := cycles;
-        xdr_permyriad_per_icp := xdr_permyriad_per_icp_;
     };
 
     public shared({caller}) func createProposal(action: MainTypes.ProposalActions_V2): 

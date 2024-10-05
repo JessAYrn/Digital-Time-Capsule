@@ -62,7 +62,6 @@ export const CANISTER_DATA_FIELDS = {
     managerCanisterPrincipal: "managerCanisterPrincipal",
     releaseVersionLoaded: "releaseVersionLoaded",
     releaseVersionInstalled: "releaseVersionInstalled",
-    nftId: "nftId",
     founder: "founder",
     proposals: "proposals",
     isAdmin: "isAdmin",

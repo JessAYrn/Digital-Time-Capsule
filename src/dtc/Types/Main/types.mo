@@ -83,29 +83,11 @@ module{
         lastRecordedTime: Int;
         profilesMetaData: ProfilesMetaData;
         isAdmin: Bool;
-        nftId: ?Nat;
         founder: Text;
         supportMode: Bool;
         releaseVersionLoaded: Nat;
         releaseVersionInstalled: Nat;
         requestsForAccess: RequestsForAccess;
-    };
-
-    public type DaoMetaData_V3 = {
-        managerCanisterPrincipal: Text; 
-        treasuryCanisterPrincipal: Text;
-        frontEndPrincipal: Text;
-        backEndPrincipal: Text;
-        lastRecordedBackEndCyclesBalance: Nat;
-        backEndCyclesBurnRatePerDay: Nat;
-        admin: [(Text, AdminData)];
-        acceptingRequests: Bool;
-        lastRecordedTime: Int;
-        nftId: ?Nat;
-        founder: ?Text;
-        supportMode: Bool;
-        requestsForAccess: RequestsForAccess;
-        defaultControllers: [Principal];
     };
 
     public type DaoMetaData_V4 = {
@@ -118,7 +100,6 @@ module{
         admin: [(Text, AdminData)];
         acceptingRequests: Bool;
         lastRecordedTime: Int;
-        nftId: ?Nat;
         founder: Text;
         supportMode: Bool;
         requestsForAccess: RequestsForAccess;
@@ -182,24 +163,6 @@ module{
 
     public type Vote = { adopt: Bool };
 
-    public let DEFAULT_DAO_METADATA_V3: DaoMetaData_V3 = {
-        managerCanisterPrincipal = "Null";
-        treasuryCanisterPrincipal = "Null";
-        frontEndPrincipal = "Null";
-        backEndPrincipal = "Null";
-        lastRecordedBackEndCyclesBalance = 0;
-        backEndCyclesBurnRatePerDay = 0;
-        admin = [];
-        acceptingRequests = true;
-        lastRecordedTime = 0;
-        supportMode = true;
-        requestsForAccess = [];
-        defaultControllers = [];
-        nftId = null;
-        founder = null;
-    };
-
-
     public let DEFAULT_DAO_METADATA_V4: DaoMetaData_V4 = {
         managerCanisterPrincipal = "Null";
         treasuryCanisterPrincipal = "Null";
@@ -213,7 +176,6 @@ module{
         supportMode = false;
         requestsForAccess = [];
         defaultControllers = [];
-        nftId = null;
         founder = "Null";
     };
 

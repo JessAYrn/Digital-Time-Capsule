@@ -1,7 +1,6 @@
 import Iter "mo:base/Iter";
 import Buffer "mo:base/Buffer";
 import Result "mo:base/Result";
-import Account "../../Serializers/Account";
 import JournalTypes "../../Types/Journal/types";
 import Principal "mo:base/Principal";
 import Cycles "mo:base/ExperimentalCycles";
@@ -16,9 +15,6 @@ import Manager "../../Manager";
 import AssetCanister "../../Types/AssetCanister/types";
 import HashMap "mo:base/HashMap";
 import WasmStore "../../Types/WasmStore/types";
-import Hex "../../Serializers/Hex";
-import NftCollection "../../Types/NftCollection/types";
-import Nat32 "mo:base/Nat32";
 import Support "../../SupportCanisterIds/SupportCanisterIds";
 import Time "mo:base/Time";
 import Float "mo:base/Float";
@@ -31,8 +27,6 @@ import FloatX "../../MotokoNumbers/FloatX";
 module{
 
     private let ic : IC.Self = actor "aaaaa-aa";
-
-    private let nftCollection : NftCollection.Interface = actor(NftCollection.CANISTER_ID);
 
     private let nanosecondsInADay: Nat64 = 86400000000000;
 
@@ -142,7 +136,7 @@ module{
             daoMetaData.frontEndPrincipal == "Null" or 
             daoMetaData.managerCanisterPrincipal == "Null" or 
             daoMetaData.treasuryCanisterPrincipal == "Null" or 
-            (daoMetaData.founder == "Null" and daoMetaData.nftId == null)
+            daoMetaData.founder == "Null"
         ) return true;
         return false;
     };
@@ -241,19 +235,19 @@ module{
         };
     };
 
-    public func heartBeat(currentCylcesBalance: Nat, daoMetaData : MainTypes.DaoMetaData_V4, profilesMap: MainTypes.UserProfilesMap_V2): 
+    public func heartBeat(currentCyclesBalance: Nat, daoMetaData : MainTypes.DaoMetaData_V4, profilesMap: MainTypes.UserProfilesMap_V2): 
     async MainTypes.DaoMetaData_V4{
         let managerCanister : Manager.Manager = actor(daoMetaData.managerCanisterPrincipal);
         ignore managerCanister.notifyNextStableRelease();
-        ignore refillCanisterCycles(daoMetaData, profilesMap);
+        if(currentCyclesBalance > 10_000_000_000_000){ ignore refillCanisterCycles(daoMetaData, profilesMap); };
         let timeLapsed =Time.now() - daoMetaData.lastRecordedTime;
         let timeLapsedInDays : Float = FloatX.divideInt64(Int64.fromInt(timeLapsed), Int64.fromNat64(nanosecondsInADay));
         if(timeLapsedInDays < 1){ return daoMetaData };
-        let cyclesBurned : Float = Float.fromInt(daoMetaData.lastRecordedBackEndCyclesBalance - currentCylcesBalance);
+        let cyclesBurned : Float = Float.fromInt(daoMetaData.lastRecordedBackEndCyclesBalance - currentCyclesBalance);
         let dailyBurnRate : Nat = Int.abs(Int.max(Float.toInt(cyclesBurned / timeLapsedInDays), 0));
         let updatedCanisterData = {
             daoMetaData with 
-            lastRecordedBackEndCyclesBalance = currentCylcesBalance;
+            lastRecordedBackEndCyclesBalance = currentCyclesBalance;
             backEndCyclesBurnRatePerDay = dailyBurnRate;
             lastRecordedTime = Time.now();
         };
@@ -418,32 +412,5 @@ module{
         let adminData = adminMap.get(Principal.toText(princiapl));
         if(adminData == null){ return false; };
         return true;
-    };
-
-    public func verifyUserHasAdminNft( principal: Principal, daoMetaData: MainTypes.DaoMetaData_V4 ): async Bool {
-        let ?nftId_ = daoMetaData.nftId else { return false; };
-        let accountIdBlob = Account.accountIdentifier(principal, Account.defaultSubaccount());
-        let accountIdArray = Blob.toArray(accountIdBlob);
-        let accountIdText = Hex.encode(accountIdArray);
-        let tokens_ext_result = await nftCollection.tokens_ext(accountIdText);
-        switch(tokens_ext_result){
-            case(#ok(tokensOwned)){
-                var index = 0;
-                let tokensOwnedIter = Iter.fromArray(tokensOwned);
-                let numberOfTokensOwned = Iter.size(tokensOwnedIter);
-                while(index < numberOfTokensOwned){
-                    let tokenData = tokensOwned[index];
-                    let (tokenIndex, _, _) = tokenData;
-                    var tokenIndexAsNat = Nat32.toNat(tokenIndex);
-                    tokenIndexAsNat += 1;
-                    if(tokenIndexAsNat == nftId_){
-                        return true;
-                    };
-                    index += 1;
-                };
-                return false;
-            };
-            case(#err(e)){ return false; };
-        };  
     };
 }

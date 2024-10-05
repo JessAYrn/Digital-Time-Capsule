@@ -88,7 +88,6 @@ export const mapBackendCanisterDataToFrontEndObj = (props) => {
         treasuryCanisterPrincipal,
         releaseVersionLoaded,
         releaseVersionInstalled,
-        nftId,
         founder,
         managerCanisterPrincipal,
     } = props;
@@ -116,7 +115,6 @@ export const mapBackendCanisterDataToFrontEndObj = (props) => {
         requestsForAccess: requestsForAccess_,
         releaseVersionLoaded: parseInt(releaseVersionLoaded),
         releaseVersionInstalled: parseInt(releaseVersionInstalled),
-        nftId: nftId[0] ? parseInt(nftId[0]) : null,
         founder
     }
 }; 

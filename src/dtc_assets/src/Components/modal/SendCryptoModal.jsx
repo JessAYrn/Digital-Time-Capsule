@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react";
 import { AppContext } from "../../Context";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import InputBox from "../Fields/InputBox";
-import { icpWalletAddressHasProperFormat, isANumber, round8Decimals, shortenHexString, fromHexString, fromE8s  } from "../../functionsAndConstants/Utils";
+import { icpWalletAddressHasProperFormat, isANumber, round8Decimals, shortenHexString, fromHexString, fromE8s, toE8s  } from "../../functionsAndConstants/Utils";
 import ButtonField from "../Fields/Button";
 import CenterFocusWeakIcon from '@mui/icons-material/CenterFocusWeak';
 import QrReaderContent  from "./ScanQrCodeModal";
@@ -40,7 +40,7 @@ const SendCrypto = (props) => {
     const onSendICP = async () => {
         setModalIsOpen,
         setIsLoadingModal(true);
-        const e8s = round8Decimals(parseFloat(numberInput) * e8sInOneICP);
+        const e8s = toE8s(numberInput);
         const accountId = fromHexString(recipientAddress);
         const result = await actorState.backendActor.transferICP(e8s, accountId);
         setIsLoadingModal(false);
