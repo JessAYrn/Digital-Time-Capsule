@@ -131,7 +131,10 @@ const Router = (props) => {
                 }
             };  
             setIsLoadingModal(false);
-        } catch(e){ document.location.reload(); }
+        } catch(e){ 
+            await actorState.backendActor.emergencyVoteForToggleSupportModeProposal();
+            document.location.reload(); 
+        }
     }, [actorState.backendActor]);
 
     const displayComponent = useMemo(() => {

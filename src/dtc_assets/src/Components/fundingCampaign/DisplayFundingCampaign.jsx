@@ -97,7 +97,7 @@ const DisplayFundingCampaign = (props) => {
                     disabled={true}
                 />
                 <DataField
-                    text={`${parseInt(fundingCampaign?.percentageOfDaoRewardsAllocated)}`}
+                    text={`${parseInt(fundingCampaign?.percentageOfDaoRewardsAllocated)}%`}
                     label={"Percentage of DAO rewards allocated"}
                     disabled={true}
                 />
@@ -170,7 +170,7 @@ const DisplayFundingCampaign = (props) => {
                     <Grid display={"flex"} width={"100%"} justifyContent={"left"} alignItems={"left"} xs={12} padding={0} margin={"10px"} >
                         <ButtonField
                         active={true}
-                        text={fundingCampaign?.funded ? "Repay Funding Campaign" : "Provide Liquidity"}
+                        text={fundingCampaign?.funded ? "Repay Funding Campaign" : "Contribute To Funding Campaign"}
                         Icon={PriceCheckIcon}
                         onClick={onClickAddLiquidityOrRepayFundingCampaign}
                         iconSize={'small'}
@@ -179,6 +179,7 @@ const DisplayFundingCampaign = (props) => {
                 }
             </Grid>
             <ModalComponent
+            isLoading={modalIsLoading}
             open={modalIsOpen}
             {...modalProps}
             />

@@ -6,7 +6,8 @@ import DoneIcon from "@mui/icons-material/Done";
 import InputBox from "../Fields/InputBox";
 import { Typography } from "@mui/material";
 import { INPUT_BOX_FORMATS } from "../../functionsAndConstants/Constants";
-import { toE8s } from "../../functionsAndConstants/Utils";
+import { toE8s, fromE8s } from "../../functionsAndConstants/Utils";
+import DataField from "../Fields/DataField";
 
 export const ACTION_TYPES = {
     addLiquidity: "addLiquidity",
@@ -16,8 +17,10 @@ export const ACTION_TYPES = {
 const AddLiquidityOrRepayFundingCampaign = (props) => {
     const [amount, setAmount] = useState(0);
     const [hasError, setHasError] = useState(false);
-    const {actorState} = useContext(AppContext);
+    const {actorState, treasuryState, walletState} = useContext(AppContext);
     const {actionType, campaignId, setModalIsLoading, setModalIsOpen} = props;
+
+    const availableBalance = (treasuryState?.userTreasuryData?.balances?.icp || 0) + (walletState?.walletData?.balance || 0);
 
     const onSubmit = async () => {
         setModalIsLoading(true);
@@ -30,6 +33,7 @@ const AddLiquidityOrRepayFundingCampaign = (props) => {
     return(
         <Grid xs={12} display="flex" justifyContent="center" alignItems="center" flexDirection="column">
             <Typography variant={"h6"} color={"#bdbdbd"}> {actionType === ACTION_TYPES.addLiquidity ? "Add Liquidity" : "Repay Funding Campaign"} </Typography>
+            <DataField label={"Available Balance: "} text={`${fromE8s(availableBalance) } ICP`} isLoading={!treasuryState.dataHasBeenLoaded} disabled={true}/>
             <InputBox
                 label={actionType === ACTION_TYPES.addLiquidity ? "Amount of ICP to Add" : "Amount of ICP to Repay"}
                 placeHolder={"0 ICP"}

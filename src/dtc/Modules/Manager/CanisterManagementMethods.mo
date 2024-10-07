@@ -1,5 +1,6 @@
 import AssetCanister "../../Types/AssetCanister/types";
 import Buffer "mo:base/Buffer";
+import Array "mo:base/Array";
 import HashMap "mo:base/HashMap";
 import Iter "mo:base/Iter";
 import AssetManagementFunctions "../../Modules/AssetCanister/AssetManagementFunctions";
@@ -153,6 +154,9 @@ module{
     ) : async () {
         var arg = to_candid(null);
         switch(argument){ case null {}; case (?argument_){ arg := to_candid(argument_); } };
+        let currentSnapshots = await ic.list_canister_snapshots({canister_id});
+        let mostRecentCanisterSnapshot: ?IC.snapshot_id = switch(Array.size(currentSnapshots) > 0){ case true { ?currentSnapshots[0].id }; case false { null }; };
+        ignore await ic.take_canister_snapshot({canister_id; replace_snapshot = mostRecentCanisterSnapshot});
         await ic.stop_canister({canister_id});
         await ic.install_code({
             arg;

@@ -443,10 +443,13 @@ module{
     ) 
     : async TreasuryTypes.FundingCampaignsArray {
         let ?campaign = fundingCampaignsMap.get(campaignId) else throw Error.reject("Campaign not found.");
-        let {subaccountId = fundingCampaignSubaccountId; funded;} = campaign;
+        let {subaccountId = fundingCampaignSubaccountId; funded; campaignWalletBalance; amountToFund} = campaign;
         if(funded) throw Error.reject("Campaign already funded.");
+        if(campaignWalletBalance.icp.e8s >= amountToFund.icp.e8s) throw Error.reject("Campaign already funded.");
+        let amountRemainingToFund = amountToFund.icp.e8s - campaignWalletBalance.icp.e8s;
+        let amountToContribute = Nat64.min(amount, amountRemainingToFund);
         let (_, contributorSubaccountId) = SyncronousHelperMethods.getIdAndSubaccount(#Principal(contributor), usersTreasuryDataMap, fundingCampaignsMap);
-        let {amountSent} = await performTransfer(amount, {subaccountId = ?contributorSubaccountId; accountType = #UserTreasuryData}, {owner = treasuryCanisterId; subaccountId = ?fundingCampaignSubaccountId; accountType = #FundingCampaign}, updateTokenBalances);
+        let {amountSent} = await performTransfer(amountToContribute + txFee, {subaccountId = ?contributorSubaccountId; accountType = #UserTreasuryData}, {owner = treasuryCanisterId; subaccountId = ?fundingCampaignSubaccountId; accountType = #FundingCampaign}, updateTokenBalances);
         creditCampaignContribution(contributor, campaignId, amountSent, fundingCampaignsMap);
         return Iter.toArray(fundingCampaignsMap.entries());
     };

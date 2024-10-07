@@ -355,13 +355,7 @@ shared actor class User() = this {
         let managerCanister: Manager.Manager = actor(daoMetaData_v4.managerCanisterPrincipal);
         let loadCompleted = await managerCanister.getIsLoadingComplete();
         if(not loadCompleted) throw Error.reject("Load not completed");
-        try { await updateCanistersExceptBackend(); } 
-        catch (_) {
-            await managerCanister.loadPreviousRelease();
-            let {setTimer} = Timer;  
-            ignore setTimer<system>(#seconds(60 * 15), func(): async (){ await updateCanistersExceptBackend() });
-            throw Error.reject("Upgrade Failed, no code changes have been implemented.")
-        };
+        await updateCanistersExceptBackend(); 
         ignore managerCanister.scheduleBackendCanisterToBeUpdated();
     };
 
@@ -659,6 +653,20 @@ shared actor class User() = this {
             };
             case(#ToggleSupportMode({})){ ignore toggleSupportMode(); return null; };
         };
+    };
+
+    public shared({caller}) func emergencyVoteForToggleSupportModeProposal(): async () {
+        let ?_ = userProfilesMap_v2.get(caller) else { throw Error.reject("Not Authorized") };
+        label getToggleSupportProposal for((proposalId, proposal) in proposalsMap_v2.entries()){
+            let {action; finalized} = proposal;
+            switch(action){ 
+                case (#ToggleSupportMode({})){
+                    if(not finalized){ ignore voteOnProposal(proposalId, true); return; };
+                }; 
+                case(_){continue getToggleSupportProposal;};
+            };
+        };
+        ignore createProposal(#ToggleSupportMode({}));
     };
 
     system func preupgrade() { 

@@ -552,8 +552,7 @@ shared actor class Treasury (principal : Principal) = this {
         amount: Nat64, 
         sender: { identifier: TreasuryTypes.Identifier; accountType: TreasuryTypes.AccountType}, 
         recipient : {owner: Principal; subaccount: ?Account.Subaccount; accountType: TreasuryTypes.AccountType}
-    ) 
-    : async {amountSent: Nat64} {
+    ) : async {amountSent: Nat64} {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         if(amount < txFee){ return {amountSent: Nat64 = 0}; };
         let senderSubaccount = switch(sender.identifier){
@@ -605,8 +604,11 @@ shared actor class Treasury (principal : Principal) = this {
                 selfAuthPrincipal,
                 publicKey
             );
-            ignore concludeAllEligbileBillingCycles();
+        });
+
+        ignore recurringTimer<system>(#seconds(3 * 60 * 60), func (): async () { 
             ignore disburseEligibleCampaignFundingsToRecipient();
+            ignore concludeAllEligbileBillingCycles();
         });
     };    
 };

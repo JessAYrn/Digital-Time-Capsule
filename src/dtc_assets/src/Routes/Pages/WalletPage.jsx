@@ -13,7 +13,6 @@ import DataField from '../../Components/Fields/DataField';
 import AccordionField from '../../Components/Fields/Accordion';
 import ModalComponent from '../../Components/modal/Modal';
 import ButtonField from '../../Components/Fields/Button';
-import DisplayQrCode from '../../Components/modal/DisplayQrCode';
 import Graph from '../../Components/Fields/Chart';
 import Typography from '@mui/material/Typography';
 import ActionButton from '../../Components/ActionButton';
@@ -28,18 +27,6 @@ const WalletPage = (props) => {
 
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [modalProps, setModalProps] = useState({});
-
-    const onClick_QrCode = () => {
-        setModalIsOpen(true);
-        setModalProps({
-            components: [{
-                Component: DisplayQrCode,
-                props: {
-                    onClose: () => {setModalIsOpen(false); () => setModalProps({})},
-                }
-            }]
-        });
-    };
 
     const DisplayTxAddresses = (props) => {
         const {addresses} = props;
@@ -115,30 +102,6 @@ const WalletPage = (props) => {
                     height={"500px"}
                     width={"100%"}
                 />
-                <Paper elevation={24} className={''} sx={{
-                    backgroundColor: "rgba(52, 52, 52, 0.8)",
-                    width: "100%",
-                    height: "auto",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    flexDirection: "column",
-                }}>
-                    <Grid width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} padding={"0"}>
-                        <DataField
-                            label={'Address: '}
-                            text={`${shortenHexString(walletState.walletData.address)}`}
-                            isLoading={!walletState.dataHasBeenLoaded}
-                            onClick={() => copyText( walletState.walletData.address )}
-                            buttonIcon={ContentCopyIcon}
-                        />
-                        <ButtonField
-                            Icon={QrCodeIcon}
-                            transparentBackground={true}
-                            onClick={onClick_QrCode}
-                        />
-                    </Grid>
-                </Paper> 
             </Grid>
             <Grid 
                 columns={12} 
