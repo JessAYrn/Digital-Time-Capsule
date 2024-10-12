@@ -594,7 +594,7 @@ shared actor class User() = this {
                     command = ?#Disburse({to_account = ?{hash = treasuryAccountId}; amount = null });
                     neuron_id_or_subaccount = null;
                 };
-                ignore await treasuryCanister.manageNeuron(args, false);
+                ignore await treasuryCanister.manageNeuron(args);
                 return null;
             };
             case(#DissolveNeuron({neuronId;})){
@@ -603,7 +603,7 @@ shared actor class User() = this {
                     command = ?#Configure({operation = ?#StartDissolving({});});
                     neuron_id_or_subaccount = null;
                 };
-                ignore await treasuryCanister.manageNeuron(args, false);
+                ignore await treasuryCanister.manageNeuron(args);
                 return null;
 
             };
@@ -614,7 +614,7 @@ shared actor class User() = this {
                     command = ?#Follow({topic; followees;});
                     neuron_id_or_subaccount = null;
                 };
-                ignore await treasuryCanister.manageNeuron(args, false);
+                ignore await treasuryCanister.manageNeuron(args);
                 return null;
             };
             case(#IncreaseDissolveDelay({neuronId; additionalDissolveDelaySeconds;})){
@@ -624,7 +624,7 @@ shared actor class User() = this {
                     command = ?#Configure({operation = ?#IncreaseDissolveDelay({additional_dissolve_delay_seconds});});
                     neuron_id_or_subaccount = null;
                 };
-                ignore await treasuryCanister.manageNeuron(args, false);
+                ignore await treasuryCanister.manageNeuron(args);
                 return null;
             };
             case(#SpawnNeuron({neuronId; percentage_to_spawn;})){
@@ -638,7 +638,7 @@ shared actor class User() = this {
                     command = ?#Spawn(spawnArgs);
                     neuron_id_or_subaccount = null;
                 };
-                ignore await treasuryCanister.manageNeuron(args, true);
+                ignore await treasuryCanister.manageNeuron(args);
                 return null;
             };
             case(#CreateFundingCampaign({fundingCampaignInput})){

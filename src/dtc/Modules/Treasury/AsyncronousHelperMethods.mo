@@ -25,17 +25,21 @@ module{
 
     public let PENDING_NEURON_SUFFIX = "_pendingNeuron";
 
-    public func manageNeuron( neuronDataMap: TreasuryTypes.NeuronsDataMap, args: Governance.ManageNeuron): 
-    async Governance.ManageNeuronResponse {
+    public func manageNeuron( 
+        neuronDataMap: TreasuryTypes.NeuronsDataMap, 
+        args: Governance.ManageNeuron,
+        neuronContributionsForNewlyCreatedNeuron: TreasuryTypes.NeuronContributions
+    ): async (Governance.ManageNeuronResponse, ?TreasuryTypes.NeuronContributions) {
+        
         let governanceCanister: Governance.Interface = actor(Governance.CANISTER_ID);
         let ?command = args.command else { throw Error.reject("No command in request"); };
-        let args_: Governance.ManageNeuron = switch(args.id){
+        let (args_, neuronContributions): (Governance.ManageNeuron, ?TreasuryTypes.NeuronContributions) = switch(args.id){
             case null {
                 switch(command){
                     case(#ClaimOrRefresh({by})){ 
                         let ?by_ = by else { throw Error.reject("NeuronId and MemoAndController missing from args") };
                         switch(by_){ 
-                            case(#MemoAndController(_)){ args };
+                            case(#MemoAndController(_)){ (args, ?neuronContributionsForNewlyCreatedNeuron) };
                             case(_){ throw Error.reject("NeuronId and MemoAndController missing from args") };
                         };
                     };
@@ -44,16 +48,17 @@ module{
             };
             case(?neuronId){
                 let ?{contributions; proxyNeuron} = neuronDataMap.get(Nat64.toText(neuronId.id)) else Debug.trap("No neuron data for neuronId");
-                switch(command){
+                let parentNeuronContributions: ?TreasuryTypes.NeuronContributions = switch(command){
                     case(#Disburse(_)) {
                         label isCollateralized for((userPrincipal, {collateralized_stake_e8s}) in Iter.fromArray(contributions)){
                             let ?collateral = collateralized_stake_e8s else continue isCollateralized;
                             if(collateral > 0) { throw Error.reject("Neuron is collateralized. Cannot disburse from collateralized neuron.") };
                         };
+                        null
                     };       
-                    case(#Spawn(_)){};
-                    case(#ClaimOrRefresh(_)){};
-                    case(#Follow(_)){};
+                    case(#Spawn(_)){ ?contributions; };
+                    case(#ClaimOrRefresh(_)){null};
+                    case(#Follow(_)){null};
                     case(#Configure({operation})){
                         switch(operation){
                             case(?#StartDissolving(_)){
@@ -64,7 +69,7 @@ module{
                                 };
                             };
                             case(_){};
-                        };
+                        }; null;
                     };
                     case(#Split(_)) { throw Error.reject("Action: 'Split' is unsupported") };
                     case(#DisburseToNeuron(_)) { throw Error.reject("Action: 'DisburseToNeuron' is unsupported") };
@@ -75,7 +80,7 @@ module{
                     case(#MakeProposal(_)) { throw Error.reject("Action: 'MakeProposal' is unsupported") };
                 };
                 switch(proxyNeuron){
-                    case null{ args };
+                    case null{ (args, parentNeuronContributions) };
                     case(?proxyNeuron){
                         let ?proxyNeuronIdAsNat = Nat.fromText(proxyNeuron) else { throw Error.reject("Invalid proxyNeuron") };
                         let proxyArgs = {
@@ -88,12 +93,12 @@ module{
                                 summary = "See URL for details";
                             });
                         };
-                        proxyArgs;
+                        (proxyArgs, parentNeuronContributions);
                     };
                 };
             };
         }; 
-        await governanceCanister.manage_neuron(args_);
+        return (await governanceCanister.manage_neuron(args_), neuronContributions);
     };
 
     // public func manageNeuron( 
@@ -405,10 +410,8 @@ module{
     //     };
     // };
 
-    public func upateNeuronsDataMap({
-        neuronDataMap: TreasuryTypes.NeuronsDataMap;
-        neuronContributions: ?TreasuryTypes.NeuronContributions
-    }): async () {
+    public func upateNeuronsDataMap( neuronDataMap: TreasuryTypes.NeuronsDataMap, neuronContributions: ?TreasuryTypes.NeuronContributions): 
+    async () {
 
         let governanceCanister: Governance.Interface = actor(Governance.CANISTER_ID);
         let ownedNeurons = await governanceCanister.get_neuron_ids();
@@ -417,7 +420,7 @@ module{
         let {neuron_infos; full_neurons} = await governanceCanister.list_neurons(listNeuronsInput);
 
         label updatingNeuronInfosAndAddingNewNeuronsToNeuronsDataMap for((neuronId, neuronInfo) in Iter.fromArray(neuron_infos) ){
-            if(neuronInfo.stake_e8s == 0) continue updatingNeuronInfosAndAddingNewNeuronsToNeuronsDataMap;
+            if(neuronInfo.stake_e8s == 0 and neuronInfo.state != TreasuryTypes.NEURON_STATES.spawning ) continue updatingNeuronInfosAndAddingNewNeuronsToNeuronsDataMap;
             switch(neuronDataMap.get(Nat64.toText(neuronId))){
                 case null {
                     var parentNeuronContributions: ?TreasuryTypes.NeuronContributions = null;
