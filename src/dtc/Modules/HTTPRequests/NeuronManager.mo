@@ -30,10 +30,10 @@ module {
     let txFee : Nat64 = 10_000;
     public type TransformFnSignature = query { response : IC.http_response; context: Blob } -> async IC.http_response;
 
-    public func transferIcpToNeuron( amount: Nat64, memoOrNeuronSubaccountId: {#Memo: Nat64; #NeuronSubaccountId: Blob}, senderSubaccount: Account.Subaccount, selfAuthPrincipal: Principal): async {amountSent: Nat64} {
+    public func transferIcpToNeuron( amount: Nat64, memoOrNeuronSubaccountId: {#Memo: Nat64; #NeuronSubaccountId: Blob}, senderSubaccount: Account.Subaccount, controller: Principal): async {amountSent: Nat64} {
         if(amount < 10_000){ return {amountSent: Nat64 = 0}; };
         let (memo, treasuryNeuronSubaccountId) = switch(memoOrNeuronSubaccountId){
-            case(#Memo(memo)) { (memo, Account.neuronSubaccount(selfAuthPrincipal, memo)); };
+            case(#Memo(memo)) { (memo, Account.neuronSubaccount(controller, memo)); };
             case(#NeuronSubaccountId(subaccount)) { let memo: Nat64 = 0; (memo, subaccount) };
         };
         let treasuryNeuronAccountId = Account.accountIdentifier(Principal.fromText(Governance.CANISTER_ID), treasuryNeuronSubaccountId);
@@ -50,7 +50,7 @@ module {
             case(#Ok(_)) { return {amountSent} };
             case(#Err(#InsufficientFunds { balance })) { 
                 if(balance.e8s < 10_000){ return {amountSent: Nat64 = 0} };
-                var amountSent = balance.e8s - txFee;
+                amountSent := balance.e8s - txFee;
                 let res = await ledger.transfer({transferInput with amount = { e8s = amountSent }}); 
                 switch(res){
                     case(#Ok(_)) { return {amountSent} };

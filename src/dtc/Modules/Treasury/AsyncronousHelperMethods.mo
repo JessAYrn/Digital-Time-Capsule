@@ -5,9 +5,7 @@ import Nat64 "mo:base/Nat64";
 import Text "mo:base/Text";
 import Debug "mo:base/Debug";
 import Error "mo:base/Error";
-import NeuronManager "../HTTPRequests/NeuronManager";
-import Governance "../../NNS/Governance";
-import Result "mo:base/Result";
+import Governance "../../NNS/Governance"; 
 import Array "mo:base/Array";
 import Int "mo:base/Int";
 import Time "mo:base/Time";
@@ -27,319 +25,431 @@ module{
 
     public let PENDING_NEURON_SUFFIX = "_pendingNeuron";
 
-    public func manageNeuron( 
-        neuronDataMap: TreasuryTypes.NeuronsDataMap,
-        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap,
-        pendingActionsMap: TreasuryTypes.PendingActionsMap,
-        actionLogsArrayBuffer: TreasuryTypes.ActionLogsArrayBuffer,
-        memoToNeuronIdMap: TreasuryTypes.MemoToNeuronIdMap,
-        updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async (),
-        fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap,
-        transformFn: NeuronManager.TransformFnSignature,
-        args: Governance.ManageNeuron,
-        proposer: ?Principal,
-        treasuryCanisterId: ?Principal,
-        selfAuthPrincipal: Principal,
-        publicKey: Blob
-    ): async Result.Result<(), TreasuryTypes.Error> {
-        
-        let ?neuronId = args.id else {
-            actionLogsArrayBuffer.add(Int.toText(Time.now()), "No neuronId in request");
-            Debug.trap("No neuronId in request");
-        };
-        let ?command = args.command else {
-            actionLogsArrayBuffer.add(Int.toText(Time.now()), "No command in request");
-            Debug.trap("No command in request");
-        };
-
-        let pendingActionId : Text = switch(command){
-            case(#Spawn(_)) { "spawn_"#Nat64.toText(neuronId.id); };
-            case(#Follow(_)) { "follow_"#Nat64.toText(neuronId.id); };
-            case(#Configure(_)) { "configure_"#Nat64.toText(neuronId.id); };
-            case(#Disburse(_)) { 
-                let ?{contributions} = neuronDataMap.get(Nat64.toText(neuronId.id)) else { throw Error.reject("No neuron found") };
-                label isCollateralized for((userPrincipal, {collateralized_stake_e8s }) in Iter.fromArray(contributions)){
-                    let ?collateral = collateralized_stake_e8s else continue isCollateralized;
-                    if(collateral > 0) { throw Error.reject("Neuron is collateralized. Cannot disburse from collateralized neuron.") };
-                };
-                "disburse_"#Nat64.toText(neuronId.id); 
-            };
-            case(#ClaimOrRefresh(_)) { "claimOrRefresh_"#Nat64.toText(neuronId.id);};
-            case(_) { return #err(#ActionNotSupported) };
-        };
-        let newPendingAction: TreasuryTypes.PendingAction = {
-            expectedHttpResponseType = ?#GovernanceManageNeuronResponse({neuronId = ?neuronId.id; memo = null; proposer; treasuryCanisterId; });
-            function = #ManageNeuron({  input = {args; selfAuthPrincipal; public_key = publicKey; transformFn;} });
-        };
-        pendingActionsMap.put(pendingActionId, newPendingAction);
-        actionLogsArrayBuffer.add(Int.toText(Time.now()),"New Action Pending: "#pendingActionId);
-        ignore resolvePendingActionFromQueue( 
-            neuronDataMap, 
-            usersTreasuryDataMap, 
-            pendingActionsMap, 
-            actionLogsArrayBuffer, 
-            memoToNeuronIdMap, 
-            updateTokenBalances,
-            fundingCampaignsMap, 
-            transformFn
-        );
-        return #ok(());
-    };
-
-    public func increaseNeuron(
-        neuronDataMap: TreasuryTypes.NeuronsDataMap,
-        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap,
-        pendingActionsMap: TreasuryTypes.PendingActionsMap,
-        actionLogsArrayBuffer: TreasuryTypes.ActionLogsArrayBuffer,
-        memoToNeuronIdMap: TreasuryTypes.MemoToNeuronIdMap,
-        updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async (),
-        fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap,
-        transformFn: NeuronManager.TransformFnSignature,
-        {amount: Nat64; neuronId: Nat64; contributor: Principal; selfAuthPrincipal: Principal; publicKey: Blob}
-    ) : async Result.Result<({amountSent: Nat64}), TreasuryTypes.Error>  {
-
-        let ?neuronData = neuronDataMap.get(Nat64.toText(neuronId)) else Debug.trap("No neuron data for neuronId");
-        let ?neuron = neuronData.neuron else Debug.trap("No neuron for neuronId");
-        let {account = neuronSubaccount} = neuron;
-        let ?{subaccountId} = usersTreasuryDataMap.get(Principal.toText(contributor)) else Debug.trap("No subaccount for contributor");
-        let {amountSent} = await NeuronManager.transferIcpToNeuron(amount, #NeuronSubaccountId(neuronSubaccount), subaccountId, selfAuthPrincipal);
-        ignore updateTokenBalances(#Principal(Principal.toText(contributor)), #Icp, #UserTreasuryData);
-        SyncronousHelperMethods.updateUserNeuronContribution( neuronDataMap,{ userPrincipal = Principal.toText(contributor);  delta = amountSent; neuronId = Nat64.toText(neuronId); operation = #AddStake; });
-        let args = { id = null; command = ?#ClaimOrRefresh( {by = ?#NeuronIdOrSubaccount( {} )} );neuron_id_or_subaccount = ?#Subaccount(neuronSubaccount); };
-        let newPendingAction: TreasuryTypes.PendingAction = {
-            expectedHttpResponseType = ?#GovernanceManageNeuronResponse({neuronId = ?neuronId; memo = null; proposer = null; treasuryCanisterId = null; });
-            function = #ManageNeuron({ input = { args; selfAuthPrincipal; public_key = publicKey; transformFn; method_name = TreasuryTypes.GetNeuronDataMethodNames.getFullNeuron }; });
-        };
-        
-        pendingActionsMap.put("claimOrRefresh_"#Nat64.toText(neuronId), newPendingAction);
-        actionLogsArrayBuffer.add(Int.toText(Time.now()),"New Action Pending: claimOrRefresh_"#Nat64.toText(neuronId));
-        ignore resolvePendingActionFromQueue( 
-            neuronDataMap, 
-            usersTreasuryDataMap, 
-            pendingActionsMap, 
-            actionLogsArrayBuffer, 
-            memoToNeuronIdMap, 
-            updateTokenBalances,
-            fundingCampaignsMap, 
-            transformFn
-        );
-        return #ok({amountSent});
-    };
-
-    public func createNeuron(
-        neuronDataMap: TreasuryTypes.NeuronsDataMap,
-        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap,
-        pendingActionsMap: TreasuryTypes.PendingActionsMap,
-        actionLogsArrayBuffer: TreasuryTypes.ActionLogsArrayBuffer,
-        memoToNeuronIdMap: TreasuryTypes.MemoToNeuronIdMap,
-        updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async (),
-        fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap,
-        transformFn: NeuronManager.TransformFnSignature,
-        {amount: Nat64; contributor: Principal; neuronMemo: Nat64; selfAuthPrincipal: Principal; publicKey: Blob}
-    ) : async Result.Result<({amountSent: Nat64}), TreasuryTypes.Error>  {
-
-        let ?{subaccountId} = usersTreasuryDataMap.get(Principal.toText(contributor)) else Debug.trap("No subaccount for contributor");
-        let {amountSent} = await NeuronManager.transferIcpToNeuron(amount, #Memo(neuronMemo), subaccountId, selfAuthPrincipal);
-        ignore updateTokenBalances(#Principal(Principal.toText(contributor)), #Icp, #UserTreasuryData);
-        let newNeuronIdPlaceholderKey : Text = Nat64.toText(neuronMemo)#PENDING_NEURON_SUFFIX;
-        SyncronousHelperMethods.updateUserNeuronContribution( neuronDataMap,{ userPrincipal = Principal.toText(contributor);  delta = amountSent; neuronId = newNeuronIdPlaceholderKey; operation = #AddStake;});
-        let args = { id = null; command = ?#ClaimOrRefresh( {by = ?#MemoAndController( {controller = ?selfAuthPrincipal; memo = neuronMemo} )} ); neuron_id_or_subaccount = null; };
-        let newPendingAction: TreasuryTypes.PendingAction = {
-            expectedHttpResponseType = ?#GovernanceManageNeuronResponse({neuronId = null; memo = ?neuronMemo; proposer = null; treasuryCanisterId = null; });
-            function = #ManageNeuron({ input = {args; selfAuthPrincipal; public_key = publicKey; transformFn;} });
-        };
-        pendingActionsMap.put("createNeuronResponse_"#Nat64.toText(neuronMemo), newPendingAction);
-        actionLogsArrayBuffer.add(Int.toText(Time.now()),"New Action Pending: createNeuronResponse_"#Nat64.toText(neuronMemo));
-        ignore resolvePendingActionFromQueue( 
-            neuronDataMap, 
-            usersTreasuryDataMap, 
-            pendingActionsMap, 
-            actionLogsArrayBuffer, 
-            memoToNeuronIdMap, 
-            updateTokenBalances, 
-            fundingCampaignsMap,
-            transformFn
-        );
-        return #ok({amountSent});
-        
-    };
-
-    public func refreshNeuronsData(
-        neuronDataMap: TreasuryTypes.NeuronsDataMap,
-        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap,
-        pendingActionsMap: TreasuryTypes.PendingActionsMap,
-        actionLogsArrayBuffer: TreasuryTypes.ActionLogsArrayBuffer,
-        memoToNeuronIdMap: TreasuryTypes.MemoToNeuronIdMap,
-        updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async (),
-        fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap,
-        transformFn: NeuronManager.TransformFnSignature,
-        selfAuthPrincipal: Principal,
-        publicKey: Blob
-    ) : async () {
-
-        label populatePendingActionsLoop for((_, neuronData) in neuronDataMap.entries()){
-            let ?neuron = neuronData.neuron else continue populatePendingActionsLoop;
-            let ?neuronId = neuron.id else continue populatePendingActionsLoop;
-            let args = { id = null; command = ?#ClaimOrRefresh( {by = ?#NeuronIdOrSubaccount( {} )} );neuron_id_or_subaccount = ?#NeuronId(neuronId); };
-            let newPendingAction: TreasuryTypes.PendingAction = {
-                expectedHttpResponseType = ?#GovernanceManageNeuronResponse({neuronId = ?neuronId.id; memo = null; proposer = null; treasuryCanisterId = null; });
-                function = #ManageNeuron({ input = {args; selfAuthPrincipal; public_key = publicKey; transformFn;} });
-            };                
-            pendingActionsMap.put("claimOrRefresh_"#Nat64.toText(neuronId.id), newPendingAction);
-        };
-
-        ignore resolvePendingActionFromQueue( 
-            neuronDataMap, 
-            usersTreasuryDataMap, 
-            pendingActionsMap, 
-            actionLogsArrayBuffer, 
-            memoToNeuronIdMap, 
-            updateTokenBalances, 
-            fundingCampaignsMap,
-            transformFn
-        );
-    };
-
-    public func resolvePendingActionFromQueue(
-        neuronDataMap: TreasuryTypes.NeuronsDataMap,
-        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap,
-        pendingActionsMap: TreasuryTypes.PendingActionsMap,
-        actionLogsArrayBuffer: TreasuryTypes.ActionLogsArrayBuffer,
-        memoToNeuronIdMap: TreasuryTypes.MemoToNeuronIdMap,
-        updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType ) -> async (),
-        fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap,
-        transformFn: NeuronManager.TransformFnSignature
-    ): async () {
-
-        func resolvePendingAction_(identifier: Text, action: TreasuryTypes.PendingAction): async () {
-            try{
-                actionLogsArrayBuffer.add(Int.toText(Time.now()),"Resolving pending action: "#identifier#", making HTTPS request to NNS governance canister.");
-                let ({response; requestId; ingress_expiry;}, selfAuthPrincipal, publicKey) = switch(action.function){
-                    case (#ManageNeuron({input;})) { (await NeuronManager.manageNeuron(input),input.selfAuthPrincipal, input.public_key ); };
-                    case (#GetNeuronData({input;})){ (await NeuronManager.getNeuronData(input), input.selfAuthPrincipal, input.public_key); };
-                };
-                if(response.status != 202) { actionLogsArrayBuffer.add(Int.toText(Time.now()),"Action failed. HTTPS status returned is NOT 202"); throw Error.reject("Action failed. HTTPS status returned is NOT 202"); };
-                let ?expectedResponseType = action.expectedHttpResponseType else { throw Error.reject("No expected response type for action: "#identifier); };
-                let readRequestResponseInput = {response; requestId; expiry = ingress_expiry; expectedResponseType;};
-                let failedAttempts: Nat = 0;
-                actionLogsArrayBuffer.add(Int.toText(Time.now()),"RequestID received for: "#identifier#". Reading Response From NNS Governance Canister.");
-                let readRequestResponseOutput = await NeuronManager.readRequestResponse(readRequestResponseInput, selfAuthPrincipal, publicKey, transformFn, failedAttempts);
-                let processResponseInput: TreasuryTypes.ProcessResponseInput = {readRequestResponseOutput; neuronDataMap; usersTreasuryDataMap; pendingActionsMap; actionLogsArrayBuffer; memoToNeuronIdMap; updateTokenBalances; selfAuthPrincipal; publicKey; transformFn; identifier; fundingCampaignsMap};
-                ignore pendingActionsMap.remove(identifier);
-                actionLogsArrayBuffer.add(Int.toText(Time.now()),"Processing Response for: "#identifier);
-                let {newPendingAction} = try { await processResponse(processResponseInput); }
-                catch(e){ actionLogsArrayBuffer.add(Int.toText(Time.now()),"Failed to process response for: "#identifier#". Error: "#Error.message(e)); return; };
-                actionLogsArrayBuffer.add(Int.toText(Time.now()),"Processing completed for response: "#identifier);
-                if(newPendingAction) ignore resolvePendingActionFromQueue( neuronDataMap, usersTreasuryDataMap, pendingActionsMap, actionLogsArrayBuffer, memoToNeuronIdMap, updateTokenBalances,fundingCampaignsMap, transformFn);
-            } catch(e){ actionLogsArrayBuffer.add(Int.toText(Time.now()),"Failed to resolve pending action: "#identifier#". Cause of error: " #Error.message(e)); };
-        };
-
-        let pendingActionsArray = Iter.toArray(pendingActionsMap.entries());
-        let length = Array.size(pendingActionsArray);
-        if(length == 0) throw Error.reject("No pending actions to resolve");
-        var index = 0;
-        label loop_ while(index < length){
-            let (identifier, action) = pendingActionsArray[index];
-            ignore resolvePendingAction_(identifier, action); 
-            index += 1;
-        };
-
-
-    };
-
-    public func processResponse({
-        neuronDataMap: TreasuryTypes.NeuronsDataMap;
-        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap;
-        pendingActionsMap: TreasuryTypes.PendingActionsMap;
-        actionLogsArrayBuffer: TreasuryTypes.ActionLogsArrayBuffer;
-        memoToNeuronIdMap: TreasuryTypes.MemoToNeuronIdMap;
-        updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async ();
-        fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap;
-        readRequestResponseOutput: TreasuryTypes.ReadRequestResponseOutput;
-        selfAuthPrincipal: Principal;
-        publicKey: Blob;
-        transformFn: TreasuryTypes.TransformFnSignature;
-    }): async {newPendingAction: Bool;} {
-
-        func createPendingActionsToUpdateNeuronData(neuronId: Nat64){
-            let newPendingAction: TreasuryTypes.PendingAction = {
-                    expectedHttpResponseType = ?#GovernanceResult_2({neuronId});
-                    function = #GetNeuronData({ input = {args = neuronId; selfAuthPrincipal; public_key = publicKey; transformFn; method_name = TreasuryTypes.GetNeuronDataMethodNames.getFullNeuron}; }); 
-                };
-            let newPendingAction2: TreasuryTypes.PendingAction = {
-                expectedHttpResponseType = ?#GovernanceResult_5({neuronId});
-                function = #GetNeuronData({ input = {args = neuronId; selfAuthPrincipal; public_key = publicKey; transformFn; method_name = TreasuryTypes.GetNeuronDataMethodNames.getNeuronInfo}; }); };
-            pendingActionsMap.put("getFullNeuronResponse_"#Nat64.toText(neuronId), newPendingAction);
-            pendingActionsMap.put("getNeuronInfoResponse_"#Nat64.toText(neuronId), newPendingAction2);
-        };
-
-        switch(readRequestResponseOutput){
-            case(#ClaimOrRefresh({memo; neuronId})){
-                if(memo != null){
-                    let ?memo_ = memo else { throw Error.reject("No memo for newly created neuron") } ;
-                    memoToNeuronIdMap.put(Nat64.toNat(memo_), neuronId);
-                    SyncronousHelperMethods.finalizeNewlyCreatedNeuronData(Nat64.toText(memo_)#PENDING_NEURON_SUFFIX, neuronId, neuronDataMap);
-                };
-                createPendingActionsToUpdateNeuronData(neuronId);
-                return {newPendingAction = true};
-            };
-            case(#Spawn({created_neuron_id; neuronId;})){
-                neuronDataMap.put(Nat64.toText(created_neuron_id), {neuron = null; neuronInfo = null; parentNeuronContributions = null; contributions = []; });
-
-                let ?parentNeuron = neuronDataMap.get(Nat64.toText(neuronId)) else { throw Error.reject("no neuron found") };
-                let parentNeuronContributions = ?parentNeuron.contributions;
-                neuronDataMap.put(Nat64.toText(created_neuron_id), {neuron = null; neuronInfo = null; parentNeuronContributions; contributions = []; });
-                createPendingActionsToUpdateNeuronData(neuronId);
-                createPendingActionsToUpdateNeuronData(created_neuron_id);
-                return {newPendingAction = true};
-            };
-            case(#Follow({neuronId;})){
-                createPendingActionsToUpdateNeuronData(neuronId);
-                return {newPendingAction = true};
-            };
-            case(#Configure({neuronId;})){
-                createPendingActionsToUpdateNeuronData(neuronId);
-                return {newPendingAction = true};
-            };
-            case(#Disburse({neuronId; treasuryCanisterId})){
-                await distributePayoutsFromNeuron( Nat64.toText(neuronId), usersTreasuryDataMap, actionLogsArrayBuffer, updateTokenBalances, fundingCampaignsMap, neuronDataMap, treasuryCanisterId);
-                ignore neuronDataMap.remove(Nat64.toText(neuronId));
-                return {newPendingAction = false};
-            };
-            case(#Error({error_message;})){throw Error.reject(error_message) };
-            case(#GovernanceResult_2({response; neuronId;})){
-                switch(response){
-                    case(#Ok(neuron)){
-                        let ?neuronData = neuronDataMap.get(Nat64.toText(neuronId)) else { throw Error.reject("neuronData Not Found") };
-                        neuronDataMap.put(Nat64.toText(neuronId), {neuronData with neuron = ?neuron }); 
-                        return {newPendingAction = false};
-                    }; 
-                    case(#Err({error_message;})){ throw Error.reject(error_message) };
-                };
-            };
-            case(#GovernanceResult_5({response; neuronId;})){
-                switch(response){
-                    case(#Ok(neuronInfo)){
-                        switch(neuronDataMap.get(Nat64.toText(neuronId))){
-                            case null { throw Error.reject("neuronInfo Not Found") };
-                            case(?neuronData){
-                                neuronDataMap.put(Nat64.toText(neuronId), {neuronData with neuronInfo = ?neuronInfo});
-                                SyncronousHelperMethods.computeNeuronStakeInfosVotingPowers(neuronDataMap, Nat64.toText(neuronId));
-                                if(neuronData.contributions.size() == 0) SyncronousHelperMethods.populateContributionsArrayFromParentNeuronContributions(neuronDataMap, Nat64.toText(neuronId));
-                                {newPendingAction = false};
-                            };
+    public func manageNeuron( neuronDataMap: TreasuryTypes.NeuronsDataMap, args: Governance.ManageNeuron): 
+    async Governance.ManageNeuronResponse {
+        let governanceCanister: Governance.Interface = actor(Governance.CANISTER_ID);
+        let ?command = args.command else { throw Error.reject("No command in request"); };
+        let args_: Governance.ManageNeuron = switch(args.id){
+            case null {
+                switch(command){
+                    case(#ClaimOrRefresh({by})){ 
+                        let ?by_ = by else { throw Error.reject("NeuronId and MemoAndController missing from args") };
+                        switch(by_){ 
+                            case(#MemoAndController(_)){ args };
+                            case(_){ throw Error.reject("NeuronId and MemoAndController missing from args") };
                         };
-                    }; 
-                    case(#Err({error_message})){ throw Error.reject(error_message) };
+                    };
+                    case(_){ throw Error.reject("NeuronId missing from args") };
+                }
+            };
+            case(?neuronId){
+                let ?{contributions; proxyNeuron} = neuronDataMap.get(Nat64.toText(neuronId.id)) else Debug.trap("No neuron data for neuronId");
+                switch(command){
+                    case(#Disburse(_)) {
+                        label isCollateralized for((userPrincipal, {collateralized_stake_e8s}) in Iter.fromArray(contributions)){
+                            let ?collateral = collateralized_stake_e8s else continue isCollateralized;
+                            if(collateral > 0) { throw Error.reject("Neuron is collateralized. Cannot disburse from collateralized neuron.") };
+                        };
+                    };       
+                    case(#Spawn(_)){};
+                    case(#ClaimOrRefresh(_)){};
+                    case(#Follow(_)){};
+                    case(#Configure({operation})){
+                        switch(operation){
+                            case(?#StartDissolving(_)){
+                                if(proxyNeuron != null) { throw Error.reject("Neuron is proxies. Cannot disburse proxied neurons.") };
+                                label checkingIsNeuronAProxyNeuron for((_,{proxyNeuron}) in neuronDataMap.entries()){
+                                    let ?proxyNeuron_ = proxyNeuron else continue checkingIsNeuronAProxyNeuron;
+                                    if(proxyNeuron_ == Nat64.toText(neuronId.id)) { throw Error.reject("Neuron is a proxy neuron. Cannot disburse a proxy neuron.") };
+                                };
+                            };
+                            case(_){};
+                        };
+                    };
+                    case(#Split(_)) { throw Error.reject("Action: 'Split' is unsupported") };
+                    case(#DisburseToNeuron(_)) { throw Error.reject("Action: 'DisburseToNeuron' is unsupported") };
+                    case(#RegisterVote(_)) { throw Error.reject("Action: 'RegisterVote' is unsupported") };
+                    case(#StakeMaturity(_)) { throw Error.reject("Action: 'StakeMaturity' is unsupported") };
+                    case(#MergeMaturity(_)) { throw Error.reject("Action: 'MergeMaturity' is unsupported") };
+                    case(#Merge(_)) { throw Error.reject("Action: 'Merge' is unsupported") };
+                    case(#MakeProposal(_)) { throw Error.reject("Action: 'MakeProposal' is unsupported") };
+                };
+                switch(proxyNeuron){
+                    case null{ args };
+                    case(?proxyNeuron){
+                        let ?proxyNeuronIdAsNat = Nat.fromText(proxyNeuron) else { throw Error.reject("Invalid proxyNeuron") };
+                        let proxyArgs = {
+                            id = ?{ id = Nat64.fromNat(proxyNeuronIdAsNat) }; 
+                            neuron_id_or_subaccount = null;
+                            command = ?#MakeProposal({
+                                url = "https://forum.dfinity.org/t/personal-dao-canister-controlled-neuron-types-proxied-neurons-vs-non-proxied-neurons/36013";
+                                title = ?"Proposal to manage DAO's neuron created with a tECDSA Signed HTTPS outcall via a proxy neuron";
+                                action = ?#ManageNeuron(args);
+                                summary = "See URL for details";
+                            });
+                        };
+                        proxyArgs;
+                    };
                 };
             };
+        }; 
+        await governanceCanister.manage_neuron(args_);
+    };
+
+    // public func manageNeuron( 
+    //     neuronDataMap: TreasuryTypes.NeuronsDataMap,
+    //     usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap,
+    //     pendingActionsMap: TreasuryTypes.PendingActionsMap,
+    //     actionLogsArrayBuffer: TreasuryTypes.ActionLogsArrayBuffer,
+    //     memoToNeuronIdMap: TreasuryTypes.MemoToNeuronIdMap,
+    //     updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async (),
+    //     fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap,
+    //     transformFn: NeuronManager.TransformFnSignature,
+    //     args: Governance.ManageNeuron,
+    //     proposer: ?Principal,
+    //     treasuryCanisterId: ?Principal,
+    //     selfAuthPrincipal: Principal,
+    //     publicKey: Blob
+    // ): async Result.Result<(), TreasuryTypes.Error> {
+        
+    //     let ?neuronId = args.id else {
+    //         actionLogsArrayBuffer.add(Int.toText(Time.now()), "No neuronId in request");
+    //         Debug.trap("No neuronId in request");
+    //     };
+    //     let ?command = args.command else {
+    //         actionLogsArrayBuffer.add(Int.toText(Time.now()), "No command in request");
+    //         Debug.trap("No command in request");
+    //     };
+
+    //     let pendingActionId : Text = switch(command){
+    //         case(#Spawn(_)) { "spawn_"#Nat64.toText(neuronId.id); };
+    //         case(#Follow(_)) { "follow_"#Nat64.toText(neuronId.id); };
+    //         case(#Configure(_)) { "configure_"#Nat64.toText(neuronId.id); };
+    //         case(#Disburse(_)) { 
+    //             let ?{contributions} = neuronDataMap.get(Nat64.toText(neuronId.id)) else { throw Error.reject("No neuron found") };
+    //             label isCollateralized for((userPrincipal, {collateralized_stake_e8s }) in Iter.fromArray(contributions)){
+    //                 let ?collateral = collateralized_stake_e8s else continue isCollateralized;
+    //                 if(collateral > 0) { throw Error.reject("Neuron is collateralized. Cannot disburse from collateralized neuron.") };
+    //             };
+    //             "disburse_"#Nat64.toText(neuronId.id); 
+    //         };
+    //         case(#ClaimOrRefresh(_)) { "claimOrRefresh_"#Nat64.toText(neuronId.id);};
+    //         case(_) { return #err(#ActionNotSupported) };
+    //     };
+    //     let newPendingAction: TreasuryTypes.PendingAction = {
+    //         expectedHttpResponseType = ?#GovernanceManageNeuronResponse({neuronId = ?neuronId.id; memo = null; proposer; treasuryCanisterId; });
+    //         function = #ManageNeuron({  input = {args; selfAuthPrincipal; public_key = publicKey; transformFn;} });
+    //     };
+    //     pendingActionsMap.put(pendingActionId, newPendingAction);
+    //     actionLogsArrayBuffer.add(Int.toText(Time.now()),"New Action Pending: "#pendingActionId);
+    //     ignore resolvePendingActionFromQueue( 
+    //         neuronDataMap, 
+    //         usersTreasuryDataMap, 
+    //         pendingActionsMap, 
+    //         actionLogsArrayBuffer, 
+    //         memoToNeuronIdMap, 
+    //         updateTokenBalances,
+    //         fundingCampaignsMap, 
+    //         transformFn
+    //     );
+    //     return #ok(());
+    // };
+
+    // public func increaseNeuron(
+    //     neuronDataMap: TreasuryTypes.NeuronsDataMap,
+    //     usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap,
+    //     pendingActionsMap: TreasuryTypes.PendingActionsMap,
+    //     actionLogsArrayBuffer: TreasuryTypes.ActionLogsArrayBuffer,
+    //     memoToNeuronIdMap: TreasuryTypes.MemoToNeuronIdMap,
+    //     updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async (),
+    //     fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap,
+    //     transformFn: NeuronManager.TransformFnSignature,
+    //     {amount: Nat64; neuronId: Nat64; contributor: Principal; selfAuthPrincipal: Principal; publicKey: Blob}
+    // ) : async Result.Result<({amountSent: Nat64}), TreasuryTypes.Error>  {
+
+    //     let ?neuronData = neuronDataMap.get(Nat64.toText(neuronId)) else Debug.trap("No neuron data for neuronId");
+    //     let ?neuron = neuronData.neuron else Debug.trap("No neuron for neuronId");
+    //     let {account = neuronSubaccount} = neuron;
+    //     let ?{subaccountId} = usersTreasuryDataMap.get(Principal.toText(contributor)) else Debug.trap("No subaccount for contributor");
+    //     let {amountSent} = await NeuronManager.transferIcpToNeuron(amount, #NeuronSubaccountId(neuronSubaccount), subaccountId, selfAuthPrincipal);
+    //     ignore updateTokenBalances(#Principal(Principal.toText(contributor)), #Icp, #UserTreasuryData);
+    //     SyncronousHelperMethods.updateUserNeuronContribution( neuronDataMap,{ userPrincipal = Principal.toText(contributor);  delta = amountSent; neuronId = Nat64.toText(neuronId); operation = #AddStake; });
+    //     let args = { id = null; command = ?#ClaimOrRefresh( {by = ?#NeuronIdOrSubaccount( {} )} );neuron_id_or_subaccount = ?#Subaccount(neuronSubaccount); };
+    //     let newPendingAction: TreasuryTypes.PendingAction = {
+    //         expectedHttpResponseType = ?#GovernanceManageNeuronResponse({neuronId = ?neuronId; memo = null; proposer = null; treasuryCanisterId = null; });
+    //         function = #ManageNeuron({ input = { args; selfAuthPrincipal; public_key = publicKey; transformFn; method_name = TreasuryTypes.GetNeuronDataMethodNames.getFullNeuron }; });
+    //     };
+        
+    //     pendingActionsMap.put("claimOrRefresh_"#Nat64.toText(neuronId), newPendingAction);
+    //     actionLogsArrayBuffer.add(Int.toText(Time.now()),"New Action Pending: claimOrRefresh_"#Nat64.toText(neuronId));
+    //     ignore resolvePendingActionFromQueue( 
+    //         neuronDataMap, 
+    //         usersTreasuryDataMap, 
+    //         pendingActionsMap, 
+    //         actionLogsArrayBuffer, 
+    //         memoToNeuronIdMap, 
+    //         updateTokenBalances,
+    //         fundingCampaignsMap, 
+    //         transformFn
+    //     );
+    //     return #ok({amountSent});
+    // };
+
+    // public func createNeuron(
+    //     neuronDataMap: TreasuryTypes.NeuronsDataMap,
+    //     usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap,
+    //     pendingActionsMap: TreasuryTypes.PendingActionsMap,
+    //     actionLogsArrayBuffer: TreasuryTypes.ActionLogsArrayBuffer,
+    //     memoToNeuronIdMap: TreasuryTypes.MemoToNeuronIdMap,
+    //     updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async (),
+    //     fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap,
+    //     transformFn: NeuronManager.TransformFnSignature,
+    //     {amount: Nat64; contributor: Principal; neuronMemo: Nat64; selfAuthPrincipal: Principal; publicKey: Blob}
+    // ) : async Result.Result<({amountSent: Nat64}), TreasuryTypes.Error>  {
+
+    //     let ?{subaccountId} = usersTreasuryDataMap.get(Principal.toText(contributor)) else Debug.trap("No subaccount for contributor");
+    //     let {amountSent} = await NeuronManager.transferIcpToNeuron(amount, #Memo(neuronMemo), subaccountId, selfAuthPrincipal);
+    //     ignore updateTokenBalances(#Principal(Principal.toText(contributor)), #Icp, #UserTreasuryData);
+    //     let newNeuronIdPlaceholderKey : Text = Nat64.toText(neuronMemo)#PENDING_NEURON_SUFFIX;
+    //     SyncronousHelperMethods.updateUserNeuronContribution( neuronDataMap,{ userPrincipal = Principal.toText(contributor);  delta = amountSent; neuronId = newNeuronIdPlaceholderKey; operation = #AddStake;});
+    //     let args = { id = null; command = ?#ClaimOrRefresh( {by = ?#MemoAndController( {controller = ?selfAuthPrincipal; memo = neuronMemo} )} ); neuron_id_or_subaccount = null; };
+    //     let newPendingAction: TreasuryTypes.PendingAction = {
+    //         expectedHttpResponseType = ?#GovernanceManageNeuronResponse({neuronId = null; memo = ?neuronMemo; proposer = null; treasuryCanisterId = null; });
+    //         function = #ManageNeuron({ input = {args; selfAuthPrincipal; public_key = publicKey; transformFn;} });
+    //     };
+    //     pendingActionsMap.put("createNeuronResponse_"#Nat64.toText(neuronMemo), newPendingAction);
+    //     actionLogsArrayBuffer.add(Int.toText(Time.now()),"New Action Pending: createNeuronResponse_"#Nat64.toText(neuronMemo));
+    //     ignore resolvePendingActionFromQueue( 
+    //         neuronDataMap, 
+    //         usersTreasuryDataMap, 
+    //         pendingActionsMap, 
+    //         actionLogsArrayBuffer, 
+    //         memoToNeuronIdMap, 
+    //         updateTokenBalances, 
+    //         fundingCampaignsMap,
+    //         transformFn
+    //     );
+    //     return #ok({amountSent});
+        
+    // };
+
+    // public func refreshNeuronsData(
+    //     neuronDataMap: TreasuryTypes.NeuronsDataMap,
+    //     usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap,
+    //     pendingActionsMap: TreasuryTypes.PendingActionsMap,
+    //     actionLogsArrayBuffer: TreasuryTypes.ActionLogsArrayBuffer,
+    //     memoToNeuronIdMap: TreasuryTypes.MemoToNeuronIdMap,
+    //     updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async (),
+    //     fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap,
+    //     transformFn: NeuronManager.TransformFnSignature,
+    //     selfAuthPrincipal: Principal,
+    //     publicKey: Blob
+    // ) : async () {
+
+    //     label populatePendingActionsLoop for((_, neuronData) in neuronDataMap.entries()){
+    //         let ?neuron = neuronData.neuron else continue populatePendingActionsLoop;
+    //         let ?neuronId = neuron.id else continue populatePendingActionsLoop;
+    //         let args = { id = null; command = ?#ClaimOrRefresh( {by = ?#NeuronIdOrSubaccount( {} )} );neuron_id_or_subaccount = ?#NeuronId(neuronId); };
+    //         let newPendingAction: TreasuryTypes.PendingAction = {
+    //             expectedHttpResponseType = ?#GovernanceManageNeuronResponse({neuronId = ?neuronId.id; memo = null; proposer = null; treasuryCanisterId = null; });
+    //             function = #ManageNeuron({ input = {args; selfAuthPrincipal; public_key = publicKey; transformFn;} });
+    //         };                
+    //         pendingActionsMap.put("claimOrRefresh_"#Nat64.toText(neuronId.id), newPendingAction);
+    //     };
+
+    //     ignore resolvePendingActionFromQueue( 
+    //         neuronDataMap, 
+    //         usersTreasuryDataMap, 
+    //         pendingActionsMap, 
+    //         actionLogsArrayBuffer, 
+    //         memoToNeuronIdMap, 
+    //         updateTokenBalances, 
+    //         fundingCampaignsMap,
+    //         transformFn
+    //     );
+    // };
+
+    // public func resolvePendingActionFromQueue(
+    //     neuronDataMap: TreasuryTypes.NeuronsDataMap,
+    //     usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap,
+    //     pendingActionsMap: TreasuryTypes.PendingActionsMap,
+    //     actionLogsArrayBuffer: TreasuryTypes.ActionLogsArrayBuffer,
+    //     memoToNeuronIdMap: TreasuryTypes.MemoToNeuronIdMap,
+    //     updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType ) -> async (),
+    //     fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap,
+    //     transformFn: NeuronManager.TransformFnSignature
+    // ): async () {
+
+    //     func resolvePendingAction_(identifier: Text, action: TreasuryTypes.PendingAction): async () {
+    //         try{
+    //             actionLogsArrayBuffer.add(Int.toText(Time.now()),"Resolving pending action: "#identifier#", making HTTPS request to NNS governance canister.");
+    //             let ({response; requestId; ingress_expiry;}, selfAuthPrincipal, publicKey) = switch(action.function){
+    //                 case (#ManageNeuron({input;})) { (await NeuronManager.manageNeuron(input),input.selfAuthPrincipal, input.public_key ); };
+    //                 case (#GetNeuronData({input;})){ (await NeuronManager.getNeuronData(input), input.selfAuthPrincipal, input.public_key); };
+    //             };
+    //             if(response.status != 202) { actionLogsArrayBuffer.add(Int.toText(Time.now()),"Action failed. HTTPS status returned is NOT 202"); throw Error.reject("Action failed. HTTPS status returned is NOT 202"); };
+    //             let ?expectedResponseType = action.expectedHttpResponseType else { throw Error.reject("No expected response type for action: "#identifier); };
+    //             let readRequestResponseInput = {response; requestId; expiry = ingress_expiry; expectedResponseType;};
+    //             let failedAttempts: Nat = 0;
+    //             actionLogsArrayBuffer.add(Int.toText(Time.now()),"RequestID received for: "#identifier#". Reading Response From NNS Governance Canister.");
+    //             let readRequestResponseOutput = await NeuronManager.readRequestResponse(readRequestResponseInput, selfAuthPrincipal, publicKey, transformFn, failedAttempts);
+    //             let processResponseInput: TreasuryTypes.ProcessResponseInput = {readRequestResponseOutput; neuronDataMap; usersTreasuryDataMap; pendingActionsMap; actionLogsArrayBuffer; memoToNeuronIdMap; updateTokenBalances; selfAuthPrincipal; publicKey; transformFn; identifier; fundingCampaignsMap};
+    //             ignore pendingActionsMap.remove(identifier);
+    //             actionLogsArrayBuffer.add(Int.toText(Time.now()),"Processing Response for: "#identifier);
+    //             let {newPendingAction} = try { await processResponse(processResponseInput); }
+    //             catch(e){ actionLogsArrayBuffer.add(Int.toText(Time.now()),"Failed to process response for: "#identifier#". Error: "#Error.message(e)); return; };
+    //             actionLogsArrayBuffer.add(Int.toText(Time.now()),"Processing completed for response: "#identifier);
+    //             if(newPendingAction) ignore resolvePendingActionFromQueue( neuronDataMap, usersTreasuryDataMap, pendingActionsMap, actionLogsArrayBuffer, memoToNeuronIdMap, updateTokenBalances,fundingCampaignsMap, transformFn);
+    //         } catch(e){ actionLogsArrayBuffer.add(Int.toText(Time.now()),"Failed to resolve pending action: "#identifier#". Cause of error: " #Error.message(e)); };
+    //     };
+
+    //     let pendingActionsArray = Iter.toArray(pendingActionsMap.entries());
+    //     let length = Array.size(pendingActionsArray);
+    //     if(length == 0) throw Error.reject("No pending actions to resolve");
+    //     var index = 0;
+    //     label loop_ while(index < length){
+    //         let (identifier, action) = pendingActionsArray[index];
+    //         ignore resolvePendingAction_(identifier, action); 
+    //         index += 1;
+    //     };
+
+
+    // };
+
+    // public func processResponse({
+    //     neuronDataMap: TreasuryTypes.NeuronsDataMap;
+    //     usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap;
+    //     pendingActionsMap: TreasuryTypes.PendingActionsMap;
+    //     actionLogsArrayBuffer: TreasuryTypes.ActionLogsArrayBuffer;
+    //     memoToNeuronIdMap: TreasuryTypes.MemoToNeuronIdMap;
+    //     updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async ();
+    //     fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap;
+    //     readRequestResponseOutput: TreasuryTypes.ReadRequestResponseOutput;
+    //     selfAuthPrincipal: Principal;
+    //     publicKey: Blob;
+    //     transformFn: TreasuryTypes.TransformFnSignature;
+    // }): async {newPendingAction: Bool;} {
+
+    //     func createPendingActionsToUpdateNeuronData(neuronId: Nat64){
+    //         let newPendingAction: TreasuryTypes.PendingAction = {
+    //                 expectedHttpResponseType = ?#GovernanceResult_2({neuronId});
+    //                 function = #GetNeuronData({ input = {args = neuronId; selfAuthPrincipal; public_key = publicKey; transformFn; method_name = TreasuryTypes.GetNeuronDataMethodNames.getFullNeuron}; }); 
+    //             };
+    //         let newPendingAction2: TreasuryTypes.PendingAction = {
+    //             expectedHttpResponseType = ?#GovernanceResult_5({neuronId});
+    //             function = #GetNeuronData({ input = {args = neuronId; selfAuthPrincipal; public_key = publicKey; transformFn; method_name = TreasuryTypes.GetNeuronDataMethodNames.getNeuronInfo}; }); };
+    //         pendingActionsMap.put("getFullNeuronResponse_"#Nat64.toText(neuronId), newPendingAction);
+    //         pendingActionsMap.put("getNeuronInfoResponse_"#Nat64.toText(neuronId), newPendingAction2);
+    //     };
+
+    //     switch(readRequestResponseOutput){
+    //         case(#ClaimOrRefresh({memo; neuronId})){
+    //             if(memo != null){
+    //                 let ?memo_ = memo else { throw Error.reject("No memo for newly created neuron") } ;
+    //                 memoToNeuronIdMap.put(Nat64.toNat(memo_), neuronId);
+    //                 SyncronousHelperMethods.finalizeNewlyCreatedNeuronData(Nat64.toText(memo_)#PENDING_NEURON_SUFFIX, neuronId, neuronDataMap);
+    //             };
+    //             createPendingActionsToUpdateNeuronData(neuronId);
+    //             return {newPendingAction = true};
+    //         };
+    //         case(#Spawn({created_neuron_id; neuronId;})){
+    //             neuronDataMap.put(Nat64.toText(created_neuron_id), {neuron = null; neuronInfo = null; parentNeuronContributions = null; contributions = []; proxyNeuron = null });
+
+    //             let ?parentNeuron = neuronDataMap.get(Nat64.toText(neuronId)) else { throw Error.reject("no neuron found") };
+    //             let parentNeuronContributions = ?parentNeuron.contributions;
+    //             neuronDataMap.put(Nat64.toText(created_neuron_id), {neuron = null; neuronInfo = null; parentNeuronContributions; contributions = []; proxyNeuron = null});
+    //             createPendingActionsToUpdateNeuronData(neuronId);
+    //             createPendingActionsToUpdateNeuronData(created_neuron_id);
+    //             return {newPendingAction = true};
+    //         };
+    //         case(#Follow({neuronId;})){
+    //             createPendingActionsToUpdateNeuronData(neuronId);
+    //             return {newPendingAction = true};
+    //         };
+    //         case(#Configure({neuronId;})){
+    //             createPendingActionsToUpdateNeuronData(neuronId);
+    //             return {newPendingAction = true};
+    //         };
+    //         case(#Disburse({neuronId; treasuryCanisterId})){
+    //             await distributePayoutsFromNeuron( Nat64.toText(neuronId), usersTreasuryDataMap, updateTokenBalances, fundingCampaignsMap, neuronDataMap, treasuryCanisterId);
+    //             ignore neuronDataMap.remove(Nat64.toText(neuronId));
+    //             return {newPendingAction = false};
+    //         };
+    //         case(#Error({error_message;})){throw Error.reject(error_message) };
+    //         case(#GovernanceResult_2({response; neuronId;})){
+    //             switch(response){
+    //                 case(#Ok(neuron)){
+    //                     let ?neuronData = neuronDataMap.get(Nat64.toText(neuronId)) else { throw Error.reject("neuronData Not Found") };
+    //                     neuronDataMap.put(Nat64.toText(neuronId), {neuronData with neuron = ?neuron }); 
+    //                     return {newPendingAction = false};
+    //                 }; 
+    //                 case(#Err({error_message;})){ throw Error.reject(error_message) };
+    //             };
+    //         };
+    //         case(#GovernanceResult_5({response; neuronId;})){
+    //             switch(response){
+    //                 case(#Ok(neuronInfo)){
+    //                     switch(neuronDataMap.get(Nat64.toText(neuronId))){
+    //                         case null { throw Error.reject("neuronInfo Not Found") };
+    //                         case(?neuronData){
+    //                             neuronDataMap.put(Nat64.toText(neuronId), {neuronData with neuronInfo = ?neuronInfo});
+    //                             SyncronousHelperMethods.computeNeuronStakeInfosVotingPowers(neuronDataMap, Nat64.toText(neuronId));
+    //                             if(neuronData.contributions.size() == 0) SyncronousHelperMethods.populateContributionsArrayFromParentNeuronContributions(neuronDataMap, Nat64.toText(neuronId));
+    //                             {newPendingAction = false};
+    //                         };
+    //                     };
+    //                 }; 
+    //                 case(#Err({error_message})){ throw Error.reject(error_message) };
+    //             };
+    //         };
+    //     };
+    // };
+
+    public func upateNeuronsDataMap({
+        neuronDataMap: TreasuryTypes.NeuronsDataMap;
+        neuronContributions: ?TreasuryTypes.NeuronContributions
+    }): async () {
+
+        let governanceCanister: Governance.Interface = actor(Governance.CANISTER_ID);
+        let ownedNeurons = await governanceCanister.get_neuron_ids();
+
+        let listNeuronsInput = { neuron_ids : [Nat64] = ownedNeurons; include_neurons_readable_by_caller : Bool = false; };
+        let {neuron_infos; full_neurons} = await governanceCanister.list_neurons(listNeuronsInput);
+
+        label updatingNeuronInfosAndAddingNewNeuronsToNeuronsDataMap for((neuronId, neuronInfo) in Iter.fromArray(neuron_infos) ){
+            if(neuronInfo.stake_e8s == 0) continue updatingNeuronInfosAndAddingNewNeuronsToNeuronsDataMap;
+            switch(neuronDataMap.get(Nat64.toText(neuronId))){
+                case null {
+                    var parentNeuronContributions: ?TreasuryTypes.NeuronContributions = null;
+                    var contributions: TreasuryTypes.NeuronContributions = [];
+                    if(neuronInfo.state == TreasuryTypes.NEURON_STATES.spawning){ parentNeuronContributions := neuronContributions }
+                    else { 
+                        let ?contributions_ = neuronContributions else { throw Error.reject("No contributions for neuron") };
+                        contributions := contributions_; 
+                    };
+                    let neuronData: TreasuryTypes.NeuronData = {neuron = null; neuronInfo = ?neuronInfo; parentNeuronContributions; contributions; proxyNeuron = null};
+                    neuronDataMap.put(Nat64.toText(neuronId), neuronData);
+                };
+                case (?neuronData){ 
+                    neuronDataMap.put(Nat64.toText(neuronId), {neuronData with neuronInfo = ?neuronInfo}); 
+                    if(neuronData.contributions.size() == 0 and neuronInfo.state != TreasuryTypes.NEURON_STATES.spawning ){
+                        SyncronousHelperMethods.populateContributionsArrayFromParentNeuronContributions(neuronDataMap, Nat64.toText(neuronId));
+                    };
+                };
+            };
+            SyncronousHelperMethods.computeNeuronStakeInfosVotingPowers(neuronDataMap, Nat64.toText(neuronId));
+        };
+
+        label updatingFullNeurons for(neuron in Iter.fromArray(full_neurons) ){
+            let ?{id = neuronId} = neuron.id else continue updatingFullNeurons;
+            let ?neuronData = neuronDataMap.get(Nat64.toText(neuronId)) else continue updatingFullNeurons;
+            neuronDataMap.put(Nat64.toText(neuronId), {neuronData with neuron = ?neuron});
         };
     };
 
     public func distributePayoutsFromNeuron(
         neuronId: TreasuryTypes.NeuronIdAsText,
         usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap, 
-        actionLogsArrayBuffer: TreasuryTypes.ActionLogsArrayBuffer,
         updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async (), 
         fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap,
         neuronDataMap: TreasuryTypes.NeuronsDataMap,
@@ -397,9 +507,14 @@ module{
             ignore performTransfer(amountRemainingToPayoutToUser, {subaccountId = null; accountType = #MultiSigAccount}, {owner = treasuryCanisterId; subaccountId = ?userSubaccountId; accountType = #UserTreasuryData }, updateTokenBalances);
         };
 
-        let ?{contributions} = neuronDataMap.get(neuronId) else { throw Error.reject("No neuron found") };
-        label loop_ for((userPrincipal, {stake_e8s }) in Iter.fromArray(contributions)){
-            ignore performUserPayoutFromNeuronDisbursal(Principal.fromText(userPrincipal), stake_e8s);
+        let ?{contributions; neuronInfo} = neuronDataMap.get(neuronId) else { throw Error.reject("No neuron found") };
+        let ?neuronInfo_ = neuronInfo else { throw Error.reject("No neuronInfo found") };
+        var totalAmountContributedToNeuron: Nat64 = 0;
+        for((_, {stake_e8s = userContribution }) in Iter.fromArray(contributions)){ totalAmountContributedToNeuron += userContribution; };
+
+        label loop_ for((userPrincipal, {stake_e8s = userContribution }) in Iter.fromArray(contributions)){
+            let amountOwedToUser: Nat64 = NatX.nat64ComputePercentage({value = neuronInfo_.stake_e8s; numerator = userContribution; denominator = totalAmountContributedToNeuron});
+            ignore performUserPayoutFromNeuronDisbursal(Principal.fromText(userPrincipal), amountOwedToUser);
         };
     };
 

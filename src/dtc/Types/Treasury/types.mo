@@ -150,7 +150,13 @@ module{
 
     public type NeuronContributions = [NeuronContribution];
 
-    public type NeuronData = { contributions: NeuronContributions; neuron: ?Governance.Neuron; neuronInfo: ?Governance.NeuronInfo; parentNeuronContributions: ?NeuronContributions; };
+    public type NeuronData = { 
+        contributions: NeuronContributions; 
+        neuron: ?Governance.Neuron; 
+        neuronInfo: ?Governance.NeuronInfo; 
+        parentNeuronContributions: ?NeuronContributions; 
+        proxyNeuron: ?NeuronIdAsText;
+    };
 
     public type NeuronsDataArray = [(NeuronIdAsText, NeuronData)];
 
@@ -256,4 +262,10 @@ module{
 
     public type ActionLogsArrayBuffer = Buffer.Buffer<(Text, Text)>; 
 
+    public let NEURON_STATES = {
+        locked: Int32 = 1;
+        dissolving: Int32 = 2;
+        unlocked: Int32 = 3;
+        spawning: Int32 = 4;
+    }
 }

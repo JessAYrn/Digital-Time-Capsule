@@ -158,7 +158,6 @@ module{
             Cycles.add<system>(1_000_000_000_000);
             let treasuryCanister = await Treasury.Treasury(Principal.fromText(daoMetaData.backEndPrincipal));
             ignore await treasuryCanister.wallet_receive();
-            ignore treasuryCanister.populateSelfAuthenticatingPrincipalAndPublicKey();
             ignore treasuryCanister.createTreasuryData(Principal.fromActor(treasuryCanister));
             let treasuryCanisterPrincipal_ = Principal.fromActor(treasuryCanister);
             ignore addControllers([daoMetaData.managerCanisterPrincipal], treasuryCanisterPrincipal_);

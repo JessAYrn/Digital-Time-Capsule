@@ -594,7 +594,7 @@ shared actor class User() = this {
                     command = ?#Disburse({to_account = ?{hash = treasuryAccountId}; amount = null });
                     neuron_id_or_subaccount = null;
                 };
-                ignore await treasuryCanister.manageNeuron(args, Principal.fromText(proposer));
+                ignore await treasuryCanister.manageNeuron(args, false);
                 return null;
             };
             case(#DissolveNeuron({neuronId;})){
@@ -603,7 +603,7 @@ shared actor class User() = this {
                     command = ?#Configure({operation = ?#StartDissolving({});});
                     neuron_id_or_subaccount = null;
                 };
-                ignore await treasuryCanister.manageNeuron(args, Principal.fromText(proposer));
+                ignore await treasuryCanister.manageNeuron(args, false);
                 return null;
 
             };
@@ -614,7 +614,7 @@ shared actor class User() = this {
                     command = ?#Follow({topic; followees;});
                     neuron_id_or_subaccount = null;
                 };
-                ignore await treasuryCanister.manageNeuron(args, Principal.fromText(proposer));
+                ignore await treasuryCanister.manageNeuron(args, false);
                 return null;
             };
             case(#IncreaseDissolveDelay({neuronId; additionalDissolveDelaySeconds;})){
@@ -624,13 +624,13 @@ shared actor class User() = this {
                     command = ?#Configure({operation = ?#IncreaseDissolveDelay({additional_dissolve_delay_seconds});});
                     neuron_id_or_subaccount = null;
                 };
-                ignore await treasuryCanister.manageNeuron(args, Principal.fromText(proposer));
+                ignore await treasuryCanister.manageNeuron(args, false);
                 return null;
             };
             case(#SpawnNeuron({neuronId; percentage_to_spawn;})){
                 let spawnArgs : Governance.Spawn = {
                     percentage_to_spawn : ?Nat32 = ?percentage_to_spawn;
-                    new_controller : ?Principal = null;
+                    new_controller : ?Principal = ?Principal.fromActor(treasuryCanister);
                     nonce : ?Nat64 = null;
                 };
                 let args : Governance.ManageNeuron = {
@@ -638,7 +638,7 @@ shared actor class User() = this {
                     command = ?#Spawn(spawnArgs);
                     neuron_id_or_subaccount = null;
                 };
-                ignore await treasuryCanister.manageNeuron(args, Principal.fromText(proposer));
+                ignore await treasuryCanister.manageNeuron(args, true);
                 return null;
             };
             case(#CreateFundingCampaign({fundingCampaignInput})){
@@ -678,7 +678,7 @@ shared actor class User() = this {
         userProfilesArray_v2 := []; 
         proposalsArray_v2 := [];
         ignore recurringTimer<system>(#seconds (24 * 60 * 60), heartBeat_unshared);
-        ignore recurringTimer<system>(#seconds (60 * 60), finalizeAllEligibleProposals);
+        ignore recurringTimer<system>(#seconds (60), finalizeAllEligibleProposals);
         ignore recurringTimer<system>(#seconds (60 * 60), heartBeat_hourly);
         ignore recurringTimer<system>(#seconds (30), updateUsersTxHistory);
 

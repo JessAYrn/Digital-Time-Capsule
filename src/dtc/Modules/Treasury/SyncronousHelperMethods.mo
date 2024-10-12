@@ -39,10 +39,18 @@ module{
         var totalCollateralizedStake: Nat64 = 0;
         var totalVotingPower: Nat64 = 0;
 
-        label loop_ for((neuronId, {contributions}) in neuronDataMap.entries()){
+        label loop_ for((neuronId, {contributions; neuronInfo}) in neuronDataMap.entries()){
+
+            let ?neuronInfo_ = neuronInfo else { continue loop_};
+            var totalNeuronContributions: Nat64 = 0;
+            for((_, {stake_e8s}) in Iter.fromArray(contributions)){ totalNeuronContributions += stake_e8s; };
+
             let contributionsMap = HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.NeuronStakeInfo>( Iter.fromArray(contributions), Iter.size(Iter.fromArray(contributions)), Text.equal, Text.hash );
-            let ?{stake_e8s; voting_power; collateralized_stake_e8s} = contributionsMap.get(pincipal) else { continue loop_};
-            totalStake += stake_e8s; totalVotingPower += voting_power; totalCollateralizedStake += switch(collateralized_stake_e8s){ case null { 0; }; case(?collateralized_stake_e8s_) { collateralized_stake_e8s_; }; };
+            let ?{stake_e8s = userContributions; voting_power; collateralized_stake_e8s} = contributionsMap.get(pincipal) else { continue loop_};
+
+            totalStake += NatX.nat64ComputePercentage({value = neuronInfo_.stake_e8s; numerator = userContributions; denominator = totalNeuronContributions}); 
+            totalVotingPower += voting_power; 
+            totalCollateralizedStake += switch(collateralized_stake_e8s){ case null { 0; }; case(?collateralized_stake_e8s_) { collateralized_stake_e8s_; }; };
         };
         return {stake_e8s = totalStake; voting_power = totalVotingPower; collateralized_stake_e8s = ?totalCollateralizedStake;};
     };
@@ -52,7 +60,7 @@ module{
         { userPrincipal: Text; newAmount: Nat64; neuronId: Text; property: {#Stake; #VotingPower; #CollateralizedStake} }
     ): () {
         let neuronData = switch(neuronDataMap.get(neuronId)){
-            case null { {neuron = null; neuronInfo = null; parentNeuronContributions = null; contributions = []; };};
+            case null { {neuron = null; neuronInfo = null; parentNeuronContributions = null; contributions = []; proxyNeuron = null; };};
             case(?neuronData_){ neuronData_ };
         };
         let {contributions} = neuronData;
@@ -105,10 +113,10 @@ module{
         };
     };
 
-    public func finalizeNewlyCreatedNeuronData( placeHolderKey: Text, newNeuronId: Nat64, neuronDataMap: TreasuryTypes.NeuronsDataMap): () {
-        let ?neuronData = neuronDataMap.remove(placeHolderKey) else { return };
-        neuronDataMap.put(Nat64.toText(newNeuronId), neuronData);
-    };
+    // public func finalizeNewlyCreatedNeuronData( placeHolderKey: Text, newNeuronId: Nat64, neuronDataMap: TreasuryTypes.NeuronsDataMap): () {
+    //     let ?neuronData = neuronDataMap.remove(placeHolderKey) else { return };
+    //     neuronDataMap.put(Nat64.toText(newNeuronId), neuronData);
+    // };
 
     public func populateContributionsArrayFromParentNeuronContributions(neuronDataMap: TreasuryTypes.NeuronsDataMap, neuronId: Text): () {
         let ?neuronData = neuronDataMap.get(neuronId) else { return };
