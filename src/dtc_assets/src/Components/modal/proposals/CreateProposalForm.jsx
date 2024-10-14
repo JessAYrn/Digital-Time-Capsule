@@ -21,6 +21,7 @@ import CreateNeuronOrPurchaseCycles from "./proposalModalComponentTypes/CreateNe
 import IncreaseNeuron from "./proposalModalComponentTypes/IncreaseNeuron";
 import IncreaseDissolveDelay from "./proposalModalComponentTypes/IncreaseDissolveDelay";
 import CancelFundingCampaign from "./proposalModalComponentTypes/CancelFundingCampaign";
+import WithdrawFromMultiSigWallet from "./proposalModalComponentTypes/WithdrawFromMultiSigWallet";
 
 const CreateProposalForm = (props) => {
     const {
@@ -44,7 +45,7 @@ const CreateProposalForm = (props) => {
     };
 
     const mainMenuItemProps = [
-        { text: PROPOSAL_ACTIONS.PurchaseCycles, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.PurchaseCycles), selected: proposalAction_ === PROPOSAL_ACTIONS.PurchaseCycles},
+        // { text: PROPOSAL_ACTIONS.PurchaseCycles, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.PurchaseCycles), selected: proposalAction_ === PROPOSAL_ACTIONS.PurchaseCycles},
         { text: PROPOSAL_ACTIONS.LoadUpgrades, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.LoadUpgrades), selected: proposalAction_ === PROPOSAL_ACTIONS.LoadUpgrades},
         { text: PROPOSAL_ACTIONS.InstallUpgrades, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.InstallUpgrades), selected: proposalAction_ === PROPOSAL_ACTIONS.InstallUpgrades},
         { text: PROPOSAL_ACTIONS.AddAdmin, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.AddAdmin), selected: proposalAction_ === PROPOSAL_ACTIONS.AddAdmin},
@@ -59,6 +60,7 @@ const CreateProposalForm = (props) => {
         { text: PROPOSAL_ACTIONS.ToggleSupportMode, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.ToggleSupportMode), selected: proposalAction_ === PROPOSAL_ACTIONS.ToggleSupportMode},
         { text: PROPOSAL_ACTIONS.CreateFundingCampaign, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.CreateFundingCampaign), selected: proposalAction_ === PROPOSAL_ACTIONS.CreateFundingCampaign},
         { text: PROPOSAL_ACTIONS.CancelFundingCampaign, onClick: () => onMenuItemClick(PROPOSAL_ACTIONS.CancelFundingCampaign), selected: proposalAction_ === PROPOSAL_ACTIONS.CancelFundingCampaign},
+        { text: PROPOSAL_ACTIONS.WithdrawFromMultiSigWallet, onClick: () => onMenuItemClick(PROPOSAL_ACTIONS.WithdrawFromMultiSigWallet), selected: proposalAction_ === PROPOSAL_ACTIONS.WithdrawFromMultiSigWallet}
     ];
 
     const modalButton_close = [
@@ -119,7 +121,7 @@ const CreateProposalForm = (props) => {
                 (proposalAction_ ===  PROPOSAL_ACTIONS.IncreaseNeuron || proposalAction_ === PROPOSAL_ACTIONS.CreateNeuron) &&
                 <DataField label={"Available Balance: "} text={`${fromE8s(availableBalance) } ICP`} isLoading={!treasuryState.dataHasBeenLoaded} disabled={true}/>
             }
-            { proposalAction_ === PROPOSAL_ACTIONS.PurchaseCycles && 
+            { proposalAction_ === PROPOSAL_ACTIONS.PurchaseCycles || proposalAction_ === PROPOSAL_ACTIONS.WithdrawFromMultiSigWallet &&
                 <DataField label={"Available Balance: "} text={`${fromE8s(treasuryState.daoWalletBalance || 0) } ICP`} isLoading={!treasuryState.dataHasBeenLoaded} disabled={true}/>
             }
             { proposalAction_ === PROPOSAL_ACTIONS.IncreaseDissolveDelay && <IncreaseDissolveDelay onSubmitProposal={onSubmitProposal} action={proposalAction_} payload={proposalPayload_} /> }
@@ -131,6 +133,7 @@ const CreateProposalForm = (props) => {
             { proposalAction_ === PROPOSAL_ACTIONS.SpawnNeuron && <SpawnNeuron onSubmitProposal={onSubmitProposal} action={proposalAction_} payload={proposalPayload_}/> }
             { proposalAction_ === PROPOSAL_ACTIONS.CreateFundingCampaign && <NewFundingCampaign onSubmitProposal={onSubmitProposal} action={proposalAction_} payload={proposalPayload_}/> }
             { proposalAction_ === PROPOSAL_ACTIONS.CancelFundingCampaign && <CancelFundingCampaign onSubmitProposal={onSubmitProposal} action={proposalAction_} payload={proposalPayload_}/> }
+            { proposalAction_ === PROPOSAL_ACTIONS.WithdrawFromMultiSigWallet && <WithdrawFromMultiSigWallet onSubmitProposal={onSubmitProposal} action={proposalAction_} payload={proposalPayload_}/> }
             { (proposalAction_ === PROPOSAL_ACTIONS.InstallUpgrades || proposalAction_ === PROPOSAL_ACTIONS.LoadUpgrades || proposalAction_ === PROPOSAL_ACTIONS.ToggleSupportMode) 
                 && <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}> 
                     <ButtonField Icon={DoneIcon} active={true} text={'Submit Proposal'} onClick={() => onSubmitProposal({[proposalAction_]: {}})} /> 

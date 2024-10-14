@@ -29,6 +29,8 @@ import AddOrRemoveAdmin from "./proposalModalComponentTypes/AddOrRemoveAdmin";
 import FollowNeuron from "./proposalModalComponentTypes/FollowNeuron";
 import SpawnNeuron from "./proposalModalComponentTypes/SpawnNeuron";
 import NewFundingCampaign from "./proposalModalComponentTypes/NewFundingCampaign";
+import WithdrawFromMultiSigWallet from "./proposalModalComponentTypes/WithdrawFromMultiSigWallet";
+import CancelFundingCampaign from "./proposalModalComponentTypes/CancelFundingCampaign";
 
 
 const CYCLES_COSTS_ASSOCIATED_WITH_ACTIONS = [
@@ -266,6 +268,8 @@ const DisplayProposal = (props) => {
                 { actionType === PROPOSAL_ACTIONS.FollowNeuron && <FollowNeuron action={actionType} payload={payload} disabled={true}/> }
                 { actionType === PROPOSAL_ACTIONS.SpawnNeuron && <SpawnNeuron action={actionType} payload={payload} disabled={true}/> }
                 { actionType === PROPOSAL_ACTIONS.CreateFundingCampaign && <NewFundingCampaign action={actionType} payload={payload} disabled={true}/> }
+                { actionType === PROPOSAL_ACTIONS.CancelFundingCampaign && <CancelFundingCampaign action={actionType} payload={payload} disabled={true}/> }
+                { actionType === PROPOSAL_ACTIONS.WithdrawFromMultiSigWallet && <WithdrawFromMultiSigWallet action={actionType} payload={payload} disabled={true}/> }
 
                 { timeRemainingInNanoseconds > 0 && <DataField
                     label={'Voting Ends in: '}

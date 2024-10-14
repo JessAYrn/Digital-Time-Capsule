@@ -10,6 +10,7 @@ const CancelFundingCampaign = (props) => {
     const {onSubmitProposal, action, payload, disabled} = props;
     const { treasuryState } = useContext(AppContext);
     const [fundingCampaignId, setFundingCampaignId] = useState(payload?.fundingCampaignId ? parseInt(payload?.fundingCampaignId) : null);
+
     const submitProposal = async () => { 
         await onSubmitProposal({[action]: {fundingCampaignId}}); 
     };
@@ -20,7 +21,7 @@ const CancelFundingCampaign = (props) => {
             onClick: () => setFundingCampaignId(parseInt(campaignId)),
             selected: parseInt(campaignId) === parseInt(fundingCampaignId)
         };
-    }).filter(([campaignId, fundingCampaign]) => !fundingCampaign?.funded);
+    }).filter(({fundingCampaign}) => !fundingCampaign?.funded);
 
     return (
         <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>

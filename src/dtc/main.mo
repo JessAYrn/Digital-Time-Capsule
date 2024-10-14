@@ -523,6 +523,7 @@ shared actor class User() = this {
                                 switch(action){
                                     case(#CreateNeuron(_)){ action := #CreateNeuron({amount = amountSent;}); };
                                     case(#IncreaseNeuron(args)){ action := #IncreaseNeuron({args with amount = amountSent;}); };
+                                    case(#WithdrawFromMultiSigWallet(args)){ action := #WithdrawFromMultiSigWallet({args with amount = amountSent;}); };
                                     case(_){};
                             }};
                         }; 
@@ -652,6 +653,12 @@ shared actor class User() = this {
                 return null;
             };
             case(#ToggleSupportMode({})){ ignore toggleSupportMode(); return null; };
+            case(#WithdrawFromMultiSigWallet({amount; to;})){
+                let sender = {identifier = #Principal(daoMetaData_v4.treasuryCanisterPrincipal); accountType = #MultiSigAccount;};
+                let recipient = {owner = Principal.fromText(to); subaccount = null; accountType = #ExternalAccount};
+                let {amountSent} = await treasuryCanister.transferICP(amount, sender, recipient);
+                return ?{amountSent};
+            };
         };
     };
 

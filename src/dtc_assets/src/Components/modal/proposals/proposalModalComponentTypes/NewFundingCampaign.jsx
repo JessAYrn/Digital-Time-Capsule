@@ -17,7 +17,7 @@ const NewFundingCampaign = (props) => {
     const fundingCampaignInput = payload?.fundingCampaignInput;
     const terms = fundingCampaignInput?.terms[0] || false;
 
-    const { homePageState, treasuryState } = useContext(AppContext);
+    const { treasuryState } = useContext(AppContext);
 
     const [percentageOfDaoRewardsAllocated, setPercentageOfDaoRewardsAllocated] = useState(fundingCampaignInput?.percentageOfDaoRewardsAllocated ? parseInt(fundingCampaignInput?.percentageOfDaoRewardsAllocated) : null);
     const [description, setDescription] = useState(fundingCampaignInput?.description);

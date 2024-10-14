@@ -24,6 +24,8 @@ module{
 
     public let daysInAMonth = 30;
 
+    public type PrincipalAsText = Text;
+
     public type JournalData = {
         userJournalData : ([JournalTypes.JournalEntryExportKeyValuePair], JournalTypes.Bio,); 
         userName: Text;
@@ -159,6 +161,7 @@ module{
         #IncreaseDissolveDelay: {neuronId: Nat64; additionalDissolveDelaySeconds: Nat32; };
         #FollowNeuron: {neuronId: Nat64; topic : Int32; followee :  Nat64 };
         #ToggleSupportMode: {};
+        #WithdrawFromMultiSigWallet: {amount: Nat64; to: PrincipalAsText;};
     };
 
     public type Vote = { adopt: Bool };

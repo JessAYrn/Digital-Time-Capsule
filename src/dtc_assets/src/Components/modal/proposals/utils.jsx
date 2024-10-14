@@ -14,6 +14,7 @@ export const PROPOSAL_ACTIONS = {
     IncreaseDissolveDelay: "IncreaseDissolveDelay",
     FollowNeuron: "FollowNeuron",
     ToggleSupportMode: "ToggleSupportMode",
+    WithdrawFromMultiSigWallet: "WithdrawFromMultiSigWallet"
 };
 
 export const TREASURY_ACTIONS = {
