@@ -17,11 +17,6 @@ export const PROPOSAL_ACTIONS = {
     WithdrawFromMultiSigWallet: "WithdrawFromMultiSigWallet"
 };
 
-export const TREASURY_ACTIONS = {
-    DepositIcpToTreasury: "DepositIcpToTreasury",
-    WithdrawIcpFromTreasury: "WithdrawIcpFromTreasury"
-};
-
 export const PAYLOAD_DATA_TYPES = {
     principal: "principal",
     nat: "nat"

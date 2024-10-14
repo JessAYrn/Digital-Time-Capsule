@@ -39,7 +39,10 @@ const DisplayNeuron = (props) => {
     if(dissolveDelay > 30){ dissolveDelay = daysToMonths(dissolveDelay); timeSpan = "months";};
 
     let userContribution = getUserNeuronContribution(userPrincipal, contributions);
-    let totalContributions = contributions.reduce((acc, contribution) => acc + parseInt(contribution.stake_e8s), 0);
+
+    let totalContributions = 0;
+    for(const [contributor, contribution] of contributions) totalContributions += parseInt(contribution.stake_e8s);
+
     let userRemainingStake = parseInt(neuronInfo.stake_e8s) * parseInt(userContribution.stake_e8s) / totalContributions;
     let userVotingPower = parseInt(neuronInfo.voting_power) * parseInt(userContribution.stake_e8s) / totalContributions;
 

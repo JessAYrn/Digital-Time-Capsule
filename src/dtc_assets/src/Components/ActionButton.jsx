@@ -2,12 +2,10 @@ import React, {useState, useContext} from "react";
 import { AppContext } from "../Context";
 import SendIcon from '@mui/icons-material/Send';
 import AccountBalanceWalletOutlinedIcon from '@mui/icons-material/AccountBalanceWalletOutlined';
-import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import HowToVoteIcon from '@mui/icons-material/HowToVote';
-import DepositOrWithdrawModal from "./modal/DepositOrWithdraw";
+import withdrawModal from "./modal/withdraw";
 import CreateProposalForm from "./modal/proposals/CreateProposalForm";
-import { TREASURY_ACTIONS } from "./modal/proposals/utils";
 import { loadAllDataIntoReduxStores } from "../functionsAndConstants/loadingFunctions";
 import { types as journalTypes } from "../reducers/journalReducer";
 import { walletTypes } from "../reducers/walletReducer";
@@ -37,16 +35,14 @@ const ActionButton = (props) => {
     const [modalProps, setModalProps] = useState({});
     const [isLoadingModal, setIsLoadingModal] = useState(false);
 
-    const openDepositOrWithdrawForm = (action) => {
-        let text = action === TREASURY_ACTIONS.DepositIcpToTreasury ? "DEPOSIT ICP TO TREASURY" : "WITHDRAW ICP FROM TREASURY";
+    const openWithdrawForm = () => {
         setModalIsOpen(true);
         setModalProps({
-            bigText: text,
+            bigText: "WITHDRAW ICP FROM TREASURY",
             components: [
               {
-                Component: DepositOrWithdrawModal,
+                Component: withdrawModal,
                 props: {
-                  action,
                   setModalIsOpen, 
                   setModalProps, 
                   setIsLoadingModal,
@@ -81,7 +77,6 @@ const ActionButton = (props) => {
       const onSend = () => {
         setModalProps({
             bigText: "SEND ICP TO ANOTHER ADDRESS",
-            smallText: "Do not use this feature to send ICP to the treasury. Use the deposit to treasury feature instead.",
             components: [{
                 Component: SendCrypto,
                 props: {
@@ -98,8 +93,7 @@ const ActionButton = (props) => {
     const speedDialActions = [
         {name: "Refresh", icon: RefreshIcon, onClick: reloadData},
         {name: "Create Proposal", icon: HowToVoteIcon , onClick: openProposalForm},
-        {name: "Withdraw To Wallet", icon: AccountBalanceWalletOutlinedIcon , onClick: () => openDepositOrWithdrawForm(TREASURY_ACTIONS.WithdrawIcpFromTreasury)},
-        {name: "Deposit To Treasury", icon: AccountBalanceIcon , onClick: () => openDepositOrWithdrawForm(TREASURY_ACTIONS.DepositIcpToTreasury)},
+        {name: "Withdraw To Wallet", icon: AccountBalanceWalletOutlinedIcon , onClick: () => openWithdrawForm()},
         {name: "New Transaction", icon: SendIcon , onClick: onSend}
     ]
 

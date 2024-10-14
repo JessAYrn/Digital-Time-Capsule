@@ -55,7 +55,7 @@ const TreasuryPage = (props) => {
     setModalProps({
         flexDirection: "column",
         bigText: "Be Careful!",
-        smallText: "Sending ICP directly to this account ID without using the 'Deposit To Treasury' button will result in no treasury contribution being recorded from your account. In other words, you're essentially donating to the treasury without receiving any credit. If you're not sure what you're doing, do NOT proceed. If you mean to receive credit for your deposit to the treasury, use the 'Deposit To Treasury' button.",
+        smallText: "Sending ICP directly to this account ID will result in no treasury contribution being recorded from your account. In other words, you're essentially donating to the treasury without receiving any credit. If you're not sure what you're doing, do NOT proceed.",
         Icon: WarningAmberIcon,
         components: [
           {

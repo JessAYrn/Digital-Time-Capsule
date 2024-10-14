@@ -15,13 +15,15 @@ const CancelFundingCampaign = (props) => {
         await onSubmitProposal({[action]: {fundingCampaignId}}); 
     };
 
-    const fundingCampaignMenuItemProps = treasuryState?.fundingCampaigns?.map(([campaignId, fundingCampaign]) => {
+    const fundingCampaignMenuItemProps = treasuryState?.fundingCampaigns?.filter(([campaign, fundingCampaign]) => {
+        return !fundingCampaign?.funded;
+    }).map(([campaignId, fundingCampaign]) => {
         return {
             text: parseInt(campaignId),
             onClick: () => setFundingCampaignId(parseInt(campaignId)),
             selected: parseInt(campaignId) === parseInt(fundingCampaignId)
         };
-    }).filter(({fundingCampaign}) => !fundingCampaign?.funded);
+    });
 
     return (
         <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
@@ -31,6 +33,7 @@ const CancelFundingCampaign = (props) => {
                 alignItems={"center"}
                 justifyContent={"center"}
                 active={true}
+                disabled={disabled}
                 color={"custom"}
                 label={"Funding Campaign To Cancel"}
                 MenuIcon={KeyboardArrowDownIcon}
@@ -39,12 +42,12 @@ const CancelFundingCampaign = (props) => {
             {(!!fundingCampaignId && fundingCampaignId !== 0) && 
             <>
                 <Typography varient={"h6"} color={"#bdbdbd"}> Funding Campaign Selected: {fundingCampaignId} </Typography>
-                <ButtonField
+                {!disabled && <ButtonField
                     disabled={disabled}
                     active={true}
                     text={'Submit Proposal'}
                     onClick={submitProposal}
-                />
+                />}
             </>
         }
         </Grid>

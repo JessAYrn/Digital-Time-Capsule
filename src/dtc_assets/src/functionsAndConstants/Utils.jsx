@@ -156,8 +156,6 @@ export const secondsToMilliseconds = (seconds) => {
 };
 
 export const daysToNanoSeconds = (days) => {
-  console.log(days);
-  console.log(days * 86400 * 1000000000);
   return days * 86400 * 1000000000;
 };
 

@@ -140,6 +140,8 @@ const NewFundingCampaign = (props) => {
                 menuItemProps={amountToFundOptions([FUNDING_CAMPAIGN_ASSET_TYPES.icp_staked])}
             />
             { amountToFund.type && 
+            <>
+                <Typography>{amountToFund.type}</Typography>
                 <InputBox
                     disabled={disabled}
                     hasError={hasError_1}
@@ -155,6 +157,7 @@ const NewFundingCampaign = (props) => {
                         setAmountToFund({...amountToFund, value});
                     }}
                 /> 
+            </>
             }
             { amountToFund.value && !hasError_1 &&
                 <InputBox
