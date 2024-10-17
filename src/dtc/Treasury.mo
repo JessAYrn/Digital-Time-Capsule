@@ -181,7 +181,13 @@ shared actor class Treasury (principal : Principal) = this {
                             remainingLoanInterestAmount = terms.initialLoanInterestAmount;
                             remainingLoanPrincipalAmount = updatedCampaign.amountDisbursedToRecipient;
                             remainingCollateralLocked = terms.initialCollateralLocked;
-                            forfeitedCollateral = { terms.initialCollateralLocked with e8s: Nat64 = 0; };
+                            forfeitedCollateral = { 
+                                terms.initialCollateralLocked.icp_staked with 
+                                icp_staked = {
+                                    terms.initialCollateralLocked.icp_staked with 
+                                    e8s: Nat64 = 0; 
+                                };
+                            };
                         }
                     };
                 };

@@ -16,13 +16,7 @@ import CreateProposalForm from "../modal/proposals/CreateProposalForm";
 import ModalComponent from "../modal/Modal";
 import { PROPOSAL_ACTIONS } from "../modal/proposals/utils";
 
-const NeuronStates = {
-    locked: 1,
-    dissolving: 2,
-    unlocked: 3,
-    spawning: 4,
-}
-
+const NeuronStates = { locked: 1, dissolving: 2, unlocked: 3, spawning: 4 };
 
 const DisplayNeuron = (props) => {
     const {

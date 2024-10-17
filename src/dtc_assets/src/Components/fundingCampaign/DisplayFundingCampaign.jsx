@@ -1,12 +1,10 @@
 import React, {useState} from "react";
 import Grid from "@mui/material/Unstable_Grid2";
 import Graph from "../Fields/Chart";
-import { Typography } from "@mui/material";
 import InputBox from "../Fields/InputBox";
-import { fromE8s, nanoSecondsToMiliSeconds, shortenHexString } from "../../functionsAndConstants/Utils";
+import { nanoSecondsToMiliSeconds, shortenHexString } from "../../functionsAndConstants/Utils";
 import ButtonField from "../Fields/Button";
 import DataField from "../Fields/DataField";
-import DataTable from "../Fields/Table";
 import PriceCheckIcon from '@mui/icons-material/PriceCheck';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { GRAPH_DATA_SETS, CHART_TYPES, GRAPH_DISPLAY_LABELS } from "../../functionsAndConstants/Constants";
@@ -112,13 +110,15 @@ const DisplayFundingCampaign = (props) => {
                     buttonIcon={ContentCopyIcon}
                     onClick={() => copyText(fundingCampaign?.recipient)}
                 />
+                {!!terms.length && 
+                    <DataField
+                        text={`${remainingCollateralLockedValue} ${remainingCollateralLockedType}`}
+                        label={"Collateral Locked"}
+                        disabled={true}
+                    />
+                }
                 {nextPaymentDueDate &&
                     <>
-                        <DataField
-                            text={`${remainingCollateralLockedValue} ${remainingCollateralLockedType}`}
-                            label={"Collateral Locked"}
-                            disabled={true}
-                        />
                         <DataField
                             text={`${forfeitedCollateralValue} ${forfeitedCollateralType}` }
                             label={"Collateral Forfeited"}
@@ -142,7 +142,7 @@ const DisplayFundingCampaign = (props) => {
                         <DatePickerField
                             disabled={true}
                             width={"100% !important"}
-                            value={new Date(nanoSecondsToMiliSeconds(nextPaymentDueDate))}
+                            value={new Date(nanoSecondsToMiliSeconds(parseInt(nextPaymentDueDate)))}
                             label={"Next Payment Due Date"}
                         />
                     </>

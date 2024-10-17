@@ -582,7 +582,7 @@ module{
         updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async (), 
         treasuryCanisterId: Principal,
     ) : async TreasuryTypes.FundingCampaignsArray {
-        if(amount < 10_000_000) throw Error.reject("Minimum repayment amount is 0.1 ICP.");
+        if(amount < 5_000_000) throw Error.reject("Minimum repayment amount is 0.1 ICP.");
         let ?campaign = fundingCampaignsMap.get(campaignId) else throw Error.reject("Campaign not found.");
         let {subaccountId = fundingCampaignSubaccountId; funded; recipient; amountDisbursedToRecipient} = campaign;
         if(not funded) throw Error.reject("Campaign funds have not been disbursed yet.");
@@ -593,7 +593,7 @@ module{
             {owner = treasuryCanisterId; subaccountId = ?fundingCampaignSubaccountId; accountType = #FundingCampaign},
             updateTokenBalances
         );  
-        await distributePayoutsFromFundingCampaign(campaignId, amountSent, usersTreasuryDataMap, updateTokenBalances, fundingCampaignsMap, treasuryCanisterId);
+        ignore distributePayoutsFromFundingCampaign(campaignId, amountSent, usersTreasuryDataMap, updateTokenBalances, fundingCampaignsMap, treasuryCanisterId);
         let amountRepaidDuringCurrentPaymentInterval = {icp = { e8s: Nat64 = terms.amountRepaidDuringCurrentPaymentInterval.icp.e8s + amountSent; } };
         var amountToDeductFromPrincipalAmount: Nat64 = 0;
         let remainingLoanInterestAmount = if(terms.remainingLoanInterestAmount.icp.e8s > amountSent) { 
@@ -637,12 +637,12 @@ module{
         switch (res) {
             case (#Ok(_)) {};
             case (#Err(#InsufficientFunds { balance })) {
-                if(balance < Nat64.toNat(txFee)){ amountSent := 0; } 
+                if(balance < Nat64.toNat(txFee)){ amountSent := 0; return {amountSent}; }
                 else amountSent := Nat64.fromNat(balance) - txFee;
                 let res = await ledger.icrc1_transfer({transferInput with amount = Nat64.toNat(amountSent)});
-                switch(res){ case (#Ok(_)) {}; case (#Err(_)) { amountSent:= 0} };
+                switch(res){ case (#Ok(_)) {}; case (#Err(_)) { amountSent:= 0; return {amountSent}} };
             };
-            case (#Err(_)) { amountSent := 0 };
+            case (#Err(_)) { amountSent := 0; return {amountSent} };
         };
         switch(from.subaccountId){
             case null { ignore updateTokenBalances(#SubaccountId(Account.defaultSubaccount()), #Icp, from.accountType); }; 
