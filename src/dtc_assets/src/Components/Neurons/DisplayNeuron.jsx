@@ -4,7 +4,8 @@ import { Typography } from "@mui/material";
 import { fromE8s, round2Decimals, secondsToHours, hoursToDays, daysToMonths } from "../../functionsAndConstants/Utils";
 import Graph from "../Fields/Chart";
 import { CHART_TYPES, GRAPH_DATA_SETS, GRAPH_DISPLAY_LABELS } from "../../functionsAndConstants/Constants";
-import { getUserNeuronContribution, mapDataMapToChartFormat, neuronContributionsTableColumns, mapNeuronContributionsToTableRows } from "../../mappers/treasuryPageMapperFunctions";
+import { mapDataMapToChartFormat, neuronContributionsTableColumns, mapNeuronContributionsToTableRows } from "../../mappers/treasuryPageMapperFunctions";
+import { getTotalContributions, getUserNeuronContribution } from "../../functionsAndConstants/treasuryDataFunctions";
 import ButtonField from "../Fields/Button";
 import AddIcon from '@mui/icons-material/Add';
 import HourglassTopIcon from '@mui/icons-material/HourglassTop';
@@ -34,8 +35,7 @@ const DisplayNeuron = (props) => {
 
     let userContribution = getUserNeuronContribution(userPrincipal, contributions);
 
-    let totalContributions = 0;
-    for(const [contributor, contribution] of contributions) totalContributions += parseInt(contribution.stake_e8s);
+    const totalContributions = getTotalContributions(contributions);
 
     let userRemainingStake = parseInt(neuronInfo.stake_e8s) * parseInt(userContribution.stake_e8s) / totalContributions;
     let userVotingPower = parseInt(neuronInfo.voting_power) * parseInt(userContribution.stake_e8s) / totalContributions;

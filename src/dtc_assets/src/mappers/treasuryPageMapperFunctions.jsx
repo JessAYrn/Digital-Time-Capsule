@@ -1,5 +1,4 @@
 import { round8Decimals, toHexString } from "../functionsAndConstants/Utils";
-
 import { nanoSecondsToMiliSeconds, getDateAsStringMMDDYYY, fromE8s, shortenHexString } from "../functionsAndConstants/Utils";
 import { GRAPH_DISPLAY_LABELS, GRAPH_DATA_SETS } from "../functionsAndConstants/Constants";
 
@@ -166,14 +165,6 @@ export const mapNeuronContributionsToTableRows = (neuronContributions) => {
     });
     return sortedNeuronContributions;
 }
-
-
-export const getUserNeuronContribution = (userPrincipal, neuronContributions) => {
-    let userContribution = neuronContributions.find(([contributor, _]) => {
-        return contributor === userPrincipal;
-    });
-    return userContribution ? userContribution[1] : {stake_e8s: 0, voting_power: 0};
-};
 
 export const mapBackendTreasuryDataToFrontEndObj = (props) => {
     const {

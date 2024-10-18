@@ -149,6 +149,10 @@ export const GRAPH_DISPLAY_LABELS = {
 export const FUNDING_CAMPAIGN_ASSET_TYPES = {
     icp: "icp",
     icp_staked: "icp_staked",
+    ck_btc: "ck_btc",
+    ck_eth: "ck_eth",
+    ck_usdc: "ck_usdc",
+    ck_usdt: "ck_usdt",
 };
 
 export const PERMITTED_USERNAME_CHARACTERS = [
