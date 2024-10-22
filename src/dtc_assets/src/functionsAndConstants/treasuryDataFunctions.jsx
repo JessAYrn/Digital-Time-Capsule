@@ -2,7 +2,7 @@ export const getUserNeuronContribution = (userPrincipal, neuronContributions) =>
     let userContribution = neuronContributions.find(([contributor, _]) => {
         return contributor === userPrincipal;
     });
-    return userContribution ? userContribution[1] : {stake_e8s: 0, voting_power: 0, collateralize_stake_e8s: [0]};
+    return userContribution ? userContribution[1] : {stake_e8s: 0, voting_power: 0, collateralized_stake_e8s: [0]};
 };
 
 export const getUserNeuronContributionFromNeuronId = (userPrincipal, neuronId, neuronsDataArray) => {

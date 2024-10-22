@@ -157,7 +157,7 @@ const NewFundingCampaign = (props) => {
                     ])}
                 />
                 <InfoToolTip 
-                    text={"The Currency that you wish to raise in this funding campaign. Currently Only ICP is available. ckBTC, ckETH, ckUSDC and ckUSDT coming soon."} 
+                    text={"The Currency that the proposer wishes to raise in this funding campaign. Currently Only ICP is available. ckBTC, ckETH, ckUSDC and ckUSDT coming soon."} 
                     placement={"top-start"}
                     color={"white"}
                 />
@@ -182,7 +182,7 @@ const NewFundingCampaign = (props) => {
                         }}
                     /> 
                     <InfoToolTip 
-                        text={`The amount of ${amountToFund.type.toUpperCase()} that you wish to raise.`} 
+                        text={`The amount of ${amountToFund.type.toUpperCase()} that the proposer wishes to raise.`} 
                         placement={"top-start"}
                         color={"white"}
                     />
@@ -211,7 +211,7 @@ const NewFundingCampaign = (props) => {
                     />
                     <InfoToolTip 
                         text={
-                            `You may propose to allocate a percentage of the DAO's neuron rewards for funding this campaign. 
+                            `Proposers may request to allocate a percentage of the DAO's neuron rewards for funding this campaign. 
                             Whenever a neuron is disbursed, a percentage of the rewards will be used to fund this campaign. 
                             the neurons contributors are recorded as contributors to this campaign.`
                         } 
@@ -236,7 +236,7 @@ const NewFundingCampaign = (props) => {
                         }}
                     />
                     <InfoToolTip 
-                        text={`Give a brief description or link external references regarding this funding campaign.`} 
+                        text={`A brief description or link to external references regarding this funding campaign.`} 
                         placement={"top-start"}
                         color={"white"}
                     />
@@ -257,7 +257,7 @@ const NewFundingCampaign = (props) => {
                         menuItemProps={isALoanMenuItemProps}
                     />
                     <InfoToolTip 
-                        text={`Are you looking to raise funds as a loan or as a donation? 
+                        text={`Specifies whether this funding campaign is a loan or a donation.
                             Loans require repayment and some form of collateral. 
                             Donations are not required to be repaid nor collateralized.`} 
                         placement={"top-start"}
@@ -289,8 +289,8 @@ const NewFundingCampaign = (props) => {
                         }}
                     />
                     <InfoToolTip 
-                        text={`The frequency at which you are promising to make at least 1 payment on your loan. 
-                            (e.g. if you select 7 days, you are promising that you will make at least 1 payment every 7 days)
+                        text={`The frequency at which the proposer is promising to make at least 1 payment on the loan. 
+                            (e.g. if 7 days is selected, the proposer is promising to make at least 1 payment every 7 days)
                             The maximum repayment interval is 30 days.`
                         } 
                         placement={"top-start"}
@@ -315,8 +315,8 @@ const NewFundingCampaign = (props) => {
                             }}
                         />
                         <InfoToolTip
-                            text={`The minimum amount of ${paymentAmounts.type.toUpperCase()} that you are promising to repay during each repayment interval.
-                                (e.g. if you select 10 ${paymentAmounts.type.toUpperCase()}, you are promising that you will repay at least 10 ${paymentAmounts.type.toUpperCase()} during each repayment interval)`
+                            text={`The minimum amount of ${paymentAmounts.type.toUpperCase()} that the proposer is promising to repay during each repayment interval.
+                                (e.g. if 10 ${paymentAmounts.type.toUpperCase()} is selected, the proposer is promising to repay at least 10 ${paymentAmounts.type.toUpperCase()} during each repayment interval)`
                             }
                             placement={"top-start"}
                             color={"white"}
@@ -341,7 +341,7 @@ const NewFundingCampaign = (props) => {
                             }}
                         />
                         <InfoToolTip
-                            text={`The amount of ${paymentAmounts.type.toUpperCase()} that you are promising to repay as interest for this loan.`}
+                            text={`The amount of ${paymentAmounts.type.toUpperCase()} that the proposer is promising to repay as interest for this loan.`}
                             placement={"top-start"}
                             color={"white"}
                         />
@@ -368,7 +368,7 @@ const NewFundingCampaign = (props) => {
                             ])}
                         />
                         <InfoToolTip
-                            text={`Select the currency that you wish to use as collateral for your loan.`}
+                            text={` The currency that the proposer wishes to use as collateral for this loan.`}
                             placement={"top-start"}
                             color={"white"}
                         />
@@ -391,7 +391,7 @@ const NewFundingCampaign = (props) => {
                                 menuItemProps={neuronstoCollateralizeOptions}
                             />
                             <InfoToolTip
-                                text={`Select the neuron that holds the staked ICP you wish to collateralize.`}
+                                text={`The neuron that holds the staked ICP that the proposer wishes to collateralize.`}
                                 placement={"top-start"}
                                 color={"white"}
                             />
@@ -402,12 +402,14 @@ const NewFundingCampaign = (props) => {
                     || initialCollateralLocked?.fromNeuron &&
                     <>
                         <Typography>{initialCollateralLocked.fromNeuron}</Typography>
-                        <DataField 
-                            label={"Available Stake: "} 
-                            text={`${avaiableStake} ICP`} 
-                            isLoading={!treasuryState.dataHasBeenLoaded} 
-                            disabled={true}
-                        />
+                        {!disabled && 
+                            <DataField 
+                                label={"Available Stake: "} 
+                                text={`${avaiableStake} ICP`} 
+                                isLoading={!treasuryState.dataHasBeenLoaded} 
+                                disabled={true}
+                            />
+                        }
                         <Grid minWidth={"275px"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
                         <InputBox
                             disabled={disabled}
@@ -426,7 +428,7 @@ const NewFundingCampaign = (props) => {
                             }}
                         />
                         <InfoToolTip
-                            text={`The amount of the ${initialCollateralLocked.type.toUpperCase()} that you wish to lock within the treasury as collateral for your loan.`}
+                            text={`The amount of the ${initialCollateralLocked.type.toUpperCase()} that the proposer wishes to lock within the treasury as collateral for this loan.`}
                             placement={"top-start"}
                             color={"white"}
                         />

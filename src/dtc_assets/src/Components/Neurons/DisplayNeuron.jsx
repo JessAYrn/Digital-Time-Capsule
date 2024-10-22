@@ -20,10 +20,7 @@ import { PROPOSAL_ACTIONS } from "../modal/proposals/utils";
 const NeuronStates = { locked: 1, dissolving: 2, unlocked: 3, spawning: 4 };
 
 const DisplayNeuron = (props) => {
-    const {
-        neuronData,
-        userPrincipal
-    } = props;
+    const { neuronData, userPrincipal} = props;
 
     const [neuronId, neuronData_] = neuronData;
     const{contributions, neuron, neuronInfo} = neuronData_;
