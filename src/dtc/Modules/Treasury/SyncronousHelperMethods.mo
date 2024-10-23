@@ -8,6 +8,7 @@ import Blob "mo:base/Blob";
 import TreasuryTypes "../../Types/Treasury/types";
 import Account "../../Serializers/Account";
 import NatX "../../MotokoNumbers/NatX";
+import Principal "mo:base/Principal";
 
 module{
 
@@ -225,6 +226,56 @@ module{
             remainingAmount -= stakeCredit;
         };
         if(remainingAmount > 0) updateUserNeuronContribution(neuronDataMap, {userPrincipal = loanContributions[0].0; delta = remainingAmount; neuronId; operation = #AddStake});
+    };
+
+    public func getTotalDebtsOwedByUser(userPrincipal: TreasuryTypes.PrincipalAsText, fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap): {totalDebtsOwed: Nat64} {
+        var totalDebtsOwed: Nat64 = 0;
+        label summingDebtsOwed for((campaignId, campaign) in fundingCampaignsMap.entries()){
+            let {recipient; terms; settled; funded;} = campaign;
+            if(settled or not funded) continue summingDebtsOwed;
+            if(recipient != userPrincipal) continue summingDebtsOwed;
+            let ?terms_ = terms else continue summingDebtsOwed;
+            let {remainingLoanPrincipalAmount; remainingLoanInterestAmount } = terms_;
+            totalDebtsOwed += remainingLoanPrincipalAmount.icp.e8s + remainingLoanInterestAmount.icp.e8s;
+        };
+        return {totalDebtsOwed};
+    };
+
+    public func getTotalDebts(fundingCampaignMap: TreasuryTypes.FundingCampaignsMap): {totalDebts: Nat64} {
+        var totalDebts: Nat64 = 0;
+        label summingDebts for((_, campaign) in fundingCampaignMap.entries()){
+            let {terms; settled; funded;} = campaign;
+            if(settled or not funded) continue summingDebts;
+            let ?terms_ = terms else continue summingDebts;
+            let {remainingLoanPrincipalAmount; remainingLoanInterestAmount } = terms_;
+            totalDebts += remainingLoanPrincipalAmount.icp.e8s + remainingLoanInterestAmount.icp.e8s;
+        };
+        return {totalDebts};
+    };
+
+    public func getTotalFundingAwaitingContributions(fundingCampaignMap: TreasuryTypes.FundingCampaignsMap): 
+    {totalFundingAwaitingContributions: Nat64; totalLoansAwaitingContributions: Nat64;} {
+
+        var totalFundingAwaitingContributions: Nat64 = 0;
+        var totalLoansAwaitingContributions: Nat64 = 0;
+
+        label summingFundingAwaitingContributions for((_, campaign) in fundingCampaignMap.entries()){
+            let {amountToFund; funded; settled;} = campaign;
+            if(settled or funded) continue summingFundingAwaitingContributions;
+            totalFundingAwaitingContributions += amountToFund.icp.e8s;
+            if(campaign.terms != null) totalLoansAwaitingContributions += amountToFund.icp.e8s
+        };
+        return {totalFundingAwaitingContributions; totalLoansAwaitingContributions};
+    };
+
+    public func getTotalFundingForUserAwaitingContributions(userPrincipal: TreasuryTypes.PrincipalAsText, fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap): {totalFundingForUserAwaitingContributions: Nat64} {
+        var totalFundingForUserAwaitingContributions: Nat64 = 0;
+        label summingFundingAwaitingContributions for((_, campaign) in fundingCampaignsMap.entries()){
+            let {recipient; amountToFund; funded; settled;} = campaign;
+            if(settled or funded or recipient != userPrincipal) continue summingFundingAwaitingContributions;
+            totalFundingForUserAwaitingContributions += amountToFund.icp.e8s;
+        };
+        return {totalFundingForUserAwaitingContributions};
     };
 
 };

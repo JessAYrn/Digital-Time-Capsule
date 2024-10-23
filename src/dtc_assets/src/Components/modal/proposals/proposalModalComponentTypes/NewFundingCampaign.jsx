@@ -23,7 +23,6 @@ const NewFundingCampaign = (props) => {
 
     const { treasuryState } = useContext(AppContext);
 
-    const [percentageOfDaoRewardsAllocated, setPercentageOfDaoRewardsAllocated] = useState(fundingCampaignInput?.percentageOfDaoRewardsAllocated ? parseInt(fundingCampaignInput?.percentageOfDaoRewardsAllocated) : null);
     const [description, setDescription] = useState(fundingCampaignInput?.description);
     const [amountToFund, setAmountToFund] = useState(fundingCampaignInput?.amountToFund ? getFundingCampaignAssetTypeAndValue(fundingCampaignInput?.amountToFund) : {});
     const [isALoan, setIsALoan] = useState(fundingCampaignInput ? !!terms : undefined);
@@ -39,7 +38,6 @@ const NewFundingCampaign = (props) => {
     const [hasError_4, setHasError_4] = useState(false);
     const [hasError_5, setHasError_5] = useState(false);
     const [hasError_6, setHasError_6] = useState(false);
-    const [hasError_7, setHasError_7] = useState(false);
     const [isReadyToSubmit, setIsReadyToSubmit] = useState(false);
 
     const amountToFundOptions = (exlude = []) => {
@@ -82,7 +80,7 @@ const NewFundingCampaign = (props) => {
     ];
 
     useEffect(() => {
-        const requiredFields = [ percentageOfDaoRewardsAllocated, description, isALoan, amountToFund.value, amountToFund.type ];
+        const requiredFields = [ description, isALoan, amountToFund.value, amountToFund.type ];
         if(isALoan) requiredFields.push(
             paymentIntervalsInDays, 
             initialLoanInterestAmount?.type, 
@@ -95,10 +93,9 @@ const NewFundingCampaign = (props) => {
         if(initialCollateralLocked?.type === FUNDING_CAMPAIGN_ASSET_TYPES.icp_staked) requiredFields.push(initialCollateralLocked?.fromNeuron);
         if(requiredFields.includes(null)) setIsReadyToSubmit(false);
         else if(requiredFields.includes(undefined)) setIsReadyToSubmit(false);
-        else if(hasError_1 || hasError_2 || hasError_3 || hasError_4 || hasError_5 || hasError_6 || hasError_7) setIsReadyToSubmit(false);
+        else if(hasError_1 || hasError_2 || hasError_3 || hasError_4 || hasError_5 || hasError_6) setIsReadyToSubmit(false);
         else setIsReadyToSubmit(true);
     },[
-        percentageOfDaoRewardsAllocated, 
         description,
         isALoan, 
         paymentIntervalsInDays, 
@@ -122,7 +119,6 @@ const NewFundingCampaign = (props) => {
             }] : [];
         const payload = {
             amountToFund: { [amountToFund.type]: { e8s: toE8s(amountToFund.value) } },
-            percentageOfDaoRewardsAllocated: percentageOfDaoRewardsAllocated,
             description: description,
             terms
         };
@@ -188,50 +184,19 @@ const NewFundingCampaign = (props) => {
                     />
                 </Grid>
             </>
-            }
-            { !!amountToFund.value && !hasError_1 &&
+            }         
+            { !!amountToFund.value && !hasError_1 && 
                 <Grid minWidth={"275px"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
                     <InputBox
                         disabled={disabled}
-                        width={"100%"}
                         hasError={hasError_2}
-                        label={"DAO Rewards Allocatation"}
-                        format={INPUT_BOX_FORMATS.numberFormat}
-                        allowNegative={false}
-                        maxDecimalPlaces={0}
-                        maxValue={100}
-                        omitMaxValueButton={true}
-                        parseNumber={parseInt}
-                        suffix={" %"}
-                        value={percentageOfDaoRewardsAllocated}
-                        onChange={(value) => {
-                            setHasError_2(value > 100 || value === "NaN" || value === NaN || value === "");
-                            setPercentageOfDaoRewardsAllocated(value);
-                        }}
-                    />
-                    <InfoToolTip 
-                        text={
-                            `Proposers may request to allocate a percentage of the DAO's neuron rewards for funding this campaign. 
-                            Whenever a neuron is disbursed, a percentage of the rewards will be used to fund this campaign. 
-                            the neurons contributors are recorded as contributors to this campaign.`
-                        } 
-                        placement={"top-start"}
-                        color={"white"}
-                    />
-                </Grid>
-            }               
-            { (!!percentageOfDaoRewardsAllocated || percentageOfDaoRewardsAllocated === 0) && !hasError_2 && 
-                <Grid minWidth={"275px"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
-                    <InputBox
-                        disabled={disabled}
-                        hasError={hasError_3}
                         width={"100%"}
                         label={"Description"}
                         format={INPUT_BOX_FORMATS.noFormat}
                         value={description}
                         rows={5}
                         onChange={(value) => {
-                            setHasError_3(!value.length);
+                            setHasError_2(!value.length);
                             setDescription(value);
                         }}
                     />
@@ -242,7 +207,7 @@ const NewFundingCampaign = (props) => {
                     />
                 </Grid>
             }
-            { !!description && !hasError_3 &&
+            { !!description && !hasError_2 &&
                 <Grid minWidth={"275px"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
                     <MenuField
                         disabled={disabled}
@@ -273,7 +238,7 @@ const NewFundingCampaign = (props) => {
                     <InputBox
                         disabled={disabled}
                         width={"100%"}
-                        hasError={hasError_4}
+                        hasError={hasError_3}
                         label={"Repayment Intervals"}
                         format={INPUT_BOX_FORMATS.numberFormat}
                         allowNegative={false}
@@ -284,7 +249,7 @@ const NewFundingCampaign = (props) => {
                         suffix={" days"}
                         value={paymentIntervalsInDays}
                         onChange={(value) => {
-                            setHasError_4(value > 30 || value === "NaN" || value === NaN || value === "" || value === 0);
+                            setHasError_3(value > 30 || value === "NaN" || value === NaN || value === "" || value === 0);
                             setPaymentIntervalsInDays(value);
                         }}
                     />
@@ -297,11 +262,11 @@ const NewFundingCampaign = (props) => {
                         color={"white"}
                     />
                     </Grid>
-                    { !!paymentIntervalsInDays && !hasError_4 &&
+                    { !!paymentIntervalsInDays && !hasError_3 &&
                         <Grid minWidth={"275px"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
                         <InputBox
                             disabled={disabled}
-                            hasError={hasError_5}
+                            hasError={hasError_4}
                             width={"100%"}
                             label={"Minimum Payment Amounts"}
                             format={INPUT_BOX_FORMATS.numberFormat}
@@ -310,7 +275,7 @@ const NewFundingCampaign = (props) => {
                             parseNumber={parseFloat}
                             suffix={` ${paymentAmounts.type.toUpperCase()}`}
                             onChange={(value) => {
-                                setHasError_5(value === "NaN" || value === NaN || value === "" || value === 0);
+                                setHasError_4(value === "NaN" || value === NaN || value === "" || value === 0);
                                 setPaymentAmounts({...paymentAmounts, value});
                             }}
                         />
@@ -323,11 +288,11 @@ const NewFundingCampaign = (props) => {
                         />
                         </Grid>
                     }
-                { !!paymentAmounts.value && !hasError_5 && 
+                { !!paymentAmounts.value && !hasError_4 && 
                     <Grid minWidth={"275px"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
                         <InputBox
                             disabled={disabled}
-                            hasError={hasError_6}
+                            hasError={hasError_5}
                             width={"100%"}
                             label={"Interest to be paid"}
                             format={INPUT_BOX_FORMATS.numberFormat}
@@ -336,7 +301,7 @@ const NewFundingCampaign = (props) => {
                             parseNumber={parseFloat}
                             suffix={` ${initialLoanInterestAmount.type.toUpperCase()}`}
                             onChange={(value) => {
-                                setHasError_6(value === "NaN" || value === NaN || value === "" || value === 0);
+                                setHasError_5(value === "NaN" || value === NaN || value === "" || value === 0);
                                 setInitialLoanInterestAmount({...initialLoanInterestAmount, value});
                             }}
                         />
@@ -347,7 +312,7 @@ const NewFundingCampaign = (props) => {
                         />
                     </Grid>
                 }
-                { !!initialLoanInterestAmount.value && !hasError_6 &&
+                { !!initialLoanInterestAmount.value && !hasError_5 &&
                     <Grid minWidth={"275px"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
                         <MenuField
                             disabled={disabled}
@@ -413,7 +378,7 @@ const NewFundingCampaign = (props) => {
                         <Grid minWidth={"275px"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
                         <InputBox
                             disabled={disabled}
-                            hasError={hasError_7}
+                            hasError={hasError_6}
                             width={"100%"}
                             label={"Amount to be collateralized"}
                             format={INPUT_BOX_FORMATS.numberFormat}
@@ -423,7 +388,7 @@ const NewFundingCampaign = (props) => {
                             suffix={` ${initialCollateralLocked.type.toUpperCase()}`}
                             onChange={(value) => {
                                 console.log("Value: ", `${value}`);
-                                setHasError_7(`${value}` === "NaN" || value === NaN || value === "" || value === 0 || value > avaiableStake);
+                                setHasError_6(`${value}` === "NaN" || value === NaN || value === "" || value === 0 || value > avaiableStake);
                                 setInitialCollateralLocked({...initialCollateralLocked, value});
                             }}
                         />

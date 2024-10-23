@@ -15,12 +15,16 @@ import InfoToolTip from "../../Components/Fields/InfoToolTip";
 import DisplayAllFundingCampaigns from "../../Components/fundingCampaign/DisplayAllFundingCampaigns";
 import DisplayAllNeurons from "../../Components/Neurons/DisplayAllNeurons";
 import ActionButton from "../../Components/ActionButton";
+import AccordionField from "../../Components/Fields/Accordion";
 
 const TreasuryPage = (props) => {
   
   const { treasuryState } = useContext(AppContext);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [modalProps, setModalProps] = useState({});
+  
+  const activeFundingCampaigns = treasuryState.fundingCampaigns.filter(([campaignId, {settled}]) => {return settled === false} );
+  const inactiveFundingCampaigns = treasuryState.fundingCampaigns.filter(([campaignId, {settled}]) => {return settled === true} );
 
   const displayTreasuryAccountId = () => {
     setModalProps({
@@ -166,7 +170,20 @@ const TreasuryPage = (props) => {
           width={"100%"}
         />
         <DisplayAllNeurons />
-        <DisplayAllFundingCampaigns />
+        <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
+            <AccordionField>
+              <div 
+                  title={"Active Funding Campaigns"} 
+                  fundingCampaigns={activeFundingCampaigns}
+                  CustomComponent={DisplayAllFundingCampaigns}
+              ></div>
+              <div 
+                  title={"Inactive Funding Campaigns"} 
+                  fundingCampaigns={inactiveFundingCampaigns}
+                  CustomComponent={DisplayAllFundingCampaigns}
+              ></div>
+            </AccordionField>
+        </Grid>
         <ButtonField
           paperSx={{marginTop: "20px"}}
           text={"View Treasury Account ID"}

@@ -55,11 +55,6 @@ shared actor class Treasury (principal : Principal) = this {
 
     public shared({caller}) func createFundingCampaign(campaign: TreasuryTypes.FundingCampaignInput, userPrincipal: Text) : async () {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
-        var totalAllocation: Nat = campaign.percentageOfDaoRewardsAllocated;
-        label loop_ for((campaignId_, {percentageOfDaoRewardsAllocated; settled; funded}) in fundingCampaignsMap.entries()){
-            if(settled or funded) continue loop_; totalAllocation += percentageOfDaoRewardsAllocated; 
-        };
-        if(totalAllocation > 100) throw Error.reject("Allocation percentage cannot be greater than 100.");
         let terms = switch(campaign.terms){
             case null { null };
             case (?terms) { 
@@ -97,12 +92,6 @@ shared actor class Treasury (principal : Principal) = this {
         return Iter.toArray(fundingCampaignsMap.entries());
     };
 
-    public shared({caller}) func contributeToFundingCampaign(contributor: TreasuryTypes.PrincipalAsText, campaignId: Nat, amount: Nat64) 
-    : async TreasuryTypes.FundingCampaignsArray {
-        if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
-        await AsyncronousHelperMethods.contributeToFundingCampaign(contributor, campaignId, amount, fundingCampaignsMap, usersTreasuryDataMap, Principal.fromActor(this), updateTokenBalances);
-    };
-
     public shared({caller}) func cancelFundingCampaign(campaignId: Nat): async TreasuryTypes.FundingCampaignsArray {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         let ?campaign = fundingCampaignsMap.get(campaignId) else throw Error.reject("Campaign not found.");
@@ -117,10 +106,78 @@ shared actor class Treasury (principal : Principal) = this {
         return Iter.toArray(fundingCampaignsMap.entries());
     };
 
+    public shared({caller}) func contributeToFundingCampaign(contributor: TreasuryTypes.PrincipalAsText, campaignId: Nat, amount: Nat64) 
+    : async TreasuryTypes.FundingCampaignsArray {
+        if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
+        await AsyncronousHelperMethods.contributeToFundingCampaign(contributor, campaignId, amount, fundingCampaignsMap, usersTreasuryDataMap, Principal.fromActor(this), updateTokenBalances);
+    };
+
+    public shared({caller}) func contributeToAllFundingCampaignsForLoans(contributor: TreasuryTypes.PrincipalAsText, amount: Nat64) : async TreasuryTypes.FundingCampaignsArray {
+        if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
+        let {totalLoansAwaitingContributions} = SyncronousHelperMethods.getTotalFundingAwaitingContributions(fundingCampaignsMap);
+        let totalAmountToContribute = Nat64.min(amount, totalLoansAwaitingContributions);
+        label makingContributions for((campaignId, campaign) in fundingCampaignsMap.entries()){
+            let {settled; funded; amountToFund = loanAmount; terms;} = campaign;
+            if(settled or funded or terms == null) continue makingContributions;
+            let amountToContributeToThisCampaign = NatX.nat64ComputePercentage({value = totalAmountToContribute; numerator = loanAmount.icp.e8s; denominator = totalLoansAwaitingContributions});
+            ignore contributeToFundingCampaign(contributor, campaignId, amountToContributeToThisCampaign);
+        };
+        return Iter.toArray(fundingCampaignsMap.entries());
+    };
+
+    private func makeContributionsByAllUsersToAllFundingCampaignsForLoans(): async () {
+        var totalLiquidityAvailableForLoans: Nat64 = 0;
+
+        label summingAvailableLiquidity for((principal, {balances; automaticallyContributeToLoans}) in usersTreasuryDataMap.entries()){ 
+            if(principal == Principal.toText(Principal.fromActor(this))) continue summingAvailableLiquidity;
+            switch(automaticallyContributeToLoans){ case(?true){totalLiquidityAvailableForLoans += balances.icp.e8s;}; case(_){}; }; 
+        };
+
+        let {totalLoansAwaitingContributions} = SyncronousHelperMethods.getTotalFundingAwaitingContributions(fundingCampaignsMap);
+
+        label makingContributions for((userPrincipal, {automaticallyContributeToLoans; balances}) in usersTreasuryDataMap.entries()){ 
+            switch(automaticallyContributeToLoans){ 
+                case (?true){
+                    let userLiquidityAvailableForLoans = balances.icp.e8s;
+                    let portionOfAwaitingLoansToBeProvidedByThisUser = NatX.nat64ComputePercentage({value = totalLoansAwaitingContributions; numerator = userLiquidityAvailableForLoans; denominator = totalLiquidityAvailableForLoans});
+                    let amountToContribute = Nat64.min(userLiquidityAvailableForLoans, portionOfAwaitingLoansToBeProvidedByThisUser);
+                    ignore contributeToAllFundingCampaignsForLoans(userPrincipal, amountToContribute);
+                };
+                case(_){ continue makingContributions };
+            };
+        };
+    };
+
     public shared({caller}) func repayFundingCampaign(contributor: TreasuryTypes.PrincipalAsText, campaignId: Nat, amount: Nat64) : async TreasuryTypes.FundingCampaignsArray {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         let (_, subaccountId) = SyncronousHelperMethods.getIdAndSubaccount(#Principal(contributor), usersTreasuryDataMap, fundingCampaignsMap);
-        await AsyncronousHelperMethods.repayFundingCampaign(amount, {subaccountId = ?subaccountId; accountType = #UserTreasuryData}, campaignId, fundingCampaignsMap, usersTreasuryDataMap, neuronDataMap, updateTokenBalances, Principal.fromActor(this) );
+        await AsyncronousHelperMethods.repayFundingCampaign(amount + txFee, {subaccountId = ?subaccountId; accountType = #UserTreasuryData}, campaignId, fundingCampaignsMap, usersTreasuryDataMap, neuronDataMap, updateTokenBalances, Principal.fromActor(this) );
+    };
+
+    public shared({caller}) func repayAllFundingCampaignsOwed(contributor: TreasuryTypes.PrincipalAsText, maxAmountToRepay: Nat64) : async TreasuryTypes.FundingCampaignsArray {
+        if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
+        let {totalDebtsOwed} = SyncronousHelperMethods.getTotalDebtsOwedByUser(contributor, fundingCampaignsMap);
+        let totalAmountToRepay = Nat64.min(maxAmountToRepay, totalDebtsOwed);
+        label makingPayments for((campaignId, {recipient; terms; settled; funded }) in fundingCampaignsMap.entries()){
+            if(settled or not funded or recipient != contributor) continue makingPayments;
+            let ?{remainingLoanPrincipalAmount; remainingLoanInterestAmount} = terms else continue makingPayments; 
+            let debtOwedOnThisLoan = remainingLoanPrincipalAmount.icp.e8s + remainingLoanInterestAmount.icp.e8s; 
+            let amountToRepayOnThisLoan = NatX.nat64ComputePercentage({value = totalAmountToRepay; numerator = debtOwedOnThisLoan; denominator = totalDebtsOwed});
+            ignore repayFundingCampaign(contributor, campaignId, amountToRepayOnThisLoan);
+        };
+        return Iter.toArray(fundingCampaignsMap.entries());
+    };
+
+    private func repayAllFundingCampaignsOwedByAllUsers(): async (){
+        for((userPrincipal, {automaticallyRepayLoans; balances}) in usersTreasuryDataMap.entries()){ 
+            switch(automaticallyRepayLoans){
+                case (?true){ 
+                    let maxAmountToRepay = balances.icp.e8s;
+                    ignore repayAllFundingCampaignsOwed(userPrincipal, maxAmountToRepay); 
+                };
+                case (_){};
+            };
+        };
     };
     
     private func concludeAllEligbileBillingCycles(): async () {
@@ -134,8 +191,8 @@ shared actor class Treasury (principal : Principal) = this {
             } else {  (amountRepaidDuringCurrentPaymentInterval.icp.e8s - paymentAmounts.icp.e8s, 0);  };
 
             let amountOfCollateralForfeited = NatX.nat64ComputePercentage({value = initialCollateralLocked.icp_staked.e8s; numerator = paymentAmountMissed; denominator = amountDisbursedToRecipient.icp.e8s});
-            let updatedRemainingCollateralLocked = {remainingCollateralLocked with e8s = remainingCollateralLocked.icp_staked.e8s - amountOfCollateralForfeited};
-            let updatedForfeitedCollateral = {forfeitedCollateral with e8s = forfeitedCollateral.icp_staked.e8s + amountOfCollateralForfeited};
+            let updatedRemainingCollateralLocked = {remainingCollateralLocked with icp_staked = { remainingCollateralLocked.icp_staked with e8s = remainingCollateralLocked.icp_staked.e8s - amountOfCollateralForfeited} };
+            let updatedForfeitedCollateral = {forfeitedCollateral with icp_staked = { forfeitedCollateral.icp_staked with e8s = forfeitedCollateral.icp_staked.e8s + amountOfCollateralForfeited} };
             let nextPaymentDueDate = ?(Time.now() + Nat64.toNat(paymentIntervals));
 
             SyncronousHelperMethods.updateUserNeuronContribution(neuronDataMap, {userPrincipal = recipient; delta = amountOfCollateralForfeited; neuronId = initialCollateralLocked.icp_staked.fromNeuron; operation = #SubtractCollateralizedStake});
@@ -155,7 +212,7 @@ shared actor class Treasury (principal : Principal) = this {
     };
     
     private func disburseEligibleCampaignFundingsToRecipient() : async () {
-        func disburseCampaignFundingToRecipients(campaignId: Nat, campaign: TreasuryTypes.FundingCampaign): async () {
+        func disburseCampaignFundingToRecipient(campaignId: Nat, campaign: TreasuryTypes.FundingCampaign): async () {
             let {campaignWalletBalance; recipient; subaccountId = campaignSubaccountId} = campaign;
             var updatedCampaign = campaign;
             let (_,recipientSubaccountId) = SyncronousHelperMethods.getIdAndSubaccount(#Principal(recipient), usersTreasuryDataMap, fundingCampaignsMap);
@@ -198,8 +255,8 @@ shared actor class Treasury (principal : Principal) = this {
         label loop_ for((campaignId, campaign) in fundingCampaignsMap.entries()){
             let {settled; funded; amountToFund; campaignWalletBalance} = campaign;
             if(settled or funded) continue loop_;
-            if(campaignWalletBalance.icp.e8s >= amountToFund.icp.e8s){
-                ignore disburseCampaignFundingToRecipients(campaignId, campaign);
+            if( campaignWalletBalance.icp.e8s >= amountToFund.icp.e8s - (2 * txFee) ){
+                ignore disburseCampaignFundingToRecipient(campaignId, campaign);
             };
         };
     };
@@ -244,6 +301,8 @@ shared actor class Treasury (principal : Principal) = this {
                 btc = {e8s: Nat64 = 0};
             };
             subaccountId = newSubaccount;
+            automaticallyContributeToLoans = ?true;
+            automaticallyRepayLoans = ?true;
         };
         usersTreasuryDataMap.put(Principal.toText(principal), newUserTreasuryData);
     };
@@ -253,6 +312,14 @@ shared actor class Treasury (principal : Principal) = this {
         let principalAsText = Principal.toText(principal);
         if(usersTreasuryDataMap.get(principalAsText) != null) throw Error.reject("User already has treasury data.");
         await createTreasuryData_(principal);
+    };
+
+    public shared({caller}) func updateAutomatedSettings({userPrinciapl: Principal; automaticallyContributeToLoans: ?Bool; automaticallyRepayLoans: ?Bool;}): async () {
+        if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
+        let userPrincipalAsText = Principal.toText(userPrinciapl);
+        let ?userTreasuryData = usersTreasuryDataMap.get(userPrincipalAsText) else throw Error.reject("User not found.");
+        let newUserTreasuryData = {userTreasuryData with automaticallyContributeToLoans; automaticallyRepayLoans};
+        usersTreasuryDataMap.put(userPrincipalAsText, newUserTreasuryData);
     };
     
     // revised to conform to new data structure
@@ -332,27 +399,24 @@ shared actor class Treasury (principal : Principal) = this {
     //     neuronDataMap.put(Nat64.toText(neuron_id), {neuronData with proxyNeuron = ?Nat64.toText(proxyNeuronId)});
     // };
 
-    public shared({caller}) func manageNeuron(args: Governance.ManageNeuron) : async Governance.ManageNeuronResponse {
-
-        if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
+    public shared({caller}) func manageNeuron(args: Governance.ManageNeuron) : async Governance.ManageNeuronResponse {        if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         let (manageNeuronResponse, neuronContributions) = await AsyncronousHelperMethods.manageNeuron(neuronDataMap, args, newlyCreatedNeuronContributions); 
-
-        switch(manageNeuronResponse.command){
-            case(?manageNeuronResponseCommand) {
-                switch(manageNeuronResponseCommand){
-                    case(#Disburse(_)){
-                        let ?neuronId_ = args.id else { throw Error.reject("No neuronId in response") };
-                        await AsyncronousHelperMethods.distributePayoutsFromNeuron( Nat64.toText(neuronId_.id), usersTreasuryDataMap, updateTokenBalances, fundingCampaignsMap, neuronDataMap, Principal.fromActor(this));
-                        ignore neuronDataMap.remove(Nat64.toText(neuronId_.id));
-                        return manageNeuronResponse;
-                    };
-                    case(#Error({error_message;})){throw Error.reject(error_message) };
-                    case(_){};
-                };
-                ignore AsyncronousHelperMethods.upateNeuronsDataMap(neuronDataMap, neuronContributions);
-            };
-            case(null) { throw Error.reject("Error managing neuron.") };
+        func completeDisbursements(): async () {
+            let ?neuronId_ = args.id else { throw Error.reject("No neuronId in response") };
+            await AsyncronousHelperMethods.distributePayoutsFromNeuron( Nat64.toText(neuronId_.id), usersTreasuryDataMap, updateTokenBalances, neuronDataMap, Principal.fromActor(this));
+            ignore neuronDataMap.remove(Nat64.toText(neuronId_.id));
+            let {setTimer} = Timer;
+            ignore setTimer<system>(#seconds(5 * 60), func(): async (){ ignore repayAllFundingCampaignsOwedByAllUsers(); });
+            ignore setTimer<system>(#seconds(10 * 60), func(): async (){ ignore makeContributionsByAllUsersToAllFundingCampaignsForLoans(); });
         };
+        switch(manageNeuronResponse.command){
+            case(?#Disburse(_)){ ignore completeDisbursements(); };
+            case(?#MakeProposal(_)){ switch(args.command){ case(?#Disburse(_)){ ignore completeDisbursements(); }; case(_){}; } };
+            case(?#Error({error_message;})){throw Error.reject(error_message) };
+            case(null) { throw Error.reject("Error managing neuron.") };
+            case(_){};
+        };
+        ignore AsyncronousHelperMethods.upateNeuronsDataMap(neuronDataMap, neuronContributions);
         return manageNeuronResponse;
     };
 

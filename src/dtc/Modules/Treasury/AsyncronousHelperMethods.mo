@@ -454,60 +454,13 @@ module{
         neuronId: TreasuryTypes.NeuronIdAsText,
         usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap, 
         updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async (), 
-        fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap,
         neuronDataMap: TreasuryTypes.NeuronsDataMap,
         treasuryCanisterId: Principal,
     ): async () {
         
-        func performUserPayoutFromNeuronDisbursal(userPrincipal: Principal, userTotalNeuronContributionAmount: Nat64) : async () {
-
-            var numberOfDebtsToRepay: Nat64 = 0;
-            var totalOutStandingPaymentOwed: Nat64 = 0;
-            label getDebtInfo for((campaignId, {terms; funded; recipient; settled}) in fundingCampaignsMap.entries()){
-                if(not funded or settled or recipient != Principal.toText(userPrincipal)) continue getDebtInfo;
-                let ?{paymentAmounts; amountRepaidDuringCurrentPaymentInterval} = terms else continue getDebtInfo;
-                if(amountRepaidDuringCurrentPaymentInterval.icp.e8s < paymentAmounts.icp.e8s){ 
-                    let outStandingPaymentOwed = paymentAmounts.icp.e8s - amountRepaidDuringCurrentPaymentInterval.icp.e8s;
-                    totalOutStandingPaymentOwed += outStandingPaymentOwed; 
-                    numberOfDebtsToRepay += 1;
-                };
-            };
-
-            let amountOfUserContributionsReservedToPayDebts: Nat64 = Nat64.min(userTotalNeuronContributionAmount, totalOutStandingPaymentOwed);
-            var amountOfUserNeuronContributionsUsedToPayDebts: Nat64 = 0;
-            if(numberOfDebtsToRepay > 0){
-                label repayDebts for ((campaignId, campaign) in fundingCampaignsMap.entries()){
-                    let {settled; funded; recipient; terms} = campaign;
-                    if(not funded or settled or recipient != Principal.toText(userPrincipal)) continue repayDebts;
-                    let ?{paymentAmounts; amountRepaidDuringCurrentPaymentInterval} = terms else continue repayDebts;
-                    if(amountRepaidDuringCurrentPaymentInterval.icp.e8s > paymentAmounts.icp.e8s) continue repayDebts;
-                    let debtRepaymentAmountOwed: Nat64 = paymentAmounts.icp.e8s - amountRepaidDuringCurrentPaymentInterval.icp.e8s;
-                    let amountAllocatedTowardsDebtRepayment = Nat64.min(
-                        debtRepaymentAmountOwed,
-                        NatX.nat64ComputePercentage({value = amountOfUserContributionsReservedToPayDebts; numerator = 1; denominator = numberOfDebtsToRepay})
-                    );
-                    ignore repayFundingCampaign( amountAllocatedTowardsDebtRepayment, {subaccountId = null; accountType = #MultiSigAccount}, campaignId, fundingCampaignsMap, usersTreasuryDataMap, neuronDataMap, updateTokenBalances, treasuryCanisterId);
-                    amountOfUserNeuronContributionsUsedToPayDebts += amountAllocatedTowardsDebtRepayment;
-                }; 
-            };
-
-            let amountOfUserNeuronContributionsReservedToContributeToFundingCampaigns: Nat64 = userTotalNeuronContributionAmount - amountOfUserNeuronContributionsUsedToPayDebts;
-            var amountContributedToFundingCampaigns: Nat64 = 0;
-
-            if(amountOfUserNeuronContributionsReservedToContributeToFundingCampaigns < txFee) return;
-
-            label contributeRewardsToFundingCampaigns for((campaignId, campaign) in fundingCampaignsMap.entries()){
-                let {settled; funded; percentageOfDaoRewardsAllocated; subaccountId = fundingCampaignSubaccountId} = campaign;
-                if(settled or funded) continue contributeRewardsToFundingCampaigns;
-                let amountAllocatedToCampaign = NatX.nat64ComputePercentage({value = amountOfUserNeuronContributionsReservedToContributeToFundingCampaigns; numerator = Nat64.fromNat(percentageOfDaoRewardsAllocated); denominator = 100});
-                let {amountSent} = await performTransfer(amountAllocatedToCampaign, {subaccountId = null; accountType = #MultiSigAccount}, {owner = treasuryCanisterId; subaccountId = ?fundingCampaignSubaccountId; accountType = #FundingCampaign}, updateTokenBalances);
-                creditCampaignContribution(Principal.toText(userPrincipal), campaignId, amountSent, fundingCampaignsMap);
-                amountContributedToFundingCampaigns += amountAllocatedToCampaign;
-            };
-
-            let amountRemainingToPayoutToUser = userTotalNeuronContributionAmount - amountOfUserNeuronContributionsUsedToPayDebts - amountContributedToFundingCampaigns;
+        func performUserPayoutFromNeuronDisbursal(userPrincipal: Principal, amountOwedToUser: Nat64) : async () {
             let ?{subaccountId = userSubaccountId} = usersTreasuryDataMap.get(Principal.toText(userPrincipal)) else { return };
-            ignore performTransfer(amountRemainingToPayoutToUser, {subaccountId = null; accountType = #MultiSigAccount}, {owner = treasuryCanisterId; subaccountId = ?userSubaccountId; accountType = #UserTreasuryData }, updateTokenBalances);
+            ignore await performTransfer(amountOwedToUser, {subaccountId = null; accountType = #MultiSigAccount}, {owner = treasuryCanisterId; subaccountId = ?userSubaccountId; accountType = #UserTreasuryData }, updateTokenBalances);
         };
 
         let ?{contributions; neuronInfo} = neuronDataMap.get(neuronId) else { throw Error.reject("No neuron found") };
@@ -582,7 +535,7 @@ module{
         updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async (), 
         treasuryCanisterId: Principal,
     ) : async TreasuryTypes.FundingCampaignsArray {
-        if(amount < 5_000_000) throw Error.reject("Minimum repayment amount is 0.1 ICP.");
+        if(amount < 10_000) throw Error.reject("Minimum repayment amount is 0.0001 ICP.");
         let ?campaign = fundingCampaignsMap.get(campaignId) else throw Error.reject("Campaign not found.");
         let {subaccountId = fundingCampaignSubaccountId; funded; recipient; amountDisbursedToRecipient} = campaign;
         if(not funded) throw Error.reject("Campaign funds have not been disbursed yet.");

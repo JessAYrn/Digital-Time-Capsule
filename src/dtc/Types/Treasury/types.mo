@@ -38,7 +38,6 @@ module{
         campaignWalletBalance: {icp: {e8s : Nat64;}; };
         recipient: PrincipalAsText;
         subaccountId: Account.Subaccount;
-        percentageOfDaoRewardsAllocated: Nat;
         description: Text; 
         settled: Bool;
         funded: Bool;
@@ -58,7 +57,6 @@ module{
 
     public type FundingCampaignInput = {
         amountToFund: {icp: {e8s : Nat64;}; };
-        percentageOfDaoRewardsAllocated: Nat;
         description: Text; 
         terms:?{
             paymentIntervals: Nat64;
@@ -114,11 +112,15 @@ module{
     public type UserTreasuryData = {
         balances : Balances;
         subaccountId : Account.Subaccount;
+        automaticallyContributeToLoans: ?Bool;
+        automaticallyRepayLoans: ?Bool;
     };
 
     public type UserTreasuryDataExport = {
         balances : BalancesExport;
         subaccountId : Account.Subaccount;
+        automaticallyContributeToLoans: ?Bool;
+        automaticallyRepayLoans: ?Bool;
     };
 
     public type PrincipalAsText = Text;

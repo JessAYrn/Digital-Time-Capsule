@@ -9,16 +9,23 @@ import { fromE8s, isANumber, toE8s } from "../../functionsAndConstants/Utils";
 import { INPUT_BOX_FORMATS } from "../../functionsAndConstants/Constants";
 import DataField from "../Fields/DataField";
 
-const withdrawModal = (props) => {
+export const actions = {
+    deposit: "deposit",
+    withdraw: "withdraw"
+};
 
-    const { setModalIsOpen, setModalProps,  setIsLoadingModal} = props;
-    const {actorState, treasuryState} = useContext(AppContext);
+const DepositOrWithdrawModal = (props) => {
+
+    const { setModalIsOpen, setModalProps,  setIsLoadingModal, action} = props;
+    const {actorState, treasuryState, walletState} = useContext(AppContext);
     const [amount, setAmount] = useState(null);
     const [hasError, setHasError] = useState(true);
 
     const submit = async () => {
         setIsLoadingModal(true);
-        await actorState.backendActor.withdrawIcpFromTreasury(toE8s(amount));
+        if(action === actions.deposit) await actorState.backendActor.depositIcpToTreasury(toE8s(amount)); 
+        else if(action === actions.withdraw )await actorState.backendActor.withdrawIcpFromTreasury(toE8s(amount));
+        else throw new Error("Invalid Action");
         setIsLoadingModal(false);
         setModalProps({});
         setModalIsOpen(false);
@@ -42,14 +49,14 @@ const withdrawModal = (props) => {
             <Grid xs={12} display="flex" justifyContent="center" alignItems="center">
                 <DataField
                     label={'Available Balance: '}
-                    text={`${fromE8s(treasuryState.userTreasuryData?.balances.icp || 0) } ICP`}
+                    text={`${action === actions.withdraw ? fromE8s(treasuryState.userTreasuryData?.balances.icp || 0): fromE8s(walletState?.walletData?.balance) } ICP`}
                     isLoading={!treasuryState.dataHasBeenLoaded}
                     disabled={true}
                 />
             </Grid>
             <InputBox
                 width={"100%"}
-                label={`Amount To Withdraw: `}
+                label={`Amount to ${action}: `}
                 rows={"1"}
                 hasError={hasError}
                 onChange={onAmountChange}
@@ -60,9 +67,11 @@ const withdrawModal = (props) => {
                 value={amount}
                 format={INPUT_BOX_FORMATS.numberFormat}
             />
-            <Grid xs={12} display="flex" justifyContent="center" alignItems="center">
-                <Typography >{"Note: A withdrawel fee of ~0.5% is deducted to sustain this DAO's Operations"}</Typography>
-            </Grid>
+            {action === actions.withdraw &&
+                <Grid xs={12} display="flex" justifyContent="center" alignItems="center">
+                    <Typography >{"Note: A withdrawel fee of ~0.5% is deducted to sustain this DAO's Operations"}</Typography>
+                </Grid>
+            }
             {amount && !hasError &&
                 <ButtonField
                 Icon={DoneIcon}
@@ -76,4 +85,4 @@ const withdrawModal = (props) => {
     )
 };
 
-export default withdrawModal;
+export default DepositOrWithdrawModal;

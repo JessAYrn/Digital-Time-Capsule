@@ -95,11 +95,6 @@ const DisplayFundingCampaign = (props) => {
                     disabled={true}
                 />
                 <DataField
-                    text={`${parseInt(fundingCampaign?.percentageOfDaoRewardsAllocated)}%`}
-                    label={"Percentage of DAO rewards allocated"}
-                    disabled={true}
-                />
-                <DataField
                     label={"Amount Disbursed"}
                     text={`${amountDisbursedToRecipientValue} ${amountDisbursedToRecipientType}`}
                     disabled={true}
