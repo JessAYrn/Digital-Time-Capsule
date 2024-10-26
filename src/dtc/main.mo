@@ -662,6 +662,11 @@ shared actor class User() = this {
         };
     };
 
+    public shared({caller}) func updateAutomatedSettings({automaticallyContributeToLoans: ?Bool; automaticallyRepayLoans: ?Bool;}): async () {
+        let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v4.treasuryCanisterPrincipal);
+        await treasuryCanister.updateAutomatedSettings({userPrinciapl = caller; automaticallyContributeToLoans; automaticallyRepayLoans});
+    };
+
     public shared({caller}) func emergencyVoteForToggleSupportModeProposal(): async () {
         let ?_ = userProfilesMap_v2.get(caller) else { throw Error.reject("Not Authorized") };
         label getToggleSupportProposal for((proposalId, proposal) in proposalsMap_v2.entries()){

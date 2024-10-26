@@ -183,7 +183,9 @@ export const mapBackendTreasuryDataToFrontEndObj = (props) => {
     const totalDeposits_ = parseInt(totalDeposits.e8s);
 
     const treasuryDataToFrontendFormat = (principal, treasuryData) => {
-        let {balances} = treasuryData;
+        let {balances, automaticallyContributeToLoans, automaticallyRepayLoans} = treasuryData;
+        const automaticallyContributeToLoans_ = !!automaticallyContributeToLoans.length && !!automaticallyContributeToLoans[0];
+        const automaticallyRepayLoans_ = !!automaticallyRepayLoans.length && !!automaticallyRepayLoans[0];
         let {icp, icp_staked, eth, btc, voting_power} = balances;
         balances = {
             icp: parseInt(icp.e8s), 
@@ -192,7 +194,7 @@ export const mapBackendTreasuryDataToFrontEndObj = (props) => {
             btc: parseInt(btc.e8s),
             voting_power: parseInt(voting_power.e8s)
         }; 
-        return [ principal, { ...treasuryData, balances} ];
+        return [ principal, { ...treasuryData, balances, automaticallyContributeToLoans: automaticallyContributeToLoans_, automaticallyRepayLoans: automaticallyRepayLoans_} ];
     };
 
     const usersTreasuryDataArray_ = usersTreasuryDataArray.map(([principal, treasuryData ]) => treasuryDataToFrontendFormat(principal, treasuryData));

@@ -23,8 +23,6 @@ const DisplayFundingCampaign = (props) => {
     const [modalProps, setModalProps] = useState({});
     const [modalIsLoading, setModalIsLoading] = useState(false);
 
-    console.log(campaignId, fundingCampaign);
-
     const { value: amountToFundValue, type: amountToFundType } = getFundingCampaignAssetTypeAndValue(fundingCampaign?.amountToFund);
     const { value: amountDisbursedToRecipientValue, type: amountDisbursedToRecipientType } = getFundingCampaignAssetTypeAndValue(fundingCampaign?.amountDisbursedToRecipient);
     const { value: campaignWalletBalanceValue, type: campaignWalletBalanceType } = getFundingCampaignAssetTypeAndValue(fundingCampaign?.campaignWalletBalance);

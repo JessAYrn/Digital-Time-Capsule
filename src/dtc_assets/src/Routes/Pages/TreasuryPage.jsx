@@ -16,15 +16,32 @@ import DisplayAllFundingCampaigns from "../../Components/fundingCampaign/Display
 import DisplayAllNeurons from "../../Components/Neurons/DisplayAllNeurons";
 import ActionButton from "../../Components/ActionButton";
 import AccordionField from "../../Components/Fields/Accordion";
+import Switch from "../../Components/Fields/Switch";
 
 const TreasuryPage = (props) => {
   
-  const { treasuryState } = useContext(AppContext);
+  const { treasuryState, actorState } = useContext(AppContext);
   const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [modalProps, setModalProps] = useState({});
+  const [autoContributeToLoans, setAutoContributeToLoans] = useState(treasuryState?.userTreasuryData?.automaticallyContributeToLoans);
+  const [autoRepayLoans, setAutoRepayLoans] = useState(treasuryState?.userTreasuryData?.automaticallyRepayLoans);
   
   const activeFundingCampaigns = treasuryState.fundingCampaigns.filter(([campaignId, {settled}]) => {return settled === false} );
   const inactiveFundingCampaigns = treasuryState.fundingCampaigns.filter(([campaignId, {settled}]) => {return settled === true} );
+
+  const onSwitchToggle = async (newAutoRepayLoansSetting, newAutoLoanContributionSetting) => {
+    setModalIsOpen(true);
+    setIsLoading(true);
+    setAutoRepayLoans(newAutoRepayLoansSetting);
+    setAutoContributeToLoans(newAutoLoanContributionSetting);
+    await actorState.backendActor.updateAutomatedSettings({
+      automaticallyContributeToLoans: [newAutoLoanContributionSetting],
+      automaticallyRepayLoans: [newAutoRepayLoansSetting]
+    });
+    setModalIsOpen(false);
+    setIsLoading(false);
+  }; 
 
   const displayTreasuryAccountId = () => {
     setModalProps({
@@ -169,6 +186,20 @@ const TreasuryPage = (props) => {
           height={"500px"}
           width={"100%"}
         />
+        <Grid columns={12} xs={12} rowSpacing={0} display="flex" justifyContent="center" alignItems="center" flexDirection={"column"} width={"100%"}>
+            <Switch
+              checked={autoRepayLoans}
+              onClick={() => onSwitchToggle(!autoRepayLoans, autoContributeToLoans)}
+              labelLeft={"Auto pay on loans received from funding campaigns: "}
+            />
+        </Grid>
+        <Grid columns={12} xs={12} rowSpacing={0} display="flex" justifyContent="center" alignItems="center" flexDirection={"column"} width={"100%"} >
+            <Switch
+              checked={autoContributeToLoans}
+              onClick={() => onSwitchToggle(autoRepayLoans, !autoContributeToLoans)}
+              labelLeft={"Auto lend to approved funding campaigns: "}
+            />
+        </Grid>
         <DisplayAllNeurons />
         <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
             <AccordionField>
@@ -195,6 +226,7 @@ const TreasuryPage = (props) => {
       <ModalComponent 
           {...modalProps}
           open={modalIsOpen} 
+          isLoading={isLoading}
       /> 
     </Grid>
     

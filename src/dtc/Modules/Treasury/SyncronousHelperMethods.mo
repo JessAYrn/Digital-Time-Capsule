@@ -8,7 +8,6 @@ import Blob "mo:base/Blob";
 import TreasuryTypes "../../Types/Treasury/types";
 import Account "../../Serializers/Account";
 import NatX "../../MotokoNumbers/NatX";
-import Principal "mo:base/Principal";
 
 module{
 
@@ -228,17 +227,22 @@ module{
         if(remainingAmount > 0) updateUserNeuronContribution(neuronDataMap, {userPrincipal = loanContributions[0].0; delta = remainingAmount; neuronId; operation = #AddStake});
     };
 
-    public func getTotalDebtsOwedByUser(userPrincipal: TreasuryTypes.PrincipalAsText, fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap): {totalDebtsOwed: Nat64} {
+    public func getTotalDebtsByUser(userPrincipal: TreasuryTypes.PrincipalAsText, fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap): {totalDebtsOwed: Nat64; totalDebtsDue: Nat64;} {
         var totalDebtsOwed: Nat64 = 0;
+        var totalDebtsDue: Nat64 = 0;
         label summingDebtsOwed for((campaignId, campaign) in fundingCampaignsMap.entries()){
             let {recipient; terms; settled; funded;} = campaign;
             if(settled or not funded) continue summingDebtsOwed;
             if(recipient != userPrincipal) continue summingDebtsOwed;
             let ?terms_ = terms else continue summingDebtsOwed;
-            let {remainingLoanPrincipalAmount; remainingLoanInterestAmount } = terms_;
+            let { remainingLoanPrincipalAmount; remainingLoanInterestAmount; paymentAmounts; amountRepaidDuringCurrentPaymentInterval } = terms_;
             totalDebtsOwed += remainingLoanPrincipalAmount.icp.e8s + remainingLoanInterestAmount.icp.e8s;
+            totalDebtsDue += switch(paymentAmounts.icp.e8s > amountRepaidDuringCurrentPaymentInterval.icp.e8s){
+                case true { paymentAmounts.icp.e8s - amountRepaidDuringCurrentPaymentInterval.icp.e8s; };
+                case false { 0; };
+            };
         };
-        return {totalDebtsOwed};
+        return {totalDebtsOwed; totalDebtsDue};
     };
 
     public func getTotalDebts(fundingCampaignMap: TreasuryTypes.FundingCampaignsMap): {totalDebts: Nat64} {

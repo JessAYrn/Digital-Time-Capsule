@@ -51,7 +51,7 @@ shared actor class Treasury (principal : Principal) = this {
     private stable var campaignIndex : Nat = 0;
     private stable var newlyCreatedNeuronContributions : TreasuryTypes.NeuronContributions = [];
 
-    let {recurringTimer} = Timer;
+    let {recurringTimer; setTimer} = Timer;
 
     public shared({caller}) func createFundingCampaign(campaign: TreasuryTypes.FundingCampaignInput, userPrincipal: Text) : async () {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
@@ -154,15 +154,18 @@ shared actor class Treasury (principal : Principal) = this {
         await AsyncronousHelperMethods.repayFundingCampaign(amount + txFee, {subaccountId = ?subaccountId; accountType = #UserTreasuryData}, campaignId, fundingCampaignsMap, usersTreasuryDataMap, neuronDataMap, updateTokenBalances, Principal.fromActor(this) );
     };
 
-    public shared({caller}) func repayAllFundingCampaignsOwed(contributor: TreasuryTypes.PrincipalAsText, maxAmountToRepay: Nat64) : async TreasuryTypes.FundingCampaignsArray {
+    public shared({caller}) func repayAllFundingCampaignsOwedByUser(contributor: TreasuryTypes.PrincipalAsText, maxAmountToRepay: Nat64) : async TreasuryTypes.FundingCampaignsArray {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
-        let {totalDebtsOwed} = SyncronousHelperMethods.getTotalDebtsOwedByUser(contributor, fundingCampaignsMap);
-        let totalAmountToRepay = Nat64.min(maxAmountToRepay, totalDebtsOwed);
+        let {totalDebtsDue;} = SyncronousHelperMethods.getTotalDebtsByUser(contributor, fundingCampaignsMap);
+        let totalAmountToRepay = Nat64.min(maxAmountToRepay, totalDebtsDue);
         label makingPayments for((campaignId, {recipient; terms; settled; funded }) in fundingCampaignsMap.entries()){
             if(settled or not funded or recipient != contributor) continue makingPayments;
-            let ?{remainingLoanPrincipalAmount; remainingLoanInterestAmount} = terms else continue makingPayments; 
-            let debtOwedOnThisLoan = remainingLoanPrincipalAmount.icp.e8s + remainingLoanInterestAmount.icp.e8s; 
-            let amountToRepayOnThisLoan = NatX.nat64ComputePercentage({value = totalAmountToRepay; numerator = debtOwedOnThisLoan; denominator = totalDebtsOwed});
+            let ?{ paymentAmounts; amountRepaidDuringCurrentPaymentInterval; } = terms else continue makingPayments; 
+            let debtDueOnThisLoan: Nat64 = switch(paymentAmounts.icp.e8s > amountRepaidDuringCurrentPaymentInterval.icp.e8s){
+                case true { paymentAmounts.icp.e8s - amountRepaidDuringCurrentPaymentInterval.icp.e8s; };
+                case false { 0; };
+            };
+            let amountToRepayOnThisLoan = NatX.nat64ComputePercentage({value = totalAmountToRepay; numerator = debtDueOnThisLoan; denominator = totalDebtsDue});
             ignore repayFundingCampaign(contributor, campaignId, amountToRepayOnThisLoan);
         };
         return Iter.toArray(fundingCampaignsMap.entries());
@@ -173,7 +176,7 @@ shared actor class Treasury (principal : Principal) = this {
             switch(automaticallyRepayLoans){
                 case (?true){ 
                     let maxAmountToRepay = balances.icp.e8s;
-                    ignore repayAllFundingCampaignsOwed(userPrincipal, maxAmountToRepay); 
+                    ignore repayAllFundingCampaignsOwedByUser(userPrincipal, maxAmountToRepay); 
                 };
                 case (_){};
             };
@@ -405,9 +408,6 @@ shared actor class Treasury (principal : Principal) = this {
             let ?neuronId_ = args.id else { throw Error.reject("No neuronId in response") };
             await AsyncronousHelperMethods.distributePayoutsFromNeuron( Nat64.toText(neuronId_.id), usersTreasuryDataMap, updateTokenBalances, neuronDataMap, Principal.fromActor(this));
             ignore neuronDataMap.remove(Nat64.toText(neuronId_.id));
-            let {setTimer} = Timer;
-            ignore setTimer<system>(#seconds(5 * 60), func(): async (){ ignore repayAllFundingCampaignsOwedByAllUsers(); });
-            ignore setTimer<system>(#seconds(10 * 60), func(): async (){ ignore makeContributionsByAllUsersToAllFundingCampaignsForLoans(); });
         };
         switch(manageNeuronResponse.command){
             case(?#Disburse(_)){ ignore completeDisbursements(); };
@@ -707,10 +707,14 @@ shared actor class Treasury (principal : Principal) = this {
         neuronDataArray := [];
         fundingCampaignsArray := [];
 
-        ignore recurringTimer<system>(#seconds(3 * 60 * 60), func (): async () { 
-            await AsyncronousHelperMethods.upateNeuronsDataMap(neuronDataMap, null);
+        ignore recurringTimer<system>(#seconds(6 * 60 * 60), func (): async () { 
             ignore disburseEligibleCampaignFundingsToRecipient();
             ignore concludeAllEligbileBillingCycles();
+        });
+        ignore recurringTimer<system>(#seconds(24 * 60 * 60), func (): async () { 
+            await AsyncronousHelperMethods.upateNeuronsDataMap(neuronDataMap, null);
+            ignore setTimer<system>(#seconds(5 * 60), func(): async (){ ignore repayAllFundingCampaignsOwedByAllUsers(); });
+            ignore setTimer<system>(#seconds(10 * 60), func(): async (){ ignore makeContributionsByAllUsersToAllFundingCampaignsForLoans(); });
         });
     };    
 };

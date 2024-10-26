@@ -145,7 +145,7 @@ const theme = createTheme({
       MuiSwitch:{
         styleOverrides:{
           track:{
-            backgroundColor: '#F7931A'
+            backgroundColor: "#F7931A"
           }
         }
       },
