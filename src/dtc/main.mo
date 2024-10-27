@@ -310,7 +310,7 @@ shared actor class User() = this {
         let currentVersions = await managerCanister.getCurrentVersions();
         let canisterDataPackagedForExport = {
             daoMetaData_v4 with 
-            proposals = GovernanceHelperMethods.tallyAllProposalVotes({proposals = proposalsMap_v2; neuronsDataArray; founder = daoMetaData_v4.founder; userProfilesMap = userProfilesMap_v2; includeNonVoters = true});
+            proposals = GovernanceHelperMethods.tallyAllProposalVotes({proposals = proposalsMap_v2; neuronsDataArray; userProfilesMap = userProfilesMap_v2;});
             isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v4);
             currentCyclesBalance_backend = Cycles.balance();
             journalCount = userProfilesMap_v2.size();
@@ -455,7 +455,7 @@ shared actor class User() = this {
         let proposal = {votes; action; proposer; timeInitiated; executed = false; voteTally; timeVotingPeriodEnds; finalized = false;};
         let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v4.treasuryCanisterPrincipal);
         let neuronsDataArray = await treasuryCanister.getNeuronsDataArray();
-        let votingResults = GovernanceHelperMethods.tallyVotes({ neuronsDataArray; proposal; founder = daoMetaData_v4.founder; userProfilesMap = userProfilesMap_v2; includeNonVoters = true});
+        let votingResults = GovernanceHelperMethods.tallyVotes({ neuronsDataArray; proposal; userProfilesMap = userProfilesMap_v2;});
         proposalsMap_v2.put(proposalIndex, {proposal with voteTally = votingResults} );
         proposalIndex += 1;
         let updatedProposalsArray = Iter.toArray(proposalsMap_v2.entries());
@@ -474,7 +474,7 @@ shared actor class User() = this {
                 let neuronsDataArray = await treasuryCanister.getNeuronsDataArray();
                 votesMap.put(Principal.toText(caller), {adopt});
                 var updatedProposal = {proposal with votes = Iter.toArray(votesMap.entries()); };
-                let voteTally = GovernanceHelperMethods.tallyVotes({ neuronsDataArray; proposal = updatedProposal; founder = daoMetaData_v4.founder; userProfilesMap = userProfilesMap_v2; includeNonVoters = true});
+                let voteTally = GovernanceHelperMethods.tallyVotes({ neuronsDataArray; proposal = updatedProposal; userProfilesMap = userProfilesMap_v2;});
                 updatedProposal := {updatedProposal with voteTally};
                 proposalsMap_v2.put(proposalIndex, updatedProposal);
                 return #ok(Iter.toArray(proposalsMap_v2.entries()));
@@ -500,10 +500,7 @@ shared actor class User() = this {
             let totalStakeAndVotingPower = await treasuryCanister.getDaoTotalStakeAndVotingPower();
             let totalVotingPower: Nat64 = if(totalStakeAndVotingPower.totalVotingPower == 0){  1; } else { totalStakeAndVotingPower.totalVotingPower; };
             let votingPeriodHasEnded = proposal.timeVotingPeriodEnds < Time.now();
-            let {yay; nay; totalParticipated } = switch(votingPeriodHasEnded) { 
-                case true { GovernanceHelperMethods.tallyVotes({ neuronsDataArray; proposal; founder = daoMetaData_v4.founder; userProfilesMap = userProfilesMap_v2; includeNonVoters = true}); };
-                case false { GovernanceHelperMethods.tallyVotes({ neuronsDataArray; proposal; founder = daoMetaData_v4.founder; userProfilesMap = userProfilesMap_v2; includeNonVoters = false}); };
-            };
+            let {yay; nay; totalParticipated } = GovernanceHelperMethods.tallyVotes({ neuronsDataArray; proposal; userProfilesMap = userProfilesMap_v2;});
             let participationRate = FloatX.divideNat64(totalParticipated, totalVotingPower);
             let quorumHasBeenReached = participationRate >= quorum;
             let percentageOfTotalVotingPowerVotingYes = FloatX.divideNat64(yay, totalVotingPower);

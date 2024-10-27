@@ -20,3 +20,11 @@ export const getUncollateralizedStake = (userPrincipal, neuronId, neuronsDataArr
     const userContribution = getUserNeuronContributionFromNeuronId(userPrincipal, neuronId, neuronsDataArray);
     return parseInt(userContribution.stake_e8s) - (parseInt(userContribution.collateralized_stake_e8s[0] || 0));
 };
+
+export const sortFundingCampaigns = (fundingCampaigns) => {
+    const sortedFundingCampaigns = fundingCampaigns.sort(([campaignId_a, _], [campaignId_b, __]) => {
+        if(parseInt(campaignId_a) > parseInt(campaignId_b)) return -1
+        else return 1
+    });
+    return sortedFundingCampaigns;
+};

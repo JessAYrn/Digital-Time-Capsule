@@ -35,10 +35,10 @@ module{
         let ?userProfile = profiles.get(caller) else { throw Error.reject("User not found") };
         let userCanisterId = userProfile.canisterId;
         let treasury: Treasury.Treasury = actor(daoMetaData.treasuryCanisterPrincipal);
-        let {subaccountId = userTreasurySubaccountId} = await treasury.getUserTreasuryData(caller);
+        let {subaccountId = userTreasurySubaccountId; balances} = await treasury.getUserTreasuryData(caller);
         let treasuryFee = NatX.nat64ComputePercentage({value = amount; numerator = 1; denominator = 200});
-        let withdrawelamount = amount - treasuryFee;
-        if(treasuryFee < 10_000 or withdrawelamount < 10_000){ return {amountSent: Nat64 = 0}; };
+        let withdrawelamount = Nat64.min(amount - treasuryFee, balances.icp.e8s);
+        if(withdrawelamount < 1_000_000){ return {amountSent: Nat64 = 0}; };
         ignore await treasury.transferICP(
             treasuryFee, {identifier = #SubaccountId(userTreasurySubaccountId); accountType = #UserTreasuryData}, 
             {owner = Principal.fromText(daoMetaData.treasuryCanisterPrincipal); subaccount = null; accountType = #MultiSigAccount});

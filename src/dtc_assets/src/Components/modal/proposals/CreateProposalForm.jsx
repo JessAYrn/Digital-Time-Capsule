@@ -22,6 +22,7 @@ import IncreaseNeuron from "./proposalModalComponentTypes/IncreaseNeuron";
 import IncreaseDissolveDelay from "./proposalModalComponentTypes/IncreaseDissolveDelay";
 import CancelFundingCampaign from "./proposalModalComponentTypes/CancelFundingCampaign";
 import WithdrawFromMultiSigWallet from "./proposalModalComponentTypes/WithdrawFromMultiSigWallet";
+import { sortProposals } from "../../../functionsAndConstants/governanceDataFunctions";
 
 const CreateProposalForm = (props) => {
     const {
@@ -85,7 +86,7 @@ const CreateProposalForm = (props) => {
                 components: modalButton_close
             });
         } else{
-            let updatedProposals = result.ok;
+            let updatedProposals = sortProposals(result.ok);
             homePageDispatch({
                 actionType: homePageTypes.SET_PROPOSALS_DATA,
                 payload: updatedProposals

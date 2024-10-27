@@ -1,3 +1,4 @@
+import { sortProposals } from "../functionsAndConstants/governanceDataFunctions";
 export const requestsForAccessTableColumns = [
     { 
         field: 'id', 
@@ -94,10 +95,6 @@ export const mapBackendCanisterDataToFrontEndObj = (props) => {
 
     const requestsForAccess_ = mapRequestsForAccessToTableRows(requestsForAccess);
     const profilesMetaData_ = mapUsersProfileDataToTableRows(profilesMetaData);
-    const proposals_ = proposals.sort(([proposalId_a, {timeInitiated: timeInitiated_a}], [proposalId_b, {timeInitiated: timeInitiated_b}]) => {
-        if(BigInt(timeInitiated_a) > BigInt(timeInitiated_b)) return -1
-        else return 1
-    });
 
     return {
         profilesMetaData: profilesMetaData_,
@@ -108,7 +105,7 @@ export const mapBackendCanisterDataToFrontEndObj = (props) => {
         managerCanisterPrincipal: managerCanisterPrincipal,
         lastRecordedBackEndCyclesBalance: parseInt(lastRecordedBackEndCyclesBalance),
         isAdmin: isAdmin,
-        proposals: proposals_,
+        proposals: sortProposals(proposals),
         supportMode: supportMode,
         acceptingRequests: acceptingRequests,
         journalCount: parseInt(journalCount),

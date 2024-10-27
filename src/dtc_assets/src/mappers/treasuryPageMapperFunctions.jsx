@@ -1,6 +1,7 @@
 import { round8Decimals, toHexString } from "../functionsAndConstants/Utils";
 import { nanoSecondsToMiliSeconds, getDateAsStringMMDDYYY, fromE8s, shortenHexString } from "../functionsAndConstants/Utils";
 import { GRAPH_DISPLAY_LABELS, GRAPH_DATA_SETS } from "../functionsAndConstants/Constants";
+import { sortFundingCampaigns } from "../functionsAndConstants/treasuryDataFunctions";
 
 const dummyLabels = [
     getDateAsStringMMDDYYY(Date.now() - (1000 * 60 * 60 * 24 * 6)),
@@ -234,6 +235,6 @@ export const mapBackendTreasuryDataToFrontEndObj = (props) => {
         userVotingPower,
         userTreasuryData: userTreasuryData_[1],
         userPrincipal,
-        fundingCampaigns
+        fundingCampaigns: sortFundingCampaigns(fundingCampaigns)
     };
 };

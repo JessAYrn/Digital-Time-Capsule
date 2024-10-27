@@ -7,6 +7,8 @@ import InputBox from "../Fields/InputBox";
 import { Typography } from "@mui/material";
 import { INPUT_BOX_FORMATS } from "../../functionsAndConstants/Constants";
 import { toE8s, fromE8s } from "../../functionsAndConstants/Utils";
+import { treasuryTypes } from "../../reducers/treasuryReducer";
+import { sortFundingCampaigns } from "../../functionsAndConstants/treasuryDataFunctions";
 import DataField from "../Fields/DataField";
 
 export const ACTION_TYPES = {
@@ -17,7 +19,7 @@ export const ACTION_TYPES = {
 const AddLiquidityOrRepayFundingCampaign = (props) => {
     const [amount, setAmount] = useState(0);
     const [hasError, setHasError] = useState(false);
-    const {actorState, treasuryState, walletState} = useContext(AppContext);
+    const {actorState, treasuryState, treasuryDispatch, walletState} = useContext(AppContext);
     const {actionType, campaignId, setModalIsLoading, setModalIsOpen} = props;
 
     const availableBalance = (treasuryState?.userTreasuryData?.balances?.icp || 0) + (walletState?.walletData?.balance || 0);
@@ -25,7 +27,11 @@ const AddLiquidityOrRepayFundingCampaign = (props) => {
     const onSubmit = async () => {
         setModalIsLoading(true);
         const backendFunctionToCall = (actionType === ACTION_TYPES.addLiquidity) ? actorState.backendActor.contributeToFundingCampaign : actorState.backendActor.repayFundingCampaign;
-        await backendFunctionToCall(campaignId, toE8s(amount));
+        const updatedFundingCampaignsArray = sortFundingCampaigns(await backendFunctionToCall(campaignId, toE8s(amount)));
+        treasuryDispatch({
+            actionType: treasuryTypes.SET_TREASURY_DATA, 
+            payload: {fundingCampaigns: updatedFundingCampaignsArray }
+        });
         setModalIsLoading(false);
         setModalIsOpen(false);
     };
