@@ -1,8 +1,8 @@
-import React, {useState} from "react";
+import React, {useMemo, useState} from "react";
 import Grid from "@mui/material/Unstable_Grid2";
 import Graph from "../Fields/Chart";
 import InputBox from "../Fields/InputBox";
-import { nanoSecondsToMiliSeconds, shortenHexString } from "../../functionsAndConstants/Utils";
+import { nanoSecondsToMiliSeconds, shortenHexString, millisecondsToSeconds, secondsToHours, hoursToDays, round2Decimals } from "../../functionsAndConstants/Utils";
 import ButtonField from "../Fields/Button";
 import DataField from "../Fields/DataField";
 import PriceCheckIcon from '@mui/icons-material/PriceCheck';
@@ -78,6 +78,13 @@ const DisplayFundingCampaign = (props) => {
         });
         setModalIsOpen(true);
     };
+
+    const timeUntilPaymentIsDue = useMemo(() => {
+        const nextPaymentDueDateInseconds = millisecondsToSeconds(nanoSecondsToMiliSeconds(parseInt(nextPaymentDueDate)));
+        const nowInSeconds = millisecondsToSeconds(Date.now());
+        const secondsUntillDue = nextPaymentDueDateInseconds - nowInSeconds;
+        return {seconds: secondsUntillDue, hours: round2Decimals(secondsToHours(secondsUntillDue)), days: round2Decimals(hoursToDays(secondsToHours(secondsUntillDue))) };
+    },[nextPaymentDueDate]);    
     
     return (
         <>
@@ -132,11 +139,10 @@ const DisplayFundingCampaign = (props) => {
                             text={`${Math.max(paymentAmountsValue - amountPaidDuringCurrentPaymentIntervalValue, 0)} ${paymentAmountsType}`}
                             disabled={true}
                         />
-                        <DatePickerField
+                        <DataField
+                            label={"Time Until Payment Is Due: "}
+                            text={`${timeUntilPaymentIsDue?.days > 2 ? timeUntilPaymentIsDue?.days : timeUntilPaymentIsDue?.hours } ${timeUntilPaymentIsDue?.days > 2 ? "days" : "hours"}`}
                             disabled={true}
-                            width={"100% !important"}
-                            value={new Date(nanoSecondsToMiliSeconds(parseInt(nextPaymentDueDate)))}
-                            label={"Next Payment Due Date"}
                         />
                     </>
                 }

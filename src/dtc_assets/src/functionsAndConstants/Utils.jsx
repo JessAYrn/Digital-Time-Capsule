@@ -99,7 +99,7 @@ export const milisecondsToNanoSeconds = (time) => {
 }
 
 export const nanoSecondsToMiliSeconds = (time) => {
-  return Math.floor(time / 1000000);
+  return parseInt(time / 1000000);
 }
 
 export const fileToBlob = async (file) => {
@@ -153,6 +153,10 @@ export const daysToSeconds = (days) => {
 
 export const secondsToMilliseconds = (seconds) => {
   return seconds * 1000;
+};
+
+export const millisecondsToSeconds = (seconds) => {
+  return seconds / 1000;
 };
 
 export const daysToNanoSeconds = (days) => {

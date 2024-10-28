@@ -16,6 +16,7 @@ const SwitchField = (props) => {
         disabled,
         labelLeft,
         labelRight,
+        sx
     } = props
 
     let switchClassName;
@@ -23,7 +24,7 @@ const SwitchField = (props) => {
     if(labelRight) switchClassName = "switchLeft";
 
     return (
-        <Grid className="switchDiv" display='flex' justifyContent="center" alignItems="Center" width="100%" >
+        <Grid className="switchDiv" display='flex' justifyContent="center" alignItems="Center" width="100%" sx={sx}>
             <FormGroup className="switch">
                 {labelLeft && 
                     <Grid display='flex' justifyContent="left" alignItems="Center" xs={10} className='leftLabel'>

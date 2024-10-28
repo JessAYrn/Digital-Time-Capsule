@@ -191,13 +191,13 @@ const TreasuryPage = (props) => {
               checked={autoRepayLoans}
               onClick={() => onSwitchToggle(!autoRepayLoans, autoContributeToLoans)}
               labelLeft={"Auto pay on loans received from funding campaigns: "}
+              sx={{ paddingTop: "0px", paddingBottom: "0px" }}
             />
-        </Grid>
-        <Grid columns={12} xs={12} rowSpacing={0} display="flex" justifyContent="center" alignItems="center" flexDirection={"column"} width={"100%"} >
             <Switch
               checked={autoContributeToLoans}
               onClick={() => onSwitchToggle(autoRepayLoans, !autoContributeToLoans)}
               labelLeft={"Auto lend to approved funding campaigns: "}
+              sx={{ paddingTop: "0px", paddingBottom: "0px" }}
             />
         </Grid>
         <DisplayAllNeurons />
