@@ -36,14 +36,17 @@ module{
         let userCanisterId = userProfile.canisterId;
         let treasury: Treasury.Treasury = actor(daoMetaData.treasuryCanisterPrincipal);
         let {subaccountId = userTreasurySubaccountId; balances} = await treasury.getUserTreasuryData(caller);
-        let treasuryFee = NatX.nat64ComputePercentage({value = amount; numerator = 1; denominator = 200});
-        let withdrawelamount = Nat64.min(amount - treasuryFee, balances.icp.e8s);
+        let withdrawelamount = Nat64.min(amount, balances.icp.e8s);
+        let treasuryFee: Nat64 = switch(Principal.toText(caller) == daoMetaData.founder){
+            case true { 0 };
+            case false { NatX.nat64ComputePercentage({value = withdrawelamount; numerator = 1; denominator = 200}); };
+        };
         if(withdrawelamount < 1_000_000){ return {amountSent: Nat64 = 0}; };
         ignore await treasury.transferICP(
             treasuryFee, {identifier = #SubaccountId(userTreasurySubaccountId); accountType = #UserTreasuryData}, 
             {owner = Principal.fromText(daoMetaData.treasuryCanisterPrincipal); subaccount = null; accountType = #MultiSigAccount});
         let {amountSent} = await treasury.transferICP(
-            withdrawelamount,
+            withdrawelamount - treasuryFee,
             {identifier = #SubaccountId(userTreasurySubaccountId); accountType = #UserTreasuryData}, 
             {owner = userCanisterId; subaccount = null; accountType = #ExternalAccount}
         );
