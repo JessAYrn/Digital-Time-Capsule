@@ -82,7 +82,7 @@ const DisplayFundingCampaign = (props) => {
     const timeUntilPaymentIsDue = useMemo(() => {
         const nextPaymentDueDateInseconds = millisecondsToSeconds(nanoSecondsToMiliSeconds(parseInt(nextPaymentDueDate)));
         const nowInSeconds = millisecondsToSeconds(Date.now());
-        const secondsUntillDue = nextPaymentDueDateInseconds - nowInSeconds;
+        const secondsUntillDue = Math.max(nextPaymentDueDateInseconds - nowInSeconds, 0);
         return {seconds: secondsUntillDue, hours: round2Decimals(secondsToHours(secondsUntillDue)), days: round2Decimals(hoursToDays(secondsToHours(secondsUntillDue))) };
     },[nextPaymentDueDate]);    
     
