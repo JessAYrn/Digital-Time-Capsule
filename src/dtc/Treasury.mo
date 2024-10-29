@@ -98,11 +98,12 @@ shared actor class Treasury (principal : Principal) = this {
         let {funded; campaignWalletBalance; terms;} = campaign;
         if(funded) throw Error.reject("Funding campaign has already been funded.");
         await AsyncronousHelperMethods.distributePayoutsFromFundingCampaign(campaignId, campaignWalletBalance.icp.e8s, usersTreasuryDataMap, updateTokenBalances, fundingCampaignsMap, Principal.fromActor(this));
-        switch(terms){case null {}; case (?terms) { 
-            let {initialCollateralLocked} = terms;
-            SyncronousHelperMethods.updateUserNeuronContribution(neuronDataMap, {userPrincipal = campaign.recipient; delta = initialCollateralLocked.icp_staked.e8s; neuronId = initialCollateralLocked.icp_staked.fromNeuron; operation = #SubtractCollateralizedStake});
+        let updatedTerms: ?TreasuryTypes.FundingCampaignTerms = switch(terms){case null { null }; case (?terms) { 
+            let { remainingCollateralLocked } = terms;
+            SyncronousHelperMethods.updateUserNeuronContribution(neuronDataMap, {userPrincipal = campaign.recipient; delta = remainingCollateralLocked.icp_staked.e8s; neuronId = remainingCollateralLocked.icp_staked.fromNeuron; operation = #SubtractCollateralizedStake});
+            ?{ terms with remainingCollateralLocked = {remainingCollateralLocked with icp_staked = {remainingCollateralLocked.icp_staked with e8s: Nat64 = 0}}; };
         };};
-        fundingCampaignsMap.delete(campaignId);
+        fundingCampaignsMap.put(campaignId, {campaign with terms = updatedTerms;});
         return Iter.toArray(fundingCampaignsMap.entries());
     };
 

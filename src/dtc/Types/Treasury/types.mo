@@ -41,29 +41,33 @@ module{
         description: Text; 
         settled: Bool;
         funded: Bool;
-        terms:?{
-            paymentIntervals: Nat64;
-            nextPaymentDueDate: ?Int;
-            paymentAmounts: {icp: {e8s : Nat64;}; };
-            initialLoanInterestAmount: {icp: {e8s : Nat64;}; };
-            remainingLoanInterestAmount: {icp: {e8s : Nat64;}; };
-            initialCollateralLocked: {icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText}};
-            remainingCollateralLocked: {icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText}};
-            forfeitedCollateral: {icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText}};
-            remainingLoanPrincipalAmount: {icp: {e8s : Nat64;}; };
-            amountRepaidDuringCurrentPaymentInterval: {icp: {e8s : Nat64;}; };
-        };
+        terms:?FundingCampaignTerms;
+    };
+
+    public type FundingCampaignTerms = {
+        paymentIntervals: Nat64;
+        nextPaymentDueDate: ?Int;
+        paymentAmounts: {icp: {e8s : Nat64;}; };
+        initialLoanInterestAmount: {icp: {e8s : Nat64;}; };
+        remainingLoanInterestAmount: {icp: {e8s : Nat64;}; };
+        initialCollateralLocked: {icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText}};
+        remainingCollateralLocked: {icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText}};
+        forfeitedCollateral: {icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText}};
+        remainingLoanPrincipalAmount: {icp: {e8s : Nat64;}; };
+        amountRepaidDuringCurrentPaymentInterval: {icp: {e8s : Nat64;}; };
     };
 
     public type FundingCampaignInput = {
         amountToFund: {icp: {e8s : Nat64;}; };
         description: Text; 
-        terms:?{
-            paymentIntervals: Nat64;
-            paymentAmounts: {icp: {e8s : Nat64;}; };
-            initialLoanInterestAmount: {icp: {e8s : Nat64;}; };
-            initialCollateralLocked: {icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText}};
-        };
+        terms:?FundingCampaignTermsInput
+    };
+
+    public type FundingCampaignTermsInput = {
+        paymentIntervals: Nat64;
+        paymentAmounts: {icp: {e8s : Nat64;}; };
+        initialLoanInterestAmount: {icp: {e8s : Nat64;}; };
+        initialCollateralLocked: {icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText}};
     };
 
     public type FundingCampaignsArray = [(CampaignId, FundingCampaign)];
