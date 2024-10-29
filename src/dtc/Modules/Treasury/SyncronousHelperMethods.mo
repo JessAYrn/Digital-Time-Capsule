@@ -8,6 +8,7 @@ import Blob "mo:base/Blob";
 import TreasuryTypes "../../Types/Treasury/types";
 import Account "../../Serializers/Account";
 import NatX "../../MotokoNumbers/NatX";
+import Governance "../../NNS/Governance";
 
 module{
 
@@ -280,6 +281,30 @@ module{
             totalFundingForUserAwaitingContributions += amountToFund.icp.e8s;
         };
         return {totalFundingForUserAwaitingContributions};
+    };
+
+    public func isProxyOrHasAProxyNeuron(neuronId: Nat64, neuronDataMap: TreasuryTypes.NeuronsDataMap): Bool {
+        let ?{proxyNeuron} = neuronDataMap.get(Nat64.toText(neuronId)) else { Debug.trap("No neuron data for neuronId") };
+        if(proxyNeuron != null) { return true };
+        label checkingIsNeuronAProxyNeuron for((_,{proxyNeuron}) in neuronDataMap.entries()){
+            let ?proxyNeuron_ = proxyNeuron else continue checkingIsNeuronAProxyNeuron;
+            if(proxyNeuron_ == Nat64.toText(neuronId)) { return true };
+        };
+        return false;
+    };
+
+    public func wrapArgsToProxiedNeuron(args: Governance.ManageNeuron, proxyNeuronId: Nat64): Governance.ManageNeuron {
+        return {
+            id = ?{ id = proxyNeuronId }; 
+            neuron_id_or_subaccount = null;
+            command = ?#MakeProposal({
+                url = "https://forum.dfinity.org/t/personal-dao-canister-controlled-neuron-types-proxied-neurons-vs-non-proxied-neurons/36013";
+                title = ?"Proposal to manage DAO's neuron created with a tECDSA Signed HTTPS outcall via a proxy neuron";
+                action = ?#ManageNeuron(args);
+                summary = "See URL for details";
+            });
+        };
+        
     };
 
 };

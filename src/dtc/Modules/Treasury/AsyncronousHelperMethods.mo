@@ -50,6 +50,7 @@ module{
                 let ?{contributions; proxyNeuron} = neuronDataMap.get(Nat64.toText(neuronId.id)) else Debug.trap("No neuron data for neuronId");
                 let parentNeuronContributions: ?TreasuryTypes.NeuronContributions = switch(command){
                     case(#Disburse(_)) {
+                        if(SyncronousHelperMethods.isProxyOrHasAProxyNeuron(neuronId.id, neuronDataMap)) { throw Error.reject("Neuron is or has a proxy neuron. Cannot disburse such neurons.") };
                         label isCollateralized for((userPrincipal, {collateralized_stake_e8s}) in Iter.fromArray(contributions)){
                             let ?collateral = collateralized_stake_e8s else continue isCollateralized;
                             if(collateral > 0) { throw Error.reject("Neuron is collateralized. Cannot disburse from collateralized neuron.") };
@@ -58,15 +59,11 @@ module{
                     };       
                     case(#Spawn(_)){ ?contributions; };
                     case(#ClaimOrRefresh(_)){null};
-                    case(#Follow(_)){null};
+                    case(#Follow({topic})){ if(topic == 1){ throw Error.reject("No followee may be selected for this particular topic.") }; null};
                     case(#Configure({operation})){
                         switch(operation){
-                            case(?#StartDissolving(_)){
-                                if(proxyNeuron != null) { throw Error.reject("Neuron is proxies. Cannot disburse proxied neurons.") };
-                                label checkingIsNeuronAProxyNeuron for((_,{proxyNeuron}) in neuronDataMap.entries()){
-                                    let ?proxyNeuron_ = proxyNeuron else continue checkingIsNeuronAProxyNeuron;
-                                    if(proxyNeuron_ == Nat64.toText(neuronId.id)) { throw Error.reject("Neuron is a proxy neuron. Cannot disburse a proxy neuron.") };
-                                };
+                            case(?#StartDissolving(_)){ 
+                                if(SyncronousHelperMethods.isProxyOrHasAProxyNeuron(neuronId.id, neuronDataMap)) { throw Error.reject("Neuron is or has a proxy neuron. Cannot disburse such neurons.") };
                             };
                             case(_){};
                         }; null;
@@ -83,16 +80,7 @@ module{
                     case null{ (args, parentNeuronContributions) };
                     case(?proxyNeuron){
                         let ?proxyNeuronIdAsNat = Nat.fromText(proxyNeuron) else { throw Error.reject("Invalid proxyNeuron") };
-                        let proxyArgs = {
-                            id = ?{ id = Nat64.fromNat(proxyNeuronIdAsNat) }; 
-                            neuron_id_or_subaccount = null;
-                            command = ?#MakeProposal({
-                                url = "https://forum.dfinity.org/t/personal-dao-canister-controlled-neuron-types-proxied-neurons-vs-non-proxied-neurons/36013";
-                                title = ?"Proposal to manage DAO's neuron created with a tECDSA Signed HTTPS outcall via a proxy neuron";
-                                action = ?#ManageNeuron(args);
-                                summary = "See URL for details";
-                            });
-                        };
+                        let proxyArgs = SyncronousHelperMethods.wrapArgsToProxiedNeuron(args, Nat64.fromNat(proxyNeuronIdAsNat));
                         (proxyArgs, parentNeuronContributions);
                     };
                 };

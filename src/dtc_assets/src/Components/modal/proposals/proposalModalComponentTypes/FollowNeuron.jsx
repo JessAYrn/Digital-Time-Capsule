@@ -102,8 +102,10 @@ const FollowNeuron = (props) => {
         }
     });
 
-    const neuronTopicItemProps = Object.keys(NEURON_TOPICS).map((topicName_) => {
-        return {text: topicName_,  onClick: () => setTopicName(topicName_) };
+    const neuronTopicItemProps = Object.keys(NEURON_TOPICS).filter(
+        (topicName_) => { return NEURON_TOPICS[topicName_] !== NEURON_TOPICS.neuronManagement }
+    ).map(
+        (topicName_) => { return {text: topicName_,  onClick: () => setTopicName(topicName_) };
     });
 
     useEffect(() => {
