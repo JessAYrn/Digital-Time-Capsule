@@ -16,7 +16,8 @@ import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import SpeedDialField from "./Fields/SpeedDialField";
 import ModalComponent from "./modal/Modal";
 import SendCrypto from "./modal/SendCryptoModal";
-
+import PaymentIcon from '@mui/icons-material/Payment';
+import BuyCrypto from "./modal/proposals/proposalModalComponentTypes/BuyCrypto";
 
 const ActionButton = (props) => {
 
@@ -111,9 +112,25 @@ const ActionButton = (props) => {
         setModalIsOpen(true);
     };
 
+    const openBuyCrypto = () => {
+        setModalIsOpen(true);
+        setModalProps({
+            bigText: "BUY CRYPTO",
+            smallText:"This decentralized application requires users to stake $ICP in order to receive voting power, rewards and loans. You are being redirected to a third party service to purchase $ICP that will be sent automatically to your wallet here within this application upon completion of purchase.",
+            components: [
+              {
+                Component: BuyCrypto,
+                props: { handleClose: () => setModalIsOpen(false)},
+              }
+            ],
+            handleClose: () => setModalIsOpen(false)
+        });
+    };
+
     const speedDialActions = [
         {name: "Refresh", icon: RefreshIcon, onClick: reloadData},
         {name: "Create Proposal", icon: HowToVoteIcon , onClick: openProposalForm},
+        {name: "Buy $ICP", icon: PaymentIcon, onClick: openBuyCrypto},
         {name: "Withdraw To Wallet", icon: AccountBalanceWalletOutlinedIcon , onClick: () => openWithdrawForm()},
         {name: "Deposit To Treasury", icon: AccountBalanceIcon , onClick: () => openDepositToTreasuryForm()},
         {name: "New Transaction", icon: SendIcon , onClick: onSend}

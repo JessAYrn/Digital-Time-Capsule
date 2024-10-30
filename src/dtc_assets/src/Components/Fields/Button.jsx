@@ -25,7 +25,8 @@ const ButtonField = (props) => {
         className,
         upload,
         sx,
-        paperSx
+        paperSx,
+        hyperLink,
     } = props;
     
     let doNothing = () => {};
@@ -42,27 +43,30 @@ const ButtonField = (props) => {
             elevation={elevation ? elevation : 24} 
             className={`${transparentBackground ? "transparentBackground" : ""} ${className} buttonField`} 
             >
-                <ButtonType 
-                    sx={sx}
-                    varient={upload ? 'contained' : null}
-                    component={upload ? "label" : null}
-                    aria-controls={ariaControls}
-                    aria-haspopup={ariaHaspopup}
-                    aria-expanded={ariaExpanded}
-                    id={id}
-                    onBlur={onBlur}
-                    size={iconSize} 
-                    color={color || color_} 
-                    endIcon={(text && Icon) ?<Icon/> : null} 
-                    onClick={handleClick}
-                    disabled={disabled}
-                    loading={isLoading}
-                    loadingIndicatorCenter
-                >
-                    {text && !isLoading && <span style={{color: color ? color :"white"}}>{text}</span>}
-                    {!text && Icon && <Icon/>}
-                    {upload && <input type="file" hidden onChange={onChange} ref={ref}/>}
-                </ButtonType>
+                { hyperLink ?
+                    <a href={hyperLink} target="_blank" rel="noreferrer noopener" style={{color: "white"}}>{text}</a> :
+                    <ButtonType 
+                        sx={sx}
+                        varient={upload ? 'contained' : null}
+                        component={upload ? "label" : null}
+                        aria-controls={ariaControls}
+                        aria-haspopup={ariaHaspopup}
+                        aria-expanded={ariaExpanded}
+                        id={id}
+                        onBlur={onBlur}
+                        size={iconSize} 
+                        color={color || color_} 
+                        endIcon={(text && Icon) ?<Icon/> : null} 
+                        onClick={handleClick}
+                        disabled={disabled}
+                        loading={isLoading}
+                        loadingIndicatorCenter
+                    >
+                        {text && !isLoading && <span style={{color: color ? color :"white"}}>{text}</span>}
+                        {!text && Icon && <Icon/>}
+                        {upload && <input type="file" hidden onChange={onChange} ref={ref}/>}
+                    </ButtonType>
+                }
             </Paper> 
     );
 
