@@ -570,7 +570,7 @@ shared actor class User() = this {
                 };
                 
             };
-            case(#IncreaseNeuron({amount; neuronId;})){
+            case(#IncreaseNeuron({amount; neuronId; onBehalfOf})){
                 let {balances} = await treasuryCanister.getUserTreasuryData(Principal.fromText(proposer));
                 if(balances.icp.e8s < amount){ 
                     let amountToDeposit = amount - balances.icp.e8s + txFee;  
@@ -579,7 +579,7 @@ shared actor class User() = this {
                     } catch(_){};
 
                 };
-                let result = await treasuryCanister.increaseNeuron({amount; neuronId; contributor = Principal.fromText(proposer);});
+                let result = await treasuryCanister.increaseNeuron({amount; neuronId; contributor = Principal.fromText(proposer); onBehalfOf});
                 switch(result){
                     case(#ok({amountSent})){ ?{amountSent} };
                     case(#err(_)){ let amountSent: Nat64 = 0; ?{amountSent} };

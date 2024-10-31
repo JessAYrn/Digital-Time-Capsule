@@ -9,6 +9,9 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { fromE8s, toE8s } from '../../../../functionsAndConstants/Utils';
 import { AppContext } from '../../../../Context';
 import { Typography } from '@mui/material';
+import {Checkbox} from '@mui/material';
+import FormGroup from '@mui/material/FormGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
 
 const IncreaseNeuron = (props) => {
     const { onSubmitProposal, payload, action, disabled } = props;
@@ -16,6 +19,8 @@ const IncreaseNeuron = (props) => {
     const [selectedNeuronId, setSelectedNeuronId] = useState(payload?.neuronId?.toString());
     const [amount, setAmount] = useState(payload?.amount || payload?.amount === BigInt(0) ? fromE8s(parseInt(payload?.amount)) : null);
     const [hasError, setHasError] = useState(false);
+    const [onBehalfOf, setOnBehalfOf] = useState(payload?.onBehalfOf || []);
+    const [showOnBehalfOfDropdown, setShowOnBehalfOfDropdown] = useState(payload?.onBehalfOf?.length);
     const [isReadyToSubmit, setIsReadyToSubmit] = useState(false);
 
     useEffect(() => { setIsReadyToSubmit(!!amount && !hasError && selectedNeuronId); }, [amount, selectedNeuronId]);
@@ -28,7 +33,15 @@ const IncreaseNeuron = (props) => {
         }
     });
 
-    const submitProposal = async () => { await onSubmitProposal({[action]: {neuronId: BigInt(selectedNeuronId), amount: toE8s(amount)}}); };
+    const onBehalfOfMenuItemProps = treasuryState?.usersTreasuryDataArray?.map(([userPrincipal, _]) => {
+        return {
+            text: userPrincipal,
+            onClick: () => setOnBehalfOf([userPrincipal]),
+            selected: (!!onBehalfOf.length && userPrincipal === onBehalfOf[0])
+        }
+    });
+
+    const submitProposal = async () => { await onSubmitProposal({[action]: { neuronId: BigInt(selectedNeuronId), amount: toE8s(amount), onBehalfOf }}); };
 
     return (
         <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
@@ -61,6 +74,37 @@ const IncreaseNeuron = (props) => {
                         value={amount}
                         suffix={" ICP"}
                     />
+                    {!disabled && <FormGroup sx={{marginBottom: "20px"}}>
+                        <FormControlLabel 
+                            label = {"Stake on someone else's behalf"}
+                            labelPlacement="start"
+                            color="white"
+                            disabled={disabled} 
+                            control={
+                                <Checkbox 
+                                    color='white'
+                                    checked={showOnBehalfOfDropdown} 
+                                    onChange={(e) => setShowOnBehalfOfDropdown(e.target.checked)}
+                                />
+                            }
+                        />
+                    </FormGroup>}
+                    {showOnBehalfOfDropdown &&
+                        <MenuField
+                            sx={{marginBottom: "20px"}}
+                            xs={8}
+                            disabled={disabled}
+                            display={"flex"}
+                            alignItems={"center"}
+                            justifyContent={"center"}
+                            active={true}
+                            color={"custom"}
+                            label={"Who to credit this stake to?"}
+                            MenuIcon={KeyboardArrowDownIcon}
+                            menuItemProps={onBehalfOfMenuItemProps}
+                        />
+                    }
+                    {!!onBehalfOf.length && <Typography marginBottom={"20px"} varient={"h6"} color={"#bdbdbd"}> {onBehalfOf[0]} </Typography>}
                 </>
             }
             {isReadyToSubmit && !disabled && 

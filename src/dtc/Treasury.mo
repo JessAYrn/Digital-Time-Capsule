@@ -438,7 +438,7 @@ shared actor class Treasury (principal : Principal) = this {
         return #ok({amountSent});
     };
 
-    public shared({caller}) func increaseNeuron({amount: Nat64; neuronId: Nat64; contributor: Principal}): async Result.Result<({amountSent: Nat64}) , TreasuryTypes.Error>{
+    public shared({caller}) func increaseNeuron({amount: Nat64; neuronId: Nat64; contributor: Principal; onBehalfOf: ?TreasuryTypes.PrincipalAsText}): async Result.Result<({amountSent: Nat64}) , TreasuryTypes.Error>{
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         let ?neuronData = neuronDataMap.get(Nat64.toText(neuronId)) else Debug.trap("No neuron data for neuronId");
         let ?neuron = neuronData.neuron else Debug.trap("No neuron for neuronId");
@@ -446,7 +446,8 @@ shared actor class Treasury (principal : Principal) = this {
         let ?{subaccountId} = usersTreasuryDataMap.get(Principal.toText(contributor)) else Debug.trap("No subaccount for contributor");
         let {amountSent} = await NeuronManager.transferIcpToNeuron(amount, #NeuronSubaccountId(neuronSubaccount), subaccountId, Principal.fromActor(this));
         ignore updateTokenBalances(#Principal(Principal.toText(contributor)), #Icp, #UserTreasuryData);
-        SyncronousHelperMethods.updateUserNeuronContribution( neuronDataMap,{ userPrincipal = Principal.toText(contributor);  delta = amountSent; neuronId = Nat64.toText(neuronId); operation = #AddStake;});
+        let principalToCredit = switch(onBehalfOf){case (?principal){principal}; case (null){Principal.toText(contributor);};};
+        SyncronousHelperMethods.updateUserNeuronContribution( neuronDataMap,{ userPrincipal = principalToCredit;  delta = amountSent; neuronId = Nat64.toText(neuronId); operation = #AddStake;});
         let args = { id = ?{id = neuronId}; command = ?#ClaimOrRefresh( {by = ?#NeuronIdOrSubaccount({})} ); neuron_id_or_subaccount = null; };
         ignore manageNeuron(args);
         return #ok({amountSent});

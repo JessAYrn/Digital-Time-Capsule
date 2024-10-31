@@ -153,7 +153,7 @@ module{
         #CreateNeuron: {amount: Nat64; };
         #CreateFundingCampaign: {fundingCampaignInput: TreasuryTypes.FundingCampaignInput};
         #CancelFundingCampaign: {fundingCampaignId: Nat};
-        #IncreaseNeuron: {amount: Nat64; neuronId: Nat64; };
+        #IncreaseNeuron: {amount: Nat64; neuronId: Nat64; onBehalfOf: ?PrincipalAsText};
         #PurchaseCycles: {amount : Nat64;};
         #SpawnNeuron: {neuronId: Nat64; percentage_to_spawn : Nat32;};
         #DisburseNeuron: {neuronId: Nat64; };

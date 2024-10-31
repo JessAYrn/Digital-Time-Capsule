@@ -124,18 +124,19 @@ const DisplayProposal = (props) => {
         treasuryState?.usersTreasuryDataArray.map(([principal, userTreasuryData]) => { hypotheticalUsersTreasuryDataMap[principal] = userTreasuryData;});
 
         if(actionType === PROPOSAL_ACTIONS.CreateNeuron || actionType === PROPOSAL_ACTIONS.IncreaseNeuron){
-            let proposerTreasuryData = hypotheticalUsersTreasuryDataMap[proposer];
-            if(!proposerTreasuryData) proposerTreasuryData =  {balances: {icp_staked: 0, voting_power: 0}};
+            let principalToReceiveVotingPower = !!payload?.onBehalfOf?.length ? payload?.onBehalfOf[0] : proposer;
+            let recipientTreasuryData = hypotheticalUsersTreasuryDataMap[principalToReceiveVotingPower];
+            if(!recipientTreasuryData) recipientTreasuryData =  {balances: {icp_staked: 0, voting_power: 0}};
 
-            proposerTreasuryData = {
-                ...proposerTreasuryData, 
+            recipientTreasuryData = {
+                ...recipientTreasuryData, 
                 balances: {
-                    ...proposerTreasuryData.balances,
-                    icp_staked: proposerTreasuryData.balances.icp_staked + parseInt(amountToIncreaseNeuron), 
-                    voting_power: proposerTreasuryData.balances.voting_power + (parseInt(amountToIncreaseNeuron) * parseInt(votingPowerBonusMultipllier))
+                    ...recipientTreasuryData.balances,
+                    icp_staked: recipientTreasuryData.balances.icp_staked + parseInt(amountToIncreaseNeuron), 
+                    voting_power: recipientTreasuryData.balances.voting_power + (parseInt(amountToIncreaseNeuron) * parseInt(votingPowerBonusMultipllier))
                 }
             };
-            hypotheticalUsersTreasuryDataMap[proposer] = proposerTreasuryData;  
+            hypotheticalUsersTreasuryDataMap[principalToReceiveVotingPower] = recipientTreasuryData;  
             hypotheticalUsersTreasuryDataArray = Object.entries(hypotheticalUsersTreasuryDataMap);
         } else if(actionType === PROPOSAL_ACTIONS.IncreaseDissolveDelay){
             let neuronData = neurons.icp.find(([neuronId_, _]) => neuronId_ === BigInt(neuronId).toString());
