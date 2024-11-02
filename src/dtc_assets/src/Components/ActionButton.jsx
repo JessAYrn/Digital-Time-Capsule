@@ -1,10 +1,9 @@
 import React, {useState, useContext} from "react";
 import { AppContext } from "../Context";
 import SendIcon from '@mui/icons-material/Send';
-import AccountBalanceWalletOutlinedIcon from '@mui/icons-material/AccountBalanceWalletOutlined';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import HowToVoteIcon from '@mui/icons-material/HowToVote';
-import DepositOrWithdrawModal, {actions} from "./modal/DepositOrWithdraw";
+import TransactWithTreasuryModal, {actions} from "./modal/TransactWithTreasury";
 import CreateProposalForm from "./modal/proposals/CreateProposalForm";
 import { loadAllDataIntoReduxStores } from "../functionsAndConstants/loadingFunctions";
 import { types as journalTypes } from "../reducers/journalReducer";
@@ -18,6 +17,7 @@ import ModalComponent from "./modal/Modal";
 import SendCrypto from "./modal/SendCryptoModal";
 import PaymentIcon from '@mui/icons-material/Payment';
 import BuyCrypto from "./modal/proposals/proposalModalComponentTypes/BuyCrypto";
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 
 const ActionButton = (props) => {
 
@@ -37,34 +37,14 @@ const ActionButton = (props) => {
     const [modalProps, setModalProps] = useState({});
     const [isLoadingModal, setIsLoadingModal] = useState(false);
 
-    const openWithdrawForm = () => {
+    const openTransactWithTreasuryForm = () => {
         setModalIsOpen(true);
         setModalProps({
-            bigText: "WITHDRAW ICP FROM TREASURY",
+            bigText: "TRANSACT WITH TREASURY",
             components: [
               {
-                Component: DepositOrWithdrawModal,
+                Component: TransactWithTreasuryModal,
                 props: {
-                  action: actions.withdraw,
-                  setModalIsOpen, 
-                  setModalProps, 
-                  setIsLoadingModal,
-                }
-              }
-            ],
-            handleClose: () => setModalIsOpen(false)
-        });
-    };
-
-    const openDepositToTreasuryForm = () => {
-        setModalIsOpen(true);
-        setModalProps({
-            bigText: "DEPOSIT ICP TO TREASURY",
-            components: [
-              {
-                Component: DepositOrWithdrawModal,
-                props: {
-                  action: actions.deposit,
                   setModalIsOpen, 
                   setModalProps, 
                   setIsLoadingModal,
@@ -127,13 +107,19 @@ const ActionButton = (props) => {
         });
     };
 
+    const openWalletModal = () => {
+      //TODO: Create and Implement Wallet Modal
+      //Modal should allow users to view their wallet balance, 
+      //view their wallet address & principal and transfer funds from their wallet.
+    };
+
     const speedDialActions = [
         {name: "Refresh", icon: RefreshIcon, onClick: reloadData},
         {name: "Create Proposal", icon: HowToVoteIcon , onClick: openProposalForm},
         {name: "Buy $ICP", icon: PaymentIcon, onClick: openBuyCrypto},
-        {name: "Withdraw To Wallet", icon: AccountBalanceWalletOutlinedIcon , onClick: () => openWithdrawForm()},
-        {name: "Deposit To Treasury", icon: AccountBalanceIcon , onClick: () => openDepositToTreasuryForm()},
-        {name: "New Transaction", icon: SendIcon , onClick: onSend}
+        {name: "Treasury Transaction", icon: AccountBalanceIcon, onClick: () => openTransactWithTreasuryForm()},
+        {name: "Wallet Transaction", icon: AccountBalanceWalletIcon , onClick: () => openWalletModal()},
+        // {name: "New Transaction", icon: SendIcon , onClick: onSend}
     ]
 
     
