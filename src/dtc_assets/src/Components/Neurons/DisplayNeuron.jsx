@@ -1,4 +1,5 @@
-import React, {useState} from "react";
+import React, {useContext} from "react";
+import { AppContext } from "../../Context";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import { Typography } from "@mui/material";
 import { fromE8s, round2Decimals, secondsToHours, hoursToDays, daysToMonths } from "../../functionsAndConstants/Utils";
@@ -14,7 +15,6 @@ import HistoryToggleOffIcon from '@mui/icons-material/HistoryToggleOff';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import DataTable from "../Fields/Table";
 import CreateProposalForm from "../modal/proposals/CreateProposalForm";
-import ModalComponent from "../modal/Modal";
 import { PROPOSAL_ACTIONS } from "../modal/proposals/utils";
 
 const NeuronStates = { locked: 1, dissolving: 2, unlocked: 3, spawning: 4 };
@@ -46,10 +46,7 @@ const DisplayNeuron = (props) => {
     else if(neuronInfo?.state === NeuronStates.spawning)  {neuronState = "Spawning"; buttonIcon = HistoryToggleOffIcon;}
 
     const userMaturity = round2Decimals(fromE8s(parseInt(neuron?.maturity_e8s_equivalent || 0) * (parseInt(userContribution.stake_e8s)/parseInt(totalContributions || 1))));
-
-    const [modalIsOpen, setModalIsOpen] = useState(false);
-    const [isLoadingModal, setIsLoadingModal] = useState(false);
-    const [modalProps, setModalProps] = useState({});
+    const { setModalIsOpen, setModalProps } = useContext(AppContext)
 
     const openProposalForm = (props) => {
         let {proposalAction, proposalPayload } = props;
@@ -58,13 +55,7 @@ const DisplayNeuron = (props) => {
             components: [
               {
                 Component: CreateProposalForm,
-                props: {
-                    setModalIsOpen, 
-                    setModalProps, 
-                    setIsLoadingModal,
-                    proposalAction,
-                    proposalPayload,
-                }
+                props: { proposalAction, proposalPayload }
               }
             ],
             handleClose: () => setModalIsOpen(false)
@@ -227,11 +218,6 @@ const DisplayNeuron = (props) => {
                         </>}
                 </Grid>
             </Grid>
-            <ModalComponent 
-                {...modalProps}
-                open={modalIsOpen} 
-                isLoading={isLoadingModal} 
-            /> 
         </>
     );
 

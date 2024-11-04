@@ -17,7 +17,6 @@ import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 import DoneIcon from '@mui/icons-material/Done';
 import CloseIcon from '@mui/icons-material/Close';
 import { mapApiObjectToFrontEndJournalEntriesObject } from "../../mappers/journalPageMappers";
-import ModalComponent from "../../Components/modal/Modal";
 
 
 const count = 30;
@@ -25,8 +24,6 @@ const count = 30;
 const JournalPage = (props) => {
     const [counter, setCounter] = useState(1);
     const [showUnlockTimeDatePicker, setShowUnlockTimeDatePicker] = useState(false);
-    const [modalIsOpen, setModalIsOpen] = useState(false);
-    const [isLoadingModal, setIsLoadingModal ] = useState(false);
     
     const { index } = props;
 
@@ -34,7 +31,9 @@ const JournalPage = (props) => {
         journalState,
         journalDispatch,
         actorState,
-        actorDispatch
+        actorDispatch,
+        setModalIsOpen,
+        setModalIsLoading,
     } = useContext(AppContext);
 
     const journalPageData = useMemo(() => {
@@ -124,7 +123,7 @@ const JournalPage = (props) => {
     };
 
     const submit = async () => {
-        setIsLoadingModal(true);
+        setModalIsLoading(true);
         const entryKey = {entryKey: journalPageData.entryKey}
         await sendData();
         let result = await actorState.backendActor.submitJournalEntry(entryKey);
@@ -132,7 +131,7 @@ const JournalPage = (props) => {
         journalEntries = mapApiObjectToFrontEndJournalEntriesObject(journalEntries);
         journalDispatch({ payload: journalEntries, actionType: types.SET_JOURNAL });
         journalDispatch({ actionType: types.CHANGE_PAGE_IS_OPEN, payload: false, index: index });
-        setIsLoadingModal(false);
+        setModalIsLoading(false);
         setModalIsOpen(false);
     }
 
@@ -325,14 +324,6 @@ const JournalPage = (props) => {
                 />
             </Grid>
             {!journalPageData.submitted && <SpeedDialField actions={speedDialActions} position={"right"}/>}
-            <ModalComponent 
-                Icon={PublishIcon}
-                open={modalIsOpen} 
-                isLoading={isLoadingModal} 
-                handleClose={() => setModalIsOpen(false)}
-                bigText={"Submit Entry?"}
-                components={modalButtons}
-            />
         </>
     )
 };

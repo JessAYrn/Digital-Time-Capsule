@@ -7,7 +7,6 @@ import { copyText } from "../../functionsAndConstants/walletFunctions/CopyWallet
 import { fromE8s, shortenHexString, round2Decimals } from "../../functionsAndConstants/Utils";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import ModalComponent from "../../Components/modal/Modal";
 import ButtonField from "../../Components/Fields/Button";
 import Graph from "../../Components/Fields/Chart";
 import { CHART_TYPES, GRAPH_DATA_SETS, GRAPH_DISPLAY_LABELS } from "../../functionsAndConstants/Constants";
@@ -20,10 +19,7 @@ import Switch from "../../Components/Fields/Switch";
 
 const TreasuryPage = (props) => {
   
-  const { treasuryState, actorState } = useContext(AppContext);
-  const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [modalProps, setModalProps] = useState({});
+  const { treasuryState, actorState, setModalIsOpen, setModalIsLoading, setModalProps } = useContext(AppContext);
   const [autoContributeToLoans, setAutoContributeToLoans] = useState(treasuryState?.userTreasuryData?.automaticallyContributeToLoans);
   const [autoRepayLoans, setAutoRepayLoans] = useState(treasuryState?.userTreasuryData?.automaticallyRepayLoans);
   
@@ -32,7 +28,7 @@ const TreasuryPage = (props) => {
 
   const onSwitchToggle = async (newAutoRepayLoansSetting, newAutoLoanContributionSetting) => {
     setModalIsOpen(true);
-    setIsLoading(true);
+    setModalIsLoading(true);
     setAutoRepayLoans(newAutoRepayLoansSetting);
     setAutoContributeToLoans(newAutoLoanContributionSetting);
     await actorState.backendActor.updateAutomatedSettings({
@@ -40,7 +36,7 @@ const TreasuryPage = (props) => {
       automaticallyRepayLoans: [newAutoRepayLoansSetting]
     });
     setModalIsOpen(false);
-    setIsLoading(false);
+    setModalIsLoading(false);
   }; 
 
   const displayTreasuryAccountId = () => {
@@ -223,11 +219,6 @@ const TreasuryPage = (props) => {
         />
       </Grid>
       <ActionButton/>
-      <ModalComponent 
-          {...modalProps}
-          open={modalIsOpen} 
-          isLoading={isLoading}
-      /> 
     </Grid>
     
   );

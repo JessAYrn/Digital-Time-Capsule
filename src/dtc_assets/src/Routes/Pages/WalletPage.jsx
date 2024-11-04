@@ -11,7 +11,6 @@ import Grid from '@mui/material/Unstable_Grid2/Grid2';
 import Paper  from '@mui/material/Paper';
 import DataField from '../../Components/Fields/DataField';
 import AccordionField from '../../Components/Fields/Accordion';
-import ModalComponent from '../../Components/modal/Modal';
 import ButtonField from '../../Components/Fields/Button';
 import Graph from '../../Components/Fields/Chart';
 import Typography from '@mui/material/Typography';
@@ -20,13 +19,7 @@ import ActionButton from '../../Components/ActionButton';
 
 const WalletPage = (props) => {
 
-    const { 
-        walletState, 
-        treasuryState, 
-    } = useContext(AppContext);
-
-    const [modalIsOpen, setModalIsOpen] = useState(false);
-    const [modalProps, setModalProps] = useState({});
+    const { walletState, treasuryState } = useContext(AppContext);
 
     const DisplayTxAddresses = (props) => {
         const {addresses} = props;
@@ -128,11 +121,6 @@ const WalletPage = (props) => {
 
             </Grid>
             <ActionButton/>
-            <ModalComponent
-                open={modalIsOpen}
-                handleClose={() => setModalIsOpen(false)}
-                {...modalProps}
-            />
         </Grid>
             
         

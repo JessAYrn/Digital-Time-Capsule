@@ -25,25 +25,16 @@ import WithdrawFromMultiSigWallet from "./proposalModalComponentTypes/WithdrawFr
 import { sortProposals } from "../../../functionsAndConstants/governanceDataFunctions";
 
 const CreateProposalForm = (props) => {
-    const {
-        setModalIsOpen, 
-        setModalProps, 
-        setIsLoadingModal,
-        proposalAction,
-        proposalPayload,
-    } = props;
+    const { proposalAction, proposalPayload } = props;
 
-    const {  actorState, homePageDispatch, treasuryState, walletState } = useContext(AppContext);
+    const {  actorState, homePageDispatch, treasuryState, walletState, setModalIsOpen, setModalProps, setModalIsLoading } = useContext(AppContext);
 
     const availableBalance = (treasuryState?.userTreasuryData?.balances?.icp || 0) + (walletState?.walletData?.balance || 0);
 
     const [proposalAction_, setProposalAction] = useState(proposalAction);
     const [proposalPayload_, setProposalPayload] = useState(proposalPayload);
 
-    const onMenuItemClick = (proposalAction) => {
-        setProposalPayload({});
-        setProposalAction(proposalAction);
-    };
+    const onMenuItemClick = (proposalAction) => { setProposalPayload({}); setProposalAction(proposalAction); };
 
     const mainMenuItemProps = [
         // { text: PROPOSAL_ACTIONS.PurchaseCycles, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.PurchaseCycles), selected: proposalAction_ === PROPOSAL_ACTIONS.PurchaseCycles},
@@ -75,7 +66,7 @@ const CreateProposalForm = (props) => {
     ];
 
     const onSubmitProposal = async (action) => {
-        setIsLoadingModal(true);
+        setModalIsLoading(true);
         let result = await actorState.backendActor.createProposal(action);
         if("err" in result){
             let errorMessagArray = Object.keys(result.err);
@@ -93,7 +84,7 @@ const CreateProposalForm = (props) => {
             });
             setModalIsOpen(false);
         }
-        setIsLoadingModal(false);
+        setModalIsLoading(false);
     };
 
     return (

@@ -10,7 +10,6 @@ import { getProposalType } from "./utils";
 import CloseIcon from '@mui/icons-material/Close';
 import ButtonField from "../../Fields/Button";
 import CheckIcon from '@mui/icons-material/Check';
-import ModalComponent from "../../modal/Modal";
 import { copyText } from "../../../functionsAndConstants/walletFunctions/CopyWalletAddress";
 import { AppContext } from "../../../Context";
 import { homePageTypes } from "../../../reducers/homePageReducer";
@@ -66,12 +65,8 @@ const DisplayProposal = (props) => {
         voteTally
     } = props;
 
-    const [modalProps, setModalProps] = useState({});
-    const [modalIsOpen, setModalIsOpen] = useState(false);
-    const [isLoadingModal, setIsLoading] = useState(false);
     const [hasVoted, setHasVoted] = useState(false);
-
-    const { actorState, homePageDispatch, treasuryState } = useContext(AppContext);
+    const { actorState, homePageDispatch, treasuryState, setModalIsOpen, setModalIsLoading, setModalProps } = useContext(AppContext);
 
     let [numberOfNays, numberOfYays, totalVotes] = useMemo(() => {
         let numberOfNays = 0;
@@ -175,9 +170,9 @@ const DisplayProposal = (props) => {
     }
 
     const onConfirmVote = async (bool) => {
-        setIsLoading(true);
+        setModalIsLoading(true);
         let result = await actorState.backendActor.voteOnProposal(proposalId, bool);
-        setIsLoading(false);
+        setModalIsLoading(false);
         if(result.err){
             setModalProps({
                 smallText: `Your vote could not be successfully submitted.`,
@@ -383,11 +378,6 @@ const DisplayProposal = (props) => {
                     </>
                 }
             </Grid>
-            <ModalComponent
-            {...modalProps}
-            open={modalIsOpen} 
-            isLoading={isLoadingModal} 
-            />
         </Grid>
     )
 };

@@ -1,4 +1,5 @@
-import React, {useMemo, useState} from "react";
+import React, {useMemo, useContext} from "react";
+import { AppContext } from "../../Context";
 import Grid from "@mui/material/Unstable_Grid2";
 import Graph from "../Fields/Chart";
 import InputBox from "../Fields/InputBox";
@@ -11,17 +12,12 @@ import { GRAPH_DATA_SETS, CHART_TYPES, GRAPH_DISPLAY_LABELS } from "../../functi
 import { getFundingCampaignAssetTypeAndValue } from "../../functionsAndConstants/Utils";
 import { copyText } from "../../functionsAndConstants/walletFunctions/CopyWalletAddress";
 import { mapDataMapToChartFormat } from "../../mappers/treasuryPageMapperFunctions";
-import DatePickerField from "../Fields/DatePicker";
-import ModalComponent from "../modal/Modal";
 import AddLiquidityOrRepayFundingCampaign, {ACTION_TYPES} from "../modal/AddLiquidityOrRepayFundingCampaign";
 
 const DisplayFundingCampaign = (props) => {
     const { fundingCampaign, campaignId } = props;
     const { contributions, terms } = fundingCampaign;
-
-    const [modalIsOpen, setModalIsOpen] = useState(false);
-    const [modalProps, setModalProps] = useState({});
-    const [modalIsLoading, setModalIsLoading] = useState(false);
+    const {setModalIsOpen, setModalProps } = useContext(AppContext);
 
     const { value: amountToFundValue, type: amountToFundType } = getFundingCampaignAssetTypeAndValue(fundingCampaign?.amountToFund);
     const { value: amountDisbursedToRecipientValue, type: amountDisbursedToRecipientType } = getFundingCampaignAssetTypeAndValue(fundingCampaign?.amountDisbursedToRecipient);
@@ -68,13 +64,10 @@ const DisplayFundingCampaign = (props) => {
                 Component: AddLiquidityOrRepayFundingCampaign,
                 props: { 
                     actionType: fundingCampaign?.funded ? ACTION_TYPES.repayFundingCampaign : ACTION_TYPES.addLiquidity,
-                    campaignId,
-                    setModalIsOpen,
-                    setModalIsLoading
+                    campaignId
                 }
               }
             ],
-            handleClose: () => setModalIsOpen(false)
         });
         setModalIsOpen(true);
     };
@@ -177,11 +170,6 @@ const DisplayFundingCampaign = (props) => {
                     </Grid>
                 }
             </Grid>
-            <ModalComponent
-            isLoading={modalIsLoading}
-            open={modalIsOpen}
-            {...modalProps}
-            />
         </>
     );
 };

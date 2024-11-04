@@ -8,20 +8,19 @@ import { AppContext } from "../../Context";
 
 const CreateAccount = (props) => {
 
-    const { setModalIsOpen, reloadDataIntoReduxStores} = props;
+    const { reloadDataIntoReduxStores} = props;
 
-    const { actorState } = useContext(AppContext);
+    const { actorState, setModalIsOpen, setModalIsLoading } = useContext(AppContext);
 
     const [username, setUsername] = useState("");
     const [hasError, setHasError] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
 
     const [typography, setTypography] = useState("Enter Your Desired Username: ");
 
     const onSubmit = async () => {
-        setIsLoading(true);
+        setModalIsLoading(true);
         const response = await actorState.backendActor.create(username);
-        setIsLoading(false);
+        setModalIsLoading(false);
         if(response.ok) {
             await reloadDataIntoReduxStores();
             setModalIsOpen(false);
@@ -52,7 +51,6 @@ const CreateAccount = (props) => {
                 text="Create Account"
                 onClick={onSubmit}
                 disabled={hasError || username.length < 3}
-                isLoading={isLoading}
             />
         </Grid>
         </>

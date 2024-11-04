@@ -1,8 +1,12 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import { JOURNAL_TABS, NAV_LINKS } from '../../functionsAndConstants/Constants';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
 import MenuIcon from '@mui/icons-material/Menu';
-import { types } from '../../reducers/journalReducer';
+import { types as journalTypes } from "../../reducers/journalReducer";
+import { walletTypes } from "../../reducers/walletReducer";
+import { homePageTypes } from "../../reducers/homePageReducer";
+import { notificationsTypes } from "../../reducers/notificationsReducer";
+import { treasuryTypes } from "../../reducers/treasuryReducer";
 import "./NavBar.scss";
 import SdStorageIcon from '@mui/icons-material/SdStorage';
 import MenuField from "../Fields/MenuField";
@@ -10,8 +14,9 @@ import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { AppContext } from "../../Context";
-import DisplayUserData from '../UserData/DisplayUserData';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import { loadAllDataIntoReduxStores } from '../../functionsAndConstants/loadingFunctions';
+import ButtonField from '../Fields/Button';
 
 
 
@@ -31,13 +36,27 @@ export const NavBar = (props) => {
         treasuryState,
         treasuryDispatch,
         actorState,
+        modalIsLoading,
+        setModalIsLoading,
+        setModalIsOpen,
         setRoute
     } = useContext(AppContext);
+
+    const dispatches = { homePageDispatch, treasuryDispatch, walletDispatch, notificationsDispatch, journalDispatch};
+    const types = { journalTypes, walletTypes, homePageTypes, notificationsTypes, treasuryTypes};
 
     const changeRoute = (route) => setRoute(route);
 
     const onClick_logout = () => {
         document.location.reload();
+    };
+
+    const reloadData = async () => {
+        setModalIsLoading(true);
+        setModalIsOpen(true);
+        await loadAllDataIntoReduxStores(actorState, dispatches, types);
+        setModalIsOpen(false);
+        setModalIsLoading(false);
     };
 
     const onClick_notifications = (key, route) => {
@@ -121,17 +140,12 @@ export const NavBar = (props) => {
                     menuItemProps={journalTabMenuItemProps}
                 />
             }
-            <MenuField
-                MenuIcon={AccountCircleIcon}
-                xs={2}
-                md={1}
-                display={"flex"}
-                alignItems={"center"}
-                justifyContent={"center"}
-                disabled={isLoading}
+            <ButtonField
+                Icon={RefreshIcon}
+                transparentBackground={true}
                 active={true}
-                color={"custom"}
-                Component={DisplayUserData}
+                onClick={reloadData}
+                disabled={isLoading || modalIsLoading}
             />
             <MenuField
                 MenuIcon={NotificationIcon}

@@ -9,8 +9,7 @@ import PendingIcon from '@mui/icons-material/Pending';
 
 const style = {
   position: 'absolute',
-  minWidth: "267px",
-  maxWidth: "500px",
+  width: "275px",
   maxHeight: "500px",
   top: '50%',
   left: '50%',
@@ -47,7 +46,7 @@ const ModalComponent = (props_) => {
         sx={{ ...style, }} 
         className={`modalBox ${isLoading ? 'transparent' : ''}`} 
         display={"flex"} 
-        justifyContent={"safe center"} 
+        justifyContent={"safe start"} 
         alignItems={"center"}
         flexDirection={"column"}
         overflow={"auto"}

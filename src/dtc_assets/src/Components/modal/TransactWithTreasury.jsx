@@ -17,13 +17,12 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 export const actions = {
     deposit: "deposit",
     withdraw: "withdraw",
-    transfer: "transfer",
+    send: "send",
 };
 
 const TransactWithTreasuryModal = (props) => {
 
-    const { setModalIsOpen, setModalProps,  setIsLoadingModal} = props;
-    const {actorState, treasuryState, walletState} = useContext(AppContext);
+    const {actorState, treasuryState, walletState, setModalIsOpen, setModalProps, setModalIsLoading} = useContext(AppContext);
     const [action, setAction] = useState(actions.deposit);
     const [amount, setAmount] = useState(null);
     const [recipientPrincipal, setRecipientPrincipal] = useState(null);
@@ -37,12 +36,12 @@ const TransactWithTreasuryModal = (props) => {
     });
 
     const submit = async () => {
-        setIsLoadingModal(true);
+        setModalIsLoading(true);
         if(action === actions.deposit) await actorState.backendActor.depositIcpToTreasury(toE8s(amount)); 
         else if(action === actions.withdraw )await actorState.backendActor.withdrawIcpFromTreasury(toE8s(amount));
-        else if(action === actions.transfer) await actorState.backendActor.trasnferICPFromTreasuryAccountToTreasuryAccount(toE8s(amount), recipientPrincipal);
+        else if(action === actions.send) await actorState.backendActor.trasnferICPFromTreasuryAccountToTreasuryAccount(toE8s(amount), recipientPrincipal);
         else throw new Error("Invalid Action");
-        setIsLoadingModal(false);
+        setModalIsLoading(false);
         setModalProps({});
         setModalIsOpen(false);
     };
@@ -62,34 +61,44 @@ const TransactWithTreasuryModal = (props) => {
             alignItems="center" 
             flexDirection={"column"}
         >
-            <FormGroup sx={{marginBottom: "20px"}}>
-                <FormControlLabel 
-                    style={{marginTop: "20px"}}
-                    label = {"Deposit ICP to Treasury from Wallet"}
-                    labelPlacement="end"
-                    color="white"
-                    control={ <Checkbox style={{color: "white"}} checked={action === actions.deposit} onChange={ (e) => {setRecipientPrincipal(null); setAction(e.target.checked ? actions.deposit : null) } }/> }
-                />
-                <FormControlLabel 
-                    style={{marginTop: "20px"}}
-                    label = {"Withdraw ICP from Treasury to Wallet"}
-                    labelPlacement="end"
-                    color="white"
-                    control={ <Checkbox style={{color: "white"}} checked={action === actions.withdraw} onChange={ (e) => {setRecipientPrincipal(null); setAction(e.target.checked ? actions.withdraw : null) } }/> }
-                />
-                <FormControlLabel 
-                    style={{marginTop: "20px"}}
-                    label = {"Transfer ICP from Your Treasury Account to Another User's Treasury Account"}
-                    labelPlacement="end"
-                    color="white"
-                    control={ <Checkbox style={{color: "white"}} checked={action === actions.transfer} onChange={ (e) => {setRecipientPrincipal(null); setAction(e.target.checked ? actions.transfer : null)} }/>}
-                />
-            </FormGroup>
+            <Grid
+                columns={12} 
+                xs={12} 
+                rowSpacing={8} 
+                display="flex" 
+                justifyContent="center" 
+                alignItems="center" 
+            >
+                <FormGroup>
+                    <FormControlLabel 
+                        label = {"Deposit"}
+                        labelPlacement="end"
+                        color="white"
+                        control={ <Checkbox style={{color: "white"}} checked={action === actions.deposit} onChange={ (e) => {setRecipientPrincipal(null); setAction(e.target.checked ? actions.deposit : null) } }/> }
+                    />
+                </FormGroup>
+                <FormGroup>
+                    <FormControlLabel 
+                        label = {"Send"}
+                        labelPlacement="end"
+                        color="white"
+                        control={ <Checkbox style={{color: "white"}} checked={action === actions.send} onChange={ (e) => {setRecipientPrincipal(null); setAction(e.target.checked ? actions.send : null)} }/>}
+                    />
+                </FormGroup>
+                <FormGroup>
+                    <FormControlLabel 
+                        label = {"Withdraw"}
+                        labelPlacement="end"
+                        color="white"
+                        control={ <Checkbox style={{color: "white"}} checked={action === actions.withdraw} onChange={ (e) => {setRecipientPrincipal(null); setAction(e.target.checked ? actions.withdraw : null) } }/> }
+                    />
+                    </FormGroup>
+            </Grid>
 
              <Grid xs={12} display="flex" justifyContent="center" alignItems="center">
                 <DataField
                     label={'Available Balance: '}
-                    text={`${(action === actions.withdraw || action === actions.transfer) ? fromE8s(treasuryState.userTreasuryData?.balances.icp || 0): fromE8s(walletState?.walletData?.balance) } ICP`}
+                    text={`${(action === actions.withdraw || action === actions.send) ? fromE8s(treasuryState.userTreasuryData?.balances.icp || 0): fromE8s(walletState?.walletData?.balance) } ICP`}
                     isLoading={!treasuryState.dataHasBeenLoaded}
                     disabled={true}
                 />
@@ -113,7 +122,7 @@ const TransactWithTreasuryModal = (props) => {
                     <Typography >{"Note: A withdrawel fee of ~0.5% is deducted to sustain this DAO's Operations"}</Typography>
                 </Grid>
             }
-            {action === actions.transfer &&
+            {action === actions.send &&
                 <MenuField
                     xs={8}
                     display={"flex"}
@@ -131,7 +140,7 @@ const TransactWithTreasuryModal = (props) => {
                     <Typography >{recipientPrincipal}</Typography>
                 </Grid>
             }
-            {!!amount && !hasError && (action !== actions.transfer || recipientPrincipal) &&
+            {!!amount && !hasError && (action !== actions.send || recipientPrincipal) &&
                 <ButtonField
                 Icon={DoneIcon}
                 active={true}

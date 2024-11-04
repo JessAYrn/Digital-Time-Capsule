@@ -14,7 +14,6 @@ import { inTrillions, round2Decimals, shortenHexString } from '../../functionsAn
 import { copyText } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
 import DataTable from '../../Components/Fields/Table';
 import { mapRequestsForAccessToTableRows, mapUsersProfileDataToTableRows, requestsForAccessTableColumns, usersTableColumns } from '../../mappers/dashboardMapperFunctions';
-import ModalComponent from '../../Components/modal/Modal';
 import DisplayProposals from '../../Components/modal/proposals/DisplayAllProposals';
 import { AppContext } from '../../Context';
 import { mapUsersTotalTreasuryStakesAndVotingPowersDataToChartFormat } from '../../mappers/treasuryPageMapperFunctions';
@@ -28,11 +27,11 @@ const Analytics = (props) => {
         homePageDispatch, 
         homePageState, 
         actorState, 
-        treasuryState
+        treasuryState,
+        setModalIsOpen,
+        setModalIsLoading
     } = useContext(AppContext);
 
-    const [modalIsOpen, setModalIsOpen] = useState(false);
-    const [isLoadingModal, setIsLoadingModal] = useState(false);
     const [requestsTableIsLoading, setRequestsTableIsLoading] = useState(false);
     const [usersTableIsLoading, setUsersTableIsLoading] = useState(false);
 
@@ -108,11 +107,11 @@ const Analytics = (props) => {
     };
 
     const toggleAcceptRequest = async () => {
-        setIsLoadingModal(true);
+        setModalIsLoading(true);
         setModalIsOpen(true);
         let result = await actorState.backendActor.toggleAcceptRequest();
         setModalIsOpen(false);
-        setIsLoadingModal(false);
+        setModalIsLoading(false);
         if('err' in result) return;
         homePageDispatch({
             actionType: homePageTypes.SET_CANISTER_DATA,
@@ -331,10 +330,6 @@ const Analytics = (props) => {
                 </Grid> 
             </>
             <ActionButton />
-            <ModalComponent 
-                open={modalIsOpen} 
-                isLoading={isLoadingModal} 
-            />  
         </Grid>
         
     )

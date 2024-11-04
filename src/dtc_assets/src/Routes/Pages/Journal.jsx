@@ -18,7 +18,6 @@ import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
 import { journalPagesTableColumns, mapRequestsForAccessToTableRows } from "../../mappers/journalPageMappers";
 import { mapApiObjectToFrontEndJournalEntriesObject } from "../../mappers/journalPageMappers";
-import ModalComponent from "../../Components/modal/Modal";
 import ButtonField from "../../Components/Fields/Button";
 
 const count = 30
@@ -26,11 +25,8 @@ const count = 30
 
 const Journal = (props) => {
 
-    const { journalState, journalDispatch, actorState, actorDispatch} = useContext(AppContext);
+    const { journalState, journalDispatch, actorState, actorDispatch, setModalIsOpen, setModalIsLoading, setModalProps} = useContext(AppContext);
     const [counter, setCounter] = useState(1);
-    const [modalIsOpen, setModalIsOpen] = useState(false);
-    const [modalIsLoading, setModalIsLoading] = useState(false);
-    const [modelProps, setModalProps] = useState({});
 
     const sendData = async () => {
         journalDispatch({
@@ -253,21 +249,6 @@ const Journal = (props) => {
                 <SpeedDialField actions={speedDialActions} position={"right"}/>
             </>}  
         </Grid>
-        <ModalComponent 
-            open={modalIsOpen} 
-            isLoading={modalIsLoading} 
-            handleClose={() => {setModalIsOpen(false)}}
-            components={[{
-                Component: ButtonField, 
-                props: {
-                    active: true,
-                    text: "OK",
-                    Icon: ThumbUpAltIcon,
-                    onClick: () => setModalIsOpen(false)
-                }
-            }]}
-            {...modelProps}
-        />
         </>
     );
 

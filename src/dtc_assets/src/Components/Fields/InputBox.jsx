@@ -115,11 +115,10 @@ const InputBox = (props) => {
               disabled={(showEditButton && !editing) || disabled}
               variant="standard"
               multiline
-              
               maxRows={rows ? rows : 100}
               fullWidth
               />
-            {maxValue && !omitMaxValueButton &&
+            {(!!maxValue && !omitMaxValueButton) ?
               <ButtonField
                 sx={{marginLeft: "-8px"}}
                 transparentBackground={true}
@@ -127,7 +126,7 @@ const InputBox = (props) => {
                 text={"max"}
                 onClick={() => { handleChange(maxValue); focusTextBox(); }}
                 iconSize={'small'}
-              />
+              /> : <></>
             }
           </>
         }

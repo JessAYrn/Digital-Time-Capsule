@@ -19,8 +19,8 @@ export const ACTION_TYPES = {
 const AddLiquidityOrRepayFundingCampaign = (props) => {
     const [amount, setAmount] = useState(0);
     const [hasError, setHasError] = useState(false);
-    const {actorState, treasuryState, treasuryDispatch, walletState} = useContext(AppContext);
-    const {actionType, campaignId, setModalIsLoading, setModalIsOpen} = props;
+    const {actorState, treasuryState, treasuryDispatch, walletState, setModalIsOpen, setModalIsLoading} = useContext(AppContext);
+    const {actionType, campaignId} = props;
 
     const availableBalance = (treasuryState?.userTreasuryData?.balances?.icp || 0) + (walletState?.walletData?.balance || 0);
 

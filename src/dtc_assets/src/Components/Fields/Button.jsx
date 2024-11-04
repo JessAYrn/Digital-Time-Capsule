@@ -44,7 +44,7 @@ const ButtonField = (props) => {
             className={`${transparentBackground ? "transparentBackground" : ""} ${className} buttonField`} 
             >
                 { hyperLink ?
-                    <a href={hyperLink} target="_blank" rel="noreferrer noopener" style={{color: "white"}}>{text}</a> :
+                    <a href={hyperLink} target="_blank" rel="noreferrer noopener" style={{color: "#F7931A"}}>{text}</a> :
                     <ButtonType 
                         sx={sx}
                         varient={upload ? 'contained' : null}

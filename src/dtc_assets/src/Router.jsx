@@ -37,7 +37,7 @@ const Router = (props) => {
     const [actorState, actorDispatch] = useReducer(actorReducer, actorInitialState);
     
     const [modalIsOpen, setModalIsOpen] = useState(false);
-    const [isLoadingModal, setIsLoadingModal] = useState(false);
+    const [modalIsLoading, setModalIsLoading] = useState(false);
     const [modalProps, setModalProps] = useState({});
 
     const ReducerDispatches={
@@ -72,15 +72,18 @@ const Router = (props) => {
         treasuryState,
         treasuryDispatch,
         setRoute,
+        modalIsOpen,
         setModalIsOpen,
-        setIsLoadingModal,
+        modalIsLoading,
+        setModalIsLoading,
+        modalProps,
         setModalProps
     };
 
     useEffect( async () => {
         if(!actorState.backendActor) return;
         try{
-            setIsLoadingModal(true);
+            setModalIsLoading(true);
             setModalIsOpen(true);
             const loadSuccessful = await loadAllDataIntoReduxStores(actorState, ReducerDispatches, ReducerTypes);
             if(loadSuccessful) setModalIsOpen(false);
@@ -130,7 +133,7 @@ const Router = (props) => {
                     })
                 }
             };  
-            setIsLoadingModal(false);
+            setModalIsLoading(false);
         } catch(e){ 
             await actorState.backendActor.emergencyVoteForToggleSupportModeProposal();
             document.location.reload(); 
@@ -176,7 +179,8 @@ const Router = (props) => {
                 <ModalComponent 
                 {...modalProps}
                 open={modalIsOpen} 
-                isLoading={isLoadingModal} 
+                isLoading={modalIsLoading} 
+                handleClose={() => { setModalProps({}); setModalIsOpen(false) } } 
             />     
             </AppContext.Provider>                 
         </ThemeProvider>

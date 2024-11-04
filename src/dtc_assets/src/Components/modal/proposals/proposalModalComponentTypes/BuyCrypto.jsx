@@ -5,12 +5,8 @@ import { AppContext } from "../../../../Context";
 import ButtonField from "../../../Fields/Button";
 
 const BuyCrypto = (props) => {
-    const {handleClose} = props;
 
     const {walletState} = useContext(AppContext);
-
-
-    
 
     const url = useMemo(() => {
         const queryParams = {
@@ -35,12 +31,14 @@ const BuyCrypto = (props) => {
     }, [walletState?.walletData?.address]);
 
     return (
-        <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} marginTop={"20px"}>
-            <Grid xs={6} display={"flex"}  justifyContent={"left"} alignItems={"center"} width={"100%"}>
-                <ButtonField text={"Cancel"} onClick={handleClose}/>
-            </Grid>
-            <Grid xs={6} display={"flex"}  justifyContent={"right"} alignItems={"center"} width={"100%"}>
-                <ButtonField text= {"Continue"} hyperLink={url}/>
+        <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} flexDirection={"column"}>
+            <Typography width={"100%"}>
+                This decentralized application requires users to stake $ICP in order to receive voting power, 
+                rewards and loans. You are being redirected to a third party service to purchase $ICP that will be sent automatically 
+                to your wallet here within this application upon completion of purchase.
+            </Typography>
+            <Grid xs={12} display={"flex"}  justifyContent={"center"} alignItems={"center"} width={"100%"} marginTop={"10px"}>
+                <ButtonField text= {"Continue"} hyperLink={url} />
             </Grid>
         </Grid>
     )

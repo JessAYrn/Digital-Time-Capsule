@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react";
 import { AppContext } from "../../Context";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import InputBox from "../Fields/InputBox";
-import { icpWalletAddressHasProperFormat, isANumber, round8Decimals, shortenHexString, fromHexString, fromE8s, toE8s  } from "../../functionsAndConstants/Utils";
+import { icpWalletAddressHasProperFormat, principalHasProperFormat, isANumber, round8Decimals, shortenHexString, fromHexString, fromE8s, toE8s  } from "../../functionsAndConstants/Utils";
 import ButtonField from "../Fields/Button";
 import CenterFocusWeakIcon from '@mui/icons-material/CenterFocusWeak';
 import QrReaderContent  from "./ScanQrCodeModal";
@@ -10,13 +10,6 @@ import { INPUT_BOX_FORMATS, e8sInOneICP } from "../../functionsAndConstants/Cons
 import DataField from "../Fields/DataField";
 
 const SendCrypto = (props) => {
-    
-    const { 
-        onClickCancel,
-        setModalIsOpen,
-        setIsLoadingModal
-    } = props
-
     const [hasError_1, setHasError_1] = useState(false);
     const [hasError_2, setHasError_2] = useState(false);
     const [recipientAddress, setRecipientAddress] = useState("");
@@ -24,10 +17,10 @@ const SendCrypto = (props) => {
     const [showSummary, setShowSummary] = useState(false);
     const [numberInput, setNumberInput] = useState(null);
 
-    const { walletState, actorState } = useContext(AppContext);
+    const { walletState, actorState, setModalIsOpen, setModalIsLoading } = useContext(AppContext);
 
     const onChangeRecipientAddress = (recipient) => {
-        setHasError_1(!recipient  || !icpWalletAddressHasProperFormat(recipient))
+        setHasError_1(!recipient  || (!icpWalletAddressHasProperFormat(recipient) && !principalHasProperFormat(recipient)));
         setRecipientAddress(recipient);
     };
 
@@ -39,11 +32,11 @@ const SendCrypto = (props) => {
 
     const onSendICP = async () => {
         setModalIsOpen,
-        setIsLoadingModal(true);
+        setModalIsLoading(true);
         const e8s = toE8s(numberInput);
         const accountId = fromHexString(recipientAddress);
         const result = await actorState.backendActor.transferICP(e8s, accountId);
-        setIsLoadingModal(false);
+        setModalIsLoading(false);
         setModalIsOpen(false);
         if("err" in result){
             alert("Error: " + Object.keys(result.err)[0]);
@@ -85,7 +78,7 @@ const SendCrypto = (props) => {
                                 <InputBox
                                     hasError={hasError_1}
                                     label={"Recipient: "}
-                                    rows={"1"}
+                                    rows={"10"}
                                     onChange={onChangeRecipientAddress}
                                     value={recipientAddress}
                                     width={"100%"}
@@ -108,7 +101,7 @@ const SendCrypto = (props) => {
                                 <InputBox
                                     hasError={hasError_2}
                                     label={"Amount: "}
-                                    rows={"1"}
+                                    rows={"10"}
                                     onChange={onChangeAmount}
                                     value={numberInput}
                                     parseNumber={parseFloat}
@@ -125,11 +118,6 @@ const SendCrypto = (props) => {
                                 alignItems={'center'}
                                 width={"100%"}
                             >
-                                <ButtonField
-                                    paperSx={{margin: "20px", width: "90px"}}
-                                    text={"cancel"}
-                                    onClick={onClickCancel}
-                                />
                                 <ButtonField
                                     paperSx={{margin: "20px", width: "90px"}}
                                     text={"summary"}
