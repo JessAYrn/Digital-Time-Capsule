@@ -59,14 +59,15 @@ shared actor class User() = this {
     };
 
     public query({caller}) func hasAccessGranted() : async Bool {
-        if(Principal.equal(Principal.fromText(daoMetaData_v4.founder), caller )){ return true; };
+        if(daoMetaData_v4.founder == "Null"){ return true; };
         let requestsForAccessMap = HashMap.fromIter<Text, MainTypes.Approved>(Iter.fromArray(daoMetaData_v4.requestsForAccess), Iter.size(Iter.fromArray(daoMetaData_v4.requestsForAccess)), Text.equal,Text.hash);
         switch(requestsForAccessMap.get(Principal.toText(caller))){ case null { return false}; case(?approved){ return approved;}};
     };
     
     public shared({ caller }) func create (userName: Text) : async Result.Result<MainTypes.AmountAccepted, JournalTypes.Error> {
         let amountAccepted = await MainMethods.create(caller, userName, userProfilesMap_v2, daoMetaData_v4);
-        let updatedDaoMetaData = await CanisterManagementMethods.removeFromRequestsList([Principal.toText(caller)], daoMetaData_v4);
+        var updatedDaoMetaData = await CanisterManagementMethods.removeFromRequestsList([Principal.toText(caller)], daoMetaData_v4);
+        if(daoMetaData_v4.founder == "Null") { updatedDaoMetaData := { updatedDaoMetaData with founder = Principal.toText(caller); admin = [(Principal.toText(caller), {percentage = 100})]} };
         switch(amountAccepted){
             case(#ok(amount)){ daoMetaData_v4 := updatedDaoMetaData; return #ok(amount); };
             case(#err(e)){ return #err(e); };
@@ -243,7 +244,7 @@ shared actor class User() = this {
         daoMetaData_v4 := {daoMetaData_v4 with frontEndPrincipal};
     };
 
-    public shared func configureApp(founder: Text) : async Result.Result<(), JournalTypes.Error> {
+    public shared func configureApp() : async Result.Result<(), JournalTypes.Error> {
         let canConfigureApp = CanisterManagementMethods.canConfigureApp(daoMetaData_v4);
         if(not canConfigureApp){ return #err(#NotAuthorized); };
         daoMetaData_v4 := {daoMetaData_v4 with backEndPrincipal = Principal.toText(Principal.fromActor(this))};
@@ -252,9 +253,7 @@ shared actor class User() = this {
         let managerCanister : Manager.Manager = actor(managerCanisterPrincipal);
         await managerCanister.loadRelease();
         let defaultControllers = [Principal.fromText(backEndPrincipal), Principal.fromText(managerCanisterPrincipal)];
-        let founderPrincipal = Principal.fromText(founder);
-        let admin = [(Principal.toText(founderPrincipal), {percentage = 100})];
-        daoMetaData_v4 := { daoMetaData_v4 with founder; admin; defaultControllers; };
+        daoMetaData_v4 := { daoMetaData_v4 with defaultControllers; };
 
         ignore createTreasuryCanister();
         ignore createFrontEndCanister();
@@ -679,7 +678,7 @@ shared actor class User() = this {
         userProfilesArray_v2 := []; 
         proposalsArray_v2 := [];
         ignore recurringTimer<system>(#seconds (24 * 60 * 60), heartBeat_unshared);
-        ignore recurringTimer<system>(#seconds (60 * 60), finalizeAllEligibleProposals);
+        ignore recurringTimer<system>(#seconds (60), finalizeAllEligibleProposals);
         ignore recurringTimer<system>(#seconds (60 * 60), heartBeat_hourly);
         ignore recurringTimer<system>(#seconds (30), updateUsersTxHistory);
 

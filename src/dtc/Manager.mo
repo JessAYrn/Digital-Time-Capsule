@@ -106,6 +106,7 @@ shared(msg) actor class Manager (principal : Principal) = this {
                 };
             };
         };
+        currentVersionInstalled := currentVersionLoaded;
         newVersionAvailable := false;
     };
 
