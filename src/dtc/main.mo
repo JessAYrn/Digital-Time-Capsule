@@ -365,22 +365,9 @@ shared actor class User() = this {
         let managerCanister: Manager.Manager = actor(daoMetaData_v4.managerCanisterPrincipal);
         let loadCompleted = await managerCanister.getIsLoadingComplete();
         if(not loadCompleted) throw Error.reject("Load not completed");
-        await updateCanistersExceptBackend(); 
-        ignore managerCanister.scheduleBackendCanisterToBeUpdated();
-    };
-
-    private func updateCanistersExceptBackend(): async (){
-        let managerCanister: Manager.Manager = actor(daoMetaData_v4.managerCanisterPrincipal);
-        await CanisterManagementMethods.installCode_managerCanister(daoMetaData_v4);
-        ignore await managerCanister.installCode_frontendCanister(daoMetaData_v4, #upgrade(?{skip_pre_upgrade = ?false}));
-        await managerCanister.installCode_journalCanisters(Iter.toArray(userProfilesMap_v2.entries()), #upgrade(?{skip_pre_upgrade = ?false}));
-        await managerCanister.installCode_treasuryCanister(daoMetaData_v4, #upgrade(?{skip_pre_upgrade = ?false}));
-    };
-
-    public shared({caller}) func scheduleCanistersToBeUpdatedExceptBackend(): async () {
-        if( Principal.toText(caller) != daoMetaData_v4.managerCanisterPrincipal) { throw Error.reject("Unauthorized access."); };
-        let {setTimer} = Timer;
-        ignore setTimer<system>(#nanoseconds(1), updateCanistersExceptBackend);
+        let managerCanisterWasmModule = await managerCanister.getReleaseModule(#Manager);
+        await CanisterManagementMethods.installCode_(?Principal.fromActor(this), managerCanisterWasmModule, Principal.fromText(daoMetaData_v4.managerCanisterPrincipal), #upgrade(?{skip_pre_upgrade = ?false}));
+        ignore managerCanister.installCurrentVersionLoaded(daoMetaData_v4, Iter.toArray(userProfilesMap_v2.entries()), #upgrade(?{skip_pre_upgrade = ?false}));
     };
 
     private func toggleSupportMode() : async Result.Result<(),JournalTypes.Error>{
@@ -390,21 +377,16 @@ shared actor class User() = this {
     };
 
     public composite query({ caller }) func getNotifications(): async NotificationsTypes.Notifications{
-        let userProfile = userProfilesMap_v2.get(caller);
-        switch(userProfile){
-            case null {throw Error.reject("user profile not found")};
-            case(?profile){
-                let managerCanister : Manager.Manager = actor(daoMetaData_v4.managerCanisterPrincipal);
-                let userCanister: Journal.Journal = actor(Principal.toText(profile.canisterId));
-                let userNotifications = await userCanister.getNotifications();
-                let notificationsBuffer = Buffer.fromArray<NotificationsTypes.Notification>(userNotifications);
-                let currentVersions = await managerCanister.getCurrentVersions();
-                let nextStableVersion = await managerCanister.getWhatIsNextStableReleaseVersion();
-                let text = Text.concat("New Stable Version Availabe: Version #", Nat.toText(nextStableVersion.number));
-                if(nextStableVersion.number > currentVersions.currentVersionInstalled.number) notificationsBuffer.add({text; key = null});
-                return Buffer.toArray(notificationsBuffer);
-            };
-        };
+        let ?userProfile = userProfilesMap_v2.get(caller) else {throw Error.reject("user profile not found")};
+        let managerCanister : Manager.Manager = actor(daoMetaData_v4.managerCanisterPrincipal);
+        let userCanister: Journal.Journal = actor(Principal.toText(userProfile.canisterId));
+        let userNotifications = await userCanister.getNotifications();
+        let notificationsBuffer = Buffer.fromArray<NotificationsTypes.Notification>(userNotifications);
+        let {currentVersionLoaded} = await managerCanister.getCurrentVersions();
+        let newReleaseAvailable = await managerCanister.hasNewRelease();
+        let text = Text.concat("New Stable Version Availabe: Version #", Nat.toText(currentVersionLoaded.number + 1 ));
+        if(newReleaseAvailable) notificationsBuffer.add({text; key = null});
+        return Buffer.toArray(notificationsBuffer);
     };
 
     public shared({ caller }) func clearJournalNotifications(): async (){

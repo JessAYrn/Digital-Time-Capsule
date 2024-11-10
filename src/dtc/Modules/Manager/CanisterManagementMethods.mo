@@ -3,7 +3,6 @@ import Buffer "mo:base/Buffer";
 import Array "mo:base/Array";
 import HashMap "mo:base/HashMap";
 import Iter "mo:base/Iter";
-import AssetManagementFunctions "../../Modules/AssetCanister/AssetManagementFunctions";
 import Text "mo:base/Text";
 import Principal "mo:base/Principal";
 import IC "../../Types/IC/types";
@@ -13,97 +12,27 @@ module{
     
     private let ic : IC.Self = actor "aaaaa-aa";
 
-    public func installCodeJournalWasms( 
-        wasmModule: Blob, 
-        profilesArray : [(Principal, {canisterId: Principal})],
-        mode: {#upgrade: ?{skip_pre_upgrade: ?Bool}; #install; #reinstall}
-    ): 
-    async () {
-        let profilesSize = profilesArray.size();
-        var index = 0;
-        while(index < profilesSize){
-            let (_, profile) = profilesArray[index];
-            ignore installCode_(null, wasmModule, profile.canisterId, mode);
-            index += 1;
-        };
-    };
-
-    public func installCodeBackendWasm( 
-        backEndPrincipal: Text, 
-        wasmModule: Blob,
-        mode: {#upgrade: ?{skip_pre_upgrade: ?Bool}; #install; #reinstall}
-    ): async (){
-        let backEndPrincipalBlob = Principal.fromText(backEndPrincipal);
-        await installCode_(null, wasmModule, backEndPrincipalBlob, mode);
-    };
-
-    public func installCodeTreasuryWasm( 
-        daoMetaData: {treasuryCanisterPrincipal: Text; backEndPrincipal: Text;}, 
-        wasmModule: Blob,
-         mode: {#upgrade: ?{skip_pre_upgrade: ?Bool}; #install; #reinstall}
-    ): async (){
-        let {treasuryCanisterPrincipal; backEndPrincipal;} = daoMetaData;
-        let treasuryCanisterBlob = Principal.fromText(treasuryCanisterPrincipal);
-        let backEndPrincipalBlob = Principal.fromText(backEndPrincipal);
-        await installCode_(?backEndPrincipalBlob, wasmModule, treasuryCanisterBlob, mode);
-    };
-
-
-    public func installFrontendWasm( 
-        daoMetaData: {frontEndPrincipal: Text}, 
-        wasmModule: Blob,
-        mode: {#upgrade: ?{skip_pre_upgrade: ?Bool}; #install; #reinstall}
-    ): async (){
-        let {frontEndPrincipal} = daoMetaData;
-        let frontEndPrincipalBlob = Principal.fromText(frontEndPrincipal);
-        await installCode_(null, wasmModule, frontEndPrincipalBlob, mode);
-    };
-
-    public func uploadAssetsToFrontEndCanister(canisterData: {frontEndPrincipal: Text}, release: WasmStore.Release) : 
-    async ([AssetCanister.BatchOperationKind]) {
-        let {frontEndPrincipal} = canisterData;
+    public func uploadAssetsToFrontEndCanister(frontEndPrincipal: Text, assets: WasmStore.Assets) : async ([AssetCanister.BatchOperationKind]) {
         let frontendCanister: AssetCanister.Interface = actor(frontEndPrincipal);
 
         // clearing all of the assets from the canister
-        let batch_id_for_clearing_operation = await frontendCanister.create_batch({});
-        let batch_operation_clear_array: [AssetCanister.BatchOperationKind] = [#Clear({})];
-        await frontendCanister.commit_batch({
-            batch_id = batch_id_for_clearing_operation.batch_id;
-            operations = batch_operation_clear_array;
-        });
+        let {batch_id = batch_id_for_clearing_assets} = await frontendCanister.create_batch({});
+        await frontendCanister.commit_batch({ batch_id = batch_id_for_clearing_assets; operations = [#Clear({})]; });
 
         // adding the new assets to the assets canister.
-        let {batch_id} = await frontendCanister.create_batch({});
+        let {batch_id = batch_id_for_adding_assets} = await frontendCanister.create_batch({});
 
         let batchOperationsBuffer = Buffer.Buffer<AssetCanister.BatchOperationKind>(1);
 
-        //pulling the new assets from the latest release.
-        let {assets} = release;
-
-        let numberOfAssets = assets.size();
-
-        var index_ = 0;
-
-        while(index_ < numberOfAssets){
-            let (key, assetArgs) = assets[index_];
-            let { allow_raw_access; chunks; content_type; enable_aliasing; headers; max_age;} = assetArgs;
-            let batch_operation_create = await AssetManagementFunctions.getCreateAssetBatchOperation({
-                key;
-                content_type;
-                enable_aliasing;
-                headers;
-                max_age;
-                allow_raw_access; 
-            });
-            batchOperationsBuffer.add(batch_operation_create);
-            let numberOfChunks = chunks.size();
-            var index__ = 0;
+        for((key, assetData) in Iter.fromArray(assets)){
+            let { allow_raw_access; chunks; content_type; enable_aliasing; headers; max_age;} = assetData;
+            batchOperationsBuffer.add(#CreateAsset({ key; content_type; enable_aliasing; headers; max_age; allow_raw_access; }));
             let chunksHashMap = HashMap.HashMap<AssetCanister.Content_encoding, (AssetCanister.Sha256, [AssetCanister.ChunkId])>(1, Text.equal, Text.hash);
 
-            while(index__ < numberOfChunks){
-                let (_, (content_encoding, sha256, content)) = chunks[index__];
-                let {chunk_id} = await frontendCanister.create_chunk({content; batch_id;});
+            for((_, (content_encoding, sha256, content)) in Iter.fromArray(chunks)){
+                let {chunk_id} = await frontendCanister.create_chunk({content; batch_id = batch_id_for_adding_assets;});
                 let chunkIdsArray = chunksHashMap.get(content_encoding);
+                
                 switch(chunkIdsArray){
                     case null{ chunksHashMap.put(content_encoding, (sha256, [chunk_id])); };
                     case(?(sha256, chunk_ids_array)){
@@ -112,48 +41,22 @@ module{
                         chunksHashMap.put(content_encoding,(sha256, Buffer.toArray(buffer)));
                     };
                 };
-                index__ += 1;
             };
 
             let chunksArraysByContentEncoding : [(AssetCanister.Content_encoding, (AssetCanister.Sha256,[AssetCanister.ChunkId]))] = 
             Iter.toArray(chunksHashMap.entries());
 
-            let numberOfChunksArrays = chunksArraysByContentEncoding.size();
-            index__ := 0;
-
-            while(index__ < numberOfChunksArrays){
-                let (content_encoding, (sha256, chunk_ids)) = chunksArraysByContentEncoding[index__];
-                let batch_operation_set_asset_content = await AssetManagementFunctions.getSetAssetBatchOperation({
-                    key; 
-                    sha256; 
-                    chunk_ids; 
-                    content_encoding;
-                });
-
-                batchOperationsBuffer.add(batch_operation_set_asset_content);
-                index__ +=1;
+            for((content_encoding, (sha256, chunk_ids)) in Iter.fromArray(chunksArraysByContentEncoding)){
+                batchOperationsBuffer.add(#SetAssetContent({ key; sha256; chunk_ids; content_encoding;}));
             };
-
-            index_ += 1;
         };
         let operations = Buffer.toArray(batchOperationsBuffer);
-
-        await frontendCanister.commit_batch({
-            batch_id;
-            operations;
-        });
-
+        await frontendCanister.commit_batch({ batch_id = batch_id_for_adding_assets; operations; });
         return operations;
     };
 
-    private func installCode_ (
-        argument: ?Principal, 
-        wasm_module: Blob, 
-        canister_id: Principal, 
-        mode: {#upgrade: ?{skip_pre_upgrade: ?Bool}; #install; #reinstall}
-    ) : async () {
-        var arg = to_candid(null);
-        switch(argument){ case null {}; case (?argument_){ arg := to_candid(argument_); } };
+    public func installCode_ (argument: ?Principal, wasm_module: Blob, canister_id: Principal, mode: {#upgrade: ?{skip_pre_upgrade: ?Bool}; #install; #reinstall}) : async () {
+        let arg = switch(argument){ case null { to_candid(null) }; case (?argument_){ to_candid(argument_); } };
         let currentSnapshots = await ic.list_canister_snapshots({canister_id});
         let mostRecentCanisterSnapshot: ?IC.snapshot_id = switch(Array.size(currentSnapshots) > 0){ case true { ?currentSnapshots[0].id }; case false { null }; };
         ignore await ic.take_canister_snapshot({canister_id; replace_snapshot = mostRecentCanisterSnapshot});

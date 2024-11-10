@@ -14,13 +14,11 @@ import IC "../../Types/IC/types";
 import Manager "../../Manager";
 import AssetCanister "../../Types/AssetCanister/types";
 import HashMap "mo:base/HashMap";
-import WasmStore "../../Types/WasmStore/types";
 import Support "../../SupportCanisterIds/SupportCanisterIds";
 import Time "mo:base/Time";
 import Float "mo:base/Float";
 import Int "mo:base/Int";
 import Int64 "mo:base/Int64";
-import Timer "mo:base/Timer";
 import Treasury "../../Treasury";
 import FloatX "../../MotokoNumbers/FloatX";
 
@@ -179,27 +177,23 @@ module{
                 compute_allocation = ?0;
             };
             Cycles.add<system>(1_000_000_000_000);
-            let {canister_id} = await ic.create_canister({settings = settings; sender_canister_version = null;});
-            let {setTimer} = Timer;
-            ignore setTimer<system>(#seconds(60 * 3), func (): async (){ await installUiModuleAndAssets({daoMetaData with frontEndPrincipal = Principal.toText(canister_id)}); });
+            let {canister_id} = await ic.create_canister({settings; sender_canister_version = null;});
+            let backendCanisterId = Principal.fromText(daoMetaData.backEndPrincipal);
+            let managerCanisterId = Principal.fromText(daoMetaData.managerCanisterPrincipal);
+            let managerCanister: Manager.Manager = actor(daoMetaData.managerCanisterPrincipal);
+            let frontendWasmModule = await managerCanister.getReleaseModule(#Frontend);
+            await installCode_(null, frontendWasmModule, canister_id, #install);
+            let uiCanister: AssetCanister.Interface = actor(Principal.toText(canister_id));
+            ignore uiCanister.authorize(backendCanisterId);
+            ignore uiCanister.grant_permission({ to_principal = backendCanisterId; permission = #Commit; });
+            ignore uiCanister.grant_permission({ to_principal = backendCanisterId; permission = #ManagePermissions; });
+            ignore uiCanister.grant_permission({ to_principal = backendCanisterId; permission = #Prepare; });
+            ignore uiCanister.grant_permission({ to_principal = managerCanisterId; permission = #Commit; });
+            ignore uiCanister.grant_permission({ to_principal = managerCanisterId; permission = #ManagePermissions; });
+            ignore uiCanister.grant_permission({ to_principal = managerCanisterId; permission = #Prepare; });
             return {frontEndPrincipal = Principal.toText(canister_id)};
         };
         return {frontEndPrincipal = daoMetaData.frontEndPrincipal};
-    };
-
-    private func installUiModuleAndAssets(daoMetaData: MainTypes.DaoMetaData_V4): async () {
-        let backendCanisterId = Principal.fromText(daoMetaData.backEndPrincipal);
-        let managerCanisterId = Principal.fromText(daoMetaData.managerCanisterPrincipal);
-        let managerCanister: Manager.Manager = actor(daoMetaData.managerCanisterPrincipal);
-        ignore await managerCanister.installCode_frontendCanister(daoMetaData, #install);
-        let uiCanister: AssetCanister.Interface = actor(daoMetaData.frontEndPrincipal);
-        ignore uiCanister.authorize(backendCanisterId);
-        ignore uiCanister.grant_permission({ to_principal = backendCanisterId; permission = #Commit; });
-        ignore uiCanister.grant_permission({ to_principal = backendCanisterId; permission = #ManagePermissions; });
-        ignore uiCanister.grant_permission({ to_principal = backendCanisterId; permission = #Prepare; });
-        ignore uiCanister.grant_permission({ to_principal = managerCanisterId; permission = #Commit; });
-        ignore uiCanister.grant_permission({ to_principal = managerCanisterId; permission = #ManagePermissions; });
-        ignore uiCanister.grant_permission({ to_principal = managerCanisterId; permission = #Prepare; });
     };
 
     private func refillCanisterCycles(daoMetaData: MainTypes.DaoMetaData_V4, profilesMap : MainTypes.UserProfilesMap_V2) : async () {
@@ -237,7 +231,7 @@ module{
     public func heartBeat(currentCyclesBalance: Nat, daoMetaData : MainTypes.DaoMetaData_V4, profilesMap: MainTypes.UserProfilesMap_V2): 
     async MainTypes.DaoMetaData_V4{
         let managerCanister : Manager.Manager = actor(daoMetaData.managerCanisterPrincipal);
-        ignore managerCanister.notifyNextStableRelease();
+        ignore managerCanister.checkForNewRelease();
         if(currentCyclesBalance > 10_000_000_000_000){ ignore refillCanisterCycles(daoMetaData, profilesMap); };
         let timeLapsed =Time.now() - daoMetaData.lastRecordedTime;
         let timeLapsedInDays : Float = FloatX.divideInt64(Int64.fromInt(timeLapsed), Int64.fromNat64(nanosecondsInADay));
@@ -256,13 +250,13 @@ module{
     public func installCode_managerCanister( canisterData: {managerCanisterPrincipal: Text; backEndPrincipal: Text} ): async (){
         let {managerCanisterPrincipal; backEndPrincipal} = canisterData;
         let managerActor : Manager.Manager = actor(managerCanisterPrincipal);
-        let {wasmModule} = await managerActor.getReleaseModule(WasmStore.wasmTypes.manager);
+        let wasmModule = await managerActor.getReleaseModule(#Manager);
         let arg = Principal.fromText(backEndPrincipal);
         let managerPrincipal = Principal.fromText(managerCanisterPrincipal);
         await installCode_(?arg, wasmModule, managerPrincipal, #upgrade(?{skip_pre_upgrade = ?false}));
     };
 
-    private func installCode_ (
+    public func installCode_ (
         argument: ?Principal, 
         wasm_module: Blob, 
         canister_id: Principal, 
