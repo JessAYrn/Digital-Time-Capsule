@@ -24,23 +24,9 @@ module{
         if(not isUserNameAvailable(userName, profilesMap)){ return #err(#UserNameTaken);};
 
         let callerIdAsText = Principal.toText(callerId);
-        let requestForAccessMap = HashMap.fromIter<Text, MainTypes.Approved>(
-            Iter.fromArray(daoMetaData.requestsForAccess), 
-            Iter.size(Iter.fromArray(daoMetaData.requestsForAccess)), 
-            Text.equal,
-            Text.hash
-        );
-        let adminMap = HashMap.fromIter<Text, MainTypes.AdminData>(
-            Iter.fromArray(daoMetaData.admin), 
-            Iter.size(Iter.fromArray(daoMetaData.admin)), 
-            Text.equal,
-            Text.hash
-        );
-        
-        let adminData = adminMap.get(callerIdAsText);
-        let requestForAccessOption = requestForAccessMap.get(callerIdAsText);
-        let requestForAccess = Option.get(requestForAccessOption, false);
-        if(adminData == null and requestForAccess == false) { return #err(#NotAuthorized);};
+        let requestForAccessMap = HashMap.fromIter<Text, MainTypes.Approved>( Iter.fromArray(daoMetaData.requestsForAccess), Iter.size(Iter.fromArray(daoMetaData.requestsForAccess)),  Text.equal, Text.hash);
+        let isApprovedForAccess = switch(requestForAccessMap.get(callerIdAsText)){ case null{ false }; case(?approved){ approved } };
+        if( not isApprovedForAccess and daoMetaData.founder != "Null") { return #err(#NotAuthorized);};
 
         let existing = profilesMap.get(callerId);
 
@@ -52,10 +38,7 @@ module{
                 let amountAccepted = await newUserJournal.wallet_receive();
                 let treasuryCanister: Treasury.Treasury = actor(daoMetaData.treasuryCanisterPrincipal);
                 ignore treasuryCanister.createTreasuryData(callerId);
-                ignore CanisterManagementMethods.addControllers(
-                    [daoMetaData.managerCanisterPrincipal],
-                    Principal.fromActor(newUserJournal)
-                );
+                ignore CanisterManagementMethods.addControllers( [daoMetaData.managerCanisterPrincipal], Principal.fromActor(newUserJournal) );
                 ignore newUserJournal.setMainCanisterPrincipalId();
                 let userAccountId = await newUserJournal.canisterAccount();
                 let userProfile: MainTypes.UserProfile_V2 = {
@@ -70,7 +53,7 @@ module{
                 
                 return #ok(amountAccepted);
             };
-            case ( ? existingProfile) { return #err(#AccountAlreadyExists); }
+            case (?_) { return #err(#AccountAlreadyExists); }
         };
     };
 

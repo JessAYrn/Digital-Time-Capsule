@@ -105,7 +105,7 @@ const WalletPage = (props) => {
                 justifyContent="center" 
                 alignItems="center" 
             >
-                {walletState.walletData.txHistory.data.length && 
+                {!!walletState?.walletData?.txHistory?.data?.length && 
                 <AccordionField>
                     {walletState.walletData.txHistory.data.map(([mapKey, tx]) => {
                         const {balanceDelta, increase, recipient, timeStamp, source} = tx;

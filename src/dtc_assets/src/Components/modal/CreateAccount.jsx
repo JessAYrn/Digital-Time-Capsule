@@ -20,7 +20,6 @@ const CreateAccount = (props) => {
     const onSubmit = async () => {
         setModalIsLoading(true);
         const response = await actorState.backendActor.create(username);
-        setModalIsLoading(false);
         if(response.ok) {
             await reloadDataIntoReduxStores();
             setModalIsOpen(false);
@@ -29,6 +28,7 @@ const CreateAccount = (props) => {
             setUsername("");
             setHasError(true);
         }
+        setModalIsLoading(false);
     };
 
     return(
