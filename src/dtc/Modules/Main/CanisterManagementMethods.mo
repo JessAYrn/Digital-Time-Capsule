@@ -183,14 +183,19 @@ module{
             let managerCanister: Manager.Manager = actor(daoMetaData.managerCanisterPrincipal);
             let frontendWasmModule = await managerCanister.getReleaseModule(#Frontend);
             await installCode_(null, frontendWasmModule, canister_id, #install);
+
             let uiCanister: AssetCanister.Interface = actor(Principal.toText(canister_id));
+
+            await uiCanister.grant_permission({ to_principal = managerCanisterId; permission = #Commit; });
+            await uiCanister.grant_permission({ to_principal = managerCanisterId; permission = #ManagePermissions; });
+            await uiCanister.grant_permission({ to_principal = managerCanisterId; permission = #Prepare; });
+            
+            ignore managerCanister.uploadAssetsToFrontendCanister(Principal.toText(canister_id));
             ignore uiCanister.authorize(backendCanisterId);
             ignore uiCanister.grant_permission({ to_principal = backendCanisterId; permission = #Commit; });
             ignore uiCanister.grant_permission({ to_principal = backendCanisterId; permission = #ManagePermissions; });
             ignore uiCanister.grant_permission({ to_principal = backendCanisterId; permission = #Prepare; });
-            ignore uiCanister.grant_permission({ to_principal = managerCanisterId; permission = #Commit; });
-            ignore uiCanister.grant_permission({ to_principal = managerCanisterId; permission = #ManagePermissions; });
-            ignore uiCanister.grant_permission({ to_principal = managerCanisterId; permission = #Prepare; });
+            
             return {frontEndPrincipal = Principal.toText(canister_id)};
         };
         return {frontEndPrincipal = daoMetaData.frontEndPrincipal};

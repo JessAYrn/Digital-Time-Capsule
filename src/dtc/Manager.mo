@@ -16,7 +16,7 @@ import CanisterManagementMethods "/Modules/Manager/CanisterManagementMethods";
 
 shared(msg) actor class Manager (principal : Principal) = this {
 
-    private stable var currentVersionLoaded : { number: Nat; } = { number = 192; };
+    private stable var currentVersionLoaded : { number: Nat; } = { number = 1; };
     private stable var currentVersionInstalled : {number: Nat;} = currentVersionLoaded;
     private stable var newVersionAvailable : Bool = false;
     private stable var mainCanisterId : Text = Principal.toText(principal); 
@@ -66,6 +66,10 @@ shared(msg) actor class Manager (principal : Principal) = this {
         if( Principal.toText(caller) != mainCanisterId and Principal.toText(caller) != Principal.toText(Principal.fromActor(this))){ 
             throw Error.reject("Unauthorized access.");
         }; return {currentVersionInstalled; currentVersionLoaded;};
+    };
+
+    public func uploadAssetsToFrontendCanister(frontEndPrincipal: Text): async (){
+        ignore await CanisterManagementMethods.uploadAssetsToFrontEndCanister(frontEndPrincipal, release.assets);   
     };
 
     public shared({caller}) func installCurrentVersionLoaded(
@@ -118,6 +122,7 @@ shared(msg) actor class Manager (principal : Principal) = this {
     };
 
     private func loadModules(nextVersionToUpgradeTo: Nat) : async (){
+        loadProgress := { loadProgress with numberOfModulesLoaded = 0; };
         let wasmStore: WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
         let backendWasm = await wasmStore.getModule({version = nextVersionToUpgradeTo; wasmType = #Backend});
         let frontendWasm = await wasmStore.getModule({version = nextVersionToUpgradeTo; wasmType = #Frontend});
@@ -132,7 +137,7 @@ shared(msg) actor class Manager (principal : Principal) = this {
     private func loadAssets(nextVersionToUpgradeTo: Nat): async () {
         let wasmStore: WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
         let assetsKeys = await wasmStore.getAssetKeys({version = nextVersionToUpgradeTo});
-        loadProgress := { loadProgress with totalNumberOfAssets = assetsKeys.size();};
+        loadProgress := { loadProgress with totalNumberOfAssets = assetsKeys.size(); numberOfAssetsLoaded = 0};
         let assetsMap = HashMap.HashMap<WasmStore.Key, WasmStore.AssetData>(assetsKeys.size(), Text.equal, Text.hash);
 
         func loadAsset(key: Text): async (){
@@ -154,7 +159,7 @@ shared(msg) actor class Manager (principal : Principal) = this {
             };
         };
 
-        for(key in Iter.fromArray(assetsKeys)) ignore loadAsset(key);
+        for(key in Iter.fromArray(assetsKeys)) await loadAsset(key);
     };
 
     public shared({caller}) func checkForNewRelease(): async() {
