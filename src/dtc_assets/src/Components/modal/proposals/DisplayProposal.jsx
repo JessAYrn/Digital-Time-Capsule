@@ -267,7 +267,7 @@ const DisplayProposal = (props) => {
                 { actionType === PROPOSAL_ACTIONS.CancelFundingCampaign && <CancelFundingCampaign action={actionType} payload={payload} disabled={true}/> }
                 { actionType === PROPOSAL_ACTIONS.WithdrawFromMultiSigWallet && <WithdrawFromMultiSigWallet action={actionType} payload={payload} disabled={true}/> }
 
-                { timeRemainingInNanoseconds > 0 && <DataField
+                { !!(timeRemainingInNanoseconds > 0) && <DataField
                     label={'Voting Ends in: '}
                     text={`${round2Decimals(timeRemainingInHours)} hours`}
                     disabled={true}

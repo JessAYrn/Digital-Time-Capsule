@@ -16,13 +16,14 @@ import CanisterManagementMethods "/Modules/Manager/CanisterManagementMethods";
 
 shared(msg) actor class Manager (principal : Principal) = this {
 
-    private stable var currentVersionLoaded : { number: Nat; } = { number = 1; };
+    private stable var currentVersionLoaded : { number: Nat; } = { number = 2; };
     private stable var currentVersionInstalled : {number: Nat;} = currentVersionLoaded;
     private stable var newVersionAvailable : Bool = false;
     private stable var mainCanisterId : Text = Principal.toText(principal); 
     private var capacity = 1_000_000_000_000;
     private stable var release : WasmStore.Release = { assets = []; wasmModules = []; };
-    private stable var loadProgress : { totalNumberOfAssets : Nat; numberOfAssetsLoaded : Nat; totalNumberOfModules : Nat; numberOfModulesLoaded : Nat; } = { totalNumberOfAssets = 0; numberOfAssetsLoaded = 0; totalNumberOfModules = 5; numberOfModulesLoaded = 0; };
+    private var releaseAssetsHashMap: HashMap.HashMap<WasmStore.Key, WasmStore.AssetData> = HashMap.fromIter(Iter.fromArray(release.assets), Iter.size(Iter.fromArray(release.assets)), Text.equal, Text.hash);
+    private stable var expectedNumberOfAssetsAndModules : { totalNumberOfAssets : Nat; totalNumberOfModules : Nat; } = { totalNumberOfAssets = 0; totalNumberOfModules = 5; };
     private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
 
     public shared({caller}) func wallet_balance() : async Nat {
@@ -59,7 +60,7 @@ shared(msg) actor class Manager (principal : Principal) = this {
         if(Principal.toText(caller) != mainCanisterId and Principal.toText(caller) != Principal.toText(Principal.fromActor(this))){ 
             throw Error.reject("Unauthorized access.");
         };
-        return loadProgress.numberOfModulesLoaded == loadProgress.totalNumberOfModules and loadProgress.numberOfAssetsLoaded == loadProgress.totalNumberOfAssets;
+        return Array.size(release.wasmModules) == expectedNumberOfAssetsAndModules.totalNumberOfModules and Array.size(release.assets) == expectedNumberOfAssetsAndModules.totalNumberOfAssets;
     };
 
     public query({caller}) func getCurrentVersions(): async {currentVersionLoaded: {number: Nat;}; currentVersionInstalled: {number: Nat;};}{
@@ -114,15 +115,14 @@ shared(msg) actor class Manager (principal : Principal) = this {
         newVersionAvailable := false;
     };
 
-    public shared({caller}) func resetLoadProgress(): async () {
+    public shared({caller}) func resetReleaseData(): async () {
         if( Principal.toText(caller) != mainCanisterId and Principal.toText(caller) != Principal.toText(Principal.fromActor(this))){ 
             throw Error.reject("Unauthorized access.");
         };
-        loadProgress := { loadProgress with numberOfModulesLoaded = 0; numberOfAssetsLoaded = 0; };
+        release := {wasmModules = []; assets = []};
     };
 
     private func loadModules(nextVersionToUpgradeTo: Nat) : async (){
-        loadProgress := { loadProgress with numberOfModulesLoaded = 0; };
         let wasmStore: WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
         let backendWasm = await wasmStore.getModule({version = nextVersionToUpgradeTo; wasmType = #Backend});
         let frontendWasm = await wasmStore.getModule({version = nextVersionToUpgradeTo; wasmType = #Frontend});
@@ -131,14 +131,13 @@ shared(msg) actor class Manager (principal : Principal) = this {
         let treasuryWasm = await wasmStore.getModule({version = nextVersionToUpgradeTo; wasmType = #Treasury});
 
         release := { release with wasmModules = [journalWasm, frontendWasm, backendWasm, treasuryWasm, managerWasm]; };
-        loadProgress := { loadProgress with numberOfModulesLoaded = 5; };
     };
 
     private func loadAssets(nextVersionToUpgradeTo: Nat): async () {
         let wasmStore: WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
         let assetsKeys = await wasmStore.getAssetKeys({version = nextVersionToUpgradeTo});
-        loadProgress := { loadProgress with totalNumberOfAssets = assetsKeys.size(); numberOfAssetsLoaded = 0};
-        let assetsMap = HashMap.HashMap<WasmStore.Key, WasmStore.AssetData>(assetsKeys.size(), Text.equal, Text.hash);
+        expectedNumberOfAssetsAndModules := { expectedNumberOfAssetsAndModules with totalNumberOfAssets = assetsKeys.size();};
+        releaseAssetsHashMap := HashMap.HashMap<WasmStore.Key, WasmStore.AssetData>(assetsKeys.size(), Text.equal, Text.hash);
 
         func loadAsset(key: Text): async (){
                 
@@ -151,15 +150,14 @@ shared(msg) actor class Manager (principal : Principal) = this {
             let chunks = Buffer.toArray(ChunksBuffer);
 
             let assetDataWithoutChunks = await wasmStore.getAssetMetaDataWithoutChunksData({ version = nextVersionToUpgradeTo; key });
-            assetsMap.put(key, { assetDataWithoutChunks with chunks; });
+            releaseAssetsHashMap.put(key, { assetDataWithoutChunks with chunks; });
 
-            loadProgress := {loadProgress with numberOfAssetsLoaded = loadProgress.numberOfAssetsLoaded + 1 };
-            if(loadProgress.numberOfAssetsLoaded == loadProgress.totalNumberOfAssets){
-                release := {release with assets = Iter.toArray(assetsMap.entries())};
+            if(releaseAssetsHashMap.size() == expectedNumberOfAssetsAndModules.totalNumberOfAssets){
+                release := {release with assets = Iter.toArray(releaseAssetsHashMap.entries())};
             };
         };
 
-        for(key in Iter.fromArray(assetsKeys)) await loadAsset(key);
+        for(key in Iter.fromArray(assetsKeys)) ignore loadAsset(key);
     };
 
     public shared({caller}) func checkForNewRelease(): async() {

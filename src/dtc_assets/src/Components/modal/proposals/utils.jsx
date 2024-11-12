@@ -1,7 +1,6 @@
 export const PROPOSAL_ACTIONS = {
     AddAdmin: "AddAdmin" ,
     RemoveAdmin: "RemoveAdmin" ,
-    LoadUpgrades: "LoadUpgrades",
     InstallUpgrades: "InstallUpgrades",
     CreateFundingCampaign: "CreateFundingCampaign",
     CancelFundingCampaign: "CancelFundingCampaign",

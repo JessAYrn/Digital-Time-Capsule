@@ -148,7 +148,6 @@ module{
     public type ProposalActions_V2 = {
         #AddAdmin: {principal: Text};
         #RemoveAdmin: {principal: Text};
-        #LoadUpgrades:{};
         #InstallUpgrades: {};
         #CreateNeuron: {amount: Nat64; };
         #CreateFundingCampaign: {fundingCampaignInput: TreasuryTypes.FundingCampaignInput};

@@ -89,7 +89,7 @@ const IncreaseNeuron = (props) => {
                             }
                         />
                     </FormGroup>}
-                    {showOnBehalfOfDropdown &&
+                    {!!showOnBehalfOfDropdown &&
                         <MenuField
                             sx={{marginBottom: "20px"}}
                             xs={8}

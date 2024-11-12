@@ -46,8 +46,8 @@ shared actor class User() = this {
     private stable var frontEndCanisterBalance: Nat = 1;
     private stable var quorum: Float = 0.125;
     private var maxNumberDaoMembers : Nat = 250;
-    private var userProfilesMap_v2 : MainTypes.UserProfilesMap_V2 = HashMap.fromIter<Principal, MainTypes.UserProfile_V2>(Iter.fromArray(userProfilesArray_v2), Iter.size(Iter.fromArray(userProfilesArray_v2)), Principal.equal, Principal.hash);
-    private var proposalsMap_v2 : MainTypes.ProposalsMap_V2 = HashMap.fromIter<Nat, MainTypes.Proposal_V2>(Iter.fromArray(proposalsArray_v2), Iter.size(Iter.fromArray(proposalsArray_v2)), Nat.equal, Hash.hash);
+    private var userProfilesMap_v2 : MainTypes.UserProfilesMap_V2 = HashMap.fromIter(Iter.fromArray(userProfilesArray_v2), Iter.size(Iter.fromArray(userProfilesArray_v2)), Principal.equal, Principal.hash);
+    private var proposalsMap_v2 : MainTypes.ProposalsMap_V2 = HashMap.fromIter(Iter.fromArray(proposalsArray_v2), Iter.size(Iter.fromArray(proposalsArray_v2)), Nat.equal, Hash.hash);
     private stable var startIndexForBlockChainQuery : Nat64 = 7_356_011;
     private let ic : IC.Self = actor "aaaaa-aa";
 
@@ -256,8 +256,8 @@ shared actor class User() = this {
         daoMetaData_v4 := { daoMetaData_v4 with defaultControllers; };
 
         ignore createTreasuryCanister();
-        ignore createFrontEndCanister();
-        ignore setTimer<system>(#seconds(20 * 60), func(): async (){ ignore toggleSupportMode();});
+        ignore setTimer<system>(#seconds(5 * 60), func(): async (){ await createFrontEndCanister();});
+        ignore setTimer<system>(#seconds(10 * 60), func(): async (){ ignore toggleSupportMode();});
         return #ok(());
     };
 
@@ -311,7 +311,7 @@ shared actor class User() = this {
     };
 
     public composite query({caller}) func getCanisterData() : async Result.Result<(MainTypes.CanisterDataExport), JournalTypes.Error> {
-        let ?_ = userProfilesMap_v2.get(caller) else { return #err(#NotAuthorized) };
+        if(daoMetaData_v4.founder != "Null") { switch(userProfilesMap_v2.get(caller)){case null { return #err(#NotAuthorized) }; case(?_){}}; };
         let managerCanister : Manager.Manager = actor(daoMetaData_v4.managerCanisterPrincipal);
         let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v4.treasuryCanisterPrincipal);
         let neuronsDataArray = await treasuryCanister.getNeuronsDataArray();
@@ -356,7 +356,7 @@ shared actor class User() = this {
 
     private func loadUpgrades_(): async (){
         let managerCanister: Manager.Manager = actor(daoMetaData_v4.managerCanisterPrincipal);
-        await managerCanister.resetLoadProgress();
+        await managerCanister.resetReleaseData();
         await managerCanister.loadRelease();
     };
 
@@ -366,7 +366,7 @@ shared actor class User() = this {
         if(not loadCompleted) throw Error.reject("Load not completed");
         let managerCanisterWasmModule = await managerCanister.getReleaseModule(#Manager);
         await CanisterManagementMethods.installCode_(?Principal.fromActor(this), managerCanisterWasmModule, Principal.fromText(daoMetaData_v4.managerCanisterPrincipal), #upgrade(?{skip_pre_upgrade = ?false}));
-        ignore managerCanister.installCurrentVersionLoaded(daoMetaData_v4, Iter.toArray(userProfilesMap_v2.entries()), #upgrade(?{skip_pre_upgrade = ?false}));
+        await managerCanister.installCurrentVersionLoaded(daoMetaData_v4, Iter.toArray(userProfilesMap_v2.entries()), #upgrade(?{skip_pre_upgrade = ?false}));
     };
 
     private func toggleSupportMode() : async Result.Result<(),JournalTypes.Error>{
@@ -543,9 +543,19 @@ shared actor class User() = this {
                 daoMetaData_v4 := updatedDaoMetaData;
                 return null;    
             };
-            //still need to delete the public upgradeApp method once the frontend has been updated
-            case(#LoadUpgrades({})){ ignore loadUpgrades_(); return null; };
-            case (#InstallUpgrades({})){ ignore installUpgrades_(); return null; };
+            case (#InstallUpgrades({})){ 
+                var inSupportModePriorToUpgrade = true;
+                if(not daoMetaData_v4.supportMode) {
+                    inSupportModePriorToUpgrade := false;
+                    ignore await toggleSupportMode();
+                };
+                await loadUpgrades_();
+                ignore setTimer<system>(#seconds(5 * 60), func(): async (){ await installUpgrades_(); });
+                ignore setTimer<system>(#seconds(24 * 60 * 60), func(): async (){ 
+                    if(not inSupportModePriorToUpgrade and daoMetaData_v4.supportMode){ ignore await toggleSupportMode() }
+                });
+                return null; 
+            };
             case (#CreateNeuron({amount;})){
                 let {balances} = await treasuryCanister.getUserTreasuryData(Principal.fromText(proposer));
                 if(balances.icp.e8s < amount){ 

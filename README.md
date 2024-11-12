@@ -161,7 +161,7 @@ dfx canister --network ic info $(dfx identity --network ic get-wallet)
 
 ### command for setting a new controller for a canister
 
-dfx canister --network ic update-settings --controller <PRINCIPAL_OF_NEW_CONTROLLER> <CANISTER_ID>
+dfx canister --network ic update-settings --add-controller <PRINCIPAL_OF_NEW_CONTROLLER> <CANISTER_ID>
 
 ### Upgrade dfx SDK
 
