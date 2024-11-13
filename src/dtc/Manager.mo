@@ -12,11 +12,12 @@ import Bool "mo:base/Bool";
 import WasmStore "Types/WasmStore/types";
 import HashMap "mo:base/HashMap";
 import Array "mo:base/Array";
+import Timer "mo:base/Timer";
 import CanisterManagementMethods "/Modules/Manager/CanisterManagementMethods";
 
 shared(msg) actor class Manager (principal : Principal) = this {
 
-    private stable var currentVersionLoaded : { number: Nat; } = { number = 2; };
+    private stable var currentVersionLoaded : { number: Nat; } = { number = 3; };
     private stable var currentVersionInstalled : {number: Nat;} = currentVersionLoaded;
     private stable var newVersionAvailable : Bool = false;
     private stable var mainCanisterId : Text = Principal.toText(principal); 
@@ -50,10 +51,9 @@ shared(msg) actor class Manager (principal : Principal) = this {
         if( Principal.toText(caller) != mainCanisterId and Principal.toText(caller) != Principal.toText(Principal.fromActor(this))){ 
             throw Error.reject("Unauthorized access.");
         };
-        let nextReleaseVersion = { number = currentVersionInstalled.number + 1; };
-        await loadModules(nextReleaseVersion.number);
-        await loadAssets(nextReleaseVersion.number);
-        currentVersionLoaded := nextReleaseVersion;
+        await loadModules();
+        await loadAssets();
+        currentVersionLoaded := {number = currentVersionInstalled.number + 1};
     };
 
     public query({caller}) func getIsLoadingComplete(): async Bool {
@@ -70,6 +70,13 @@ shared(msg) actor class Manager (principal : Principal) = this {
     };
 
     public func uploadAssetsToFrontendCanister(frontEndPrincipal: Text): async (){
+        let isFinishedLoading = await getIsLoadingComplete();
+        if(not isFinishedLoading){
+            await loadAssets();
+            let {setTimer} = Timer;
+            ignore setTimer<system>(#seconds(3 * 60), func(): async (){ await uploadAssetsToFrontendCanister(frontEndPrincipal);  });
+            return;
+        };
         ignore await CanisterManagementMethods.uploadAssetsToFrontEndCanister(frontEndPrincipal, release.assets);   
     };
 
@@ -89,7 +96,7 @@ shared(msg) actor class Manager (principal : Principal) = this {
                 case(#Frontend(wasmModule)){ 
                     func upgradeFrontendCanister(): async (){
                         await CanisterManagementMethods.installCode_(null, wasmModule, Principal.fromText(frontEndPrincipal), mode);
-                        ignore await CanisterManagementMethods.uploadAssetsToFrontEndCanister(frontEndPrincipal, release.assets);   
+                        await uploadAssetsToFrontendCanister(frontEndPrincipal);   
                     };
                     ignore upgradeFrontendCanister(); 
                 };
@@ -119,25 +126,31 @@ shared(msg) actor class Manager (principal : Principal) = this {
         if( Principal.toText(caller) != mainCanisterId and Principal.toText(caller) != Principal.toText(Principal.fromActor(this))){ 
             throw Error.reject("Unauthorized access.");
         };
+        let wasmStore: WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
+        let assetsKeys = await wasmStore.getAssetKeys({version = currentVersionInstalled.number + 1});
         release := {wasmModules = []; assets = []};
+        releaseAssetsHashMap := HashMap.HashMap<WasmStore.Key, WasmStore.AssetData>(assetsKeys.size(), Text.equal, Text.hash);
     };
 
-    private func loadModules(nextVersionToUpgradeTo: Nat) : async (){
+    private func loadModules() : async (){
         let wasmStore: WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
-        let backendWasm = await wasmStore.getModule({version = nextVersionToUpgradeTo; wasmType = #Backend});
-        let frontendWasm = await wasmStore.getModule({version = nextVersionToUpgradeTo; wasmType = #Frontend});
-        let managerWasm = await wasmStore.getModule({version = nextVersionToUpgradeTo; wasmType = #Manager});
-        let journalWasm = await wasmStore.getModule({version = nextVersionToUpgradeTo; wasmType = #Journal});
-        let treasuryWasm = await wasmStore.getModule({version = nextVersionToUpgradeTo; wasmType = #Treasury});
+        let backendWasm = await wasmStore.getModule({version = currentVersionInstalled.number + 1; wasmType = #Backend});
+        let frontendWasm = await wasmStore.getModule({version = currentVersionInstalled.number + 1; wasmType = #Frontend});
+        let managerWasm = await wasmStore.getModule({version = currentVersionInstalled.number + 1; wasmType = #Manager});
+        let journalWasm = await wasmStore.getModule({version = currentVersionInstalled.number + 1; wasmType = #Journal});
+        let treasuryWasm = await wasmStore.getModule({version = currentVersionInstalled.number + 1; wasmType = #Treasury});
 
         release := { release with wasmModules = [journalWasm, frontendWasm, backendWasm, treasuryWasm, managerWasm]; };
     };
 
-    private func loadAssets(nextVersionToUpgradeTo: Nat): async () {
+    public shared({caller}) func loadAssets(): async () {
+        if( Principal.toText(caller) != mainCanisterId and Principal.toText(caller) != Principal.toText(Principal.fromActor(this))){ 
+            throw Error.reject("Unauthorized access.");
+        };
+        let nextVersionToUpgradeTo = currentVersionInstalled.number + 1;
         let wasmStore: WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
         let assetsKeys = await wasmStore.getAssetKeys({version = nextVersionToUpgradeTo});
         expectedNumberOfAssetsAndModules := { expectedNumberOfAssetsAndModules with totalNumberOfAssets = assetsKeys.size();};
-        releaseAssetsHashMap := HashMap.HashMap<WasmStore.Key, WasmStore.AssetData>(assetsKeys.size(), Text.equal, Text.hash);
 
         func loadAsset(key: Text): async (){
                 
@@ -157,7 +170,12 @@ shared(msg) actor class Manager (principal : Principal) = this {
             };
         };
 
-        for(key in Iter.fromArray(assetsKeys)) ignore loadAsset(key);
+        label loadingAssets for(key in Iter.fromArray(assetsKeys)){
+            switch(releaseAssetsHashMap.get(key)){
+                case null{ ignore loadAsset(key); };
+                case(?_){ continue loadingAssets };
+            };
+        };
     };
 
     public shared({caller}) func checkForNewRelease(): async() {

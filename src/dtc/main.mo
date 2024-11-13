@@ -363,7 +363,11 @@ shared actor class User() = this {
     private func installUpgrades_(): async (){
         let managerCanister: Manager.Manager = actor(daoMetaData_v4.managerCanisterPrincipal);
         let loadCompleted = await managerCanister.getIsLoadingComplete();
-        if(not loadCompleted) throw Error.reject("Load not completed");
+        if(not loadCompleted){
+            await managerCanister.loadAssets();
+            ignore setTimer<system>(#seconds(3 * 60), installUpgrades_);
+            return;
+        };
         let managerCanisterWasmModule = await managerCanister.getReleaseModule(#Manager);
         await CanisterManagementMethods.installCode_(?Principal.fromActor(this), managerCanisterWasmModule, Principal.fromText(daoMetaData_v4.managerCanisterPrincipal), #upgrade(?{skip_pre_upgrade = ?false}));
         await managerCanister.installCurrentVersionLoaded(daoMetaData_v4, Iter.toArray(userProfilesMap_v2.entries()), #upgrade(?{skip_pre_upgrade = ?false}));
