@@ -21,7 +21,6 @@ shared(msg) actor class Manager (principal : Principal) = this {
     private stable var currentVersionInstalled : {number: Nat;} = currentVersionLoaded;
     private stable var newVersionAvailable : Bool = false;
     private stable var mainCanisterId : Text = Principal.toText(principal); 
-    private var capacity = 1_000_000_000_000;
     private stable var release : WasmStore.Release = { assets = []; wasmModules = []; };
     private var releaseAssetsHashMap: HashMap.HashMap<WasmStore.Key, WasmStore.AssetData> = HashMap.fromIter(Iter.fromArray(release.assets), Iter.size(Iter.fromArray(release.assets)), Text.equal, Text.hash);
     private stable var expectedNumberOfAssetsAndModules : { totalNumberOfAssets : Nat; totalNumberOfModules : Nat; } = { totalNumberOfAssets = 0; totalNumberOfModules = 5; };
@@ -204,12 +203,7 @@ shared(msg) actor class Manager (principal : Principal) = this {
     // Return the cycles received up to the capacity allowed
     public shared func wallet_receive() : async { accepted: Nat64 } {
         let amount = Cycles.available();
-        let limit : Nat = capacity - Cycles.balance();
-        let accepted = 
-            if (amount <= limit) amount
-            else limit;
-        let deposit = Cycles.accept<system>(accepted);
-        assert (deposit == accepted);
+        let accepted = Cycles.accept<system>(amount);
         { accepted = Nat64.fromNat(accepted) };
     };
 

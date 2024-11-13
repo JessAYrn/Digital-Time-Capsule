@@ -105,7 +105,6 @@ module{
         founder: Text;
         supportMode: Bool;
         requestsForAccess: RequestsForAccess;
-        defaultControllers: [Principal];
     };
 
     public type Approved = Bool;
@@ -177,7 +176,6 @@ module{
         lastRecordedTime = 0;
         supportMode = false;
         requestsForAccess = [];
-        defaultControllers = [];
         founder = "Null";
     };
 

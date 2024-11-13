@@ -249,11 +249,8 @@ shared actor class User() = this {
         if(not canConfigureApp){ return #err(#NotAuthorized); };
         daoMetaData_v4 := {daoMetaData_v4 with backEndPrincipal = Principal.toText(Principal.fromActor(this))};
         await createManagerCanister();
-        let {backEndPrincipal; managerCanisterPrincipal} = daoMetaData_v4;
-        let managerCanister : Manager.Manager = actor(managerCanisterPrincipal);
+        let managerCanister : Manager.Manager = actor(daoMetaData_v4.managerCanisterPrincipal);
         await managerCanister.loadRelease();
-        let defaultControllers = [Principal.fromText(backEndPrincipal), Principal.fromText(managerCanisterPrincipal)];
-        daoMetaData_v4 := { daoMetaData_v4 with defaultControllers; };
 
         ignore createTreasuryCanister();
         ignore setTimer<system>(#seconds(5 * 60), func(): async (){ await createFrontEndCanister();});

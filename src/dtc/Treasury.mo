@@ -42,7 +42,6 @@ shared actor class Treasury (principal : Principal) = this {
     // private var memoToNeuronIdMap : TreasuryTypes.MemoToNeuronIdMap = HashMap.fromIter<TreasuryTypes.Memo, TreasuryTypes.NeuronId>(Iter.fromArray(memoToNeuronIdArray), Iter.size(Iter.fromArray(memoToNeuronIdArray)), Nat.equal, Hash.hash);
     private stable var neuronDataArray : TreasuryTypes.NeuronsDataArray = [];
     private var neuronDataMap : TreasuryTypes.NeuronsDataMap = HashMap.fromIter<TreasuryTypes.NeuronIdAsText, TreasuryTypes.NeuronData>(Iter.fromArray(neuronDataArray), Iter.size(Iter.fromArray(neuronDataArray)), Text.equal, Text.hash);
-    private var capacity = 1000000000000;
     private let txFee : Nat64 = 10_000;
     private let ledger : Ledger.Interface  = actor(Ledger.CANISTER_ID);
     private stable var neuronMemo : Nat64 = 0;
@@ -641,12 +640,7 @@ shared actor class Treasury (principal : Principal) = this {
     // Return the cycles received up to the capacity allowed
     public shared func wallet_receive() : async { accepted: Nat64 } {
         let amount = Cycles.available();
-        let limit : Nat = capacity - Cycles.balance();
-        let accepted = 
-            if (amount <= limit) amount
-            else limit;
-        let deposit = Cycles.accept<system>(accepted);
-        assert (deposit == accepted);
+        let accepted = Cycles.accept<system>(amount);
         { accepted = Nat64.fromNat(accepted) };
     };
 

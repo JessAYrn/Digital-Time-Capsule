@@ -19,6 +19,7 @@ import Time "mo:base/Time";
 import Float "mo:base/Float";
 import Int "mo:base/Int";
 import Int64 "mo:base/Int64";
+import Debug "mo:base/Debug";
 import Treasury "../../Treasury";
 import FloatX "../../MotokoNumbers/FloatX";
 
@@ -140,71 +141,85 @@ module{
     };
 
     public func createManagerCanister(daoMetaData: MainTypes.DaoMetaData_V4) : async {managerCanisterPrincipal: Text} {
-        if(daoMetaData.managerCanisterPrincipal == "Null"){ 
-            Cycles.add<system>(1_000_000_000_000);
-            let managerCanister = await Manager.Manager(Principal.fromText(daoMetaData.backEndPrincipal));
+        let managerCanisterPrincipal = switch(daoMetaData.managerCanisterPrincipal == "Null"){
+            case true {
+                Cycles.add<system>(3_000_000_000_000);
+                let managerCanister = await Manager.Manager(Principal.fromText(daoMetaData.backEndPrincipal));
+                Principal.toText(Principal.fromActor(managerCanister));
+            };
+            case false { daoMetaData.managerCanisterPrincipal };
+        };
+        let managerCanister: Manager.Manager = actor(managerCanisterPrincipal);
+        try{
             ignore await managerCanister.wallet_receive();
             ignore addControllers([Principal.toText(Principal.fromActor(managerCanister))], Principal.fromActor(managerCanister));
-            let managerCanisterPrincipal = Principal.toText(Principal.fromActor(managerCanister));
             return {managerCanisterPrincipal};
-        };
-        return {managerCanisterPrincipal = daoMetaData.managerCanisterPrincipal};
+        }catch(_) { return {managerCanisterPrincipal} };
     };
     
     public func createTreasuryCanister(daoMetaData: MainTypes.DaoMetaData_V4 ) : async {treasuryCanisterPrincipal: Text} {
-        if(daoMetaData.treasuryCanisterPrincipal == "Null"){
-            Cycles.add<system>(1_000_000_000_000);
-            let treasuryCanister = await Treasury.Treasury(Principal.fromText(daoMetaData.backEndPrincipal));
-            ignore await treasuryCanister.wallet_receive();
-            ignore treasuryCanister.createTreasuryData(Principal.fromActor(treasuryCanister));
-            let treasuryCanisterPrincipal_ = Principal.fromActor(treasuryCanister);
-            ignore addControllers([daoMetaData.managerCanisterPrincipal], treasuryCanisterPrincipal_);
-            let treasuryCanisterPrincipal = Principal.toText(treasuryCanisterPrincipal_);
-            return {treasuryCanisterPrincipal};
+        if(daoMetaData.backEndPrincipal == "Null" or daoMetaData.managerCanisterPrincipal == "Null" ){ Debug.trap("backend or manager canister not created") };
+
+        let treasuryCanisterPrincipal = switch(daoMetaData.treasuryCanisterPrincipal == "Null"){
+            case true {
+                Cycles.add<system>(3_000_000_000_000);
+                let treasuryCanister = await Treasury.Treasury(Principal.fromText(daoMetaData.backEndPrincipal));
+                Principal.toText(Principal.fromActor(treasuryCanister));
+            };
+            case false { daoMetaData.treasuryCanisterPrincipal };
         };
-        return {treasuryCanisterPrincipal = daoMetaData.treasuryCanisterPrincipal};
+        let treasuryCanister: Treasury.Treasury = actor(treasuryCanisterPrincipal);
+        try{
+            ignore await treasuryCanister.wallet_receive();
+            ignore addControllers([daoMetaData.managerCanisterPrincipal], Principal.fromActor(treasuryCanister));
+            return {treasuryCanisterPrincipal};
+        }catch(_) { return {treasuryCanisterPrincipal} };
+
     };
 
     public func createUiCanister(daoMetaData: MainTypes.DaoMetaData_V4): async {frontEndPrincipal: Text} {
-        if(daoMetaData.frontEndPrincipal == "Null"){
-            let settings = ?{
-                controllers = ?[
-                    Principal.fromText(daoMetaData.backEndPrincipal), 
-                    Principal.fromText(daoMetaData.managerCanisterPrincipal)
-                ];
-                freezing_threshold = ?2_592_000;
-                memory_allocation = ?0;
-                compute_allocation = ?0;
-            };
-            Cycles.add<system>(1_000_000_000_000);
-            let {canister_id} = await ic.create_canister({settings; sender_canister_version = null;});
+        if(daoMetaData.backEndPrincipal == "Null" or daoMetaData.managerCanisterPrincipal == "Null" ){ Debug.trap("backend or manager canister not created") };
+
+        let frontEndPrincipal = switch(daoMetaData.frontEndPrincipal == "Null"){
+            case true{
+                let settings = ?{
+                    controllers = ?[
+                        Principal.fromText(daoMetaData.backEndPrincipal), 
+                        Principal.fromText(daoMetaData.managerCanisterPrincipal)
+                    ];
+                    freezing_threshold = ?2_592_000;
+                    memory_allocation = ?0;
+                    compute_allocation = ?0;
+                };
+                Cycles.add<system>(3_000_000_000_000);
+                let {canister_id} = await ic.create_canister({settings; sender_canister_version = null;});
+                Principal.toText(canister_id);
+            }; 
+            case false{ daoMetaData.frontEndPrincipal };
+        };
+
+        try{
             let backendCanisterId = Principal.fromText(daoMetaData.backEndPrincipal);
             let managerCanisterId = Principal.fromText(daoMetaData.managerCanisterPrincipal);
             let managerCanister: Manager.Manager = actor(daoMetaData.managerCanisterPrincipal);
             let frontendWasmModule = await managerCanister.getReleaseModule(#Frontend);
-            await installCode_(null, frontendWasmModule, canister_id, #install);
-
-            let uiCanister: AssetCanister.Interface = actor(Principal.toText(canister_id));
+            await installCode_(null, frontendWasmModule, Principal.fromText(frontEndPrincipal), #install);
+            let uiCanister: AssetCanister.Interface = actor(frontEndPrincipal);
 
             await uiCanister.grant_permission({ to_principal = managerCanisterId; permission = #Commit; });
             await uiCanister.grant_permission({ to_principal = managerCanisterId; permission = #ManagePermissions; });
             await uiCanister.grant_permission({ to_principal = managerCanisterId; permission = #Prepare; });
-            
-            ignore managerCanister.uploadAssetsToFrontendCanister(Principal.toText(canister_id));
+
+            ignore managerCanister.uploadAssetsToFrontendCanister(frontEndPrincipal);
             ignore uiCanister.authorize(backendCanisterId);
             ignore uiCanister.grant_permission({ to_principal = backendCanisterId; permission = #Commit; });
             ignore uiCanister.grant_permission({ to_principal = backendCanisterId; permission = #ManagePermissions; });
             ignore uiCanister.grant_permission({ to_principal = backendCanisterId; permission = #Prepare; });
-            
-            return {frontEndPrincipal = Principal.toText(canister_id)};
-        };
-        return {frontEndPrincipal = daoMetaData.frontEndPrincipal};
+            return {frontEndPrincipal};
+        } catch(_){ return {frontEndPrincipal}; };
     };
 
     private func refillCanisterCycles(daoMetaData: MainTypes.DaoMetaData_V4, profilesMap : MainTypes.UserProfilesMap_V2) : async () {
-        let numberOfProfiles = profilesMap.size();
-        let profilesIter = profilesMap.entries();
-        let profilesArray = Iter.toArray(profilesIter);
         var index = 0;
         let frontendCanisterStatus = await ic.canister_status({ canister_id = Principal.fromText(daoMetaData.frontEndPrincipal) });
         let managerCanisterStatus = await ic.canister_status({ canister_id = Principal.fromText(daoMetaData.managerCanisterPrincipal)});
@@ -221,9 +236,8 @@ module{
             Cycles.add<system>(1_000_000_000_000);
             ignore ic.deposit_cycles({ canister_id = Principal.fromText(daoMetaData.treasuryCanisterPrincipal); });
         };
-        while(index < numberOfProfiles){
-            let (_, {canisterId; approved; }) = profilesArray[index];
-            let approved_ = Option.get(approved, false);
+        for((_, {canisterId; approved; }) in profilesMap.entries()){
+            let approved_ = switch(approved){ case(?true){ true }; case(_){ false } };
             let {cycles;} = await ic.canister_status({ canister_id = canisterId });
             if(approved_ and cycles < 1_000_000_000_000){
                 Cycles.add<system>(250_000_000_000);
@@ -250,15 +264,6 @@ module{
             lastRecordedTime = Time.now();
         };
         return updatedCanisterData;
-    };
-
-    public func installCode_managerCanister( canisterData: {managerCanisterPrincipal: Text; backEndPrincipal: Text} ): async (){
-        let {managerCanisterPrincipal; backEndPrincipal} = canisterData;
-        let managerActor : Manager.Manager = actor(managerCanisterPrincipal);
-        let wasmModule = await managerActor.getReleaseModule(#Manager);
-        let arg = Principal.fromText(backEndPrincipal);
-        let managerPrincipal = Principal.fromText(managerCanisterPrincipal);
-        await installCode_(?arg, wasmModule, managerPrincipal, #upgrade(?{skip_pre_upgrade = ?false}));
     };
 
     public func installCode_ (
@@ -352,8 +357,9 @@ module{
     async MainTypes.DaoMetaData_V4{
 
         let { 
-            supportMode; backEndPrincipal; defaultControllers; managerCanisterPrincipal; frontEndPrincipal; treasuryCanisterPrincipal
+            supportMode; backEndPrincipal; managerCanisterPrincipal; frontEndPrincipal; treasuryCanisterPrincipal
         } = daoMetaData;
+        let defaultControllers = [Principal.fromText(backEndPrincipal), Principal.fromText(managerCanisterPrincipal)];
         let supportMode_updated = not supportMode;
         if(supportMode_updated){
             let techSupportPrincipals = [ Support.TechSupportPrincipal1, Support.TechSupportPrincipal2 ];

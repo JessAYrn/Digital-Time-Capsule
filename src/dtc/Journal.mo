@@ -37,7 +37,6 @@ shared(msg) actor class Journal () = this {
     private stable var mainCanisterId_ : Text = "null"; 
     private stable var journalEntryIndex : Nat = 0;
     private var txFee : Nat64 = 10_000;
-    private var capacity = 1_500_000_000_000;
     private var balance = Cycles.balance();
     private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
 
@@ -49,13 +48,7 @@ shared(msg) actor class Journal () = this {
     // Return the cycles received up to the capacity allowed
     public shared func wallet_receive() : async { accepted: Nat64 } {
         let amount = Cycles.available();
-        let limit : Nat = capacity - balance;
-        let accepted = 
-            if (amount <= limit) amount
-            else limit;
-        let deposit = Cycles.accept<system>(accepted);
-        assert (deposit == accepted);
-        balance += accepted;
+        let accepted = Cycles.accept<system>(amount);
         { accepted = Nat64.fromNat(accepted) };
     };
 
