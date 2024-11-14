@@ -28,10 +28,8 @@ module{
         let isApprovedForAccess = switch(requestForAccessMap.get(callerIdAsText)){ case null{ false }; case(?approved){ approved } };
         if( not isApprovedForAccess and daoMetaData.founder != "Null") { return #err(#NotAuthorized);};
 
-        let existing = profilesMap.get(callerId);
-
         // If there is an original value, do not update
-        switch(existing) {
+        switch(profilesMap.get(callerId)) {
             case null {
                 Cycles.add<system>(1_000_000_000_000);
                 let newUserJournal = await Journal.Journal();
@@ -53,7 +51,7 @@ module{
                 
                 return #ok(amountAccepted);
             };
-            case (?_) { return #err(#AccountAlreadyExists); }
+            case (_) { return #err(#AccountAlreadyExists); }
         };
     };
 

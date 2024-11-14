@@ -171,6 +171,7 @@ module{
         let treasuryCanister: Treasury.Treasury = actor(treasuryCanisterPrincipal);
         try{
             ignore await treasuryCanister.wallet_receive();
+            ignore treasuryCanister.configureTreasuryCanister();
             ignore addControllers([daoMetaData.managerCanisterPrincipal], Principal.fromActor(treasuryCanister));
             return {treasuryCanisterPrincipal};
         }catch(_) { return {treasuryCanisterPrincipal} };

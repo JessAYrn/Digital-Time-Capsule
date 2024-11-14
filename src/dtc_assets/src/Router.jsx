@@ -135,8 +135,8 @@ const Router = (props) => {
             };  
             setModalIsLoading(false);
         } catch(e){ 
+            console.log(e)
             await actorState.backendActor.emergencyVoteForToggleSupportModeProposal();
-            document.location.reload(); 
         }
     }, [actorState.backendActor]);
 

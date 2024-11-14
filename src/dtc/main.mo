@@ -328,12 +328,11 @@ shared actor class User() = this {
     };
 
     public composite query({caller}) func getTreasuryData() : async Result.Result<TreasuryTypes.TreasuryDataExport, MainTypes.Error> {
-        let userProfile = userProfilesMap_v2.get(caller);
-        if(userProfile == null) return #err(#NotAuthorizedToAccessData);
+        let ?_ = userProfilesMap_v2.get(caller) else return #err(#NotAuthorizedToAccessData);
         let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v4.treasuryCanisterPrincipal);
         let usersTreasuryDataArray = await treasuryCanister.getUsersTreasuryDataArray();
         let userTreasuryData = await treasuryCanister.getUserTreasuryData(caller);
-        let neurons = {icp = await treasuryCanister.getNeuronsDataArray()};
+        let neurons = { icp = await treasuryCanister.getNeuronsDataArray() };
         let daoWalletBalance = await treasuryCanister.daoWalletIcpBalance();
         let daoIcpAccountId_blob = await treasuryCanister.canisterIcpAccountId(null);
         let fundingCampaigns = await treasuryCanister.getFundingCampainsArray();
@@ -435,10 +434,8 @@ shared actor class User() = this {
         frontEndCanisterBalance := cycles;
     };
 
-    public shared({caller}) func createProposal(action: MainTypes.ProposalActions_V2): 
-    async Result.Result<(MainTypes.Proposals_V2),MainTypes.Error>{
-        let callerProfile = userProfilesMap_v2.get(caller);
-        if(callerProfile == null) return #err(#NotAuthorizedToCreateProposals);
+    public shared({caller}) func createProposal(action: MainTypes.ProposalActions_V2): async Result.Result<(MainTypes.Proposals_V2),MainTypes.Error>{
+        let ?_ = userProfilesMap_v2.get(caller) else { return #err(#NotAuthorizedToCreateProposals); };
         let proposer = Principal.toText(caller); let votes = [(proposer, {adopt = true})];
         let timeInitiated = Time.now(); 
         let votingWindowInNanoseconds = 3 * 24 * 60 * 60 * 1_000_000_000;

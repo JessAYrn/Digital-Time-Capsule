@@ -52,6 +52,16 @@ shared actor class Treasury (principal : Principal) = this {
 
     let {recurringTimer; setTimer} = Timer;
 
+    public shared({caller}) func configureTreasuryCanister(): async (){
+        if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
+        usersTreasuryDataMap.put(Principal.toText(Principal.fromActor(this)), {
+            balances = { icp = {e8s : Nat64 = 0;}; eth = {e8s : Nat64 = 0}; btc = {e8s : Nat64 = 0}; };
+            automaticallyContributeToLoans: ?Bool = ?true;
+            automaticallyRepayLoans: ?Bool = ?true;
+            subaccountId = Account.defaultSubaccount();
+        });
+    };
+
     public shared({caller}) func createFundingCampaign(campaign: TreasuryTypes.FundingCampaignInput, userPrincipal: Text) : async () {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         let terms = switch(campaign.terms){
