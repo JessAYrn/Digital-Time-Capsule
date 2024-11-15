@@ -114,11 +114,6 @@ module{
         };
     };
 
-    // public func finalizeNewlyCreatedNeuronData( placeHolderKey: Text, newNeuronId: Nat64, neuronDataMap: TreasuryTypes.NeuronsDataMap): () {
-    //     let ?neuronData = neuronDataMap.remove(placeHolderKey) else { return };
-    //     neuronDataMap.put(Nat64.toText(newNeuronId), neuronData);
-    // };
-
     public func populateContributionsArrayFromParentNeuronContributions(neuronDataMap: TreasuryTypes.NeuronsDataMap, neuronId: Text): () {
         let ?neuronData = neuronDataMap.get(neuronId) else { return };
 

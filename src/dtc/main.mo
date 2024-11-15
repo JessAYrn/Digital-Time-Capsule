@@ -31,7 +31,6 @@ import TreasuryTypes "Types/Treasury/types";
 import TreasuryHelperMethods "Modules/Main/TreasuryHelperMethods";
 import AnalyticsHelperMethods "Modules/Analytics/AnalyticsHelperMethods";
 import Journal "Journal";
-import MarketData "Modules/HTTPRequests/MarketData";
 import AnalyticsTypes "Types/Analytics/types";
 import Governance "NNS/Governance";
 import FloatX "MotokoNumbers/FloatX";
@@ -259,17 +258,8 @@ shared actor class User() = this {
     };
 
     public query func transform({response: IC.http_response}) : async IC.http_response {
-      let transformed : IC.http_response = {
-        status = response.status;
-        body = response.body;
-        headers = [];
-      };
+      let transformed : IC.http_response = { status = response.status; body = response.body; headers = []; };
       transformed;
-    };
-
-    public shared func getCurrencyExchangeRate(unitCurrency: Text) : async IC.http_response_with_text {
-        let {status; body; headers; } = await MarketData.getCurrencyExchangeRate(unitCurrency, transform);
-        return {status; headers; body = Text.decodeUtf8(body)};
     };
 
     public shared({caller}) func toggleAcceptRequest() : async  Result.Result<(MainTypes.DaoMetaData_V4), JournalTypes.Error>{
