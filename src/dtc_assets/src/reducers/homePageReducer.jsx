@@ -32,7 +32,6 @@ export const homePageInitialState={
         managerCanisterPrincipal: NULL_STRING_CAPITALIZED,
         releaseVersionLoaded: 0,
         releaseVersionInstalled: 0,
-        nftId: null,
         lastRecordedBackEndCyclesBalance: 1,
         proposals: [],
         isAdmin: false,

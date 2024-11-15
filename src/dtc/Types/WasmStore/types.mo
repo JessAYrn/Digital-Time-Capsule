@@ -1,48 +1,57 @@
-import AssetCanister "../AssetCanister/types";
-import Result "mo:base/Result";
+module {
 
+    public let wasmStoreCanisterId = "b5jc2-xyaaa-aaaam-adsba-cai";
 
-module{
-
-     public type WasmData = {
-        dev : Principal;
-        wasmModule: Blob
+    public type AssetMetaData = {
+        content_type : Text;
+        encodings: [{ content_encoding : Text; length : Nat; modified :Int; sha256 : ?Blob; }];
+        key : Key;
     };
 
-    public type Release = {
-        assets: AssetCanister.Assets;
-        frontend: WasmData;
-        backend: WasmData;
-        journal: WasmData;
-        manager: WasmData;
-        treasury: WasmData;
-    };
+    public type AssetData = {
+        content_type : Text;
+        headers : ?[HeaderField];
+        allow_raw_access : ?Bool;
+        chunks : [(ChunkId, ChunkData)];
+        max_age : ?Nat64;
+        enable_aliasing : ?Bool;
+    }; 
 
-    public let wasmTypes  = { 
-        backend = "BACKEND"; 
-        frontend = "FRONTEND"; 
-        manager = "MANAGER"; 
-        journal = "JOURNAL"; 
-        treasury = "TREASURY";
-    };
-
-    public type Error = {
-        #NoNewVersionAvailable;
-        #VersionNotCreated;
+    public type Assets = [(Key, AssetData)];
+    public type Release = { assets: Assets; wasmModules: [WasmModule]; };
+    public type Chunk = Blob;
+    public type ChunkData = (Content_encoding, Sha256, Chunk);
+    public type ChunkId = Nat;
+    public type Content_encoding = Text;
+    public type Error ={
+        #IncompleteRelease;
         #WasmModuleNotFound;
         #AssetNotFound;
+        #NoNewVersionAvailable;
+        #VersionNotCreated;
+        #NotFound;
+        #AlreadyExists;
+        #NotAuthorized;
+        #NoInputGiven;
+        #InsufficientFunds;
+        #TxFailed;
+        #UserNameTaken;
+        #WalletBalanceTooLow;
+        #ZeroAddress;
+        #NotAcceptingRequests;
     };
-
-    public let wasmStoreCanisterId = "mow67-rqaaa-aaaap-qa6na-cai";
+    public type HeaderField = { text : Text };
+    public type Key = Text;
+    public type Key__1 = Text;
+    public type Sha256 = ?Blob;
+    public type WasmType = { #Backend; #Frontend; #Journal; #Manager; #Treasury; };
+    public type WasmModule = { #Journal: Blob; #Frontend: Blob; #Backend: Blob; #Treasury: Blob; #Manager: Blob; };
 
     public type Interface = actor {
-        getAssetKeys: query (Nat) -> async [AssetCanister.Key];
-        getLatestReleaseNumber: query () -> async Nat;
-        getNextRequiredRelease: query (Nat) -> async Nat;
-        getNextAppropriateRelease: query ({number: Nat; isStable: Bool;}) -> async {number: Nat; isStable: Bool;};
-        getModule: (Nat, Text) -> async WasmData;
-        getAssetMetaDataWithoutChunksData: query (Nat, AssetCanister.Key) -> async AssetCanister.AssetArgs;
-        getLastestStableRelease: query () -> async {number: Nat; isStable: Bool;};
-        getAssetChunk: query (Nat, Text, Nat) -> async (AssetCanister.ChunkId, AssetCanister.ChunkData);
-    };
-};
+        getAssetChunk : shared query { key : Key; chunkId : Nat; version : Nat; } -> async (ChunkId, ChunkData);
+        getAssetKeys : shared query { version : Nat } -> async [Key__1];
+        getAssetMetaDataWithoutChunksData : shared query { key : Key; version : Nat; } -> async AssetData;
+        getLatestRelease : shared query () -> async Nat;
+        getModule : shared { wasmType : WasmType; version : Nat } -> async WasmModule;
+    }
+}

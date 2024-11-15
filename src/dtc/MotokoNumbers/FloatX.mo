@@ -1,12 +1,9 @@
 import Buffer "mo:base/Buffer";
-import Debug "mo:base/Debug";
 import Float "mo:base/Float";
 import Int "mo:base/Int";
 import Int64 "mo:base/Int64";
 import Iter "mo:base/Iter";
 import Nat "mo:base/Nat";
-import Nat16 "mo:base/Nat16";
-import Nat32 "mo:base/Nat32";
 import Nat64 "mo:base/Nat64";
 import NatX "./NatX";
 
@@ -207,6 +204,14 @@ module {
       maxMantissaDenomiator = 2 ** mantissaBitLength;
       smallestNormalNumber = smallestNormalNumber;
     };
+  };
+
+  public func divideNat64(numerator : Nat64, denominator : Nat64) : Float {
+    Float.fromInt64(Int64.fromNat64(numerator)) / Float.fromInt64(Int64.fromNat64(denominator));
+  };
+
+  public func divideInt64(numerator : Int64, denominator : Int64) : Float {
+    Float.fromInt64(numerator) / Float.fromInt64(denominator);
   };
 
 };

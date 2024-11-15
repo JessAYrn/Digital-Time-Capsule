@@ -6,33 +6,20 @@ import { CANISTER_DATA_FIELDS, GRAPH_DISPLAY_LABELS, GRAPH_DATA_SETS, CHART_TYPE
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
 import Paper from '@mui/material/Paper';
-import UpgradeIcon from '@mui/icons-material/Upgrade';
-import CloseIcon from '@mui/icons-material/Close';
-import HowToVoteIcon from '@mui/icons-material/HowToVote';
-import ButtonField from '../../Components/Fields/Button';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import Grid from '@mui/material/Unstable_Grid2';
-import RefreshIcon from '@mui/icons-material/Refresh';
 import AccordionField from '../../Components/Fields/Accordion';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import {homePageTypes} from '../../reducers/homePageReducer';
-import {types as journalTypes} from '../../reducers/journalReducer';
-import {walletTypes} from '../../reducers/walletReducer';
-import {notificationsTypes} from '../../reducers/notificationsReducer';
-import {treasuryTypes} from '../../reducers/treasuryReducer';
-import { inTrillions, nanoSecondsToMiliSeconds, round2Decimals, shortenHexString } from '../../functionsAndConstants/Utils';
+import { inTrillions, round2Decimals, shortenHexString } from '../../functionsAndConstants/Utils';
 import { copyText } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
 import DataTable from '../../Components/Fields/Table';
 import { mapRequestsForAccessToTableRows, mapUsersProfileDataToTableRows, requestsForAccessTableColumns, usersTableColumns } from '../../mappers/dashboardMapperFunctions';
-import ModalComponent from '../../Components/modal/Modal';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import SpeedDialField from '../../Components/Fields/SpeedDialField';
-import CreateProposalForm from '../../Components/proposals/CreateProposalForm';
-import DisplayProposals from '../../Components/proposals/DisplayProposal';
+import DisplayProposals from '../../Components/modal/proposals/DisplayAllProposals';
 import { AppContext } from '../../Context';
 import { mapUsersTotalTreasuryStakesAndVotingPowersDataToChartFormat } from '../../mappers/treasuryPageMapperFunctions';
 import Graph from '../../Components/Fields/Chart';
-import { loadAllDataIntoReduxStores } from '../../functionsAndConstants/loadingFunctions';
+import ActionButton from '../../Components/ActionButton';
+import { Typography } from '@mui/material';
 
 const Analytics = (props) => {
 
@@ -40,42 +27,16 @@ const Analytics = (props) => {
         homePageDispatch, 
         homePageState, 
         actorState, 
-        treasuryState, 
-        treasuryDispatch,
-        walletState,
-        walletDispatch,
-        notificationsState,
-        notificationsDispatch,
-        journalState,
-        journalDispatch,
+        treasuryState,
+        setModalIsOpen,
+        setModalIsLoading
     } = useContext(AppContext);
 
-    const states = {homePageState, actorState, treasuryState, walletState, notificationsState, journalState,};
-    const dispatches = { homePageDispatch, treasuryDispatch, walletDispatch, notificationsDispatch, journalDispatch};
-    const types = { journalTypes, walletTypes, homePageTypes, notificationsTypes, treasuryTypes};
-
-    const [modalIsOpen, setModalIsOpen] = useState(false);
-    const [isLoadingModal, setIsLoadingModal] = useState(false);
-    const [modalProps, setModalProps] = useState({});
     const [requestsTableIsLoading, setRequestsTableIsLoading] = useState(false);
     const [usersTableIsLoading, setUsersTableIsLoading] = useState(false);
 
-    let activeProposal = homePageState?.canisterData?.proposals?.filter(proposal => nanoSecondsToMiliSeconds(parseInt(proposal[1].timeVotingPeriodEnds)) > Date.now());
-    let inactiveProposals = homePageState?.canisterData?.proposals?.filter(proposal => nanoSecondsToMiliSeconds(parseInt(proposal[1].timeVotingPeriodEnds)) < Date.now());
-
-    const modalButton_close = [
-        {
-            Component: ButtonField,
-            props: { active: true, text: "Close", Icon: CloseIcon, onClick: () => setModalIsOpen(false)}
-        }
-    ];
-
-    const modalForm_createProposal = [
-        {
-            Component: CreateProposalForm,
-            props: { setModalIsOpen, setModalProps, setIsLoadingModal}
-        }
-    ];
+    let activeProposal = homePageState?.canisterData?.proposals?.filter(proposal => !proposal[1].finalized);
+    let inactiveProposals = homePageState?.canisterData?.proposals?.filter(proposal => proposal[1].finalized);
 
     const onGrantAccess = async (args) => {
         setRequestsTableIsLoading(true);
@@ -146,95 +107,17 @@ const Analytics = (props) => {
     };
 
     const toggleAcceptRequest = async () => {
-        setIsLoadingModal(true);
+        setModalIsLoading(true);
         setModalIsOpen(true);
         let result = await actorState.backendActor.toggleAcceptRequest();
         setModalIsOpen(false);
-        setIsLoadingModal(false);
+        setModalIsLoading(false);
         if('err' in result) return;
         homePageDispatch({
             actionType: homePageTypes.SET_CANISTER_DATA,
             payload: { ...homePageState.canisterData, acceptingRequests: !homePageState.canisterData.acceptingRequests }
         });
     };
-
-    const toggleSupportMode = async () => {
-        setIsLoadingModal(true);
-        setModalIsOpen(true);
-        let result = await actorState.backendActor.toggleSupportMode();
-        setModalIsOpen(false);
-        setIsLoadingModal(false);
-        if('err' in result) return;
-        homePageDispatch({
-            actionType: homePageTypes.SET_CANISTER_DATA,
-            payload: { ...homePageState.canisterData, supportMode: !homePageState.canisterData.supportMode }
-        });
-    };
-
-    const handleInstallUpgrade = async () => {
-        setIsLoadingModal(true);
-        setModalIsOpen(true);
-        try{
-            await actorState.backendActor.installUpgrades();
-            setModalProps({
-                bigText: "Install Complete",
-                smallText: "Refresh page in order to have the changes take effect",
-                Icon: CheckCircleOutlineIcon,
-                components: modalButton_close
-            })
-        } catch(e){
-            console.log("Error: ", e);
-            setModalProps({
-                bigText: "Install Unsuccessfull",
-                Icon: ErrorOutlineIcon,
-                components: modalButton_close
-            })
-        };
-        setIsLoadingModal(false);
-    };
-
-    const handleLoadUpgrade = async () => {
-        setIsLoadingModal(true);
-        setModalIsOpen(true);
-        try{
-            await actorState.backendActor.loadUpgrades();
-            setModalProps({
-                bigText: "Load Complete",
-                smallText: "Refresh page in order to have the changes take effect",
-                Icon: CheckCircleOutlineIcon,
-                components: modalButton_close
-            })
-        } catch(e){
-            console.log("Error: ", e);
-            setModalProps({
-                bigText: "Load Unsuccessfull",
-                Icon: ErrorOutlineIcon,
-                components: modalButton_close
-            })
-        };
-        setIsLoadingModal(false);
-    };
-
-    const openProposalForm = () => {
-        setModalIsOpen(true);
-        setModalProps({
-            components: modalForm_createProposal,
-            handleClose: () => setModalIsOpen(false)
-        });
-    };
-
-    const reloadData = async () => {
-        setIsLoadingModal(true);
-        setModalIsOpen(true);
-        await loadAllDataIntoReduxStores(states, dispatches, types);
-        setModalIsOpen(false);
-        setIsLoadingModal(false);
-    };
-
-    const speedDialActions = [
-        {name: "Refresh", icon: RefreshIcon , onClick: reloadData},
-        {name: "Create Proposal", icon: HowToVoteIcon , onClick: openProposalForm}
-    ]
 
     return(
         <Grid 
@@ -254,16 +137,86 @@ const Analytics = (props) => {
                 xs={11}  
                 md={9}
                 rowSpacing={0} 
+                padding={0}
                 display="flex" 
                 justifyContent="center" 
                 alignItems="center" 
                 flexDirection={"column"}
                 marginTop={"60px"}
                 >
+                    <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} xs={12} padding={0} flexDirection={"column"} width={"100%"} >
+                        <Typography variant="h4" color="white" marginBottom={"10px"} marginTop={"10px"} textAlign={"center"}>
+                            Voting Power Distribution
+                        </Typography>
+                        <Graph
+                            type={CHART_TYPES.pie}
+                            defaultLabel={GRAPH_DISPLAY_LABELS.votingPower}
+                            inputData={mapUsersTotalTreasuryStakesAndVotingPowersDataToChartFormat(treasuryState.usersTreasuryDataArray)}
+                            defaultDataSetName={GRAPH_DATA_SETS.usersTotalStakesAndVotingPowers}
+                            height={"500px"}
+                            maintainAspectRatio={false}
+                            hideButton1={true}
+                            hideButton2={true}
+                        />  
+                    </Grid>
+                    <Grid xs={12} paddingBottom={5} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
+                        <AccordionField>
+                        <div 
+                            title={"Active Proposals"} 
+                            proposals={activeProposal}
+                            CustomComponent={DisplayProposals}
+                        ></div>
+                        <div 
+                            title={"Inactive Proposals"} 
+                            proposals={inactiveProposals}
+                            CustomComponent={DisplayProposals}
+                        ></div>
+                        </AccordionField>
+                    </Grid>
+                    <Grid xs={12} paddingBottom={5} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
+                        <AccordionField>
+                            <div 
+                                title={"DAO Participants"} 
+                                iconSize={"medium"}
+                                onClick_button_1={subsidize}
+                                onClick_button_2={Unsubsidize}
+                                onCellClick={(e) => { if(e === "yes" || e === "no") return; else copyText(e)}}
+                                text_1={'Subsidize'}
+                                text_2={'Unsubsidize'}
+                                transparent={true}
+                                checkboxSelection={true}
+                                disabled={!homePageState.canisterData.isAdmin}
+                                isLoading={usersTableIsLoading}
+                                columns={usersTableColumns}
+                                rows={homePageState.canisterData.profilesMetaData}
+                                Icon_1={CheckIcon}
+                                Icon_2={ClearIcon}
+                                CustomComponent={DataTable}
+                            ></div>
+                             <div 
+                                title={"Principals Requesting Access"} 
+                                iconSize={"medium"}
+                                onClick_button_1={onGrantAccess}
+                                onClick_button_2={onDenyAccess}
+                                text_1={'Approve'}
+                                text_2={'Deny'}
+                                onCellClick={(e) => { if(e === "yes" || e === "no") return; else copyText(e)}}
+                                transparent={true}
+                                checkboxSelection={true}
+                                disabled={!homePageState.canisterData.isAdmin}
+                                isLoading={requestsTableIsLoading}
+                                columns={requestsForAccessTableColumns}
+                                rows={homePageState.canisterData.requestsForAccess}
+                                Icon_1={CheckIcon}
+                                Icon_2={ClearIcon}
+                                CustomComponent={DataTable}
+                            ></div>
+                        </AccordionField>
+                    </Grid>
                     <Paper sx={{ width: "100%", backgroundColor: "rgba(52,52,52, 0.8)" }}>
                         <Grid xs={12} display="flex" justifyContent="center" alignItems="center" paddingBottom={"15px"} flexDirection={"column"}>
                             <DataField
-                                label={'Journals Created:'}
+                                label={'Accounts Created:'}
                                 text={homePageState.canisterData[CANISTER_DATA_FIELDS.journalCount]}
                                 disabled={true}
                             />
@@ -358,87 +311,15 @@ const Analytics = (props) => {
                                 disabled={true}
                             />
                         </Grid>
+                        <Grid xs={12} display="flex" justifyContent="center" alignItems="center" paddingBottom={"15px"} paddingTop={"15px"} flexDirection={"column"}>
+                            <DataField
+                                label={'Support Mode:'}
+                                text={`${homePageState.canisterData[CANISTER_DATA_FIELDS.supportMode]? "Enabled" : "Disabled"}`}
+                                disabled={true}
+                            />
+                        </Grid>
                     </Paper>
-                </Grid>
-                <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} xs={11} md={9} padding={0} >
-                    <Graph
-                        type={CHART_TYPES.pie}
-                        defaultLabel={GRAPH_DISPLAY_LABELS.votingPower}
-                        inputData={mapUsersTotalTreasuryStakesAndVotingPowersDataToChartFormat(treasuryState.usersTreasuryDataArray)}
-                        defaultDataSetName={GRAPH_DATA_SETS.usersTotalStakesAndVotingPowers}
-                        height={"500px"}
-                        maintainAspectRatio={false}
-                        hideButton1={true}
-                        hideButton2={true}
-                    />  
-                </Grid>
-                <Grid 
-                    columns={12}
-                    xs={11} 
-                    md={9}
-                    rowSpacing={0} 
-                    display="flex" 
-                    justifyContent="center" 
-                    alignItems="center" 
-                    flexDirection={"column"}
-                >
-                    <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
-                        <AccordionField>
-                        <div 
-                            title={"Active Proposals"} 
-                            proposals={activeProposal}
-                            CustomComponent={DisplayProposals}
-                        ></div>
-                        <div 
-                            title={"Inactive Proposals"} 
-                            proposals={inactiveProposals}
-                            CustomComponent={DisplayProposals}
-                        ></div>
-                        </AccordionField>
-                    </Grid>
-                    <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
-                        <AccordionField>
-                            <div 
-                                title={"Principals Requesting Access"} 
-                                iconSize={"medium"}
-                                onClick_button_1={onGrantAccess}
-                                onClick_button_2={onDenyAccess}
-                                text_1={'Approve'}
-                                text_2={'Deny'}
-                                onCellClick={(e) => { if(e === "yes" || e === "no") return; else copyText(e)}}
-                                transparent={true}
-                                checkboxSelection={true}
-                                disabled={!homePageState.canisterData.isAdmin}
-                                isLoading={requestsTableIsLoading}
-                                columns={requestsForAccessTableColumns}
-                                rows={homePageState.canisterData.requestsForAccess}
-                                Icon_1={CheckIcon}
-                                Icon_2={ClearIcon}
-                                CustomComponent={DataTable}
-                            ></div>
-                            <div 
-                                title={"DAO Participants"} 
-                                iconSize={"medium"}
-                                onClick_button_1={subsidize}
-                                onClick_button_2={Unsubsidize}
-                                onCellClick={(e) => { if(e === "yes" || e === "no") return; else copyText(e)}}
-                                text_1={'Subsidize'}
-                                text_2={'Unsubsidize'}
-                                transparent={true}
-                                checkboxSelection={true}
-                                disabled={!homePageState.canisterData.isAdmin}
-                                isLoading={usersTableIsLoading}
-                                columns={usersTableColumns}
-                                rows={homePageState.canisterData.profilesMetaData}
-                                Icon_1={CheckIcon}
-                                Icon_2={ClearIcon}
-                                CustomComponent={DataTable}
-                            ></div>
-                        </AccordionField>
-                    </Grid>
-                </Grid> 
-                <Grid columns={12} xs={11} md={9} rowSpacing={0}>
-                    <Grid columns={12} xs={12} rowSpacing={0} display="flex" justifyContent="center" alignItems="center" flexDirection={"column"}>
+                    <Grid columns={12} xs={12} rowSpacing={0} padding={0} display="flex" justifyContent="center" alignItems="center" flexDirection={"column"}>
                         <Switch
                             checked={homePageState.canisterData.acceptingRequests}
                             onClick={toggleAcceptRequest}
@@ -446,14 +327,9 @@ const Analytics = (props) => {
                             labelLeft={"Receive Requests:  "}
                         />
                     </Grid>
-                </Grid>
-                <SpeedDialField actions={speedDialActions} position={"right"}/>
+                </Grid> 
             </>
-            <ModalComponent 
-                {...modalProps}
-                open={modalIsOpen} 
-                isLoading={isLoadingModal} 
-            />  
+            <ActionButton />
         </Grid>
         
     )

@@ -3,6 +3,7 @@ import Principal "mo:base/Principal";
 import HashMap "mo:base/HashMap";
 import Nat "mo:base/Nat";
 import JournalTypes "../Journal/types";
+import TreasuryTypes "../Treasury/types";
 import IC "../IC/types";
 import Ledger "../../NNS/Ledger";
 
@@ -23,6 +24,8 @@ module{
 
     public let daysInAMonth = 30;
 
+    public type PrincipalAsText = Text;
+
     public type JournalData = {
         userJournalData : ([JournalTypes.JournalEntryExportKeyValuePair], JournalTypes.Bio,); 
         userName: Text;
@@ -36,6 +39,7 @@ module{
         #NotAuthorizedToVoteOnThisProposal;
         #VoteHasAlreadyBeenSubmitted;
         #NotAuthorized;
+        #ProposalNotFound;
         #PorposalHasExpired;
         #NotAuthorizedToAccessData;
         #NoProfileFound;
@@ -76,34 +80,16 @@ module{
         lastRecordedBackEndCyclesBalance: Nat;
         backEndCyclesBurnRatePerDay: Nat;
         admin: [(Text, AdminData)];
-        proposals: Proposals;
+        proposals: Proposals_V2;
         acceptingRequests: Bool;
         lastRecordedTime: Int;
         profilesMetaData: ProfilesMetaData;
         isAdmin: Bool;
-        nftId: ?Nat;
         founder: Text;
         supportMode: Bool;
         releaseVersionLoaded: Nat;
         releaseVersionInstalled: Nat;
         requestsForAccess: RequestsForAccess;
-    };
-
-    public type DaoMetaData_V3 = {
-        managerCanisterPrincipal: Text; 
-        treasuryCanisterPrincipal: Text;
-        frontEndPrincipal: Text;
-        backEndPrincipal: Text;
-        lastRecordedBackEndCyclesBalance: Nat;
-        backEndCyclesBurnRatePerDay: Nat;
-        admin: [(Text, AdminData)];
-        acceptingRequests: Bool;
-        lastRecordedTime: Int;
-        nftId: ?Nat;
-        founder: ?Text;
-        supportMode: Bool;
-        requestsForAccess: RequestsForAccess;
-        defaultControllers: [Principal];
     };
 
     public type DaoMetaData_V4 = {
@@ -116,11 +102,9 @@ module{
         admin: [(Text, AdminData)];
         acceptingRequests: Bool;
         lastRecordedTime: Int;
-        nftId: ?Nat;
         founder: Text;
         supportMode: Bool;
         requestsForAccess: RequestsForAccess;
-        defaultControllers: [Principal];
     };
 
     public type Approved = Bool;
@@ -139,33 +123,35 @@ module{
 
     public type UserProfilesArray_V2 = [(Principal, UserProfile_V2)];
 
-    public type Proposals = [(Nat,Proposal)];
+    public type Proposals_V2 = [(Nat,Proposal_V2)];
 
-    public type ProposalsMap = HashMap.HashMap<Nat, Proposal>;
-    
-    public type VotingResults = {
+    public type ProposalsMap_V2 = HashMap.HashMap<Nat, Proposal_V2>;
+
+    public type VotingResults_V2 = {
         yay: Nat64;
         nay: Nat64;
-        total: Nat64;
+        totalParticipated: Nat64;
     };
 
-    public type Proposal = {
+    public type Proposal_V2 = {
         votes: [(Text, Vote)];
-        voteTally: VotingResults;
-        action: ProposalActions;
+        voteTally: VotingResults_V2;
+        action: ProposalActions_V2;
         proposer: Text;
         timeInitiated: Int;
         executed: Bool;
+        finalized: Bool;
         timeVotingPeriodEnds: Int;
     };
 
-    public type ProposalActions = {
+    public type ProposalActions_V2 = {
         #AddAdmin: {principal: Text};
         #RemoveAdmin: {principal: Text};
-        #LoadUpgrades:{};
         #InstallUpgrades: {};
         #CreateNeuron: {amount: Nat64; };
-        #IncreaseNeuron: {amount: Nat64; neuronId: Nat64; };
+        #CreateFundingCampaign: {fundingCampaignInput: TreasuryTypes.FundingCampaignInput};
+        #CancelFundingCampaign: {fundingCampaignId: Nat};
+        #IncreaseNeuron: {amount: Nat64; neuronId: Nat64; onBehalfOf: ?PrincipalAsText};
         #PurchaseCycles: {amount : Nat64;};
         #SpawnNeuron: {neuronId: Nat64; percentage_to_spawn : Nat32;};
         #DisburseNeuron: {neuronId: Nat64; };
@@ -173,27 +159,10 @@ module{
         #IncreaseDissolveDelay: {neuronId: Nat64; additionalDissolveDelaySeconds: Nat32; };
         #FollowNeuron: {neuronId: Nat64; topic : Int32; followee :  Nat64 };
         #ToggleSupportMode: {};
+        #WithdrawFromMultiSigWallet: {amount: Nat64; to: PrincipalAsText;};
     };
 
     public type Vote = { adopt: Bool };
-
-    public let DEFAULT_DAO_METADATA_V3: DaoMetaData_V3 = {
-        managerCanisterPrincipal = "Null";
-        treasuryCanisterPrincipal = "Null";
-        frontEndPrincipal = "Null";
-        backEndPrincipal = "Null";
-        lastRecordedBackEndCyclesBalance = 0;
-        backEndCyclesBurnRatePerDay = 0;
-        admin = [];
-        acceptingRequests = true;
-        lastRecordedTime = 0;
-        supportMode = true;
-        requestsForAccess = [];
-        defaultControllers = [];
-        nftId = null;
-        founder = null;
-    };
-
 
     public let DEFAULT_DAO_METADATA_V4: DaoMetaData_V4 = {
         managerCanisterPrincipal = "Null";
@@ -207,8 +176,6 @@ module{
         lastRecordedTime = 0;
         supportMode = false;
         requestsForAccess = [];
-        defaultControllers = [];
-        nftId = null;
         founder = "Null";
     };
 

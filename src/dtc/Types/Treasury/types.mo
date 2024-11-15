@@ -16,7 +16,63 @@ module{
 
     public type SubaccountRegistryMap = HashMap.HashMap<Blob, SubaccountsMetaData>;
 
-    public type Identifier = {#Principal: Text; #SubaccountId: Account.Subaccount};
+    public type Identifier = {#Principal: Text; #SubaccountId: Account.Subaccount; #CampaignId: Nat};
+
+    public type AccountType = {#FundingCampaign; #UserTreasuryData; #ExternalAccount; #MultiSigAccount};
+
+    public type CampaignId = Nat;
+
+    public type CampaignContributions = { icp: {e8s : Nat64;}; };
+
+    public type CampaignContributionsArray = [(PrincipalAsText, CampaignContributions)];
+
+    public type FundingCampaignAssets = {
+        icp: {e8s : Nat64;};
+        icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText};
+    };
+
+    public type FundingCampaign = {
+        contributions: CampaignContributionsArray;
+        amountToFund: {icp: {e8s : Nat64;}; };
+        amountDisbursedToRecipient: {icp: {e8s : Nat64;}; };
+        campaignWalletBalance: {icp: {e8s : Nat64;}; };
+        recipient: PrincipalAsText;
+        subaccountId: Account.Subaccount;
+        description: Text; 
+        settled: Bool;
+        funded: Bool;
+        terms:?FundingCampaignTerms;
+    };
+
+    public type FundingCampaignTerms = {
+        paymentIntervals: Nat64;
+        nextPaymentDueDate: ?Int;
+        paymentAmounts: {icp: {e8s : Nat64;}; };
+        initialLoanInterestAmount: {icp: {e8s : Nat64;}; };
+        remainingLoanInterestAmount: {icp: {e8s : Nat64;}; };
+        initialCollateralLocked: {icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText}};
+        remainingCollateralLocked: {icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText}};
+        forfeitedCollateral: {icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText}};
+        remainingLoanPrincipalAmount: {icp: {e8s : Nat64;}; };
+        amountRepaidDuringCurrentPaymentInterval: {icp: {e8s : Nat64;}; };
+    };
+
+    public type FundingCampaignInput = {
+        amountToFund: {icp: {e8s : Nat64;}; };
+        description: Text; 
+        terms:?FundingCampaignTermsInput
+    };
+
+    public type FundingCampaignTermsInput = {
+        paymentIntervals: Nat64;
+        paymentAmounts: {icp: {e8s : Nat64;}; };
+        initialLoanInterestAmount: {icp: {e8s : Nat64;}; };
+        initialCollateralLocked: {icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText}};
+    };
+
+    public type FundingCampaignsArray = [(CampaignId, FundingCampaign)];
+
+    public type FundingCampaignsMap = HashMap.HashMap<CampaignId, FundingCampaign>;
 
     public type Balances = {
         icp: {e8s : Nat64;};
@@ -27,6 +83,7 @@ module{
     public type BalancesExport = {
         icp: {e8s : Nat64;};
         icp_staked: {e8s : Nat64;};
+        icp_staked_collateralized: {e8s : Nat64;};
         eth: {e8s : Nat64};
         btc: {e8s : Nat64};
         voting_power: {e8s: Nat64};
@@ -52,16 +109,22 @@ module{
     public type NeuronStakeInfo = {
         stake_e8s : Nat64;
         voting_power : Nat64;
+        collateralized_stake_e8s : ?Nat64;
     };
+    
 
     public type UserTreasuryData = {
         balances : Balances;
         subaccountId : Account.Subaccount;
+        automaticallyContributeToLoans: ?Bool;
+        automaticallyRepayLoans: ?Bool;
     };
 
     public type UserTreasuryDataExport = {
         balances : BalancesExport;
         subaccountId : Account.Subaccount;
+        automaticallyContributeToLoans: ?Bool;
+        automaticallyRepayLoans: ?Bool;
     };
 
     public type PrincipalAsText = Text;
@@ -75,10 +138,12 @@ module{
     public type TreasuryDataExport = {
         neurons : { icp: NeuronsDataArray; };
         usersTreasuryDataArray : UsersTreasuryDataArrayExport;
+        userTreasuryData : UserTreasuryDataExport;
         totalDeposits : {e8s : Nat64};
         daoWalletBalance: {e8s : Nat64};
         daoIcpAccountId: [Nat8];
         userPrincipal: Text;
+        fundingCampaigns: FundingCampaignsArray;
     };
 
     public type Memo = Nat;
@@ -87,9 +152,17 @@ module{
 
     public type NeuronIdAsText = Text;
 
-    public type NeuronContributions = [(PrincipalAsText, NeuronStakeInfo)];
+    public type NeuronContribution = (PrincipalAsText, NeuronStakeInfo);
 
-    public type NeuronData = { contributions: NeuronContributions; neuron: ?Governance.Neuron; neuronInfo: ?Governance.NeuronInfo; parentNeuronContributions: ?NeuronContributions; };
+    public type NeuronContributions = [NeuronContribution];
+
+    public type NeuronData = { 
+        contributions: NeuronContributions; 
+        neuron: ?Governance.Neuron; 
+        neuronInfo: ?Governance.NeuronInfo; 
+        parentNeuronContributions: ?NeuronContributions; 
+        proxyNeuron: ?NeuronIdAsText;
+    };
 
     public type NeuronsDataArray = [(NeuronIdAsText, NeuronData)];
 
@@ -122,7 +195,7 @@ module{
         #Follow : { neuronId: Nat64;};
         #ClaimOrRefresh : { neuronId: Nat64; memo: ?Nat64;};
         #Configure : { neuronId: Nat64; };
-        #Disburse : { transfer_block_height: Nat64; neuronId: Nat64; proposer: Principal; treasuryCanisterId: Principal;};
+        #Disburse : { transfer_block_height: Nat64; neuronId: Nat64; treasuryCanisterId: Principal;};
     };
 
     public type ReadRequestInput = {
@@ -166,7 +239,8 @@ module{
         pendingActionsMap: PendingActionsMap;
         actionLogsArrayBuffer: ActionLogsArrayBuffer;
         memoToNeuronIdMap: MemoToNeuronIdMap;
-        updateTokenBalances: shared ( Identifier, SupportedCurrencies ) -> async ();
+        updateTokenBalances: shared ( Identifier, SupportedCurrencies, accountType: AccountType ) -> async ();
+        fundingCampaignsMap: FundingCampaignsMap;
         readRequestResponseOutput: ReadRequestResponseOutput;
         selfAuthPrincipal: Principal;
         publicKey: Blob;
@@ -194,4 +268,10 @@ module{
 
     public type ActionLogsArrayBuffer = Buffer.Buffer<(Text, Text)>; 
 
+    public let NEURON_STATES = {
+        locked: Int32 = 1;
+        dissolving: Int32 = 2;
+        unlocked: Int32 = 3;
+        spawning: Int32 = 4;
+    }
 }

@@ -5,82 +5,39 @@ import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import { Typography } from "@mui/material";
 import { copyText } from "../../functionsAndConstants/walletFunctions/CopyWalletAddress";
 import { fromE8s, shortenHexString, round2Decimals } from "../../functionsAndConstants/Utils";
-import { treasuryTypes } from "../../reducers/treasuryReducer";
-import { walletTypes } from "../../reducers/walletReducer";
-import { homePageTypes } from "../../reducers/homePageReducer";
-import { types as journalTypes } from "../../reducers/journalReducer";
-import { notificationsTypes } from "../../reducers/notificationsReducer";
-import { loadAllDataIntoReduxStores } from "../../functionsAndConstants/loadingFunctions";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import SpeedDialField from "../../Components/Fields/SpeedDialField";
-import HowToVoteIcon from '@mui/icons-material/HowToVote';
-import ModalComponent from "../../Components/modal/Modal";
 import ButtonField from "../../Components/Fields/Button";
-import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
-import AccountBalanceWalletOutlinedIcon from '@mui/icons-material/AccountBalanceWalletOutlined';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import CreateProposalForm from "../../Components/proposals/CreateProposalForm";
-import DepositOrWithdrawModal from "../../Components/modal/DepositOrWithdraw";
 import Graph from "../../Components/Fields/Chart";
 import { CHART_TYPES, GRAPH_DATA_SETS, GRAPH_DISPLAY_LABELS } from "../../functionsAndConstants/Constants";
-import { TREASURY_ACTIONS } from "../../Components/proposals/utils";
+import InfoToolTip from "../../Components/Fields/InfoToolTip";
+import DisplayAllFundingCampaigns from "../../Components/fundingCampaign/DisplayAllFundingCampaigns";
+import DisplayAllNeurons from "../../Components/Neurons/DisplayAllNeurons";
+import ActionButton from "../../Components/ActionButton";
 import AccordionField from "../../Components/Fields/Accordion";
-import DisplayNeuron from "../../Components/Neurons/DisplayNeuron";
+import Switch from "../../Components/Fields/Switch";
 
 const TreasuryPage = (props) => {
-  const { 
-    treasuryState, 
-    treasuryDispatch,
-    walletState, 
-    walletDispatch, 
-    homePageState,
-    homePageDispatch,
-    journalState,
-    journalDispatch,
-    notificationsState,
-    notificationsDispatch,
-    actorState, 
-  } = useContext(AppContext);
+  
+  const { treasuryState, actorState, setModalIsOpen, setModalIsLoading, setModalProps } = useContext(AppContext);
+  const [autoContributeToLoans, setAutoContributeToLoans] = useState(treasuryState?.userTreasuryData?.automaticallyContributeToLoans);
+  const [autoRepayLoans, setAutoRepayLoans] = useState(treasuryState?.userTreasuryData?.automaticallyRepayLoans);
+  
+  const activeFundingCampaigns = treasuryState.fundingCampaigns.filter(([campaignId, {settled}]) => {return settled === false} );
+  const inactiveFundingCampaigns = treasuryState.fundingCampaigns.filter(([campaignId, {settled}]) => {return settled === true} );
 
-  const states = {homePageState, actorState, treasuryState, walletState, notificationsState, journalState,};
-  const dispatches = { homePageDispatch, treasuryDispatch, walletDispatch, notificationsDispatch, journalDispatch};
-  const types = { journalTypes, walletTypes, homePageTypes, notificationsTypes, treasuryTypes};
-
-  const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [isLoadingModal, setIsLoadingModal] = useState(false);
-  const [modalProps, setModalProps] = useState({});
-
-  const openProposalForm = () => {
+  const onSwitchToggle = async (newAutoRepayLoansSetting, newAutoLoanContributionSetting) => {
     setModalIsOpen(true);
-    setModalProps({
-        components: [
-          {
-            Component: CreateProposalForm,
-            props: { setModalIsOpen, setModalProps, setIsLoadingModal}
-          }
-        ],
-        handleClose: () => setModalIsOpen(false)
+    setModalIsLoading(true);
+    setAutoRepayLoans(newAutoRepayLoansSetting);
+    setAutoContributeToLoans(newAutoLoanContributionSetting);
+    await actorState.backendActor.updateAutomatedSettings({
+      automaticallyContributeToLoans: [newAutoLoanContributionSetting],
+      automaticallyRepayLoans: [newAutoRepayLoansSetting]
     });
-  };
-
-  const openDepositOrWithdrawForm = (action) => {
-    setModalIsOpen(true);
-    setModalProps({
-        components: [
-          {
-            Component: DepositOrWithdrawModal,
-            props: {
-              action,
-              setModalIsOpen, 
-              setModalProps, 
-              setIsLoadingModal,
-            }
-          }
-        ],
-        handleClose: () => setModalIsOpen(false)
-    });
-  };
+    setModalIsOpen(false);
+    setModalIsLoading(false);
+  }; 
 
   const displayTreasuryAccountId = () => {
     setModalProps({
@@ -115,7 +72,7 @@ const TreasuryPage = (props) => {
     setModalProps({
         flexDirection: "column",
         bigText: "Be Careful!",
-        smallText: "Sending ICP directly to this account ID without using the 'Deposit To Treasury' button will result in no treasury contribution being recorded from your account. In other words, you're essentially donating to the treasury without receiving any credit. If you're not sure what you're doing, do NOT proceed. If you mean to receive credit for your deposit to the treasury, use the 'Deposit To Treasury' button.",
+        smallText: "Sending ICP directly to this account ID will result in no treasury contribution being recorded from your account. In other words, you're essentially donating to the treasury without receiving any credit. If you're not sure what you're doing, do NOT proceed.",
         Icon: WarningAmberIcon,
         components: [
           {
@@ -138,22 +95,6 @@ const TreasuryPage = (props) => {
         handleClose: () => setModalIsOpen(false)
     });
   };
-
-  const reloadData = async () => {
-    setIsLoadingModal(true);
-    setModalIsOpen(true);
-    await loadAllDataIntoReduxStores(states, dispatches, types);
-    setModalIsOpen(false);
-    setIsLoadingModal(false);
-  };
-
-  const speedDialActions = [
-    {name: "Refresh", icon: RefreshIcon , onClick: reloadData},
-    {name: "Create Proposal", icon: HowToVoteIcon , onClick: openProposalForm},
-    {name: "Withdraw To Wallet", icon: AccountBalanceWalletOutlinedIcon , onClick: () => openDepositOrWithdrawForm(TREASURY_ACTIONS.WithdrawIcpFromTreasury)},
-    {name: "Deposit To Treasury", icon: AccountBalanceIcon , onClick: () => openDepositOrWithdrawForm(TREASURY_ACTIONS.DepositIcpToTreasury)}
-  ];
-
 
   return (
     <Grid 
@@ -179,33 +120,57 @@ const TreasuryPage = (props) => {
         flexDirection={"column"}
         marginTop={"60px"}
       >
-        <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"}>
-          <Grid xs={5}  width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"} flexDirection={"column"}>
+        <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"flex-start"} alignItems={"flex-start"}>
+          <Grid xs={4}  width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"} flexDirection={"column"}>
             <Typography width={"100%"}>Liquid:</Typography>
-            <Typography width={"100%"} variant="h6" color={"custom"}>
-              {`${round2Decimals(fromE8s(treasuryState.daoWalletBalance))}`} ICP
-            </Typography>
-            <Typography width={"100%"} style={{color: '#bdbdbd'}}>
-              {`${round2Decimals(fromE8s(treasuryState.userTreasuryData?.balances.icp || 0))}`} ICP
-            </Typography>
+              <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>
+                <Typography variant="h6" color={"custom"}>
+                  {`${round2Decimals(fromE8s(treasuryState.totalDeposits))}`} ICP
+                </Typography>
+                <InfoToolTip text="The sum of all ICP deposited into the treasury by all users." placement="top-end" color="white"/>
+              </Grid>
+              <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>
+                <Typography style={{color: '#bdbdbd'}}>
+                  {`${round2Decimals(fromE8s(treasuryState.userTreasuryData?.balances.icp || 0))}`} ICP
+                </Typography>
+                <InfoToolTip text="YOUR ICP deposited within the treasury. Available for you to use or withdraw." placement="bottom-end" color="white"/>
+              </Grid>
+              <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>
+                <Typography variant="h6" color={'#bdbdbd'}>
+                  {`${round2Decimals(fromE8s(treasuryState.daoWalletBalance))}`} ICP
+                </Typography>
+                <InfoToolTip text="The amount of ICP within the treasury's multi-sig wallet." placement="bottom-end" color="white"/>
+              </Grid>
           </Grid>
-          <Grid xs={2} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
+          <Grid xs={4} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
             <Typography width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"}>Staked:</Typography>
-            <Typography width={"100%"} variant="h6" display={"flex"} justifyContent={"center"} alignItems={"center"}>
-              {`${round2Decimals(fromE8s(treasuryState.daoTotalIcpStaked))}`} ICP
-            </Typography>
-            <Typography width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} style={{color: '#bdbdbd'}}>
-              {`${round2Decimals(fromE8s(treasuryState.userTreasuryData?.balances.icp_staked || 0))}`} ICP
-            </Typography>
+            <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"}>
+              <Typography variant="h6" display={"flex"} justifyContent={"center"} alignItems={"center"}>
+                {`${round2Decimals(fromE8s(treasuryState.daoTotalIcpStaked))}`} ICP
+              </Typography>
+              <InfoToolTip text="The sum of all ICP staked across all of the DAO's neurons" placement="top" color="white"/>
+            </Grid>
+            <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"}>
+              <Typography display={"flex"} justifyContent={"center"} alignItems={"center"} style={{color: '#bdbdbd'}}>
+                {`${round2Decimals(fromE8s(treasuryState.userTreasuryData?.balances.icp_staked || 0))}`} ICP
+              </Typography>
+              <InfoToolTip text="The sum of all YOUR ICP staked across all of the DAO's neurons" placement="bottom" color="white"/>
+            </Grid>
           </Grid>
-          <Grid xs={5} width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"} flexDirection={"column"}>
+          <Grid xs={4} width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"} flexDirection={"column"}>
             <Typography width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"} >Voting Power:</Typography>
-            <Typography width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"} variant="h6">
-              {`${round2Decimals(fromE8s(treasuryState.votingPower))}`}
-            </Typography>
-            <Typography width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"} style={{color: '#bdbdbd'}}>
-              {`${round2Decimals(fromE8s(treasuryState.userVotingPower))}`} 
-            </Typography>
+            <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"}>
+              <Typography width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"} variant="h6">
+                {`${round2Decimals(fromE8s(treasuryState.votingPower))}`}
+              </Typography>
+              <InfoToolTip text="The sum of all voting power yielded by all of the DAO's neurons" placement="top-start" color="white"/>
+            </Grid>
+            <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"}>
+              <Typography width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"} style={{color: '#bdbdbd'}}>
+                {`${round2Decimals(fromE8s(treasuryState.userVotingPower))}`} 
+              </Typography>
+              <InfoToolTip text="The sum of all YOUR voting power yielded by all of your contributions to the DAO's neurons" placement="bottom-start" color="white"/>
+            </Grid>
           </Grid>
         </Grid>
         <Graph 
@@ -217,25 +182,35 @@ const TreasuryPage = (props) => {
           height={"500px"}
           width={"100%"}
         />
-        {
-          treasuryState?.neurons?.icp && treasuryState?.neurons?.icp.length > 0 &&
-          <AccordionField>
-            {
-              treasuryState?.neurons?.icp.map(neuron => {
-                let subtitle = neuron[1]?.neuronInfo?.stake_e8s ? `${round2Decimals(fromE8s(parseInt(neuron[1].neuronInfo.stake_e8s)))} ICP` : "Retrieving...";
-                return (
-                  <div 
-                  title={`${neuron[0]}`}
-                  subtitle={subtitle}
-                  CustomComponent={DisplayNeuron} 
-                  neuronData={neuron}
-                  userPrincipal={treasuryState?.userPrincipal}
-                  ></div> 
-                )
-              })
-            }
-          </AccordionField>
-        }
+        <Grid columns={12} xs={12} rowSpacing={0} display="flex" justifyContent="center" alignItems="center" flexDirection={"column"} width={"100%"}>
+            <Switch
+              checked={autoRepayLoans}
+              onClick={() => onSwitchToggle(!autoRepayLoans, autoContributeToLoans)}
+              labelLeft={"Auto pay on loans received from funding campaigns: "}
+              sx={{ paddingTop: "0px", paddingBottom: "0px" }}
+            />
+            <Switch
+              checked={autoContributeToLoans}
+              onClick={() => onSwitchToggle(autoRepayLoans, !autoContributeToLoans)}
+              labelLeft={"Auto lend to approved funding campaigns: "}
+              sx={{ paddingTop: "0px", paddingBottom: "0px" }}
+            />
+        </Grid>
+        <DisplayAllNeurons />
+        <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
+            <AccordionField>
+              <div 
+                  title={"Active Funding Campaigns"} 
+                  fundingCampaigns={activeFundingCampaigns}
+                  CustomComponent={DisplayAllFundingCampaigns}
+              ></div>
+              <div 
+                  title={"Inactive Funding Campaigns"} 
+                  fundingCampaigns={inactiveFundingCampaigns}
+                  CustomComponent={DisplayAllFundingCampaigns}
+              ></div>
+            </AccordionField>
+        </Grid>
         <ButtonField
           paperSx={{marginTop: "20px"}}
           text={"View Treasury Account ID"}
@@ -243,12 +218,7 @@ const TreasuryPage = (props) => {
           iconSize={'large'}
         />
       </Grid>
-      <SpeedDialField actions={speedDialActions} position={"right"}/>
-      <ModalComponent 
-          {...modalProps}
-          open={modalIsOpen} 
-          isLoading={isLoadingModal} 
-      /> 
+      <ActionButton/>
     </Grid>
     
   );

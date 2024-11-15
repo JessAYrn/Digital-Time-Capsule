@@ -1,62 +1,64 @@
-import React, {useState} from 'react';
+import React, {useState, useMemo} from 'react';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
-import PropTypes from 'prop-types';
 import { NumericFormat } from 'react-number-format';
-import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
-import { useTheme, ThemeProvider } from '@mui/material/styles';
 import EditIcon from '@mui/icons-material/Edit';
 import UploadIcon from '@mui/icons-material/Upload';
 import ButtonField from './Button';
 import { INPUT_BOX_FORMATS } from '../../functionsAndConstants/Constants';
-  
-  const NumericFormatCustom = React.forwardRef(function NumericFormatCustom(
-    props,
-    ref,
-  ) {
-    const { onChange, prefix, ...other } = props;
-  
-    return (
-      <NumericFormat
-        {...other}
-        getInputRef={ref}
-        onValueChange={(values) => {
-          onChange({
-            target: {
-              name: props.name,
-              value: values.value,
-            },
-          });
-        }}
-        thousandSeparator
-        valueIsNumericString
-        prefix={""}
-      />
-    );
-  });
-  
-  NumericFormatCustom.propTypes = {
-    name: PropTypes.string.isRequired,
-    onChange: PropTypes.func.isRequired,
-  };
 
-
-
+const NumericFormatCustom = (suffix, prefix, allowNegative, maxDecimalPlaces = 8) => {
+  return React.forwardRef(function NumericFormatCustom( props_, ref) {
+  return (
+    <NumericFormat
+      {...props_}
+      getInputRef={ref}
+      onKeyDown={() => {}}
+      decimalScale={maxDecimalPlaces}
+      thousandSeparator = {false}
+      valueIsNumericString = {true}
+      allowedDecimalSeparators={["."]}
+      allowNegative={allowNegative}
+      allowLeadingZeros={false}
+      suffix={suffix}
+      prefix={prefix}
+    />
+  );
+})};
+  
 const InputBox = (props) => {
 
-    const [values, setValues] = useState({});
+    const {
+      label,
+      placeHolder,
+      rows,
+      disabled,
+      showEditButton,
+      dispatchAction,
+      dispatch,
+      index,
+      onChange,
+      onDisableEdit,
+      value,
+      hasError,
+      format,
+      width,
+      maxValue,
+      omitMaxValueButton,
+      maxDecimalPlaces,
+      prefix, 
+      allowNegative,
+      suffix,
+      parseNumber
+    } = props;
     
-    const handleChange = (eventName, eventValue) => { 
-      setValues({
-          ...values,
-          [eventName]: `${eventValue}`,
-      });
+    const handleChange = (eventValue) => { 
       if(dispatch) dispatch({
           actionType: dispatchAction,
-          payload: `${eventValue}`,
+          payload: eventValue,
           index: index
       });
-      if(onChange) onChange(`${eventValue}`);
+      if(onChange) onChange(eventValue);
     };
 
     const focusTextBox = () => {
@@ -66,34 +68,15 @@ const InputBox = (props) => {
     
 
     const [editing, setEditing] = useState(false);
-
-    const {
-        label,
-        placeHolder,
-        rows,
-        disabled,
-        editable,
-        dispatchAction,
-        dispatch,
-        index,
-        onChange,
-        onDisableEdit,
-        value,
-        hasError,
-        format,
-        width,
-        maxValue
-    } = props;
-
-    let inputComponent;
-    if(format === INPUT_BOX_FORMATS.numberFormat) inputComponent = NumericFormatCustom;
-
     const onChange_editButton = () => {
         setEditing(!editing);
         if(onDisableEdit) onDisableEdit(!editing);
     };
 
-    const theme = useTheme();
+    let NumericFormatCustom_ = useMemo(() => {
+      return format == INPUT_BOX_FORMATS.numberFormat ?
+      NumericFormatCustom(suffix, prefix, allowNegative, maxDecimalPlaces) : undefined
+    }, []);
 
     let EditIcon_;
     if(editing) EditIcon_ = UploadIcon;
@@ -116,35 +99,34 @@ const InputBox = (props) => {
       >
         {format == INPUT_BOX_FORMATS.numberFormat && 
           <>
-            <Stack direction="row" spacing={2}>
               <TextField
               columns={12} 
               xs={12} 
+              error={hasError}
               width={"100%"}
               color='white'
-              label={label}       
-              value={values[format]}
-              onChange={(e) => handleChange(e.target.name, e.target.value)}
+              label={label}    
+              value={value}   
+              onChange={(e) => { parseNumber ? handleChange(parseNumber(e.target.value)): handleChange(e.target.value); }}
               placeholder={placeHolder}
               name={format}
               id={`formatted-${format}-input`}
-              InputProps={{inputComponent}}
-              disabled={(editable && !editing) || disabled}
+              InputProps={{inputComponent: NumericFormatCustom_ }}
+              disabled={(showEditButton && !editing) || disabled}
               variant="standard"
               multiline
               maxRows={rows ? rows : 100}
               fullWidth
               />
-            </Stack>
-            {maxValue &&
+            {(!!maxValue && !omitMaxValueButton) ?
               <ButtonField
                 sx={{marginLeft: "-8px"}}
                 transparentBackground={true}
                 elevation={0}
                 text={"max"}
-                onClick={() => { handleChange(INPUT_BOX_FORMATS.numberFormat, maxValue); focusTextBox(); }}
+                onClick={() => { handleChange(maxValue); focusTextBox(); }}
                 iconSize={'small'}
-              />
+              /> : <></>
             }
           </>
         }
@@ -157,8 +139,8 @@ const InputBox = (props) => {
             color='white'
             placeholder={placeHolder}
             value={value}
-            disabled={(editable && !editing) || disabled}
-            onChange={(e) => handleChange(e.target.name, e.target.value)}
+            disabled={(showEditButton && !editing) || disabled}
+            onChange={(e) => handleChange(e.target.value)}
             id="filled-multiline-flexible"
             label={label}
             multiline
@@ -167,7 +149,7 @@ const InputBox = (props) => {
             fullWidth
           />
         }
-        {editable && 
+        {showEditButton && 
           <ButtonField
             className={"inputBox"}
             transparentBackground={true}

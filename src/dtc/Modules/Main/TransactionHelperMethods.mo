@@ -1,7 +1,6 @@
 import MainTypes "../../Types/Main/types";
 import Account "../../Serializers/Account";
 import Result "mo:base/Result";
-import Trie "mo:base/Trie";
 import Principal "mo:base/Principal";
 import JournalTypes "../../Types/Journal/types";
 import Ledger "../../NNS/Ledger";
@@ -9,26 +8,24 @@ import Iter "mo:base/Iter";
 import Blob "mo:base/Blob";
 import Journal "../../Journal";
 import Nat64 "mo:base/Nat64";
-import Error "mo:base/Error";
 import Array "mo:base/Array";
-import Option "mo:base/Option";
 import Hex "../../Serializers/Hex";
 import Treasury "../../Treasury";
 
 module{
 
     private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
+    private let txFee : Nat64 = 10_000;
 
     public func transferICP(callerId: Principal, profilesMap: MainTypes.UserProfilesMap_V2 ,amount: Nat64, canisterAccountId: Account.AccountIdentifier) : 
-    async Result.Result<({blockIndex: Nat64}), JournalTypes.Error> {
-
+    async Result.Result<({amountSent: Nat64}), JournalTypes.Error> {
+        if(amount < txFee){ return #err(#TxFailed) };
         let userProfile = profilesMap.get(callerId);
         switch(userProfile) {
             case null{ #err(#NotFound) }; 
             case (? profile){
                 let userJournal : Journal.Journal = actor(Principal.toText(profile.canisterId));
-                try{ let {blockIndex} = await userJournal.transferICP(amount, #AccountIdentifier(canisterAccountId)); return #ok({blockIndex});
-                } catch (error) { return #err(#TxFailed); };
+                let {amountSent} = await userJournal.transferICP(amount, #AccountIdentifier(canisterAccountId)); return #ok({amountSent});
             };
         };
     };
@@ -76,15 +73,10 @@ module{
                     let treasuryAccountId = await treasuryCanister.canisterIcpAccountId(null);
                     let treasuryAccountIdAsText = Hex.encode(Blob.toArray(treasuryAccountId));
                     if(recipientAsText == treasuryAccountIdAsText or sourceAsText == treasuryAccountIdAsText){
-                        ignore treasuryCanister.updateTokenBalances(
-                            #Principal(metaData.treasuryCanisterPrincipal),
-                            #Icp
-                        );
+                        ignore treasuryCanister.updateTokenBalances(#Principal(metaData.treasuryCanisterPrincipal),#Icp, #MultiSigAccount);
                     };
                 };
-                case(#Approve(r)){};
-                case(#Burn(r)){};
-                case(#Mint(r)){};
+                case(_){};
             };
             index += 1;
         };

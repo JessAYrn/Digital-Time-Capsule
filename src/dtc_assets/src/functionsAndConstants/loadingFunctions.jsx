@@ -6,10 +6,8 @@ import { mapBalancesDataFromApiToFrontend, mapBackendTreasuryDataToFrontEndObj }
 import { getFileUrl_fromApi } from "../Components/Fields/fileManger/FileManagementTools";
 
 
-export const loadAllDataIntoReduxStores = async (states, dispatchFunctions, types) => {
+export const loadAllDataIntoReduxStores = async (actorState, dispatchFunctions, types) => {
     let loadSuccessful = true;
-
-    let {walletState, homePageState, journalState, actorState, notificationsState, treasuryState} = states;
     let {journalDispatch, walletDispatch, homePageDispatch, notificationsDispatch, treasuryDispatch} = dispatchFunctions;
     let {journalTypes, walletTypes, homePageTypes, notificationsTypes, treasuryTypes } = types;
     //checks to see if user has an account. If not, then it attemptes to make an account, if 

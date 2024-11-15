@@ -9,7 +9,8 @@ import PendingIcon from '@mui/icons-material/Pending';
 
 const style = {
   position: 'absolute',
-  minWidth: "267px",
+  width: "275px",
+  maxHeight: "500px",
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
@@ -41,7 +42,15 @@ const ModalComponent = (props_) => {
         aria-labelledby="parent-modal-title"
         aria-describedby="parent-modal-description"
       >
-        <Box sx={{ ...style, }} className={`modalBox ${isLoading ? 'transparent' : ''}`} >
+        <Box 
+        sx={{ ...style, }} 
+        className={`modalBox ${isLoading ? 'transparent' : ''}`} 
+        display={"flex"} 
+        justifyContent={"safe start"} 
+        alignItems={"center"}
+        flexDirection={"column"}
+        overflow={"auto"}
+        >
           {bigText && !isLoading && <Typography varient={"h2"} id="parent-modal-title">{bigText}</Typography>}
           {Icon && !isLoading &&  <Icon style={{height: "75px", width:"75px" }}/>}
           {smallText && !isLoading && <Typography varient={"body1"} id="parent-modal-description">{smallText}</Typography>}

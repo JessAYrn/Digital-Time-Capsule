@@ -1,7 +1,7 @@
 import { round8Decimals, toHexString } from "../functionsAndConstants/Utils";
-
 import { nanoSecondsToMiliSeconds, getDateAsStringMMDDYYY, fromE8s, shortenHexString } from "../functionsAndConstants/Utils";
 import { GRAPH_DISPLAY_LABELS, GRAPH_DATA_SETS } from "../functionsAndConstants/Constants";
+import { sortFundingCampaigns } from "../functionsAndConstants/treasuryDataFunctions";
 
 const dummyLabels = [
     getDateAsStringMMDDYYY(Date.now() - (1000 * 60 * 60 * 24 * 6)),
@@ -55,7 +55,7 @@ const getDataSetsForChartFromDataMap = (data, radius) => {
 
 const getLabels_balancesHistory = (data) => {return data.map(([date, balances]) => {return date})};
 
-const getLabels_neuronContributions = (data) => {return data.map(([contributor, contributions]) => {
+const getLabels_contributions = (data) => {return data.map(([contributor, contributions]) => {
     return contributor.length > 15 ? shortenHexString(contributor) : contributor
 })};
 
@@ -67,8 +67,9 @@ export const mapDataMapToChartFormat = (data, nameOfDataSet) => {
         case GRAPH_DATA_SETS.balancesHistory.month: labels = getLabels_balancesHistory(data); radius = 2; break;
         case GRAPH_DATA_SETS.balancesHistory.year: labels = getLabels_balancesHistory(data); radius = 2; break;
         case GRAPH_DATA_SETS.balancesHistory.allTime: labels = getLabels_balancesHistory(data); radius = 2; break;
-        case GRAPH_DATA_SETS.neuronContributions: labels = getLabels_neuronContributions(data); radius = 125; break;
-        case GRAPH_DATA_SETS.usersTotalStakesAndVotingPowers: labels = getLabels_neuronContributions(data); radius = 125; break;
+        case GRAPH_DATA_SETS.neuronContributions: labels = getLabels_contributions(data); radius = 125; break;
+        case GRAPH_DATA_SETS.usersTotalStakesAndVotingPowers: labels = getLabels_contributions(data); radius = 125; break;
+        case GRAPH_DATA_SETS.fundingCampaignContributions: labels = getLabels_contributions(data); radius = 125; break;
     };
     const data_ = { labels, datasets: getDataSetsForChartFromDataMap(data, radius) };
     return { [nameOfDataSet]: data_};
@@ -78,7 +79,7 @@ export const mapUsersTotalTreasuryStakesAndVotingPowersDataToChartFormat = (user
     const usersTreasuryDataArraySorted = usersTreasuryDataArray.sort(function(a, b){
         const [principal_a, data_a] = a;
         const [principal_b, data_b] = b;
-        if(data_a?.balances?.voting_power > data_b?.balances?.voting_power) return -11;
+        if(data_a?.balances?.voting_power > data_b?.balances?.voting_power) return -1;
         else return 1;
     });
     const allUsersTotalIcpStakesAndVotingPowerSorted = [];
@@ -166,35 +167,26 @@ export const mapNeuronContributionsToTableRows = (neuronContributions) => {
     return sortedNeuronContributions;
 }
 
-export const getUserTreasuryData = (userPrincipal, usersTreasuryDataArray) => {
-    let userTreasuryData = usersTreasuryDataArray.find(([principal, _]) => {
-        return principal === userPrincipal;
-    });
-    return userTreasuryData ? userTreasuryData[1] : undefined;
-};
-
-export const getUserNeuronContribution = (userPrincipal, neuronContributions) => {
-    let userContribution = neuronContributions.find(([contributor, _]) => {
-        return contributor === userPrincipal;
-    });
-    return userContribution ? userContribution[1] : {stake_e8s: 0, voting_power: 0};
-};
-
 export const mapBackendTreasuryDataToFrontEndObj = (props) => {
     const {
         usersTreasuryDataArray,
+        userTreasuryData,
         userPrincipal,
         totalDeposits,
         daoIcpAccountId,
         daoWalletBalance,
-        neurons
+        neurons, 
+        fundingCampaigns
     } = props;
     
     const daoIcpAccountId_ = toHexString(new Uint8Array( [...daoIcpAccountId]));
     const daoWalletBalance_ = parseInt(daoWalletBalance.e8s);
     const totalDeposits_ = parseInt(totalDeposits.e8s);
-    const usersTreasuryDataArray_ = usersTreasuryDataArray.map(([principal, treasuryData ]) => {
-        let {balances} = treasuryData;
+
+    const treasuryDataToFrontendFormat = (principal, treasuryData) => {
+        let {balances, automaticallyContributeToLoans, automaticallyRepayLoans} = treasuryData;
+        const automaticallyContributeToLoans_ = !!automaticallyContributeToLoans.length && !!automaticallyContributeToLoans[0];
+        const automaticallyRepayLoans_ = !!automaticallyRepayLoans.length && !!automaticallyRepayLoans[0];
         let {icp, icp_staked, eth, btc, voting_power} = balances;
         balances = {
             icp: parseInt(icp.e8s), 
@@ -203,8 +195,11 @@ export const mapBackendTreasuryDataToFrontEndObj = (props) => {
             btc: parseInt(btc.e8s),
             voting_power: parseInt(voting_power.e8s)
         }; 
-        return [ principal, { ...treasuryData, balances} ];
-    });
+        return [ principal, { ...treasuryData, balances, automaticallyContributeToLoans: automaticallyContributeToLoans_, automaticallyRepayLoans: automaticallyRepayLoans_} ];
+    };
+
+    const usersTreasuryDataArray_ = usersTreasuryDataArray.map(([principal, treasuryData ]) => treasuryDataToFrontendFormat(principal, treasuryData));
+    const userTreasuryData_ = treasuryDataToFrontendFormat(userPrincipal, userTreasuryData);
     let daoTotalIcpStaked = 0;
     let votingPower = 0;
     let userVotingPower = 0;
@@ -228,8 +223,6 @@ export const mapBackendTreasuryDataToFrontEndObj = (props) => {
         return neuronData;
     });
 
-    let userTreasuryData = getUserTreasuryData(userPrincipal, usersTreasuryDataArray_);
-
     return {
         usersTreasuryDataArray: usersTreasuryDataArray_, 
         daoWalletBalance: daoWalletBalance_, 
@@ -240,7 +233,8 @@ export const mapBackendTreasuryDataToFrontEndObj = (props) => {
         userNeurons: {icp: userIcpNeurons},
         votingPower,
         userVotingPower,
-        userTreasuryData,
-        userPrincipal
+        userTreasuryData: userTreasuryData_[1],
+        userPrincipal,
+        fundingCampaigns: sortFundingCampaigns(fundingCampaigns)
     };
 };

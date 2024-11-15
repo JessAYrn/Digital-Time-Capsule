@@ -1,5 +1,4 @@
 import Ledger "NNS/Ledger";
-import Debug "mo:base/Debug";
 import Error "mo:base/Error";
 import Trie "mo:base/Trie";
 import Hash "mo:base/Hash";
@@ -38,7 +37,6 @@ shared(msg) actor class Journal () = this {
     private stable var mainCanisterId_ : Text = "null"; 
     private stable var journalEntryIndex : Nat = 0;
     private var txFee : Nat64 = 10_000;
-    private var capacity = 1_500_000_000_000;
     private var balance = Cycles.balance();
     private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
 
@@ -50,13 +48,7 @@ shared(msg) actor class Journal () = this {
     // Return the cycles received up to the capacity allowed
     public shared func wallet_receive() : async { accepted: Nat64 } {
         let amount = Cycles.available();
-        let limit : Nat = capacity - balance;
-        let accepted = 
-            if (amount <= limit) amount
-            else limit;
-        let deposit = Cycles.accept<system>(accepted);
-        assert (deposit == accepted);
-        balance += accepted;
+        let accepted = Cycles.accept<system>(amount);
         { accepted = Nat64.fromNat(accepted) };
     };
 
@@ -256,7 +248,7 @@ shared(msg) actor class Journal () = this {
 
         switch(entry){
             case null{ #err(#NotFound); };
-            case (? v){
+            case (? _){
                 journalMap.delete(key);
                 let journalAsArray = Iter.toArray(journalMap.entries());
                 ignore mapJournalEntriesArrayToExport(journalAsArray);
@@ -271,7 +263,7 @@ shared(msg) actor class Journal () = this {
         let entryFiles = filesMap.get(fileId);
         switch(entryFiles){
             case null{ #err(#NotFound); };
-            case (? v){
+            case (? _){
                 filesMap.delete(fileId);
                 #ok(());
             };
@@ -298,64 +290,75 @@ shared(msg) actor class Journal () = this {
         return Iter.toArray(balancesMap.entries());
     };
 
-    public shared({caller}) func transferICP(
-        amount: Nat64, 
-        recipientIdentifier: JournalTypes.RecipientIdentifier
-    ) : async {blockIndex: Nat64} {
+    public shared({caller}) func transferICP( amount: Nat64, recipientIdentifier: JournalTypes.RecipientIdentifier) : async {amountSent: Nat64} {
         if( Principal.toText(caller) != mainCanisterId_) { throw Error.reject("Unauthorized access."); };
+        if(amount < txFee){ return {amountSent: Nat64 = 0}; };
+        var amountSent = amount - txFee;
 
-        let res: {#icrc1_transfer: Ledger.Result; #transfer: Ledger.Result_5} = switch(recipientIdentifier) {
-            case(#PrincipalAndSubaccount(recipient, subaccount)) {
-                let res_ = await ledger.icrc1_transfer({
-                    memo = null;
-                    from_subaccount = null;
-                    to = {owner = recipient; subaccount};
-                    amount = Nat64.toNat(amount - txFee);
-                    fee = ?Nat64.toNat(txFee);
-                    created_at_time = ?Nat64.fromNat(Int.abs(Time.now()));
-                });
-                #icrc1_transfer(res_);
-            };
-            case(#AccountIdentifier(accountId)) {
-                let res_ = await ledger.transfer({
-                    memo = Nat64.fromNat(0);
-                    from_subaccount = null;
-                    to = accountId;
-                    amount = { e8s = amount - txFee};
-                    fee = { e8s = txFee };
-                    created_at_time = ?{ timestamp_nanos = Nat64.fromNat(Int.abs(Time.now())) };
-                });
-                #transfer(res_);
+        func performTransfer(amountSent: Nat64, recipientIdentifier: JournalTypes.RecipientIdentifier) : 
+        async {#icrc1_transfer: Ledger.Result; #transfer: Ledger.Result_5} {
+            switch(recipientIdentifier) {
+                case(#PrincipalAndSubaccount(recipient, subaccount)) {
+                    let res_ = await ledger.icrc1_transfer({
+                        memo = null;
+                        from_subaccount = null;
+                        to = {owner = recipient; subaccount};
+                        amount = Nat64.toNat(amountSent);
+                        fee = ?Nat64.toNat(txFee);
+                        created_at_time = ?Nat64.fromNat(Int.abs(Time.now()));
+                    });
+                    #icrc1_transfer(res_);
+                };
+                case(#AccountIdentifier(accountId)) {
+                    let res_ = await ledger.transfer({
+                        memo = Nat64.fromNat(0);
+                        from_subaccount = null;
+                        to = accountId;
+                        amount = { e8s = amountSent};
+                        fee = { e8s = txFee };
+                        created_at_time = ?{ timestamp_nanos = Nat64.fromNat(Int.abs(Time.now())) };
+                    });
+                    #transfer(res_);
+                };
             };
         };
+
+        let res = await performTransfer(amountSent, recipientIdentifier);
 
         switch (res) {
             case(#icrc1_transfer(res_)){
                 switch(res_) {
-                    case(#Ok(blockIndex)) {
-                        Debug.print("Paid reward to " # debug_show Principal.fromActor(this) # " in block " # debug_show blockIndex);
-                        return {blockIndex = Nat64.fromNat(blockIndex)};
-                    };
+                    case(#Ok(_)) {return {amountSent};};
                     case(#Err(#InsufficientFunds { balance })) {
-                        throw Error.reject("Top me up! The balance is only " # debug_show balance # " e8s");    
+                        if(balance < Nat64.toNat(txFee)){ return {amountSent: Nat64 = 0}; };
+                        amountSent := Nat64.fromNat(balance) - txFee;
+                        let res = await performTransfer(amountSent, recipientIdentifier);
+                        switch (res) {
+                            case(#icrc1_transfer(#Err(_))){ return {amountSent: Nat64 = 0}; };
+                            case(#transfer(#Err(_))){ return {amountSent: Nat64 = 0}; };
+                            case(#icrc1_transfer(_)){ return {amountSent}; };
+                            case(#transfer(_)){ return {amountSent}; }
+                        }
+                            
                     };
-                    case(#Err(other)) {
-                        throw Error.reject("Unexpected error: " # debug_show other);
-                    };
+                    case(#Err(_)) { return {amountSent: Nat64 = 0}; };
                 };
             };
             case(#transfer(res_)){
                 switch(res_) {
-                    case(#Ok(blockIndex)) {
-                        Debug.print("Paid reward to " # debug_show Principal.fromActor(this) # " in block " # debug_show blockIndex);
-                        return {blockIndex};
-                    };
+                    case(#Ok(_)) { return {amountSent}; };
                     case(#Err(#InsufficientFunds { balance })) {
-                        throw Error.reject("Top me up! The balance is only " # debug_show balance # " e8s");    
+                        if(balance.e8s < txFee){ return {amountSent: Nat64 = 0}; };
+                        amountSent := balance.e8s - txFee;
+                        let res = await performTransfer(amountSent, recipientIdentifier);
+                        switch (res) {
+                            case(#icrc1_transfer(#Err(_))){ return {amountSent: Nat64 = 0}; };
+                            case(#transfer(#Err(_))){ return {amountSent: Nat64 = 0}; };
+                            case(#icrc1_transfer(_)){ return {amountSent}; };
+                            case(#transfer(_)){ return {amountSent}; }
+                        } 
                     };
-                    case(#Err(other)) {
-                        throw Error.reject("Unexpected error: " # debug_show other);
-                    };
+                    case(#Err(_)) { return {amountSent: Nat64 = 0}; };
                 };
             };
         };

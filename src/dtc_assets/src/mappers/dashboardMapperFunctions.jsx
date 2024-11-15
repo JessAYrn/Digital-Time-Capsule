@@ -1,3 +1,4 @@
+import { sortProposals } from "../functionsAndConstants/governanceDataFunctions";
 export const requestsForAccessTableColumns = [
     { 
         field: 'id', 
@@ -88,17 +89,12 @@ export const mapBackendCanisterDataToFrontEndObj = (props) => {
         treasuryCanisterPrincipal,
         releaseVersionLoaded,
         releaseVersionInstalled,
-        nftId,
         founder,
         managerCanisterPrincipal,
     } = props;
 
     const requestsForAccess_ = mapRequestsForAccessToTableRows(requestsForAccess);
     const profilesMetaData_ = mapUsersProfileDataToTableRows(profilesMetaData);
-    const proposals_ = proposals.sort(([proposalId_a], [proposalId_b]) => {
-        if(parseInt(proposalId_a) > parseInt(proposalId_b)) return -1
-        else return 1
-    });
 
     return {
         profilesMetaData: profilesMetaData_,
@@ -109,14 +105,13 @@ export const mapBackendCanisterDataToFrontEndObj = (props) => {
         managerCanisterPrincipal: managerCanisterPrincipal,
         lastRecordedBackEndCyclesBalance: parseInt(lastRecordedBackEndCyclesBalance),
         isAdmin: isAdmin,
-        proposals: proposals_,
+        proposals: sortProposals(proposals),
         supportMode: supportMode,
         acceptingRequests: acceptingRequests,
         journalCount: parseInt(journalCount),
         requestsForAccess: requestsForAccess_,
         releaseVersionLoaded: parseInt(releaseVersionLoaded),
         releaseVersionInstalled: parseInt(releaseVersionInstalled),
-        nftId: nftId[0] ? parseInt(nftId[0]) : null,
         founder
     }
 }; 

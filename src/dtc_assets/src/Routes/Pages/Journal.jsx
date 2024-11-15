@@ -18,7 +18,6 @@ import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
 import { journalPagesTableColumns, mapRequestsForAccessToTableRows } from "../../mappers/journalPageMappers";
 import { mapApiObjectToFrontEndJournalEntriesObject } from "../../mappers/journalPageMappers";
-import ModalComponent from "../../Components/modal/Modal";
 import ButtonField from "../../Components/Fields/Button";
 
 const count = 30
@@ -26,11 +25,8 @@ const count = 30
 
 const Journal = (props) => {
 
-    const { journalState, journalDispatch, actorState, actorDispatch} = useContext(AppContext);
+    const { journalState, journalDispatch, actorState, actorDispatch, setModalIsOpen, setModalIsLoading, setModalProps} = useContext(AppContext);
     const [counter, setCounter] = useState(1);
-    const [modalIsOpen, setModalIsOpen] = useState(false);
-    const [modalIsLoading, setModalIsLoading] = useState(false);
-    const [modelProps, setModalProps] = useState({});
 
     const sendData = async () => {
         journalDispatch({
@@ -152,7 +148,7 @@ const Journal = (props) => {
                     <InputBox
                         label={"This Journal Belongs To: "}
                         rows={"1"}
-                        editable={true}
+                        showEditButton={true}
                         dispatch={journalDispatch}
                         onChange={onTextBoxChange}
                         onDisableEdit={onDisableEdit}
@@ -163,12 +159,12 @@ const Journal = (props) => {
                         value={journalState.bio.dob[0]}
                         label={"Date Of Birth"}
                         onChange={onDatePickerChange}
-                        editable={true}
+                        showEditButton={true}
                     />
                     <InputBox
                         label={"Place of Birth: "}
                         rows={"1"}
-                        editable={true}
+                        showEditButton={true}
                         onChange={onTextBoxChange}
                         onDisableEdit={onDisableEdit}
                         dispatch={journalDispatch}
@@ -188,7 +184,7 @@ const Journal = (props) => {
                     flexDirection={"column"}
                 >
                 <FileCarousel
-                    editable={true}
+                    showEditButton={true}
                     revokeDataURL={false}
                     onChange={triggerSendDataFunctionAfterReduxStateUpdate}
                     filesMetaDataArray={journalState.bio.photos}
@@ -214,7 +210,7 @@ const Journal = (props) => {
                 >
                     <InputBox
                         label={"Dedications: "}
-                        editable={true}
+                        showEditButton={true}
                         onChange={onTextBoxChange}
                         onDisableEdit={onDisableEdit}
                         rows={"8"}
@@ -224,7 +220,7 @@ const Journal = (props) => {
                     />
                     <InputBox
                         label={"Preface: "}
-                        editable={true}
+                        showEditButton={true}
                         onChange={onTextBoxChange}
                         onDisableEdit={onDisableEdit}
                         rows={"16"}
@@ -253,21 +249,6 @@ const Journal = (props) => {
                 <SpeedDialField actions={speedDialActions} position={"right"}/>
             </>}  
         </Grid>
-        <ModalComponent 
-            open={modalIsOpen} 
-            isLoading={modalIsLoading} 
-            handleClose={() => {setModalIsOpen(false)}}
-            components={[{
-                Component: ButtonField, 
-                props: {
-                    active: true,
-                    text: "OK",
-                    Icon: ThumbUpAltIcon,
-                    onClick: () => setModalIsOpen(false)
-                }
-            }]}
-            {...modelProps}
-        />
         </>
     );
 

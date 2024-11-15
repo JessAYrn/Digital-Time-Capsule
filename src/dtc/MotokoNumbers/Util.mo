@@ -1,7 +1,6 @@
 import Array "mo:base/Array";
 import Buffer "mo:base/Buffer";
 import Char "mo:base/Char";
-import Debug "mo:base/Debug";
 import Int "mo:base/Int";
 import Iter "mo:base/Iter";
 import Nat8 "mo:base/Nat8";

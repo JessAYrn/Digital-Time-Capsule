@@ -37,7 +37,7 @@ const Router = (props) => {
     const [actorState, actorDispatch] = useReducer(actorReducer, actorInitialState);
     
     const [modalIsOpen, setModalIsOpen] = useState(false);
-    const [isLoadingModal, setIsLoadingModal] = useState(false);
+    const [modalIsLoading, setModalIsLoading] = useState(false);
     const [modalProps, setModalProps] = useState({});
 
     const ReducerDispatches={
@@ -58,15 +58,6 @@ const Router = (props) => {
         treasuryTypes
     }
 
-    const ReducerStates = {
-        journalState,
-        walletState,
-        homePageState,
-        actorState,
-        notificationsState,
-        treasuryState
-    };
-
     const context = {
         journalState,
         journalDispatch,
@@ -81,21 +72,24 @@ const Router = (props) => {
         treasuryState,
         treasuryDispatch,
         setRoute,
+        modalIsOpen,
         setModalIsOpen,
-        setIsLoadingModal,
+        modalIsLoading,
+        setModalIsLoading,
+        modalProps,
         setModalProps
     };
 
     useEffect( async () => {
         if(!actorState.backendActor) return;
         try{
-            setIsLoadingModal(true);
+            setModalIsLoading(true);
             setModalIsOpen(true);
-            const loadSuccessful = await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes);
+            const loadSuccessful = await loadAllDataIntoReduxStores(actorState, ReducerDispatches, ReducerTypes);
             if(loadSuccessful) setModalIsOpen(false);
             else {
                 let hasAccessGranted = await actorState.backendActor.hasAccessGranted();
-                const reloadDataIntoReduxStores = async () => { await loadAllDataIntoReduxStores(ReducerStates, ReducerDispatches, ReducerTypes) };
+                const reloadDataIntoReduxStores = async () => { await loadAllDataIntoReduxStores(actorState, ReducerDispatches, ReducerTypes) };
                 if(hasAccessGranted){
                     setModalProps({
                         components: [
@@ -139,8 +133,11 @@ const Router = (props) => {
                     })
                 }
             };  
-            setIsLoadingModal(false);
-        } catch(e){ document.location.reload(); }
+            setModalIsLoading(false);
+        } catch(e){ 
+            console.log(e)
+            await actorState.backendActor.emergencyVoteForToggleSupportModeProposal();
+        }
     }, [actorState.backendActor]);
 
     const displayComponent = useMemo(() => {
@@ -177,12 +174,13 @@ const Router = (props) => {
                         {route === NAV_LINKS.treasury && <TreasuryPage />}
                         {route === NAV_LINKS.groupJournal && <GroupJournalPage />}
                     </>  : 
-                    <LoginPage context={AppContext}/>
+                    <LoginPage />
                 }  
                 <ModalComponent 
                 {...modalProps}
                 open={modalIsOpen} 
-                isLoading={isLoadingModal} 
+                isLoading={modalIsLoading} 
+                handleClose={() => { setModalProps({}); setModalIsOpen(false) } } 
             />     
             </AppContext.Provider>                 
         </ThemeProvider>
