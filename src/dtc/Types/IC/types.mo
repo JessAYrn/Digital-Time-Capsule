@@ -75,6 +75,12 @@ module {
   };
   public type utxo = { height : Nat32; value : satoshi; outpoint : outpoint };
   public type wasm_module = Blob;
+  public type snapshot_id = Blob;
+  public type snapshot = {
+    id : snapshot_id;
+    taken_at_timestamp : Nat64;
+    total_size: Nat64;
+  };
   public type Self = actor {
     bitcoin_get_balance : shared get_balance_request -> async satoshi;
     bitcoin_get_balance_query : shared query get_balance_request -> async satoshi;
@@ -180,8 +186,12 @@ module {
         sender_canister_version : ?Nat64;
       } -> async ();
     upload_chunk : shared {
-        chunk : Blob;
-        canister_id : Principal;
-      } -> async chunk_hash;
+      chunk : Blob;
+      canister_id : Principal;
+    } -> async chunk_hash;
+    take_canister_snapshot : shared { canister_id : canister_id; replace_snapshot: ?snapshot_id } -> async snapshot;
+    load_canister_snapshot : shared { canister_id : canister_id; snapshot_id: snapshot_id } -> async ();
+    list_canister_snapshots : shared { canister_id : canister_id } -> async [snapshot];
+    delete_canister_snapshot : shared { canister_id : canister_id; snapshot_id: snapshot_id } -> async ();
   }
 }

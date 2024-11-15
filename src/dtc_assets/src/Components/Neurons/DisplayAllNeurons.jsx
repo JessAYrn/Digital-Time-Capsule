@@ -19,7 +19,7 @@ const DisplayAllNeurons = (props) => {
               <AccordionField>
                 {
                   neurons?.icp.map(neuron => {
-                    let subtitle = neuron[1]?.neuronInfo?.stake_e8s ? `${round2Decimals(fromE8s(parseInt(neuron[1].neuronInfo.stake_e8s)))} ICP` : "Retrieving...";
+                    let subtitle = neuron[1]?.neuronInfo?.stake_e8s ? `${round2Decimals(fromE8s(parseInt(neuron[1].neuronInfo.stake_e8s)))} ICP` : "Spawning...";
                     return (
                       <div 
                       title={`${neuron[0]}`}

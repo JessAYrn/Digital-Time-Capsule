@@ -48,6 +48,7 @@ module {
     Blob.fromArray(Buffer.toArray(ArrayBuffer))
   };
 
+
   public func accountIdentifier(principal: Principal, subaccount: Subaccount) : AccountIdentifier {
     let hash = SHA224.Digest();
     hash.write([0x0A]);

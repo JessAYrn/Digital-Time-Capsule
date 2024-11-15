@@ -206,4 +206,12 @@ module {
     };
   };
 
+  public func divideNat64(numerator : Nat64, denominator : Nat64) : Float {
+    Float.fromInt64(Int64.fromNat64(numerator)) / Float.fromInt64(Int64.fromNat64(denominator));
+  };
+
+  public func divideInt64(numerator : Int64, denominator : Int64) : Float {
+    Float.fromInt64(numerator) / Float.fromInt64(denominator);
+  };
+
 };

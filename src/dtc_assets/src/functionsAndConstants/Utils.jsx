@@ -99,7 +99,7 @@ export const milisecondsToNanoSeconds = (time) => {
 }
 
 export const nanoSecondsToMiliSeconds = (time) => {
-  return Math.floor(time / 1000000);
+  return parseInt(time / 1000000);
 }
 
 export const fileToBlob = async (file) => {
@@ -155,9 +155,11 @@ export const secondsToMilliseconds = (seconds) => {
   return seconds * 1000;
 };
 
+export const millisecondsToSeconds = (seconds) => {
+  return seconds / 1000;
+};
+
 export const daysToNanoSeconds = (days) => {
-  console.log(days);
-  console.log(days * 86400 * 1000000000);
   return days * 86400 * 1000000000;
 };
 
@@ -347,5 +349,12 @@ export const userNamePermitted = (userName) => {
   };
   return true;
 }
+
+export const getFundingCampaignAssetTypeAndValue = (asset) => {
+    const type = Object.keys(asset)[0];
+    const value = fromE8s(parseInt(asset[type].e8s));
+    const fromNeuron = asset[type].fromNeuron;
+    return {type, value, fromNeuron};
+};
 
 

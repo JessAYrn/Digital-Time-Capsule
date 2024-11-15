@@ -3,90 +3,23 @@ import { AppContext } from '../../Context';
 import { NavBar } from '../../Components/navigation/NavBar';
 import { CHART_TYPES, GRAPH_DISPLAY_LABELS, GRAPH_DATA_SETS } from '../../functionsAndConstants/Constants';
 import { copyText } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
-import { loadAllDataIntoReduxStores } from '../../functionsAndConstants/loadingFunctions';
-import { walletTypes  } from '../../reducers/walletReducer';
-import { treasuryTypes } from '../../reducers/treasuryReducer';
-import { notificationsTypes } from '../../reducers/notificationsReducer';
-import { homePageTypes } from '../../reducers/homePageReducer';
-import { types as journalTypes } from '../../reducers/journalReducer';
 
 import { nanoSecondsToMiliSeconds, shortenHexString, round2Decimals, fromE8s } from '../../functionsAndConstants/Utils';
 import QrCodeIcon from '@mui/icons-material/QrCode';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import SendIcon from '@mui/icons-material/Send';
-import RefreshIcon from '@mui/icons-material/Refresh';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
 import Paper  from '@mui/material/Paper';
 import DataField from '../../Components/Fields/DataField';
 import AccordionField from '../../Components/Fields/Accordion';
-import SpeedDialField from '../../Components/Fields/SpeedDialField';
-import ModalComponent from '../../Components/modal/Modal';
-import SendCryptoModal from '../../Components/modal/SendCryptoModal';
 import ButtonField from '../../Components/Fields/Button';
-import DisplayQrCode from '../../Components/modal/DisplayQrCode';
 import Graph from '../../Components/Fields/Chart';
 import Typography from '@mui/material/Typography';
+import ActionButton from '../../Components/ActionButton';
 
 
 const WalletPage = (props) => {
 
-    const { 
-        walletState, 
-        walletDispatch, 
-        actorState,
-        treasuryState, 
-        treasuryDispatch,
-        notificationsDispatch,
-        homePageDispatch,
-        journalDispatch
-    } = useContext(AppContext);
-
-    const dispatches = { homePageDispatch, treasuryDispatch, walletDispatch, notificationsDispatch, journalDispatch};
-    const types = { journalTypes, walletTypes, homePageTypes, notificationsTypes, treasuryTypes};
-
-    const [loadingWalletData, setIsLoadingWalletData] = useState(false);
-    const [modalIsOpen, setModalIsOpen] = useState(false);
-    const [modalProps, setModalProps] = useState({});
-
-    const onSend = () => {
-        setModalProps({
-            components: [{
-                Component: SendCryptoModal,
-                props: {
-                    onClickCancel: () => {setModalIsOpen(false); () => setModalProps({})},
-                    setModalProps,
-                    setModalIsOpen,
-                    setIsLoadingWalletData
-                }
-            }]
-        });
-        setModalIsOpen(true);
-    };
-
-    const onClick_QrCode = () => {
-        setModalIsOpen(true);
-        setModalProps({
-            components: [{
-                Component: DisplayQrCode,
-                props: {
-                    onClose: () => {setModalIsOpen(false); () => setModalProps({})},
-                }
-            }]
-        });
-    };
-
-    const reloadData = async () => {
-        setIsLoadingWalletData(true);
-        setModalIsOpen(true);
-        await loadAllDataIntoReduxStores(actorState, dispatches, types);
-        setModalIsOpen(false);
-        setIsLoadingWalletData(false);
-    };
-
-    const speedDialActions = [
-        {name: "Refresh", icon: RefreshIcon, onClick: reloadData},
-        {name: "New Transaction", icon: SendIcon , onClick: onSend}
-    ]
+    const { walletState, treasuryState } = useContext(AppContext);
 
     const DisplayTxAddresses = (props) => {
         const {addresses} = props;
@@ -162,30 +95,6 @@ const WalletPage = (props) => {
                     height={"500px"}
                     width={"100%"}
                 />
-                <Paper elevation={24} className={''} sx={{
-                    backgroundColor: "rgba(52, 52, 52, 0.8)",
-                    width: "100%",
-                    height: "auto",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    flexDirection: "column",
-                }}>
-                    <Grid width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} padding={"0"}>
-                        <DataField
-                            label={'Address: '}
-                            text={`${shortenHexString(walletState.walletData.address)}`}
-                            isLoading={!walletState.dataHasBeenLoaded}
-                            onClick={() => copyText( walletState.walletData.address )}
-                            buttonIcon={ContentCopyIcon}
-                        />
-                        <ButtonField
-                            Icon={QrCodeIcon}
-                            transparentBackground={true}
-                            onClick={onClick_QrCode}
-                        />
-                    </Grid>
-                </Paper> 
             </Grid>
             <Grid 
                 columns={12} 
@@ -196,7 +105,7 @@ const WalletPage = (props) => {
                 justifyContent="center" 
                 alignItems="center" 
             >
-                {walletState.walletData.txHistory.data.length && 
+                {!!walletState?.walletData?.txHistory?.data?.length && 
                 <AccordionField>
                     {walletState.walletData.txHistory.data.map(([mapKey, tx]) => {
                         const {balanceDelta, increase, recipient, timeStamp, source} = tx;
@@ -211,13 +120,7 @@ const WalletPage = (props) => {
                 </AccordionField>}
 
             </Grid>
-            <SpeedDialField actions={speedDialActions} position={"right"}/>
-            <ModalComponent
-                open={modalIsOpen}
-                isLoading={loadingWalletData}
-                handleClose={() => setModalIsOpen(false)}
-                {...modalProps}
-            />
+            <ActionButton/>
         </Grid>
             
         

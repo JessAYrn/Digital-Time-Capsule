@@ -23,8 +23,11 @@ const APP_CONTEXTS={
     treasuryState:{},
     treasuryDispatch: () => {},
     setRoute: () => {},
+    modalIsOpen: false,
     setModalIsOpen: () => {},
-    setIsLoadingModal: () => {},
+    modalIsLoading: false,
+    setModalIsLoading: () => {},
+    modalProps: {},
     setModalProps: () => {},
 };
 

@@ -145,7 +145,7 @@ const theme = createTheme({
       MuiSwitch:{
         styleOverrides:{
           track:{
-            backgroundColor: '#F7931A'
+            backgroundColor: "#F7931A"
           }
         }
       },
@@ -164,7 +164,7 @@ const theme = createTheme({
           root: {
             ".MuiButtonBase-root": {
               ".MuiTouchRipple-root":{
-                backgroundColor: "#343434",
+                backgroundColor: grey[50],
                 color: grey[50]
               }
             }
@@ -174,7 +174,7 @@ const theme = createTheme({
       MuiSpeedDialIcon: {
         styleOverrides: {
           root: {
-            color: grey[50],
+            color: "#343434",
             zIndex: 1
           }
         }
@@ -184,7 +184,7 @@ const theme = createTheme({
           fab: {
             ".MuiSvgIcon-root": {
               zIndex: 1,
-              color: grey[50]
+              color: "#343434"
             }
           }
         }

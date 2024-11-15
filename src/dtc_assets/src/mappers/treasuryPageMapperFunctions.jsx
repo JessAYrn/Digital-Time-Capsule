@@ -1,7 +1,7 @@
 import { round8Decimals, toHexString } from "../functionsAndConstants/Utils";
-
 import { nanoSecondsToMiliSeconds, getDateAsStringMMDDYYY, fromE8s, shortenHexString } from "../functionsAndConstants/Utils";
 import { GRAPH_DISPLAY_LABELS, GRAPH_DATA_SETS } from "../functionsAndConstants/Constants";
+import { sortFundingCampaigns } from "../functionsAndConstants/treasuryDataFunctions";
 
 const dummyLabels = [
     getDateAsStringMMDDYYY(Date.now() - (1000 * 60 * 60 * 24 * 6)),
@@ -167,14 +167,6 @@ export const mapNeuronContributionsToTableRows = (neuronContributions) => {
     return sortedNeuronContributions;
 }
 
-
-export const getUserNeuronContribution = (userPrincipal, neuronContributions) => {
-    let userContribution = neuronContributions.find(([contributor, _]) => {
-        return contributor === userPrincipal;
-    });
-    return userContribution ? userContribution[1] : {stake_e8s: 0, voting_power: 0};
-};
-
 export const mapBackendTreasuryDataToFrontEndObj = (props) => {
     const {
         usersTreasuryDataArray,
@@ -192,7 +184,9 @@ export const mapBackendTreasuryDataToFrontEndObj = (props) => {
     const totalDeposits_ = parseInt(totalDeposits.e8s);
 
     const treasuryDataToFrontendFormat = (principal, treasuryData) => {
-        let {balances} = treasuryData;
+        let {balances, automaticallyContributeToLoans, automaticallyRepayLoans} = treasuryData;
+        const automaticallyContributeToLoans_ = !!automaticallyContributeToLoans.length && !!automaticallyContributeToLoans[0];
+        const automaticallyRepayLoans_ = !!automaticallyRepayLoans.length && !!automaticallyRepayLoans[0];
         let {icp, icp_staked, eth, btc, voting_power} = balances;
         balances = {
             icp: parseInt(icp.e8s), 
@@ -201,7 +195,7 @@ export const mapBackendTreasuryDataToFrontEndObj = (props) => {
             btc: parseInt(btc.e8s),
             voting_power: parseInt(voting_power.e8s)
         }; 
-        return [ principal, { ...treasuryData, balances} ];
+        return [ principal, { ...treasuryData, balances, automaticallyContributeToLoans: automaticallyContributeToLoans_, automaticallyRepayLoans: automaticallyRepayLoans_} ];
     };
 
     const usersTreasuryDataArray_ = usersTreasuryDataArray.map(([principal, treasuryData ]) => treasuryDataToFrontendFormat(principal, treasuryData));
@@ -241,6 +235,6 @@ export const mapBackendTreasuryDataToFrontEndObj = (props) => {
         userVotingPower,
         userTreasuryData: userTreasuryData_[1],
         userPrincipal,
-        fundingCampaigns
+        fundingCampaigns: sortFundingCampaigns(fundingCampaigns)
     };
 };

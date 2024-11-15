@@ -6,7 +6,6 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { Card, CardMedia } from '@mui/material';
 import ButtonField from '../Button';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
-import ModalComponent from '../../modal/Modal';
 import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import WarningIcon from '@mui/icons-material/Warning';
@@ -32,9 +31,7 @@ const FileUpload = (props) => {
         revokeDataURL
     } = props;
 
-    const { actorState } = useContext(AppContext);
-    const [modalProps, setModalProps] = useState({});
-    const [modalIsOpen, setModalIsOpen] = useState(false);
+    const { actorState, setModalIsOpen, setModalProps } = useContext(AppContext);
     const [errorWhenDisplaying, setErrorWhenDisplaying] = useState(null);
 
     useEffect(async () => {
@@ -179,20 +176,6 @@ const FileUpload = (props) => {
                     /> 
                 }
             </Card>
-            <ModalComponent 
-                {...modalProps}
-                open={modalIsOpen} 
-                handleClose={() => setModalIsOpen(false)} 
-                components={[{
-                    Component: ButtonField, 
-                    props: {
-                        active: true,
-                        text: "OK",
-                        Icon: ThumbUpAltIcon,
-                        onClick: () => setModalIsOpen(false)
-                    }
-                }]}
-            />
         </>
     );
 }

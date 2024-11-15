@@ -1,5 +1,4 @@
 import Ledger "NNS/Ledger";
-import Debug "mo:base/Debug";
 import Error "mo:base/Error";
 import Trie "mo:base/Trie";
 import Hash "mo:base/Hash";
@@ -38,7 +37,6 @@ shared(msg) actor class Journal () = this {
     private stable var mainCanisterId_ : Text = "null"; 
     private stable var journalEntryIndex : Nat = 0;
     private var txFee : Nat64 = 10_000;
-    private var capacity = 1_500_000_000_000;
     private var balance = Cycles.balance();
     private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
 
@@ -50,13 +48,7 @@ shared(msg) actor class Journal () = this {
     // Return the cycles received up to the capacity allowed
     public shared func wallet_receive() : async { accepted: Nat64 } {
         let amount = Cycles.available();
-        let limit : Nat = capacity - balance;
-        let accepted = 
-            if (amount <= limit) amount
-            else limit;
-        let deposit = Cycles.accept<system>(accepted);
-        assert (deposit == accepted);
-        balance += accepted;
+        let accepted = Cycles.accept<system>(amount);
         { accepted = Nat64.fromNat(accepted) };
     };
 
@@ -256,7 +248,7 @@ shared(msg) actor class Journal () = this {
 
         switch(entry){
             case null{ #err(#NotFound); };
-            case (? v){
+            case (? _){
                 journalMap.delete(key);
                 let journalAsArray = Iter.toArray(journalMap.entries());
                 ignore mapJournalEntriesArrayToExport(journalAsArray);
@@ -271,7 +263,7 @@ shared(msg) actor class Journal () = this {
         let entryFiles = filesMap.get(fileId);
         switch(entryFiles){
             case null{ #err(#NotFound); };
-            case (? v){
+            case (? _){
                 filesMap.delete(fileId);
                 #ok(());
             };
@@ -300,6 +292,7 @@ shared(msg) actor class Journal () = this {
 
     public shared({caller}) func transferICP( amount: Nat64, recipientIdentifier: JournalTypes.RecipientIdentifier) : async {amountSent: Nat64} {
         if( Principal.toText(caller) != mainCanisterId_) { throw Error.reject("Unauthorized access."); };
+        if(amount < txFee){ return {amountSent: Nat64 = 0}; };
         var amountSent = amount - txFee;
 
         func performTransfer(amountSent: Nat64, recipientIdentifier: JournalTypes.RecipientIdentifier) : 
@@ -337,6 +330,7 @@ shared(msg) actor class Journal () = this {
                 switch(res_) {
                     case(#Ok(_)) {return {amountSent};};
                     case(#Err(#InsufficientFunds { balance })) {
+                        if(balance < Nat64.toNat(txFee)){ return {amountSent: Nat64 = 0}; };
                         amountSent := Nat64.fromNat(balance) - txFee;
                         let res = await performTransfer(amountSent, recipientIdentifier);
                         switch (res) {
@@ -354,6 +348,7 @@ shared(msg) actor class Journal () = this {
                 switch(res_) {
                     case(#Ok(_)) { return {amountSent}; };
                     case(#Err(#InsufficientFunds { balance })) {
+                        if(balance.e8s < txFee){ return {amountSent: Nat64 = 0}; };
                         amountSent := balance.e8s - txFee;
                         let res = await performTransfer(amountSent, recipientIdentifier);
                         switch (res) {

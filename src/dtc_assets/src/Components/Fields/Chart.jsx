@@ -32,7 +32,7 @@ const Graph = (props) => {
         let set = inputData[dataSetName];
         let dataset = set.datasets.find(dataset => dataset.label === labelDisplayed);
         return {...set, datasets: [dataset]};
-    },[dataSetName, labelDisplayed]);
+    },[dataSetName, labelDisplayed, inputData]);
 
 
 

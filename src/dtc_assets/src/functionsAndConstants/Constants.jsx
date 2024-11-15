@@ -62,7 +62,6 @@ export const CANISTER_DATA_FIELDS = {
     managerCanisterPrincipal: "managerCanisterPrincipal",
     releaseVersionLoaded: "releaseVersionLoaded",
     releaseVersionInstalled: "releaseVersionInstalled",
-    nftId: "nftId",
     founder: "founder",
     proposals: "proposals",
     isAdmin: "isAdmin",
@@ -145,7 +144,16 @@ export const GRAPH_DISPLAY_LABELS = {
     votingPower: "VOTING_POWER",
     voting_power: "VOTING_POWER",
 
-}
+};
+
+export const FUNDING_CAMPAIGN_ASSET_TYPES = {
+    icp: "icp",
+    icp_staked: "icp_staked",
+    ck_btc: "ck_btc",
+    ck_eth: "ck_eth",
+    ck_usdc: "ck_usdc",
+    ck_usdt: "ck_usdt",
+};
 
 export const PERMITTED_USERNAME_CHARACTERS = [
     'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',

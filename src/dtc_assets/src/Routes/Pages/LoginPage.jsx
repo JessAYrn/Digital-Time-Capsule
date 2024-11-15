@@ -54,14 +54,9 @@ const LoginPage = (props) => {
     useEffect(async () => {
         setIsLoading(true);
         const {actor} = await getBackendActor({anon: true});
-        let promises = [actor.getCanisterCyclesBalances(), actor.heartBeat()];
-        let [result_0, result_1] = await Promise.all(promises);
-        const {
-            currentCyclesBalance_backend, 
-            currentCyclesBalance_frontend, 
-            currentCyclesBalance_treasury, 
-            currentCyclesBalance_manager
-        } = result_0;
+        const balances = await actor.getCanisterCyclesBalances();
+        actor.heartBeat();
+        const { currentCyclesBalance_backend, currentCyclesBalance_frontend, currentCyclesBalance_treasury, currentCyclesBalance_manager} = balances;
         homePageDispatch({
             payload: {
                 currentCyclesBalance_backend: parseInt(currentCyclesBalance_backend),
