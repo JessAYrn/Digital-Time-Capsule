@@ -31,7 +31,7 @@ module{
         // If there is an original value, do not update
         switch(profilesMap.get(callerId)) {
             case null {
-                Cycles.add<system>(1_000_000_000_000);
+                Cycles.add<system>(1_500_000_000_000);
                 let newUserJournal = await Journal.Journal();
                 let amountAccepted = await newUserJournal.wallet_receive();
                 let treasuryCanister: Treasury.Treasury = actor(daoMetaData.treasuryCanisterPrincipal);

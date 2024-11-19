@@ -252,7 +252,7 @@ module{
     async MainTypes.DaoMetaData_V4{
         let managerCanister : Manager.Manager = actor(daoMetaData.managerCanisterPrincipal);
         ignore managerCanister.checkForNewRelease();
-        if(currentCyclesBalance > 10_000_000_000_000){ ignore refillCanisterCycles(daoMetaData, profilesMap); };
+        if(currentCyclesBalance > 20_000_000_000_000){ ignore refillCanisterCycles(daoMetaData, profilesMap); };
         let timeLapsed =Time.now() - daoMetaData.lastRecordedTime;
         let timeLapsedInDays : Float = FloatX.divideInt64(Int64.fromInt(timeLapsed), Int64.fromNat64(nanosecondsInADay));
         if(timeLapsedInDays < 1){ return daoMetaData };
