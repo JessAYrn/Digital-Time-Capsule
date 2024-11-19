@@ -676,8 +676,8 @@ shared actor class User() = this {
         userProfilesArray_v2 := []; 
         proposalsArray_v2 := [];
         ignore recurringTimer<system>(#seconds (24 * 60 * 60), heartBeat_unshared);
-        ignore recurringTimer<system>(#seconds (60), finalizeAllEligibleProposals);
-        ignore recurringTimer<system>(#seconds (60 * 60), heartBeat_hourly);
+        ignore recurringTimer<system>(#seconds (3 * 60 * 60), finalizeAllEligibleProposals);
+        ignore recurringTimer<system>(#seconds (24 * 60 * 60), heartBeat_hourly);
         ignore recurringTimer<system>(#seconds (30), updateUsersTxHistory);
 
     };
