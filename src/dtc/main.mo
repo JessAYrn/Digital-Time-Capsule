@@ -49,6 +49,7 @@ shared actor class User() = this {
     private var proposalsMap_v2 : MainTypes.ProposalsMap_V2 = HashMap.fromIter(Iter.fromArray(proposalsArray_v2), Iter.size(Iter.fromArray(proposalsArray_v2)), Nat.equal, Hash.hash);
     private stable var startIndexForBlockChainQuery : Nat64 = 7_356_011;
     private let ic : IC.Self = actor "aaaaa-aa";
+    private stable var subnetType: MainTypes.SubnetType = #Application;
 
     let {recurringTimer; setTimer} = Timer;
 
@@ -64,7 +65,7 @@ shared actor class User() = this {
     };
     
     public shared({ caller }) func create (userName: Text) : async Result.Result<MainTypes.AmountAccepted, JournalTypes.Error> {
-        let amountAccepted = await MainMethods.create(caller, userName, userProfilesMap_v2, daoMetaData_v4);
+        let amountAccepted = await MainMethods.create(caller, userName, userProfilesMap_v2, daoMetaData_v4, subnetType);
         var updatedDaoMetaData = await CanisterManagementMethods.removeFromRequestsList([Principal.toText(caller)], daoMetaData_v4);
         if(daoMetaData_v4.founder == "Null") { updatedDaoMetaData := { updatedDaoMetaData with founder = Principal.toText(caller); admin = [(Principal.toText(caller), {percentage = 100})]} };
         switch(amountAccepted){
@@ -243,7 +244,8 @@ shared actor class User() = this {
         daoMetaData_v4 := {daoMetaData_v4 with frontEndPrincipal};
     };
 
-    public shared func configureApp() : async Result.Result<(), JournalTypes.Error> {
+    public shared func configureApp(subnet_type: MainTypes.SubnetType) : async Result.Result<(), JournalTypes.Error> {
+        subnetType := subnet_type;
         let canConfigureApp = CanisterManagementMethods.canConfigureApp(daoMetaData_v4);
         if(not canConfigureApp){ return #err(#NotAuthorized); };
         daoMetaData_v4 := {daoMetaData_v4 with backEndPrincipal = Principal.toText(Principal.fromActor(this))};

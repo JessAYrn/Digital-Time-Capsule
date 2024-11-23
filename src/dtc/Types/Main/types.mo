@@ -127,6 +127,8 @@ module{
 
     public type ProposalsMap_V2 = HashMap.HashMap<Nat, Proposal_V2>;
 
+    public type SubnetType = {#Fiduciary; #Application};
+
     public type VotingResults_V2 = {
         yay: Nat64;
         nay: Nat64;
