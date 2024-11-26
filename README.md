@@ -1,143 +1,48 @@
-Personal DAO
+  This repository is coded such that local development of the user interface is conducted where the local host communicates with a pd_api canister that runs on the live internet computer network rather than a pd_api canister that runs locally. This allows for ease of testing within the context of a user interface that relies on developers logging in Internet Identity for testing.
 
-## Running the Personal DAO repo locally
+  Developers looking to start their testing environment must follow the steps below:
 
-in the Personal DAO project 
+  1. create `node_modules`:
+    ```npm i```
+  
+  2. create a pd_api canister on the internet computer network:
+    ```dfx canister create pd_api --network ic```
 
-in the webpack.config.js file, be sure that the II_URL property uses the proper canister ID. it should use the canister ID of the local internet-identity canister. you find this in the termial where you deployed the local internet-identity repo. 
+    ```dfx deploy pd_api --network ic```
 
-delete the /package-lock.json file, 
-delete the /node_modules file,
-delete the /dist file,
-delete the /.dfx file,
-delete the /src/declarations file
+  3. create and configure treasury canister, manager canister and ui canister on the internet computer network:
+    ```dfx canister call pd_api configureApp --network ic```
 
-add the follow properties to the "canisters" object in the dfx.json file:
+    you may view the canister IDs of the newly created canisters by running the following command:
+    ```dfx canister call pd_api getCanisterData --network ic```
+    the frontendPrincipal property will read "Null" for up to 15 minutes following the call to the `configureApp` function.
 
-```
-"ledger": {
-      "type": "custom",
-      "wasm": "ledger.wasm",
-      "candid": "ledger.public.did"
-  },
-  "internet_identity": {
-      "type": "custom",
-      "candid": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity.did",
-      "wasm": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity_dev.wasm",
-      "shrink": false,
-      "remote": {
-        "candid": "internet_identity.did",
-        "id": {
-          "ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
-        }
-      }
-    },
-```
+  4. start local dfx session:
+    ```dfx start --clean```
 
-start local replica by running the following line:
+  5. create and build local instances of pd_api and pd_ui canisters:
+    ```dfx canister create pd_api```
 
-```
-dfx start --clean
-```
+    ```dfx build pd_api```
 
-Create a new identity that will work as a minting account by running the following lines:
+    ```dfx canister create pd_ui``
 
-```
-dfx identity new minter
-dfx identity use minter
-export MINT_ACC=$(dfx ledger account-id)
-```
+    ```dfx build pd_ui```
 
-Switch back to your default identity and record its ledger account identifier by running the following lines:
+  6. generate declarations for pd_api and pd_ui canisters:
+  ```dfx generate pd_api```
 
-```
-dfx identity use default
-export LEDGER_ACC=$(dfx ledger account-id)
-```
+  ```dfx generate pd_ui```
 
-### deploy the internet identity canister locally
+  7. within the `src/declarations/pd_api/pd_api.did` file replace all occurances of the string `composite query` with the string `composite query` 
+  
+    within the `src/declarations/pd_api/pd_api.did.js` file replace all occurances of the string `composite_query` with the string `query`
 
-Deploy the internet identity app to your network by running the following line:
-```
-dfx deploy internet_identity
-```
-
-take the canister id for the internet identity canister and set it as the value of the LOCAL_II_CANISTER_ID variable located on line 8 
-of the webpack.config.js file.
+  8. run the following command:
+    ```npm start```
 
 
-### deploy the ledger canister locally
-
-change the "candid": "ledger.public.did" line of the dfx.json file so that it reads "candid": "ledger.private.did"
-
-Deploy the ledger canister to your network by running the following line:
-```
-dfx deploy ledger --argument '(record {minting_account = "'${MINT_ACC}'"; initial_values = vec { record { "'${LEDGER_ACC}'"; record { e8s=100_000_000_000 } }; }; send_whitelist = vec {}})'
-```
-
-change the "candid": "ledger.private.did" line of the dfx.json file back so that it reads "candid": "ledger.public.did" again.
-
-Take the ledger canister-id and set it as the value of the CANISTER_ID variable in the pd/src/pd_backend/ledger.mo file. 
-
-### deploy the backend and frontend canisters locally
-
-set the isLocal var in the main.mo file to true;
-
-run the following commands in the Personal DAO terminal: 
-
-npm i
-
-then:
-
-dfx deploy pd_api
-
-then:
-
-dfx deploy pd_ui
-
-then: 
-## the server only works in localhost with node versions up to 16. so you have to swtich to version 16
-nvm use 16.15.1
-
-then:
-npm start
-
-## Deploying to the Mainnet
-
-set the isLocal var in the main.mo file to false;
-
-Change the CANISTER_ID variable in the pd/src/pd_backend/ledger.mo file to "ryjl3-tyaaa-aaaaa-aaaba-cai" (This is the canister-id of the ledger canister on the mainnet);
-
-run the following commands
-
-npm install
-
-// to deploy back-end canister only
-dfx deploy --network ic pd_api
-
-// to deploy front-end canister only
-dfx deploy --network ic pd_ui
-
-
-## Command for minting ICP
-
-```
-dfx canister call ledger transfer 'record {memo = 1234; amount = record { e8s=10_000_000_000 }; fee = record { e8s=10_000 }; from_subaccount = null; to =  '$(python3 -c 'print("vec{" + ";".join([str(b) for b in bytes.fromhex("'$JESSE_ACC'")]) + "}")')'; created_at_time = null }' 
-
-```
-
-## Command to view ICP balance 
-
-```
-dfx canister call ledger account_balance '(record { account = '$(python3 -c 'print("vec{" + ";".join([str(b) for b in bytes.fromhex("'$JESSE_ACC'")]) + "}")')' })'
-```
-
-### Command for setting variable name for an account-id
-```
-export JESSE_ACC=73cee9e565a0eb00aafdefdd04a14f6e6339f0cc8715dba8d353d57e7fda6da2
-```
-
-<!-- this above command creates a variable named 'JESSE_ACC' and sets it equal to the long string of characters on the right side of the equal sign -->
+### the following commands are stored below for referral purposes. 
 
 ### command for retrieving the canister-id of the default identity's wallet: 
 
