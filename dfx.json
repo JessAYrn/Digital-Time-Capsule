@@ -18,7 +18,7 @@
     },
     "pd_ui": {
       "dependencies": [
-        "pd_api"
+  
       ],
       "frontend": {
         "entrypoint": "src/pd_ui/src/index.html"
