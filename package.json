@@ -13,7 +13,7 @@
     "prebuild": "npm run generate",
     "start": "webpack serve --mode development --env development",
     "prestart": "npm run generate",
-    "generate": "dfx generate pd_api --network ic"
+    "generate": "dfx generate pd_ui --network ic"
   },
   "devDependencies": {
     "@dfinity/agent": "^0.10.4",
