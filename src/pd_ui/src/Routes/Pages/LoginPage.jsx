@@ -2,7 +2,6 @@ import React, {useContext, useEffect, useState} from "react";
 import DataField from "../../Components/Fields/DataField";
 import { homePageTypes } from "../../reducers/homePageReducer";
 import { round2Decimals, inTrillions } from "../../functionsAndConstants/Utils";
-import AccordionField from "../../Components/Fields/Accordion";
 import Grid from '@mui/material/Unstable_Grid2';
 import { getBackendActor } from "../../functionsAndConstants/authentication";
 import { actorTypes } from "../../reducers/actorReducer";
@@ -10,26 +9,6 @@ import LoginIcon from '@mui/icons-material/Login';
 import { AppContext } from "../../Context";
 import { Paper } from "@mui/material";
 import ButtonField from "../../Components/Fields/Button";
-
-export const accordionContent=[    
-    {
-        title:"1.) Navigate to your Personal DAO's unique URL and press the share button circled below ", 
-        image: `dtcscreengrab2.png`
-    },
-    {  
-        title:"2.) Select the 'Add to Home Screen' button", 
-        image:`dtcscreengrab3.png`
-    },
-    {
-        title:"3.) Enter a title and then press the 'add' button", 
-        image: `dtcscreengrab4.png`
-    },
-    {
-        title:"4.) Your Personal DAO app will then be installed and visible on yoru Home Screen", 
-        image:`dtcscreengrab1.png`
-    },
-
-];
 
 const LoginPage = (props) => {
 
@@ -69,8 +48,6 @@ const LoginPage = (props) => {
         setIsLoading(false);
     },[]);
     
-
-
     return(
         <Grid container columns={12} xs={12} rowSpacing={8} display="flex" justifyContent="center" alignItems="center">
             <Grid xs={11} md={9} display="flex" justifyContent="center" alignItems="center">
@@ -133,15 +110,6 @@ const LoginPage = (props) => {
                     iconSize={'medium'}
                     />
                 </Paper>
-            </Grid>
-        
-            <Grid xs={11} md={9} display="flex" justifyContent="center" alignItems="center">
-                <AccordionField>
-                    <div title={accordionContent[0].title} image={accordionContent[0].image}></div>
-                    <div title={accordionContent[1].title} image={accordionContent[1].image}></div>
-                    <div title={accordionContent[2].title} image={accordionContent[2].image}></div>
-                    <div title={accordionContent[3].title} image={accordionContent[3].image}></div>
-                </AccordionField>
             </Grid>
         </Grid>
     );

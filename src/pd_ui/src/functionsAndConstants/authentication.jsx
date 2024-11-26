@@ -2,8 +2,8 @@ import { getCurrentURL, extractCanisterIdFromURL } from './Utils';
 import { AuthClient }  from '@dfinity/auth-client';
 import { Actor, HttpAgent } from "@dfinity/agent";
 import * as canisterIds from "../../../../canister_ids.json";
-import * as dtcFiles from "../../../declarations/dtc";
-import * as dtcAssetsFiles from "../../../declarations/dtc_assets";
+import * as pdApiFiles from "../../../declarations/pd_api";
+import * as pdUiFiles from "../../../declarations/pd_ui";
 
 export const getLoginCredentials = async (anon) => {
   const authClient = await AuthClient.create();
@@ -21,15 +21,15 @@ export const getLoginCredentials = async (anon) => {
 
 export const getBackendActor = async ({anon = false}) => {
     const {agent} = await getLoginCredentials(anon);
-    let dtc_canisterId;
-    if(process.env.NODE_ENV === "development") dtc_canisterId = canisterIds.dtc.ic;
+    let pd_api_canisterId;
+    if(process.env.NODE_ENV === "development") pd_api_canisterId = canisterIds.pd_api.ic;
     else {
       let currentURL = getCurrentURL();
       let frontEndPrincipal = extractCanisterIdFromURL(currentURL);
-      let dtcAssetsCanister = dtcAssetsFiles.createActor(frontEndPrincipal, {agentOptions: {host: "https://icp-api.io"}});
-      let authorizedPrincipals = await dtcAssetsCanister.list_authorized();
-      dtc_canisterId = authorizedPrincipals[0];
+      let pdUiCanister = pdUiFiles.createActor(frontEndPrincipal, {agentOptions: {host: "https://icp-api.io"}});
+      let authorizedPrincipals = await pdUiCanister.list_authorized();
+      pd_api_canisterId = authorizedPrincipals[0];
     }
-    let actor = Actor.createActor(dtcFiles.idlFactory, { agent, canisterId: dtc_canisterId} );
+    let actor = Actor.createActor(pdApiFiles.idlFactory, { agent, canisterId: pd_api_canisterId} );
     return {actor, agent};
   };

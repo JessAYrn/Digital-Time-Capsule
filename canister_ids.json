@@ -1,8 +1,8 @@
 {
-    "dtc": {
+    "pd_api": {
       "ic": "mxtrc-7yaaa-aaaam-adlta-cai"
     },
-    "dtc_assets": {
+    "pd_ui": {
       "ic": "nbyjj-kiaaa-aaaam-adlwa-cai"
     },
     "manager": {

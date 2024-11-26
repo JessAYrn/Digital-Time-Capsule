@@ -1,8 +1,8 @@
-Digital-Time-Capsule
+Personal DAO
 
-## Running the Digital-Time-Capsule repo locally
+## Running the Personal DAO repo locally
 
-in the Digital-Time-Capsule project 
+in the Personal DAO project 
 
 in the webpack.config.js file, be sure that the II_URL property uses the proper canister ID. it should use the canister ID of the local internet-identity canister. you find this in the termial where you deployed the local internet-identity repo. 
 
@@ -77,23 +77,23 @@ dfx deploy ledger --argument '(record {minting_account = "'${MINT_ACC}'"; initia
 
 change the "candid": "ledger.private.did" line of the dfx.json file back so that it reads "candid": "ledger.public.did" again.
 
-Take the ledger canister-id and set it as the value of the CANISTER_ID variable in the Digital-Time-Capsule/src/dtc/ledger.mo file. 
+Take the ledger canister-id and set it as the value of the CANISTER_ID variable in the pd/src/pd_backend/ledger.mo file. 
 
 ### deploy the backend and frontend canisters locally
 
 set the isLocal var in the main.mo file to true;
 
-run the following commands in the Digital-Time-Capsule terminal: 
+run the following commands in the Personal DAO terminal: 
 
 npm i
 
 then:
 
-dfx deploy dtc
+dfx deploy pd_api
 
 then:
 
-dfx deploy dtc_assets
+dfx deploy pd_ui
 
 then: 
 ## the server only works in localhost with node versions up to 16. so you have to swtich to version 16
@@ -106,17 +106,17 @@ npm start
 
 set the isLocal var in the main.mo file to false;
 
-Change the CANISTER_ID variable in the Digital-Time-Capsule/src/dtc/ledger.mo file to "ryjl3-tyaaa-aaaaa-aaaba-cai" (This is the canister-id of the ledger canister on the mainnet);
+Change the CANISTER_ID variable in the pd/src/pd_backend/ledger.mo file to "ryjl3-tyaaa-aaaaa-aaaba-cai" (This is the canister-id of the ledger canister on the mainnet);
 
 run the following commands
 
 npm install
 
 // to deploy back-end canister only
-dfx deploy --network ic dtc
+dfx deploy --network ic pd_api
 
 // to deploy front-end canister only
-dfx deploy --network ic dtc_assets
+dfx deploy --network ic pd_ui
 
 
 ## Command for minting ICP
@@ -173,10 +173,10 @@ dfx canister --network ic  update-settings <canister_id> --freezing-threshold <N
 
 ### Add a new controller
 
-dfx canister update-settings dtc --add-controller <ADD_CONTROLLER>
+dfx canister update-settings pd_api --add-controller <ADD_CONTROLLER>
 
-### gzip wasm module before upgrading canister (note: after gzipping, you'll have to change the file name from dtc.wasm.gz back to dtc.wasm)
-gzip -f -1 ./.dfx/ic/canisters/dtc/dtc.wasm  
+### gzip wasm module before upgrading canister (note: after gzipping, you'll have to change the file name from pd.wasm.gz back to pd.wasm)
+gzip -f -1 ./.dfx/ic/canisters/pd_api/pd_api.wasm  
 
 ### grant permissions within asset canister
-dfx canister call dtc_assets grant_permission '(record {to_principal = principal "22xax-4iaaa-aaaap-qbaiq-cai"; permission = variant {ManagePermissions} })' --network ic
+dfx canister call pd_ui grant_permission '(record {to_principal = principal "22xax-4iaaa-aaaap-qbaiq-cai"; permission = variant {ManagePermissions} })' --network ic

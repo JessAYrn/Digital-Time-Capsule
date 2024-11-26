@@ -1,31 +1,31 @@
 {
   "canisters": {
-    "dtc": {
-      "main": "src/dtc/main.mo",
+    "pd_api": {
+      "main": "src/pd_backend/main.mo",
       "type": "motoko"
     },
     "journal": {
-      "main": "src/dtc/Journal.mo",
+      "main": "src/pd_backend/Journal.mo",
       "type": "motoko"
     },
     "treasury": {
-      "main": "src/dtc/Treasury.mo",
+      "main": "src/pd_backend/Treasury.mo",
       "type": "motoko"
     },
     "manager": {
-      "main": "src/dtc/Manager.mo",
+      "main": "src/pd_backend/Manager.mo",
       "type": "motoko"
     },
-    "dtc_assets": {
+    "pd_ui": {
       "dependencies": [
-        "dtc"
+        "pd_api"
       ],
       "frontend": {
-        "entrypoint": "src/dtc_assets/src/index.html"
+        "entrypoint": "src/pd_ui/src/index.html"
       },
       "source": [
-        "src/dtc_assets/assets",
-        "dist/dtc_assets/"
+        "src/pd_ui/assets",
+        "dist/pd_ui/"
       ],
       "type": "assets"
     }

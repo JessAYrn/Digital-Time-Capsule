@@ -1,6 +1,6 @@
 import * as canisterIds from "../../../../canister_ids.json";
-import * as dtcFiles from "../../../declarations/dtc"
-import * as dtcAssetsFiles from "../../../declarations/dtc_assets";
+import * as pdFiles from "../../../declarations/pd_api"
+import * as pdUiFiles from "../../../declarations/pd_ui";
 import { e8sInOneICP, MASTER_COPY_FRONTEND_CANISTER_ID, PERMITTED_USERNAME_CHARACTERS } from "./Constants";
 
 
@@ -251,16 +251,16 @@ export const scrollTo_Y =  (distanceFromTop = 0) => {
 
 export const backendActor = async (activeProvider) => {
   let currentURL = getCurrentURL();
-  let dtc_canisterId;
-  if(process.env.NODE_ENV === "development") dtc_canisterId = canisterIds.dtc.ic;
+  let pd_canisterId;
+  if(process.env.NODE_ENV === "development") pd_canisterId = canisterIds.pd_api.ic;
   else {
     let frontEndPrincipal = extractCanisterIdFromURL(currentURL);
-    let dtcAssetsCanister = dtcAssetsFiles.createActor(frontEndPrincipal, {agentOptions: {host: "https://icp-api.io"}});
-    let authorizedPrincipals = await dtcAssetsCanister.list_authorized();
-    dtc_canisterId = authorizedPrincipals[0];
+    let pdUiCanister = pdUiFiles.createActor(frontEndPrincipal, {agentOptions: {host: "https://icp-api.io"}});
+    let authorizedPrincipals = await pdUiCanister.list_authorized();
+    pd_canisterId = authorizedPrincipals[0];
   }
-  const dtc_idlFactory = dtcFiles.idlFactory;
-  let { value: actor } = await activeProvider?.createActor(dtc_canisterId, dtc_idlFactory);
+  const pd_idlFactory = pdFiles.idlFactory;
+  let { value: actor } = await activeProvider?.createActor(pd_canisterId, pd_idlFactory);
   return actor;
 };
 
