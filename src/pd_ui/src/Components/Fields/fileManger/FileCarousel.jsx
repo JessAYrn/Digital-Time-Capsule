@@ -10,6 +10,7 @@ import { defaultFileMetaData } from "../../../reducers/journalReducer";
 
 const FileCarousel = (props) => {
 
+    
     const {
         revokeDataURL,
         filesMetaDataArray,
