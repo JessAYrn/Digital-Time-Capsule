@@ -17,7 +17,7 @@ import SpawnNeuron from "./proposalModalComponentTypes/SpawnNeuron";
 import FollowNeuron from "./proposalModalComponentTypes/FollowNeuron";
 import AddOrRemoveAdmin from "./proposalModalComponentTypes/AddOrRemoveAdmin";
 import DissolveOrDisburseNeuron from "./proposalModalComponentTypes/DissolveOrDisburseNeuron";
-import CreateNeuronOrPurchaseCycles from "./proposalModalComponentTypes/CreateNeuronOrPurchaseCycles";
+import SetAmount from "./proposalModalComponentTypes/SetAmount";
 import IncreaseNeuron from "./proposalModalComponentTypes/IncreaseNeuron";
 import IncreaseDissolveDelay from "./proposalModalComponentTypes/IncreaseDissolveDelay";
 import CancelFundingCampaign from "./proposalModalComponentTypes/CancelFundingCampaign";
@@ -37,20 +37,23 @@ const CreateProposalForm = (props) => {
     const onMenuItemClick = (proposalAction) => { setProposalPayload({}); setProposalAction(proposalAction); };
 
     const mainMenuItemProps = [
-        // { text: PROPOSAL_ACTIONS.PurchaseCycles, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.PurchaseCycles), selected: proposalAction_ === PROPOSAL_ACTIONS.PurchaseCycles},
-        { text: PROPOSAL_ACTIONS.InstallUpgrades, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.InstallUpgrades), selected: proposalAction_ === PROPOSAL_ACTIONS.InstallUpgrades},
         { text: PROPOSAL_ACTIONS.AddAdmin, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.AddAdmin), selected: proposalAction_ === PROPOSAL_ACTIONS.AddAdmin},
-        { text: PROPOSAL_ACTIONS.RemoveAdmin, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.RemoveAdmin), selected: proposalAction_ === PROPOSAL_ACTIONS.RemoveAdmin},
+        { text: PROPOSAL_ACTIONS.CancelFundingCampaign, onClick: () => onMenuItemClick(PROPOSAL_ACTIONS.CancelFundingCampaign), selected: proposalAction_ === PROPOSAL_ACTIONS.CancelFundingCampaign},
+        { text: PROPOSAL_ACTIONS.CreateFundingCampaign, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.CreateFundingCampaign), selected: proposalAction_ === PROPOSAL_ACTIONS.CreateFundingCampaign},
+        { text: PROPOSAL_ACTIONS.CreateNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.CreateNeuron), selected: proposalAction_ === PROPOSAL_ACTIONS.CreateNeuron},
         { text: PROPOSAL_ACTIONS.DisburseNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.DisburseNeuron), selected: proposalAction_ === PROPOSAL_ACTIONS.DisburseNeuron},
         { text: PROPOSAL_ACTIONS.DissolveNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.DissolveNeuron), selected: proposalAction_ === PROPOSAL_ACTIONS.DissolveNeuron},
-        { text: PROPOSAL_ACTIONS.SpawnNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.SpawnNeuron), selected: proposalAction_ === PROPOSAL_ACTIONS.SpawnNeuron},
         { text: PROPOSAL_ACTIONS.FollowNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.FollowNeuron), selected: proposalAction_ === PROPOSAL_ACTIONS.FollowNeuron},
         { text: PROPOSAL_ACTIONS.IncreaseDissolveDelay, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.IncreaseDissolveDelay), selected: proposalAction_ === PROPOSAL_ACTIONS.IncreaseDissolveDelay},
-        { text: PROPOSAL_ACTIONS.CreateNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.CreateNeuron), selected: proposalAction_ === PROPOSAL_ACTIONS.CreateNeuron},
         { text: PROPOSAL_ACTIONS.IncreaseNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.IncreaseNeuron), selected: proposalAction_ === PROPOSAL_ACTIONS.IncreaseNeuron},
+
+        { text: PROPOSAL_ACTIONS.InstallUpgrades, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.InstallUpgrades), selected: proposalAction_ === PROPOSAL_ACTIONS.InstallUpgrades},
+        // { text: PROPOSAL_ACTIONS.PurchaseCycles, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.PurchaseCycles), selected: proposalAction_ === PROPOSAL_ACTIONS.PurchaseCycles},
+        { text: PROPOSAL_ACTIONS.RemoveAdmin, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.RemoveAdmin), selected: proposalAction_ === PROPOSAL_ACTIONS.RemoveAdmin},
+        { text: PROPOSAL_ACTIONS.SetCostToEnterDao, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.SetCostToEnterDao), selected: proposalAction_ === PROPOSAL_ACTIONS.SetCostToEnterDao},
+        { text: PROPOSAL_ACTIONS.SpawnNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.SpawnNeuron), selected: proposalAction_ === PROPOSAL_ACTIONS.SpawnNeuron},
+        { text: PROPOSAL_ACTIONS.TogglePrivacySetting, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.TogglePrivacySetting), selected: proposalAction_ === PROPOSAL_ACTIONS.TogglePrivacySetting},
         { text: PROPOSAL_ACTIONS.ToggleSupportMode, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.ToggleSupportMode), selected: proposalAction_ === PROPOSAL_ACTIONS.ToggleSupportMode},
-        { text: PROPOSAL_ACTIONS.CreateFundingCampaign, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.CreateFundingCampaign), selected: proposalAction_ === PROPOSAL_ACTIONS.CreateFundingCampaign},
-        { text: PROPOSAL_ACTIONS.CancelFundingCampaign, onClick: () => onMenuItemClick(PROPOSAL_ACTIONS.CancelFundingCampaign), selected: proposalAction_ === PROPOSAL_ACTIONS.CancelFundingCampaign},
         { text: PROPOSAL_ACTIONS.WithdrawFromMultiSigWallet, onClick: () => onMenuItemClick(PROPOSAL_ACTIONS.WithdrawFromMultiSigWallet), selected: proposalAction_ === PROPOSAL_ACTIONS.WithdrawFromMultiSigWallet}
     ];
 
@@ -117,7 +120,7 @@ const CreateProposalForm = (props) => {
             }
             { proposalAction_ === PROPOSAL_ACTIONS.IncreaseDissolveDelay && <IncreaseDissolveDelay onSubmitProposal={onSubmitProposal} action={proposalAction_} payload={proposalPayload_} /> }
             { proposalAction_ === PROPOSAL_ACTIONS.IncreaseNeuron && <IncreaseNeuron onSubmitProposal={onSubmitProposal} action={proposalAction_} payload={proposalPayload_}/> }
-            { (proposalAction_ === PROPOSAL_ACTIONS.CreateNeuron || proposalAction_ === PROPOSAL_ACTIONS.PurchaseCycles) && <CreateNeuronOrPurchaseCycles onSubmitProposal={onSubmitProposal} action={proposalAction_} payload={proposalPayload_}/> }
+            { (proposalAction_ === PROPOSAL_ACTIONS.CreateNeuron || proposalAction_ === PROPOSAL_ACTIONS.PurchaseCycles || proposalAction_ === PROPOSAL_ACTIONS.SetCostToEnterDao) && <SetAmount onSubmitProposal={onSubmitProposal} action={proposalAction_} payload={proposalPayload_}/> }
             { (proposalAction_ === PROPOSAL_ACTIONS.DisburseNeuron || proposalAction_ === PROPOSAL_ACTIONS.DissolveNeuron) && <DissolveOrDisburseNeuron onSubmitProposal={onSubmitProposal} action={proposalAction_} payload={proposalPayload_}/> }
             { (proposalAction_ === PROPOSAL_ACTIONS.AddAdmin || proposalAction_ === PROPOSAL_ACTIONS.RemoveAdmin) && <AddOrRemoveAdmin onSubmitProposal={onSubmitProposal} action={proposalAction_} payload={proposalPayload_}/> }
             { proposalAction_ === PROPOSAL_ACTIONS.FollowNeuron && <FollowNeuron onSubmitProposal={onSubmitProposal} action={proposalAction_} payload={proposalPayload_}/> }
@@ -125,7 +128,7 @@ const CreateProposalForm = (props) => {
             { proposalAction_ === PROPOSAL_ACTIONS.CreateFundingCampaign && <NewFundingCampaign onSubmitProposal={onSubmitProposal} action={proposalAction_} payload={proposalPayload_}/> }
             { proposalAction_ === PROPOSAL_ACTIONS.CancelFundingCampaign && <CancelFundingCampaign onSubmitProposal={onSubmitProposal} action={proposalAction_} payload={proposalPayload_}/> }
             { proposalAction_ === PROPOSAL_ACTIONS.WithdrawFromMultiSigWallet && <WithdrawFromMultiSigWallet onSubmitProposal={onSubmitProposal} action={proposalAction_} payload={proposalPayload_}/> }
-            { (proposalAction_ === PROPOSAL_ACTIONS.InstallUpgrades || proposalAction_ === PROPOSAL_ACTIONS.ToggleSupportMode) 
+            { (proposalAction_ === PROPOSAL_ACTIONS.InstallUpgrades || proposalAction_ === PROPOSAL_ACTIONS.ToggleSupportMode || proposalAction_ === PROPOSAL_ACTIONS.TogglePrivacySetting) 
                 && <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}> 
                     <ButtonField Icon={DoneIcon} active={true} text={'Submit Proposal'} onClick={() => onSubmitProposal({[proposalAction_]: {}})} /> 
                 </Grid> 

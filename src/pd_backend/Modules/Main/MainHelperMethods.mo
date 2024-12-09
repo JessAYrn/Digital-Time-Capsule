@@ -1,14 +1,10 @@
-import Iter "mo:base/Iter";
-import Option "mo:base/Option";
 import Text "mo:base/Text";
-import Result "mo:base/Result";
-import JournalTypes "../../Types/Journal/types";
 import Principal "mo:base/Principal";
 import Cycles "mo:base/ExperimentalCycles";
+import Error "mo:base/Error";
 import MainTypes "../../Types/Main/types";
 import Journal "../../Journal";
 import CanisterManagementMethods "../Main/CanisterManagementMethods";
-import HashMap "mo:base/HashMap";
 import Treasury "../../Treasury";
 
 module{
@@ -19,19 +15,12 @@ module{
         profilesMap: MainTypes.UserProfilesMap_V2, 
         daoMetaData: MainTypes.DaoMetaData_V4,
         subnetType: MainTypes.SubnetType
-    ) : async Result.Result<MainTypes.AmountAccepted, JournalTypes.Error> {
-
-        if(Principal.toText(callerId) == "2vxsx-fae"){ return #err(#NotAuthorized);};
-        if(not isUserNameAvailable(userName, profilesMap)){ return #err(#UserNameTaken);};
-
-        let callerIdAsText = Principal.toText(callerId);
-        let requestForAccessMap = HashMap.fromIter<Text, MainTypes.Approved>( Iter.fromArray(daoMetaData.requestsForAccess), Iter.size(Iter.fromArray(daoMetaData.requestsForAccess)),  Text.equal, Text.hash);
-        let isApprovedForAccess = switch(requestForAccessMap.get(callerIdAsText)){ case null{ false }; case(?approved){ approved } };
-        if( not isApprovedForAccess and daoMetaData.founder != "Null") { return #err(#NotAuthorized);};
+    ) : async MainTypes.AmountAccepted {
 
         // If there is an original value, do not update
         switch(profilesMap.get(callerId)) {
             case null {
+                if(not isUserNameAvailable(userName, profilesMap)){ throw Error.reject("The selected user name has already been taken") };
                 let amountOfCyclesToSend = switch(subnetType){ case(#Fiduciary){ 2_500_000_000_000 }; case(#Application){ 1_250_000_000_000}};
                 Cycles.add<system>(amountOfCyclesToSend);
                 let newUserJournal = await Journal.Journal();
@@ -51,14 +40,11 @@ module{
                 };
                 profilesMap.put(callerId, userProfile);
                 
-                return #ok(amountAccepted);
+                return amountAccepted
             };
-            case (_) { return #err(#AccountAlreadyExists); }
+            case (_) { return throw Error.reject("A profile already exists for this principal ID"); }
         };
     };
-
-    public func delete(callerId: Principal, profilesMap: MainTypes.UserProfilesMap_V2) : 
-    async Result.Result<(), JournalTypes.Error> { profilesMap.delete(callerId); #ok(()); };
 
     public func isUserNameAvailable(userName: Text, profilesMap: MainTypes.UserProfilesMap_V2) : Bool {
         label lopp_ for((_, userProfile) in profilesMap.entries()){ 

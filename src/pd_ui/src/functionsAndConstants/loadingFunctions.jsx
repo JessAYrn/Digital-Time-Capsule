@@ -5,15 +5,14 @@ import { mapBackendCanisterDataToFrontEndObj } from "../mappers/dashboardMapperF
 import { mapBalancesDataFromApiToFrontend, mapBackendTreasuryDataToFrontEndObj } from "../mappers/treasuryPageMapperFunctions";
 import { getFileUrl_fromApi } from "../Components/Fields/fileManger/FileManagementTools";
 
-
 export const loadAllDataIntoReduxStores = async (actorState, dispatchFunctions, types) => {
     let loadSuccessful = true;
     let {journalDispatch, walletDispatch, homePageDispatch, notificationsDispatch, treasuryDispatch} = dispatchFunctions;
     let {journalTypes, walletTypes, homePageTypes, notificationsTypes, treasuryTypes } = types;
     //checks to see if user has an account. If not, then it attemptes to make an account, if 
     //the account creation is unsuccessful, then it returns
-    let hasAccount = await actorState.backendActor.hasAccount();
-    if(!hasAccount) { loadSuccessful = false; return loadSuccessful;}
+    loadSuccessful = await actorState.backendActor.hasAccount();
+    if(!loadSuccessful) return {loadSuccessful};
     //calls the backend and loads the retrieved data into the appropriate redux stores.
     let promises = [
         loadWalletData(actorState, walletDispatch, walletTypes),
@@ -22,8 +21,8 @@ export const loadAllDataIntoReduxStores = async (actorState, dispatchFunctions, 
         loadNotificationsData(actorState, notificationsDispatch, notificationsTypes),
         loadTreasuryData(actorState, treasuryDispatch, treasuryTypes)
     ];
-    const response = await Promise.all(promises);
-    return loadSuccessful
+    await Promise.all(promises);
+    return {loadSuccessful}
 };
 
 export const loadNotificationsData = async (actorState, notificationsDispatch, notificationsTypes) => {

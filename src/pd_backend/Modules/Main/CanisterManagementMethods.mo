@@ -1,7 +1,5 @@
 import Iter "mo:base/Iter";
 import Buffer "mo:base/Buffer";
-import Result "mo:base/Result";
-import JournalTypes "../../Types/Journal/types";
 import Principal "mo:base/Principal";
 import Cycles "mo:base/ExperimentalCycles";
 import MainTypes "../../Types/Main/types";
@@ -20,8 +18,11 @@ import Float "mo:base/Float";
 import Int "mo:base/Int";
 import Int64 "mo:base/Int64";
 import Debug "mo:base/Debug";
+import Nat64 "mo:base/Nat64";
 import Treasury "../../Treasury";
 import FloatX "../../MotokoNumbers/FloatX";
+import Account "../../Serializers/Account";
+import Ledger "../../NNS/Ledger";
 
 module{
 
@@ -29,104 +30,76 @@ module{
 
     private let nanosecondsInADay: Nat64 = 86400000000000;
 
-    public func getPrincipalsList( profilesMap : MainTypes.UserProfilesMap_V2): 
-    async [Principal] {
-        var index = 0;
-        let numberOfProfiles = profilesMap.size();
-        let profilesIter = profilesMap.entries();
-        let profilesArray = Iter.toArray(profilesIter);
-        let arrayBuffer = Buffer.Buffer<(Principal)>(1);
-        while(index < numberOfProfiles){
-            let (userPrincipal, _) = profilesArray[index];
-            arrayBuffer.add(userPrincipal);
-            index += 1;
+    public func grantAccess( principals: [Text], requestsForAccessMap: MainTypes.RequestsForAccessMap) : () {
+        label looping for(principal in Iter.fromArray(principals)){ 
+            let ?request = requestsForAccessMap.get(principal) else continue looping; 
+            requestsForAccessMap.put(principal, {request with approved = true});
         };
-        return Buffer.toArray(arrayBuffer);
-    };
-
-    public func grantAccess( principals: [Text], daoMetaData: MainTypes.DaoMetaData_V4) : 
-    async Result.Result<(MainTypes.DaoMetaData_V4), JournalTypes.Error> {
-        let { requestsForAccess; } = daoMetaData;
-
-        var index = 0;
-        let principalsArraySize = principals.size();
-        let requestsHashMap : HashMap.HashMap<Text, Bool> = HashMap.fromIter<Text, Bool>(
-            Iter.fromArray(requestsForAccess), 
-            Iter.size(Iter.fromArray(requestsForAccess)), 
-            Text.equal,
-            Text.hash
-        );
-
-        while(index < principalsArraySize){
-            let principal = principals[index];
-            requestsHashMap.put(principal, true);
-            index += 1;
-        };
-        let newRequestsArray = Iter.toArray(requestsHashMap.entries());
-        let updatedDaoMetaData: MainTypes.DaoMetaData_V4 = { daoMetaData with requestsForAccess = newRequestsArray; }; 
-        return #ok(updatedDaoMetaData);
     };
 
     public func updateApprovalStatus( principals: [Text], profilesMap: MainTypes.UserProfilesMap_V2, newApprovalStatuse: Bool) : (){
+        label looping for(principal in Iter.fromArray(principals)){
+            let ?profile = profilesMap.get(Principal.fromText(principal)) else continue looping;
+            let updatedProfile : MainTypes.UserProfile_V2 = { profile with approved = ?newApprovalStatuse; };
+            profilesMap.put(Principal.fromText(principal), updatedProfile);
+        };
+    };
 
-        var index = 0;
-        while(index < principals.size()){
-            let principal = Principal.fromText(principals[index]);
-            let userProfile = profilesMap.get(principal);
-            switch(userProfile){
-                case null{};
-                case(?profile){
-                    let updatedProfile : MainTypes.UserProfile_V2 = {
-                        profile with 
-                        approved = ?newApprovalStatuse;
-                    };
-                    profilesMap.put(principal, updatedProfile);
-                };
+    public func newUserIsPermittedToEnterDao(principal: Principal, daoIsPrivate: Bool, thisCanisterId: Principal, costToEnterDao: Nat64, daoMetaData: MainTypes.DaoMetaData_V4, requestsForAccessMap: MainTypes.RequestsForAccessMap): 
+    async {approved: Bool; paidEntryCost: Bool} {
+
+        if(Principal.toText(principal) == "2vxsx-fae") return {approved = false; paidEntryCost = false };
+        if(daoMetaData.founder == "Null") return {approved = true; paidEntryCost = true };
+
+        switch(requestsForAccessMap.get(Principal.toText(principal))){ 
+
+            case null{ return {approved = false; paidEntryCost = false } }; 
+            case(?{approved; escrowSubaccountId}){ 
+
+                let isApproved = approved or not daoIsPrivate;
+                let ledger: Ledger.Interface = actor(Ledger.CANISTER_ID);
+                let newUserBalance = Nat64.fromNat(await ledger.icrc1_balance_of({owner = thisCanisterId; subaccount = ?escrowSubaccountId}));
+                let paidEntryCost = newUserBalance >= costToEnterDao;
+                return { approved = isApproved; paidEntryCost };
+
+            }; 
+
+        };
+    };
+
+    public func requestEntryToDao (caller: Principal, daoIsPrivate: Bool, thisCanisterId: Principal, costToEnterDao: Nat64, daoMetaData: MainTypes.DaoMetaData_V4, requestsForAccessMap: MainTypes.RequestsForAccessMap) : 
+    async {approved: Bool; paidEntryCost: Bool} { 
+        switch(requestsForAccessMap.get(Principal.toText(caller))){
+            case null { 
+                let request = {approved = not daoIsPrivate; escrowSubaccountId = await Account.getRandomSubaccount(); };
+                requestsForAccessMap.put(Principal.toText(caller), request); 
             };
-            index += 1;
+            case(?_){ };
         };
+        return await newUserIsPermittedToEnterDao(caller, daoIsPrivate, thisCanisterId, costToEnterDao, daoMetaData, requestsForAccessMap);
     };
 
-    public func requestApproval (caller: Principal, daoMetaData:  MainTypes.DaoMetaData_V4) : 
-    Result.Result<MainTypes.DaoMetaData_V4, JournalTypes.Error>{
-        if(daoMetaData.acceptingRequests == false){ return #err(#NotAcceptingRequests); };
-        let{ requestsForAccess; } = daoMetaData;
-        let callerIdAsText = Principal.toText(caller);
+    public func removeFromRequestsList( principals: [Text], requestsForAccessMap:  MainTypes.RequestsForAccessMap, apiCanisterPrincipal: Principal, treasuryCanisterPrincipal: Principal) : async () { 
+        let ledger: Ledger.Interface = actor(Ledger.CANISTER_ID);
 
-        let requestsHashMap : HashMap.HashMap<Text, Bool> = HashMap.fromIter<Text, Bool>(
-            Iter.fromArray(requestsForAccess), 
-            Iter.size(Iter.fromArray(requestsForAccess)), 
-            Text.equal,
-            Text.hash
-        );
-
-        requestsHashMap.put(callerIdAsText, false);
-        let newRequestsArray = Iter.toArray(requestsHashMap.entries());
-        let updatedDaoMetaData : MainTypes.DaoMetaData_V4 = { daoMetaData with requestsForAccess = newRequestsArray;};
-        return #ok(updatedDaoMetaData);
-    };
-
-    public func removeFromRequestsList( principals: [Text], daoMetaData: MainTypes.DaoMetaData_V4) : 
-    async MainTypes.DaoMetaData_V4 {
-        let { requestsForAccess; } = daoMetaData;
-        
-        var index = 0;
-        let principalsArraySize = principals.size();
-        let requestsHashMap : HashMap.HashMap<Text, Bool> = HashMap.fromIter<Text, Bool>(
-            Iter.fromArray(requestsForAccess), 
-            Iter.size(Iter.fromArray(requestsForAccess)), 
-            Text.equal,
-            Text.hash
-        );
-
-        while(index < principalsArraySize){
-            let principal = principals[index];
-            requestsHashMap.delete(principal);
-            index += 1;
+        func removeRequest(principal: Text): async () {
+            let ?{escrowSubaccountId; } = requestsForAccessMap.get(principal) else return;
+            let newUserDepositBalance = await ledger.icrc1_balance_of({owner = apiCanisterPrincipal; subaccount = ?escrowSubaccountId});
+            let {transfer_fee} = await ledger.transfer_fee({});
+            if(newUserDepositBalance > Nat64.toNat(transfer_fee.e8s)){
+                ignore await ledger.icrc1_transfer({
+                    to = {owner = treasuryCanisterPrincipal; subaccount = null};
+                    fee = ?Nat64.toNat(transfer_fee.e8s);
+                    memo = null;
+                    from_subaccount = ?escrowSubaccountId;
+                    created_at_time = ?Int64.toNat64(Int64.abs(Int64.fromInt(Time.now())));
+                    amount = newUserDepositBalance - Nat64.toNat(transfer_fee.e8s);
+                });
+            };
+            requestsForAccessMap.delete(principal); 
         };
-        let newRequestsArray = Iter.toArray(requestsHashMap.entries());
-        let updatedDaoMetaData: MainTypes.DaoMetaData_V4 = { daoMetaData with requestsForAccess = newRequestsArray; }; 
-        return updatedDaoMetaData;
+
+        for(principal in Iter.fromArray(principals)){ ignore removeRequest(principal); }; 
     };
 
     public func canConfigureApp(daoMetaData: MainTypes.DaoMetaData_V4) : Bool {

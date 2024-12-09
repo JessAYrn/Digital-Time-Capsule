@@ -10,7 +10,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import Grid from '@mui/material/Unstable_Grid2';
 import AccordionField from '../../Components/Fields/Accordion';
 import {homePageTypes} from '../../reducers/homePageReducer';
-import { inTrillions, round2Decimals, shortenHexString } from '../../functionsAndConstants/Utils';
+import { fromE8s, inTrillions, round2Decimals, shortenHexString } from '../../functionsAndConstants/Utils';
 import { copyText } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
 import DataTable from '../../Components/Fields/Table';
 import { mapRequestsForAccessToTableRows, mapUsersProfileDataToTableRows, requestsForAccessTableColumns, usersTableColumns } from '../../mappers/dashboardMapperFunctions';
@@ -47,7 +47,7 @@ const Analytics = (props) => {
             return row.userPrincipal;
         });
         let result = await actorState.backendActor.grantAccess(principals);
-        result = mapRequestsForAccessToTableRows(result.ok);
+        result = mapRequestsForAccessToTableRows(result);
         homePageDispatch({
             actionType: homePageTypes.SET_CANISTER_DATA,
             payload: { ...homePageState.canisterData, requestsForAccess: result }
@@ -64,7 +64,7 @@ const Analytics = (props) => {
             return row.userPrincipal;
         });
         let result = await actorState.backendActor.removeFromRequestsList(principals);
-        result = mapRequestsForAccessToTableRows(result.ok);
+        result = mapRequestsForAccessToTableRows(result);
         homePageDispatch({
             actionType: homePageTypes.SET_CANISTER_DATA,
             payload: { ...homePageState.canisterData, requestsForAccess: result }
@@ -218,6 +218,20 @@ const Analytics = (props) => {
                             <DataField
                                 label={'Accounts Created:'}
                                 text={homePageState.canisterData[CANISTER_DATA_FIELDS.journalCount]}
+                                disabled={true}
+                            />
+                        </Grid>
+                        <Grid xs={12} display="flex" justifyContent="center" alignItems="center" paddingBottom={"15px"} flexDirection={"column"}>
+                            <DataField
+                                label={'DAO Entry Cost:'}
+                                text={`${fromE8s(homePageState.canisterData[CANISTER_DATA_FIELDS.costToEnterDao]) } ICP `}
+                                disabled={true}
+                            />
+                        </Grid>
+                        <Grid xs={12} display="flex" justifyContent="center" alignItems="center" paddingBottom={"15px"} flexDirection={"column"}>
+                            <DataField
+                                label={'Privacy Setting:'}
+                                text={homePageState.canisterData[CANISTER_DATA_FIELDS.daoIsPrivate] ? "Private":"Public"}
                                 disabled={true}
                             />
                         </Grid>

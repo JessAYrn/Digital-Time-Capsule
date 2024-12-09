@@ -22,7 +22,7 @@ import MenuField from "../../Fields/MenuField";
 import { KeyboardArrowDownIcon } from "@mui/icons-material";
 import IncreaseDissolveDelay from "./proposalModalComponentTypes/IncreaseDissolveDelay";
 import IncreaseNeuron from "./proposalModalComponentTypes/IncreaseNeuron";
-import CreateNeuronOrPurchaseCycles from "./proposalModalComponentTypes/CreateNeuronOrPurchaseCycles";
+import SetAmount from "./proposalModalComponentTypes/SetAmount";
 import DissolveOrDisburseNeuron from "./proposalModalComponentTypes/DissolveOrDisburseNeuron";
 import AddOrRemoveAdmin from "./proposalModalComponentTypes/AddOrRemoveAdmin";
 import FollowNeuron from "./proposalModalComponentTypes/FollowNeuron";
@@ -258,7 +258,7 @@ const DisplayProposal = (props) => {
                 <Typography varient={"h6"} color={"#bdbdbd"}> {actionType} </Typography>
                 { actionType === PROPOSAL_ACTIONS.IncreaseDissolveDelay && <IncreaseDissolveDelay action={actionType} payload={payload} disabled={true}/> }
                 { actionType === PROPOSAL_ACTIONS.IncreaseNeuron && <IncreaseNeuron action={actionType} payload={payload} disabled={true}/> }
-                { (actionType === PROPOSAL_ACTIONS.CreateNeuron || actionType === PROPOSAL_ACTIONS.PurchaseCycles) && <CreateNeuronOrPurchaseCycles action={actionType} payload={payload} disabled={true}/> }
+                { (actionType === PROPOSAL_ACTIONS.CreateNeuron || actionType === PROPOSAL_ACTIONS.PurchaseCycles || actionType === PROPOSAL_ACTIONS.SetCostToEnterDao) && <SetAmount action={actionType} payload={payload} disabled={true}/> }
                 { (actionType === PROPOSAL_ACTIONS.DisburseNeuron || actionType === PROPOSAL_ACTIONS.DissolveNeuron) && <DissolveOrDisburseNeuron action={actionType} payload={payload} disabled={true}/> }
                 { (actionType === PROPOSAL_ACTIONS.AddAdmin || actionType === PROPOSAL_ACTIONS.RemoveAdmin) && <AddOrRemoveAdmin action={actionType} payload={payload} disabled={true}/> }
                 { actionType === PROPOSAL_ACTIONS.FollowNeuron && <FollowNeuron action={actionType} payload={payload} disabled={true}/> }

@@ -68,6 +68,8 @@ export const CANISTER_DATA_FIELDS = {
     supportMode: "supportMode",
     acceptingRequests: "acceptingRequests",
     canistersCyclesBalances: "canistersCyclesBalances",
+    costToEnterDao: "costToEnterDao",
+    daoIsPrivate: "daoIsPrivate"
 };
 
 export const PAGES = {

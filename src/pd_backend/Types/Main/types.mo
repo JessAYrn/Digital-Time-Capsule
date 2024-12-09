@@ -90,6 +90,8 @@ module{
         releaseVersionLoaded: Nat;
         releaseVersionInstalled: Nat;
         requestsForAccess: RequestsForAccess;
+        costToEnterDao: Nat64;
+        daoIsPrivate: Bool
     };
 
     public type DaoMetaData_V4 = {
@@ -104,12 +106,13 @@ module{
         lastRecordedTime: Int;
         founder: Text;
         supportMode: Bool;
-        requestsForAccess: RequestsForAccess;
     };
 
-    public type Approved = Bool;
+    public type RequestForAccess = {approved: Bool; escrowSubaccountId: Account.Subaccount };
 
-    public type RequestsForAccess = [(Text, Approved)];
+    public type RequestsForAccess = [(Text, {approved: Bool; escrowSubaccountId: Account.Subaccount })];
+
+    public type RequestsForAccessMap = HashMap.HashMap<Text, RequestForAccess>;
 
     public type CanisterCyclesBalances = {
         currentCyclesBalance_backend: Nat;
@@ -162,6 +165,8 @@ module{
         #FollowNeuron: {neuronId: Nat64; topic : Int32; followee :  Nat64 };
         #ToggleSupportMode: {};
         #WithdrawFromMultiSigWallet: {amount: Nat64; to: PrincipalAsText;};
+        #SetCostToEnterDao: {amount: Nat64};
+        #TogglePrivacySetting: {};
     };
 
     public type Vote = { adopt: Bool };
@@ -177,7 +182,6 @@ module{
         acceptingRequests = true;
         lastRecordedTime = 0;
         supportMode = false;
-        requestsForAccess = [];
         founder = "Null";
     };
 

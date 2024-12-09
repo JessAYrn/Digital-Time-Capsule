@@ -91,6 +91,8 @@ export const mapBackendCanisterDataToFrontEndObj = (props) => {
         releaseVersionInstalled,
         founder,
         managerCanisterPrincipal,
+        daoIsPrivate,
+        costToEnterDao,
     } = props;
 
     const requestsForAccess_ = mapRequestsForAccessToTableRows(requestsForAccess);
@@ -112,6 +114,8 @@ export const mapBackendCanisterDataToFrontEndObj = (props) => {
         requestsForAccess: requestsForAccess_,
         releaseVersionLoaded: parseInt(releaseVersionLoaded),
         releaseVersionInstalled: parseInt(releaseVersionInstalled),
-        founder
+        founder,
+        daoIsPrivate,
+        costToEnterDao: parseInt(costToEnterDao)
     }
 }; 

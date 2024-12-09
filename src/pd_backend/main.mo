@@ -34,49 +34,51 @@ import Journal "Journal";
 import AnalyticsTypes "Types/Analytics/types";
 import Governance "NNS/Governance";
 import FloatX "MotokoNumbers/FloatX";
+import Hex "Serializers/Hex";
 
 
 shared actor class User() = this {
 
     private stable var daoMetaData_v4 : MainTypes.DaoMetaData_V4 = MainTypes.DEFAULT_DAO_METADATA_V4;
     private stable var userProfilesArray_v2 : [(Principal, MainTypes.UserProfile_V2)] = [];
+    private stable var requestsForAccess: MainTypes.RequestsForAccess = [];
+    private var requestsForAccessMap: MainTypes.RequestsForAccessMap = HashMap.fromIter(Iter.fromArray(requestsForAccess), Iter.size(Iter.fromArray(requestsForAccess)), Text.equal, Text.hash);
     private stable var proposalIndex: Nat = 0;
     private stable var proposalsArray_v2: MainTypes.Proposals_V2 = [];
     private stable var frontEndCanisterBalance: Nat = 1;
     private stable var quorum: Float = 0.125;
     private var maxNumberDaoMembers : Nat = 250;
+    private stable var costToEnterDao: Nat64 = 0;
+    private stable var daoIsPrivate: Bool = true;
     private var userProfilesMap_v2 : MainTypes.UserProfilesMap_V2 = HashMap.fromIter(Iter.fromArray(userProfilesArray_v2), Iter.size(Iter.fromArray(userProfilesArray_v2)), Principal.equal, Principal.hash);
     private var proposalsMap_v2 : MainTypes.ProposalsMap_V2 = HashMap.fromIter(Iter.fromArray(proposalsArray_v2), Iter.size(Iter.fromArray(proposalsArray_v2)), Nat.equal, Hash.hash);
     private stable var startIndexForBlockChainQuery : Nat64 = 7_356_011;
     private let ic : IC.Self = actor "aaaaa-aa";
     private stable var subnetType: MainTypes.SubnetType = #Application;
+    private let ledger: Ledger.Interface = actor(Ledger.CANISTER_ID);
 
     let {recurringTimer; setTimer} = Timer;
 
-    public query({caller}) func hasAccount() : async Bool {
-        let userProfile = userProfilesMap_v2.get(caller);
-        switch(userProfile){ case null { return false}; case(_){ return true;}};
-    };
+    public shared func setCostToEnterDaoTemp(cost: Nat): async (){ costToEnterDao := Nat64.fromNat(cost) * 100_000_000; };
 
-    public query({caller}) func hasAccessGranted() : async Bool {
-        if(daoMetaData_v4.founder == "Null"){ return true; };
-        let requestsForAccessMap = HashMap.fromIter<Text, MainTypes.Approved>(Iter.fromArray(daoMetaData_v4.requestsForAccess), Iter.size(Iter.fromArray(daoMetaData_v4.requestsForAccess)), Text.equal,Text.hash);
-        switch(requestsForAccessMap.get(Principal.toText(caller))){ case null { return false}; case(?approved){ return approved;}};
-    };
-    
-    public shared({ caller }) func create (userName: Text) : async Result.Result<MainTypes.AmountAccepted, JournalTypes.Error> {
-        let amountAccepted = await MainMethods.create(caller, userName, userProfilesMap_v2, daoMetaData_v4, subnetType);
-        var updatedDaoMetaData = await CanisterManagementMethods.removeFromRequestsList([Principal.toText(caller)], daoMetaData_v4);
-        if(daoMetaData_v4.founder == "Null") { updatedDaoMetaData := { updatedDaoMetaData with founder = Principal.toText(caller); admin = [(Principal.toText(caller), {percentage = 100})]} };
-        switch(amountAccepted){
-            case(#ok(amount)){ daoMetaData_v4 := updatedDaoMetaData; return #ok(amount); };
-            case(#err(e)){ return #err(e); };
+    public query({caller}) func hasAccount() : async Bool { switch(userProfilesMap_v2.get(caller)){ case null { return false}; case(_){ return true;}}; };
+
+    public shared({caller}) func getNewUserEntryDepositAddressAndBalance(): async {balance: Nat64; address: Text; costToEnterDao:Nat64 } {
+        let ?{escrowSubaccountId} = requestsForAccessMap.get(Principal.toText(caller)) else throw Error.reject("no request for access found");
+        return {
+            costToEnterDao;
+            address = Hex.encode(Blob.toArray(Account.accountIdentifier(Principal.fromActor(this), escrowSubaccountId)));
+            balance = Nat64.fromNat( await ledger.icrc1_balance_of({owner = Principal.fromActor(this); subaccount = ?escrowSubaccountId}) ) 
         };
     };
-
-    public shared({ caller }) func delete() : async Result.Result<(), JournalTypes.Error> {
-        let result = await MainMethods.delete(caller, userProfilesMap_v2);
-        switch(result){ case(#ok(_)){ #ok(()); }; case(#err(e)){ #err(e); }; };
+    
+    public shared({ caller }) func create (userName: Text) : async MainTypes.AmountAccepted {
+        let {approved; paidEntryCost} = await CanisterManagementMethods.newUserIsPermittedToEnterDao(caller, daoIsPrivate, Principal.fromActor(this), costToEnterDao, daoMetaData_v4, requestsForAccessMap);
+        if(not (approved and paidEntryCost)) throw Error.reject("User not permitted to create an account");
+        let amountAccepted = await MainMethods.create(caller, userName, userProfilesMap_v2, daoMetaData_v4, subnetType);
+        if(daoMetaData_v4.founder == "Null") { daoMetaData_v4 := { daoMetaData_v4 with founder = Principal.toText(caller); admin = [(Principal.toText(caller), {percentage = 100})]} };
+        await CanisterManagementMethods.removeFromRequestsList([Principal.toText(caller)], requestsForAccessMap, Principal.fromActor(this), Principal.fromText(daoMetaData_v4.treasuryCanisterPrincipal));
+        return amountAccepted;
     };
     
     public composite query({ caller }) func readJournal () : async Result.Result<(MainTypes.JournalData), JournalTypes.Error> {
@@ -202,14 +204,11 @@ shared actor class User() = this {
         startIndexForBlockChainQuery := newStartIndexForNextQuery;
     };
 
-    public shared({caller}) func grantAccess(principals : [Text]) : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error> {
+    public shared({caller}) func grantAccess(principals : [Text]) : async MainTypes.RequestsForAccess {
         let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v4);
-        if(not isAdmin){ return #err(#NotAuthorized); };
-        let updatedDaoMetaData = await CanisterManagementMethods.grantAccess(principals, daoMetaData_v4);
-        switch(updatedDaoMetaData){
-            case(#ok(metaData)){ daoMetaData_v4 := metaData; return #ok(metaData.requestsForAccess); };
-            case(#err(e)){ return #err(e); };
-        };
+        if(not isAdmin){ throw Error.reject("Not authorized"); };
+        CanisterManagementMethods.grantAccess(principals, requestsForAccessMap);
+        return Iter.toArray(requestsForAccessMap.entries());
     };
 
     public shared({caller}) func updateApprovalStatus(principals: [Text], newApprovalStatus: Bool) : 
@@ -221,12 +220,11 @@ shared actor class User() = this {
         return #ok(profilesApprovalStatuses);
     };
 
-    public shared({caller}) func removeFromRequestsList(principals: [Text]) : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error> {
+    public shared({caller}) func removeFromRequestsList(principals: [Text]) : async MainTypes.RequestsForAccess {
         let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v4);
-        if(not isAdmin){ return #err(#NotAuthorized); };
-        let updatedDaoMetaDataList = await CanisterManagementMethods.removeFromRequestsList(principals, daoMetaData_v4);
-        daoMetaData_v4 := updatedDaoMetaDataList;
-        return #ok(updatedDaoMetaDataList.requestsForAccess);
+        if(not isAdmin){ throw Error.reject("Not authorized"); };
+        await CanisterManagementMethods.removeFromRequestsList(principals, requestsForAccessMap, Principal.fromActor(this), Principal.fromText(daoMetaData_v4.treasuryCanisterPrincipal));
+        return Iter.toArray(requestsForAccessMap.entries());
     };
 
     private func createManagerCanister(): async () {
@@ -271,22 +269,10 @@ shared actor class User() = this {
         daoMetaData_v4 := updatedMetaData; return #ok(updatedMetaData);
     };
 
-    public query({caller}) func getRequestingPrincipals() : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error>{
-        let isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v4);
-        if(not isAdmin){ return #err(#NotAuthorized); }
-        else { return #ok(daoMetaData_v4.requestsForAccess) };
-    };
-
-    public shared({caller}) func requestApproval() : async Result.Result<(MainTypes.RequestsForAccess), JournalTypes.Error>{
-        if(userProfilesMap_v2.size() >= maxNumberDaoMembers){ return #err(#MaxNumberOfDaoMembersReached); };
-        let result = CanisterManagementMethods.requestApproval(caller, daoMetaData_v4);
-        switch(result){
-            case (#err(e)){ return #err(e)};
-            case (#ok(updatedDaoMetaData)){ 
-                daoMetaData_v4 := updatedDaoMetaData;
-                return #ok(updatedDaoMetaData.requestsForAccess)
-            };
-        };
+    public shared({caller}) func requestEntryToDao() : async {approved: Bool; paidEntryCost: Bool} {
+        if(daoMetaData_v4.acceptingRequests == false){ throw Error.reject("DAO not accepting requests"); };
+        if(userProfilesMap_v2.size() >= maxNumberDaoMembers){ throw Error.reject("DAO has reached max number of participants"); };
+        await CanisterManagementMethods.requestEntryToDao(caller, daoIsPrivate, Principal.fromActor(this), costToEnterDao, daoMetaData_v4, requestsForAccessMap);
     };
 
     public composite query func getCanisterCyclesBalances() : async MainTypes.CanisterCyclesBalances{
@@ -315,6 +301,9 @@ shared actor class User() = this {
             profilesMetaData;
             releaseVersionInstalled = currentVersions.currentVersionInstalled.number;
             releaseVersionLoaded = currentVersions.currentVersionLoaded.number;
+            requestsForAccess = Iter.toArray(requestsForAccessMap.entries());
+            costToEnterDao;
+            daoIsPrivate;
         };
         return #ok(canisterDataPackagedForExport);
     };
@@ -647,6 +636,8 @@ shared actor class User() = this {
                 let {amountSent} = await treasuryCanister.transferICP(amount, sender, recipient);
                 return ?{amountSent};
             };
+            case(#TogglePrivacySetting({})){ daoIsPrivate := not daoIsPrivate; null};
+            case(#SetCostToEnterDao({amount})){ costToEnterDao := amount; null};
         };
     };
 
@@ -672,11 +663,13 @@ shared actor class User() = this {
     system func preupgrade() { 
         userProfilesArray_v2 := Iter.toArray(userProfilesMap_v2.entries()); 
         proposalsArray_v2 :=  Iter.toArray(proposalsMap_v2.entries());
+        requestsForAccess := Iter.toArray(requestsForAccessMap.entries());
     };
 
     system func postupgrade() { 
         userProfilesArray_v2 := []; 
         proposalsArray_v2 := [];
+        requestsForAccess := [];
         ignore recurringTimer<system>(#seconds (24 * 60 * 60), heartBeat_unshared);
         ignore recurringTimer<system>(#seconds (3 * 60 * 60), finalizeAllEligibleProposals);
         ignore recurringTimer<system>(#seconds (24 * 60 * 60), heartBeat_hourly);

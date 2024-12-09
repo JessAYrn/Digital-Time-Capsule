@@ -4,7 +4,6 @@ import { NULL_STRING_CAPITALIZED } from "../functionsAndConstants/Constants";
 
 
 export const homePageTypes={
-    SET_ENTIRE_DASHBOARD_REDUX_STATE:'SET_ENTIRE_DASHBOARD_REDUX_STATE',
     SET_CANISTER_DATA: "SET_CANISTER_DATA",
     SET_DATA_HAS_BEEN_LOADED: "SET_DATA_HAS_BEEN_LOADED",
     SET_IS_LOADING:"SET_IS_LOADING",
@@ -46,11 +45,6 @@ const changeValue=(state=homePageInitialState, action)=>{
 
 
     switch(actionType){
-        case homePageTypes.SET_ENTIRE_DASHBOARD_REDUX_STATE:
-            state = payload;
-            return {
-                ...state
-            }
         case homePageTypes.SET_CANISTER_DATA:
                 state.canisterData = payload;
                 return {

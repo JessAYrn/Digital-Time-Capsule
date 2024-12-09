@@ -13,7 +13,9 @@ export const PROPOSAL_ACTIONS = {
     IncreaseDissolveDelay: "IncreaseDissolveDelay",
     FollowNeuron: "FollowNeuron",
     ToggleSupportMode: "ToggleSupportMode",
-    WithdrawFromMultiSigWallet: "WithdrawFromMultiSigWallet"
+    WithdrawFromMultiSigWallet: "WithdrawFromMultiSigWallet",
+    SetCostToEnterDao: "SetCostToEnterDao",
+    TogglePrivacySetting: "TogglePrivacySetting"
 };
 
 export const PAYLOAD_DATA_TYPES = {

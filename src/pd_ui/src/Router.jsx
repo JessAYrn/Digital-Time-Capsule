@@ -10,6 +10,7 @@ import DoNotDisturbOnIcon from '@mui/icons-material/DoNotDisturbOn';
 import { copyText } from './functionsAndConstants/walletFunctions/CopyWalletAddress';
 import ButtonField from './Components/Fields/Button';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import CelebrationIcon from '@mui/icons-material/Celebration';
 import Analytics from './Routes/Pages/Analytics';
 import Journal from './Routes/Pages/Journal';
 import Notes from './Routes/Pages/Notes';
@@ -22,8 +23,8 @@ import { AppContext } from './Context';
 import WalletPage from './Routes/Pages/WalletPage';
 import TreasuryPage from './Routes/Pages/TreasuryPage';
 import GroupJournalPage from './Routes/Pages/GroupJournalPage';
-import { Typography } from '@mui/material';
 import CreateAccount from './Components/modal/CreateAccount';
+import { fromE8s, shortenHexString } from './functionsAndConstants/Utils';
 
 const Router = (props) => {
 
@@ -40,104 +41,75 @@ const Router = (props) => {
     const [modalIsLoading, setModalIsLoading] = useState(false);
     const [modalProps, setModalProps] = useState({});
 
-    const ReducerDispatches={
-        walletDispatch,
-        journalDispatch,
-        homePageDispatch,
-        actorDispatch,
-        notificationsDispatch,
-        treasuryDispatch
-    }
+    const ReducerDispatches={ walletDispatch, journalDispatch, homePageDispatch, actorDispatch, notificationsDispatch, treasuryDispatch };
+    const ReducerTypes={ journalTypes:types, walletTypes, homePageTypes, actorTypes, notificationsTypes, treasuryTypes };
+    const context = { journalState, journalDispatch, walletDispatch, walletState, homePageDispatch, homePageState, actorDispatch, actorState, notificationsState, notificationsDispatch, treasuryState, treasuryDispatch, setRoute, modalIsOpen, setModalIsOpen, modalIsLoading, setModalIsLoading, modalProps, setModalProps };
 
-    const ReducerTypes={
-        journalTypes:types,
-        walletTypes,
-        homePageTypes,
-        actorTypes,
-        notificationsTypes,
-        treasuryTypes
-    }
-
-    const context = {
-        journalState,
-        journalDispatch,
-        walletDispatch,
-        walletState,
-        homePageDispatch,
-        homePageState,
-        actorDispatch,
-        actorState,
-        notificationsState,
-        notificationsDispatch,
-        treasuryState,
-        treasuryDispatch,
-        setRoute,
-        modalIsOpen,
-        setModalIsOpen,
-        modalIsLoading,
-        setModalIsLoading,
-        modalProps,
-        setModalProps
-    };
+    const loadAllDataIntoReduxStores_ =  async () => { const result = await loadAllDataIntoReduxStores(actorState, ReducerDispatches, ReducerTypes); return result };
 
     useEffect( async () => {
         if(!actorState.backendActor) return;
         try{
+
             setModalIsLoading(true);
             setModalIsOpen(true);
-            const loadSuccessful = await loadAllDataIntoReduxStores(actorState, ReducerDispatches, ReducerTypes);
-            if(loadSuccessful) setModalIsOpen(false);
-            else {
-                let hasAccessGranted = await actorState.backendActor.hasAccessGranted();
-                const reloadDataIntoReduxStores = async () => { await loadAllDataIntoReduxStores(actorState, ReducerDispatches, ReducerTypes) };
-                if(hasAccessGranted){
-                    setModalProps({
+            const {loadSuccessful} = await loadAllDataIntoReduxStores_();
+            if(loadSuccessful) { setModalIsLoading(false); setModalIsOpen(false); return; };
+
+            let modalProps = {};
+            
+            try{
+                let {approved, paidEntryCost} = await actorState.backendActor.requestEntryToDao();
+                if(approved && paidEntryCost){
+                    modalProps = {
                         components: [
                             {
                                 Component: CreateAccount,
-                                props: { setModalIsOpen, reloadDataIntoReduxStores }
+                                props: { setModalIsOpen, loadAllDataIntoReduxStores_ }
                             },
                         ]
-                        
-                    });
-                } else {
-                    let bigTextmsg = "Request For Access Has Been Sent To The DAO Admin";
-                    let response = await actorState.backendActor.requestApproval();
-                    if(response.err) { 
-                        bigTextmsg = Object.keys(response.err)[0];
-                        smallTextMsg = "Your request for could not be submitted. Please try again later."
                     };
+                } else if(!approved){
                     let {userCredentials} = actorState;
                     let {principal} = userCredentials;
-                    setModalProps({
-                        bigText: bigTextmsg, 
+
+                    modalProps = {
+                        bigText: "Request For Access Has Been Sent To The DAO Admin",
+                        smallText: "Below is your Principal ID. Share it with the DAO admin so they know who it belongs to: ",
                         Icon: DoNotDisturbOnIcon,
                         flexDirection: "column",
                         components: [
                             {
-                                Component: Typography,
-                                props: {
-                                    children: "Below is your Principal ID. Share it with the DAO admin so they know who it belongs to: ",
-                                }
-                            },
-                            {
                                 Component: ButtonField,
-                                props: {
-                                    text: `${principal}`,
-                                    Icon: ContentCopyIcon,
-                                    onClick: () => copyText(principal)
-                                }
+                                props: { text: `${principal}`, Icon: ContentCopyIcon, onClick: () => copyText(principal) }
                             },
                         ]
-                        
-                    })
+                    } 
+                } else if(!paidEntryCost){
+                    let {costToEnterDao, address, balance} = await actorState.backendActor.getNewUserEntryDepositAddressAndBalance();
+                    modalProps = {
+                        bigText: "Request For Access Has Been Sent To The DAO Admin",
+                        smallText: ` You currently have ${fromE8s(parseInt(balance))} $ICP deposited. Before entry, you must deposit ${ fromE8s(parseInt(costToEnterDao))} $ICP to the address below, refresh the browser, and log in again:  `,
+                        Icon: CelebrationIcon,
+                        flexDirection: "column",
+                        components: [
+                            {
+                                Component: ButtonField,
+                                props: { text: `${shortenHexString(address)}`, Icon: ContentCopyIcon, onClick: () => copyText(address) }
+                            },
+                        ]
+                    };
                 }
-            };  
+            } catch(e){ modalProps = { bigText: e, smallText: "Your request for could not be submitted. Please try again later." }; };
+
+            console.log("approved: ", approved);
+            console.log("paidEntryCost: ", paidEntryCost);
+
             setModalIsLoading(false);
-        } catch(e){ 
-            console.log(e)
-            await actorState.backendActor.emergencyVoteForToggleSupportModeProposal();
-        }
+            setModalProps(modalProps);
+
+        } catch(e){ console.log(e); await actorState.backendActor.emergencyVoteForToggleSupportModeProposal(); }
+
     }, [actorState.backendActor]);
 
     const displayComponent = useMemo(() => {

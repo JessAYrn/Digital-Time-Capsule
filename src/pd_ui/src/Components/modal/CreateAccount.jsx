@@ -8,7 +8,7 @@ import { AppContext } from "../../Context";
 
 const CreateAccount = (props) => {
 
-    const { reloadDataIntoReduxStores} = props;
+    const { loadAllDataIntoReduxStores_} = props;
 
     const { actorState, setModalIsOpen, setModalIsLoading } = useContext(AppContext);
 
@@ -19,12 +19,12 @@ const CreateAccount = (props) => {
 
     const onSubmit = async () => {
         setModalIsLoading(true);
-        const response = await actorState.backendActor.create(username);
-        if(response.ok) {
-            await reloadDataIntoReduxStores();
+        try{
+            await actorState.backendActor.create(username);
+            await loadAllDataIntoReduxStores_();
             setModalIsOpen(false);
-        } else {
-            setTypography (`${Object.keys(response.err)[0]}`);
+        } catch(e){
+            setTypography (`${e}`);
             setUsername("");
             setHasError(true);
         }

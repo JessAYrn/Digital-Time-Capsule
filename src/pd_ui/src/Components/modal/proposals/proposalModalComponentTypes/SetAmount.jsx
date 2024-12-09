@@ -8,7 +8,7 @@ import { INPUT_BOX_FORMATS } from '../../../../functionsAndConstants/Constants';
 import { toE8s } from '../../../../functionsAndConstants/Utils';
 
 
-const CreateNeuronOrPurchaseCycles = (props) => {
+const SetAmount = (props) => {
 
     const {onSubmitProposal, action, payload, disabled} = props;
     const [amount, setAmount] = useState(payload?.amount || payload?.amount === BigInt(0) ? fromE8s(parseInt(payload?.amount)) : null);
@@ -46,4 +46,4 @@ const CreateNeuronOrPurchaseCycles = (props) => {
     );
 };
 
-export default CreateNeuronOrPurchaseCycles;
+export default SetAmount;
