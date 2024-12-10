@@ -231,7 +231,7 @@ const Analytics = (props) => {
                         <Grid xs={12} display="flex" justifyContent="center" alignItems="center" paddingBottom={"15px"} flexDirection={"column"}>
                             <DataField
                                 label={'Privacy Setting:'}
-                                text={homePageState.canisterData[CANISTER_DATA_FIELDS.daoIsPrivate] ? "Private":"Public"}
+                                text={homePageState.canisterData[CANISTER_DATA_FIELDS.daoIsPublic] ? "Public":"Private"}
                                 disabled={true}
                             />
                         </Grid>
@@ -280,25 +280,25 @@ const Analytics = (props) => {
                         <Grid xs={12} display="flex" justifyContent="center" alignItems="center" paddingBottom={"15px"} paddingTop={"15px"} flexDirection={"column"}>
                             <DataField
                                 label={'Frontend Cycles Balance:'}
-                                text={`${round2Decimals(inTrillions(homePageState.canistersCyclesBalances.currentCyclesBalance_frontend))} T`}
+                                text={`${round2Decimals(inTrillions(homePageState.daoPublicData.currentCyclesBalance_frontend))} T`}
                                 isCycles={true}
                                 disabled={true}
                             />
                             <DataField
                                 label={'Backend Cycles Balance:'}
-                                text={`${round2Decimals(inTrillions(homePageState.canistersCyclesBalances.currentCyclesBalance_backend))} T`}
+                                text={`${round2Decimals(inTrillions(homePageState.daoPublicData.currentCyclesBalance_backend))} T`}
                                 isCycles={true}
                                 disabled={true}
                             />
                             <DataField
                                 label={'Treasury Cycles Balance:'}
-                                text={`${round2Decimals(inTrillions(homePageState.canistersCyclesBalances.currentCyclesBalance_treasury))} T`}
+                                text={`${round2Decimals(inTrillions(homePageState.daoPublicData.currentCyclesBalance_treasury))} T`}
                                 isCycles={true}
                                 disabled={true}
                             />
                             <DataField
                                 label={'Manager Cycles Balance:'}
-                                text={`${round2Decimals(inTrillions(homePageState.canistersCyclesBalances.currentCyclesBalance_manager))} T`}
+                                text={`${round2Decimals(inTrillions(homePageState.daoPublicData.currentCyclesBalance_manager))} T`}
                                 isCycles={true}
                                 disabled={true}
                             />

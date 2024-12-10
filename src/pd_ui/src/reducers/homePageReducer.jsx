@@ -8,14 +8,17 @@ export const homePageTypes={
     SET_DATA_HAS_BEEN_LOADED: "SET_DATA_HAS_BEEN_LOADED",
     SET_IS_LOADING:"SET_IS_LOADING",
     SET_PROPOSALS_DATA: "SET_PROPOSALS_DATA",
-    SET_CANISTERS_CYCLES_BALANCES: "SET_CANISTERS_CYCLES_BALANCES",
+    SET_DAO_PUBLIC_DATA: "SET_DAO_PUBLIC_DATA",
 }
 
 
 export const homePageInitialState={
     dataHasBeenLoaded: undefined,
     isLoading: false,
-    canistersCyclesBalances: {
+    daoPublicData: {
+        costToEnterDao: 0,
+        daoFounder: "",
+        daoIsPublic: null,
         currentCyclesBalance_backend: 1,
         currentCyclesBalance_frontend: 1,
         currentCyclesBalance_treasury: 1,
@@ -50,8 +53,8 @@ const changeValue=(state=homePageInitialState, action)=>{
                 return {
                 ...state
             }
-        case homePageTypes.SET_CANISTERS_CYCLES_BALANCES:
-            state.canistersCyclesBalances = payload;
+        case homePageTypes.SET_DAO_PUBLIC_DATA:
+            state.daoPublicData = payload;
             return {
             ...state
         }

@@ -91,7 +91,7 @@ export const mapBackendCanisterDataToFrontEndObj = (props) => {
         releaseVersionInstalled,
         founder,
         managerCanisterPrincipal,
-        daoIsPrivate,
+        daoIsPublic,
         costToEnterDao,
     } = props;
 
@@ -115,7 +115,7 @@ export const mapBackendCanisterDataToFrontEndObj = (props) => {
         releaseVersionLoaded: parseInt(releaseVersionLoaded),
         releaseVersionInstalled: parseInt(releaseVersionInstalled),
         founder,
-        daoIsPrivate,
+        daoIsPublic,
         costToEnterDao: parseInt(costToEnterDao)
     }
 }; 

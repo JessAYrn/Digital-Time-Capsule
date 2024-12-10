@@ -67,9 +67,9 @@ export const CANISTER_DATA_FIELDS = {
     isAdmin: "isAdmin",
     supportMode: "supportMode",
     acceptingRequests: "acceptingRequests",
-    canistersCyclesBalances: "canistersCyclesBalances",
+    daoPublicData: "daoPublicData",
     costToEnterDao: "costToEnterDao",
-    daoIsPrivate: "daoIsPrivate"
+    daoIsPublic: "daoIsPublic"
 };
 
 export const PAGES = {

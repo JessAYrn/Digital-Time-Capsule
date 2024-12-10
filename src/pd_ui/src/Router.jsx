@@ -102,9 +102,6 @@ const Router = (props) => {
                 }
             } catch(e){ modalProps = { bigText: e, smallText: "Your request for could not be submitted. Please try again later." }; };
 
-            console.log("approved: ", approved);
-            console.log("paidEntryCost: ", paidEntryCost);
-
             setModalIsLoading(false);
             setModalProps(modalProps);
 

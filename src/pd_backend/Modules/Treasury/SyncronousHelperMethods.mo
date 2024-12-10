@@ -91,25 +91,18 @@ module{
         switch(operation){
             case(#AddStake) { updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount = userNeuronStakeInfo.stake_e8s + delta; neuronId; property = #Stake}); };
             case(#SubtractStake) {
-                let delta_ = Nat64.min(userNeuronStakeInfo.stake_e8s, delta);
-                updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount = userNeuronStakeInfo.stake_e8s - delta_; neuronId; property = #Stake});
+                let newAmount: Nat64 = switch(userNeuronStakeInfo.stake_e8s > delta){ case true {userNeuronStakeInfo.stake_e8s - delta }; case false { 0 }};
+                updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount; neuronId; property = #Stake});
             };
             case(#AddCollateralizedStake) { 
-                let collateralized_stake_e8s : Nat64 = switch(userNeuronStakeInfo.collateralized_stake_e8s){
-                    case null { 0; };
-                    case(?collateralized_stake_e8s_) { collateralized_stake_e8s_; };
-                };
-                let maximumIncreaseAmountToCollateralizedStake = userNeuronStakeInfo.stake_e8s - collateralized_stake_e8s;
-                let delta_ =  Nat64.min(maximumIncreaseAmountToCollateralizedStake, delta);
-                updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount = collateralized_stake_e8s + delta_; neuronId; property = #CollateralizedStake});
+                let collateralized_stake_e8s : Nat64 = switch(userNeuronStakeInfo.collateralized_stake_e8s){ case null { 0; }; case(?collateralized_stake_e8s_) { collateralized_stake_e8s_; }; };
+                let newAmount =  Nat64.min(userNeuronStakeInfo.stake_e8s, collateralized_stake_e8s + delta);
+                updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount; neuronId; property = #CollateralizedStake});
             };
             case(#SubtractCollateralizedStake) { 
-                let collateralized_stake_e8s: Nat64 = switch(userNeuronStakeInfo.collateralized_stake_e8s){
-                    case null { 0; };
-                    case(?collateralized_stake_e8s_) { collateralized_stake_e8s_; };
-                };
-                let delta_: Nat64 = Nat64.min(collateralized_stake_e8s, delta);
-                updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount = collateralized_stake_e8s - delta_; neuronId; property = #CollateralizedStake});
+                let collateralized_stake_e8s: Nat64 = switch(userNeuronStakeInfo.collateralized_stake_e8s){ case null { 0; }; case(?collateralized_stake_e8s_) { collateralized_stake_e8s_; }; };
+                let newAmount: Nat64 = switch(collateralized_stake_e8s > delta){case true { collateralized_stake_e8s - delta }; case false { 0 }};
+                updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount; neuronId; property = #CollateralizedStake});
             };
         };
     };

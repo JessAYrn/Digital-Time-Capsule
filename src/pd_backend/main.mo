@@ -49,7 +49,7 @@ shared actor class User() = this {
     private stable var quorum: Float = 0.125;
     private var maxNumberDaoMembers : Nat = 250;
     private stable var costToEnterDao: Nat64 = 0;
-    private stable var daoIsPrivate: Bool = true;
+    private stable var daoIsPublic: Bool = false;
     private var userProfilesMap_v2 : MainTypes.UserProfilesMap_V2 = HashMap.fromIter(Iter.fromArray(userProfilesArray_v2), Iter.size(Iter.fromArray(userProfilesArray_v2)), Principal.equal, Principal.hash);
     private var proposalsMap_v2 : MainTypes.ProposalsMap_V2 = HashMap.fromIter(Iter.fromArray(proposalsArray_v2), Iter.size(Iter.fromArray(proposalsArray_v2)), Nat.equal, Hash.hash);
     private stable var startIndexForBlockChainQuery : Nat64 = 7_356_011;
@@ -73,7 +73,7 @@ shared actor class User() = this {
     };
     
     public shared({ caller }) func create (userName: Text) : async MainTypes.AmountAccepted {
-        let {approved; paidEntryCost} = await CanisterManagementMethods.newUserIsPermittedToEnterDao(caller, daoIsPrivate, Principal.fromActor(this), costToEnterDao, daoMetaData_v4, requestsForAccessMap);
+        let {approved; paidEntryCost} = await CanisterManagementMethods.newUserIsPermittedToEnterDao(caller, Principal.fromActor(this), costToEnterDao, daoMetaData_v4, requestsForAccessMap);
         if(not (approved and paidEntryCost)) throw Error.reject("User not permitted to create an account");
         let amountAccepted = await MainMethods.create(caller, userName, userProfilesMap_v2, daoMetaData_v4, subnetType);
         if(daoMetaData_v4.founder == "Null") { daoMetaData_v4 := { daoMetaData_v4 with founder = Principal.toText(caller); admin = [(Principal.toText(caller), {percentage = 100})]} };
@@ -272,17 +272,23 @@ shared actor class User() = this {
     public shared({caller}) func requestEntryToDao() : async {approved: Bool; paidEntryCost: Bool} {
         if(daoMetaData_v4.acceptingRequests == false){ throw Error.reject("DAO not accepting requests"); };
         if(userProfilesMap_v2.size() >= maxNumberDaoMembers){ throw Error.reject("DAO has reached max number of participants"); };
-        await CanisterManagementMethods.requestEntryToDao(caller, daoIsPrivate, Principal.fromActor(this), costToEnterDao, daoMetaData_v4, requestsForAccessMap);
+        await CanisterManagementMethods.requestEntryToDao(caller, daoIsPublic, Principal.fromActor(this), costToEnterDao, daoMetaData_v4, requestsForAccessMap);
     };
 
-    public composite query func getCanisterCyclesBalances() : async MainTypes.CanisterCyclesBalances{
+    public composite query func getDaoPublicData() : async MainTypes.DaoPublicData{
         let currentCyclesBalance_backend = Cycles.balance();
         let managerCanister: Manager.Manager = actor(daoMetaData_v4.managerCanisterPrincipal);
         let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v4.treasuryCanisterPrincipal);
         let currentCyclesBalance_frontend  = frontEndCanisterBalance;
         let currentCyclesBalance_treasury = await treasuryCanister.getCyclesBalance();
         let currentCyclesBalance_manager = await managerCanister.getCyclesBalance();
-        return {currentCyclesBalance_backend; currentCyclesBalance_frontend; currentCyclesBalance_manager; currentCyclesBalance_treasury};
+        let daoFounder = if(daoMetaData_v4.founder == "Null"){ "No Founder Declared Yet"} else {
+            switch(userProfilesMap_v2.get(Principal.fromText(daoMetaData_v4.founder))){
+                case(?{userName}){ userName };
+                case null { daoMetaData_v4.founder }
+            }
+        };
+        return {currentCyclesBalance_backend; currentCyclesBalance_frontend; currentCyclesBalance_manager; currentCyclesBalance_treasury; daoFounder; costToEnterDao; daoIsPublic};
     };
 
     public composite query({caller}) func getCanisterData() : async Result.Result<(MainTypes.CanisterDataExport), JournalTypes.Error> {
@@ -303,7 +309,7 @@ shared actor class User() = this {
             releaseVersionLoaded = currentVersions.currentVersionLoaded.number;
             requestsForAccess = Iter.toArray(requestsForAccessMap.entries());
             costToEnterDao;
-            daoIsPrivate;
+            daoIsPublic;
         };
         return #ok(canisterDataPackagedForExport);
     };
@@ -636,7 +642,7 @@ shared actor class User() = this {
                 let {amountSent} = await treasuryCanister.transferICP(amount, sender, recipient);
                 return ?{amountSent};
             };
-            case(#TogglePrivacySetting({})){ daoIsPrivate := not daoIsPrivate; null};
+            case(#TogglePrivacySetting({})){ daoIsPublic := not daoIsPublic; null};
             case(#SetCostToEnterDao({amount})){ costToEnterDao := amount; null};
         };
     };

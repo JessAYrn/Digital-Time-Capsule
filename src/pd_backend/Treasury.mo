@@ -103,7 +103,7 @@ shared actor class Treasury (principal : Principal) = this {
             SyncronousHelperMethods.updateUserNeuronContribution(neuronDataMap, {userPrincipal = campaign.recipient; delta = remainingCollateralLocked.icp_staked.e8s; neuronId = remainingCollateralLocked.icp_staked.fromNeuron; operation = #SubtractCollateralizedStake});
             ?{ terms with remainingCollateralLocked = {remainingCollateralLocked with icp_staked = {remainingCollateralLocked.icp_staked with e8s: Nat64 = 0}}; };
         };};
-        fundingCampaignsMap.put(campaignId, {campaign with terms = updatedTerms;});
+        fundingCampaignsMap.put(campaignId, {campaign with terms = updatedTerms; settled = true});
         return Iter.toArray(fundingCampaignsMap.entries());
     };
 
@@ -188,22 +188,22 @@ shared actor class Treasury (principal : Principal) = this {
         func concludeBillingCycle(campaignId: Nat, campaign: TreasuryTypes.FundingCampaign): async () {
             let {recipient; amountDisbursedToRecipient; contributions} = campaign;
             let ?terms = campaign.terms else return;
-            let { paymentIntervals; paymentAmounts; remainingCollateralLocked; initialCollateralLocked; amountRepaidDuringCurrentPaymentInterval; forfeitedCollateral } = terms;
+            let { paymentIntervals; paymentAmounts; remainingCollateralLocked; initialCollateralLocked; amountRepaidDuringCurrentPaymentInterval; forfeitedCollateral; remainingLoanPrincipalAmount; remainingLoanInterestAmount } = terms;
 
             let (updatedAmountRepaidDuringCurrentPaymentInterval, paymentAmountMissed) : (Nat64, Nat64) = if(amountRepaidDuringCurrentPaymentInterval.icp.e8s < paymentAmounts.icp.e8s) {
                 (0, paymentAmounts.icp.e8s - amountRepaidDuringCurrentPaymentInterval.icp.e8s);
             } else {  (amountRepaidDuringCurrentPaymentInterval.icp.e8s - paymentAmounts.icp.e8s, 0);  };
 
-            let amountOfCollateralForfeited = NatX.nat64ComputePercentage({value = initialCollateralLocked.icp_staked.e8s; numerator = paymentAmountMissed; denominator = amountDisbursedToRecipient.icp.e8s});
-            let updatedRemainingCollateralLocked = {remainingCollateralLocked with icp_staked = { remainingCollateralLocked.icp_staked with e8s = remainingCollateralLocked.icp_staked.e8s - amountOfCollateralForfeited} };
+            let amountOfCollateralForfeited = Nat64.min( remainingCollateralLocked.icp_staked.e8s, NatX.nat64ComputePercentage({value = initialCollateralLocked.icp_staked.e8s; numerator = paymentAmountMissed; denominator = amountDisbursedToRecipient.icp.e8s}));
+            let updatedRemainingCollateralLocked = {remainingCollateralLocked with icp_staked = { remainingCollateralLocked.icp_staked with e8s = remainingCollateralLocked.icp_staked.e8s - amountOfCollateralForfeited } };
             let updatedForfeitedCollateral = {forfeitedCollateral with icp_staked = { forfeitedCollateral.icp_staked with e8s = forfeitedCollateral.icp_staked.e8s + amountOfCollateralForfeited} };
             let nextPaymentDueDate = ?(Time.now() + Nat64.toNat(paymentIntervals));
 
             SyncronousHelperMethods.updateUserNeuronContribution(neuronDataMap, {userPrincipal = recipient; delta = amountOfCollateralForfeited; neuronId = initialCollateralLocked.icp_staked.fromNeuron; operation = #SubtractCollateralizedStake});
             SyncronousHelperMethods.updateUserNeuronContribution(neuronDataMap, {userPrincipal = recipient; delta = amountOfCollateralForfeited; neuronId = initialCollateralLocked.icp_staked.fromNeuron; operation = #SubtractStake});
             SyncronousHelperMethods.redistributeStakeToLoanContributors(amountOfCollateralForfeited, contributions,neuronDataMap, initialCollateralLocked.icp_staked.fromNeuron);
-
-            fundingCampaignsMap.put(campaignId, { campaign with terms = ?{ terms with nextPaymentDueDate; remainingCollateralLocked = updatedRemainingCollateralLocked; forfeitedCollateral = updatedForfeitedCollateral; amountRepaidDuringCurrentPaymentInterval = {icp = {e8s = updatedAmountRepaidDuringCurrentPaymentInterval}};};});
+            let settled = switch(initialCollateralLocked.icp_staked.e8s > 0){ case false { remainingLoanPrincipalAmount.icp.e8s + remainingLoanInterestAmount.icp.e8s == 0 }; case true { updatedRemainingCollateralLocked.icp_staked.e8s == 0} };
+            fundingCampaignsMap.put(campaignId, { campaign with settled; terms = ?{ terms with nextPaymentDueDate; remainingCollateralLocked = updatedRemainingCollateralLocked; forfeitedCollateral = updatedForfeitedCollateral; amountRepaidDuringCurrentPaymentInterval = {icp = {e8s = updatedAmountRepaidDuringCurrentPaymentInterval}};};});
         };
 
         label concludeEllibleBillingCycles for((campaignId, campaign) in fundingCampaignsMap.entries()){
@@ -369,7 +369,8 @@ shared actor class Treasury (principal : Principal) = this {
         tresasuryIcpAccountId(subaccount);
     };
 
-    public shared({caller}) func manageNeuron(args: Governance.ManageNeuron) : async Governance.ManageNeuronResponse {        if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
+    public shared({caller}) func manageNeuron(args: Governance.ManageNeuron) : async Governance.ManageNeuronResponse {        
+        if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         let (manageNeuronResponse, neuronContributions) = await AsyncronousHelperMethods.manageNeuron(neuronDataMap, args, newlyCreatedNeuronContributions); 
         func completeDisbursements(): async () {
             let ?neuronId_ = args.id else { throw Error.reject("No neuronId in response") };

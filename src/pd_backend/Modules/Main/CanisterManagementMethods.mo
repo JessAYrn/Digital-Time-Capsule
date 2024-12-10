@@ -45,7 +45,7 @@ module{
         };
     };
 
-    public func newUserIsPermittedToEnterDao(principal: Principal, daoIsPrivate: Bool, thisCanisterId: Principal, costToEnterDao: Nat64, daoMetaData: MainTypes.DaoMetaData_V4, requestsForAccessMap: MainTypes.RequestsForAccessMap): 
+    public func newUserIsPermittedToEnterDao(principal: Principal, thisCanisterId: Principal, costToEnterDao: Nat64, daoMetaData: MainTypes.DaoMetaData_V4, requestsForAccessMap: MainTypes.RequestsForAccessMap): 
     async {approved: Bool; paidEntryCost: Bool} {
 
         if(Principal.toText(principal) == "2vxsx-fae") return {approved = false; paidEntryCost = false };
@@ -55,28 +55,26 @@ module{
 
             case null{ return {approved = false; paidEntryCost = false } }; 
             case(?{approved; escrowSubaccountId}){ 
-
-                let isApproved = approved or not daoIsPrivate;
                 let ledger: Ledger.Interface = actor(Ledger.CANISTER_ID);
                 let newUserBalance = Nat64.fromNat(await ledger.icrc1_balance_of({owner = thisCanisterId; subaccount = ?escrowSubaccountId}));
                 let paidEntryCost = newUserBalance >= costToEnterDao;
-                return { approved = isApproved; paidEntryCost };
+                return { approved; paidEntryCost };
 
             }; 
 
         };
     };
 
-    public func requestEntryToDao (caller: Principal, daoIsPrivate: Bool, thisCanisterId: Principal, costToEnterDao: Nat64, daoMetaData: MainTypes.DaoMetaData_V4, requestsForAccessMap: MainTypes.RequestsForAccessMap) : 
+    public func requestEntryToDao (caller: Principal, daoIsPublic: Bool, thisCanisterId: Principal, costToEnterDao: Nat64, daoMetaData: MainTypes.DaoMetaData_V4, requestsForAccessMap: MainTypes.RequestsForAccessMap) : 
     async {approved: Bool; paidEntryCost: Bool} { 
         switch(requestsForAccessMap.get(Principal.toText(caller))){
             case null { 
-                let request = {approved = not daoIsPrivate; escrowSubaccountId = await Account.getRandomSubaccount(); };
+                let request = {approved = daoIsPublic; escrowSubaccountId = await Account.getRandomSubaccount(); };
                 requestsForAccessMap.put(Principal.toText(caller), request); 
             };
             case(?_){ };
         };
-        return await newUserIsPermittedToEnterDao(caller, daoIsPrivate, thisCanisterId, costToEnterDao, daoMetaData, requestsForAccessMap);
+        return await newUserIsPermittedToEnterDao(caller, thisCanisterId, costToEnterDao, daoMetaData, requestsForAccessMap);
     };
 
     public func removeFromRequestsList( principals: [Text], requestsForAccessMap:  MainTypes.RequestsForAccessMap, apiCanisterPrincipal: Principal, treasuryCanisterPrincipal: Principal) : async () { 
