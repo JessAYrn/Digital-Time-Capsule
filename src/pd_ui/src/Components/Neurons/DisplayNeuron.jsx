@@ -46,7 +46,7 @@ const DisplayNeuron = (props) => {
     else if(neuronInfo?.state === NeuronStates.spawning)  {neuronState = "Spawning"; buttonIcon = HistoryToggleOffIcon;}
 
     const userMaturity = round2Decimals(fromE8s(parseInt(neuron?.maturity_e8s_equivalent || 0) * (parseInt(userContribution.stake_e8s)/parseInt(totalContributions || 1))));
-    const { setModalIsOpen, setModalProps } = useContext(AppContext)
+    const { setModalIsOpen, setModalProps, homePageState } = useContext(AppContext)
 
     const openProposalForm = (props) => {
         let {proposalAction, proposalPayload } = props;
@@ -203,7 +203,7 @@ const DisplayNeuron = (props) => {
                                     hideButton2={true}
                                     type={CHART_TYPES.pie}
                                     defaultLabel={GRAPH_DISPLAY_LABELS.stake_e8s}
-                                    inputData={mapDataMapToChartFormat(contributions, GRAPH_DATA_SETS.neuronContributions)}
+                                    inputData={mapDataMapToChartFormat(contributions, GRAPH_DATA_SETS.neuronContributions, homePageState?.canisterData?.userNames)}
                                     defaultDataSetName={GRAPH_DATA_SETS.neuronContributions}
                                     maintainAspectRatio={false}
                                 />  
@@ -212,7 +212,7 @@ const DisplayNeuron = (props) => {
                                 <DataTable
                                     transparent={true}
                                     columns={neuronContributionsTableColumns}
-                                    rows={mapNeuronContributionsToTableRows(contributions)}
+                                    rows={mapNeuronContributionsToTableRows(contributions, homePageState?.canisterData?.userNames)}
                                 />
                             </Grid>
                         </>}

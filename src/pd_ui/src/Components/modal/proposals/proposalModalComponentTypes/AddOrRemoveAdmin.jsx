@@ -15,7 +15,7 @@ const AddOrRemoveAdmin = (props) => {
     useEffect(() => { setIsReadyToSubmit(!!principal); }, [principal]);
 
     const principalsMenuItemProps = homePageState?.canisterData?.profilesMetaData?.map(({userPrincipal}) => {
-        return { text: userPrincipal, onClick: () => setPrincipal(userPrincipal) };
+        return { text: homePageState?.canisterData?.userNames[userPrincipal], onClick: () => { setPrincipal(userPrincipal); } };
     });
 
     const submitProposal = async () => { await onSubmitProposal({[action]: {principal}}); };
@@ -34,7 +34,7 @@ const AddOrRemoveAdmin = (props) => {
                 MenuIcon={KeyboardArrowDownIcon}
                 menuItemProps={principalsMenuItemProps}
             />
-            {principal && <Typography varient={"h6"} color={"#bdbdbd"}> {principal} </Typography>}
+            {principal && <Typography varient={"h6"} color={"#bdbdbd"}> {homePageState?.canisterData?.userNames[principal]} </Typography>}
             {isReadyToSubmit && !disabled &&
             <>
                 <ButtonField
@@ -47,8 +47,6 @@ const AddOrRemoveAdmin = (props) => {
             </>}
         </Grid>
     );
-
-    return 
 };
 
 export default AddOrRemoveAdmin;

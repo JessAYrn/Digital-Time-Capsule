@@ -15,7 +15,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 
 const IncreaseNeuron = (props) => {
     const { onSubmitProposal, payload, action, disabled } = props;
-    const { treasuryState } = useContext(AppContext);
+    const { treasuryState, homePageState } = useContext(AppContext);
     const [selectedNeuronId, setSelectedNeuronId] = useState(payload?.neuronId?.toString());
     const [amount, setAmount] = useState(payload?.amount || payload?.amount === BigInt(0) ? fromE8s(parseInt(payload?.amount)) : null);
     const [hasError, setHasError] = useState(false);
@@ -25,7 +25,9 @@ const IncreaseNeuron = (props) => {
 
     useEffect(() => { setIsReadyToSubmit(!!amount && !hasError && selectedNeuronId); }, [amount, selectedNeuronId]);
 
-    const neuronMenuItemProps = treasuryState?.neurons?.icp?.map(([neuronId, neuronData]) => {
+    const neuronMenuItemProps = treasuryState?.neurons?.icp?.filter(([neuronId, neuronData]) => {
+        return !!neuronData?.neuronInfo;
+    }).map(([neuronId, neuronData]) => {
         return {
             text: neuronId,  
             onClick: () => setSelectedNeuronId(neuronId),
@@ -33,10 +35,10 @@ const IncreaseNeuron = (props) => {
         }
     });
 
-    const onBehalfOfMenuItemProps = treasuryState?.usersTreasuryDataArray?.map(([userPrincipal, _]) => {
+    const onBehalfOfMenuItemProps = Object.keys(homePageState?.canisterData?.userNames).map((userPrincipal) => {
         return {
-            text: userPrincipal,
-            onClick: () => setOnBehalfOf([userPrincipal]),
+            text: homePageState?.canisterData?.userNames[userPrincipal],
+            onClick: () => { setOnBehalfOf([userPrincipal]); },
             selected: (!!onBehalfOf.length && userPrincipal === onBehalfOf[0])
         }
     });
@@ -104,7 +106,7 @@ const IncreaseNeuron = (props) => {
                             menuItemProps={onBehalfOfMenuItemProps}
                         />
                     }
-                    {!!onBehalfOf.length && <Typography marginBottom={"20px"} varient={"h6"} color={"#bdbdbd"}> {onBehalfOf[0]} </Typography>}
+                    {!!onBehalfOf.length && <Typography marginBottom={"20px"} varient={"h6"} color={"#bdbdbd"}> {homePageState?.canisterData?.userNames[onBehalfOf[0]]} </Typography>}
                 </>
             }
             {isReadyToSubmit && !disabled && 

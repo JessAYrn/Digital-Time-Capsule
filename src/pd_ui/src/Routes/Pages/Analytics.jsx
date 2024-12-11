@@ -151,7 +151,7 @@ const Analytics = (props) => {
                         <Graph
                             type={CHART_TYPES.pie}
                             defaultLabel={GRAPH_DISPLAY_LABELS.votingPower}
-                            inputData={mapUsersTotalTreasuryStakesAndVotingPowersDataToChartFormat(treasuryState.usersTreasuryDataArray)}
+                            inputData={mapUsersTotalTreasuryStakesAndVotingPowersDataToChartFormat(treasuryState.usersTreasuryDataArray, homePageState?.canisterData?.userNames)}
                             defaultDataSetName={GRAPH_DATA_SETS.usersTotalStakesAndVotingPowers}
                             height={"500px"}
                             maintainAspectRatio={false}

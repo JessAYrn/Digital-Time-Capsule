@@ -17,7 +17,7 @@ import AddLiquidityOrRepayFundingCampaign, {ACTION_TYPES} from "../modal/AddLiqu
 const DisplayFundingCampaign = (props) => {
     const { fundingCampaign, campaignId } = props;
     const { contributions, terms } = fundingCampaign;
-    const {setModalIsOpen, setModalProps } = useContext(AppContext);
+    const {setModalIsOpen, setModalProps, homePageState } = useContext(AppContext);
 
     const { value: amountToFundValue, type: amountToFundType } = getFundingCampaignAssetTypeAndValue(fundingCampaign?.amountToFund);
     const { value: amountDisbursedToRecipientValue, type: amountDisbursedToRecipientType } = getFundingCampaignAssetTypeAndValue(fundingCampaign?.amountDisbursedToRecipient);
@@ -98,10 +98,9 @@ const DisplayFundingCampaign = (props) => {
                     disabled={true}
                 />
                 <DataField
-                    text={`${shortenHexString(fundingCampaign?.recipient)}`}
-                    label={"Recipient Principal ID"}
-                    buttonIcon={ContentCopyIcon}
-                    onClick={() => copyText(fundingCampaign?.recipient)}
+                    text={homePageState?.canisterData?.userNames[fundingCampaign?.recipient]}
+                    label={"Recipient: "}
+                    disabled={true}
                 />
                 {!!terms.length && 
                     <DataField
@@ -154,7 +153,7 @@ const DisplayFundingCampaign = (props) => {
                     hideButton2={true}
                     type={CHART_TYPES.pie}
                     defaultLabel={GRAPH_DISPLAY_LABELS.icp}
-                    inputData={mapDataMapToChartFormat(contributions, GRAPH_DATA_SETS.fundingCampaignContributions)}
+                    inputData={mapDataMapToChartFormat(contributions, GRAPH_DATA_SETS.fundingCampaignContributions, homePageState?.canisterData?.userNames)}
                     defaultDataSetName={GRAPH_DATA_SETS.fundingCampaignContributions}
                     maintainAspectRatio={false}
                 />}

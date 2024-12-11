@@ -66,7 +66,7 @@ const DisplayProposal = (props) => {
     } = props;
 
     const [hasVoted, setHasVoted] = useState(false);
-    const { actorState, homePageDispatch, treasuryState, setModalIsOpen, setModalIsLoading, setModalProps } = useContext(AppContext);
+    const { actorState, homePageDispatch, treasuryState, setModalIsOpen, setModalIsLoading, setModalProps, homePageState } = useContext(AppContext);
 
     let [numberOfNays, numberOfYays, totalVotes] = useMemo(() => {
         let numberOfNays = 0;
@@ -158,7 +158,7 @@ const DisplayProposal = (props) => {
                 <Graph
                     type={CHART_TYPES.pie}
                     defaultLabel={GRAPH_DISPLAY_LABELS.votingPower}
-                    inputData={mapUsersTotalTreasuryStakesAndVotingPowersDataToChartFormat(hypotheticalUsersTreasuryDataArray)}
+                    inputData={mapUsersTotalTreasuryStakesAndVotingPowersDataToChartFormat(hypotheticalUsersTreasuryDataArray, homePageState?.canisterData?.userNames)}
                     defaultDataSetName={GRAPH_DATA_SETS.usersTotalStakesAndVotingPowers}
                     height={"400px"}
                     maintainAspectRatio={false}
@@ -274,9 +274,9 @@ const DisplayProposal = (props) => {
                 />}
                 <DataField
                     label={'Author: '}
-                    text={`${shortenHexString(proposer)}`}
+                    text={homePageState?.canisterData?.userNames[proposer]}
                     buttonIcon={ContentCopyIcon}
-                    onClick={() => copyText(proposer)}
+                    disabled={true}
                 />
                 <DataField
                     label={'Time Initiated: '}

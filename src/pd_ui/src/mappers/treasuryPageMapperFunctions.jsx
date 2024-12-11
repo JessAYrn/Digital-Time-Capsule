@@ -55,11 +55,11 @@ const getDataSetsForChartFromDataMap = (data, radius) => {
 
 const getLabels_balancesHistory = (data) => {return data.map(([date, balances]) => {return date})};
 
-const getLabels_contributions = (data) => {return data.map(([contributor, contributions]) => {
-    return contributor.length > 15 ? shortenHexString(contributor) : contributor
-})};
+const getLabels_contributions = (data, userNames) => {
+    return data.map(([contributor, contributions]) => { return userNames[contributor] });
+};
 
-export const mapDataMapToChartFormat = (data, nameOfDataSet) => {
+export const mapDataMapToChartFormat = (data, nameOfDataSet, userNames) => {
     let labels;
     let radius;
     switch(nameOfDataSet){
@@ -67,15 +67,15 @@ export const mapDataMapToChartFormat = (data, nameOfDataSet) => {
         case GRAPH_DATA_SETS.balancesHistory.month: labels = getLabels_balancesHistory(data); radius = 2; break;
         case GRAPH_DATA_SETS.balancesHistory.year: labels = getLabels_balancesHistory(data); radius = 2; break;
         case GRAPH_DATA_SETS.balancesHistory.allTime: labels = getLabels_balancesHistory(data); radius = 2; break;
-        case GRAPH_DATA_SETS.neuronContributions: labels = getLabels_contributions(data); radius = 125; break;
-        case GRAPH_DATA_SETS.usersTotalStakesAndVotingPowers: labels = getLabels_contributions(data); radius = 125; break;
-        case GRAPH_DATA_SETS.fundingCampaignContributions: labels = getLabels_contributions(data); radius = 125; break;
+        case GRAPH_DATA_SETS.neuronContributions: labels = getLabels_contributions(data, userNames); radius = 125; break;
+        case GRAPH_DATA_SETS.usersTotalStakesAndVotingPowers: labels = getLabels_contributions(data, userNames); radius = 125; break;
+        case GRAPH_DATA_SETS.fundingCampaignContributions: labels = getLabels_contributions(data, userNames); radius = 125; break;
     };
     const data_ = { labels, datasets: getDataSetsForChartFromDataMap(data, radius) };
     return { [nameOfDataSet]: data_};
 };
 
-export const mapUsersTotalTreasuryStakesAndVotingPowersDataToChartFormat = (usersTreasuryDataArray) => {
+export const mapUsersTotalTreasuryStakesAndVotingPowersDataToChartFormat = (usersTreasuryDataArray, userNames) => {
     const usersTreasuryDataArraySorted = usersTreasuryDataArray.sort(function(a, b){
         const [principal_a, data_a] = a;
         const [principal_b, data_b] = b;
@@ -92,7 +92,8 @@ export const mapUsersTotalTreasuryStakesAndVotingPowersDataToChartFormat = (user
     allUsersTotalIcpStakesAndVotingPowerSorted.push(["Everyone Else", {voting_power: theRestOfTheUsersVotingPower}]);
     return mapDataMapToChartFormat(
         allUsersTotalIcpStakesAndVotingPowerSorted,
-        GRAPH_DATA_SETS.usersTotalStakesAndVotingPowers
+        GRAPH_DATA_SETS.usersTotalStakesAndVotingPowers,
+        userNames
     );
 };
 
@@ -132,8 +133,8 @@ export const mapBalancesDataFromApiToFrontend = (data) => {
 
 export const neuronContributionsTableColumns = [
     { 
-        field: 'userPrincipal', 
-        headerName: 'Principal ID', 
+        field: 'userName', 
+        headerName: 'User Name', 
         width: 150,
         editable: false
     },
@@ -151,11 +152,11 @@ export const neuronContributionsTableColumns = [
     },
 ];
 
-export const mapNeuronContributionsToTableRows = (neuronContributions) => {
+export const mapNeuronContributionsToTableRows = (neuronContributions, userNames) => {
     const neuronContributions_ = neuronContributions.map(([userPrincipal, {stake_e8s, voting_power}]) => {
         return {
             id: userPrincipal,
-            userPrincipal: shortenHexString(userPrincipal),
+            userName: userNames[userPrincipal],
             stake_e8s: round8Decimals(fromE8s(parseInt(stake_e8s))),
             voting_power: round8Decimals(fromE8s(parseInt(voting_power)))
         }

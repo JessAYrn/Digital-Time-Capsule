@@ -3,20 +3,15 @@ import Grid from '@mui/material/Unstable_Grid2'
 import {FormControlLabel} from '@mui/material'
 import {FormGroup} from '@mui/material'
 import {Checkbox} from '@mui/material'
-import DisplayUserData from '../UserData/DisplayUserData'
-import { icpWalletAddressHasProperFormat, principalHasProperFormat } from '../../functionsAndConstants/Utils'
+import DisplayUserData from './DisplayUserData'
 import SendCrypto from './SendCryptoModal'
 import BuyCrypto from './proposals/proposalModalComponentTypes/BuyCrypto'
 
-export const actions = {
-    send: "send",
-    receive: "receive",
-    buy: "buy"
-};
-
+export const actions = { send: "send", receive: "receive", buy: "buy" };
 
 const TransactWithWalletModal = (props) => {
-    const [action, setAction] = useState(actions.receive);
+const [action, setAction] = useState(actions.receive);
+
     return (
         <Grid columns={12} xs={12} display="flex" justifyContent="center" alignItems="center" flexDirection={'column'}>
             <Grid columns={12} xs={12} display="flex" justifyContent="center" alignItems="center" > 

@@ -26,12 +26,6 @@ export const usersTableColumns = [
         width: 90 
     },
     {
-      field: 'userPrincipal',
-      headerName: 'User Identity',
-      width: 200,
-      editable: false,
-    },
-    {
         field: 'canisterId',
         headerName: 'Root Canister',
         width: 200,
@@ -100,6 +94,7 @@ export const mapBackendCanisterDataToFrontEndObj = (props) => {
 
     return {
         profilesMetaData: profilesMetaData_,
+        userNames: mapUserPrincipalsToUserNames(profilesMetaData_),
         backEndCyclesBurnRatePerDay: parseInt(backEndCyclesBurnRatePerDay),
         backEndPrincipal: backEndPrincipal,
         frontEndPrincipal: frontEndPrincipal,
@@ -119,3 +114,10 @@ export const mapBackendCanisterDataToFrontEndObj = (props) => {
         costToEnterDao: parseInt(costToEnterDao)
     }
 }; 
+
+
+export const mapUserPrincipalsToUserNames = (profilesMetaData) => {
+    let userNames = {};
+    for(let {userPrincipal, userName} of profilesMetaData) { userNames[userPrincipal] = userName };
+    return userNames;
+};

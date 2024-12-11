@@ -9,6 +9,7 @@ export const homePageTypes={
     SET_IS_LOADING:"SET_IS_LOADING",
     SET_PROPOSALS_DATA: "SET_PROPOSALS_DATA",
     SET_DAO_PUBLIC_DATA: "SET_DAO_PUBLIC_DATA",
+    SET_USER_NAMES: "SET_USER_NAMES"
 }
 
 
@@ -24,6 +25,7 @@ export const homePageInitialState={
         currentCyclesBalance_treasury: 1,
         currentCyclesBalance_manager: 1,
     },
+    userNames: {},
     canisterData: {
         profilesMetaData: [],
         journalCount: 0,
@@ -53,6 +55,11 @@ const changeValue=(state=homePageInitialState, action)=>{
                 return {
                 ...state
             }
+        case homePageTypes.SET_USER_NAMES:
+            state.userNames = payload;
+            return {
+            ...state
+        }
         case homePageTypes.SET_DAO_PUBLIC_DATA:
             state.daoPublicData = payload;
             return {

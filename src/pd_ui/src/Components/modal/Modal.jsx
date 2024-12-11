@@ -36,12 +36,7 @@ const ModalComponent = (props_) => {
   let isOpen = useMemo(() => {return open}, [open]);
   
   return (
-      <Modal
-        open={isOpen}
-        onClose={isLoading ? () => {} : handleClose}
-        aria-labelledby="parent-modal-title"
-        aria-describedby="parent-modal-description"
-      >
+      <Modal open={isOpen} onClose={isLoading ? () => {} : handleClose} aria-labelledby="parent-modal-title" aria-describedby="parent-modal-description">
         <Box 
         sx={{ ...style, }} 
         className={`modalBox ${isLoading ? 'transparent' : ''}`} 
