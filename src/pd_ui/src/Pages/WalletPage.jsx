@@ -1,20 +1,17 @@
-import React, { useContext, useState} from 'react';
-import { AppContext } from '../../Context';
-import { NavBar } from '../../Components/navigation/NavBar';
-import { CHART_TYPES, GRAPH_DISPLAY_LABELS, GRAPH_DATA_SETS } from '../../functionsAndConstants/Constants';
-import { copyText } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
+import React, { useContext } from 'react';
+import { AppContext } from '../Context';
+import { NavBar } from '../Components/navigation/NavBar';
+import { CHART_TYPES, GRAPH_DISPLAY_LABELS, GRAPH_DATA_SETS } from '../functionsAndConstants/Constants';
+import { copyText } from '../functionsAndConstants/walletFunctions/CopyWalletAddress';
 
-import { nanoSecondsToMiliSeconds, shortenHexString, round2Decimals, fromE8s } from '../../functionsAndConstants/Utils';
-import QrCodeIcon from '@mui/icons-material/QrCode';
+import { nanoSecondsToMiliSeconds, shortenHexString, round2Decimals, fromE8s } from '../functionsAndConstants/Utils';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
-import Paper  from '@mui/material/Paper';
-import DataField from '../../Components/Fields/DataField';
-import AccordionField from '../../Components/Fields/Accordion';
-import ButtonField from '../../Components/Fields/Button';
-import Graph from '../../Components/Fields/Chart';
+import DataField from '../Components/Fields/DataField';
+import AccordionField from '../Components/Fields/Accordion';
+import Graph from '../Components/Fields/Chart';
 import Typography from '@mui/material/Typography';
-import ActionButton from '../../Components/ActionButton';
+import ActionButton from '../Components/ActionButton';
 
 
 const WalletPage = (props) => {

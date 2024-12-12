@@ -1,6 +1,6 @@
-import { NavBar } from "../../Components/navigation/NavBar";
+import { NavBar } from "../Components/navigation/NavBar";
 import React, { useContext } from 'react';
-import { AppContext } from "../../Context";
+import { AppContext } from "../Context";
 
 const Notes = (props) => {
   const { journalState, journalDispatch} = useContext(AppContext);
@@ -10,9 +10,7 @@ const Notes = (props) => {
       notificationIcon={true}
       unreadNotifications={journalState.notifications.length}
     />
-    <div className='NotesPage_container'>
-      coming soon
-    </div>
+    <div> coming soon </div>
   </>
   );
 };

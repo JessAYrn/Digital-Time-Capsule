@@ -1,24 +1,20 @@
 import JournalPage from "./JournalPage";
 import React, { useContext, useEffect, useState } from "react";
-import {types} from "../../reducers/journalReducer";
-import { AppContext } from "../../Context";
-import InputBox from "../../Components/Fields/InputBox";
-import SpeedDialField from '../../Components/Fields/SpeedDialField'
+import {types} from "../reducers/journalReducer";
+import { AppContext } from "../Context";
+import InputBox from "../Components/Fields/InputBox";
+import SpeedDialField from '../Components/Fields/SpeedDialField'
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
-import { NavBar } from "../../Components/navigation/NavBar";
-import { getHighestEntryKey, milisecondsToNanoSeconds } from "../../functionsAndConstants/Utils";
+import { NavBar } from "../Components/navigation/NavBar";
+import { getHighestEntryKey, milisecondsToNanoSeconds } from "../functionsAndConstants/Utils";
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
-import FileCarousel from "../../Components/Fields/fileManger/FileCarousel";
-import DataTable from "../../Components/Fields/Table";
-import DatePickerField from "../../Components/Fields/DatePicker";
-import "../../SCSS/scrollable.scss";
-import "../../SCSS/contentContainer.scss";
+import FileCarousel from "../Components/Fields/fileManger/FileCarousel";
+import DataTable from "../Components/Fields/Table";
+import DatePickerField from "../Components/Fields/DatePicker";
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
-import { journalPagesTableColumns, mapRequestsForAccessToTableRows } from "../../mappers/journalPageMappers";
-import { mapApiObjectToFrontEndJournalEntriesObject } from "../../mappers/journalPageMappers";
-import ButtonField from "../../Components/Fields/Button";
+import { journalPagesTableColumns, mapRequestsForAccessToTableRows } from "../mappers/journalPageMappers";
+import { mapApiObjectToFrontEndJournalEntriesObject } from "../mappers/journalPageMappers";
 
 const count = 30
 

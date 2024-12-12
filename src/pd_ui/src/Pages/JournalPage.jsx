@@ -1,22 +1,21 @@
 import React, {useState, useContext, useMemo, useEffect, Component} from "react";
-import InputBox from "../../Components/Fields/InputBox";
-import {types} from "../../reducers/journalReducer";
-import { AppContext } from "../../Context";
-import DatePickerField from "../../Components/Fields/DatePicker";
-import { monthInMilliSeconds} from "../../functionsAndConstants/Constants";
-import { milisecondsToNanoSeconds, scrollToTop } from "../../functionsAndConstants/Utils";
+import InputBox from "../Components/Fields/InputBox";
+import {types} from "../reducers/journalReducer";
+import { AppContext } from "../Context";
+import DatePickerField from "../Components/Fields/DatePicker";
+import { monthInMilliSeconds} from "../functionsAndConstants/Constants";
+import { milisecondsToNanoSeconds, scrollToTop } from "../functionsAndConstants/Utils";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import PublishIcon from '@mui/icons-material/Publish';
-import ButtonField from "../../Components/Fields/Button";
-import FileCarousel from "../../Components/Fields/fileManger/FileCarousel";
+import ButtonField from "../Components/Fields/Button";
+import FileCarousel from "../Components/Fields/fileManger/FileCarousel";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import LockIcon from '@mui/icons-material/Lock';
-import SpeedDialField from "../../Components/Fields/SpeedDialField";
+import SpeedDialField from "../Components/Fields/SpeedDialField";
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 import DoneIcon from '@mui/icons-material/Done';
 import CloseIcon from '@mui/icons-material/Close';
-import { mapApiObjectToFrontEndJournalEntriesObject } from "../../mappers/journalPageMappers";
+import { mapApiObjectToFrontEndJournalEntriesObject } from "../mappers/journalPageMappers";
 
 
 const count = 30;

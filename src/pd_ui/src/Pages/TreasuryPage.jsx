@@ -1,21 +1,21 @@
-import { NavBar } from "../../Components/navigation/NavBar";
+import { NavBar } from "../Components/navigation/NavBar";
 import React, { useContext, useState } from 'react';
-import { AppContext } from "../../Context";
+import { AppContext } from "../Context";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import { Typography } from "@mui/material";
-import { copyText } from "../../functionsAndConstants/walletFunctions/CopyWalletAddress";
-import { fromE8s, shortenHexString, round2Decimals } from "../../functionsAndConstants/Utils";
+import { copyText } from "../functionsAndConstants/walletFunctions/CopyWalletAddress";
+import { fromE8s, shortenHexString, round2Decimals } from "../functionsAndConstants/Utils";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import ButtonField from "../../Components/Fields/Button";
-import Graph from "../../Components/Fields/Chart";
-import { CHART_TYPES, GRAPH_DATA_SETS, GRAPH_DISPLAY_LABELS } from "../../functionsAndConstants/Constants";
-import InfoToolTip from "../../Components/Fields/InfoToolTip";
-import DisplayAllFundingCampaigns from "../../Components/fundingCampaign/DisplayAllFundingCampaigns";
-import DisplayAllNeurons from "../../Components/Neurons/DisplayAllNeurons";
-import ActionButton from "../../Components/ActionButton";
-import AccordionField from "../../Components/Fields/Accordion";
-import Switch from "../../Components/Fields/Switch";
+import ButtonField from "../Components/Fields/Button";
+import Graph from "../Components/Fields/Chart";
+import { CHART_TYPES, GRAPH_DATA_SETS, GRAPH_DISPLAY_LABELS } from "../functionsAndConstants/Constants";
+import InfoToolTip from "../Components/Fields/InfoToolTip";
+import DisplayAllFundingCampaigns from "../Components/fundingCampaign/DisplayAllFundingCampaigns";
+import DisplayAllNeurons from "../Components/Neurons/DisplayAllNeurons";
+import ActionButton from "../Components/ActionButton";
+import AccordionField from "../Components/Fields/Accordion";
+import Switch from "../Components/Fields/Switch";
 
 const TreasuryPage = (props) => {
   
@@ -106,7 +106,6 @@ const TreasuryPage = (props) => {
       justifyContent="center" 
       alignItems="center" 
       flexDirection={"column"}
-      className={"container_treasury"}
     > 
       <NavBar />
       <Grid 

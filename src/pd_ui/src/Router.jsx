@@ -11,18 +11,18 @@ import { copyText } from './functionsAndConstants/walletFunctions/CopyWalletAddr
 import ButtonField from './Components/Fields/Button';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CelebrationIcon from '@mui/icons-material/Celebration';
-import Analytics from './Routes/Pages/Analytics';
-import Journal from './Routes/Pages/Journal';
-import Notes from './Routes/Pages/Notes';
+import Analytics from './Pages/Analytics';
+import Journal from './Pages/Journal';
+import Notes from './Pages/Notes';
 import ModalComponent from './Components/modal/Modal';
-import LoginPage from './Routes/Pages/LoginPage';
+import LoginPage from './Pages/LoginPage';
 import { NAV_LINKS, JOURNAL_TABS } from './functionsAndConstants/Constants';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from './Theme';
 import { AppContext } from './Context';
-import WalletPage from './Routes/Pages/WalletPage';
-import TreasuryPage from './Routes/Pages/TreasuryPage';
-import GroupJournalPage from './Routes/Pages/GroupJournalPage';
+import WalletPage from './Pages/WalletPage';
+import TreasuryPage from './Pages/TreasuryPage';
+import GroupJournalPage from './Pages/GroupJournalPage';
 import CreateAccount from './Components/modal/CreateAccount';
 import { fromE8s, shortenHexString } from './functionsAndConstants/Utils';
 
@@ -60,6 +60,7 @@ const Router = (props) => {
             
             try{
                 let {approved, paidEntryCost} = await actorState.backendActor.requestEntryToDao();
+                
                 if(approved && paidEntryCost){
                     modalProps = {
                         components: [
