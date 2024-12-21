@@ -6,7 +6,7 @@ import InputBox from "../Components/Fields/InputBox";
 import SpeedDialField from '../Components/Fields/SpeedDialField'
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
-import { NavBar } from "../Components/navigation/NavBar";
+import { NavBar } from "../Components/persistentComponents/NavBar";
 import { getHighestEntryKey, milisecondsToNanoSeconds } from "../functionsAndConstants/Utils";
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 import FileCarousel from "../Components/Fields/fileManger/FileCarousel";

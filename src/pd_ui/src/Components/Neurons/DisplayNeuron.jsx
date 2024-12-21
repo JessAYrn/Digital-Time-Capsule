@@ -1,12 +1,13 @@
-import React, {useContext} from "react";
+import React, {useContext, useMemo} from "react";
 import { AppContext } from "../../Context";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import { Typography } from "@mui/material";
 import { fromE8s, round2Decimals, secondsToHours, hoursToDays, daysToMonths } from "../../functionsAndConstants/Utils";
-import Graph from "../Fields/Chart";
-import { CHART_TYPES, GRAPH_DATA_SETS, GRAPH_DISPLAY_LABELS } from "../../functionsAndConstants/Constants";
-import { mapDataMapToChartFormat, neuronContributionsTableColumns, mapNeuronContributionsToTableRows } from "../../mappers/treasuryPageMapperFunctions";
+import Graph, { getDataSetsInChartFormat } from "../Fields/Chart";
+import { CHART_TYPES } from "../../functionsAndConstants/Constants";
+import { neuronContributionsTableColumns, mapNeuronContributionsToTableRows } from "../../mappers/treasuryPageMapperFunctions";
 import { getTotalContributions, getUserNeuronContribution } from "../../functionsAndConstants/treasuryDataFunctions";
+import { GRAPH_DISPLAY_LABELS } from "../../functionsAndConstants/Constants";
 import ButtonField from "../Fields/Button";
 import AddIcon from '@mui/icons-material/Add';
 import HourglassTopIcon from '@mui/icons-material/HourglassTop';
@@ -22,8 +23,7 @@ const NeuronStates = { locked: 1, dissolving: 2, unlocked: 3, spawning: 4 };
 const DisplayNeuron = (props) => {
     const { neuronData, userPrincipal} = props;
 
-    const [neuronId, neuronData_] = neuronData;
-    const{contributions, neuron, neuronInfo} = neuronData_;
+    const [neuronId, {contributions, neuron, neuronInfo}] = neuronData;
 
     let timeSpan = "hours";
     let dissolveDelay = secondsToHours(parseInt(neuronInfo?.dissolve_delay_seconds || 0));
@@ -61,6 +61,26 @@ const DisplayNeuron = (props) => {
             handleClose: () => setModalIsOpen(false)
         });
     };
+    const {chartLabels, chartDataSets} = useMemo(() => {
+        const chartLabels = [];
+        const contributionsObjsArray = [];
+
+        for(let [principal, neuronContributionObj] of contributions){
+            chartLabels.push(homePageState?.canisterData?.userNames[principal]);
+            for(let property in neuronContributionObj) neuronContributionObj[property] = fromE8s(parseInt(neuronContributionObj[property]))
+            contributionsObjsArray.push(neuronContributionObj);
+        };
+        let  chartDataSets =  getDataSetsInChartFormat(contributionsObjsArray, 125);
+
+        const includedDataSets = [GRAPH_DISPLAY_LABELS.votingPower, GRAPH_DISPLAY_LABELS.stake_e8s];
+        chartDataSets = chartDataSets.filter(({label}) => { return includedDataSets.includes(label)});
+        chartDataSets = chartDataSets.map(dataSet => {
+            if(dataSet.label === GRAPH_DISPLAY_LABELS.stake_e8s) return {...dataSet, label: GRAPH_DISPLAY_LABELS.icp_staked};
+            else return dataSet
+        });
+
+        return {chartLabels, chartDataSets};
+    }, [contributions]);
 
     return (
         <>
@@ -200,11 +220,9 @@ const DisplayNeuron = (props) => {
                                     withoutPaper={true}
                                     width={"25%"}
                                     height={"400px"}
-                                    hideButton2={true}
                                     type={CHART_TYPES.pie}
-                                    defaultLabel={GRAPH_DISPLAY_LABELS.stake_e8s}
-                                    inputData={mapDataMapToChartFormat(contributions, GRAPH_DATA_SETS.neuronContributions, homePageState?.canisterData?.userNames)}
-                                    defaultDataSetName={GRAPH_DATA_SETS.neuronContributions}
+                                    labels={chartLabels}
+                                    datasets={chartDataSets}
                                     maintainAspectRatio={false}
                                 />  
                             </Grid>

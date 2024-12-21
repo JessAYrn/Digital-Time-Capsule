@@ -177,15 +177,6 @@ shared actor class User() = this {
         let result = await TxHelperMethods.transferICP(caller, userProfilesMap_v2, amount, accountId); return result;
     };
 
-    public shared({caller}) func trasnferICPFromTreasuryAccountToTreasuryAccount(amount: Nat64, recipientPrincipal : Text): async {amountSent: Nat64} {
-        let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v4.treasuryCanisterPrincipal);
-        let {subaccountId = recipientSubaccountId } = await treasuryCanister.getUserTreasuryData(Principal.fromText(recipientPrincipal));
-        await treasuryCanister.transferICP( 
-            amount, 
-            {identifier = #Principal(Principal.toText(caller)); accountType = #UserTreasuryData}, 
-            {owner = Principal.fromText(daoMetaData_v4.treasuryCanisterPrincipal); accountType = #UserTreasuryData; subaccount = ?recipientSubaccountId}
-        );
-    }; 
 
     public composite query({caller}) func readTransaction() : async Result.Result<[(Nat, JournalTypes.Transaction)], JournalTypes.Error> {
         let result = userProfilesMap_v2.get(caller);

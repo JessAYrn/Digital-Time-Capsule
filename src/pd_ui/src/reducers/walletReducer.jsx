@@ -1,5 +1,4 @@
 import {WALLET_TABS} from '../functionsAndConstants/Constants';
-import { dummyDateSets } from '../mappers/treasuryPageMapperFunctions';
 
 export const walletTypes={
     SET_ENTIRE_WALLET_REDUX_STATE: "SET_ENTIRE_WALLET_REDUX_STATE",
@@ -26,7 +25,7 @@ export const walletInitialState={
             data: []
         }
     },
-    balancesData: dummyDateSets
+    balancesData: {}
 
 
 }

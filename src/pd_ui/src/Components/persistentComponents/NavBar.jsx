@@ -79,9 +79,8 @@ export const NavBar = (props) => {
     const NotificationIcon =  notificationsState.notifications.length ? NotificationsActiveIcon : NotificationsNoneIcon;
 
     const mainMenuItemProps = [
-        { text: "Wallet", onClick: () => changeRoute(NAV_LINKS.wallet) },
         // { text: "Storage", onClick: () => changeRoute(NAV_LINKS.journal) },
-        { text: "Treasury", onClick: () => changeRoute(NAV_LINKS.treasury) },
+        { text: "Finances", onClick: () => changeRoute(NAV_LINKS.finances) },
         { text: "Dashboard", onClick: () => changeRoute(NAV_LINKS.dashboard) },
         // { text: "Community", onClick: () => changeRoute(NAV_LINKS.groupJournal) },
     ];
@@ -104,11 +103,13 @@ export const NavBar = (props) => {
 
     return (
         <Grid 
+        container
         xs={12} 
         display="flex" 
         justifyContent="center" 
         alignItems="center" 
         padding={0} 
+        width={"100%"}
         className={'navBarContainer'} 
         zIndex={10}
         >

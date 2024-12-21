@@ -19,7 +19,7 @@ export const NAV_LINKS = {
     journal : '/app',
     account: '/account',
     dashboard: '/',
-    treasury:'/treasury',
+    finances:'/finances',
     groupJournal:'/groupjournal'
 };
 
@@ -135,16 +135,23 @@ export const GRAPH_DATA_SETS = {
     }
 }
 
+export const GRAPH_DATA_SET_TIMEFRAMES = {
+    week: "week",
+    month: "month",
+    year: "year",
+    allTime: "allTime",
+};
+
 export const GRAPH_DISPLAY_LABELS = {
-    icp: "ICP",
-    icp_staked: "ICP_STAKED",
-    btc: "BTC",
-    eth: "ETH",
-    xdrs: "XDRS",
-    stake: "ICP_STAKED",
-    stake_e8s: "ICP_STAKED",
-    votingPower: "VOTING_POWER",
-    voting_power: "VOTING_POWER",
+    icp: "icp",
+    icp_staked: "icp_staked",
+    btc: "btc",
+    eth: "eth",
+    xdrs: "xdrs",
+    stake: "icp_staked",
+    stake_e8s: "stake_e8s",
+    votingPower: "voting_power",
+    voting_power: "voting_power",
 
 };
 

@@ -16,7 +16,6 @@ import { homePageTypes } from "../../../reducers/homePageReducer";
 import { PROPOSAL_ACTIONS } from "./utils";
 import Graph from "../../Fields/Chart";
 import { CHART_TYPES, GRAPH_DATA_SETS, GRAPH_DISPLAY_LABELS, MAX_DISSOLVE_DELAY_IN_SECONDS, MIN_DISSOLVE_DELAY_FOR_REWARDS_IN_SECONDS } from "../../../functionsAndConstants/Constants";
-import { mapUsersTotalTreasuryStakesAndVotingPowersDataToChartFormat } from "../../../mappers/treasuryPageMapperFunctions";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import MenuField from "../../Fields/MenuField";
 import { KeyboardArrowDownIcon } from "@mui/icons-material";
@@ -155,16 +154,16 @@ const DisplayProposal = (props) => {
         return (
             <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
                 <Typography variant="h6">Voting Power Distribution If Approved: </Typography>
-                <Graph
+                {/* <Graph
                     type={CHART_TYPES.pie}
                     defaultLabel={GRAPH_DISPLAY_LABELS.votingPower}
-                    inputData={mapUsersTotalTreasuryStakesAndVotingPowersDataToChartFormat(hypotheticalUsersTreasuryDataArray, homePageState?.canisterData?.userNames)}
+                    dataSets={mapUsersTotalTreasuryStakesAndVotingPowersDataToChartFormat(hypotheticalUsersTreasuryDataArray, homePageState?.canisterData?.userNames)}
                     defaultDataSetName={GRAPH_DATA_SETS.usersTotalStakesAndVotingPowers}
                     height={"400px"}
                     maintainAspectRatio={false}
                     hideButton1={true}
                     hideButton2={true}
-                />
+                /> */}
             </Grid>
         );
     }

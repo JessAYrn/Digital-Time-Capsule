@@ -145,7 +145,7 @@ const DisplayFundingCampaign = (props) => {
                     rows={4}
                 />
                 
-                {contributions.length > 0 &&
+                {/* {contributions.length > 0 &&
                 <Graph
                     withoutPaper={true}
                     width={"25%"}
@@ -153,10 +153,10 @@ const DisplayFundingCampaign = (props) => {
                     hideButton2={true}
                     type={CHART_TYPES.pie}
                     defaultLabel={GRAPH_DISPLAY_LABELS.icp}
-                    inputData={mapDataMapToChartFormat(contributions, GRAPH_DATA_SETS.fundingCampaignContributions, homePageState?.canisterData?.userNames)}
+                    dataSets={mapDataMapToChartFormat(contributions, GRAPH_DATA_SETS.fundingCampaignContributions, homePageState?.canisterData?.userNames)}
                     defaultDataSetName={GRAPH_DATA_SETS.fundingCampaignContributions}
                     maintainAspectRatio={false}
-                />}
+                />} */}
                 {!fundingCampaign?.settled &&
                     <Grid display={"flex"} width={"100%"} justifyContent={"left"} alignItems={"left"} xs={12} padding={0} margin={"10px"} >
                         <ButtonField

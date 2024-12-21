@@ -116,7 +116,7 @@ export const mapBackendCanisterDataToFrontEndObj = (props) => {
 }; 
 
 
-export const mapUserPrincipalsToUserNames = (profilesMetaData) => {
+const mapUserPrincipalsToUserNames = (profilesMetaData) => {
     let userNames = {};
     for(let {userPrincipal, userName} of profilesMetaData) { userNames[userPrincipal] = userName };
     return userNames;

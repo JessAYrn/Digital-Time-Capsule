@@ -5,12 +5,12 @@ const theme = createTheme({
     palette: {
       primary: {
         // light: will be calculated from palette.primary.main,
-        main: '#0A0A0A',
+        main: grey[50],
         // dark: will be calculated from palette.primary.main,
         // contrastText: will be calculated to contrast with palette.primary.main
       },
       secondary: {
-        main: '#343434',
+        main: '#F7931A',
       },
       // Provide every color token (light, main, dark, and contrastText) when using
       // custom colors for props in Material UI's components.
@@ -18,6 +18,9 @@ const theme = createTheme({
       // (For TypeScript, you need to add module augmentation for the `custom` value)
       custom: {
         main: '#F7931A',
+      },
+      text: {
+        primary: grey[50]
       },
       white: {
         main: grey[100],
@@ -33,6 +36,13 @@ const theme = createTheme({
       tonalOffset: 0.2,
     },
     components: {
+      MuiPaper:{
+        styleOverrides: {
+          root:{
+            backgroundColor: "#343434"
+          }
+        }
+      },
       MuiTypography:{
         styleOverrides: {
           root:{
@@ -187,6 +197,16 @@ const theme = createTheme({
               color: "#343434"
             }
           }
+        }
+      },
+      MuiTab: {
+        styleOverrides: {
+          root:{
+            "&.Mui-selected": {
+              color: grey[50]
+            },
+            color: grey[50]
+          },
         }
       }
     },

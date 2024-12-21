@@ -1,4 +1,4 @@
-import React, {useState, useContext, useMemo, useEffect, Component} from "react";
+import React, {useState, useContext, useMemo, useEffect} from "react";
 import InputBox from "../Components/Fields/InputBox";
 import {types} from "../reducers/journalReducer";
 import { AppContext } from "../Context";

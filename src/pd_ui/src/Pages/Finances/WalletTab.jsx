@@ -83,15 +83,15 @@ const WalletPage = (props) => {
                         </Typography>
                     </Grid>
                 </Grid>
-                <Graph 
+                {/* <Graph 
                     type={CHART_TYPES.line} 
-                    inputData={walletState.balancesData} 
+                    dataSets={walletState.balancesData} 
                     defaultLabel={GRAPH_DISPLAY_LABELS.icp}
                     defaultDataSetName={GRAPH_DATA_SETS.balancesHistory.week}
                     maintainAspectRatio={false}
                     height={"500px"}
                     width={"100%"}
-                />
+                /> */}
             </Grid>
             <Grid 
                 columns={12} 

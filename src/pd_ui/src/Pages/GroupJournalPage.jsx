@@ -1,4 +1,4 @@
-import { NavBar } from "../Components/navigation/NavBar";
+import { NavBar } from "../Components/persistentComponents/NavBar";
 import React, { useContext } from 'react';
 import { AppContext } from "../Context";
 

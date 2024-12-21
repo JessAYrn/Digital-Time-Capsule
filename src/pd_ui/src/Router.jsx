@@ -20,11 +20,13 @@ import { NAV_LINKS, JOURNAL_TABS } from './functionsAndConstants/Constants';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from './Theme';
 import { AppContext } from './Context';
-import WalletPage from './Pages/WalletPage';
-import TreasuryPage from './Pages/TreasuryPage';
+import FinancesPage from './Pages/Finances/FinancesPage';
 import GroupJournalPage from './Pages/GroupJournalPage';
 import CreateAccount from './Components/modal/CreateAccount';
 import { fromE8s, shortenHexString } from './functionsAndConstants/Utils';
+import ActionButton from './Components/persistentComponents/ActionButton';
+import { NavBar } from './Components/persistentComponents/NavBar';
+import Grid from '@mui/material/Unstable_Grid2';
 
 const Router = (props) => {
 
@@ -136,12 +138,24 @@ const Router = (props) => {
     return(
        <ThemeProvider theme={theme}>
             <AppContext.Provider value={context}>
+            { displayComponent && <NavBar />}
+            { displayComponent && <ActionButton/> }
+            <Grid 
+                container 
+                columns={12} 
+                xs={12} 
+                rowSpacing={8} 
+                display="flex" 
+                justifyContent="center" 
+                alignItems="center" 
+                flexDirection={"column"}
+                marginTop={"60px"}
+            > 
                 {displayComponent ? 
                     <>
                         {route === NAV_LINKS.dashboard && <Analytics/>}
                         {route === NAV_LINKS.journal && <JournalComponent />}
-                        {route === NAV_LINKS.wallet && <WalletPage />}
-                        {route === NAV_LINKS.treasury && <TreasuryPage />}
+                        {route === NAV_LINKS.finances && <FinancesPage />}
                         {route === NAV_LINKS.groupJournal && <GroupJournalPage />}
                     </>  : 
                     <LoginPage />
@@ -151,7 +165,8 @@ const Router = (props) => {
                 open={modalIsOpen} 
                 isLoading={modalIsLoading} 
                 handleClose={() => { setModalProps({}); setModalIsOpen(false) } } 
-            />     
+            />   
+            </Grid>  
             </AppContext.Provider>                 
         </ThemeProvider>
     );

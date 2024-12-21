@@ -1,4 +1,3 @@
-import { dummyDataSets } from "../mappers/treasuryPageMapperFunctions";
 
 export const treasuryTypes={
     SET_ENTIRE_TREASURY_REDUX_STATE:'SET_ENTIRE_TREASURY_REDUX_STATE',
@@ -16,7 +15,7 @@ export const treasuryPageInitialState={
     stakes: [],
     daoWalletBalance: 0,
     daoIcpAccountId: "" ,
-    balancesData: dummyDataSets
+    balancesData: []
 }
 
 const changeValue=(state=treasuryPageInitialState, action)=>{

@@ -1,8 +1,8 @@
 import { mapApiObjectToFrontEndJournalEntriesObject } from "../mappers/journalPageMappers";
-import { toHexString, nanoSecondsToMiliSeconds, shortenHexString } from "./Utils";
+import { toHexString, nanoSecondsToMiliSeconds } from "./Utils";
 import { generateQrCode } from "./walletFunctions/GenerateQrCode";
 import { mapBackendCanisterDataToFrontEndObj } from "../mappers/dashboardMapperFunctions";
-import { mapBalancesDataFromApiToFrontend, mapBackendTreasuryDataToFrontEndObj } from "../mappers/treasuryPageMapperFunctions";
+import { mapBalancesData, mapBackendTreasuryDataToFrontEndObj } from "../mappers/treasuryPageMapperFunctions";
 import { getFileUrl_fromApi } from "../Components/Fields/fileManger/FileManagementTools";
 
 export const loadAllDataIntoReduxStores = async (actorState, dispatchFunctions, types) => {
@@ -81,7 +81,7 @@ export const loadWalletData = async (actorState, walletDispatch, types ) => {
         loadTxHistory(actorState, walletDispatch, types) 
     ];
     const [walletDataFromApi, balancesHistory, _ ] = await Promise.all(promises);
-    const userBalancesHistory = mapBalancesDataFromApiToFrontend(balancesHistory);
+    const userBalancesHistory = mapBalancesData(balancesHistory);
     const address = toHexString(new Uint8Array( [...walletDataFromApi.ok.address]));
     const walletData = { 
         balance : parseInt(walletDataFromApi.ok.balance.e8s), 
@@ -151,16 +151,13 @@ export const loadCanisterData = async (actorState, dispatch, types) => {
 export const loadTreasuryData = async (actorState, dispatch, types) => {
     let promises = [actorState.backendActor.getTreasuryData(), actorState.backendActor.retrieveTreasuryBalances()];
     let [treasuryData, treasuryBalances] = await Promise.all(promises);
-    treasuryBalances = mapBalancesDataFromApiToFrontend(treasuryBalances);
-    treasuryData = treasuryData.ok;
-    treasuryData = mapBackendTreasuryDataToFrontEndObj(treasuryData);
     dispatch({
         actionType: types.SET_TREASURY_DATA,
-        payload: treasuryData
+        payload: mapBackendTreasuryDataToFrontEndObj(treasuryData.ok)
     });
     dispatch({
         actionType: types.SET_TREASURY_BALANCES_DATA,
-        payload: treasuryBalances
+        payload: mapBalancesData(treasuryBalances)
     });
     dispatch({
         actionType: types.SET_DATA_HAS_BEEN_LOADED,
