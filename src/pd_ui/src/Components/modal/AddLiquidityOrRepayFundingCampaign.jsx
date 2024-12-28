@@ -58,7 +58,7 @@ const AddLiquidityOrRepayFundingCampaign = (props) => {
             (amount && !hasError) ? 
                 <ButtonField
                     Icon={DoneIcon}
-                    active={true}
+                    color={"secondary"}
                     text={"Submit"}
                     onClick={onSubmit}
                 />: null

@@ -7,7 +7,6 @@ import { walletTypes } from "../../reducers/walletReducer";
 import { homePageTypes } from "../../reducers/homePageReducer";
 import { notificationsTypes } from "../../reducers/notificationsReducer";
 import { treasuryTypes } from "../../reducers/treasuryReducer";
-import "./NavBar.scss";
 import SdStorageIcon from '@mui/icons-material/SdStorage';
 import MenuField from "../Fields/MenuField";
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
@@ -110,7 +109,9 @@ export const NavBar = (props) => {
         alignItems="center" 
         padding={0} 
         width={"100%"}
-        className={'navBarContainer'} 
+        position={'fixed'}
+        top={0}
+        sx={{backgroundColor: "#0A0A0A" }}
         zIndex={10}
         >
             <Grid xs={4} columns={12} display={"flex"} justifyContent={"left"} alignItems={"center"} padding={0}> 
@@ -120,9 +121,8 @@ export const NavBar = (props) => {
                 display={"flex"}
                 alignItems={"center"}
                 justifyContent={"left"}
-                active={true}
                 disabled={isLoading}
-                color={"custom"}
+                color={"secondary"}
                 menuItemProps={mainMenuItemProps}
             />
             </Grid>
@@ -136,7 +136,6 @@ export const NavBar = (props) => {
                     disabled={isLoading}
                     alignItems={"center"}
                     justifyContent={"center"}
-                    active={true}
                     color={"custom"}
                     menuItemProps={journalTabMenuItemProps}
                 />
@@ -144,7 +143,7 @@ export const NavBar = (props) => {
             <ButtonField
                 Icon={RefreshIcon}
                 transparentBackground={true}
-                active={true}
+                color={'secondary'}
                 onClick={reloadData}
                 disabled={isLoading || modalIsLoading}
             />
@@ -156,8 +155,7 @@ export const NavBar = (props) => {
                 alignItems={"center"}
                 justifyContent={"center"}
                 disabled={isLoading}
-                active={true}
-                color={"custom"}
+                color={'secondary'}
                 menuItemProps={notificationsMenuItemProps}
             />
             <MenuField
@@ -167,9 +165,8 @@ export const NavBar = (props) => {
                 display={"flex"}
                 alignItems={"center"}
                 justifyContent={"center"}
-                active={true}
                 isLoading={isLoading}
-                color={"custom"}
+                color={'secondary'}
                 menuItemProps={logoutMenuItemProps}
             />
             </Grid>

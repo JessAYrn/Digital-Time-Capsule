@@ -73,7 +73,7 @@ const FileCarousel = (props) => {
                             elevation={0}
                             onClick={onChange_editButton}
                             Icon={EditIcon_}
-                            active={true}
+                            color={"secondary"}
                             iconSize={'small'}
                         />
                 </Grid>

@@ -177,7 +177,7 @@ const DisplayProposal = (props) => {
                 flexDirection: "column",
                 components: [
                     <Typography padding={"10px"} children={`Your vote could not be successfully submitted.`} />,
-                    <ButtonField active={true} text={"Close"} Icon={CloseIcon} onClick={() => setModalIsOpen(false)} />
+                    <ButtonField color={"secondary"} text={"Close"} Icon={CloseIcon} onClick={() => setModalIsOpen(false)} />
                 ]
             });
             return;
@@ -191,25 +191,6 @@ const DisplayProposal = (props) => {
         setModalIsOpen(false);
     };
 
-    const getModalButtonsComponents = (bool) => {
-        return [
-            {Component: ButtonField,
-            props: {
-                active: true,
-                text: "Cancel",
-                Icon: CloseIcon,
-                onClick: () => setModalIsOpen(false)
-            }},
-            {Component: ButtonField,
-            props: {
-                active: true,
-                text: "Confirm",
-                Icon: CheckIcon,
-                onClick: () => onConfirmVote(bool)
-            }}
-        ]
-    };
-
     const onVote = (bool) => {
         const decision = bool ? "ADOPT" : "REJECT";
         setModalIsOpen(true);
@@ -217,8 +198,8 @@ const DisplayProposal = (props) => {
             flexDirection: "column",
             components: [
                 <Typography padding={"10px"} children={`Confirm your vote to ${decision} proposal #${proposalId}`} />,
-                <ButtonField paperSx={{padding: "10px"}} active={true} text={"Cancel"} Icon={CloseIcon} onClick={() => setModalIsOpen(false)} />,
-                <ButtonField paperSx={{padding: "10px"}} active={true} text={"Confirm"} Icon={CheckIcon} onClick={() => onConfirmVote(bool)} />,
+                <ButtonField paperSx={{padding: "10px"}} color={"secondary"} text={"Cancel"} Icon={CloseIcon} onClick={() => setModalIsOpen(false)} />,
+                <ButtonField paperSx={{padding: "10px"}} color={"secondary"} text={"Confirm"} Icon={CheckIcon} onClick={() => onConfirmVote(bool)} />,
             ]
         })
     };
@@ -247,8 +228,7 @@ const DisplayProposal = (props) => {
                     display={"flex"}
                     alignItems={"center"}
                     justifyContent={"center"}
-                    active={true}
-                    color={"custom"}
+                    color={"secondary"}
                     label={"Proposal Type"}
                     MenuIcon={KeyboardArrowDownIcon}
                     menuItemProps={[{ text: actionType, onClick: ()  => {}, selected: true},]}
@@ -347,7 +327,7 @@ const DisplayProposal = (props) => {
                                 text={"Adopt"}
                                 onClick={() => onVote(true)}
                                 Icon={ThumbUpIcon}
-                                active={!hasVoted}
+                                color={"secondary"}
                                 disabled={hasVoted}
                             />
                         </Grid>
@@ -356,7 +336,7 @@ const DisplayProposal = (props) => {
                                 text={"Reject"}
                                 onClick={() => onVote(false)}
                                 Icon={ThumbDownIcon}
-                                active={!hasVoted}
+                                color={"secondary"}
                                 disabled={hasVoted}
                             />
                         </Grid>

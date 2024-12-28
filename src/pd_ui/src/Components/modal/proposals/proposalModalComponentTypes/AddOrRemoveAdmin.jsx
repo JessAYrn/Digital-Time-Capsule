@@ -28,8 +28,7 @@ const AddOrRemoveAdmin = (props) => {
                 display={"flex"}
                 alignItems={"center"}
                 justifyContent={"center"}
-                active={true}
-                color={"custom"}
+                color={"secondary"}
                 label={"Principal"}
                 MenuIcon={KeyboardArrowDownIcon}
                 menuItemProps={principalsMenuItemProps}
@@ -40,7 +39,7 @@ const AddOrRemoveAdmin = (props) => {
                 <ButtonField
                         disabled={disabled}
                         Icon={DoneIcon}
-                        active={true}
+                        color={"secondary"}
                         text={'Submit Proposal'}
                         onClick={submitProposal}
                     />

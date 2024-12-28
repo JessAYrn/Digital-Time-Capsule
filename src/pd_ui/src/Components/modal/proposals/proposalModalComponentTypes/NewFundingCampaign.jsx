@@ -140,8 +140,7 @@ const NewFundingCampaign = (props) => {
                     display={"flex"}
                     alignItems={"center"}
                     justifyContent={"center"}
-                    active={true}
-                    color={"custom"}
+                    color={"secondary"}
                     label={"Currency To Receive"}
                     MenuIcon={KeyboardArrowDownIcon}
                     menuItemProps={amountToFundOptions([
@@ -215,8 +214,7 @@ const NewFundingCampaign = (props) => {
                         display={"flex"}
                         alignItems={"center"}
                         justifyContent={"center"}
-                        active={true}
-                        color={"custom"}
+                        color={"secondary"}
                         label={"Is this a loan?"}
                         MenuIcon={KeyboardArrowDownIcon}
                         menuItemProps={isALoanMenuItemProps}
@@ -320,8 +318,7 @@ const NewFundingCampaign = (props) => {
                             display={"flex"}
                             alignItems={"center"}
                             justifyContent={"center"}
-                            active={true}
-                            color={"custom"}
+                            color={"secondary"}
                             label={"Collateral Type"}
                             MenuIcon={KeyboardArrowDownIcon}
                             menuItemProps={currencyToCollateralizeOptions([
@@ -349,8 +346,7 @@ const NewFundingCampaign = (props) => {
                                 display={"flex"}
                                 alignItems={"center"}
                                 justifyContent={"center"}
-                                active={true}
-                                color={"custom"}
+                                color={"secondary"}
                                 label={"From Neuron"}
                                 MenuIcon={KeyboardArrowDownIcon}
                                 menuItemProps={neuronstoCollateralizeOptions}
@@ -405,7 +401,7 @@ const NewFundingCampaign = (props) => {
             { isReadyToSubmit && !disabled &&
                 <ButtonField
                     Icon={DoneIcon}
-                    active={true}
+                    color={"secondary"}
                     text={'Submit proposal'}
                     onClick={submitProposal}
                 /> 

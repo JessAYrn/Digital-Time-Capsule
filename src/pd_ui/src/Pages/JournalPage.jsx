@@ -139,27 +139,6 @@ const JournalPage = (props) => {
         {name: "Submit Entry", icon: DoneIcon, onClick: () => setModalIsOpen(true)}
     ];
 
-    const modalButtons = [
-        {
-            Component: ButtonField,
-            props: {
-                active: true,
-                text: "Yes",
-                Icon: DoneIcon,
-                onClick: submit
-            }
-        },
-        {
-            Component: ButtonField,
-            props: {
-                active: true,
-                text: "No",
-                Icon: CloseIcon,
-                onClick: () => setModalIsOpen(false)
-            }
-        }
-    ]
-
     return ( 
         <>
             <Grid

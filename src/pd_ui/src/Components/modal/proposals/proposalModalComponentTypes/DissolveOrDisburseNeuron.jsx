@@ -35,8 +35,7 @@ const DissolveOrDisburseNeuron = (props) => {
                 display={"flex"}
                 alignItems={"center"}
                 justifyContent={"center"}
-                active={true}
-                color={"custom"}
+                color={"secondary"}
                 label={"Neuron To Configure"}
                 MenuIcon={KeyboardArrowDownIcon}
                 menuItemProps={neuronMenuItemProps}
@@ -46,7 +45,7 @@ const DissolveOrDisburseNeuron = (props) => {
                 <ButtonField
                     disabled={disabled}
                     Icon={DoneIcon}
-                    active={true}
+                    color={"secondary"}
                     text={'Submit Proposal'}
                     onClick={submitProposal}
                 />

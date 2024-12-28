@@ -1,5 +1,4 @@
 import React from 'react';
-import './Switch.scss';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
@@ -10,32 +9,20 @@ import { Typography } from '@mui/material';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
 
 const SwitchField = (props) => {
-    const {
-        checked,
-        onClick,
-        disabled,
-        labelLeft,
-        labelRight,
-        sx
-    } = props
-
-    let switchClassName;
-    if(labelLeft) switchClassName = "switchRight";
-    if(labelRight) switchClassName = "switchLeft";
+    const { checked, onClick, disabled, labelLeft, labelRight, sx } = props
 
     return (
         <Grid className="switchDiv" display='flex' justifyContent="center" alignItems="Center" width="100%" sx={sx}>
-            <FormGroup className="switch">
+            <FormGroup className="switch" color='primary' sx={{width: "100%", display:"flex", justifyContent: "center", flexDirection: "row"}}>
                 {labelLeft && 
-                    <Grid display='flex' justifyContent="left" alignItems="Center" xs={10} className='leftLabel'>
+                    <Grid display='flex' width={"49%"}  justifyContent="left" alignItems="Center" xs={10}>
                         <Typography color={"white"}>{labelLeft} &nbsp;</Typography>
                     </Grid>
                 }
-                <Grid display='flex' justifyContent="center" alignItems="Center" xs={2} className={switchClassName} >
+                <Grid display='flex' justifyContent={labelLeft ? 'right' : 'left'} alignItems="Center" xs={2} width={"49%"}  >
                     {labelRight &&
                     <ButtonField
-                        active={true}
-                        color={"custom"}
+                        color={"primary"}
                         transparentBackground={true}
                         Icon={checked ? CheckIcon : CloseIcon}
                         iconSize={'small'}
@@ -46,11 +33,11 @@ const SwitchField = (props) => {
                         disabled={disabled} 
                         onChange={onClick} 
                         checked={checked} 
-                        control={<Switch color={"custom"}/>} 
+                        control={<Switch color={"secondary"}/>} 
                     />
                     {labelLeft &&
                     <ButtonField
-                        active={true}
+                        color={"primary"}
                         transparentBackground={true}
                         Icon={checked ? CheckIcon : CloseIcon}
                         iconSize={'small'}
@@ -58,7 +45,7 @@ const SwitchField = (props) => {
                     />}
                 </Grid>
                 {labelRight && 
-                    <Grid display='flex' justifyContent="right" alignItems="Center" xs={10} className='rightLabel'>
+                    <Grid display='flex' width={"49%"}  justifyContent="right" alignItems="Center" xs={10}>
                         <Typography  color={"white"}>{labelLeft} &nbsp;</Typography>
                     </Grid>
                 }

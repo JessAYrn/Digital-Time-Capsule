@@ -38,7 +38,7 @@ const SetAmount = (props) => {
             {isReadyToSubmit && !disabled &&
             <ButtonField
                 Icon={DoneIcon}
-                active={true}
+                color={"secondary"}
                 text={'Submit Proposal'}
                 onClick={submitProposal}
             />}

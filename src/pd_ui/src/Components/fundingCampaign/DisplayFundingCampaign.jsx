@@ -154,7 +154,7 @@ const DisplayFundingCampaign = (props) => {
                 {!fundingCampaign?.settled &&
                     <Grid display={"flex"} width={"100%"} justifyContent={"left"} alignItems={"left"} xs={12} padding={0} margin={"10px"} >
                         <ButtonField
-                        active={true}
+                        color={"secondary"}
                         text={fundingCampaign?.funded ? "Repay Funding Campaign" : "Contribute To Funding Campaign"}
                         Icon={PriceCheckIcon}
                         onClick={onClickAddLiquidityOrRepayFundingCampaign}

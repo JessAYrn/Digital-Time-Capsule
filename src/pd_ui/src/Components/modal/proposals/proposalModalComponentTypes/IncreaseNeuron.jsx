@@ -53,8 +53,7 @@ const IncreaseNeuron = (props) => {
                 display={"flex"}
                 alignItems={"center"}
                 justifyContent={"center"}
-                active={true}
-                color={"custom"}
+                color={"secondary"}
                 label={"Neuron To Increase"}
                 MenuIcon={KeyboardArrowDownIcon}
                 menuItemProps={neuronMenuItemProps}
@@ -99,8 +98,7 @@ const IncreaseNeuron = (props) => {
                             display={"flex"}
                             alignItems={"center"}
                             justifyContent={"center"}
-                            active={true}
-                            color={"custom"}
+                            color={"secondary"}
                             label={"Who to credit this stake to?"}
                             MenuIcon={KeyboardArrowDownIcon}
                             menuItemProps={onBehalfOfMenuItemProps}
@@ -112,7 +110,7 @@ const IncreaseNeuron = (props) => {
             {isReadyToSubmit && !disabled && 
             <ButtonField
             Icon={DoneIcon}
-            active={true}
+            color={"secondary"}
             disabled={disabled}
             text={'Submit Proposal'}
             onClick={submitProposal}

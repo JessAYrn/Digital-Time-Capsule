@@ -13,7 +13,6 @@ const ButtonField = (props) => {
         onBlur,
         disabled,
         elevation,
-        active,
         id,
         onChange,
         ref,
@@ -33,12 +32,11 @@ const ButtonField = (props) => {
     if(isLoading !== undefined ) ButtonType = LoadingButton;
     else if(text) ButtonType = Button;
     else ButtonType = IconButton;
-    let color_ = active ? 'custom' : 'white'
     let handleClick = disabled ? doNothing : onClick;
     return (
             <Paper 
             sx={{
-                color: "primary",
+                color: color || "primary",
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
@@ -59,7 +57,7 @@ const ButtonField = (props) => {
                         id={id}
                         onBlur={onBlur}
                         size={iconSize} 
-                        color={color || color_} 
+                        color={color || "primary"} 
                         endIcon={(text && Icon) ?<Icon/> : null} 
                         onClick={handleClick}
                         disabled={disabled}

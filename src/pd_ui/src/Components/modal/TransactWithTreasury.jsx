@@ -128,8 +128,7 @@ const TransactWithTreasuryModal = (props) => {
                     display={"flex"}
                     alignItems={"center"}
                     justifyContent={"center"}
-                    active={true}
-                    color={"custom"}
+                    color={"secondary"}
                     label={"Recipient's Principal: "}
                     MenuIcon={KeyboardArrowDownIcon}
                     menuItemProps={principalsMenuItemProps}
@@ -143,7 +142,7 @@ const TransactWithTreasuryModal = (props) => {
             {!!amount && !hasError && (action !== actions.send || recipientPrincipal) &&
                 <ButtonField
                 Icon={DoneIcon}
-                active={true}
+                color={"secondary"}
                 text={'Submit'}
                 onClick={submit}
                 />

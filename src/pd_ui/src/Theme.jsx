@@ -120,7 +120,6 @@ const theme = createTheme({
       MuiIconButton: {
         styleOverrides: {
           root:{
-            color: grey[50],
             "&.Mui-disabled": {
               color: grey[400]
             },

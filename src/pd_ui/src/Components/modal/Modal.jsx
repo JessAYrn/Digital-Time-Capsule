@@ -22,7 +22,7 @@ const ModalComponent = (props) => {
           <Toolbar>
             <IconButton
               edge="start"
-              color="inherit"
+              color="primary"
               onClick={handleClose}
               aria-label="close"
             >

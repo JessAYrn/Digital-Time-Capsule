@@ -44,8 +44,7 @@ const SpawnNeuron = (props) => {
                 display={"flex"}
                 alignItems={"center"}
                 justifyContent={"center"}
-                active={true}
-                color={"custom"}
+                color={"secondary"}
                 label={"Parent Neuron to Spawn New Neuron From"}
                 MenuIcon={KeyboardArrowDownIcon}
                 menuItemProps={neuronMenuItemProps}
@@ -79,7 +78,7 @@ const SpawnNeuron = (props) => {
                 <ButtonField
                     disabled={disabled}
                     Icon={DoneIcon}
-                    active={true}
+                    color={"secondary"}
                     text={'Submit Proposal'}
                     onClick={submitProposal}
                 />

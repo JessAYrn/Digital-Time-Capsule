@@ -51,8 +51,7 @@ const IncreaseDissolveDelay = (props) => {
                 display={"flex"}
                 alignItems={"center"}
                 justifyContent={"center"}
-                active={true}
-                color={"custom"}
+                color={"secondary"}
                 label={"Neuron To Configure"}
                 MenuIcon={KeyboardArrowDownIcon}
                 menuItemProps={neuronMenuItemProps}
@@ -79,7 +78,7 @@ const IncreaseDissolveDelay = (props) => {
             { isReadyToSubmit && !disabled &&
                 <ButtonField
                     Icon={DoneIcon}
-                    active={true}
+                    color={"secondary"}
                     disabled={disabled}
                     text={'Submit Proposal'}
                     onClick={submitProposal}

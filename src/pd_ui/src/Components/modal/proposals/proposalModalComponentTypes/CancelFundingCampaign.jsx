@@ -32,9 +32,8 @@ const CancelFundingCampaign = (props) => {
                 display={"flex"}
                 alignItems={"center"}
                 justifyContent={"center"}
-                active={true}
+                color={"secondary"}
                 disabled={disabled}
-                color={"custom"}
                 label={"Funding Campaign To Cancel"}
                 MenuIcon={KeyboardArrowDownIcon}
                 menuItemProps={fundingCampaignMenuItemProps}
@@ -44,7 +43,7 @@ const CancelFundingCampaign = (props) => {
                 <Typography varient={"h6"} color={"#bdbdbd"}> Funding Campaign Selected: {fundingCampaignId} </Typography>
                 {!disabled && <ButtonField
                     disabled={disabled}
-                    active={true}
+                    color={"secondary"}
                     text={'Submit Proposal'}
                     onClick={submitProposal}
                 />}

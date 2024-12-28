@@ -124,8 +124,7 @@ const FollowNeuron = (props) => {
                 display={"flex"}
                 alignItems={"center"}
                 justifyContent={"center"}
-                active={true}
-                color={"custom"}
+                color={"secondary"}
                 label={"Neuron To Configure"}
                 MenuIcon={KeyboardArrowDownIcon}
                 menuItemProps={neuronMenuItemProps}
@@ -139,8 +138,7 @@ const FollowNeuron = (props) => {
                     display={"flex"}
                     alignItems={"center"}
                     justifyContent={"center"}
-                    active={true}
-                    color={"custom"}
+                    color={"secondary"}
                     label={"Topic"}
                     MenuIcon={KeyboardArrowDownIcon}
                     menuItemProps={neuronTopicItemProps}
@@ -174,7 +172,7 @@ const FollowNeuron = (props) => {
                     <ButtonField
                         disabled={disabled}
                         Icon={DoneIcon}
-                        active={true}
+                        color={"secondary"}
                         text={'Submit Proposal'}
                         onClick={submitProposal}
                     />

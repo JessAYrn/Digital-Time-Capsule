@@ -147,7 +147,7 @@ const FileUpload = (props) => {
                             className={'DeleteFileButton'}
                             id={elementId} 
                             Icon={DeleteIcon}
-                            active={true}
+                            color={"secondary"}
                             onClick={deleteFile}
                         /> 
                     </Grid>

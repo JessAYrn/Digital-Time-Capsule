@@ -57,16 +57,6 @@ const CreateProposalForm = (props) => {
         { text: PROPOSAL_ACTIONS.WithdrawFromMultiSigWallet, onClick: () => onMenuItemClick(PROPOSAL_ACTIONS.WithdrawFromMultiSigWallet), selected: proposalAction_ === PROPOSAL_ACTIONS.WithdrawFromMultiSigWallet}
     ];
 
-    const modalButton_close = [
-        {Component: ButtonField,
-        props: {
-            active: true,
-            text: "Close",
-            Icon: CloseIcon,
-            onClick: () => setModalIsOpen(false)
-        }}
-    ];
-
     const onSubmitProposal = async (action) => {
         setModalIsLoading(true);
         let result = await actorState.backendActor.createProposal(action);
@@ -78,7 +68,7 @@ const CreateProposalForm = (props) => {
                 components: [
                     <Typography padding={"10px"} variant='h6' children={`Error: ${errorMessage}`} />,
                     <ErrorOutlineIcon/>,
-                    <ButtonField paperSx={{padding: "10px"}} active={true} text={"Close"} Icon={CloseIcon} onClick={() => setModalIsOpen(false)}/>
+                    <ButtonField paperSx={{padding: "10px"}} color={"secondary"} text={"Close"} Icon={CloseIcon} onClick={() => setModalIsOpen(false)}/>
                 ]
             });
         } else{
@@ -107,8 +97,7 @@ const CreateProposalForm = (props) => {
                 display={"flex"}
                 alignItems={"center"}
                 justifyContent={"left"}
-                active={true}
-                color={"custom"}
+                color={"secondary"}
                 label={"Proposal Type"}
                 MenuIcon={KeyboardArrowDownIcon}
                 menuItemProps={mainMenuItemProps}
@@ -133,7 +122,7 @@ const CreateProposalForm = (props) => {
             { proposalAction_ === PROPOSAL_ACTIONS.WithdrawFromMultiSigWallet && <WithdrawFromMultiSigWallet onSubmitProposal={onSubmitProposal} action={proposalAction_} payload={proposalPayload_}/> }
             { (proposalAction_ === PROPOSAL_ACTIONS.InstallUpgrades || proposalAction_ === PROPOSAL_ACTIONS.ToggleSupportMode || proposalAction_ === PROPOSAL_ACTIONS.TogglePrivacySetting) 
                 && <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}> 
-                    <ButtonField Icon={DoneIcon} active={true} text={'Submit Proposal'} onClick={() => onSubmitProposal({[proposalAction_]: {}})} /> 
+                    <ButtonField Icon={DoneIcon} color={"secondary"} text={'Submit Proposal'} onClick={() => onSubmitProposal({[proposalAction_]: {}})} /> 
                 </Grid> 
             }
         </Grid>
