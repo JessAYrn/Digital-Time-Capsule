@@ -1,7 +1,6 @@
 import React from "react";
 import { IconButton, Button, Paper } from '@mui/material';
-import LoadingButton from '@mui/lab/LoadingButton';import "./Button.scss";
-import "./Button.scss";
+import LoadingButton from '@mui/lab/LoadingButton';
 
 const ButtonField = (props) => {
     const {
@@ -22,7 +21,6 @@ const ButtonField = (props) => {
         ariaHaspopup,
         ariaExpanded,
         color,
-        className,
         upload,
         sx,
         paperSx,
@@ -39,9 +37,15 @@ const ButtonField = (props) => {
     let handleClick = disabled ? doNothing : onClick;
     return (
             <Paper 
-            sx={paperSx}
+            sx={{
+                color: "primary",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: `${transparentBackground ? "transparent": null}`,
+                ...paperSx
+            }}
             elevation={elevation ? elevation : 24} 
-            className={`${transparentBackground ? "transparentBackground" : ""} ${className} buttonField`} 
             >
                 { hyperLink ?
                     <a href={hyperLink} target="_blank" rel="noreferrer noopener" style={{color: "#F7931A"}}>{text}</a> :

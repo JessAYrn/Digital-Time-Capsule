@@ -1,14 +1,46 @@
-import React, { useMemo } from 'react';
-import Box from '@mui/material/Box';
-import Modal from '@mui/material/Modal';
-import "./Modal.scss";
+import React from 'react';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
-import ButtonField from '../Fields/Button';
-import { Typography } from '@mui/material';
-import PendingIcon from '@mui/icons-material/Pending';
+import { Box, Dialog, Slide, AppBar, Toolbar, IconButton, LinearProgress, Modal } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+
+
+const Transition = React.forwardRef(function Transition(props, ref) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
+
+const ModalComponent = (props) => {
+  const { open, handleClose, components, flexDirection, fullScreen } = props
+  return (
+      <Dialog 
+      fullScreen={fullScreen}
+      open={open} 
+      onClose={handleClose} 
+      TransitionComponent={Transition}
+      > 
+        {fullScreen && 
+        <AppBar sx={{ position: 'fixed'}}>
+          <Toolbar>
+            <IconButton
+              edge="start"
+              color="inherit"
+              onClick={handleClose}
+              aria-label="close"
+            >
+              <CloseIcon />
+            </IconButton>
+          </Toolbar>
+        </AppBar>}
+        {components &&
+          <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} flexDirection={flexDirection} padding={"10px"}>
+              {components.map(component => { return component })}
+          </Grid>}
+      </Dialog>
+  );
+};
 
 const style = {
   position: 'absolute',
+  backgroundColor:"transparent",
   width: "275px",
   maxHeight: "500px",
   top: '50%',
@@ -20,57 +52,15 @@ const style = {
   pb: 3,
 };
 
-const ModalComponent = (props_) => {
-    const {
-      open, 
-      handleClose, 
-      bigText, 
-      smallText, 
-      Icon, 
-      components, 
-      isLoading, 
-      imageSrc, 
-      flexDirection
-    } = props_
-
-  let isOpen = useMemo(() => {return open}, [open]);
-  
-  return (
-      <Modal open={isOpen} onClose={isLoading ? () => {} : handleClose} aria-labelledby="parent-modal-title" aria-describedby="parent-modal-description">
-        <Box 
-        sx={{ ...style, }} 
-        className={`modalBox ${isLoading ? 'transparent' : ''}`} 
-        display={"flex"} 
-        justifyContent={"safe start"} 
-        alignItems={"center"}
-        flexDirection={"column"}
-        overflow={"auto"}
-        >
-          {bigText && !isLoading && <Typography varient={"h2"} id="parent-modal-title">{bigText}</Typography>}
-          {Icon && !isLoading &&  <Icon style={{height: "75px", width:"75px" }}/>}
-          {smallText && !isLoading && <Typography varient={"body1"} id="parent-modal-description">{smallText}</Typography>}
-          {imageSrc && !isLoading && <img className='modalImg' src={imageSrc} alt='Wrong src'/>}
-          {isLoading && 
-          <ButtonField 
-            transparentBackground={true}
-            isLoading={true}
-            onClick={() => {}}
-            Icon={PendingIcon}
-            iconSize={'large'}
-            disabled={true}
-          />}
-          {
-            components && !isLoading &&
-            <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} flexDirection={flexDirection}>
-                {components.map(component => {
-                    const {Component, props} = component
-                    return <Component {...props} className={"modalChildCompoent"}/>
-                })}
-                </Grid>
-            }
-        </Box>
-      </Modal>
-  );
+export const LoadingModal = (props) => {
+  const {open} = props;
+  return(
+    <Modal open={open}>
+      <Box sx={style}>
+        <LinearProgress color='secondary'/>
+      </Box>
+    </Modal>
+  )
 };
 
 export default ModalComponent;

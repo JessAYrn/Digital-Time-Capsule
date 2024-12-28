@@ -60,13 +60,7 @@ const DisplayFundingCampaign = (props) => {
         setModalProps({
             flexDirection: "column",
             components: [
-              {
-                Component: AddLiquidityOrRepayFundingCampaign,
-                props: { 
-                    actionType: fundingCampaign?.funded ? ACTION_TYPES.repayFundingCampaign : ACTION_TYPES.addLiquidity,
-                    campaignId
-                }
-              }
+                <AddLiquidityOrRepayFundingCampaign campaignId={campaignId} actionType={fundingCampaign?.funded ? ACTION_TYPES.repayFundingCampaign : ACTION_TYPES.addLiquidity}/>
             ],
         });
         setModalIsOpen(true);

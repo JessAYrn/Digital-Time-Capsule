@@ -53,10 +53,7 @@ const DisplayNeuron = (props) => {
         setModalIsOpen(true);
         setModalProps({
             components: [
-              {
-                Component: CreateProposalForm,
-                props: { proposalAction, proposalPayload }
-              }
+                <CreateProposalForm proposalAction={proposalAction} proposalPayload={proposalPayload}/>
             ],
             handleClose: () => setModalIsOpen(false)
         });
@@ -83,160 +80,158 @@ const DisplayNeuron = (props) => {
     }, [contributions]);
 
     return (
-        <>
-            <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} xs={12} flexDirection={"column"} padding={0}>
-                <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0}>
-                    <Typography width={"50%"} display={"flex"} justifyContent={"left"} alignItems={"center"} variant="h6">Neuron Voting Power</Typography>
-                    <Typography width={"50%"} display={"flex"} justifyContent={"right"} alignItems={"center"} variant="h6">{`${neuronInfo?.voting_power ? round2Decimals(fromE8s(parseInt(neuronInfo?.voting_power))) : "Spawning..."}`}</Typography>
-                </Grid>
-                <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0}>
-                    <Typography color={"#bdbdbd"} width={"50%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>Your Voting Power</Typography>
-                    <Typography color={"#bdbdbd"} width={"50%"} display={"flex"} justifyContent={"right"} alignItems={"center"}>{contributions.length ? `${round2Decimals(fromE8s(parseInt(userVotingPower)))}`: "Spawning..."}</Typography>
-                </Grid>
+        <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} xs={12} flexDirection={"column"} marginTop={"60px"} padding={0}>
+            <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0}>
+                <Typography width={"50%"} display={"flex"} justifyContent={"left"} alignItems={"center"} variant="h6">Neuron Voting Power</Typography>
+                <Typography width={"50%"} display={"flex"} justifyContent={"right"} alignItems={"center"} variant="h6">{`${neuronInfo?.voting_power ? round2Decimals(fromE8s(parseInt(neuronInfo?.voting_power))) : "Spawning..."}`}</Typography>
+            </Grid>
+            <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0}>
+                <Typography color={"#bdbdbd"} width={"50%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>Your Voting Power</Typography>
+                <Typography color={"#bdbdbd"} width={"50%"} display={"flex"} justifyContent={"right"} alignItems={"center"}>{contributions.length ? `${round2Decimals(fromE8s(parseInt(userVotingPower)))}`: "Spawning..."}</Typography>
+            </Grid>
 
-                <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0} paddingTop={"25px"}>
-                    <Typography width={"50%"} display={"flex"} justifyContent={"left"} alignItems={"center"} variant="h6">Neuron Stake</Typography>
-                    <Typography width={"50%"} display={"flex"} justifyContent={"right"} alignItems={"center"} variant="h6">{neuronInfo?.stake_e8s ? `${round2Decimals(fromE8s(parseInt(neuronInfo?.stake_e8s)))} ICP` : "Spawning..."}</Typography>
-                </Grid>
-                <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0}>
-                    <Typography color={"#bdbdbd"} width={"50%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>Your Stake</Typography>
-                    <Typography color={"#bdbdbd"} width={"50%"} display={"flex"} justifyContent={"right"} alignItems={"center"}>{contributions.length ? `${round2Decimals(fromE8s(parseInt(userRemainingStake)))} ICP` : "Spawning..."}</Typography>
-                </Grid>
-                <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0} paddingTop={"10px"}>
-                    <Grid display={"flex"} justifyContent={"right"} alignItems={"center"} width={"100%"} xs={12} padding={0}>
-                        <ButtonField
-                        paperSx={{display: "flex", justifyContent: "center", alignItems: "center", width: "160px"}}
-                        elevation={0}
-                        text={"Increase Stake"}
-                        onClick={() => openProposalForm({
-                            proposalAction: PROPOSAL_ACTIONS.IncreaseNeuron,
-                            proposalPayload: {neuronId}
-                        })}
-                        disabled={contributions.length === 0}
-                        Icon={AddIcon}
-                        iconSize={'small'}
-                        />
-                    </Grid>
-                </Grid>
-                <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0} paddingTop={"25px"}>
-                    <Typography width={"50%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>Neuron State</Typography>
+            <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0} paddingTop={"25px"}>
+                <Typography width={"50%"} display={"flex"} justifyContent={"left"} alignItems={"center"} variant="h6">Neuron Stake</Typography>
+                <Typography width={"50%"} display={"flex"} justifyContent={"right"} alignItems={"center"} variant="h6">{neuronInfo?.stake_e8s ? `${round2Decimals(fromE8s(parseInt(neuronInfo?.stake_e8s)))} ICP` : "Spawning..."}</Typography>
+            </Grid>
+            <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0}>
+                <Typography color={"#bdbdbd"} width={"50%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>Your Stake</Typography>
+                <Typography color={"#bdbdbd"} width={"50%"} display={"flex"} justifyContent={"right"} alignItems={"center"}>{contributions.length ? `${round2Decimals(fromE8s(parseInt(userRemainingStake)))} ICP` : "Spawning..."}</Typography>
+            </Grid>
+            <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0} paddingTop={"10px"}>
+                <Grid display={"flex"} justifyContent={"right"} alignItems={"center"} width={"100%"} xs={12} padding={0}>
                     <ButtonField
-                        paperSx={{display: "flex", justifyContent: "right", alignItems: "center", width: "50%"}}
-                        transparentBackground={true}
-                        elevation={0}
-                        text={neuronState}
-                        onClick={() => {}}
-                        Icon={buttonIcon}
-                        iconSize={'small'}
-                        disabled={true}
+                    paperSx={{display: "flex", justifyContent: "center", alignItems: "center", width: "160px"}}
+                    elevation={0}
+                    text={"Increase Stake"}
+                    onClick={() => openProposalForm({
+                        proposalAction: PROPOSAL_ACTIONS.IncreaseNeuron,
+                        proposalPayload: {neuronId}
+                    })}
+                    disabled={contributions.length === 0}
+                    Icon={AddIcon}
+                    iconSize={'small'}
                     />
-                </Grid>
-                <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0}>
-                    <Typography width={"50%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>Dissolve Delay</Typography>
-                    <ButtonField
-                        paperSx={{display: "flex", justifyContent: "right", alignItems: "center", width: "50%"}}
-                        transparentBackground={true}
-                        elevation={0}
-                        text={`${round2Decimals(dissolveDelay)} ${timeSpan}`}
-                        onClick={() => {}}
-                        Icon={HourglassTopIcon}
-                        iconSize={'small'}
-                        disabled={true}
-                    />
-                </Grid>
-                <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0} paddingTop={"10px"}>
-                    <Grid display={"flex"} justifyContent={"left"} alignItems={"center"} width={"33%"} xs={12} padding={0}>
-                        <ButtonField
-                        paperSx={{display: "flex", justifyContent: "center", alignItems: "center", width: "230px"}}
-                        elevation={0}
-                        text={"Dissolve Neuron"}
-                        onClick={() => openProposalForm({
-                            proposalAction: PROPOSAL_ACTIONS.DissolveNeuron,
-                            proposalPayload: {neuronId}
-                        })}
-                        iconSize={'small'}
-                        />
-                    </Grid>
-                    <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"33%"} xs={12} padding={0}>
-                        <ButtonField
-                        paperSx={{display: "flex", justifyContent: "center", alignItems: "center", width: "230px"}}
-                        elevation={0}
-                        text={"Disperse Neuron"}
-                        disabled={contributions.length === 0}
-                        onClick={() => openProposalForm({
-                            proposalAction: PROPOSAL_ACTIONS.DisburseNeuron,
-                            proposalPayload: {neuronId}
-                        })}
-                        iconSize={'small'}
-                        />
-                    </Grid>
-                    <Grid display={"flex"} justifyContent={"right"} alignItems={"center"} width={"33%"} xs={12} padding={0}>
-                        <ButtonField
-                        paperSx={{display: "flex", justifyContent: "center", alignItems: "center", width: "230px"}}
-                        elevation={0}
-                        text={"Increase Dissolve Delay"}
-                        onClick={() => openProposalForm({
-                            proposalAction: PROPOSAL_ACTIONS.IncreaseDissolveDelay,
-                            proposalPayload: {neuronId}
-                        })}
-                        disabled={contributions.length === 0}
-                        Icon={AddIcon}
-                        iconSize={'small'}
-                        />
-                    </Grid>
-                </Grid>
-                <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0} paddingTop={"25px"}>
-                    <Typography width={"50%"} display={"flex"} justifyContent={"left"} alignItems={"center"} variant="h6">Neuron Maturity</Typography>
-                    <Typography width={"50%"} display={"flex"} justifyContent={"right"} alignItems={"center"} variant="h6">{`${round2Decimals(fromE8s(parseInt(neuron?.maturity_e8s_equivalent || 0)))} ICP`}</Typography>
-                </Grid>
-                <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0}>
-                    <Typography color={"#bdbdbd"} width={"50%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>Your Maturity</Typography>
-                    <Typography color={"#bdbdbd"} width={"50%"} display={"flex"} justifyContent={"right"} alignItems={"center"}>{contributions.length ? `${userMaturity} ICP`: "Spawning..."}</Typography>
-                </Grid>
-                <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0} paddingTop={"10px"}>
-                    <Grid display={"flex"} justifyContent={"right"} alignItems={"center"} width={"100%"} xs={12} padding={0}>
-                        <ButtonField
-                        paperSx={{display: "flex", justifyContent: "center", alignItems: "center", width: "230px"}}
-                        elevation={0}
-                        text={"Spawn Neuron From Maturity"}
-                        disabled={contributions.length === 0}
-                        onClick={() => openProposalForm({
-                            proposalAction: PROPOSAL_ACTIONS.SpawnNeuron,
-                            proposalPayload: {neuronId}
-                        })}
-                        iconSize={'small'}
-                        />
-                    </Grid>
-                </Grid>
-                <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} xs={12} padding={0} paddingTop={"25px"} flexDirection={'column'}>
-                    <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0}>
-                        <Typography width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"} variant="h6">Neuron Contributions: </Typography>
-                    </Grid>
-                    {contributions.length === 0 ? 
-                        <Typography width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} variant="h6">Spawning...</Typography> : 
-                        <>
-                            <Grid display={"flex"} width={"100%"} justifyContent={"center"} alignItems={"center"} xs={12} padding={0} margin={"10px"}>
-                                <Graph
-                                    withoutPaper={true}
-                                    width={"25%"}
-                                    height={"400px"}
-                                    type={CHART_TYPES.pie}
-                                    labels={chartLabels}
-                                    datasets={chartDataSets}
-                                    maintainAspectRatio={false}
-                                />  
-                            </Grid>
-                            <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} xs={12} padding={0} flexDirection={"column"} width={"100%"}>
-                                <DataTable
-                                    transparent={true}
-                                    columns={neuronContributionsTableColumns}
-                                    rows={mapNeuronContributionsToTableRows(contributions, homePageState?.canisterData?.userNames)}
-                                />
-                            </Grid>
-                        </>}
                 </Grid>
             </Grid>
-        </>
+            <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0} paddingTop={"25px"}>
+                <Typography width={"50%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>Neuron State</Typography>
+                <ButtonField
+                    paperSx={{display: "flex", justifyContent: "right", alignItems: "center", width: "50%"}}
+                    transparentBackground={true}
+                    elevation={0}
+                    text={neuronState}
+                    onClick={() => {}}
+                    Icon={buttonIcon}
+                    iconSize={'small'}
+                    disabled={true}
+                />
+            </Grid>
+            <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0}>
+                <Typography width={"50%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>Dissolve Delay</Typography>
+                <ButtonField
+                    paperSx={{display: "flex", justifyContent: "right", alignItems: "center", width: "50%"}}
+                    transparentBackground={true}
+                    elevation={0}
+                    text={`${round2Decimals(dissolveDelay)} ${timeSpan}`}
+                    onClick={() => {}}
+                    Icon={HourglassTopIcon}
+                    iconSize={'small'}
+                    disabled={true}
+                />
+            </Grid>
+            <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0} paddingTop={"10px"}>
+                <Grid display={"flex"} justifyContent={"left"} alignItems={"center"} width={"33%"} xs={12} padding={0}>
+                    <ButtonField
+                    paperSx={{display: "flex", justifyContent: "center", alignItems: "center", width: "230px"}}
+                    elevation={0}
+                    text={"Dissolve Neuron"}
+                    onClick={() => openProposalForm({
+                        proposalAction: PROPOSAL_ACTIONS.DissolveNeuron,
+                        proposalPayload: {neuronId}
+                    })}
+                    iconSize={'small'}
+                    />
+                </Grid>
+                <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"33%"} xs={12} padding={0}>
+                    <ButtonField
+                    paperSx={{display: "flex", justifyContent: "center", alignItems: "center", width: "230px"}}
+                    elevation={0}
+                    text={"Disperse Neuron"}
+                    disabled={contributions.length === 0}
+                    onClick={() => openProposalForm({
+                        proposalAction: PROPOSAL_ACTIONS.DisburseNeuron,
+                        proposalPayload: {neuronId}
+                    })}
+                    iconSize={'small'}
+                    />
+                </Grid>
+                <Grid display={"flex"} justifyContent={"right"} alignItems={"center"} width={"33%"} xs={12} padding={0}>
+                    <ButtonField
+                    paperSx={{display: "flex", justifyContent: "center", alignItems: "center", width: "230px"}}
+                    elevation={0}
+                    text={"Increase Dissolve Delay"}
+                    onClick={() => openProposalForm({
+                        proposalAction: PROPOSAL_ACTIONS.IncreaseDissolveDelay,
+                        proposalPayload: {neuronId}
+                    })}
+                    disabled={contributions.length === 0}
+                    Icon={AddIcon}
+                    iconSize={'small'}
+                    />
+                </Grid>
+            </Grid>
+            <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0} paddingTop={"25px"}>
+                <Typography width={"50%"} display={"flex"} justifyContent={"left"} alignItems={"center"} variant="h6">Neuron Maturity</Typography>
+                <Typography width={"50%"} display={"flex"} justifyContent={"right"} alignItems={"center"} variant="h6">{`${round2Decimals(fromE8s(parseInt(neuron?.maturity_e8s_equivalent || 0)))} ICP`}</Typography>
+            </Grid>
+            <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0}>
+                <Typography color={"#bdbdbd"} width={"50%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>Your Maturity</Typography>
+                <Typography color={"#bdbdbd"} width={"50%"} display={"flex"} justifyContent={"right"} alignItems={"center"}>{contributions.length ? `${userMaturity} ICP`: "Spawning..."}</Typography>
+            </Grid>
+            <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0} paddingTop={"10px"}>
+                <Grid display={"flex"} justifyContent={"right"} alignItems={"center"} width={"100%"} xs={12} padding={0}>
+                    <ButtonField
+                    paperSx={{display: "flex", justifyContent: "center", alignItems: "center", width: "230px"}}
+                    elevation={0}
+                    text={"Spawn Neuron From Maturity"}
+                    disabled={contributions.length === 0}
+                    onClick={() => openProposalForm({
+                        proposalAction: PROPOSAL_ACTIONS.SpawnNeuron,
+                        proposalPayload: {neuronId}
+                    })}
+                    iconSize={'small'}
+                    />
+                </Grid>
+            </Grid>
+            <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} xs={12} width={"100%"}  padding={0} paddingTop={"25px"} flexDirection={'column'}>
+                <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0}>
+                    <Typography width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"} variant="h6">Neuron Contributions: </Typography>
+                </Grid>
+                {contributions.length === 0 ? 
+                    <Typography width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} variant="h6">Spawning...</Typography> : 
+                    <>
+                        <Grid display={"flex"} width={"100%"} justifyContent={"center"} alignItems={"center"} xs={12} padding={0} margin={"10px"}>
+                            <Graph
+                                withoutPaper={true}
+                                width={"25%"}
+                                height={"400px"}
+                                type={CHART_TYPES.pie}
+                                labels={chartLabels}
+                                datasets={chartDataSets}
+                                maintainAspectRatio={false}
+                            />  
+                        </Grid>
+                        <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} xs={12} padding={0} flexDirection={"column"} width={"100%"}>
+                            <DataTable
+                                transparent={true}
+                                columns={neuronContributionsTableColumns}
+                                rows={mapNeuronContributionsToTableRows(contributions, homePageState?.canisterData?.userNames)}
+                            />
+                        </Grid>
+                    </>}
+            </Grid>
+        </Grid>
     );
 
 };

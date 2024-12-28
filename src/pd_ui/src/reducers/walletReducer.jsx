@@ -25,7 +25,7 @@ export const walletInitialState={
             data: []
         }
     },
-    balancesData: {}
+    balancesData: []
 
 
 }

@@ -88,9 +88,12 @@ const Journal = (props) => {
         const result = await actorState.backendActor.createJournalEntry();
         if('err' in result) {
             setModalProps({
-                bigText: "Your data canisgter is full.", 
-                smallText: "You'll have to purchase another canister for storage",
-                Icon: ErrorOutlineIcon
+                flexDirection: "column",
+                components: [
+                    <Typography padding={"10px"} variant='h6' children={"Your data canisgter is full."} />,
+                    <ErrorOutlineIcon/>,
+                    <Typography padding={"10px"} children={"You'll have to purchase another canister for storage"} />,
+                ]
             });
             setModalIsLoading(false)
             return;

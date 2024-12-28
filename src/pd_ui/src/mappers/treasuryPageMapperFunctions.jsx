@@ -1,4 +1,4 @@
-import { round8Decimals, toHexString, fromE8s } from "../functionsAndConstants/Utils";
+import { round8Decimals, toHexString, fromE8s, getDateAsString, nanoSecondsToMiliSeconds } from "../functionsAndConstants/Utils";
 import { sortFundingCampaigns } from "../functionsAndConstants/treasuryDataFunctions";
 
 export const mapBalancesData = (data) => {
@@ -11,12 +11,12 @@ export const mapBalancesData = (data) => {
         else return 1
     });
 
-    const dataMapedToUiFormat = dataSorted.map(([date, balancesDataPointsObj]) => {
+    const dataMapedToUiFormat = {};
+    for(let [date, balancesDataPointsObj] of dataSorted){
         const newBalancesDataPointsObj = {};
         for(let property in balancesDataPointsObj) newBalancesDataPointsObj[property] = fromE8s(parseInt(balancesDataPointsObj[property].e8s));
-        return [date, newBalancesDataPointsObj];
-    });
-    console.log("dataMapedToUiFormat ", dataMapedToUiFormat)
+        dataMapedToUiFormat[getDateAsString(nanoSecondsToMiliSeconds(date))] = newBalancesDataPointsObj;
+    };
     return dataMapedToUiFormat;
 };
 

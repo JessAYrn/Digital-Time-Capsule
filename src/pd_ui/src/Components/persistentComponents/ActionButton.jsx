@@ -7,6 +7,7 @@ import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import SpeedDialField from "../Fields/SpeedDialField";
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import TransactWithWalletModal from "../modal/WalletModal";
+import Typography from "@mui/material/Typography";
 
 const ActionButton = (props) => {
 
@@ -16,23 +17,31 @@ const ActionButton = (props) => {
     const openTransactWithTreasuryForm = () => {
         setModalIsOpen(true);
         setModalProps({
-            bigText: "TRANSACT WITH TREASURY",
-            components: [ { Component: TransactWithTreasuryModal } ],
+            flexDirection: "column",
+            components: [ 
+                <Typography padding={"10px"} variant='h6' children={"TRANSACT WITH TREASURY"} />,
+                <TransactWithTreasuryModal/>
+            ],
         });
     };
 
     const openTransactWithWallerForm = () => {
       setModalIsOpen(true);
       setModalProps({
-          bigText: "TRANSACT WITH WALLET",
-          components: [ {Component: TransactWithWalletModal}],
+            flexDirection: "column",
+            components: [ 
+                <Typography padding={"10px"} variant='h6' children={"TRANSACT WITH WALLET"} />,
+                <TransactWithWalletModal/>
+            ],
       });
   };
 
     const openProposalForm = () => {
         setModalIsOpen(true);
         setModalProps({ 
-          components: [ { Component: CreateProposalForm }] 
+            components: [ 
+                <CreateProposalForm/>
+            ] 
         });
     };
 

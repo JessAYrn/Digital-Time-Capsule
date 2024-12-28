@@ -2,7 +2,6 @@ import React from "react";
 import {Line, Bar, Pie} from "react-chartjs-2";
 import { Chart, registerables } from 'chart.js';
 import { CHART_TYPES } from "../../functionsAndConstants/Constants";
-import "./Chart.scss";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 Chart.register(...registerables);
 

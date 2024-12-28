@@ -174,16 +174,11 @@ const DisplayProposal = (props) => {
         setModalIsLoading(false);
         if(result.err){
             setModalProps({
-                smallText: `Your vote could not be successfully submitted.`,
-                components: [{
-                    Component: ButtonField,
-                    props: {
-                        active: true,
-                        text: "Close",
-                        Icon: CloseIcon,
-                        onClick: () => setModalIsOpen(false)
-                    }
-                }]
+                flexDirection: "column",
+                components: [
+                    <Typography padding={"10px"} children={`Your vote could not be successfully submitted.`} />,
+                    <ButtonField active={true} text={"Close"} Icon={CloseIcon} onClick={() => setModalIsOpen(false)} />
+                ]
             });
             return;
         } else if(result.ok) {
@@ -219,8 +214,12 @@ const DisplayProposal = (props) => {
         const decision = bool ? "ADOPT" : "REJECT";
         setModalIsOpen(true);
         setModalProps({
-            smallText: `Confirm your vote to ${decision} proposal #${proposalId}`,
-            components: getModalButtonsComponents(bool)
+            flexDirection: "column",
+            components: [
+                <Typography padding={"10px"} children={`Confirm your vote to ${decision} proposal #${proposalId}`} />,
+                <ButtonField paperSx={{padding: "10px"}} active={true} text={"Cancel"} Icon={CloseIcon} onClick={() => setModalIsOpen(false)} />,
+                <ButtonField paperSx={{padding: "10px"}} active={true} text={"Confirm"} Icon={CheckIcon} onClick={() => onConfirmVote(bool)} />,
+            ]
         })
     };
 

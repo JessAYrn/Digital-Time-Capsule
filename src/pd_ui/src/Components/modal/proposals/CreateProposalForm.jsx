@@ -74,9 +74,12 @@ const CreateProposalForm = (props) => {
             let errorMessagArray = Object.keys(result.err);
             let errorMessage = errorMessagArray[0];
             setModalProps({
-                bigText: `Error: ${errorMessage}`,
-                Icon: ErrorOutlineIcon,
-                components: modalButton_close
+                flexDirection: "column",
+                components: [
+                    <Typography padding={"10px"} variant='h6' children={`Error: ${errorMessage}`} />,
+                    <ErrorOutlineIcon/>,
+                    <ButtonField paperSx={{padding: "10px"}} active={true} text={"Close"} Icon={CloseIcon} onClick={() => setModalIsOpen(false)}/>
+                ]
             });
         } else{
             let updatedProposals = sortProposals(result.ok);

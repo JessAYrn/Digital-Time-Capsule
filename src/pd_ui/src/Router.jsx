@@ -14,7 +14,7 @@ import CelebrationIcon from '@mui/icons-material/Celebration';
 import Analytics from './Pages/Analytics';
 import Journal from './Pages/Journal';
 import Notes from './Pages/Notes';
-import ModalComponent from './Components/modal/Modal';
+import ModalComponent, {LoadingModal} from './Components/modal/Modal';
 import LoginPage from './Pages/LoginPage';
 import { NAV_LINKS, JOURNAL_TABS } from './functionsAndConstants/Constants';
 import { ThemeProvider } from '@mui/material/styles';
@@ -27,6 +27,7 @@ import { fromE8s, shortenHexString } from './functionsAndConstants/Utils';
 import ActionButton from './Components/persistentComponents/ActionButton';
 import { NavBar } from './Components/persistentComponents/NavBar';
 import Grid from '@mui/material/Unstable_Grid2';
+import { Typography } from '@mui/material';
 
 const Router = (props) => {
 
@@ -66,10 +67,7 @@ const Router = (props) => {
                 if(approved && paidEntryCost){
                     modalProps = {
                         components: [
-                            {
-                                Component: CreateAccount,
-                                props: { setModalIsOpen, loadAllDataIntoReduxStores_ }
-                            },
+                            <CreateAccount  loadAllDataIntoReduxStores_={loadAllDataIntoReduxStores_}/>,
                         ]
                     };
                 } else if(!approved){
@@ -77,29 +75,23 @@ const Router = (props) => {
                     let {principal} = userCredentials;
 
                     modalProps = {
-                        bigText: "Request For Access Has Been Sent To The DAO Admin",
-                        smallText: "Below is your Principal ID. Share it with the DAO admin so they know who it belongs to: ",
-                        Icon: DoNotDisturbOnIcon,
                         flexDirection: "column",
                         components: [
-                            {
-                                Component: ButtonField,
-                                props: { text: `${principal}`, Icon: ContentCopyIcon, onClick: () => copyText(principal) }
-                            },
+                            <Typography padding={"10px"} variant='h6' children={"Request For Access Has Been Sent To The DAO Admin"} />,
+                            <DoNotDisturbOnIcon/>,
+                            <Typography padding={"10px"} children={"Below is your Principal ID. Share it with the DAO admin so they know who it belongs to: "} />,
+                            <ButtonField text={`${principal}`} Icon={ContentCopyIcon} onClick={() => copyText(principal)}/>,
                         ]
                     } 
                 } else if(!paidEntryCost){
                     let {costToEnterDao, address, balance} = await actorState.backendActor.getNewUserEntryDepositAddressAndBalance();
                     modalProps = {
-                        bigText: "Request For Access Has Been Sent To The DAO Admin",
-                        smallText: ` You currently have ${fromE8s(parseInt(balance))} $ICP deposited. Before entry, you must deposit ${ fromE8s(parseInt(costToEnterDao))} $ICP to the address below, refresh the browser, and log in again:  `,
-                        Icon: CelebrationIcon,
                         flexDirection: "column",
                         components: [
-                            {
-                                Component: ButtonField,
-                                props: { text: `${shortenHexString(address)}`, Icon: ContentCopyIcon, onClick: () => copyText(address) }
-                            },
+                            <Typography variant='h6' children={"You have been approved to enter this DAO"} padding={"10px"}/>,
+                            <CelebrationIcon />,
+                            <Typography padding={"10px"} children={` You currently have ${fromE8s(parseInt(balance))} $ICP deposited. Before entry, you must deposit ${ fromE8s(parseInt(costToEnterDao))} $ICP to the address below, refresh the browser, and log in again:  `} />,
+                            <ButtonField text={`${shortenHexString(address)}`} Icon={ContentCopyIcon} onClick={() => copyText(address)}/>,
                         ]
                     };
                 }
@@ -162,10 +154,10 @@ const Router = (props) => {
                 }  
                 <ModalComponent 
                 {...modalProps}
-                open={modalIsOpen} 
-                isLoading={modalIsLoading} 
+                open={!modalIsLoading && modalIsOpen} 
                 handleClose={() => { setModalProps({}); setModalIsOpen(false) } } 
-            />   
+                />   
+                <LoadingModal open={modalIsLoading}/>
             </Grid>  
             </AppContext.Provider>                 
         </ThemeProvider>

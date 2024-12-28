@@ -81,7 +81,6 @@ export const loadWalletData = async (actorState, walletDispatch, types ) => {
         loadTxHistory(actorState, walletDispatch, types) 
     ];
     const [walletDataFromApi, balancesHistory, _ ] = await Promise.all(promises);
-    const userBalancesHistory = mapBalancesData(balancesHistory);
     const address = toHexString(new Uint8Array( [...walletDataFromApi.ok.address]));
     const walletData = { 
         balance : parseInt(walletDataFromApi.ok.balance.e8s), 
@@ -99,7 +98,7 @@ export const loadWalletData = async (actorState, walletDispatch, types ) => {
     });
     walletDispatch({
         actionType: types.SET_WALLET_BALANCES_DATA,
-        payload: userBalancesHistory
+        payload:  mapBalancesData(balancesHistory)
     });
     walletDispatch({
         actionType: types.SET_DATA_HAS_BEEN_LOADED,

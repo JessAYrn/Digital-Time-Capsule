@@ -136,10 +136,10 @@ export const GRAPH_DATA_SETS = {
 }
 
 export const GRAPH_DATA_SET_TIMEFRAMES = {
-    week: "week",
-    month: "month",
-    year: "year",
-    allTime: "allTime",
+    week: "1W",
+    month: "1M",
+    year: "1Y",
+    allTime: "all",
 };
 
 export const GRAPH_DISPLAY_LABELS = {
