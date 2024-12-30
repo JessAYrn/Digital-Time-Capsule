@@ -14,15 +14,6 @@ export const MIN_DISSOLVE_DELAY_FOR_REWARDS_IN_SECONDS = 15768000;
 
 export const CHUNK_SIZE = 1024 * 1024;
 
-export const NAV_LINKS = {
-    wallet : '/wallet',
-    journal : '/app',
-    account: '/account',
-    dashboard: '/',
-    finances:'/finances',
-    groupJournal:'/groupjournal'
-};
-
 export const DEVICE_TYPES = {
     mobile: "mobile",
     tablet: "tablet",

@@ -20,7 +20,7 @@ import { Typography } from '@mui/material';
 
 const Analytics = (props) => {
 
-    const { homePageDispatch, homePageState, actorState, treasuryState, setModalIsOpen, setModalIsLoading } = useContext(AppContext);
+    const { homePageDispatch, homePageState, navigationAndApiState, treasuryState, setModalIsOpen, setModalIsLoading } = useContext(AppContext);
 
     const [requestsTableIsLoading, setRequestsTableIsLoading] = useState(false);
     const [usersTableIsLoading, setUsersTableIsLoading] = useState(false);
@@ -36,7 +36,7 @@ const Analytics = (props) => {
             let row = tableState.rows.dataRowIdToModelLookup[rowId];
             return row.userPrincipal;
         });
-        let result = await actorState.backendActor.grantAccess(principals);
+        let result = await navigationAndApiState.backendActor.grantAccess(principals);
         result = mapRequestsForAccessToTableRows(result);
         homePageDispatch({
             actionType: homePageTypes.SET_CANISTER_DATA,
@@ -53,7 +53,7 @@ const Analytics = (props) => {
             let row = tableState.rows.dataRowIdToModelLookup[rowId];
             return row.userPrincipal;
         });
-        let result = await actorState.backendActor.removeFromRequestsList(principals);
+        let result = await navigationAndApiState.backendActor.removeFromRequestsList(principals);
         result = mapRequestsForAccessToTableRows(result);
         homePageDispatch({
             actionType: homePageTypes.SET_CANISTER_DATA,
@@ -70,7 +70,7 @@ const Analytics = (props) => {
             let row = tableState.rows.dataRowIdToModelLookup[rowId];
             return row.userPrincipal;
         });
-        let result = await actorState.backendActor.updateApprovalStatus(principals, true);
+        let result = await navigationAndApiState.backendActor.updateApprovalStatus(principals, true);
         result = mapUsersProfileDataToTableRows(result.ok);
         homePageDispatch({
             actionType: homePageTypes.SET_CANISTER_DATA,
@@ -87,7 +87,7 @@ const Analytics = (props) => {
             let row = tableState.rows.dataRowIdToModelLookup[rowId];
             return row.userPrincipal;
         });
-        let result = await actorState.backendActor.updateApprovalStatus(principals, false);
+        let result = await navigationAndApiState.backendActor.updateApprovalStatus(principals, false);
         result = mapUsersProfileDataToTableRows(result.ok);
         homePageDispatch({
             actionType: homePageTypes.SET_CANISTER_DATA,
@@ -99,7 +99,7 @@ const Analytics = (props) => {
     const toggleAcceptRequest = async () => {
         setModalIsLoading(true);
         setModalIsOpen(true);
-        let result = await actorState.backendActor.toggleAcceptRequest();
+        let result = await navigationAndApiState.backendActor.toggleAcceptRequest();
         setModalIsOpen(false);
         setModalIsLoading(false);
         if('err' in result) return;
@@ -121,6 +121,8 @@ const Analytics = (props) => {
         const includedDataSets = [GRAPH_DISPLAY_LABELS.votingPower];
         return { labels, datasets: datasets.filter(({label}) => {return includedDataSets.includes(label)}) };
     }, [treasuryState.usersTreasuryDataArray, homePageState?.canisterData?.userNames]);
+
+    window.scrollTo(0,0);
 
     return(
         <>

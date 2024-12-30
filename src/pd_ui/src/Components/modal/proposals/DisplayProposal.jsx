@@ -65,7 +65,7 @@ const DisplayProposal = (props) => {
     } = props;
 
     const [hasVoted, setHasVoted] = useState(false);
-    const { actorState, homePageDispatch, treasuryState, setModalIsOpen, setModalIsLoading, setModalProps, homePageState } = useContext(AppContext);
+    const { navigationAndApiState, homePageDispatch, treasuryState, setModalIsOpen, setModalIsLoading, setModalProps, homePageState } = useContext(AppContext);
 
     let [numberOfNays, numberOfYays, totalVotes] = useMemo(() => {
         let numberOfNays = 0;
@@ -170,7 +170,7 @@ const DisplayProposal = (props) => {
 
     const onConfirmVote = async (bool) => {
         setModalIsLoading(true);
-        let result = await actorState.backendActor.voteOnProposal(proposalId, bool);
+        let result = await navigationAndApiState.backendActor.voteOnProposal(proposalId, bool);
         setModalIsLoading(false);
         if(result.err){
             setModalProps({

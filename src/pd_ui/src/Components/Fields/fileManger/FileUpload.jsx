@@ -31,7 +31,7 @@ const FileUpload = (props) => {
         revokeDataURL
     } = props;
 
-    const { actorState, setModalIsOpen, setModalProps } = useContext(AppContext);
+    const { navigationAndApiState, setModalIsOpen, setModalProps } = useContext(AppContext);
     const [errorWhenDisplaying, setErrorWhenDisplaying] = useState(null);
 
     useEffect(async () => {
@@ -40,7 +40,7 @@ const FileUpload = (props) => {
                 fileData,
                 index,
                 fileIndex,
-                actorState, 
+                navigationAndApiState, 
                 dispatch, 
                 dispatchActionToChangeFileLoadStatus,
                 dispatchActionToChangeFileMetaData
@@ -55,7 +55,7 @@ const FileUpload = (props) => {
             fileIndex: fileIndex,
             index: index
         });
-        if(fileData.fileName) actorState.backendActor.deleteFile(fileData.fileName);
+        if(fileData.fileName) navigationAndApiState.backendActor.deleteFile(fileData.fileName);
         onChange();
     };
 
@@ -77,7 +77,7 @@ const FileUpload = (props) => {
         let inputForDisplayFileFunction = {
             uploadedFile, dispatch, 
             dispatchActionToChangeFileMetaData, index, fileIndex,
-            setChangesWereMade, actorState
+            setChangesWereMade, navigationAndApiState
         }
         const formatStatus = await getIsWithinProperFormat(uploadedFile);
         if(!formatStatus.isProperFormat){
@@ -105,7 +105,7 @@ const FileUpload = (props) => {
         });
 
         if(hasError) {
-            actorState.backendActor.deleteFile(fileId);
+            navigationAndApiState.backendActor.deleteFile(fileId);
             setModalProps({ bigText: "File Upload Unsuccessful.", Icon: ErrorOutlineIcon})
             setModalIsOpen(true);
             dispatch({

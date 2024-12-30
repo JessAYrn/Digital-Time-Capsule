@@ -1,25 +1,16 @@
-import React, { useState } from 'react';
-import TabsComponent from "../../Components/Fields/Tabs";
+import React, { useContext } from 'react';
 import TreasuryTab from './TreasuryTab';
-
-const FINANCE_PAGE_TABS = {treasury: "treasury", wallet: "wallet"}
-const FINANCE_PAGE_TABS_Array = [FINANCE_PAGE_TABS.treasury,  FINANCE_PAGE_TABS.wallet];
+import WalletTab from './WalletTab';
+import { TABS } from '../../reducers/navigationAndApiReducer';
+import  {AppContext}  from '../../Context';
 
 const FinancesPage = (props) => {
-  
-  const [selectedTab, setSelectedTab] = useState(FINANCE_PAGE_TABS_Array[0]);
+  const {navigationAndApiState} = useContext(AppContext);
 
   return (
     <> 
-      <TabsComponent 
-      tabs={FINANCE_PAGE_TABS_Array} 
-      selectedTab={selectedTab} 
-      setSelectedTab={setSelectedTab} 
-      indicatorColor={"secondary"}
-      sx={{ backgroundColor: "#0A0A0A", position: "fixed", top: "28px", zIndex: "10" }}
-      />
-      {selectedTab === FINANCE_PAGE_TABS.treasury && <TreasuryTab/>}
-      
+      {navigationAndApiState.location.tab === TABS.treasury && <TreasuryTab/>}
+      {navigationAndApiState.location.tab === TABS.wallet && <WalletTab/>}
     </>
     
   );

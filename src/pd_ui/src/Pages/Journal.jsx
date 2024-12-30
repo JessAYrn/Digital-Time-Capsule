@@ -6,7 +6,6 @@ import InputBox from "../Components/Fields/InputBox";
 import SpeedDialField from '../Components/Fields/SpeedDialField'
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
-import { NavBar } from "../Components/persistentComponents/NavBar";
 import { getHighestEntryKey, milisecondsToNanoSeconds } from "../functionsAndConstants/Utils";
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 import FileCarousel from "../Components/Fields/fileManger/FileCarousel";
@@ -21,7 +20,7 @@ const count = 30
 
 const Journal = (props) => {
 
-    const { journalState, journalDispatch, actorState, actorDispatch, setModalIsOpen, setModalIsLoading, setModalProps} = useContext(AppContext);
+    const { journalState, journalDispatch, navigationAndApiState, navigationAndApiDispatch, setModalIsOpen, setModalIsLoading, setModalProps} = useContext(AppContext);
     const [counter, setCounter] = useState(1);
 
     const sendData = async () => {
@@ -30,7 +29,7 @@ const Journal = (props) => {
             payload: true
         })
         const photos = journalState.bio.photos.filter(file => file && !!file.fileName);
-        const result = await actorState.backendActor.updateBio({
+        const result = await navigationAndApiState.backendActor.updateBio({
             dob: journalState.bio.dob[0] ? [milisecondsToNanoSeconds(journalState.bio.dob[0])] : [],
             pob: journalState.bio.pob,
             name: journalState.bio.name,
@@ -85,7 +84,7 @@ const Journal = (props) => {
     const createJournalPage = async () => {
         setModalIsLoading(true);
         setModalIsOpen(true);
-        const result = await actorState.backendActor.createJournalEntry();
+        const result = await navigationAndApiState.backendActor.createJournalEntry();
         if('err' in result) {
             setModalProps({
                 flexDirection: "column",
@@ -128,7 +127,6 @@ const Journal = (props) => {
             alignItems="center" 
             flexDirection={"column"}
         >
-            <NavBar isLoading={journalState.isLoading}/>
             {(getIndexOfVisiblePage() >=0) ?
             <JournalPage index={getIndexOfVisiblePage()}/> :
             <>
@@ -188,7 +186,7 @@ const Journal = (props) => {
                     onChange={triggerSendDataFunctionAfterReduxStateUpdate}
                     filesMetaDataArray={journalState.bio.photos}
                     journalState={journalState}
-                    actorDispatch={actorDispatch}
+                    navigationAndApiDispatch={navigationAndApiDispatch}
                     dispatch={journalDispatch}
                     dispatchActionToAddFile={types.ADD_COVER_PHOTO}
                     dispatchActionToRemoveFile={types.MARK_COVER_PHOTO_AS_DELETED}

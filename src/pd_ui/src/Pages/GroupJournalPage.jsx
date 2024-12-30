@@ -1,4 +1,3 @@
-import { NavBar } from "../Components/persistentComponents/NavBar";
 import React, { useContext } from 'react';
 import { AppContext } from "../Context";
 
@@ -7,7 +6,6 @@ const GroupJournalPage = (props) => {
 
   return (
     <div>
-      <NavBar />
       <div className=''>
         coming soon
       </div>

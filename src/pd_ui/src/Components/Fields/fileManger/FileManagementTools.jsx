@@ -4,22 +4,20 @@ import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import { 
     CHUNK_SIZE, MAX_DURATION_OF_VIDEO_IN_SECONDS, forbiddenFileTypes 
 } from "../../../functionsAndConstants/Constants";
-import { types } from "../../../reducers/journalReducer";
-// import actorReducer, { actorInitialState, actorTypes } from "../../../reducers/actorReducer";
 
 
 
-export const retrieveChunk = async (actorState, fileName, chunkIndex) => {
+export const retrieveChunk = async (navigationAndApiState, fileName, chunkIndex) => {
     let chunk;
-    chunk = await actorState.backendActor.readEntryFileChunk(fileName, chunkIndex);
+    chunk = await navigationAndApiState.backendActor.readEntryFileChunk(fileName, chunkIndex);
     chunk = chunk.ok;
     return chunk
 }; 
 
 
-export const uploadChunk = async (actorState, fileId, chunkId, fileChunk) => {    
+export const uploadChunk = async (navigationAndApiState, fileId, chunkId, fileChunk) => {    
     const fileChunkAsBlob = await fileToBlob(fileChunk);
-    return actorState.backendActor.uploadJournalEntryFile(
+    return navigationAndApiState.backendActor.uploadJournalEntryFile(
         fileId, 
         chunkId, 
         fileChunkAsBlob
@@ -94,7 +92,7 @@ export const getIsWithinProperFormat = async (uploadedFile) => {
     return {isProperFormat: true};
 }
 export const mapAndSendFileToApi = async (props) => {
-    const {actorState, fileId, uploadedFile} = props;
+    const {navigationAndApiState, fileId, uploadedFile} = props;
     const fileSize = uploadedFile.size;
 
     const chunks = Math.ceil(fileSize/CHUNK_SIZE);
@@ -109,7 +107,7 @@ export const mapAndSendFileToApi = async (props) => {
         const fileChunk = (to < fileSize -1) ? uploadedFile.slice(from,to ) : uploadedFile.slice(from);
 
         let chunkId = parseInt(chunk);
-        promises.push(uploadChunk(actorState, fileId, chunkId, fileChunk));
+        promises.push(uploadChunk(navigationAndApiState, fileId, chunkId, fileChunk));
 
         chunk += 1;
     };
@@ -118,7 +116,7 @@ export const mapAndSendFileToApi = async (props) => {
 };
 
 export const getFileUrl_fromApi = async (
-    actorState, 
+    navigationAndApiState, 
     fileData
     ) => {
 
@@ -127,13 +125,13 @@ export const getFileUrl_fromApi = async (
     let promises = [];
     let fileChunkCounteObj;
     let fileChunkCount;
-    fileChunkCounteObj = await actorState.backendActor.readEntryFileSize(fileName);
+    fileChunkCounteObj = await navigationAndApiState.backendActor.readEntryFileSize(fileName);
     fileChunkCount = parseInt(fileChunkCounteObj.ok);
     let fileURL;
 
     if( fileChunkCount > 0){
         while(index_ < fileChunkCount){
-            promises.push(retrieveChunk(actorState, fileName, index_));
+            promises.push(retrieveChunk(navigationAndApiState, fileName, index_));
             index_ += 1;
         };
         let fileBytes = await Promise.all(promises);

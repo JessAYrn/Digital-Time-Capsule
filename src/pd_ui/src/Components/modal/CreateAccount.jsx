@@ -10,7 +10,7 @@ const CreateAccount = (props) => {
 
     const { loadAllDataIntoReduxStores_} = props;
 
-    const { actorState, setModalIsOpen, setModalIsLoading } = useContext(AppContext);
+    const { navigationAndApiState, setModalIsOpen, setModalIsLoading } = useContext(AppContext);
 
     const [username, setUsername] = useState("");
     const [hasError, setHasError] = useState(false);
@@ -20,7 +20,7 @@ const CreateAccount = (props) => {
     const onSubmit = async () => {
         setModalIsLoading(true);
         try{
-            await actorState.backendActor.create(username);
+            await navigationAndApiState.backendActor.create(username);
             await loadAllDataIntoReduxStores_();
             setModalIsOpen(false);
         } catch(e){

@@ -8,11 +8,14 @@ import SpeedDialField from "../Fields/SpeedDialField";
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import TransactWithWalletModal from "../modal/WalletModal";
 import Typography from "@mui/material/Typography";
+import { animated } from "@react-spring/web";
+
 
 const ActionButton = (props) => {
 
-    const { setModalProps, setModalIsOpen } = useContext(AppContext);
+    const {style, onClick} = props;
 
+    const { setModalProps, setModalIsOpen } = useContext(AppContext);
 
     const openTransactWithTreasuryForm = () => {
         setModalIsOpen(true);
@@ -45,16 +48,14 @@ const ActionButton = (props) => {
         });
     };
 
-
     const speedDialActions = [
         {name: "Create Proposal", icon: HowToVoteIcon , onClick: openProposalForm},
         {name: "Treasury Transaction", icon: AccountBalanceIcon, onClick: () => openTransactWithTreasuryForm()},
         {name: "Wallet Transaction", icon: AccountBalanceWalletIcon , onClick: () => openTransactWithWallerForm()},
     ]
 
-    
     return (
     <SpeedDialField actions={speedDialActions} position={"right"}/>
 )
 };
-export default ActionButton;
+export default animated(ActionButton);

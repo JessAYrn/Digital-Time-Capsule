@@ -1,20 +1,18 @@
 import React, { useContext } from 'react';
-import { AppContext } from '../Context';
-import { NavBar } from '../Components/navigation/NavBar';
-import { CHART_TYPES, GRAPH_DISPLAY_LABELS, GRAPH_DATA_SETS } from '../functionsAndConstants/Constants';
-import { copyText } from '../functionsAndConstants/walletFunctions/CopyWalletAddress';
+import { AppContext } from '../../Context';
+import { CHART_TYPES, GRAPH_DISPLAY_LABELS, GRAPH_DATA_SETS } from '../../functionsAndConstants/Constants';
+import { copyText } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
 
-import { nanoSecondsToMiliSeconds, shortenHexString, round2Decimals, fromE8s } from '../functionsAndConstants/Utils';
+import { nanoSecondsToMiliSeconds, shortenHexString, round2Decimals, fromE8s } from '../../functionsAndConstants/Utils';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
-import DataField from '../Components/Fields/DataField';
-import AccordionField from '../Components/Fields/Accordion';
-import Graph from '../Components/Fields/Chart';
+import DataField from '../../Components/Fields/DataField';
+import AccordionField from '../../Components/Fields/Accordion';
+import Graph from '../../Components/Fields/Chart';
 import Typography from '@mui/material/Typography';
-import ActionButton from '../Components/ActionButton';
 
 
-const WalletPage = (props) => {
+const WalletTab = (props) => {
 
     const { walletState, treasuryState } = useContext(AppContext);
 
@@ -51,7 +49,6 @@ const WalletPage = (props) => {
             alignItems="center" 
             flexDirection={"column"}
         >
-            <NavBar/>
             <Grid 
                 columns={12} 
                 xs={11} 
@@ -117,10 +114,9 @@ const WalletPage = (props) => {
                 </AccordionField>}
 
             </Grid>
-            <ActionButton/>
         </Grid>
             
         
     );
 } 
-export default WalletPage;
+export default WalletTab;

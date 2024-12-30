@@ -29,8 +29,8 @@ const JournalPage = (props) => {
     const { 
         journalState,
         journalDispatch,
-        actorState,
-        actorDispatch,
+        navigationAndApiState,
+        navigationAndApiDispatch,
         setModalIsOpen,
         setModalIsLoading,
     } = useContext(AppContext);
@@ -41,9 +41,6 @@ const JournalPage = (props) => {
 
 
     useEffect(() => { scrollToTop(); },[]);
-    
-    //marks this page as read so that it no longer shows in the notifications section
-    // if(journalPageData.entryKey) actorState.backendActor.markJournalEntryAsRead({entryKey: journalPageData.entryKey});
 
     useEffect(() => {if(counter % count === 0) sendData()},[counter]);
 
@@ -63,7 +60,7 @@ const JournalPage = (props) => {
             timeStarted: milisecondsToNanoSeconds(journalPageData.timeStarted),
             filesMetaData: filesMetaData
         };
-        await actorState.backendActor.updateJournalEntry( entryKey, entryAsApiObject );
+        await navigationAndApiState.backendActor.updateJournalEntry( entryKey, entryAsApiObject );
         journalDispatch({ actionType: types.SET_IS_LOADING, payload: false });
         setCounter(1);
     };
@@ -125,7 +122,7 @@ const JournalPage = (props) => {
         setModalIsLoading(true);
         const entryKey = {entryKey: journalPageData.entryKey}
         await sendData();
-        let result = await actorState.backendActor.submitJournalEntry(entryKey);
+        let result = await navigationAndApiState.backendActor.submitJournalEntry(entryKey);
         let journalEntries = result.ok;
         journalEntries = mapApiObjectToFrontEndJournalEntriesObject(journalEntries);
         journalDispatch({ payload: journalEntries, actionType: types.SET_JOURNAL });

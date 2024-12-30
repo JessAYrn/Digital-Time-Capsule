@@ -5,53 +5,51 @@ import { allStatesLoaded, loadAllDataIntoReduxStores } from './functionsAndConst
 import walletReducer, { walletInitialState, walletTypes } from './reducers/walletReducer';
 import homePageReducer, { homePageInitialState, homePageTypes } from './reducers/homePageReducer';
 import treasuryReducer, { treasuryPageInitialState, treasuryTypes } from './reducers/treasuryReducer';
-import actorReducer, { actorInitialState, actorTypes } from './reducers/actorReducer';
+import navigationAndApiReducer, { navigationAndApiInitialState, navigationAndApiTypes } from './reducers/navigationAndApiReducer';
 import DoNotDisturbOnIcon from '@mui/icons-material/DoNotDisturbOn';
 import { copyText } from './functionsAndConstants/walletFunctions/CopyWalletAddress';
 import ButtonField from './Components/Fields/Button';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CelebrationIcon from '@mui/icons-material/Celebration';
 import Analytics from './Pages/Analytics';
-import Journal from './Pages/Journal';
-import Notes from './Pages/Notes';
 import ModalComponent, {LoadingModal} from './Components/modal/Modal';
 import LoginPage from './Pages/LoginPage';
-import { NAV_LINKS, JOURNAL_TABS } from './functionsAndConstants/Constants';
+import { NAV_LINKS } from './reducers/navigationAndApiReducer';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from './Theme';
 import { AppContext } from './Context';
 import FinancesPage from './Pages/Finances/FinancesPage';
-import GroupJournalPage from './Pages/GroupJournalPage';
 import CreateAccount from './Components/modal/CreateAccount';
 import { fromE8s, shortenHexString } from './functionsAndConstants/Utils';
 import ActionButton from './Components/persistentComponents/ActionButton';
-import { NavBar } from './Components/persistentComponents/NavBar';
+import ToolBar  from './Components/persistentComponents/ToolBar';
+import NavBar from './Components/persistentComponents/NavBar';
 import Grid from '@mui/material/Unstable_Grid2';
 import { Typography } from '@mui/material';
+import { useSpring, useScroll } from "@react-spring/web";
+
 
 const Router = (props) => {
-
-    const [route, setRoute] = useState(NAV_LINKS.dashboard);
 
     const [journalState, journalDispatch] = useReducer(journalReducer, initialState);
     const [notificationsState, notificationsDispatch] = useReducer(notificationsReducer, notificationsInitialState);
     const [walletState, walletDispatch] = useReducer(walletReducer, walletInitialState);
     const [homePageState, homePageDispatch] = useReducer(homePageReducer, homePageInitialState);
     const [treasuryState, treasuryDispatch] = useReducer(treasuryReducer, treasuryPageInitialState);
-    const [actorState, actorDispatch] = useReducer(actorReducer, actorInitialState);
+    const [navigationAndApiState, navigationAndApiDispatch] = useReducer(navigationAndApiReducer, navigationAndApiInitialState);
     
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [modalIsLoading, setModalIsLoading] = useState(false);
     const [modalProps, setModalProps] = useState({});
 
-    const ReducerDispatches={ walletDispatch, journalDispatch, homePageDispatch, actorDispatch, notificationsDispatch, treasuryDispatch };
-    const ReducerTypes={ journalTypes:types, walletTypes, homePageTypes, actorTypes, notificationsTypes, treasuryTypes };
-    const context = { journalState, journalDispatch, walletDispatch, walletState, homePageDispatch, homePageState, actorDispatch, actorState, notificationsState, notificationsDispatch, treasuryState, treasuryDispatch, setRoute, modalIsOpen, setModalIsOpen, modalIsLoading, setModalIsLoading, modalProps, setModalProps };
+    const ReducerDispatches={ walletDispatch, journalDispatch, homePageDispatch, navigationAndApiDispatch, notificationsDispatch, treasuryDispatch };
+    const ReducerTypes={ journalTypes:types, walletTypes, homePageTypes, navigationAndApiTypes, notificationsTypes, treasuryTypes };
+    const context = { journalState, journalDispatch, walletDispatch, walletState, homePageDispatch, homePageState, navigationAndApiDispatch, navigationAndApiState, notificationsState, notificationsDispatch, treasuryState, treasuryDispatch, modalIsOpen, setModalIsOpen, modalIsLoading, setModalIsLoading, modalProps, setModalProps };
 
-    const loadAllDataIntoReduxStores_ =  async () => { const result = await loadAllDataIntoReduxStores(actorState, ReducerDispatches, ReducerTypes); return result };
+    const loadAllDataIntoReduxStores_ =  async () => { const result = await loadAllDataIntoReduxStores(navigationAndApiState, ReducerDispatches, ReducerTypes); return result };
 
     useEffect( async () => {
-        if(!actorState.backendActor) return;
+        if(!navigationAndApiState.backendActor) return;
         try{
 
             setModalIsLoading(true);
@@ -62,7 +60,7 @@ const Router = (props) => {
             let modalProps = {};
             
             try{
-                let {approved, paidEntryCost} = await actorState.backendActor.requestEntryToDao();
+                let {approved, paidEntryCost} = await navigationAndApiState.backendActor.requestEntryToDao();
                 
                 if(approved && paidEntryCost){
                     modalProps = {
@@ -71,7 +69,7 @@ const Router = (props) => {
                         ]
                     };
                 } else if(!approved){
-                    let {userCredentials} = actorState;
+                    let {userCredentials} = navigationAndApiState;
                     let {principal} = userCredentials;
 
                     modalProps = {
@@ -84,7 +82,7 @@ const Router = (props) => {
                         ]
                     } 
                 } else if(!paidEntryCost){
-                    let {costToEnterDao, address, balance} = await actorState.backendActor.getNewUserEntryDepositAddressAndBalance();
+                    let {costToEnterDao, address, balance} = await navigationAndApiState.backendActor.getNewUserEntryDepositAddressAndBalance();
                     modalProps = {
                         flexDirection: "column",
                         components: [
@@ -100,12 +98,12 @@ const Router = (props) => {
             setModalIsLoading(false);
             setModalProps(modalProps);
 
-        } catch(e){ console.log(e); await actorState.backendActor.emergencyVoteForToggleSupportModeProposal(); }
+        } catch(e){ console.log(e); await navigationAndApiState.backendActor.emergencyVoteForToggleSupportModeProposal(); }
 
-    }, [actorState.backendActor]);
+    }, [navigationAndApiState.backendActor]);
 
     const displayComponent = useMemo(() => {
-        return actorState?.userCredentials?.agent && allStatesLoaded({
+        return navigationAndApiState?.userCredentials?.agent && allStatesLoaded({
             journalState,
             notificationsState,
             walletState,
@@ -113,25 +111,42 @@ const Router = (props) => {
             treasuryState
         });
     },[
-        actorState.userCredentials.principal, 
+        navigationAndApiState.userCredentials.principal, 
         treasuryState.dataHasBeenLoaded,
         journalState.dataHasBeenLoaded,
         walletState.dataHasBeenLoaded,
         homePageState.dataHasBeenLoaded,
         notificationsState.dataHasBeenLoaded,
-        actorState.dataHasBeenLoaded
+        navigationAndApiState.dataHasBeenLoaded
     ])
 
-    let JournalComponent = useMemo(()=>{
-        if(journalState.journalPageTab===JOURNAL_TABS.diaryTab) return Journal;
-        else return Notes;
-    },[journalState.journalPageTab])
+    const coordinates = { x:0, y:0 };
+
+    const animate = () => { styleApi.start({opacity: 1}) };
+    
+    const deanimate = () => { styleApi.start({opacity: 0.25}) };
+
+    const [style, styleApi] = useSpring(() => ({
+        from: { 
+            opacity: 1
+        }
+    }),[]);
+
+    useScroll({
+        onChange: ({value: {scrollY}}) => {
+            if(coordinates.y > scrollY) animate();
+            if(coordinates.y < scrollY) deanimate();
+            coordinates.y = scrollY
+        }
+    });
+
     
     return(
        <ThemeProvider theme={theme}>
             <AppContext.Provider value={context}>
-            { displayComponent && <NavBar />}
+            { displayComponent && <ToolBar style={style}/>}
             { displayComponent && <ActionButton/> }
+            { displayComponent && <NavBar style={style}/> }
             <Grid 
                 container 
                 columns={12} 
@@ -145,10 +160,8 @@ const Router = (props) => {
             > 
                 {displayComponent ? 
                     <>
-                        {route === NAV_LINKS.dashboard && <Analytics/>}
-                        {route === NAV_LINKS.journal && <JournalComponent />}
-                        {route === NAV_LINKS.finances && <FinancesPage />}
-                        {route === NAV_LINKS.groupJournal && <GroupJournalPage />}
+                        {navigationAndApiState?.location?.route === NAV_LINKS.dashboard && <Analytics/>}
+                        {navigationAndApiState?.location.route === NAV_LINKS.finances && <FinancesPage />}
                     </>  : 
                     <LoginPage />
                 }  

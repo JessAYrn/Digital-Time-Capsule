@@ -17,7 +17,7 @@ const SendCrypto = (props) => {
     const [showSummary, setShowSummary] = useState(false);
     const [numberInput, setNumberInput] = useState(null);
 
-    const { walletState, actorState, setModalIsOpen, setModalIsLoading } = useContext(AppContext);
+    const { walletState, navigationAndApiState, setModalIsOpen, setModalIsLoading } = useContext(AppContext);
 
     const onChangeRecipientAddress = (recipient) => {
         setHasError_1(!recipient  || (!icpWalletAddressHasProperFormat(recipient) && !principalHasProperFormat(recipient)));
@@ -35,7 +35,7 @@ const SendCrypto = (props) => {
         setModalIsLoading(true);
         const e8s = toE8s(numberInput);
         const accountId = fromHexString(recipientAddress);
-        const result = await actorState.backendActor.transferICP(e8s, accountId);
+        const result = await navigationAndApiState.backendActor.transferICP(e8s, accountId);
         setModalIsLoading(false);
         setModalIsOpen(false);
         if("err" in result){

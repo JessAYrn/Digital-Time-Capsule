@@ -21,13 +21,13 @@ const AddLiquidityOrRepayFundingCampaign = (props) => {
     
     const [amount, setAmount] = useState(0);
     const [hasError, setHasError] = useState(false);
-    const {actorState, treasuryState, treasuryDispatch, walletState, setModalIsOpen, setModalIsLoading} = useContext(AppContext);
+    const {navigationAndApiState, treasuryState, treasuryDispatch, walletState, setModalIsOpen, setModalIsLoading} = useContext(AppContext);
 
     const availableBalance = (treasuryState?.userTreasuryData?.balances?.icp || 0) + (walletState?.walletData?.balance || 0);
 
     const onSubmit = async () => {
         setModalIsLoading(true);
-        const backendFunctionToCall = (actionType === ACTION_TYPES.addLiquidity) ? actorState.backendActor.contributeToFundingCampaign : actorState.backendActor.repayFundingCampaign;
+        const backendFunctionToCall = (actionType === ACTION_TYPES.addLiquidity) ? navigationAndApiState.backendActor.contributeToFundingCampaign : navigationAndApiState.backendActor.repayFundingCampaign;
         const updatedFundingCampaignsArray = sortFundingCampaigns(await backendFunctionToCall(campaignId, toE8s(amount)));
         treasuryDispatch({
             actionType: treasuryTypes.SET_TREASURY_DATA, 

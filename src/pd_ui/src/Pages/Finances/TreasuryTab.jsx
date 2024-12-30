@@ -29,7 +29,7 @@ const TIME_FRAMES = [
 
 const TreasuryTab = (props) => {
 
-    const { treasuryState, walletState, actorState, setModalIsOpen, setModalIsLoading, setModalProps } = useContext(AppContext);
+    const { treasuryState, walletState, navigationAndApiState, setModalIsOpen, setModalIsLoading, setModalProps } = useContext(AppContext);
 
     const treasuryBalances = {
         [GRAPH_DISPLAY_LABELS.icp_staked]: {
@@ -62,7 +62,7 @@ const TreasuryTab = (props) => {
         setModalIsLoading(true);
         setAutoRepayLoans(newAutoRepayLoansSetting);
         setAutoContributeToLoans(newAutoLoanContributionSetting);
-        await actorState.backendActor.updateAutomatedSettings({
+        await navigationAndApiState.backendActor.updateAutomatedSettings({
             automaticallyContributeToLoans: [newAutoLoanContributionSetting],
             automaticallyRepayLoans: [newAutoRepayLoansSetting]
         });
@@ -133,6 +133,8 @@ const TreasuryTab = (props) => {
     const neurons = useMemo(() => {
         return treasuryState?.neurons?.icp.filter(neuron => { return !!neuron[1]?.neuronInfo } )
     }, [treasuryState?.neurons]);
+
+    window.scrollTo(0,0);
 
     return (
         <Grid columns={12} xs={11} md={9} rowSpacing={0} display="flex" justifyContent="center" alignItems="center" flexDirection={"column"} paddingTop={"0px"}>

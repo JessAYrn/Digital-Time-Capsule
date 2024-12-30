@@ -10,14 +10,14 @@ const theme = createTheme({
         // contrastText: will be calculated to contrast with palette.primary.main
       },
       secondary: {
-        main: '#F7931A',
+        main: '#F7931A'
       },
       // Provide every color token (light, main, dark, and contrastText) when using
       // custom colors for props in Material UI's components.
       // Then you will be able to use it like this: `<Button color="custom">`
       // (For TypeScript, you need to add module augmentation for the `custom` value)
       custom: {
-        main: '#F7931A',
+        main: '#F7931A'
       },
       text: {
         primary: grey[50]

@@ -27,7 +27,7 @@ import { sortProposals } from "../../../functionsAndConstants/governanceDataFunc
 const CreateProposalForm = (props) => {
     const { proposalAction, proposalPayload } = props;
 
-    const {  actorState, homePageDispatch, treasuryState, walletState, setModalIsOpen, setModalProps, setModalIsLoading } = useContext(AppContext);
+    const {  navigationAndApiState, homePageDispatch, treasuryState, walletState, setModalIsOpen, setModalProps, setModalIsLoading } = useContext(AppContext);
 
     const availableBalance = (treasuryState?.userTreasuryData?.balances?.icp || 0) + (walletState?.walletData?.balance || 0);
 
@@ -59,7 +59,7 @@ const CreateProposalForm = (props) => {
 
     const onSubmitProposal = async (action) => {
         setModalIsLoading(true);
-        let result = await actorState.backendActor.createProposal(action);
+        let result = await navigationAndApiState.backendActor.createProposal(action);
         if("err" in result){
             let errorMessagArray = Object.keys(result.err);
             let errorMessage = errorMessagArray[0];

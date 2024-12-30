@@ -60,6 +60,7 @@
     "@mui/system": "^5.14.0",
     "@mui/x-data-grid": "^6.10.0",
     "@mui/x-date-pickers": "^6.11.0",
+    "@react-spring/web": "^9.7.5",
     "@twa-dev/sdk": "^7.0.0",
     "@types/react": "^17.0.34",
     "@types/react-dom": "^17.0.11",

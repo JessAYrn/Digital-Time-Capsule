@@ -22,7 +22,7 @@ export const actions = {
 
 const TransactWithTreasuryModal = (props) => {
 
-    const {actorState, treasuryState, walletState, setModalIsOpen, setModalProps, setModalIsLoading} = useContext(AppContext);
+    const {navigationAndApiState, treasuryState, walletState, setModalIsOpen, setModalProps, setModalIsLoading} = useContext(AppContext);
     const [action, setAction] = useState(actions.deposit);
     const [amount, setAmount] = useState(null);
     const [recipientPrincipal, setRecipientPrincipal] = useState(null);
@@ -37,9 +37,9 @@ const TransactWithTreasuryModal = (props) => {
 
     const submit = async () => {
         setModalIsLoading(true);
-        if(action === actions.deposit) await actorState.backendActor.depositIcpToTreasury(toE8s(amount)); 
-        else if(action === actions.withdraw )await actorState.backendActor.withdrawIcpFromTreasury(toE8s(amount));
-        else if(action === actions.send) await actorState.backendActor.trasnferICPFromTreasuryAccountToTreasuryAccount(toE8s(amount), recipientPrincipal);
+        if(action === actions.deposit) await navigationAndApiState.backendActor.depositIcpToTreasury(toE8s(amount)); 
+        else if(action === actions.withdraw )await navigationAndApiState.backendActor.withdrawIcpFromTreasury(toE8s(amount));
+        else if(action === actions.send) await navigationAndApiState.backendActor.trasnferICPFromTreasuryAccountToTreasuryAccount(toE8s(amount), recipientPrincipal);
         else throw new Error("Invalid Action");
         setModalIsLoading(false);
         setModalProps({});

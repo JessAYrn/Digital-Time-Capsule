@@ -4,7 +4,7 @@ import { homePageTypes } from "../reducers/homePageReducer";
 import { round2Decimals, inTrillions, fromE8s } from "../functionsAndConstants/Utils";
 import Grid from '@mui/material/Unstable_Grid2';
 import { getBackendActor } from "../functionsAndConstants/authentication";
-import { actorTypes } from "../reducers/actorReducer";
+import { navigationAndApiTypes } from "../reducers/navigationAndApiReducer";
 import LoginIcon from '@mui/icons-material/Login';
 import { AppContext } from "../Context";
 import { Paper } from "@mui/material";
@@ -12,19 +12,19 @@ import ButtonField from "../Components/Fields/Button";
 
 const LoginPage = (props) => {
 
-    const { actorDispatch, homePageState, homePageDispatch } = useContext(AppContext);
+    const { navigationAndApiDispatch, homePageState, homePageDispatch } = useContext(AppContext);
     const [isLoading, setIsLoading] = useState(false);
     
     const handleLogin = async() => {
         setIsLoading(true);
         const {agent, actor} = await getBackendActor({anon: false});
         const principal = await agent.getPrincipal();
-        actorDispatch({
-            actionType: actorTypes.SET_USER_CREDENTIALS,
+        navigationAndApiDispatch({
+            actionType: navigationAndApiTypes.SET_USER_CREDENTIALS,
             payload: {agent, principal : principal.toText()}
         })
-        actorDispatch({
-            actionType: actorTypes.SET_BACKEND_ACTOR,
+        navigationAndApiDispatch({
+            actionType: navigationAndApiTypes.SET_BACKEND_ACTOR,
             payload: actor
         });
         setIsLoading(false);
@@ -51,6 +51,8 @@ const LoginPage = (props) => {
         });
         setIsLoading(false);
     },[]);
+
+    window.scrollTo(0,0);
     
     return(
         <Grid container columns={12} xs={12} rowSpacing={8} display="flex" justifyContent="center" alignItems="center" flexDirection={"column"}>
