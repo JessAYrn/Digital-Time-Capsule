@@ -198,8 +198,8 @@ const DisplayProposal = (props) => {
             flexDirection: "column",
             components: [
                 <Typography padding={"10px"} children={`Confirm your vote to ${decision} proposal #${proposalId}`} />,
-                <ButtonField paperSx={{padding: "10px"}} color={"secondary"} text={"Cancel"} Icon={CloseIcon} onClick={() => setModalIsOpen(false)} />,
-                <ButtonField paperSx={{padding: "10px"}} color={"secondary"} text={"Confirm"} Icon={CheckIcon} onClick={() => onConfirmVote(bool)} />,
+                <ButtonField gridSx={{padding: "10px"}} color={"secondary"} text={"Cancel"} Icon={CloseIcon} onClick={() => setModalIsOpen(false)} />,
+                <ButtonField gridSx={{padding: "10px"}} color={"secondary"} text={"Confirm"} Icon={CheckIcon} onClick={() => onConfirmVote(bool)} />,
             ]
         })
     };

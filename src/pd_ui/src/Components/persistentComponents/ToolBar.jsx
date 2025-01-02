@@ -90,16 +90,16 @@ const ToolBar = (props) => {
         height={"53px"}
         zIndex={10}
         >
-            <Grid xs={1} columns={12} display={"flex"} justifyContent={"left"} alignItems={"center"} padding={0} width={"25%"}> 
+            <Grid xs={2} columns={12} display={"flex"} justifyContent={"left"} alignItems={"center"} padding={0} width={"18%"}> 
                 <ButtonField
                     Icon={RefreshIcon}
                     transparentBackground={true}
-                    color={'secondary'}
+                    color={'primary'}
                     onClick={reloadData}
                     disabled={modalIsLoading}
                 />
             </Grid>
-            <Grid xs={9} columns={12} display={"flex"} justifyContent={"center"} alignItems={"center"} padding={0} width={"100%"}>
+            <Grid xs={6} columns={12} display={"flex"} justifyContent={"center"} alignItems={"center"} padding={0} width={"100%"}>
                 {!!tabsArray.length && <TabsComponent 
                     tabs={tabsArray} 
                     selectedTab={navigationAndApiState?.location.tab} 
@@ -108,25 +108,26 @@ const ToolBar = (props) => {
                     sx={{ backgroundColor: "#0A0A0A" }}
                 />}
             </Grid>
-            <Grid xs={2} columns={12} display={"flex"} justifyContent={"right"} alignItems={"center"} padding={0} width={"40%"}> 
+            <Grid xs={4} columns={12} display={"flex"} justifyContent={"right"} alignItems={"center"} padding={0} width={"35%"}> 
                 <MenuField
                     MenuIcon={NotificationIcon}
-                    xs={1}
+                    xs={6}
                     display={"flex"}
                     alignItems={"center"}
                     justifyContent={"center"}
                     disabled={modalIsLoading}
-                    color={'secondary'}
+                    color={'primary'}
                     menuItemProps={notificationsMenuItemProps}
                 />
                 <MenuField
+                    
                     MenuIcon={LogoutIcon}
-                    xs={1}
+                    xs={6}
                     display={"flex"}
                     alignItems={"center"}
                     justifyContent={"center"}
                     disabled={modalIsLoading}
-                    color={'secondary'}
+                    color={'primary'}
                     menuItemProps={logoutMenuItemProps}
                 />
             </Grid>

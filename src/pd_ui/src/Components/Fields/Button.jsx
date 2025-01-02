@@ -1,5 +1,6 @@
 import React from "react";
-import { IconButton, Button, Paper } from '@mui/material';
+import Grid from "@mui/material/Unstable_Grid2";
+import { IconButton, Button, Typography } from '@mui/material';
 import LoadingButton from '@mui/lab/LoadingButton';
 
 const ButtonField = (props) => {
@@ -12,7 +13,6 @@ const ButtonField = (props) => {
         onClick,
         onBlur,
         disabled,
-        elevation,
         id,
         onChange,
         ref,
@@ -20,9 +20,10 @@ const ButtonField = (props) => {
         ariaHaspopup,
         ariaExpanded,
         color,
+        bgColor,
         upload,
         sx,
-        paperSx,
+        gridSx,
         hyperLink,
     } = props;
     
@@ -34,21 +35,19 @@ const ButtonField = (props) => {
     else ButtonType = IconButton;
     let handleClick = disabled ? doNothing : onClick;
     return (
-            <Paper 
-            sx={{
-                color: color || "primary",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                backgroundColor: `${transparentBackground ? "transparent": null}`,
-                ...paperSx
-            }}
-            elevation={elevation ? elevation : 24} 
+            <Grid 
+            bgcolor={transparentBackground ? "transparent": bgColor || "black"}
+            borderRadius={"5px"}
+            border={transparentBackground? null: "solid grey"}
+            padding={0}
+            display={"flex"}
+            alignItems={"center"}
+            justifyContent={"center"}
+            sx={gridSx}
             >
                 { hyperLink ?
                     <a href={hyperLink} target="_blank" rel="noreferrer noopener" style={{color: "#F7931A"}}>{text}</a> :
                     <ButtonType 
-                        sx={sx}
                         varient={upload ? 'contained' : null}
                         component={upload ? "label" : null}
                         aria-controls={ariaControls}
@@ -64,12 +63,12 @@ const ButtonField = (props) => {
                         loading={isLoading}
                         loadingIndicatorCenter
                     >
-                        {text && !isLoading && <span style={{color: color ? color :"white"}}>{text}</span>}
-                        {!text && Icon && <Icon/>}
+                        {text && !isLoading && <Typography sx={sx} color={color}>{text}</Typography>}
+                        {!text && Icon && <Icon sx={sx}/>}
                         {upload && <input type="file" hidden onChange={onChange} ref={ref}/>}
                     </ButtonType>
                 }
-            </Paper> 
+            </Grid> 
     );
 
 };

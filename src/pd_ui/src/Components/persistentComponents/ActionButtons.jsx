@@ -4,11 +4,12 @@ import HowToVoteIcon from '@mui/icons-material/HowToVote';
 import TransactWithTreasuryModal from "../modal/TransactWithTreasury";
 import CreateProposalForm from "../modal/proposals/CreateProposalForm";
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
-import SpeedDialField from "../Fields/SpeedDialField";
+import Grid from "@mui/material/Unstable_Grid2";
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import TransactWithWalletModal from "../modal/WalletModal";
 import Typography from "@mui/material/Typography";
 import { animated } from "@react-spring/web";
+import ButtonField from "../Fields/Button";
 
 
 const ActionButton = (props) => {
@@ -55,7 +56,42 @@ const ActionButton = (props) => {
     ]
 
     return (
-    <SpeedDialField actions={speedDialActions} position={"right"}/>
+        <Grid
+        onClick={onClick}
+        style={style}
+        position={"absolute"} 
+        width={"100%"} 
+        xs={12} 
+        display={"flex"} 
+        justifyContent={"center"} 
+        alignItems={"center"} 
+        bgcolor={"transparent"} 
+        padding={0}
+        zIndex={10}
+        >
+            <Grid xs={4} width={"100%"} padding={0} display={"flex"} justifyContent={"center"} alignItems={"center"}>
+            <ButtonField
+                bgColor={"#F7931A"}
+                color={"primary"}
+                gridSx={{ borderRadius: "20px", width: "135px"}}
+                elevation={0}
+                text={"Propose"}
+                onClick={() => {}}
+                iconSize={'small'}
+                sx={{color: "black"}}
+            />
+            </Grid>
+            <Grid xs={4} width={"100%"} padding={0} display={"flex"} justifyContent={"center"} alignItems={"center"}>
+            <ButtonField
+                color={"secondary"}
+                gridSx={{ borderRadius: "20px", width: "135px"}}
+                elevation={0}
+                text={"Transact"}
+                onClick={() => {}}
+                iconSize={'small'}
+            />
+            </Grid>
+        </Grid>
 )
 };
 export default animated(ActionButton);

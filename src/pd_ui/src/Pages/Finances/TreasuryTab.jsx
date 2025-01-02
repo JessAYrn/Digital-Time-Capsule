@@ -214,7 +214,7 @@ const TreasuryTab = (props) => {
                 </AccordionField>
             </Grid>
             <ButtonField
-            paperSx={{marginTop: "20px"}}
+            gridSx={{marginTop: "20px"}}
             text={"View Treasury Account ID"}
             onClick={openTreasuryAccountIdModal}
             iconSize={'large'}

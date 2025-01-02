@@ -45,6 +45,7 @@ const PreviewNeuron = (props) => {
                     buttonColor="primary"
                     labelColor="primary"
                     onClick={() => copyText(neuronId)}
+                    buttonSx={{fontSize: "13px"}}
                 />
                 <DataField
                     label={`Stake: `}

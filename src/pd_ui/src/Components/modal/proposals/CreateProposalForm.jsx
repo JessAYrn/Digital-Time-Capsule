@@ -68,7 +68,7 @@ const CreateProposalForm = (props) => {
                 components: [
                     <Typography padding={"10px"} variant='h6' children={`Error: ${errorMessage}`} />,
                     <ErrorOutlineIcon/>,
-                    <ButtonField paperSx={{padding: "10px"}} color={"secondary"} text={"Close"} Icon={CloseIcon} onClick={() => setModalIsOpen(false)}/>
+                    <ButtonField gridSx={{padding: "10px"}} color={"secondary"} text={"Close"} Icon={CloseIcon} onClick={() => setModalIsOpen(false)}/>
                 ]
             });
         } else{

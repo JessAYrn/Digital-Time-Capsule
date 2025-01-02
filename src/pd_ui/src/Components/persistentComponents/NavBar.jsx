@@ -26,32 +26,32 @@ const NavBar = (props) => {
         <Grid 
         onClick={onClick}
         style={style}
-        bottom={0}
         borderTop={"0.1px groove"}
         borderColor={"primary.dark"}
-        position={"fixed"} 
         width={"100%"} 
+        position={"absolute"}
         xs={12} 
         display={"flex"} 
         justifyContent={"center"} 
         alignItems={"center"} 
         bgcolor={"#0A0A0A"} 
-        zIndex={10}
+        bottom={0}
+        padding={0}
         >
-            <Grid xs={6} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"}>
+            <Grid xs={6} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} padding={0}>
                 <ButtonField
                     Icon={DashboardIcon}
                     transparentBackground={true}
-                    color={'secondary'}
+                    color={'primary'}
                     onClick={() => changeRoute(NAV_LINKS.dashboard)}
                     disabled={modalIsLoading}
                 />
             </Grid>
-            <Grid xs={6} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"}>
+            <Grid xs={6} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} padding={0}>
                 <ButtonField
                     Icon={AccountBalanceIcon}
                     transparentBackground={true}
-                    color={'secondary'}
+                    color={'primary'}
                     onClick={() => changeRoute(NAV_LINKS.finances)}
                     disabled={modalIsLoading}
                 />

@@ -14,7 +14,8 @@ const DataField = (props) => {
         buttonIcon,
         disabled,
         labelColor,
-        buttonColor
+        buttonColor,
+        buttonSx
     } = props;
     
 
@@ -27,8 +28,9 @@ const DataField = (props) => {
                     </Grid>
                     <Grid xs={6} display="flex" justifyContent="right" alignItems="center">
                         <ButtonField
+                            sx={buttonSx}
                             color={buttonColor}
-                            paperSx={{boxShadow: "0 0 0 0"}}
+                            gridSx={{boxShadow: "0 0 0 0"}}
                             transparentBackground={true}
                             elevation={0}
                             isLoading={isLoading}

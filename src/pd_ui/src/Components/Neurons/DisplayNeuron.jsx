@@ -101,7 +101,7 @@ const DisplayNeuron = (props) => {
             <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0} paddingTop={"10px"}>
                 <Grid display={"flex"} justifyContent={"right"} alignItems={"center"} width={"100%"} xs={12} padding={0}>
                     <ButtonField
-                    paperSx={{display: "flex", justifyContent: "center", alignItems: "center", width: "160px"}}
+                    gridSx={{display: "flex", justifyContent: "center", alignItems: "center", width: "160px"}}
                     elevation={0}
                     text={"Increase Stake"}
                     onClick={() => openProposalForm({
@@ -117,7 +117,7 @@ const DisplayNeuron = (props) => {
             <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0} paddingTop={"25px"}>
                 <Typography width={"50%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>Neuron State</Typography>
                 <ButtonField
-                    paperSx={{display: "flex", justifyContent: "right", alignItems: "center", width: "50%"}}
+                    gridSx={{display: "flex", justifyContent: "right", alignItems: "center", width: "50%"}}
                     transparentBackground={true}
                     elevation={0}
                     text={neuronState}
@@ -130,7 +130,7 @@ const DisplayNeuron = (props) => {
             <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0}>
                 <Typography width={"50%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>Dissolve Delay</Typography>
                 <ButtonField
-                    paperSx={{display: "flex", justifyContent: "right", alignItems: "center", width: "50%"}}
+                    gridSx={{display: "flex", justifyContent: "right", alignItems: "center", width: "50%"}}
                     transparentBackground={true}
                     elevation={0}
                     text={`${round2Decimals(dissolveDelay)} ${timeSpan}`}
@@ -143,7 +143,7 @@ const DisplayNeuron = (props) => {
             <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0} paddingTop={"10px"}>
                 <Grid display={"flex"} justifyContent={"left"} alignItems={"center"} width={"33%"} xs={12} padding={0}>
                     <ButtonField
-                    paperSx={{display: "flex", justifyContent: "center", alignItems: "center", width: "230px"}}
+                    gridSx={{display: "flex", justifyContent: "center", alignItems: "center", width: "230px"}}
                     elevation={0}
                     text={"Dissolve Neuron"}
                     onClick={() => openProposalForm({
@@ -155,7 +155,7 @@ const DisplayNeuron = (props) => {
                 </Grid>
                 <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"33%"} xs={12} padding={0}>
                     <ButtonField
-                    paperSx={{display: "flex", justifyContent: "center", alignItems: "center", width: "230px"}}
+                    gridSx={{display: "flex", justifyContent: "center", alignItems: "center", width: "230px"}}
                     elevation={0}
                     text={"Disperse Neuron"}
                     disabled={contributions.length === 0}
@@ -168,7 +168,7 @@ const DisplayNeuron = (props) => {
                 </Grid>
                 <Grid display={"flex"} justifyContent={"right"} alignItems={"center"} width={"33%"} xs={12} padding={0}>
                     <ButtonField
-                    paperSx={{display: "flex", justifyContent: "center", alignItems: "center", width: "230px"}}
+                    gridSx={{display: "flex", justifyContent: "center", alignItems: "center", width: "230px"}}
                     elevation={0}
                     text={"Increase Dissolve Delay"}
                     onClick={() => openProposalForm({
@@ -192,7 +192,7 @@ const DisplayNeuron = (props) => {
             <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0} paddingTop={"10px"}>
                 <Grid display={"flex"} justifyContent={"right"} alignItems={"center"} width={"100%"} xs={12} padding={0}>
                     <ButtonField
-                    paperSx={{display: "flex", justifyContent: "center", alignItems: "center", width: "230px"}}
+                    gridSx={{display: "flex", justifyContent: "center", alignItems: "center", width: "230px"}}
                     elevation={0}
                     text={"Spawn Neuron From Maturity"}
                     disabled={contributions.length === 0}

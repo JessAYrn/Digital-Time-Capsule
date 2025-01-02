@@ -21,12 +21,9 @@ import { AppContext } from './Context';
 import FinancesPage from './Pages/Finances/FinancesPage';
 import CreateAccount from './Components/modal/CreateAccount';
 import { fromE8s, shortenHexString } from './functionsAndConstants/Utils';
-import ActionButton from './Components/persistentComponents/ActionButton';
-import ToolBar  from './Components/persistentComponents/ToolBar';
-import NavBar from './Components/persistentComponents/NavBar';
 import Grid from '@mui/material/Unstable_Grid2';
 import { Typography } from '@mui/material';
-import { useSpring, useScroll } from "@react-spring/web";
+import PersistedComponents from './Components/persistentComponents/PersistedComponents';
 
 
 const Router = (props) => {
@@ -119,34 +116,10 @@ const Router = (props) => {
         notificationsState.dataHasBeenLoaded,
         navigationAndApiState.dataHasBeenLoaded
     ])
-
-    const coordinates = { x:0, y:0 };
-
-    const animate = () => { styleApi.start({opacity: 1}) };
-    
-    const deanimate = () => { styleApi.start({opacity: 0.25}) };
-
-    const [style, styleApi] = useSpring(() => ({
-        from: { 
-            opacity: 1
-        }
-    }),[]);
-
-    useScroll({
-        onChange: ({value: {scrollY}}) => {
-            if(coordinates.y > scrollY) animate();
-            if(coordinates.y < scrollY) deanimate();
-            coordinates.y = scrollY
-        }
-    });
-
     
     return(
        <ThemeProvider theme={theme}>
             <AppContext.Provider value={context}>
-            { displayComponent && <ToolBar style={style}/>}
-            { displayComponent && <ActionButton/> }
-            { displayComponent && <NavBar style={style}/> }
             <Grid 
                 container 
                 columns={12} 
@@ -158,6 +131,7 @@ const Router = (props) => {
                 flexDirection={"column"}
                 marginTop={"60px"}
             > 
+            { displayComponent && <PersistedComponents/>}
                 {displayComponent ? 
                     <>
                         {navigationAndApiState?.location?.route === NAV_LINKS.dashboard && <Analytics/>}

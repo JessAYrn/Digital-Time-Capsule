@@ -44,7 +44,7 @@ const MenuField = (props) => {
                 onClick={handleClick}
                 Icon={MenuIcon}
                 text={label}
-                paperSx={{boxShadow: "0 0 0 0"}}
+                gridSx={{boxShadow: "0 0 0 0"}}
                 color={color}
             />
             <Menu

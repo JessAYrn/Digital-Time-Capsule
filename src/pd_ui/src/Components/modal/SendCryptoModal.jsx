@@ -119,7 +119,7 @@ const SendCrypto = (props) => {
                                 width={"100%"}
                             >
                                 <ButtonField
-                                    paperSx={{margin: "20px", width: "90px"}}
+                                    gridSx={{margin: "20px", width: "90px"}}
                                     text={"summary"}
                                     disabled={hasError_1 || hasError_2 || !numberInput}
                                     onClick={() => setShowSummary(true)}
@@ -163,12 +163,12 @@ const SendCrypto = (props) => {
                         width={"100%"}
                     >
                         <ButtonField
-                            paperSx={{margin: "20px", width: "90px"}}
+                            gridSx={{margin: "20px", width: "90px"}}
                             text={"edit"}
                             onClick={() => { setShowSummary(false); setNumberInput(null)}}
                         />
                         <ButtonField
-                            paperSx={{margin: "20px", width: "90px"}}
+                            gridSx={{margin: "20px", width: "90px"}}
                             text={"send now"}
                             onClick={onSendICP}
                         />
