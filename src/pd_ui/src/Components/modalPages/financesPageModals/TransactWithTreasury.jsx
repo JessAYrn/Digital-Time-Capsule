@@ -1,17 +1,17 @@
 import React, {useState, useContext} from "react";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import { Typography } from "@mui/material";
-import { AppContext } from "../../Context";
-import InputBox from "../Fields/InputBox";
+import { AppContext } from "../../../Context";
+import InputBox from "../../Fields/InputBox";
 import DoneIcon from '@mui/icons-material/Done';
-import ButtonField from "../Fields/Button";
-import { fromE8s, isANumber, toE8s } from "../../functionsAndConstants/Utils";
-import { INPUT_BOX_FORMATS } from "../../functionsAndConstants/Constants";
-import DataField from "../Fields/DataField";
+import ButtonField from "../../Fields/Button";
+import { fromE8s, isANumber, toE8s } from "../../../functionsAndConstants/Utils";
+import { INPUT_BOX_FORMATS } from "../../../functionsAndConstants/Constants";
+import DataField from "../../Fields/DataField";
 import {FormControlLabel} from "@mui/material";
 import {FormGroup} from "@mui/material";
 import {Checkbox} from "@mui/material";
-import MenuField from "../Fields/MenuField";
+import MenuField from "../../Fields/MenuField";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
 export const actions = {

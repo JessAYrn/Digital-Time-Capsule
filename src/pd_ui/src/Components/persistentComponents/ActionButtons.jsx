@@ -1,12 +1,12 @@
 import React, { useContext} from "react";
 import { AppContext } from "../../Context";
 import HowToVoteIcon from '@mui/icons-material/HowToVote';
-import TransactWithTreasuryModal from "../modal/TransactWithTreasury";
-import CreateProposalForm from "../modal/proposals/CreateProposalForm";
+import TransactWithTreasuryModal from "../modalPages/financesPageModals/TransactWithTreasury";
+import CreateProposalForm from "../modalPages/proposals/CreateProposalForm";
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import Grid from "@mui/material/Unstable_Grid2";
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import TransactWithWalletModal from "../modal/WalletModal";
+import TransactWithWalletModal from "../modalPages/financesPageModals/WalletModal";
 import Typography from "@mui/material/Typography";
 import { animated } from "@react-spring/web";
 import ButtonField from "../Fields/Button";

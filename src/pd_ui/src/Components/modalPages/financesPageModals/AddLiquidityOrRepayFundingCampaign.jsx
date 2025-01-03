@@ -1,15 +1,15 @@
 import React, {useState, useContext} from "react";
 import Grid from "@mui/material/Unstable_Grid2";
-import ButtonField from "../Fields/Button";
-import { AppContext } from "../../Context";
+import ButtonField from "../../Fields/Button";
+import { AppContext } from "../../../Context";
 import DoneIcon from "@mui/icons-material/Done";
-import InputBox from "../Fields/InputBox";
+import InputBox from "../../Fields/InputBox";
 import { Typography } from "@mui/material";
-import { INPUT_BOX_FORMATS } from "../../functionsAndConstants/Constants";
-import { toE8s, fromE8s } from "../../functionsAndConstants/Utils";
-import { treasuryTypes } from "../../reducers/treasuryReducer";
-import { sortFundingCampaigns } from "../../functionsAndConstants/treasuryDataFunctions";
-import DataField from "../Fields/DataField";
+import { INPUT_BOX_FORMATS } from "../../../functionsAndConstants/Constants";
+import { toE8s, fromE8s } from "../../../functionsAndConstants/Utils";
+import { treasuryTypes } from "../../../reducers/treasuryReducer";
+import { sortFundingCampaigns } from "../../../functionsAndConstants/treasuryDataFunctions";
+import DataField from "../../Fields/DataField";
 
 export const ACTION_TYPES = {
     addLiquidity: "addLiquidity",

@@ -1,9 +1,9 @@
 import React, {useContext} from 'react';
-import { AppContext } from "../../Context";
-import DataField from '../Fields/DataField';
+import { AppContext } from "../../../Context";
+import DataField from '../../Fields/DataField';
 import Grid from '@mui/material/Unstable_Grid2';
-import { inTrillions, round2Decimals, shortenHexString } from '../../functionsAndConstants/Utils';
-import { copyText } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
+import { inTrillions, round2Decimals, shortenHexString } from '../../../functionsAndConstants/Utils';
+import { copyText } from '../../../functionsAndConstants/walletFunctions/CopyWalletAddress';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DisplayQrCode from './DisplayQrCode';
 

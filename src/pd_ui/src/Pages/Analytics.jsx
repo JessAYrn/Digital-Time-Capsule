@@ -13,7 +13,7 @@ import { fromE8s, inTrillions, round2Decimals, shortenHexString } from '../funct
 import { copyText } from '../functionsAndConstants/walletFunctions/CopyWalletAddress';
 import DataTable from '../Components/Fields/Table';
 import { mapRequestsForAccessToTableRows, mapUsersProfileDataToTableRows, requestsForAccessTableColumns, usersTableColumns } from '../mappers/dashboardMapperFunctions';
-import DisplayProposals from '../Components/modal/proposals/DisplayAllProposals';
+import DisplayProposals from '../Components/modalPages/proposals/DisplayAllProposals';
 import { AppContext } from '../Context';
 import Graph, { getDataSetsInChartFormat } from '../Components/Fields/Chart';
 import { Typography } from '@mui/material';

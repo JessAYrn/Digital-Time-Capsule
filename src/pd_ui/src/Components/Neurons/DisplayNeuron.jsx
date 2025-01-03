@@ -15,8 +15,8 @@ import LockIcon from '@mui/icons-material/Lock';
 import HistoryToggleOffIcon from '@mui/icons-material/HistoryToggleOff';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import DataTable from "../Fields/Table";
-import CreateProposalForm from "../modal/proposals/CreateProposalForm";
-import { PROPOSAL_ACTIONS } from "../modal/proposals/utils";
+import CreateProposalForm from "../modalPages/proposals/CreateProposalForm";
+import { PROPOSAL_ACTIONS } from "../modalPages/proposals/utils";
 
 const NeuronStates = { locked: 1, dissolving: 2, unlocked: 3, spawning: 4 };
 

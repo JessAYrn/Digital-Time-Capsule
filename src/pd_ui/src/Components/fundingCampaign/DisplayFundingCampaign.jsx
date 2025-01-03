@@ -12,7 +12,7 @@ import { GRAPH_DATA_SETS, CHART_TYPES, GRAPH_DISPLAY_LABELS } from "../../functi
 import { getFundingCampaignAssetTypeAndValue } from "../../functionsAndConstants/Utils";
 import { copyText } from "../../functionsAndConstants/walletFunctions/CopyWalletAddress";
 import { mapDataMapToChartFormat } from "../../mappers/treasuryPageMapperFunctions";
-import AddLiquidityOrRepayFundingCampaign, {ACTION_TYPES} from "../modal/AddLiquidityOrRepayFundingCampaign";
+import AddLiquidityOrRepayFundingCampaign, {ACTION_TYPES} from "../modalPages/financesPageModals/AddLiquidityOrRepayFundingCampaign";
 
 const DisplayFundingCampaign = (props) => {
     const { fundingCampaign, campaignId } = props;

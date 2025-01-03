@@ -1,6 +1,6 @@
 import React from 'react';
 import { QrReader } from 'react-qr-reader';
-import ButtonField from '../Fields/Button';
+import ButtonField from '../../Fields/Button';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
 import { Typography } from '@mui/material';
 

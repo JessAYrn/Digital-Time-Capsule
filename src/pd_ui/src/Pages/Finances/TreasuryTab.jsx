@@ -126,8 +126,20 @@ const TreasuryTab = (props) => {
     }, [currencyDataSetName, chartDataSetTimeFrame, balancesHistoryDataArray])
 
     const currencyMenuItemProps = [
-        { text: GRAPH_DISPLAY_LABELS.icp, onClick: () => setCurrencyDataSetName(GRAPH_DISPLAY_LABELS.icp) },
-        { text: GRAPH_DISPLAY_LABELS.icp_staked, onClick: () => setCurrencyDataSetName(GRAPH_DISPLAY_LABELS.icp_staked) }
+        { 
+            text: GRAPH_DISPLAY_LABELS.icp, 
+            onClick: () => {
+                setCurrencyDataSetName(GRAPH_DISPLAY_LABELS.icp);
+                setTreasuryBalancesDisplayed(treasuryBalances[GRAPH_DISPLAY_LABELS.icp]);
+            }
+        },
+        { 
+            text: GRAPH_DISPLAY_LABELS.icp_staked, 
+            onClick: () => {
+                setCurrencyDataSetName(GRAPH_DISPLAY_LABELS.icp_staked);
+                setTreasuryBalancesDisplayed(treasuryBalances[GRAPH_DISPLAY_LABELS.icp_staked]);
+            }
+        }
     ];
         
     const neurons = useMemo(() => {
@@ -139,25 +151,25 @@ const TreasuryTab = (props) => {
     return (
         <Grid columns={12} xs={11} md={9} rowSpacing={0} display="flex" justifyContent="center" alignItems="center" flexDirection={"column"} paddingTop={"0px"}>
         
-            <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"end"}>
-                <Grid xs={6}  width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"} flexDirection={"column"}>
-                <MenuField label={currencyDataSetName} xs={12} display={"flex"} alignItems={"left"} justifyContent={"left"} color={"primary"} menuItemProps={currencyMenuItemProps} MenuIcon={KeyboardArrowDownIcon}/>
-                    <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>
-                        <Typography variant="h4" color={"custom"}>{treasuryBalancesDisplayed.total}</Typography>
-                        <InfoToolTip text="YOUR ICP deposited within the treasury. Available for you to use or withdraw." placement="bottom-end" color="white"/>
-                    </Grid>
-                    {treasuryBalancesDisplayed.multiSig && 
-                    <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>
-                        <Typography variant="h6" color={'#bdbdbd'}>{treasuryBalancesDisplayed.multiSig}</Typography>
-                        <InfoToolTip text="The amount of ICP within the treasury's multi-sig wallet." placement="bottom-end" color="white"/>
-                    </Grid>}
+            <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"center"} flexDirection={"column"} alignItems={"center"}>
+                <Grid xs={12}  width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"} flexDirection={"column"} padding={0}>
+                    <MenuField label={currencyDataSetName} xs={12} display={"flex"} alignItems={"left"} justifyContent={"left"} color={"primary"} menuItemProps={currencyMenuItemProps} MenuIcon={KeyboardArrowDownIcon}/>
                 </Grid>
-                <Grid xs={6}  width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"} flexDirection={"column"}>
-                    <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"}>
-                        <Typography variant="h6" color={"primary.dark"}>{treasuryBalancesDisplayed.user}</Typography>
-                        <InfoToolTip text="The sum of all ICP deposited into the treasury by all users." placement="top-end" color="white"/>
-                    </Grid>
+                <Grid xs={12}  width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"}>
+                            <Grid xs={6} width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>
+                                <Typography variant="h4" color={"custom"}>{treasuryBalancesDisplayed.total}</Typography>
+                                <InfoToolTip text={`The sum of all ${currencyDataSetName} deposited into the treasury by all users.`} placement="top-end" color="white"/>
+                            </Grid>
+                            <Grid xs={6} width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"}>
+                                <Typography variant="h6" color={"primary.dark"}>{treasuryBalancesDisplayed.user}</Typography>
+                                <InfoToolTip text={`The amount of ${currencyDataSetName} deposited within the treasury. Available for you to use within the DeFi protocol as you wish.`} placement="bottom-end" color="white"/>
+                            </Grid>
                 </Grid>
+                {treasuryBalancesDisplayed.multiSig && 
+                <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>
+                    <Typography variant="h6" color={'#bdbdbd'}>{treasuryBalancesDisplayed.multiSig}</Typography>
+                    <InfoToolTip text={`The amount of ${currencyDataSetName} within the treasury's multi-sig wallet. Available for use via proposals submitted to the DAO and voted on by staking members.`} placement="bottom-end" color="white"/>
+                </Grid>}
             </Grid>
 
             <Grid display={"flex"} flexDirection={'column'} xs={12} width={"100%"}>
@@ -195,8 +207,8 @@ const TreasuryTab = (props) => {
 
             {neurons && neurons.length > 0 &&
             <Grid width={"100%"} xs={12} display={'flex'} flexDirection={"column"} justifyContent={"center"} alignItems={"center"}>
-            <Typography variant="h6" >Neurons</Typography>
-            <CarouselComponent components={ neurons.map(neuron => { return (<PreviewNeuron neuronData={neuron} userPrincipal={treasuryState?.userPrincipal} />); }) } />
+                <Typography variant="h6" >Neurons</Typography>
+                <CarouselComponent components={ neurons.map(neuron => { return (<PreviewNeuron neuronData={neuron} userPrincipal={treasuryState?.userPrincipal} />); }) } />
             </Grid> }
 
             <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
@@ -214,10 +226,10 @@ const TreasuryTab = (props) => {
                 </AccordionField>
             </Grid>
             <ButtonField
-            gridSx={{marginTop: "20px"}}
-            text={"View Treasury Account ID"}
-            onClick={openTreasuryAccountIdModal}
-            iconSize={'large'}
+                gridSx={{marginTop: "20px"}}
+                text={"View Treasury Account ID"}
+                onClick={openTreasuryAccountIdModal}
+                iconSize={'large'}
             />
         </Grid>
     )
