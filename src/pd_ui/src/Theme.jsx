@@ -162,7 +162,7 @@ const theme = createTheme({
         styleOverrides: {
           root: {
             width: "100%",
-            "& .MuiInputLabel-root": {
+            "&.MuiInputLabel-root": {
               left: "12px"
             }
           }
@@ -208,10 +208,16 @@ const theme = createTheme({
           },
         }
       },
-      MuiAppBar: {
+      
+      MuiDialog:{
         styleOverrides: {
           root: {
-            backgroundColor: "#343434"
+            ".MuiDialog-paperFullScreen":{
+              maxHeight: "100%",
+              height: "auto",
+              position: "absolute",
+              bottom: 0
+            }
           }
         }
       }

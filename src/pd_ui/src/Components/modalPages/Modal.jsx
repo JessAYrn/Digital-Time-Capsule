@@ -18,7 +18,7 @@ const ModalComponent = (props) => {
       TransitionComponent={Transition}
       > 
         {fullScreen && 
-        <AppBar sx={{ position: 'fixed'}}>
+        <AppBar sx={{ position: 'fixed', top: "auto", backgroundColor: "#343434"}}>
           <Toolbar>
             <IconButton
               edge="start"

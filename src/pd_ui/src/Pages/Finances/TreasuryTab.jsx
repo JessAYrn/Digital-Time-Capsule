@@ -2,22 +2,23 @@ import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { AppContext } from "../../Context";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import { Typography } from "@mui/material";
-import { copyText } from "../../functionsAndConstants/walletFunctions/CopyWalletAddress";
 import { fromE8s, round2Decimals } from "../../functionsAndConstants/Utils";
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import ButtonField from "../../Components/Fields/Button";
 import Graph, {getDataSetsInChartFormat} from "../../Components/Fields/Chart";
 import { CHART_TYPES, GRAPH_DATA_SET_TIMEFRAMES, GRAPH_DISPLAY_LABELS, GRAPH_DATA_SET_TIMEFRAMES } from "../../functionsAndConstants/Constants";
 import InfoToolTip from "../../Components/Fields/InfoToolTip";
 import DisplayAllFundingCampaigns from "../../Components/fundingCampaign/DisplayAllFundingCampaigns";
 import AccordionField from "../../Components/Fields/Accordion";
-import Switch from "../../Components/Fields/Switch";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import TuneIcon from '@mui/icons-material/Tune';
 import TabsComponent from '../../Components/Fields/Tabs';
 import MenuField from '../../Components/Fields/MenuField';
 import CarouselComponent from '../../Components/Fields/Carousel';
 import PreviewNeuron from '../../Components/Neurons/PreviewNeuron';
+import ButtonField from '../../Components/Fields/Button';
+import TreasuryConfingurationsComponent from '../../Components/modalPages/financesPageModals/TreasuryConfigurations';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import { copyText } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
 
 const TIME_FRAMES = [
     GRAPH_DATA_SET_TIMEFRAMES.week, 
@@ -29,7 +30,7 @@ const TIME_FRAMES = [
 
 const TreasuryTab = (props) => {
 
-    const { treasuryState, walletState, navigationAndApiState, setModalIsOpen, setModalIsLoading, setModalProps } = useContext(AppContext);
+    const { treasuryState, walletState, setModalIsOpen, setModalProps } = useContext(AppContext);
 
     const treasuryBalances = {
         [GRAPH_DISPLAY_LABELS.icp_staked]: {
@@ -47,8 +48,6 @@ const TreasuryTab = (props) => {
         }
     };
 
-    const [autoContributeToLoans, setAutoContributeToLoans] = useState(treasuryState?.userTreasuryData?.automaticallyContributeToLoans);
-    const [autoRepayLoans, setAutoRepayLoans] = useState(treasuryState?.userTreasuryData?.automaticallyRepayLoans);
     const [balancesHistoryDataArray, setBalancesHistoryDataArray] = useState([]);
     const [currencyDataSetName, setCurrencyDataSetName] = useState(GRAPH_DISPLAY_LABELS.icp_staked);
     const [treasuryBalancesDisplayed, setTreasuryBalancesDisplayed] = useState(treasuryBalances[GRAPH_DISPLAY_LABELS.icp_staked]);
@@ -56,49 +55,6 @@ const TreasuryTab = (props) => {
 
     const activeFundingCampaigns = treasuryState.fundingCampaigns.filter(([campaignId, {settled}]) => {return settled === false} );
     const inactiveFundingCampaigns = treasuryState.fundingCampaigns.filter(([campaignId, {settled}]) => {return settled === true} );
-
-    const onSwitchToggle = async (newAutoRepayLoansSetting, newAutoLoanContributionSetting) => {
-        setModalIsOpen(true);
-        setModalIsLoading(true);
-        setAutoRepayLoans(newAutoRepayLoansSetting);
-        setAutoContributeToLoans(newAutoLoanContributionSetting);
-        await navigationAndApiState.backendActor.updateAutomatedSettings({
-            automaticallyContributeToLoans: [newAutoLoanContributionSetting],
-            automaticallyRepayLoans: [newAutoRepayLoansSetting]
-        });
-        setModalIsOpen(false);
-        setModalIsLoading(false);
-    }; 
-
-    const displayTreasuryAccountId = () => {
-        let chars = [...treasuryState.daoIcpAccountId];
-        chars.splice(21, 0, " ");
-        chars.splice(43, 0, " ");
-        const accountId = chars.join('');
-        setModalProps({
-            flexDirection: "column",
-            components: [
-                <Typography padding={"10px"} variant='h6' children={"Treasury ICP Account ID:"} />,
-                <Typography padding={"10px"} textAlign={"center"} children={accountId} />,
-                <ButtonField text={"Copy To Clipboard"} onClick={() => copyText(treasuryState.daoIcpAccountId)} Icon={ContentCopyIcon} iconSize={'small'}/>
-            ],
-            handleClose: () => setModalIsOpen(false)
-        });
-    };
-
-    const openTreasuryAccountIdModal = () => {  
-        setModalIsOpen(true);
-        setModalProps({
-            flexDirection: "column",
-            components: [
-                <Typography padding={"10px"} varient={"h6"} children={"Be Careful!"}/>,
-                <WarningAmberIcon color='secondary'/>,
-                <Typography padding={"10px"} marginBottom={"15px"} children={"Sending ICP directly to this account ID will result in no treasury contribution being recorded from your account. In other words, you're essentially donating to the treasury without receiving any credit. If you're not sure what you're doing, do NOT proceed."}/>,
-                <ButtonField text={"I understand, proceed"} onClick={displayTreasuryAccountId} iconSize="small" />,
-            ],
-            handleClose: () => setModalIsOpen(false)
-        });
-    };
 
     useEffect(() => {
         let balancesDataPointsObjArray = [];
@@ -146,24 +102,65 @@ const TreasuryTab = (props) => {
         return treasuryState?.neurons?.icp.filter(neuron => { return !!neuron[1]?.neuronInfo } )
     }, [treasuryState?.neurons]);
 
-    window.scrollTo(0,0);
+
+    const displayTreasuryAccountId = () => {
+        let chars = [...treasuryState.daoIcpAccountId];
+        chars.splice(21, 0, " ");
+        chars.splice(43, 0, " ");
+        const accountId = chars.join('');
+        setModalProps({
+            flexDirection: "column",
+            components: [
+                <Typography padding={"10px"} variant='h6' children={"Treasury ICP Account ID:"} />,
+                <Typography padding={"10px"} textAlign={"center"} children={accountId} />,
+                <ButtonField text={"Copy To Clipboard"} onClick={() => copyText(treasuryState.daoIcpAccountId)} Icon={ContentCopyIcon} iconSize={'small'}/>
+            ],
+            handleClose: () => setModalIsOpen(false)
+        });
+    };
+
+    const openTreasuryAccountIdModal = () => {  
+        setModalIsOpen(true);
+        setModalProps({
+            flexDirection: "column",
+            components: [
+                <Typography padding={"10px"} varient={"h6"} children={"Be Careful!"}/>,
+                <WarningAmberIcon color='secondary'/>,
+                <Typography padding={"10px"} marginBottom={"15px"} children={"Sending ICP directly to this account ID will result in no treasury contribution being recorded from your account. In other words, you're essentially donating to the treasury without receiving any credit. If you're not sure what you're doing, do NOT proceed."}/>,
+                <ButtonField text={"I understand, proceed"} onClick={displayTreasuryAccountId} iconSize="small" />,
+            ],
+            handleClose: () => setModalIsOpen(false)
+        });
+    };
+
+    const openTreasuryConfigurationsPage = () => {  
+        setModalIsOpen(true);
+        setModalProps({
+            fullScreen: true,
+            components: [
+                <TreasuryConfingurationsComponent/>
+            ],
+            handleClose: () => setModalIsOpen(false)
+        });
+    };
 
     return (
         <Grid columns={12} xs={11} md={9} rowSpacing={0} display="flex" justifyContent="center" alignItems="center" flexDirection={"column"} paddingTop={"0px"}>
         
-            <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"center"} flexDirection={"column"} alignItems={"center"}>
-                <Grid xs={12}  width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"} flexDirection={"column"} padding={0}>
-                    <MenuField label={currencyDataSetName} xs={12} display={"flex"} alignItems={"left"} justifyContent={"left"} color={"primary"} menuItemProps={currencyMenuItemProps} MenuIcon={KeyboardArrowDownIcon}/>
+            <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"center"} flexDirection={"column"} alignItems={"center"} padding={0}>
+                <Grid xs={12}  width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} padding={0}>
+                    <MenuField label={currencyDataSetName} xs={6} display={"flex"} alignItems={"left"} justifyContent={"left"} color={"primary"} menuItemProps={currencyMenuItemProps} MenuIcon={KeyboardArrowDownIcon}/>
+                    <ButtonField transparentBackground={true} Icon={TuneIcon} onClick={openTreasuryConfigurationsPage} gridSx={{ width: "100%", alignItems: "right", justifyContent:"right" }}/>
                 </Grid>
                 <Grid xs={12}  width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"}>
-                            <Grid xs={6} width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>
-                                <Typography variant="h4" color={"custom"}>{treasuryBalancesDisplayed.total}</Typography>
-                                <InfoToolTip text={`The sum of all ${currencyDataSetName} deposited into the treasury by all users.`} placement="top-end" color="white"/>
-                            </Grid>
-                            <Grid xs={6} width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"}>
-                                <Typography variant="h6" color={"primary.dark"}>{treasuryBalancesDisplayed.user}</Typography>
-                                <InfoToolTip text={`The amount of ${currencyDataSetName} deposited within the treasury. Available for you to use within the DeFi protocol as you wish.`} placement="bottom-end" color="white"/>
-                            </Grid>
+                    <Grid xs={6} width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>
+                        <Typography variant="h4" color={"custom"}>{treasuryBalancesDisplayed.total}</Typography>
+                        <InfoToolTip text={`The sum of all ${currencyDataSetName} deposited into the treasury by all users.`} placement="top-end" color="white"/>
+                    </Grid>
+                    <Grid xs={6} width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"}>
+                        <Typography variant="h6" color={"primary.dark"}>{treasuryBalancesDisplayed.user}</Typography>
+                        <InfoToolTip text={`The amount of ${currencyDataSetName} deposited within the treasury. Available for you to use within the DeFi protocol as you wish.`} placement="bottom-end" color="white"/>
+                    </Grid>
                 </Grid>
                 {treasuryBalancesDisplayed.multiSig && 
                 <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>
@@ -172,7 +169,7 @@ const TreasuryTab = (props) => {
                 </Grid>}
             </Grid>
 
-            <Grid display={"flex"} flexDirection={'column'} xs={12} width={"100%"}>
+            <Grid display={"flex"} flexDirection={'column'} xs={12} width={"100%"} padding={0}>
                 <Graph 
                 type={CHART_TYPES.line} 
                 datasets={chartDataSets}
@@ -187,21 +184,6 @@ const TreasuryTab = (props) => {
                 setSelectedTab={setChartDataSetTimeFrame} 
                 indicatorColor={"primary"}
                 sx={{ backgroundColor: "transparent", position: "relative", top: "28px"}}
-                />
-            </Grid>
-
-            <Grid columns={12} xs={12} rowSpacing={0} display="flex" justifyContent="center" alignItems="center" flexDirection={"column"} width={"100%"}>
-                <Switch
-                checked={autoRepayLoans}
-                onClick={() => onSwitchToggle(!autoRepayLoans, autoContributeToLoans)}
-                labelLeft={"Auto pay on loans received from funding campaigns: "}
-                sx={{ paddingTop: "0px", paddingBottom: "0px" }}
-                />
-                <Switch
-                checked={autoContributeToLoans}
-                onClick={() => onSwitchToggle(autoRepayLoans, !autoContributeToLoans)}
-                labelLeft={"Auto lend to approved funding campaigns: "}
-                sx={{ paddingTop: "0px", paddingBottom: "0px" }}
                 />
             </Grid>
 
@@ -226,7 +208,7 @@ const TreasuryTab = (props) => {
                 </AccordionField>
             </Grid>
             <ButtonField
-                gridSx={{marginTop: "20px"}}
+                gridSx={{marginTop: "20px", marginBottom: "60px"}}
                 text={"View Treasury Account ID"}
                 onClick={openTreasuryAccountIdModal}
                 iconSize={'large'}
