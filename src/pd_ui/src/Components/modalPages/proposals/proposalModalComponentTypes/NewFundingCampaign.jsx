@@ -369,6 +369,7 @@ const NewFundingCampaign = (props) => {
                                 text={`${avaiableStake} ICP`} 
                                 isLoading={!treasuryState.dataHasBeenLoaded} 
                                 disabled={true}
+                                transparentBackground={true}
                             />
                         }
                         <Grid minWidth={"275px"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
@@ -383,7 +384,6 @@ const NewFundingCampaign = (props) => {
                             parseNumber={parseFloat}
                             suffix={` ${initialCollateralLocked.type.toUpperCase()}`}
                             onChange={(value) => {
-                                console.log("Value: ", `${value}`);
                                 setHasError_6(`${value}` === "NaN" || value === NaN || value === "" || value === 0 || value > avaiableStake);
                                 setInitialCollateralLocked({...initialCollateralLocked, value});
                             }}

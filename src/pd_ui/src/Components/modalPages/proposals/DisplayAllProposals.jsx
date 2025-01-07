@@ -10,7 +10,7 @@ const DisplayProposals = (props) => {
             {
                 proposals?.length > 0 && 
                 <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
-                    <AccordionField>
+                    {/* <AccordionField>
                         {proposals?.map(([proposalId, proposal]) => {
                             let id = parseInt(proposalId);
                             let {action, finalized, proposer, executed, timeVotingPeriodEnds, timeInitiated, voteTally, votes} = proposal;
@@ -30,7 +30,7 @@ const DisplayProposals = (props) => {
                                 />
                             )
                         })}
-                    </AccordionField>
+                    </AccordionField> */}
                 </Grid>
             }
         </>

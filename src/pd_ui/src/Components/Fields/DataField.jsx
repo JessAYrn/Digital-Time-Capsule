@@ -15,7 +15,8 @@ const DataField = (props) => {
         disabled,
         labelColor,
         buttonColor,
-        buttonSx
+        buttonSx,
+        transparentBackground
     } = props;
     
 
@@ -31,7 +32,7 @@ const DataField = (props) => {
                             sx={buttonSx}
                             color={buttonColor}
                             gridSx={{boxShadow: "0 0 0 0"}}
-                            transparentBackground={true}
+                            transparentBackground={transparentBackground}
                             elevation={0}
                             isLoading={isLoading}
                             text={text}

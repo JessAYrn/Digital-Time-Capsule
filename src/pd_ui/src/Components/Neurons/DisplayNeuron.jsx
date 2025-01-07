@@ -2,10 +2,9 @@ import React, {useContext, useMemo} from "react";
 import { AppContext } from "../../Context";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import { Typography } from "@mui/material";
-import { fromE8s, round2Decimals, secondsToHours, hoursToDays, daysToMonths } from "../../functionsAndConstants/Utils";
-import Graph, { getDataSetsInChartFormat } from "../Fields/Chart";
+import { fromE8s, round2Decimals, round8Decimals, secondsToHours, hoursToDays, daysToMonths } from "../../functionsAndConstants/Utils";
+import Graph, { getLabelsAndDataSetsInChartFormat, sortAndReduceDataMapArray } from "../Fields/Chart";
 import { CHART_TYPES } from "../../functionsAndConstants/Constants";
-import { neuronContributionsTableColumns, mapNeuronContributionsToTableRows } from "../../mappers/treasuryPageMapperFunctions";
 import { getTotalContributions, getUserNeuronContribution } from "../../functionsAndConstants/treasuryDataFunctions";
 import { GRAPH_DISPLAY_LABELS } from "../../functionsAndConstants/Constants";
 import ButtonField from "../Fields/Button";
@@ -17,8 +16,6 @@ import LockOpenIcon from '@mui/icons-material/LockOpen';
 import DataTable from "../Fields/Table";
 import CreateProposalForm from "../modalPages/proposals/CreateProposalForm";
 import { PROPOSAL_ACTIONS } from "../modalPages/proposals/utils";
-
-const NeuronStates = { locked: 1, dissolving: 2, unlocked: 3, spawning: 4 };
 
 const DisplayNeuron = (props) => {
     const { neuronData, userPrincipal} = props;
@@ -59,28 +56,23 @@ const DisplayNeuron = (props) => {
         });
     };
     const {chartLabels, chartDataSets} = useMemo(() => {
-        const chartLabels = [];
-        const contributionsObjsArray = [];
+        const dataMapArray = [];
 
-        for(let [principal, neuronContributionObj] of contributions){
-            chartLabels.push(homePageState?.canisterData?.userNames[principal]);
-            for(let property in neuronContributionObj) neuronContributionObj[property] = fromE8s(parseInt(neuronContributionObj[property]))
-            contributionsObjsArray.push(neuronContributionObj);
+        for(let [principal, {stake_e8s}] of contributions){
+            const label = homePageState?.canisterData?.userNames[principal];
+            const dataPointObj = { stake_e8s: fromE8s(parseInt(stake_e8s)) }; 
+            dataMapArray.push([label, dataPointObj ]);
         };
-        let  chartDataSets =  getDataSetsInChartFormat(contributionsObjsArray, 125);
 
-        const includedDataSets = [GRAPH_DISPLAY_LABELS.votingPower, GRAPH_DISPLAY_LABELS.stake_e8s];
-        chartDataSets = chartDataSets.filter(({label}) => { return includedDataSets.includes(label)});
-        chartDataSets = chartDataSets.map(dataSet => {
-            if(dataSet.label === GRAPH_DISPLAY_LABELS.stake_e8s) return {...dataSet, label: GRAPH_DISPLAY_LABELS.icp_staked};
-            else return dataSet
-        });
+        const reducedDataMapArray = sortAndReduceDataMapArray(dataMapArray, "stake_e8s", 10);
+        const {labels: chartLabels, datasets} =  getLabelsAndDataSetsInChartFormat(reducedDataMapArray, 125);
+        const chartDataSets = [{...datasets[0], label: GRAPH_DISPLAY_LABELS.icp_staked}]
 
         return {chartLabels, chartDataSets};
     }, [contributions]);
 
     return (
-        <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} xs={12} flexDirection={"column"} marginTop={"60px"} padding={0}>
+        <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} xs={12} flexDirection={"column"} padding={0}>
             <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0}>
                 <Typography width={"50%"} display={"flex"} justifyContent={"left"} alignItems={"center"} variant="h6">Neuron Voting Power</Typography>
                 <Typography width={"50%"} display={"flex"} justifyContent={"right"} alignItems={"center"} variant="h6">{`${neuronInfo?.voting_power ? round2Decimals(fromE8s(parseInt(neuronInfo?.voting_power))) : "Spawning..."}`}</Typography>
@@ -237,3 +229,43 @@ const DisplayNeuron = (props) => {
 };
 
 export default DisplayNeuron;
+
+
+const NeuronStates = { locked: 1, dissolving: 2, unlocked: 3, spawning: 4 };
+
+const neuronContributionsTableColumns = [
+    { 
+        field: 'userName', 
+        headerName: 'User Name', 
+        width: 150,
+        editable: false
+    },
+    { 
+        field: 'stake_e8s', 
+        headerName: 'Stake', 
+        width: 200,
+        editable: false
+    },
+    { 
+        field: 'voting_power', 
+        headerName: 'Voting Power', 
+        width: 200,
+        editable: false
+    },
+];
+
+const mapNeuronContributionsToTableRows = (neuronContributions, userNames) => {
+    const neuronContributions_ = neuronContributions.map(([userPrincipal, {stake_e8s, voting_power}]) => {
+        return {
+            id: userPrincipal,
+            userName: userNames[userPrincipal],
+            stake_e8s: `${round8Decimals(fromE8s(parseInt(stake_e8s)))} ICP`,
+            voting_power: round8Decimals(fromE8s(parseInt(voting_power)))
+        }
+    });
+    const sortedNeuronContributions = neuronContributions_.sort(function({stake_e8s: stake_e8s_a}, {stake_e8s: stake_e8s_b}){
+        if(stake_e8s_a > stake_e8s_b) return -1;
+        else return 1;
+    });
+    return sortedNeuronContributions;
+}

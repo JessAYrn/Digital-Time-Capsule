@@ -11,7 +11,7 @@ const DisplayAllFundingCampaigns = (props) => {
     return (
         fundingCampaigns && fundingCampaigns?.length > 0 ? 
         <Grid xs={12} display={"flex"} flexDirection={"column"} justifyContent={"center"} alignItems={"center"}>
-            <Accordion>
+            {/* <Accordion>
                 {fundingCampaigns.map(([campaignId, campaign]) => {
                     return (
                         <div
@@ -22,7 +22,7 @@ const DisplayAllFundingCampaigns = (props) => {
                         />
                     );
                 })}
-            </Accordion>
+            </Accordion> */}
         </Grid> : <> </>
     );
 

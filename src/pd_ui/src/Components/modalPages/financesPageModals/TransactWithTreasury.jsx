@@ -101,6 +101,7 @@ const TransactWithTreasuryModal = (props) => {
                     text={`${(action === actions.withdraw || action === actions.send) ? fromE8s(treasuryState.userTreasuryData?.balances.icp || 0): fromE8s(walletState?.walletData?.balance) } ICP`}
                     isLoading={!treasuryState.dataHasBeenLoaded}
                     disabled={true}
+                    transparentBackground={true}
                 />
             </Grid>
             {action && <InputBox

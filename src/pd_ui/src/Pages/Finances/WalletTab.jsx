@@ -28,6 +28,7 @@ const WalletTab = (props) => {
             >
                 {addresses.map((address) => {
                     return (<DataField
+                        transparentBackground={true}
                         label={`${address[0]}`}
                         text={`${shortenHexString(address[1])}`}
                         buttonIcon={ContentCopyIcon}
@@ -99,7 +100,7 @@ const WalletTab = (props) => {
                 justifyContent="center" 
                 alignItems="center" 
             >
-                {!!walletState?.walletData?.txHistory?.data?.length && 
+                {/* {!!walletState?.walletData?.txHistory?.data?.length && 
                 <AccordionField>
                     {walletState.walletData.txHistory.data.map(([mapKey, tx]) => {
                         const {balanceDelta, increase, recipient, timeStamp, source} = tx;
@@ -111,7 +112,7 @@ const WalletTab = (props) => {
         
                         return (<div title={title} subtitle={subtitle} CustomComponent={DisplayTxAddresses} addresses={[source_, recipient_]}></div>)
                     })}
-                </AccordionField>}
+                </AccordionField>} */}
 
             </Grid>
         </Grid>

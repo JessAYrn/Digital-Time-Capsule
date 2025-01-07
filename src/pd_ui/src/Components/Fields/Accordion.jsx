@@ -7,50 +7,25 @@ import { useMemo } from 'react';
 import { Typography } from '@mui/material';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
 
-const AccordionField = (props_) => {
-    const {children} = props_;
-    const elements = useMemo(() => { return children.length ? children : [children]}, [props_.children]);
+const AccordionField = (props) => {
+    const {children, title, subtitle, sx, defaultComponent} = props;
   return (
-    <Grid xs={12} width={"100%"} color={"primary"}>
-        {elements.map((child) => {
-            const {props} = child;
-            const {title, subtitle, texts, image, CustomComponent } = props;
-            return (
-                <Accordion color="primary">
-                    <Grid display={'flex'} justifyContent={'center'} alignItems={'center'} columns={12} width={"100%"} padding={0}>
-                        <AccordionSummary
-                            color='primary'
-                            expandIcon={<ExpandMoreIcon color='primary'/>}
-                            aria-controls="panel1a-content"
-                            id="panel1a-header"
-                            sx={{width: '100%'}}
-                        >
-                            {title && <Grid display={"flex"} justifyContent={"left"} alignItems={"center"} paddingBottom={0} xs={subtitle? 8 : 12} width={"100%"} padding={0}>
-                                <Typography color={'primary'}>{title}</Typography>
-                            </Grid>}
-                            {subtitle && <Grid display={"flex"} justifyContent={"right"} alignItems={"center"} paddingBottom={0} xs={4} width={"100%"} padding={0}>
-                                <Typography color={"primary"}>{subtitle}</Typography>
-                            </Grid>}
-                        </AccordionSummary>
-                    </Grid>
-                    <AccordionDetails>
-                        {texts && 
-                            <Grid display={'flex'} justifyContent={'center'} alignItems={'center'} flexDirection={'column'}>
-                                {texts.map((text) => {
-                                    return (
-                                        <Grid display={"flex"} justifyContent={"left"} alignItems={"center"} paddingBottom={0}>
-                                            <Typography>{text}</Typography>
-                                        </Grid>
-                                    )
-                                })}
-                            </Grid>
-                        }
-                        {image && <img src={image} className='accordianImage'/>}
-                        {CustomComponent && <CustomComponent {...props}/>}
-                    </AccordionDetails>
-                </Accordion>
-            )}
-        )}
+    <Grid xs={12} width={"100%"} color={"primary"} sx={sx}>
+        <Accordion color="primary">
+            <AccordionSummary
+                color='primary'
+                expandIcon={<ExpandMoreIcon color='primary'/>}
+                aria-controls="panel1a-content"
+                id="panel1a-header"
+                sx={{width: '100%', display: "flex", justifyContent: "left", alignItems:"center"}}
+            >
+                {title && <Typography width={"50%"} color={'primary'} display={"flex"} justifyContent={"left"} alignItems={"center"}>{title}</Typography>}
+                {subtitle && <Typography width={"50%"} color={'primary'} display={"flex"} justifyContent={"right"} alignItems={"center"}>{subtitle}</Typography>}
+            </AccordionSummary>
+            <AccordionDetails sx={{display: "flex", flexDirection: "column", width:"100%", justifyContent:"center", alignItems:"center", padding:"0px"}}>
+                {!!children.length ? children : defaultComponent}
+            </AccordionDetails>
+        </Accordion>
     </Grid>
   );
 }

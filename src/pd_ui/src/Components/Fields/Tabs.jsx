@@ -16,6 +16,7 @@ const TabsComponent = (props) => {
     return (
         <Box xs={12} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"left"} sx={sx}>
             <Tabs 
+                sx={{ height: "43px", minHeight: "auto"}}
                 value={selectedTab} 
                 onChange={(event, newValue) => setSelectedTab(newValue)} 
                 aria-label="basic tabs example" 

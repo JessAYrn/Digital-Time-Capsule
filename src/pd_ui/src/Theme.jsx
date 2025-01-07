@@ -39,7 +39,8 @@ const theme = createTheme({
       MuiPaper:{
         styleOverrides: {
           root:{
-            backgroundColor: "#343434"
+            boxShadow: "1px 1px 1px 0px #343434",
+            backgroundColor: "#0A0A0A"
           }
         }
       },

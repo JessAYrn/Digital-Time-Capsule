@@ -5,17 +5,42 @@ import { CHART_TYPES } from "../../functionsAndConstants/Constants";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 Chart.register(...registerables);
 
-export const getDataSetsInChartFormat = (dataPointsObjsArray, radius) => {
-    let datasets = [];
-    const getDataSet = (property) => {
-        const data = dataPointsObjsArray.map((dataPointsObj) => { return dataPointsObj[property] });
-        const label = property;
-        const boarderWidth = 0.5;
-        const pointHoverRadius = 5;
-        return {data, label, boarderWidth, radius, pointHoverRadius};
+export const getLabelsAndDataSetsInChartFormat = (dataMapArray, radius, noDataPointsLabels = false) => {
+    const datasets = [];
+    const labels = [];
+    const datasetsMap = {};
+
+    for(let [dataPointsLabel, dataPointsObj] of dataMapArray){
+
+      labels.push(noDataPointsLabels ?  "" :  dataPointsLabel);
+
+      for(let dataType in dataPointsObj) {
+        if(!datasetsMap[dataType]) datasetsMap[dataType] = { data: [], label: dataType, boarderWidth: 0.5, pointHoverRadius: 5, radius};
+        datasetsMap[dataType].data.push(dataPointsObj[dataType])
+      }
     };
-    for(let property in dataPointsObjsArray[0]){ datasets.push(getDataSet(property)) };
-    return datasets;
+
+    for(let dataset in datasetsMap) datasets.push(datasetsMap[dataset]);
+
+    return {datasets, labels};
+};
+
+export const sortAndReduceDataMapArray = (dataMapArray, dataType, accumulateAfterIndex, initialValue = 0) => {
+  const arraySorted = dataMapArray.sort(
+    function([_, obj_a],[__, obj_b]){
+    if(obj_a[dataType] > obj_b[dataType]) return -1; else return 1;
+  });
+
+  const distinguishedValues = arraySorted.slice(0,accumulateAfterIndex).map(([key, value]) => {
+    return [key, {[dataType]: value[dataType]}];
+  });
+
+  const theRest = arraySorted.slice(accumulateAfterIndex);
+  const theRestReduced = theRest.reduce(([_, obj_accumulator], [__, obj_currentValue]) => {
+    return ["the Rest", {[dataType]: obj_accumulator[dataType] + obj_currentValue[dataType]}]
+  }, ["the Rest", {[dataType]: initialValue}]);
+
+  return distinguishedValues.concat([theRestReduced]);
 };
 
 const chartOptions = {

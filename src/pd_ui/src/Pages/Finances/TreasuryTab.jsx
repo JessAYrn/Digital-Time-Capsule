@@ -3,7 +3,7 @@ import { AppContext } from "../../Context";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import { Typography } from "@mui/material";
 import { fromE8s, round2Decimals } from "../../functionsAndConstants/Utils";
-import Graph, {getDataSetsInChartFormat} from "../../Components/Fields/Chart";
+import Graph, {getLabelsAndDataSetsInChartFormat} from "../../Components/Fields/Chart";
 import { CHART_TYPES, GRAPH_DATA_SET_TIMEFRAMES, GRAPH_DISPLAY_LABELS, GRAPH_DATA_SET_TIMEFRAMES } from "../../functionsAndConstants/Constants";
 import InfoToolTip from "../../Components/Fields/InfoToolTip";
 import DisplayAllFundingCampaigns from "../../Components/fundingCampaign/DisplayAllFundingCampaigns";
@@ -48,54 +48,38 @@ const TreasuryTab = (props) => {
         }
     };
 
-    const [balancesHistoryDataArray, setBalancesHistoryDataArray] = useState([]);
     const [currencyDataSetName, setCurrencyDataSetName] = useState(GRAPH_DISPLAY_LABELS.icp_staked);
-    const [treasuryBalancesDisplayed, setTreasuryBalancesDisplayed] = useState(treasuryBalances[GRAPH_DISPLAY_LABELS.icp_staked]);
     const [chartDataSetTimeFrame, setChartDataSetTimeFrame] = useState(GRAPH_DATA_SET_TIMEFRAMES.month);
 
     const activeFundingCampaigns = treasuryState.fundingCampaigns.filter(([campaignId, {settled}]) => {return settled === false} );
     const inactiveFundingCampaigns = treasuryState.fundingCampaigns.filter(([campaignId, {settled}]) => {return settled === true} );
 
-    useEffect(() => {
-        let balancesDataPointsObjArray = [];
-        for(let date in treasuryState?.balancesData){
-            const daoBalancesDataPointsObj = {...treasuryState.balancesData[date]};
-            for(let property in walletState.balancesData[date]) daoBalancesDataPointsObj[`your ${property}`] = walletState.balancesData[date][property];
-            balancesDataPointsObjArray.push(daoBalancesDataPointsObj);
-        };
-        setBalancesHistoryDataArray(balancesDataPointsObjArray);
-    },[]);
-
     const {chartLabels, chartDataSets} = useMemo(() => {
-        const relevantDataPoints = [];
-        const chartLabels = [];
-        for(let index in balancesHistoryDataArray){
-            if(chartDataSetTimeFrame === GRAPH_DATA_SET_TIMEFRAMES.week && index >= 7) break;
-            if(chartDataSetTimeFrame === GRAPH_DATA_SET_TIMEFRAMES.month && index >= 31) break;
-            if(chartDataSetTimeFrame === GRAPH_DATA_SET_TIMEFRAMES.year && index >= 365) break;
-            chartLabels.push("");
-            relevantDataPoints.push(balancesHistoryDataArray[index]);
+
+        let count = 0;
+        const dataMapArray = [];
+        for(let [date, balances] of Object.entries(treasuryState?.balancesData)){
+            if(chartDataSetTimeFrame === GRAPH_DATA_SET_TIMEFRAMES.week && count >= 7) break;
+            if(chartDataSetTimeFrame === GRAPH_DATA_SET_TIMEFRAMES.month && count >= 31) break;
+            if(chartDataSetTimeFrame === GRAPH_DATA_SET_TIMEFRAMES.year && count >= 365) break;
+            const label = date;
+            const dataPointsObj = {
+                [currencyDataSetName]: balances[currencyDataSetName],
+                [`your ${currencyDataSetName}`]: walletState?.balancesData[date] ? walletState?.balancesData[date][currencyDataSetName] : null
+            };
+            dataMapArray.push([label, dataPointsObj])
+            count ++
         };
-        let chartDataSets = getDataSetsInChartFormat(relevantDataPoints.reverse(), 1);
-        chartDataSets = chartDataSets.filter(({label}) => { return label === currencyDataSetName || label === `your ${currencyDataSetName}`});
-        return {chartLabels, chartDataSets};
-    }, [currencyDataSetName, chartDataSetTimeFrame, balancesHistoryDataArray])
+
+        let {labels, datasets} = getLabelsAndDataSetsInChartFormat(dataMapArray.reverse(), 1, true);
+        
+        return {chartLabels: labels, chartDataSets: datasets};
+
+    }, [currencyDataSetName, chartDataSetTimeFrame])
 
     const currencyMenuItemProps = [
-        { 
-            text: GRAPH_DISPLAY_LABELS.icp, 
-            onClick: () => {
-                setCurrencyDataSetName(GRAPH_DISPLAY_LABELS.icp);
-                setTreasuryBalancesDisplayed(treasuryBalances[GRAPH_DISPLAY_LABELS.icp]);
-            }
-        },
-        { 
-            text: GRAPH_DISPLAY_LABELS.icp_staked, 
-            onClick: () => {
-                setCurrencyDataSetName(GRAPH_DISPLAY_LABELS.icp_staked);
-                setTreasuryBalancesDisplayed(treasuryBalances[GRAPH_DISPLAY_LABELS.icp_staked]);
-            }
-        }
+        { text: GRAPH_DISPLAY_LABELS.icp, onClick: () => { setCurrencyDataSetName(GRAPH_DISPLAY_LABELS.icp); }},
+        { text: GRAPH_DISPLAY_LABELS.icp_staked, onClick: () => { setCurrencyDataSetName(GRAPH_DISPLAY_LABELS.icp_staked); }}
     ];
         
     const neurons = useMemo(() => {
@@ -145,7 +129,7 @@ const TreasuryTab = (props) => {
     };
 
     return (
-        <Grid columns={12} xs={11} md={9} rowSpacing={0} display="flex" justifyContent="center" alignItems="center" flexDirection={"column"} paddingTop={"0px"}>
+        <Grid columns={12} xs={11} md={9} rowSpacing={0} display="flex" justifyContent="center" alignItems="center" flexDirection={"column"} paddingTop={"15px"}>
         
             <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"center"} flexDirection={"column"} alignItems={"center"} padding={0}>
                 <Grid xs={12}  width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} padding={0}>
@@ -154,17 +138,17 @@ const TreasuryTab = (props) => {
                 </Grid>
                 <Grid xs={12}  width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"}>
                     <Grid xs={6} width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>
-                        <Typography variant="h4" color={"custom"}>{treasuryBalancesDisplayed.total}</Typography>
+                        <Typography variant="h4" color={"custom"}>{treasuryBalances[currencyDataSetName]?.total}</Typography>
                         <InfoToolTip text={`The sum of all ${currencyDataSetName} deposited into the treasury by all users.`} placement="top-end" color="white"/>
                     </Grid>
                     <Grid xs={6} width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"}>
-                        <Typography variant="h6" color={"primary.dark"}>{treasuryBalancesDisplayed.user}</Typography>
+                        <Typography variant="h6" color={"primary.dark"}>{treasuryBalances[currencyDataSetName]?.user}</Typography>
                         <InfoToolTip text={`The amount of ${currencyDataSetName} deposited within the treasury. Available for you to use within the DeFi protocol as you wish.`} placement="bottom-end" color="white"/>
                     </Grid>
                 </Grid>
-                {treasuryBalancesDisplayed.multiSig && 
+                {treasuryBalances[currencyDataSetName]?.multiSig && 
                 <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>
-                    <Typography variant="h6" color={'#bdbdbd'}>{treasuryBalancesDisplayed.multiSig}</Typography>
+                    <Typography variant="h6" color={'#bdbdbd'}>{treasuryBalances[currencyDataSetName]?.multiSig}</Typography>
                     <InfoToolTip text={`The amount of ${currencyDataSetName} within the treasury's multi-sig wallet. Available for use via proposals submitted to the DAO and voted on by staking members.`} placement="bottom-end" color="white"/>
                 </Grid>}
             </Grid>
@@ -188,13 +172,17 @@ const TreasuryTab = (props) => {
             </Grid>
 
             {neurons && neurons.length > 0 &&
-            <Grid width={"100%"} xs={12} display={'flex'} flexDirection={"column"} justifyContent={"center"} alignItems={"center"}>
-                <Typography variant="h6" >Neurons</Typography>
-                <CarouselComponent components={ neurons.map(neuron => { return (<PreviewNeuron neuronData={neuron} userPrincipal={treasuryState?.userPrincipal} />); }) } />
-            </Grid> }
+                <CarouselComponent 
+                    title={"Neurons"} 
+                    sx={{marginTop: "75px"}}
+                    defaultComponent={<Typography textAlign={"center"} component={"There are currently no neurons staked in this treasury"} />}
+                >
+                    { neurons.map(neuron => { return (<PreviewNeuron neuronData={neuron} userPrincipal={treasuryState?.userPrincipal} />); }) }
+                </CarouselComponent>
+            }
 
             <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
-                <AccordionField>
+                {/* <AccordionField>
                 <div 
                     title={"Active Funding Campaigns"} 
                     fundingCampaigns={activeFundingCampaigns}
@@ -205,7 +193,7 @@ const TreasuryTab = (props) => {
                     fundingCampaigns={inactiveFundingCampaigns}
                     CustomComponent={DisplayAllFundingCampaigns}
                 ></div>
-                </AccordionField>
+                </AccordionField> */}
             </Grid>
             <ButtonField
                 gridSx={{marginTop: "20px", marginBottom: "60px"}}

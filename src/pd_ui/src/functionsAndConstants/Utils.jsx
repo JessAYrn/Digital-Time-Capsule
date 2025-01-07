@@ -94,9 +94,22 @@ export const shortenHexString = (hexString) => {
   return shortString
 }
 
+export const shortenString = (string, length) => {
+  const suffix = string.length > length ? "..." : "";
+  return string.slice(0,length) + suffix;
+};
+
 export const milisecondsToNanoSeconds = (time) => {
   return time * 1000000;
 }
+
+export const secondsToDays = (s) => {
+  return s / (60 * 60 * 24)
+}
+
+export const daysToSeconds = (d) => {
+  return d * 24 * 60 * 60
+};
 
 export const nanoSecondsToMiliSeconds = (time) => {
   return parseInt(time / 1000000);
@@ -146,10 +159,6 @@ export const getFileArrayBuffer = (inputFile) => {
 export const delay = (ms) => {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
-
-export const daysToSeconds = (days) => {
-  return days * 86400;
-};
 
 export const secondsToMilliseconds = (seconds) => {
   return seconds * 1000;
@@ -281,12 +290,6 @@ export const flattenUint8array = (array) => {
 export const getCurrentURL = () => {
   return window.location.href
 };
-
-export const isLocalHost = () => {
-  const url = getCurrentURL();
-  if(url.includes("localhost")) return true;
-  else false;
-}
 
 export const extractCanisterIdFromURL = (URL) => {
   if(process.env.NODE_ENV === "development") return MASTER_COPY_FRONTEND_CANISTER_ID;

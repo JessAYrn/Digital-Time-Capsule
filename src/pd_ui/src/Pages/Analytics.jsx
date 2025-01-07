@@ -9,23 +9,27 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import Grid from '@mui/material/Unstable_Grid2';
 import AccordionField from '../Components/Fields/Accordion';
 import {homePageTypes} from '../reducers/homePageReducer';
-import { fromE8s, inTrillions, round2Decimals, shortenHexString } from '../functionsAndConstants/Utils';
+import { fromE8s, inTrillions, round2Decimals, shortenHexString, shortenString } from '../functionsAndConstants/Utils';
 import { copyText } from '../functionsAndConstants/walletFunctions/CopyWalletAddress';
 import DataTable from '../Components/Fields/Table';
 import { mapRequestsForAccessToTableRows, mapUsersProfileDataToTableRows, requestsForAccessTableColumns, usersTableColumns } from '../mappers/dashboardMapperFunctions';
-import DisplayProposals from '../Components/modalPages/proposals/DisplayAllProposals';
 import { AppContext } from '../Context';
-import Graph, { getDataSetsInChartFormat } from '../Components/Fields/Chart';
+import Graph, { getLabelsAndDataSetsInChartFormat, sortAndReduceDataMapArray } from '../Components/Fields/Chart';
 import { Typography } from '@mui/material';
+import CarouselComponent from '../Components/Fields/Carousel';
+import PreviewProposal from '../Components/modalPages/proposals/PreviewProposal';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import ThumbDownIcon from '@mui/icons-material/ThumbDown';
+import DisplayProposal from '../Components/modalPages/proposals/DisplayProposal';
 
 const Analytics = (props) => {
 
-    const { homePageDispatch, homePageState, navigationAndApiState, treasuryState, setModalIsOpen, setModalIsLoading } = useContext(AppContext);
+    const { homePageDispatch, homePageState, navigationAndApiState, treasuryState, setModalIsOpen, setModalIsLoading, setModalProps } = useContext(AppContext);
 
     const [requestsTableIsLoading, setRequestsTableIsLoading] = useState(false);
     const [usersTableIsLoading, setUsersTableIsLoading] = useState(false);
 
-    let activeProposal = homePageState?.canisterData?.proposals?.filter(proposal => !proposal[1].finalized);
+    let activeProposals = homePageState?.canisterData?.proposals?.filter(proposal => !proposal[1].finalized);
     let inactiveProposals = homePageState?.canisterData?.proposals?.filter(proposal => proposal[1].finalized);
 
     const onGrantAccess = async (args) => {
@@ -109,28 +113,38 @@ const Analytics = (props) => {
         });
     };
 
-    const {labels, datasets} = useMemo(() => {
-        const labels = [];
-        const dataPointsObjsArray = [];
-        for(let [principal, { balances: balancesObj }] of treasuryState?.usersTreasuryDataArray){
-            labels.push(homePageState?.canisterData?.userNames[principal]);
-            for(let property in balancesObj) balancesObj[property] = fromE8s(balancesObj[property]);
-            dataPointsObjsArray.push(balancesObj)
-        };
-        const datasets =  getDataSetsInChartFormat(dataPointsObjsArray, 125);
-        const includedDataSets = [GRAPH_DISPLAY_LABELS.votingPower];
-        return { labels, datasets: datasets.filter(({label}) => {return includedDataSets.includes(label)}) };
-    }, [treasuryState.usersTreasuryDataArray, homePageState?.canisterData?.userNames]);
+    const viewProposal = (proposal) => {
+        setModalProps({
+            fullScreen: true,
+            components:[
+                <DisplayProposal proposal={proposal}/>
+            ]
+        });
+        setModalIsOpen(true)
+    }
 
-    window.scrollTo(0,0);
+    //TODO: make the datasets retrieval process for all other implementations of similar to this one.  
+    const {labels, datasets} = useMemo(() => {
+        const dataMapArray = [];
+
+        for(let [principal, { balances: {voting_power} }] of treasuryState?.usersTreasuryDataArray){
+            const userName = homePageState?.canisterData?.userNames[principal];
+            dataMapArray.push([userName, {voting_power: fromE8s(voting_power)}]);
+        };
+        const reducedDataMapArray = sortAndReduceDataMapArray(dataMapArray, "voting_power", 10);
+        const {labels, datasets} =  getLabelsAndDataSetsInChartFormat(reducedDataMapArray, 125);
+        return { labels, datasets };
+    }, [treasuryState.usersTreasuryDataArray, homePageState?.canisterData?.userNames]);
 
     return(
         <>
             <Grid columns={12} xs={11} md={9} rowSpacing={0} padding={0} display="flex" justifyContent="center" alignItems="center" flexDirection={"column"}>
                 <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} xs={12} padding={0} flexDirection={"column"} width={"100%"} >
+
                     <Typography variant="h4" color="white" marginBottom={"10px"} marginTop={"10px"} textAlign={"center"}>
                         Voting Power Distribution
                     </Typography>
+
                     <Graph
                         withoutPaper={true}
                         type={CHART_TYPES.pie}
@@ -142,21 +156,35 @@ const Analytics = (props) => {
                         hideButton2={true}
                     />  
                 </Grid>
-                <Grid xs={12} paddingBottom={5} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
-                    <AccordionField>
-                    <div 
+
+                <Grid xs={12} paddingBottom={5} display="flex" justifyContent="center" alignItems="center" width={"100%"} flexDirection={"column"}>
+
+                    <CarouselComponent 
                         title={"Active Proposals"} 
-                        proposals={activeProposal}
-                        CustomComponent={DisplayProposals}
-                    ></div>
-                    <div 
+                        defaultComponent={<Typography textAlign={"center"} component={"There are currently no active proposals"} />} 
+                    >
+                        {activeProposals.map((proposal) => { return <PreviewProposal proposal={proposal} onViewProposal={() => viewProposal(proposal)} /> })}
+                    </CarouselComponent>
+
+                    <AccordionField 
+                        sx={{padding: "0px", marginTop:"10px"}} 
                         title={"Inactive Proposals"} 
-                        proposals={inactiveProposals}
-                        CustomComponent={DisplayProposals}
-                    ></div>
+                        defaultComponent={<Typography textAlign={"center"} component={"There are currently no proposals"} />} 
+                    >
+                       {inactiveProposals.map(([proposalId, proposal]) => {
+                            const actionType = Object.keys(proposal.action)[0];
+                            return <DataField 
+                                label={`#${proposalId} ${shortenString(actionType, 10)}`} 
+                                text={'view'} 
+                                buttonIcon={proposal.executed ? ThumbUpIcon : ThumbDownIcon} 
+                                onClick={ () => viewProposal([proposalId, proposal]) }
+                            />
+                        })}
                     </AccordionField>
+
                 </Grid>
-                <Grid xs={12} paddingBottom={5} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
+
+                {/* <Grid xs={12} paddingBottom={5} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
                     <AccordionField>
                         <div 
                             title={"DAO Participants"} 
@@ -195,10 +223,11 @@ const Analytics = (props) => {
                             CustomComponent={DataTable}
                         ></div>
                     </AccordionField>
-                </Grid>
+                </Grid> */}
                 <Paper sx={{ width: "100%", backgroundColor: "rgba(52,52,52, 0.8)" }}>
                     <Grid xs={12} display="flex" justifyContent="center" alignItems="center" paddingBottom={"15px"} flexDirection={"column"}>
                         <DataField
+                            transparentBackground={true}
                             label={'Accounts Created:'}
                             text={homePageState.canisterData[CANISTER_DATA_FIELDS.journalCount]}
                             disabled={true}
@@ -207,6 +236,7 @@ const Analytics = (props) => {
                     <Grid xs={12} display="flex" justifyContent="center" alignItems="center" paddingBottom={"15px"} flexDirection={"column"}>
                         <DataField
                             label={'DAO Entry Cost:'}
+                            transparentBackground={true}
                             text={`${fromE8s(homePageState.canisterData[CANISTER_DATA_FIELDS.costToEnterDao]) } ICP `}
                             disabled={true}
                         />
@@ -214,6 +244,7 @@ const Analytics = (props) => {
                     <Grid xs={12} display="flex" justifyContent="center" alignItems="center" paddingBottom={"15px"} flexDirection={"column"}>
                         <DataField
                             label={'Privacy Setting:'}
+                            transparentBackground={true}
                             text={homePageState.canisterData[CANISTER_DATA_FIELDS.daoIsPublic] ? "Public":"Private"}
                             disabled={true}
                         />
@@ -223,24 +254,28 @@ const Analytics = (props) => {
                             label={'Frontend Canister Principal:'}
                             text={`${shortenHexString(homePageState.canisterData[CANISTER_DATA_FIELDS.frontEndPrincipal])}`}
                             buttonIcon={ContentCopyIcon}
+                            transparentBackground={true}
                             onClick={() => copyText( homePageState.canisterData[CANISTER_DATA_FIELDS.frontEndPrincipal] )}
                         />
                         <DataField
                             label={'Backend Canister Principal:'}
                             text={`${shortenHexString(homePageState.canisterData[CANISTER_DATA_FIELDS.backEndPrincipal])}`}
                             buttonIcon={ContentCopyIcon}
+                            transparentBackground={true}
                             onClick={() => copyText(homePageState.canisterData[CANISTER_DATA_FIELDS.backEndPrincipal])}
                         />
                         <DataField
                             label={'Treasury Canister Principal:'}
                             text={`${shortenHexString(homePageState.canisterData[CANISTER_DATA_FIELDS.treasuryCanisterPrincipal])}`}
                             buttonIcon={ContentCopyIcon}
+                            transparentBackground={true}
                             onClick={() => copyText(homePageState.canisterData[CANISTER_DATA_FIELDS.treasuryCanisterPrincipal])}
                         />
                         <DataField
                             label={'Manager Canister Principal:'}
                             text={`${shortenHexString(homePageState.canisterData[CANISTER_DATA_FIELDS.managerCanisterPrincipal])}`}
                             buttonIcon={ContentCopyIcon}
+                            transparentBackground={true}
                             onClick={() => copyText(homePageState.canisterData[CANISTER_DATA_FIELDS.managerCanisterPrincipal])}
                         />
                     </Grid>
@@ -250,24 +285,28 @@ const Analytics = (props) => {
                             text={`${round2Decimals(inTrillions(homePageState.daoPublicData.currentCyclesBalance_frontend))} T`}
                             isCycles={true}
                             disabled={true}
+                            transparentBackground={true}
                         />
                         <DataField
                             label={'Backend Cycles Balance:'}
                             text={`${round2Decimals(inTrillions(homePageState.daoPublicData.currentCyclesBalance_backend))} T`}
                             isCycles={true}
                             disabled={true}
+                            transparentBackground={true}
                         />
                         <DataField
                             label={'Treasury Cycles Balance:'}
                             text={`${round2Decimals(inTrillions(homePageState.daoPublicData.currentCyclesBalance_treasury))} T`}
                             isCycles={true}
                             disabled={true}
+                            transparentBackground={true}
                         />
                         <DataField
                             label={'Manager Cycles Balance:'}
                             text={`${round2Decimals(inTrillions(homePageState.daoPublicData.currentCyclesBalance_manager))} T`}
                             isCycles={true}
                             disabled={true}
+                            transparentBackground={true}
                         />
                     </Grid>
                     <Grid xs={12} display="flex" justifyContent="center" alignItems="center" paddingBottom={"15px"} paddingTop={"15px"} flexDirection={"column"}>
@@ -276,6 +315,7 @@ const Analytics = (props) => {
                             text={`${round2Decimals(inTrillions(homePageState.canisterData[CANISTER_DATA_FIELDS.backEndCyclesBurnRatePerDay]))} T`}
                             isCycles={true}
                             disabled={true}
+                            transparentBackground={true}
                         />
                     </Grid>
                     <Grid xs={12} display="flex" justifyContent="center" alignItems="center" paddingBottom={"15px"} paddingTop={"15px"} flexDirection={"column"}>
@@ -284,12 +324,14 @@ const Analytics = (props) => {
                             text={`${homePageState.canisterData[CANISTER_DATA_FIELDS.releaseVersionLoaded]}`}
                             isCycles={true}
                             disabled={true}
+                            transparentBackground={true}
                         />
                         <DataField
                             label={'Release Version Installed:'}
                             text={`${homePageState.canisterData[CANISTER_DATA_FIELDS.releaseVersionInstalled]}`}
                             isCycles={true}
                             disabled={true}
+                            transparentBackground={true}
                         />
                     </Grid>
                     <Grid xs={12} display="flex" justifyContent="center" alignItems="center" paddingBottom={"15px"} paddingTop={"15px"} flexDirection={"column"}>
@@ -297,6 +339,7 @@ const Analytics = (props) => {
                             label={'Support Mode:'}
                             text={`${homePageState.canisterData[CANISTER_DATA_FIELDS.supportMode]? "Enabled" : "Disabled"}`}
                             disabled={true}
+                            transparentBackground={true}
                         />
                     </Grid>
                 </Paper>

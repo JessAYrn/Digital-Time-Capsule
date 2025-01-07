@@ -86,6 +86,7 @@ const ToolBar = (props) => {
         top={0}
         style={style}
         onClick={onClick}
+        borderBottom={"solid grey"}
         bgcolor={"#0A0A0A"}
         height={"53px"}
         zIndex={10}
@@ -105,7 +106,7 @@ const ToolBar = (props) => {
                     selectedTab={navigationAndApiState?.location.tab} 
                     setSelectedTab={setSelectedTab} 
                     indicatorColor={"secondary"}
-                    sx={{ backgroundColor: "#0A0A0A" }}
+                    sx={{ backgroundColor: "#0A0A0A"}}
                 />}
             </Grid>
             <Grid xs={4} columns={12} display={"flex"} justifyContent={"right"} alignItems={"center"} padding={0} width={"35%"}> 

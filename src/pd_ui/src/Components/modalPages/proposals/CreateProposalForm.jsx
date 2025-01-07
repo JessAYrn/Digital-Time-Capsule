@@ -105,10 +105,10 @@ const CreateProposalForm = (props) => {
             <Typography varient={"h6"} color={"#bdbdbd"}> {proposalAction_} </Typography>
             {
                 (proposalAction_ ===  PROPOSAL_ACTIONS.IncreaseNeuron || proposalAction_ === PROPOSAL_ACTIONS.CreateNeuron) &&
-                <DataField label={"Available Balance: "} text={`${fromE8s(availableBalance) } ICP`} isLoading={!treasuryState.dataHasBeenLoaded} disabled={true}/>
+                <DataField label={"Available Balance: "} text={`${fromE8s(availableBalance) } ICP`} isLoading={!treasuryState.dataHasBeenLoaded} disabled={true} transparentBackground={true}/>
             }
             { proposalAction_ === PROPOSAL_ACTIONS.PurchaseCycles || proposalAction_ === PROPOSAL_ACTIONS.WithdrawFromMultiSigWallet &&
-                <DataField label={"Available Balance: "} text={`${fromE8s(treasuryState.daoWalletBalance || 0) } ICP`} isLoading={!treasuryState.dataHasBeenLoaded} disabled={true}/>
+                <DataField label={"Available Balance: "} text={`${fromE8s(treasuryState.daoWalletBalance || 0) } ICP`} isLoading={!treasuryState.dataHasBeenLoaded} disabled={true} transparentBackground={true}/>
             }
             { proposalAction_ === PROPOSAL_ACTIONS.IncreaseDissolveDelay && <IncreaseDissolveDelay onSubmitProposal={onSubmitProposal} action={proposalAction_} payload={proposalPayload_} /> }
             { proposalAction_ === PROPOSAL_ACTIONS.IncreaseNeuron && <IncreaseNeuron onSubmitProposal={onSubmitProposal} action={proposalAction_} payload={proposalPayload_}/> }

@@ -23,10 +23,10 @@ const PersistedComponents = (props) => {
     const [style2, style2Api] = useSpring(() => ({ from: { top: 0 } }), []);
 
     useScroll({
-        onChange: ({value: {scrollY}}) => {
-            if(coordinates.y > scrollY) show();
-            if(coordinates.y < scrollY) hide();
-            coordinates.y = scrollY
+        onChange: ({value: {scrollYProgress}}) => {
+            if(coordinates.y > scrollYProgress || scrollYProgress >= 0.99) show();
+            if(coordinates.y < scrollYProgress && scrollYProgress < 0.99) hide();
+            coordinates.y = scrollYProgress
         }
     });
 

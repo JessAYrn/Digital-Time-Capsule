@@ -88,6 +88,7 @@ const LoginPage = (props) => {
                     text={`${homePageState.daoPublicData.daoIsPublic ? "Public":"Private"}`}
                     isLoading={isLoading}
                     disabled={true}
+                    transparentBackground={true}
                 />
                 <DataField
                     label={'Founded By: '}
@@ -95,6 +96,7 @@ const LoginPage = (props) => {
                     text={`${homePageState.daoPublicData.daoFounder}`}
                     isLoading={isLoading}
                     disabled={true}
+                    transparentBackground={true}
                 />
                 <DataField
                     label={'The Cost To Enter Is: '}
@@ -102,6 +104,7 @@ const LoginPage = (props) => {
                     text={`${homePageState.daoPublicData.costToEnterDao} $ICP`}
                     isLoading={isLoading}
                     disabled={true}
+                    transparentBackground={true}
                 />
             </Grid>
             <Grid xs={11} md={9} display="flex" flexDirection={"column"} justifyContent="center" alignItems="center" paddingBottom={5} paddingTop={0}>
@@ -111,6 +114,7 @@ const LoginPage = (props) => {
                     text={`${round2Decimals(inTrillions(homePageState.daoPublicData.currentCyclesBalance_frontend))} T`}
                     isLoading={isLoading}
                     disabled={true}
+                    transparentBackground={true}
                 />
                 <DataField
                     label={'Back-end Canister Balance: '}
@@ -118,6 +122,7 @@ const LoginPage = (props) => {
                     text={`${round2Decimals(inTrillions(homePageState.daoPublicData.currentCyclesBalance_backend))} T`}
                     isLoading={isLoading}
                     disabled={true}
+                    transparentBackground={true}
                 />
                 <DataField
                     label={'Treasury Canister Balance: '}
@@ -125,6 +130,7 @@ const LoginPage = (props) => {
                     text={`${round2Decimals(inTrillions(homePageState.daoPublicData.currentCyclesBalance_treasury))} T`}
                     isLoading={isLoading}
                     disabled={true}
+                    transparentBackground={true}
                 />
                 <DataField
                     label={'Manager Canister Balance: '}
@@ -132,6 +138,7 @@ const LoginPage = (props) => {
                     text={`${round2Decimals(inTrillions(homePageState.daoPublicData.currentCyclesBalance_manager))} T`}
                     isLoading={isLoading}
                     disabled={true}
+                    transparentBackground={true}
                 />
             </Grid>
         </Grid>

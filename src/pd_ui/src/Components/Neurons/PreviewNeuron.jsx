@@ -5,7 +5,7 @@ import ButtonField from "../Fields/Button";
 import DataField from "../Fields/DataField";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { copyText } from "../../functionsAndConstants/walletFunctions/CopyWalletAddress";
-import { fromE8s, round2Decimals } from "../../functionsAndConstants/Utils";
+import { fromE8s, round2Decimals, shortenString } from "../../functionsAndConstants/Utils";
 import { getUserNeuronContribution, getTotalContributions } from "../../functionsAndConstants/treasuryDataFunctions";
 import { AppContext } from "../../Context";
 import DisplayNeuron from "./DisplayNeuron";
@@ -40,12 +40,12 @@ const PreviewNeuron = (props) => {
             <Grid width={"95%"} paddingBottom={"15px"} paddingTop={0}>
                 <DataField
                     label={`ID: `}
-                    text={neuronId}
+                    text={shortenString(neuronId, 10)}
                     buttonIcon={ContentCopyIcon}
                     buttonColor="primary"
                     labelColor="primary"
                     onClick={() => copyText(neuronId)}
-                    buttonSx={{fontSize: "13px"}}
+                    transparentBackground={true}
                 />
                 <DataField
                     label={`Stake: `}
@@ -55,6 +55,7 @@ const PreviewNeuron = (props) => {
                     labelColor="primary"
                     disabled={true}
                     onClick={() => {}}
+                    transparentBackground={true}
                 />
                 <DataField
                     label={`Voting Power: `}
@@ -64,6 +65,7 @@ const PreviewNeuron = (props) => {
                     labelColor="primary"
                     disabled={true}
                     onClick={() => {}}
+                    transparentBackground={true}
                 />
                 <DataField
                     label={`Maturity: `}
@@ -73,6 +75,7 @@ const PreviewNeuron = (props) => {
                     labelColor="primary"
                     disabled={true}
                     onClick={() => {}}
+                    transparentBackground={true}
                 />
             </Grid>
             <ButtonField

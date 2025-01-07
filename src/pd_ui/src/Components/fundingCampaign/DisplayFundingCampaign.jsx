@@ -80,27 +80,32 @@ const DisplayFundingCampaign = (props) => {
                     label={"amount requested"}
                     text={`${amountToFundValue} ${amountToFundType}`}
                     disabled={true}
+                    transparentBackground={true}
                 />
                 <DataField
                     label={"Campaign Wallet Balance"}
                     text={`${campaignWalletBalanceValue} ${campaignWalletBalanceType}`}
                     disabled={true}
+                    transparentBackground={true}
                 />
                 <DataField
                     label={"Amount Disbursed"}
                     text={`${amountDisbursedToRecipientValue} ${amountDisbursedToRecipientType}`}
                     disabled={true}
+                    transparentBackground={true}
                 />
                 <DataField
                     text={homePageState?.canisterData?.userNames[fundingCampaign?.recipient]}
                     label={"Recipient: "}
                     disabled={true}
+                    transparentBackground={true}
                 />
                 {!!terms.length && 
                     <DataField
                         text={`${remainingCollateralLockedValue} ${remainingCollateralLockedType}`}
                         label={"Collateral Locked"}
                         disabled={true}
+                        transparentBackground={true}
                     />
                 }
                 {nextPaymentDueDate &&
@@ -109,26 +114,31 @@ const DisplayFundingCampaign = (props) => {
                             text={`${forfeitedCollateralValue} ${forfeitedCollateralType}` }
                             label={"Collateral Forfeited"}
                             disabled={true}
+                            transparentBackground={true}
                         />
                         <DataField
                             text={`${remainingLoanPrincipalAmountValue} ${remainingLoanPrincipalAmountType}` }
                             label={"Remaininig Principal Owed"}
                             disabled={true}
+                            transparentBackground={true}
                         />
                         <DataField
                             text={`${remainingLoanInterestAmountValue} ${remainingLoanInterestAmountType}` }
                             label={"Remaining Interest Owed"}
                             disabled={true}
+                            transparentBackground={true}
                         />
                         <DataField
                             label={"Payment Due"}
                             text={`${Math.max(paymentAmountsValue - amountPaidDuringCurrentPaymentIntervalValue, 0)} ${paymentAmountsType}`}
                             disabled={true}
+                            transparentBackground={true}
                         />
                         <DataField
                             label={"Time Until Payment Is Due: "}
                             text={`${timeUntilPaymentIsDue?.days > 2 ? timeUntilPaymentIsDue?.days : timeUntilPaymentIsDue?.hours } ${timeUntilPaymentIsDue?.days > 2 ? "days" : "hours"}`}
                             disabled={true}
+                            transparentBackground={true}
                         />
                     </>
                 }

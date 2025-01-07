@@ -7,18 +7,23 @@ import { Typography } from '@mui/material';
 import DoneIcon from '@mui/icons-material/Done';
 import InputBox from '../../../Fields/InputBox';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
-import { INPUT_BOX_FORMATS } from '../../../../functionsAndConstants/Constants';
+import { INPUT_BOX_FORMATS, CHART_TYPES, GRAPH_DISPLAY_LABELS } from '../../../../functionsAndConstants/Constants';
+import { getHypotheticalVotingPowerIncreaseFromIncreasedDissolveDelay } from '../utils';
+import Graph, { getLabelsAndDataSetsInChartFormat, sortAndReduceDataMapArray } from '../../../Fields/Chart';
+import { daysToSeconds, fromE8s, secondsToDays } from '../../../../functionsAndConstants/Utils';
 
 
 const IncreaseDissolveDelay = (props) => {  
     const { onSubmitProposal, payload, action, disabled} = props;
-    const { treasuryState } = useContext(AppContext);
+    const { treasuryState, homePageState } = useContext(AppContext);
     const [selectedNeuronId, setSelectedNeuronId] = useState(payload?.neuronId?.toString());
-    const [additionalDissolveDelayInDays, setAdditionalDissolveDelayInDays] = useState(payload?.additionalDissolveDelaySeconds ? parseInt(payload?.additionalDissolveDelaySeconds) / (24 * 60 * 60): null);
+    const [additionalDissolveDelaySeconds, setAdditionalDissolveDelaySeconds] = useState(parseInt(payload?.additionalDissolveDelaySeconds));
     const [hasError, setHasError] = useState(false);
     const [isReadyToSubmit, setIsReadyToSubmit] = useState(false);
 
-    const neuronMenuItemProps = treasuryState?.neurons?.icp?.map(([neuronId, neuronData]) => {
+    const neuronMenuItemProps = treasuryState?.neurons?.icp?.filter(([neuronId, neuronData]) => {
+        return !!neuronData.neuronInfo
+    }).map(([neuronId, neuronData]) => {
         return {
             text: neuronId,
             onClick: () => setSelectedNeuronId(neuronId),
@@ -26,22 +31,44 @@ const IncreaseDissolveDelay = (props) => {
         }
     });
 
-    const maxAdditionalDissolveDelayInDays = useMemo( () => {
-        const maxDissolveDelayPossibleInDays = 2922;
-        const neuronData_ = treasuryState?.neurons?.icp?.find(([neuronId, neuronData]) => neuronId === selectedNeuronId);
-        if(!selectedNeuronId || !neuronData_) return 0;
-        const [_, neuronData] = neuronData_;
-        const {dissolve_delay_seconds} = neuronData.neuronInfo;
-        const dissolveDelayInDays = parseInt(dissolve_delay_seconds) / (24 * 60 * 60);
-        return Math.floor(maxDissolveDelayPossibleInDays - dissolveDelayInDays);
+    const {maxAdditionalDissolveDelaySeconds, selectedNeuronData} = useMemo( () => {
+        const maxDissolveDelaySecondsPossible = daysToSeconds(2922);
+        const selectedNeuronKeyValuePair = treasuryState?.neurons?.icp?.find(([neuronId, neuronData]) => neuronId === selectedNeuronId);
+        if(!selectedNeuronId || !selectedNeuronKeyValuePair) return {};
+        const [_, selectedNeuronData] = selectedNeuronKeyValuePair;
+        const {dissolve_delay_seconds} = selectedNeuronData.neuronInfo;
+        const maxAdditionalDissolveDelaySeconds = Math.floor(maxDissolveDelaySecondsPossible - parseInt(dissolve_delay_seconds));
+        return {maxAdditionalDissolveDelaySeconds, selectedNeuronData};
     }, [selectedNeuronId]);
 
-    useEffect(() => {setIsReadyToSubmit(!!selectedNeuronId && additionalDissolveDelayInDays && !hasError )}, [selectedNeuronId, additionalDissolveDelayInDays]);
+    useEffect(() => {setIsReadyToSubmit(!!selectedNeuronId && additionalDissolveDelaySeconds && !hasError )}, [selectedNeuronId, additionalDissolveDelaySeconds]);
 
     const submitProposal = async () => {
-        const additionalDissolveDelaySeconds = additionalDissolveDelayInDays * 24 * 60 * 60;
         await onSubmitProposal({[action]: {neuronId: BigInt(selectedNeuronId), additionalDissolveDelaySeconds}});
     };
+
+    const {hypotheticalLabels, hypotheticalDatasets} = useMemo(() => {
+        if(!selectedNeuronData) return {};
+
+        const usersHypotheticalVotingPowersMap = {};
+        for(let [principal, { balances: { voting_power } }] of treasuryState?.usersTreasuryDataArray) usersHypotheticalVotingPowersMap[principal] = voting_power;
+
+        const additionalVotingPowersArray = getHypotheticalVotingPowerIncreaseFromIncreasedDissolveDelay(selectedNeuronData, additionalDissolveDelaySeconds);
+        for(let [principal, {additionalVotingPower}] of additionalVotingPowersArray) usersHypotheticalVotingPowersMap[principal] += additionalVotingPower;
+
+        const hypotheticalDataMapArray = [];
+        for( let userPrincipal in usersHypotheticalVotingPowersMap) {
+            let userName = homePageState?.canisterData?.userNames[userPrincipal];
+            let dataPoint = {voting_power: fromE8s(usersHypotheticalVotingPowersMap[userPrincipal])};
+            hypotheticalDataMapArray.push([userName, dataPoint]);
+        };
+
+        const reducedHypotheticalDataMapArray = sortAndReduceDataMapArray(hypotheticalDataMapArray, "voting_power", 10);
+        const {labels, datasets} = getLabelsAndDataSetsInChartFormat(reducedHypotheticalDataMapArray, 125);
+
+        return {hypotheticalLabels: labels, hypotheticalDatasets: datasets};
+
+    }, [selectedNeuronData, additionalDissolveDelaySeconds]);
 
     return (
         <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}>
@@ -64,18 +91,33 @@ const IncreaseDissolveDelay = (props) => {
                     hasError={hasError}
                     disabled={disabled}
                     label={"Additional Dissolve Delay Days"}
-                    placeHolder={`Max: ${maxAdditionalDissolveDelayInDays} Days`}
-                    onChange={(value) => { setHasError(!value || value > maxAdditionalDissolveDelayInDays); setAdditionalDissolveDelayInDays(value); }}
+                    placeHolder={`Max: ${secondsToDays(maxAdditionalDissolveDelaySeconds)} Days`}
+                    onChange={(value) => { setHasError(!value || daysToSeconds(value) > maxAdditionalDissolveDelaySeconds); setAdditionalDissolveDelaySeconds(daysToSeconds(value)); }}
                     allowNegative={false}
                     maxDecimalPlaces={0}
                     parseNumber={parseInt}
                     format={INPUT_BOX_FORMATS.numberFormat}
-                    value={additionalDissolveDelayInDays}
+                    value={secondsToDays(additionalDissolveDelaySeconds)}
                     suffix={" Days"}
                 />
             </>
             }
-            { isReadyToSubmit && !disabled &&
+            {!!hypotheticalDatasets && !!hypotheticalLabels &&
+            <> 
+                <Typography variant="h6">Voting Power Distribution If Approved: </Typography>
+                <Graph
+                    height={"426px"}
+                    withoutPaper={true}
+                    type={CHART_TYPES.pie}
+                    datasets={hypotheticalDatasets}
+                    labels={hypotheticalLabels}
+                    maintainAspectRatio={false}
+                    hideButton1={true}
+                    hideButton2={true}
+                />  
+            </>
+            }
+            { !!isReadyToSubmit && !disabled &&
                 <ButtonField
                     Icon={DoneIcon}
                     color={"secondary"}
@@ -84,6 +126,7 @@ const IncreaseDissolveDelay = (props) => {
                     onClick={submitProposal}
                 />
             }
+            
         </Grid>
 
     );

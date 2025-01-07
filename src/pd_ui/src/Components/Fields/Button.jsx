@@ -61,7 +61,6 @@ const ButtonField = (props) => {
                         onClick={handleClick}
                         disabled={disabled}
                         loading={isLoading}
-                        loadingIndicatorCenter
                     >
                         {text && !isLoading && <Typography sx={sx} color={color}>{text}</Typography>}
                         {!text && Icon && <Icon sx={sx}/>}

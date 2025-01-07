@@ -67,6 +67,7 @@ const SendCrypto = (props) => {
                                     label={'Balance: '}
                                     text={`${walletState.walletData.balance /  e8sInOneICP} ICP`}
                                     disabled={true}
+                                    transparentBackground={true}
                                 />
                             </Grid>
                             <Grid
@@ -140,21 +141,25 @@ const SendCrypto = (props) => {
                         label={'Recipient: '}
                         text={`${shortenHexString(recipientAddress)}`}
                         disabled={true}
+                        transparentBackground={true}
                     />
                     <DataField
                         label={'Amount: '}
                         text={`${round8Decimals(parseFloat(numberInput)) - 0.0001} ICP`}
                         disabled={true}
+                        transparentBackground={true}
                     />
                     <DataField
                         label={'Fee: '}
                         text={`0.0001 ICP`}
                         disabled={true}
+                        transparentBackground={true}
                     />
                     <DataField
                         label={'Total: '}
                         text={`${round8Decimals(parseFloat(numberInput))} ICP`}
                         disabled={true}
+                        transparentBackground={true}
                     />
                     <Grid
                         display={'flex'}

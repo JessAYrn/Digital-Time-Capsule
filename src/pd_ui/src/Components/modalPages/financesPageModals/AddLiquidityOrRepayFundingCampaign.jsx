@@ -40,7 +40,7 @@ const AddLiquidityOrRepayFundingCampaign = (props) => {
     return(
         <Grid xs={12} display="flex" justifyContent="center" alignItems="center" flexDirection="column">
             <Typography variant={"h6"} color={"#bdbdbd"}> {actionType === ACTION_TYPES.addLiquidity ? "Add Liquidity" : "Repay Funding Campaign"} </Typography>
-            <DataField label={"Available Balance: "} text={`${fromE8s(availableBalance) } ICP`} isLoading={!treasuryState.dataHasBeenLoaded} disabled={true}/>
+            <DataField label={"Available Balance: "} text={`${fromE8s(availableBalance) } ICP`} isLoading={!treasuryState.dataHasBeenLoaded} disabled={true} transparentBackground={true}/>
             <InputBox
                 label={actionType === ACTION_TYPES.addLiquidity ? "Amount of ICP to Add" : "Amount of ICP to Repay"}
                 placeHolder={"0 ICP"}

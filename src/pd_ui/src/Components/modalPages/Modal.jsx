@@ -18,7 +18,7 @@ const ModalComponent = (props) => {
       TransitionComponent={Transition}
       > 
         {fullScreen && 
-        <AppBar sx={{ position: 'fixed', top: "auto", backgroundColor: "#343434"}}>
+        <AppBar sx={{ position: 'fixed', top: "auto", backgroundColor: "#0A0A0A"}}>
           <Toolbar>
             <IconButton
               edge="start"
@@ -31,7 +31,7 @@ const ModalComponent = (props) => {
           </Toolbar>
         </AppBar>}
         {components &&
-          <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} flexDirection={flexDirection} padding={"10px"}>
+          <Grid marginTop={fullScreen ? "60px": ""} border={fullScreen? "" : "solid grey "} display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} flexDirection={flexDirection} padding={"10px"}>
               {components.map(component => { return component })}
           </Grid>}
       </Dialog>

@@ -43,6 +43,7 @@ const ActionButton = (props) => {
     const openProposalForm = () => {
         setModalIsOpen(true);
         setModalProps({ 
+            fullScreen: true,
             components: [ 
                 <CreateProposalForm/>
             ] 
@@ -76,7 +77,7 @@ const ActionButton = (props) => {
                 gridSx={{ borderRadius: "20px", width: "135px"}}
                 elevation={0}
                 text={"Propose"}
-                onClick={() => {}}
+                onClick={openProposalForm}
                 iconSize={'small'}
                 sx={{color: "black"}}
             />

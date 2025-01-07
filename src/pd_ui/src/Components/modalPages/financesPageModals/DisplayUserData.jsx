@@ -25,6 +25,7 @@ const DisplayUserData = (props) => {
                     buttonColor="white"
                     labelColor="white"
                     onClick={() => copyText(rootCanisterPrincipal)}
+                    transparentBackground={true}
                 />
             </Grid>
             <Grid width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} padding={"0"}>
@@ -36,6 +37,7 @@ const DisplayUserData = (props) => {
                     labelColor="white"
                     buttonColor="white"
                     buttonIcon={ContentCopyIcon}
+                    transparentBackground={true}
                 />
             </Grid>
         </Grid>

@@ -20,43 +20,6 @@ export const mapBalancesData = (data) => {
     return dataMapedToUiFormat;
 };
 
-export const neuronContributionsTableColumns = [
-    { 
-        field: 'userName', 
-        headerName: 'User Name', 
-        width: 150,
-        editable: false
-    },
-    { 
-        field: 'stake_e8s', 
-        headerName: 'Stake', 
-        width: 200,
-        editable: false
-    },
-    { 
-        field: 'voting_power', 
-        headerName: 'Voting Power', 
-        width: 200,
-        editable: false
-    },
-];
-
-export const mapNeuronContributionsToTableRows = (neuronContributions, userNames) => {
-    const neuronContributions_ = neuronContributions.map(([userPrincipal, {stake_e8s, voting_power}]) => {
-        return {
-            id: userPrincipal,
-            userName: userNames[userPrincipal],
-            stake_e8s: round8Decimals(stake_e8s),
-            voting_power: round8Decimals(voting_power)
-        }
-    });
-    const sortedNeuronContributions = neuronContributions_.sort(function({stake_e8s: stake_e8s_a}, {stake_e8s: stake_e8s_b}){
-        if(stake_e8s_a > stake_e8s_b) return -1;
-        else return 1;
-    });
-    return sortedNeuronContributions;
-}
-
 const treasuryDataToFrontendFormat = (principal, treasuryData) => {
     let {balances, automaticallyContributeToLoans, automaticallyRepayLoans} = treasuryData;
     const automaticallyContributeToLoans_ = !!automaticallyContributeToLoans.length && !!automaticallyContributeToLoans[0];
