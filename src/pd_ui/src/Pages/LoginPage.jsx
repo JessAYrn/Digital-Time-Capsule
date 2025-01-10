@@ -51,8 +51,6 @@ const LoginPage = (props) => {
         });
         setIsLoading(false);
     },[]);
-
-    window.scrollTo(0,0);
     
     return(
         <Grid container columns={12} xs={12} rowSpacing={8} display="flex" justifyContent="center" alignItems="center" flexDirection={"column"}>

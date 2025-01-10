@@ -12,6 +12,7 @@ const CarouselComponent = (props) => {
             flexDirection: "column",
             justifyContent: "center",
             alignItems: "center",
+            border:"solid grey",
             ...sx
         }}
         >

@@ -11,7 +11,7 @@ const AccordionField = (props) => {
     const {children, title, subtitle, sx, defaultComponent} = props;
   return (
     <Grid xs={12} width={"100%"} color={"primary"} sx={sx}>
-        <Accordion color="primary">
+        <Accordion color="primary" sx={{ border:"solid grey"}}>
             <AccordionSummary
                 color='primary'
                 expandIcon={<ExpandMoreIcon color='primary'/>}

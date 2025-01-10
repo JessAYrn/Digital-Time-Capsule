@@ -213,6 +213,9 @@ const theme = createTheme({
       MuiDialog:{
         styleOverrides: {
           root: {
+            ".MuiDialog-paper": {
+              borderTop: "solid grey"
+            },
             ".MuiDialog-paperFullScreen":{
               maxHeight: "100%",
               height: "auto",
@@ -221,7 +224,7 @@ const theme = createTheme({
             }
           }
         }
-      }
+      },
     },
 });
 
