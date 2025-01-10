@@ -6,9 +6,9 @@ import { copyText } from '../../functionsAndConstants/walletFunctions/CopyWallet
 import { nanoSecondsToMiliSeconds, shortenHexString, round2Decimals, fromE8s } from '../../functionsAndConstants/Utils';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
-import DataField from '../../Components/Fields/DataField';
-import AccordionField from '../../Components/Fields/Accordion';
-import Graph from '../../Components/Fields/Chart';
+import DataField from '../../Components/DataField';
+import AccordionField from '../../Components/Accordion';
+import Graph from '../../Components/Chart';
 import Typography from '@mui/material/Typography';
 
 

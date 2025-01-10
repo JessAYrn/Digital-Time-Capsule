@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useState} from "react";
-import DataField from "../Components/Fields/DataField";
+import DataField from "../Components/DataField";
 import { homePageTypes } from "../reducers/homePageReducer";
 import { round2Decimals, inTrillions, fromE8s } from "../functionsAndConstants/Utils";
 import Grid from '@mui/material/Unstable_Grid2';
@@ -8,7 +8,7 @@ import { navigationAndApiTypes } from "../reducers/navigationAndApiReducer";
 import LoginIcon from '@mui/icons-material/Login';
 import { AppContext } from "../Context";
 import { Paper } from "@mui/material";
-import ButtonField from "../Components/Fields/Button";
+import ButtonField from "../Components/Button";
 
 const LoginPage = (props) => {
 

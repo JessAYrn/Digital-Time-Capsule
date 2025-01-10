@@ -1,11 +1,11 @@
 import React, {useContext} from "react";
 import Grid from "@mui/material/Unstable_Grid2";
-import CarouselComponent from '../../Components/Fields/Carousel';
-import AccordionField from '../../Components/Fields/Accordion'
-import DataField from '../../Components/Fields/DataField';
+import CarouselComponent from '../../Components/Carousel';
+import AccordionField from '../../Components/Accordion'
+import DataField from '../../Components/DataField';
 import Typography  from "@mui/material/Typography";
-import PreviewProposal from '../../modalPages/proposals/PreviewProposal';
-import DisplayProposal from '../../modalPages/proposals/DisplayProposal';
+import PreviewProposal from '../../modals/proposals/PreviewProposal';
+import DisplayProposal from '../../modals/proposals/DisplayProposal';
 import { shortenString } from "../../functionsAndConstants/Utils";
 import { AppContext } from "../../Context";
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';

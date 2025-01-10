@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import Switch from '../../Components/Fields/Switch';
+import Switch from '../../Components/Switch';
 import Grid from '@mui/material/Unstable_Grid2';
 import {homePageTypes} from '../../reducers/homePageReducer';
 import { AppContext } from '../../Context';

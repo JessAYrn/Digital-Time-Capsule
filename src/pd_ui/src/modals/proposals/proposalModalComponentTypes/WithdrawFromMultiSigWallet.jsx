@@ -1,7 +1,7 @@
 import React, { useMemo, useState} from "react";
 import Grid from "@mui/material/Unstable_Grid2";
 import { principalHasProperFormat, fromE8s, toE8s } from "../../../functionsAndConstants/Utils";
-import InputBox from "../../../Components/Fields/InputBox";
+import InputBox from "../../../Components/InputBox";
 import DoneIcon from '@mui/icons-material/Done';
 import ButtonField from "../../../Components/Button";
 import { Typography } from "@mui/material";

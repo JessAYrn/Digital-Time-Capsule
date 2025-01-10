@@ -1,7 +1,7 @@
 import React, { useContext, useState} from "react";
 import Grid from "@mui/material/Unstable_Grid2";
-import AccordionField from '../../Components/Fields/Accordion'
-import DataTable from '../../Components/Fields/Table';
+import AccordionField from '../../Components/Accordion'
+import DataTable from '../../Components/Table';
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
 import { AppContext } from "../../Context";

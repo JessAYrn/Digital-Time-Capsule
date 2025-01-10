@@ -5,16 +5,16 @@ import { walletTypes } from "../../reducers/walletReducer";
 import { homePageTypes } from "../../reducers/homePageReducer";
 import { notificationsTypes } from "../../reducers/notificationsReducer";
 import { treasuryTypes } from "../../reducers/treasuryReducer";
-import MenuField from "../Fields/MenuField";
+import MenuField from "../MenuField";
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { AppContext } from "../../Context";
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { loadAllDataIntoReduxStores } from '../../functionsAndConstants/loadingFunctions';
-import ButtonField from '../Fields/Button';
+import ButtonField from '../Button';
 import { animated } from "@react-spring/web";
-import TabsComponent from '../Fields/Tabs';
+import TabsComponent from '../Tabs';
 import { NAV_LINKS, navigationAndApiTypes, TABS } from '../../reducers/navigationAndApiReducer';
 
 

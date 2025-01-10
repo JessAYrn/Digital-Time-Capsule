@@ -3,7 +3,7 @@ import { toHexString, nanoSecondsToMiliSeconds } from "./Utils";
 import { generateQrCode } from "./walletFunctions/GenerateQrCode";
 import { mapBackendCanisterDataToFrontEndObj } from "../mappers/dashboardMapperFunctions";
 import { mapBalancesData, mapBackendTreasuryDataToFrontEndObj } from "../mappers/treasuryPageMapperFunctions";
-import { getFileUrl_fromApi } from "../Components/Fields/fileManger/FileManagementTools";
+import { getFileUrl_fromApi } from "../Components/fileManger/FileManagementTools";
 
 export const loadAllDataIntoReduxStores = async (navigationAndApiState, dispatchFunctions, types) => {
     let loadSuccessful = true;
