@@ -2,15 +2,15 @@ import JournalPage from "./JournalPage";
 import React, { useContext, useEffect, useState } from "react";
 import {types} from "../reducers/journalReducer";
 import { AppContext } from "../Context";
-import InputBox from "../Components/Fields/InputBox";
-import SpeedDialField from '../Components/Fields/SpeedDialField'
+import InputBox from "../components/Fields/InputBox";
+import SpeedDialField from '../components/Fields/SpeedDialField'
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import { getHighestEntryKey, milisecondsToNanoSeconds } from "../functionsAndConstants/Utils";
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
-import FileCarousel from "../Components/Fields/fileManger/FileCarousel";
-import DataTable from "../Components/Fields/Table";
-import DatePickerField from "../Components/Fields/DatePicker";
+import FileCarousel from "../components/Fields/fileManger/FileCarousel";
+import DataTable from "../components/Fields/Table";
+import DatePickerField from "../components/Fields/DatePicker";
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import { journalPagesTableColumns, mapRequestsForAccessToTableRows } from "../mappers/journalPageMappers";
 import { mapApiObjectToFrontEndJournalEntriesObject } from "../mappers/journalPageMappers";

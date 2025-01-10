@@ -1,8 +1,8 @@
 import React, {useState, useEffect} from 'react';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
-import ButtonField from '../../../Components/Button';
+import ButtonField from '../../../components/Button';
 import DoneIcon from '@mui/icons-material/Done';
-import InputBox from '../../../Components/InputBox';
+import InputBox from '../../../components/InputBox';
 import { fromE8s } from '../../../functionsAndConstants/Utils';
 import { INPUT_BOX_FORMATS } from '../../../functionsAndConstants/Constants';
 import { toE8s } from '../../../functionsAndConstants/Utils';

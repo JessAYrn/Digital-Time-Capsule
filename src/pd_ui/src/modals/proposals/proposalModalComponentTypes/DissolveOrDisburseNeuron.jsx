@@ -2,8 +2,8 @@ import React, {useState, useContext, useEffect} from 'react';
 import { AppContext } from '../../../Context';
 import { Typography } from '@mui/material';
 import DoneIcon from '@mui/icons-material/Done';
-import MenuField from '../../../Components/MenuField';
-import ButtonField from '../../../Components/Button';
+import MenuField from '../../../components/MenuField';
+import ButtonField from '../../../components/Button';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
 

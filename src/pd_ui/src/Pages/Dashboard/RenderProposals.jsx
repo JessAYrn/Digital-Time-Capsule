@@ -1,8 +1,8 @@
 import React, {useContext} from "react";
 import Grid from "@mui/material/Unstable_Grid2";
-import CarouselComponent from '../../Components/Carousel';
-import AccordionField from '../../Components/Accordion'
-import DataField from '../../Components/DataField';
+import CarouselComponent from '../../components/Carousel';
+import AccordionField from '../../components/Accordion'
+import DataField from '../../components/DataField';
 import Typography  from "@mui/material/Typography";
 import PreviewProposal from '../../modals/proposals/PreviewProposal';
 import DisplayProposal from '../../modals/proposals/DisplayProposal';

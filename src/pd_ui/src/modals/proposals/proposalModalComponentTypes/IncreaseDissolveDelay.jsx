@@ -1,15 +1,15 @@
 import React, {useState, useContext, useEffect, useMemo} from 'react';
-import MenuField from '../../../Components/MenuField';
+import MenuField from '../../../components/MenuField';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { AppContext } from '../../../Context';
-import ButtonField from '../../../Components/Button';
+import ButtonField from '../../../components/Button';
 import { Typography } from '@mui/material';
 import DoneIcon from '@mui/icons-material/Done';
-import InputBox from '../../../Components/InputBox';
+import InputBox from '../../../components/InputBox';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
 import { INPUT_BOX_FORMATS, CHART_TYPES, GRAPH_DISPLAY_LABELS } from '../../../functionsAndConstants/Constants';
 import { getHypotheticalVotingPowerIncreaseFromIncreasedDissolveDelay } from '../utils';
-import Graph, { getLabelsAndDataSetsInChartFormat, sortAndReduceDataMapArray } from '../../../Components/Chart';
+import Graph, { getLabelsAndDataSetsInChartFormat, sortAndReduceDataMapArray } from '../../../components/Chart';
 import { daysToSeconds, fromE8s, secondsToDays } from '../../../functionsAndConstants/Utils';
 
 

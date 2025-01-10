@@ -1,7 +1,7 @@
 import React, {useContext} from "react";
-import AccordionField from '../../Components/Accordion'
+import AccordionField from '../../components/Accordion'
 import Grid from "@mui/material/Unstable_Grid2";
-import DataField from '../../Components/DataField';
+import DataField from '../../components/DataField';
 import { AppContext } from "../../Context";
 import { CANISTER_DATA_FIELDS } from "../../functionsAndConstants/Constants";
 import { copyText } from "../../functionsAndConstants/walletFunctions/CopyWalletAddress";

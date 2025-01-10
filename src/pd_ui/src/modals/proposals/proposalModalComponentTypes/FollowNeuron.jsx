@@ -1,14 +1,14 @@
 import React ,{useState, useContext, useEffect} from 'react';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
-import MenuField from '../../../Components/MenuField';
+import MenuField from '../../../components/MenuField';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { AppContext } from '../../../Context';
 import { NEURON_TOPICS } from '../CreateProposalForm';
 import { Typography } from '@mui/material';
-import InputBox from '../../../Components/InputBox';
+import InputBox from '../../../components/InputBox';
 import { INPUT_BOX_FORMATS } from '../../../functionsAndConstants/Constants';
 import DoneIcon from '@mui/icons-material/Done';
-import ButtonField from '../../../Components/Button';
+import ButtonField from '../../../components/Button';
 
 export const NEURON_TOPICS = {
     // The `Unspecified` topic is used as a fallback when

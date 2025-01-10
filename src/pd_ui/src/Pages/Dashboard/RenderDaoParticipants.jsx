@@ -1,18 +1,12 @@
 import React, { useContext, useState} from "react";
 import Grid from "@mui/material/Unstable_Grid2";
-import AccordionField from '../../Components/Accordion'
-import DataTable from '../../Components/Table';
+import AccordionField from '../../components/Accordion'
+import DataTable from '../../components/Table';
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
 import { AppContext } from "../../Context";
 import { homePageTypes} from "../../reducers/homePageReducer"
 import { copyText } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
-import { 
-    mapRequestsForAccessToTableRows, 
-    mapUsersProfileDataToTableRows, 
-    requestsForAccessTableColumns, 
-    usersTableColumns 
-} from '../../mappers/dashboardMapperFunctions';
 
 const RenderDaoParticipants = () => {
 
@@ -92,7 +86,8 @@ const RenderDaoParticipants = () => {
     return (
         <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"} flexDirection={"column"} padding={0}>
             <AccordionField title={"DAO Participants"} sx={{ marginBottom: "5px", padding: "0"}}>
-                <DataTable
+                {[
+                    <DataTable
                     iconSize={"medium"}
                     onClick_button_1={subsidize}
                     onClick_button_2={Unsubsidize}
@@ -104,12 +99,14 @@ const RenderDaoParticipants = () => {
                     disabled={!homePageState.canisterData.isAdmin}
                     isLoading={usersTableIsLoading}
                     columns={usersTableColumns}
-                    rows={homePageState.canisterData.profilesMetaData}
+                    rows={mapUsersProfileDataToTableRows(homePageState.canisterData.profilesMetaData)}
                     Icon_1={CheckIcon}
                     Icon_2={ClearIcon}
                 />
+                ]}
             </AccordionField>
             <AccordionField title={"Requests for Entry"} sx={{marginBottom: "5px", padding: "0"}}>
+            {[
                 <DataTable
                     iconSize={"medium"}
                     onClick_button_1={onGrantAccess}
@@ -122,10 +119,11 @@ const RenderDaoParticipants = () => {
                     disabled={!homePageState.canisterData.isAdmin}
                     isLoading={requestsTableIsLoading}
                     columns={requestsForAccessTableColumns}
-                    rows={homePageState.canisterData.requestsForAccess}
+                    rows={mapRequestsForAccessToTableRows(homePageState.canisterData.requestsForAccess)}
                     Icon_1={CheckIcon}
                     Icon_2={ClearIcon}
                 />
+            ]}
             </AccordionField>
         </Grid>
     )
@@ -133,3 +131,71 @@ const RenderDaoParticipants = () => {
 };
 
 export default RenderDaoParticipants;
+
+
+const mapRequestsForAccessToTableRows = (requestsForAccess) => {
+    const requestsForAccess_ = requestsForAccess.map(([userPrincipal, approvalStatus], index) => {
+        return {
+            id: index,
+            userPrincipal: userPrincipal,
+            approvalStatus: approvalStatus
+        }
+    });
+    return requestsForAccess_;
+}
+
+const mapUsersProfileDataToTableRows = (usersProfileData) => {
+    const profileMetaData = usersProfileData.map((metaData, index) => {
+        return {
+            id: index,
+            ...metaData
+        }
+    });
+    return profileMetaData;
+};
+
+const requestsForAccessTableColumns = [
+    { 
+        field: 'id', 
+        headerName: '#', 
+        width: 90 
+    },
+    {
+      field: 'userPrincipal',
+      headerName: 'User Principal',
+      width: 200,
+      editable: false,
+    },
+    {
+        field: 'approvalStatus',
+        headerName: 'Approved',
+        width: 200,
+        type: 'boolean'
+    }
+];
+
+const usersTableColumns = [
+    { 
+        field: 'id', 
+        headerName: '#', 
+        width: 90 
+    },
+    {
+        field: 'canisterId',
+        headerName: 'Root Canister',
+        width: 200,
+        editable: false,
+    },
+    {
+        field: 'userName',
+        headerName: 'User Name',
+        width: 200,
+        editable: false,
+    },
+    {
+        field: 'approvalStatus',
+        headerName: 'Subsidized',
+        width: 200,
+        type: 'boolean'
+    }
+];

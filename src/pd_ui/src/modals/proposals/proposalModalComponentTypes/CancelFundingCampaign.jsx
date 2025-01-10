@@ -1,10 +1,10 @@
 import React, {useState, useContext} from 'react';
 import { AppContext } from '../../../Context';
-import ButtonField from '../../../Components/Button';
+import ButtonField from '../../../components/Button';
 import { Typography } from '@mui/material';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import MenuField from '../../../Components/MenuField';
+import MenuField from '../../../components/MenuField';
 
 const CancelFundingCampaign = (props) => {
     const {onSubmitProposal, action, payload, disabled} = props;

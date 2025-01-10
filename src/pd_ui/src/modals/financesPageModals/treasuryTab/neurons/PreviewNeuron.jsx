@@ -1,14 +1,14 @@
 import React, {useContext} from "react";
 import {Paper} from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
-import ButtonField from "../../Components/Button";
-import DataField from "../../Components/DataField";
+import ButtonField from "../../../../components/Button";
+import DataField from "../../../../components/DataField";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import { copyText } from "../../functionsAndConstants/walletFunctions/CopyWalletAddress";
-import { fromE8s, round2Decimals, shortenString } from "../../functionsAndConstants/Utils";
-import { getUserNeuronContribution, getTotalContributions } from "../../functionsAndConstants/treasuryDataFunctions";
-import { AppContext } from "../../Context";
+import { copyText } from "../../../../functionsAndConstants/walletFunctions/CopyWalletAddress";
+import { fromE8s, round2Decimals, shortenString } from "../../../../functionsAndConstants/Utils";
+import { getUserNeuronContribution, getTotalContributions } from "../../../../functionsAndConstants/treasuryDataFunctions";
 import DisplayNeuron from "./DisplayNeuron";
+import { AppContext } from "../../../../Context";
 
 const PreviewNeuron = (props) => {
     const {neuronData, userPrincipal } = props;

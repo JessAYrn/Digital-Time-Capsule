@@ -1,17 +1,17 @@
 import React, {useContext, useState, useEffect, useMemo} from 'react';
-import InputBox from '../../../Components/InputBox';
+import InputBox from '../../../components/InputBox';
 import { Typography } from '@mui/material';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { AppContext } from "../../../Context";
-import MenuField from '../../../Components/MenuField';
+import MenuField from '../../../components/MenuField';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
 import { daysToNanoSeconds, fromE8s, toE8s, nanoSecondsToDays, getFundingCampaignAssetTypeAndValue } from '../../../functionsAndConstants/Utils';
 import {  FUNDING_CAMPAIGN_ASSET_TYPES, INPUT_BOX_FORMATS } from '../../../functionsAndConstants/Constants';
-import ButtonField from '../../../Components/Button';
+import ButtonField from '../../../components/Button';
 import DoneIcon from '@mui/icons-material/Done';
-import InfoToolTip from '../../../Components/InfoToolTip';
+import InfoToolTip from '../../../components/InfoToolTip';
 import { getUncollateralizedStake } from '../../../functionsAndConstants/treasuryDataFunctions';
-import DataField from '../../../Components/DataField';
+import DataField from '../../../components/DataField';
 
  
 

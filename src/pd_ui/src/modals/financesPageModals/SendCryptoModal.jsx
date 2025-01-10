@@ -1,13 +1,13 @@
 import React, { useState, useContext } from "react";
 import { AppContext } from "../../Context";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
-import InputBox from "../../Components/InputBox";
+import InputBox from "../../components/InputBox";
 import { icpWalletAddressHasProperFormat, principalHasProperFormat, isANumber, round8Decimals, shortenHexString, fromHexString, fromE8s, toE8s  } from "../../functionsAndConstants/Utils";
-import ButtonField from "../../Components/Button";
+import ButtonField from "../../components/Button";
 import CenterFocusWeakIcon from '@mui/icons-material/CenterFocusWeak';
 import QrReaderContent  from "./ScanQrCodeModal";
 import { INPUT_BOX_FORMATS, e8sInOneICP } from "../../functionsAndConstants/Constants";
-import DataField from "../../Components/DataField";
+import DataField from "../../components/DataField";
 
 const SendCrypto = (props) => {
     const [hasError_1, setHasError_1] = useState(false);

@@ -1,17 +1,17 @@
 import React, {useMemo, useContext} from "react";
-import { AppContext } from "../../Context";
+import { AppContext } from "../../../Context";
 import Grid from "@mui/material/Unstable_Grid2";
-import Graph from "../../Components/Fields/Chart";
-import InputBox from "../../Components/Fields/InputBox";
-import { nanoSecondsToMiliSeconds, shortenHexString, millisecondsToSeconds, secondsToHours, hoursToDays, round2Decimals } from "../../functionsAndConstants/Utils";
-import ButtonField from "../../Components/Fields/Button";
-import DataField from "../../Components/Fields/DataField";
+import Graph from "../../components/Fields/Chart";
+import InputBox from "../../components/Fields/InputBox";
+import { nanoSecondsToMiliSeconds, shortenHexString, millisecondsToSeconds, secondsToHours, hoursToDays, round2Decimals } from "../../../functionsAndConstants/Utils";
+import ButtonField from "../../components/Fields/Button";
+import DataField from "../../components/Fields/DataField";
 import PriceCheckIcon from '@mui/icons-material/PriceCheck';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import { GRAPH_DATA_SETS, CHART_TYPES, GRAPH_DISPLAY_LABELS } from "../../functionsAndConstants/Constants";
-import { getFundingCampaignAssetTypeAndValue } from "../../functionsAndConstants/Utils";
-import { copyText } from "../../functionsAndConstants/walletFunctions/CopyWalletAddress";
-import { mapDataMapToChartFormat } from "../../mappers/treasuryPageMapperFunctions";
+import { GRAPH_DATA_SETS, CHART_TYPES, GRAPH_DISPLAY_LABELS } from "../../../functionsAndConstants/Constants";
+import { getFundingCampaignAssetTypeAndValue } from "../../../functionsAndConstants/Utils";
+import { copyText } from "../../../functionsAndConstants/walletFunctions/CopyWalletAddress";
+import { mapDataMapToChartFormat } from "../../../mappers/treasuryPageMapperFunctions";
 import AddLiquidityOrRepayFundingCampaign, {ACTION_TYPES} from "../modalPages/financesPageModals/AddLiquidityOrRepayFundingCampaign";
 
 const DisplayFundingCampaign = (props) => {

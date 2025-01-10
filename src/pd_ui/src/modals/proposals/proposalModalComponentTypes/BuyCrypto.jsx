@@ -2,7 +2,7 @@ import React, {useState, useContext, useMemo} from "react";
 import Grid from "@mui/material/Unstable_Grid2";
 import { Typography } from "@mui/material";
 import { AppContext } from "../../../Context";
-import ButtonField from "../../../Components/Button";
+import ButtonField from "../../../components/Button";
 
 const BuyCrypto = (props) => {
 

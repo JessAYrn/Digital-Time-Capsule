@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import RenderTreasuryTab from './TreasuryTab/RenderTreasuryTab';
+import TreasuryTab from './treasuryTab/TreasuryTab';
 import WalletTab from './WalletTab';
 import { TABS } from '../../reducers/navigationAndApiReducer';
 import  {AppContext}  from '../../Context';
@@ -9,7 +9,7 @@ const FinancesPage = (props) => {
 
   return (
     <> 
-      {navigationAndApiState.location.tab === TABS.treasury && <RenderTreasuryTab/>}
+      {navigationAndApiState.location.tab === TABS.treasury && <TreasuryTab/>}
       {navigationAndApiState.location.tab === TABS.wallet && <WalletTab/>}
     </>
     

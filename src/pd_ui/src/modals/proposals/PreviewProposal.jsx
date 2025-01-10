@@ -1,15 +1,15 @@
 import React, {useContext} from "react";
 import {Paper} from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
-import ButtonField from "../../Components/Button";
-import DataField from "../../Components/DataField";
+import ButtonField from "../../components/Button";
+import DataField from "../../components/DataField";
 import { fromE8s, round2Decimals, milisecondsToNanoSeconds, shortenString } from "../../functionsAndConstants/Utils";
 import { AppContext } from "../../Context";
 import { getProposalType } from "./utils";
 
 const PreviewProposal = (props) => {
     const {proposal, onViewProposal } = props;
-    const {setModalProps, setModalIsOpen, homePageState} = useContext(AppContext)
+    const {homePageState} = useContext(AppContext)
 
     const [proposalIdAsBigInt, proposalData] = proposal;
     const proposalId = parseInt(proposalIdAsBigInt);

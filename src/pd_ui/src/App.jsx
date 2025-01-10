@@ -8,22 +8,22 @@ import treasuryReducer, { treasuryPageInitialState, treasuryTypes } from './redu
 import navigationAndApiReducer, { navigationAndApiInitialState, navigationAndApiTypes } from './reducers/navigationAndApiReducer';
 import DoNotDisturbOnIcon from '@mui/icons-material/DoNotDisturbOn';
 import { copyText } from './functionsAndConstants/walletFunctions/CopyWalletAddress';
-import ButtonField from './Components/Button';
+import ButtonField from './components/Button';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CelebrationIcon from '@mui/icons-material/Celebration';
-import Analytics from './Pages/Dashboard/DashboardPage';
+import DashboardPage from './pages/dashboard/DashboardPage';
 import ModalComponent, {LoadingModal} from './modals/Modal';
-import LoginPage from './Pages/LoginPage';
+import LoginPage from './pages/LoginPage';
 import { NAV_LINKS } from './reducers/navigationAndApiReducer';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from './Theme';
 import { AppContext } from './Context';
-import FinancesPage from './Pages/Finances/FinancesPage';
+import FinancesPage from './pages/finances/FinancesPage';
 import CreateAccount from './modals/CreateAccount';
 import { fromE8s, shortenHexString } from './functionsAndConstants/Utils';
 import Grid from '@mui/material/Unstable_Grid2';
 import { Typography } from '@mui/material';
-import PersistedComponents from './Components/persistentComponents/PersistedComponents';
+import PersistedComponents from './components/persistentComponents/PersistedComponents';
 
 
 const Router = (props) => {
@@ -134,7 +134,7 @@ const Router = (props) => {
             { displayComponent && <PersistedComponents/>}
                 {displayComponent ? 
                     <>
-                        {navigationAndApiState?.location?.route === NAV_LINKS.dashboard && <Analytics/>}
+                        {navigationAndApiState?.location?.route === NAV_LINKS.dashboard && <DashboardPage/>}
                         {navigationAndApiState?.location.route === NAV_LINKS.finances && <FinancesPage />}
                     </>  : 
                     <LoginPage />
