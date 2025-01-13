@@ -11,6 +11,7 @@ import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import WarningIcon from '@mui/icons-material/Warning';
 import { fileLoaderHelper } from '../../../functionsAndConstants/loadingFunctions';
 import { AppContext } from '../../../Context';
+import { CONTRAST_COLOR } from '../../Theme';
 
 
 const FileUpload = (props) => {
@@ -147,7 +148,7 @@ const FileUpload = (props) => {
                             className={'DeleteFileButton'}
                             id={elementId} 
                             Icon={DeleteIcon}
-                            color={"secondary"}
+                            color={CONTRAST_COLOR}
                             onClick={deleteFile}
                         /> 
                     </Grid>

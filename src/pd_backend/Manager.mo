@@ -13,6 +13,7 @@ import WasmStore "Types/WasmStore/types";
 import HashMap "mo:base/HashMap";
 import Array "mo:base/Array";
 import Timer "mo:base/Timer";
+import IC "/Types/IC/types";
 import CanisterManagementMethods "/Modules/Manager/CanisterManagementMethods";
 
 shared(msg) actor class Manager (principal : Principal) = this {
@@ -243,5 +244,17 @@ shared(msg) actor class Manager (principal : Principal) = this {
       }
     ) else { return null };
     return ?wasmModule
+  };
+
+  public shared func sendCyclesToApiCanister(): async () {
+    let ic: IC.Self = actor("aaaaa-aa");
+    Cycles.add<system>(1_000_000_000_000);
+    ignore ic.deposit_cycles({ canister_id = Principal.fromText("ngzp5-hqaaa-aaaam-adlwq-cai"); });
+
+    Cycles.add<system>(1_000_000_000_000);
+    ignore ic.deposit_cycles({ canister_id = Principal.fromText("mxtrc-7yaaa-aaaam-adlta-cai"); });
+
+    Cycles.add<system>(250_000_000_000);
+    ignore ic.deposit_cycles({ canister_id = Principal.fromText("nu7ye-laaaa-aaaam-adlvq-cai"); });
   };
 }

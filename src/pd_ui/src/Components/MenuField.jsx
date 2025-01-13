@@ -3,6 +3,7 @@ import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import ButtonField from './Button';
+import { PAPER_COLOR } from "../Theme";
 
 const MenuField = (props) => {
     const {
@@ -35,6 +36,7 @@ const MenuField = (props) => {
         <Grid xs={xs} md={md} display={display} justifyContent={justifyContent} alignItems={alignItems} padding={0} sx={sx}>
             <ButtonField
                 isLoading={isLoading}
+                transparentBorder={true}
                 transparentBackground={true}
                 id="basic-button"
                 disabled={disabled}
@@ -55,6 +57,9 @@ const MenuField = (props) => {
                 onClose={handleClose}
                 MenuListProps={{
                 'aria-labelledby': 'basic-button',
+                style: {
+                    backgroundColor: PAPER_COLOR
+                }
                 }}
             >
                 { !Component &&  menuItemProps.map( 

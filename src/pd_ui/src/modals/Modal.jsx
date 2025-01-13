@@ -1,7 +1,11 @@
 import React from 'react';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
-import { Box, Dialog, Slide, AppBar, Toolbar, IconButton, LinearProgress, Modal } from '@mui/material';
+import { Box, Dialog, Slide, IconButton, LinearProgress, Modal } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import Typography from '@mui/material/Typography';
+import { BACKGROUND_COLOR, DIVIDER_SX } from '../Theme';
+import ButtonField from '../components/Button';
 
 
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -9,7 +13,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 });
 
 const ModalComponent = (props) => {
-  const { open, handleClose, components, flexDirection, fullScreen } = props
+  const { open, handleClose, handleReturn, components, flexDirection, fullScreen, headerComponent } = props
   return (
       <Dialog 
       fullScreen={fullScreen}
@@ -18,18 +22,42 @@ const ModalComponent = (props) => {
       TransitionComponent={Transition}
       > 
         {fullScreen && 
-        <AppBar sx={{ position: 'fixed', top: "auto", backgroundColor: "#0A0A0A"}}>
-          <Toolbar>
+        <Grid 
+        position={"fixed"}
+        top={"auto"}
+        backgroundColor={BACKGROUND_COLOR}
+        height={"50px"}
+        display={"flex"}
+        justifyContent={"left"}
+        alignItems={"center"}
+        width={"100%"}
+        paddingLeft={"10px"}
+        paddingRight={"10px"}
+        zIndex={"1"}
+        borderBottom={`solid ${DIVIDER_SX.borderColor}`}
+        >
             <IconButton
               edge="start"
               color="primary"
-              onClick={handleClose}
+              onClick={handleReturn ? handleReturn : handleClose}
               aria-label="close"
             >
-              <CloseIcon />
+                {handleReturn ? <ArrowBackIosNewIcon /> : <CloseIcon />}
             </IconButton>
-          </Toolbar>
-        </AppBar>}
+
+            <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"}>
+              {headerComponent}
+            </Grid>
+
+            <IconButton
+              edge="start"
+              color={BACKGROUND_COLOR}
+              onClick={handleReturn ? handleReturn : handleClose}
+              aria-label="close"
+            >
+                {handleReturn ? <ArrowBackIosNewIcon /> : <CloseIcon />}
+            </IconButton>
+        </Grid>}
         {components &&
           <Grid marginTop={fullScreen ? "60px": ""} border={fullScreen? "" : "solid grey "} display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} flexDirection={flexDirection} padding={"10px"}>
               {components.map(component => { return component })}

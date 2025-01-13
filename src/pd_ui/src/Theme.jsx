@@ -1,6 +1,26 @@
 import { createTheme } from '@mui/material/styles';
 import { grey } from '@mui/material/colors';
 
+export const BACKGROUND_COLOR = "#101010" 
+
+export const PAPER_COLOR = "#141414"
+
+export const BUTTON_SX = {
+  borderColor: "#2e3539",
+  backgroundColor: "#192025"
+}
+
+export const CONTRAST_COLOR = "#F7931A"
+
+export const WHITE_COLOR = "#fafafa"
+
+export const DIVIDER_SX = {
+    width: "100%", 
+    marginBottom: "5px", 
+    marginTop: "5px", 
+    borderColor: "#2e3539"
+};
+
 const theme = createTheme({
     palette: {
       primary: {
@@ -10,14 +30,14 @@ const theme = createTheme({
         // contrastText: will be calculated to contrast with palette.primary.main
       },
       secondary: {
-        main: '#F7931A'
+        main: CONTRAST_COLOR
       },
       // Provide every color token (light, main, dark, and contrastText) when using
       // custom colors for props in Material UI's components.
       // Then you will be able to use it like this: `<Button color="custom">`
       // (For TypeScript, you need to add module augmentation for the `custom` value)
       custom: {
-        main: '#F7931A'
+        main: CONTRAST_COLOR
       },
       text: {
         primary: grey[50]
@@ -39,8 +59,7 @@ const theme = createTheme({
       MuiPaper:{
         styleOverrides: {
           root:{
-            boxShadow: "1px 1px 1px 0px #343434",
-            backgroundColor: "#0A0A0A"
+            backgroundColor: BACKGROUND_COLOR
           }
         }
       },
@@ -63,9 +82,9 @@ const theme = createTheme({
       MuiInputLabel: {
         styleOverrides: {
           root: {
-            color: '#F7931A' ,
+            color: CONTRAST_COLOR ,
             "&.Mui-disabled": {
-              color: '#F7931A'
+              color: CONTRAST_COLOR
             },
             "&.Mui-focused": {
               color: grey[400]
@@ -155,7 +174,7 @@ const theme = createTheme({
       MuiSwitch:{
         styleOverrides:{
           track:{
-            backgroundColor: "#F7931A"
+            backgroundColor: CONTRAST_COLOR
           }
         }
       },
@@ -213,14 +232,12 @@ const theme = createTheme({
       MuiDialog:{
         styleOverrides: {
           root: {
-            ".MuiDialog-paper": {
-              borderTop: "solid grey"
-            },
             ".MuiDialog-paperFullScreen":{
               maxHeight: "100%",
               height: "auto",
               position: "absolute",
-              bottom: 0
+              bottom: 0,
+              minHeight: "60%"
             }
           }
         }

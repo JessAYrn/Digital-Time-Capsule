@@ -32,7 +32,7 @@ const RenderVotingDistributionsGraph = () => {
         <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} xs={12} padding={0} flexDirection={"column"} width={"100%"} >
 
             <Typography variant="h4" color="white" marginBottom={"10px"} marginTop={"10px"} textAlign={"center"}>
-                Voting Power Distribution
+                Voting Power
             </Typography>
 
             <Graph

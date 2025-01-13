@@ -6,6 +6,7 @@ import "./fileCarousel.scss";
 import ButtonField from "../Button";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import { defaultFileMetaData } from "../../../reducers/journalReducer";
+import { CONTRAST_COLOR } from "../../Theme";
 
 
 const FileCarousel = (props) => {
@@ -73,7 +74,7 @@ const FileCarousel = (props) => {
                             elevation={0}
                             onClick={onChange_editButton}
                             Icon={EditIcon_}
-                            color={"secondary"}
+                            color={CONTRAST_COLOR}
                             iconSize={'small'}
                         />
                 </Grid>

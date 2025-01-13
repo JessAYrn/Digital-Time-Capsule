@@ -2,10 +2,12 @@ import React from "react";
 import Grid from "@mui/material/Unstable_Grid2";
 import { IconButton, Button, Typography } from '@mui/material';
 import LoadingButton from '@mui/lab/LoadingButton';
+import { CONTRAST_COLOR, DIVIDER_SX, PAPER_COLOR } from "../Theme";
 
 const ButtonField = (props) => {
     const {
         transparentBackground,
+        transparentBorder,
         isLoading,
         text,
         Icon,
@@ -20,7 +22,6 @@ const ButtonField = (props) => {
         ariaHaspopup,
         ariaExpanded,
         color,
-        bgColor,
         upload,
         sx,
         gridSx,
@@ -36,17 +37,19 @@ const ButtonField = (props) => {
     let handleClick = disabled ? doNothing : onClick;
     return (
             <Grid 
-            bgcolor={transparentBackground ? "transparent": bgColor || "black"}
-            borderRadius={"5px"}
-            border={transparentBackground? null: "solid grey"}
+            borderRadius={"20px"}
+            border={transparentBorder? null: "solid " + DIVIDER_SX.borderColor}
             padding={0}
             display={"flex"}
             alignItems={"center"}
             justifyContent={"center"}
-            sx={gridSx}
+            sx={{
+                backgroundColor: transparentBackground? "transparent":  PAPER_COLOR,
+                ...gridSx
+            }}
             >
                 { hyperLink ?
-                    <a href={hyperLink} target="_blank" rel="noreferrer noopener" style={{color: "#F7931A"}}>{text}</a> :
+                    <a href={hyperLink} target="_blank" rel="noreferrer noopener" style={{color: CONTRAST_COLOR}}>{text}</a> :
                     <ButtonType 
                         varient={upload ? 'contained' : null}
                         component={upload ? "label" : null}
@@ -56,13 +59,13 @@ const ButtonField = (props) => {
                         id={id}
                         onBlur={onBlur}
                         size={iconSize} 
-                        color={color || "primary"} 
+                        sx={{color: color}}
                         endIcon={(text && Icon) ?<Icon/> : null} 
                         onClick={handleClick}
                         disabled={disabled}
                         loading={isLoading}
                     >
-                        {text && !isLoading && <Typography sx={sx} color={color}>{text}</Typography>}
+                        {text && !isLoading && <Typography sx={{color: color, ...sx}}>{text}</Typography>}
                         {!text && Icon && <Icon sx={sx}/>}
                         {upload && <input type="file" hidden onChange={onChange} ref={ref}/>}
                     </ButtonType>

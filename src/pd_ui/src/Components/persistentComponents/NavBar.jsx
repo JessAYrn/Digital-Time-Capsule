@@ -6,12 +6,13 @@ import { NAV_LINKS, navigationAndApiTypes, TABS } from "../../reducers/navigatio
 import ButtonField from "../Button";
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import DashboardIcon from '@mui/icons-material/Dashboard';
+import { BACKGROUND_COLOR, CONTRAST_COLOR, WHITE_COLOR } from "../../Theme";
 
 const NavBar = (props) => {
 
     const {style, onClick} = props;
 
-    const {modalIsLoading, navigationAndApiDispatch} = useContext(AppContext);
+    const {modalIsLoading, navigationAndApiDispatch, navigationAndApiState} = useContext(AppContext);
 
     const changeRoute = (route) => {
         let tab;
@@ -34,24 +35,26 @@ const NavBar = (props) => {
         display={"flex"} 
         justifyContent={"center"} 
         alignItems={"center"} 
-        bgcolor={"#0A0A0A"} 
+        bgcolor={BACKGROUND_COLOR} 
         bottom={0}
         padding={0}
         >
             <Grid xs={6} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} padding={0}>
                 <ButtonField
+                    transparentBorder={true}
                     Icon={DashboardIcon}
                     transparentBackground={true}
-                    color={'primary'}
+                    color={navigationAndApiState.location.route === NAV_LINKS.dashboard ? CONTRAST_COLOR : WHITE_COLOR}
                     onClick={() => changeRoute(NAV_LINKS.dashboard)}
                     disabled={modalIsLoading}
                 />
             </Grid>
             <Grid xs={6} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} padding={0}>
                 <ButtonField
+                    transparentBorder={true}
                     Icon={AccountBalanceIcon}
                     transparentBackground={true}
-                    color={'primary'}
+                    color={navigationAndApiState.location.route === NAV_LINKS.finances ? CONTRAST_COLOR : WHITE_COLOR}
                     onClick={() => changeRoute(NAV_LINKS.finances)}
                     disabled={modalIsLoading}
                 />

@@ -2,7 +2,7 @@ import React, { useContext} from "react";
 import { AppContext } from "../../Context";
 import HowToVoteIcon from '@mui/icons-material/HowToVote';
 import TransactWithTreasuryModal from "../../modals/financesPageModals/TransactWithTreasury";
-import CreateProposalForm from "../../modals/proposals/CreateProposalForm";
+import CreateProposalForm from "../../proposals/CreateProposalForm";
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import Grid from "@mui/material/Unstable_Grid2";
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
@@ -10,6 +10,7 @@ import TransactWithWalletModal from "../../modals/financesPageModals/WalletModal
 import Typography from "@mui/material/Typography";
 import { animated } from "@react-spring/web";
 import ButtonField from "../Button";
+import { CONTRAST_COLOR } from "../../Theme";
 
 const ActionButton = (props) => {
 
@@ -42,6 +43,7 @@ const ActionButton = (props) => {
     const openProposalForm = () => {
         setModalIsOpen(true);
         setModalProps({ 
+            headerComponent: <Typography variant="h6">Create Proposal</Typography>,
             fullScreen: true,
             components: [ 
                 <CreateProposalForm/>
@@ -71,9 +73,8 @@ const ActionButton = (props) => {
         >
             <Grid xs={4} width={"100%"} padding={0} display={"flex"} justifyContent={"center"} alignItems={"center"}>
             <ButtonField
-                bgColor={"#F7931A"}
                 color={"primary"}
-                gridSx={{ borderRadius: "20px", width: "135px"}}
+                gridSx={{ borderRadius: "20px", width: "135px", backgroundColor: CONTRAST_COLOR }}
                 elevation={0}
                 text={"Propose"}
                 onClick={openProposalForm}
@@ -83,7 +84,7 @@ const ActionButton = (props) => {
             </Grid>
             <Grid xs={4} width={"100%"} padding={0} display={"flex"} justifyContent={"center"} alignItems={"center"}>
             <ButtonField
-                color={"secondary"}
+                color={CONTRAST_COLOR}
                 gridSx={{ borderRadius: "20px", width: "135px"}}
                 elevation={0}
                 text={"Transact"}

@@ -22,6 +22,7 @@ const SwitchField = (props) => {
                 <Grid display='flex' justifyContent={labelLeft ? 'right' : 'left'} alignItems="Center" xs={2} width={"49%"}  >
                     {labelRight &&
                     <ButtonField
+                        transparentBorder={true}
                         color={"primary"}
                         transparentBackground={true}
                         Icon={checked ? CheckIcon : CloseIcon}
@@ -37,6 +38,7 @@ const SwitchField = (props) => {
                     />
                     {labelLeft &&
                     <ButtonField
+                        transparentBorder={true}
                         color={"primary"}
                         transparentBackground={true}
                         Icon={checked ? CheckIcon : CloseIcon}

@@ -7,7 +7,9 @@ import RenderVotingDistributionsGraph from './RenderVotingDistribution';
 import RenderProposals from './RenderProposals';
 import RenderDaoParticipants from './RenderDaoParticipants';
 import RenderDaoMetaData from './RenderDaoMetaData';
-
+import { Divider } from '@mui/material';
+import { DIVIDER_SX, CONTRAST_COLOR } from '../../Theme';
+import DataField from '../../components/DataField';
 const DashboardPage = () => {
 
     const { homePageDispatch, homePageState, navigationAndApiState, setModalIsOpen, setModalIsLoading, setModalProps } = useContext(AppContext);
@@ -24,15 +26,33 @@ const DashboardPage = () => {
             payload: { ...homePageState.canisterData, acceptingRequests: !homePageState.canisterData.acceptingRequests }
         });
     };
+
+    const viewDaoMetaData = () => {
+        setModalProps({
+            headerComponent: <Typography variant="h6">DAO Meta Data</Typography>,
+            fullScreen: true,
+            components:[
+                <RenderDaoMetaData/>
+            ]
+        });
+        setModalIsOpen(true);
+    }
     
 
     return(
         <Grid columns={12} xs={11} md={9} rowSpacing={0} padding={0} display="flex" justifyContent="center" alignItems="center" flexDirection={"column"}>
-            
             <RenderVotingDistributionsGraph/>
+            <Divider sx={{...DIVIDER_SX, marginBottom:"30px", marginTop:"30px"}} />
             <RenderProposals/>
+            <DataField 
+                buttonColor={CONTRAST_COLOR}
+                label={"DAO Meta Data"} 
+                text={"View"}
+                onClick={ () => viewDaoMetaData() }
+            />
+            <Divider sx={{...DIVIDER_SX, marginBottom:"30px", marginTop:"30px"}} />
             <RenderDaoParticipants/>
-            <RenderDaoMetaData/>
+            <Divider sx={{...DIVIDER_SX, marginBottom:"30px", marginTop:"30px"}} />
             
             <Grid columns={12} xs={12} rowSpacing={0} marginBottom={"40px"} padding={0} display="flex" justifyContent="center" alignItems="center" flexDirection={"column"}>
                 <Switch

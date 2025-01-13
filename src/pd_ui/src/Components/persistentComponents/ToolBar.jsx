@@ -16,6 +16,7 @@ import ButtonField from '../Button';
 import { animated } from "@react-spring/web";
 import TabsComponent from '../Tabs';
 import { NAV_LINKS, navigationAndApiTypes, TABS } from '../../reducers/navigationAndApiReducer';
+import { BACKGROUND_COLOR, WHITE_COLOR } from '../../Theme';
 
 
 const ToolBar = (props) => {
@@ -86,16 +87,16 @@ const ToolBar = (props) => {
         top={0}
         style={style}
         onClick={onClick}
-        borderBottom={"solid grey"}
-        bgcolor={"#0A0A0A"}
+        bgcolor={BACKGROUND_COLOR}
         height={"53px"}
         zIndex={10}
         >
             <Grid xs={2} columns={12} display={"flex"} justifyContent={"left"} alignItems={"center"} padding={0} width={"18%"}> 
                 <ButtonField
+                    transparentBorder={true}
                     Icon={RefreshIcon}
                     transparentBackground={true}
-                    color={'primary'}
+                    color={WHITE_COLOR}
                     onClick={reloadData}
                     disabled={modalIsLoading}
                 />
@@ -106,7 +107,7 @@ const ToolBar = (props) => {
                     selectedTab={navigationAndApiState?.location.tab} 
                     setSelectedTab={setSelectedTab} 
                     indicatorColor={"secondary"}
-                    sx={{ backgroundColor: "#0A0A0A"}}
+                    sx={{ backgroundColor: BACKGROUND_COLOR }}
                 />}
             </Grid>
             <Grid xs={4} columns={12} display={"flex"} justifyContent={"right"} alignItems={"center"} padding={0} width={"35%"}> 
@@ -117,7 +118,7 @@ const ToolBar = (props) => {
                     alignItems={"center"}
                     justifyContent={"center"}
                     disabled={modalIsLoading}
-                    color={'primary'}
+                    color={WHITE_COLOR}
                     menuItemProps={notificationsMenuItemProps}
                 />
                 <MenuField
@@ -128,7 +129,7 @@ const ToolBar = (props) => {
                     alignItems={"center"}
                     justifyContent={"center"}
                     disabled={modalIsLoading}
-                    color={'primary'}
+                    color={WHITE_COLOR}
                     menuItemProps={logoutMenuItemProps}
                 />
             </Grid>

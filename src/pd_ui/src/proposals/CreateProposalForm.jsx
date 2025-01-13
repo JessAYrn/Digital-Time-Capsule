@@ -1,28 +1,29 @@
 import React, {useState, useContext} from "react";
-import MenuField from "../../components/MenuField";
+import MenuField from "../components/MenuField";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import { PROPOSAL_ACTIONS } from "./utils";
-import { fromE8s  } from "../../functionsAndConstants/Utils";
-import { homePageTypes } from "../../reducers/homePageReducer";
+import { fromE8s  } from "../functionsAndConstants/Utils";
+import { homePageTypes } from "../reducers/homePageReducer";
 import { Typography } from "@mui/material";
-import ButtonField from "../../components/Button";
+import ButtonField from "../components/Button";
 import CloseIcon from '@mui/icons-material/Close';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import DoneIcon from '@mui/icons-material/Done';
-import { AppContext } from "../../Context";
-import DataField from "../../components/DataField";
-import NewFundingCampaign from "../../proposals/renderComponents/RenderNewFundingCampaign";
-import SpawnNeuron from "../../proposals/renderComponents/RenderSpawnNeuron";
-import FollowNeuron from "../../proposals/renderComponents/RenderFollowNeuron";
-import AddOrRemoveAdmin from "../../proposals/renderComponents/RenderAddOrRemoveAdmin";
-import DissolveOrDisburseNeuron from "../../proposals/renderComponents/RenderDissolveOrDisburseNeuron";
-import SetAmount from "../../proposals/renderComponents/RenderSetAmount";
-import IncreaseNeuron from "../../proposals/renderComponents/RenderIncreaseNeuron";
-import IncreaseDissolveDelay from "../../proposals/renderComponents/RenderIncreaseDissolveDelay";
-import CancelFundingCampaign from "../../proposals/renderComponents/RenderCancelFundingCampaign";
-import WithdrawFromMultiSigWallet from "../../proposals/renderComponents/RenderWithdrawFromMultiSigWallet";
-import { sortProposals } from "../../functionsAndConstants/governanceDataFunctions";
+import { AppContext } from "../Context";
+import DataField from "../components/DataField";
+import NewFundingCampaign from "./renderComponents/RenderNewFundingCampaign";
+import SpawnNeuron from "./renderComponents/RenderSpawnNeuron";
+import FollowNeuron from "./renderComponents/RenderFollowNeuron";
+import AddOrRemoveAdmin from "./renderComponents/RenderAddOrRemoveAdmin";
+import DissolveOrDisburseNeuron from "./renderComponents/RenderDissolveOrDisburseNeuron";
+import SetAmount from "./renderComponents/RenderSetAmount";
+import IncreaseNeuron from "./renderComponents/RenderIncreaseNeuron";
+import IncreaseDissolveDelay from "./renderComponents/RenderIncreaseDissolveDelay";
+import CancelFundingCampaign from "./renderComponents/RenderCancelFundingCampaign";
+import WithdrawFromMultiSigWallet from "./renderComponents/RenderWithdrawFromMultiSigWallet";
+import { sortProposals } from "../functionsAndConstants/governanceDataFunctions";
+import { CONTRAST_COLOR } from "../Theme";
 
 const CreateProposalForm = (props) => {
     const { proposalAction, proposalPayload } = props;
@@ -68,7 +69,7 @@ const CreateProposalForm = (props) => {
                 components: [
                     <Typography padding={"10px"} variant='h6' children={`Error: ${errorMessage}`} />,
                     <ErrorOutlineIcon/>,
-                    <ButtonField gridSx={{padding: "10px"}} color={"secondary"} text={"Close"} Icon={CloseIcon} onClick={() => setModalIsOpen(false)}/>
+                    <ButtonField gridSx={{padding: "10px"}} color={CONTRAST_COLOR} text={"Close"} Icon={CloseIcon} onClick={() => setModalIsOpen(false)}/>
                 ]
             });
         } else{
@@ -97,7 +98,7 @@ const CreateProposalForm = (props) => {
                 display={"flex"}
                 alignItems={"center"}
                 justifyContent={"left"}
-                color={"secondary"}
+                color={CONTRAST_COLOR}
                 label={"Proposal Type"}
                 MenuIcon={KeyboardArrowDownIcon}
                 menuItemProps={mainMenuItemProps}
@@ -122,7 +123,7 @@ const CreateProposalForm = (props) => {
             { proposalAction_ === PROPOSAL_ACTIONS.WithdrawFromMultiSigWallet && <WithdrawFromMultiSigWallet onSubmitProposal={onSubmitProposal} action={proposalAction_} payload={proposalPayload_}/> }
             { (proposalAction_ === PROPOSAL_ACTIONS.InstallUpgrades || proposalAction_ === PROPOSAL_ACTIONS.ToggleSupportMode || proposalAction_ === PROPOSAL_ACTIONS.TogglePrivacySetting) 
                 && <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}> 
-                    <ButtonField Icon={DoneIcon} color={"secondary"} text={'Submit Proposal'} onClick={() => onSubmitProposal({[proposalAction_]: {}})} /> 
+                    <ButtonField Icon={DoneIcon} color={CONTRAST_COLOR} text={'Submit Proposal'} onClick={() => onSubmitProposal({[proposalAction_]: {}})} /> 
                 </Grid> 
             }
         </Grid>

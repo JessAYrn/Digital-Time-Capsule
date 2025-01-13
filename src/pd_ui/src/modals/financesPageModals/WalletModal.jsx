@@ -5,7 +5,7 @@ import {FormGroup} from '@mui/material'
 import {Checkbox} from '@mui/material'
 import DisplayUserData from './DisplayUserData'
 import SendCrypto from './SendCryptoModal'
-import BuyCrypto from '../proposals/proposalModalComponentTypes/BuyCrypto'
+import BuyCrypto from '../../proposals/renderComponents/RenderBuyCrypto'
 
 export const actions = { send: "send", receive: "receive", buy: "buy" };
 
