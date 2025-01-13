@@ -2,6 +2,27 @@ import * as canisterIds from "../../../../canister_ids.json";
 import * as pdFiles from "../../../declarations/pd_api"
 import * as pdUiFiles from "../../../declarations/pd_ui";
 import { e8sInOneICP, MASTER_COPY_FRONTEND_CANISTER_ID, PERMITTED_USERNAME_CHARACTERS } from "./Constants";
+import QRCode from 'qrcode';
+
+export const generateQrCode = async (walletAddress) => {
+    try{
+        const response = await QRCode.toDataURL(walletAddress);
+        
+        return response;
+     } catch (error){
+     }
+};
+
+export const copyText = (address) => {
+  const addressTextArea = document.createElement("input");
+  document.body.appendChild(addressTextArea);
+  addressTextArea.setAttribute("id", "addressTextArea_id");
+  addressTextArea.setAttribute("value", address);
+  const copyText = document.getElementById("addressTextArea_id");
+  addressTextArea.select();
+  navigator.clipboard.writeText(copyText.value);
+  document.body.removeChild(addressTextArea);    
+};
 
 
 export const toHexString = (byteArray)  =>{

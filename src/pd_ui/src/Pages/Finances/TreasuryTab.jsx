@@ -6,13 +6,12 @@ import { CHART_TYPES, GRAPH_DATA_SET_TIMEFRAMES, GRAPH_DISPLAY_LABELS, GRAPH_DAT
 import AccordionField from "../../components/Accordion";
 import MenuField from '../../components/MenuField';
 import CarouselComponent from '../../components/Carousel';
-import PreviewNeuron from './PreviewNeuron';
+import PreviewNeuron from './renderComponents/PreviewNeuron';
 import ButtonField from '../../components/Button';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import { copyText } from '../../wallet/CopyWalletAddress';
-import RenderBalances from './RenderBalances';
-
+import RenderBalances from './renderComponents/RenderBalances';
+import { copyText } from '../../functionsAndConstants/Utils';
 
 const TreasuryTab = () => {
 

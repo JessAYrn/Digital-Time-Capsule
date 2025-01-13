@@ -1,14 +1,14 @@
 import React, {useContext, useEffect, useState} from "react";
-import DataField from "../components/DataField";
-import { homePageTypes } from "../reducers/homePageReducer";
-import { round2Decimals, inTrillions, fromE8s } from "../functionsAndConstants/Utils";
+import DataField from "../../components/DataField";
+import { homePageTypes } from "../../reducers/homePageReducer";
+import { round2Decimals, inTrillions, fromE8s } from "../../functionsAndConstants/Utils";
 import Grid from '@mui/material/Unstable_Grid2';
-import { getBackendActor } from "../functionsAndConstants/authentication";
-import { navigationAndApiTypes } from "../reducers/navigationAndApiReducer";
+import { getBackendActor } from "../../functionsAndConstants/authentication";
+import { navigationAndApiTypes } from "../../reducers/navigationAndApiReducer";
 import LoginIcon from '@mui/icons-material/Login';
-import { AppContext } from "../Context";
+import { AppContext } from "../../Context";
 import { Paper } from "@mui/material";
-import ButtonField from "../components/Button";
+import ButtonField from "../../components/Button";
 
 const LoginPage = (props) => {
 

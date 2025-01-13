@@ -1,10 +1,10 @@
 import React, {useState, useContext} from "react";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
-import InputBox from "../components/InputBox";
-import ButtonField from "../components/Button";
+import InputBox from "../../../components/InputBox";
+import ButtonField from "../../../components/Button";
 import Typography from "@mui/material/Typography";
-import { userNamePermitted } from "../functionsAndConstants/Utils";
-import { AppContext } from "../Context";
+import { userNamePermitted } from "../../../functionsAndConstants/Utils";
+import { AppContext } from "../../../Context";
 
 const CreateAccount = (props) => {
 

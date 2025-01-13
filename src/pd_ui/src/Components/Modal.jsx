@@ -3,9 +3,7 @@ import Grid from '@mui/material/Unstable_Grid2/Grid2';
 import { Box, Dialog, Slide, IconButton, LinearProgress, Modal } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
-import Typography from '@mui/material/Typography';
 import { BACKGROUND_COLOR, DIVIDER_SX } from '../Theme';
-import ButtonField from '../components/Button';
 
 
 const Transition = React.forwardRef(function Transition(props, ref) {

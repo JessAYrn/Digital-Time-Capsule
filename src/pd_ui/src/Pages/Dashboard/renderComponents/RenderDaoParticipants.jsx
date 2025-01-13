@@ -6,7 +6,7 @@ import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
 import { AppContext } from "../../../Context";
 import { homePageTypes} from "../../../reducers/homePageReducer"
-import { copyText } from '../../../wallet/CopyWalletAddress';
+import { copyText } from '../../../functionsAndConstants/Utils';
 
 const RenderDaoParticipants = () => {
 

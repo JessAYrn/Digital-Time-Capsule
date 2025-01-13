@@ -1,6 +1,6 @@
 import { mapApiObjectToFrontEndJournalEntriesObject } from "../mappers/journalPageMappers";
-import { toHexString, nanoSecondsToMiliSeconds } from "./Utils";
-import { generateQrCode } from "../wallet/GenerateQrCode";
+import { toHexString, nanoSecondsToMiliSeconds, generateQrCode } from "./Utils";
+
 import { mapBackendCanisterDataToFrontEndObj } from "../mappers/dashboardMapperFunctions";
 import { mapBalancesData, mapBackendTreasuryDataToFrontEndObj } from "../mappers/treasuryPageMapperFunctions";
 import { getFileUrl_fromApi } from "../components/fileManger/FileManagementTools";

@@ -4,8 +4,8 @@ import Grid from "@mui/material/Unstable_Grid2";
 import DataField from '../../../components/DataField';
 import { AppContext } from "../../../Context";
 import { CANISTER_DATA_FIELDS } from "../../../functionsAndConstants/Constants";
-import { copyText } from "../../../wallet/CopyWalletAddress";
-import { round2Decimals, inTrillions, shortenHexString, fromE8s} from "../../../functionsAndConstants/Utils";
+
+import { round2Decimals, inTrillions, shortenHexString, fromE8s, copyText} from "../../../functionsAndConstants/Utils";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import Typography from "@mui/material/Typography";
 import { Divider } from "@mui/material";

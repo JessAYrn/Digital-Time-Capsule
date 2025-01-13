@@ -12,7 +12,7 @@ import LockIcon from '@mui/icons-material/Lock';
 import HistoryToggleOffIcon from '@mui/icons-material/HistoryToggleOff';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import DataTable from "../../../../components/Table";
-import RenderNeuronValues from "./RenderNeuronValues";
+import RenderNeuronValues from "../RenderNeuronValues";
 
 const RenderNeuron = (props) => {
 

@@ -3,9 +3,9 @@ import Grid from '@mui/material/Unstable_Grid2'
 import {FormControlLabel} from '@mui/material'
 import {FormGroup} from '@mui/material'
 import {Checkbox} from '@mui/material'
-import RenderDisplayUserData from './DisplayUserData'
-import RenderSendCrypto from './SendCryptoModal'
-import RenderBuyCrypto from './RenderBuyCrypto'
+import RenderDisplayUserData from './renderComponents/DisplayUserData'
+import RenderSendCrypto from './renderComponents/SendCryptoModal'
+import RenderBuyCrypto from './renderComponents/RenderBuyCrypto'
 
 export const actions = { send: "send", receive: "receive", buy: "buy" };
 
