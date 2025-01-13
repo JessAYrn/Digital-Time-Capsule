@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { AppContext } from '../../Context';
 import { CHART_TYPES, GRAPH_DISPLAY_LABELS, GRAPH_DATA_SETS } from '../../functionsAndConstants/Constants';
-import { copyText } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
+import { copyText } from '../../wallet/CopyWalletAddress';
 
 import { nanoSecondsToMiliSeconds, shortenHexString, round2Decimals, fromE8s } from '../../functionsAndConstants/Utils';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';

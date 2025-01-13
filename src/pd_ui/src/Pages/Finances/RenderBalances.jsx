@@ -1,16 +1,16 @@
 import React, { useContext, useState, useMemo } from "react";
 import Grid from "@mui/material/Unstable_Grid2";
-import MenuField from "../../../components/MenuField";
-import ButtonField from "../../../components/Button";
+import MenuField from "../../components/MenuField";
+import ButtonField from "../../components/Button";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import TuneIcon from '@mui/icons-material/Tune';
-import InfoToolTip from "../../../components/InfoToolTip";
-import { round2Decimals, fromE8s } from "../../../functionsAndConstants/Utils";
-import { AppContext } from "../../../Context";
-import { GRAPH_DISPLAY_LABELS, GRAPH_DATA_SET_TIMEFRAMES, CHART_TYPES } from "../../../functionsAndConstants/Constants";
-import TreasuryConfingurationsComponent from '../../../modals/financesPageModals/treasuryTab/TreasuryConfigurations';
-import TabsComponent from '../../../components/Tabs';
-import Graph, {getLabelsAndDataSetsInChartFormat} from "../../../components/Chart";
+import InfoToolTip from "../../components/InfoToolTip";
+import { round2Decimals, fromE8s } from "../../functionsAndConstants/Utils";
+import { AppContext } from "../../Context";
+import { GRAPH_DISPLAY_LABELS, GRAPH_DATA_SET_TIMEFRAMES, CHART_TYPES } from "../../functionsAndConstants/Constants";
+import TreasuryConfingurationsComponent from './TreasuryConfigurations';
+import TabsComponent from '../../components/Tabs';
+import Graph, {getLabelsAndDataSetsInChartFormat} from "../../components/Chart";
 import Typography from "@mui/material/Typography";
 
 const TIME_FRAMES = [

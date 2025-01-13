@@ -7,7 +7,7 @@ import homePageReducer, { homePageInitialState, homePageTypes } from './reducers
 import treasuryReducer, { treasuryPageInitialState, treasuryTypes } from './reducers/treasuryReducer';
 import navigationAndApiReducer, { navigationAndApiInitialState, navigationAndApiTypes } from './reducers/navigationAndApiReducer';
 import DoNotDisturbOnIcon from '@mui/icons-material/DoNotDisturbOn';
-import { copyText } from './functionsAndConstants/walletFunctions/CopyWalletAddress';
+import { copyText } from './wallet/CopyWalletAddress';
 import ButtonField from './components/Button';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CelebrationIcon from '@mui/icons-material/Celebration';

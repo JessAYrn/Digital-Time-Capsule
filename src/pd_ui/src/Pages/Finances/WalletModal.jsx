@@ -3,9 +3,9 @@ import Grid from '@mui/material/Unstable_Grid2'
 import {FormControlLabel} from '@mui/material'
 import {FormGroup} from '@mui/material'
 import {Checkbox} from '@mui/material'
-import DisplayUserData from './DisplayUserData'
-import SendCrypto from './SendCryptoModal'
-import BuyCrypto from '../../proposals/renderComponents/RenderBuyCrypto'
+import RenderDisplayUserData from './DisplayUserData'
+import RenderSendCrypto from './SendCryptoModal'
+import RenderBuyCrypto from './RenderBuyCrypto'
 
 export const actions = { send: "send", receive: "receive", buy: "buy" };
 
@@ -40,9 +40,9 @@ const [action, setAction] = useState(actions.receive);
                     />
                 </FormGroup>
             </Grid>
-            { action === actions.receive && <DisplayUserData/> }
-            { action === actions.send && <SendCrypto/> }
-            { action === actions.buy && <BuyCrypto/> }
+            { action === actions.receive && <RenderDisplayUserData/> }
+            { action === actions.send && <RenderSendCrypto/> }
+            { action === actions.buy && <RenderBuyCrypto/> }
         </Grid>
     )
 

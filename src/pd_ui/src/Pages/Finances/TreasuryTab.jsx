@@ -1,16 +1,16 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react';
-import { AppContext } from "../../../Context";
+import { AppContext } from "../../Context";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import { Typography } from "@mui/material";
-import { CHART_TYPES, GRAPH_DATA_SET_TIMEFRAMES, GRAPH_DISPLAY_LABELS, GRAPH_DATA_SET_TIMEFRAMES } from "../../../functionsAndConstants/Constants";
-import AccordionField from "../../../components/Accordion";
-import MenuField from '../../../components/MenuField';
-import CarouselComponent from '../../../components/Carousel';
-import PreviewNeuron from '../../../modals/financesPageModals/treasuryTab/neurons/PreviewNeuron';   
-import ButtonField from '../../../components/Button';
+import { CHART_TYPES, GRAPH_DATA_SET_TIMEFRAMES, GRAPH_DISPLAY_LABELS, GRAPH_DATA_SET_TIMEFRAMES } from "../../functionsAndConstants/Constants";
+import AccordionField from "../../components/Accordion";
+import MenuField from '../../components/MenuField';
+import CarouselComponent from '../../components/Carousel';
+import PreviewNeuron from './PreviewNeuron';
+import ButtonField from '../../components/Button';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import { copyText } from '../../../functionsAndConstants/walletFunctions/CopyWalletAddress';
+import { copyText } from '../../wallet/CopyWalletAddress';
 import RenderBalances from './RenderBalances';
 
 

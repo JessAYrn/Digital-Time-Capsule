@@ -5,19 +5,19 @@ import HourglassTopIcon from '@mui/icons-material/HourglassTop';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import HistoryToggleOffIcon from '@mui/icons-material/HistoryToggleOff';
 import LockIcon from '@mui/icons-material/Lock';
-import DataField from "../../../../../components/DataField";
+import DataField from "../../components/DataField";
 import PsychologyAltTwoToneIcon from '@mui/icons-material/PsychologyAltTwoTone';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
-import CreateProposalForm from "../../../../../proposals/CreateProposalForm";
-import { PROPOSAL_ACTIONS } from "../../../../../proposals/utils";
-import { fromE8s, round2Decimals, secondsToHours, hoursToDays, daysToMonths } from "../../../../../functionsAndConstants/Utils";
-import { getTotalContributions, getUserNeuronContribution } from "../../../../../functionsAndConstants/treasuryDataFunctions";
-import { AppContext } from "../../../../../Context";
-import { getDateAsString } from "../../../../../functionsAndConstants/Utils";
+import CreateProposalForm from "../../proposals/CreateProposalForm";
+import { PROPOSAL_ACTIONS } from "../../proposals/utils";
+import { fromE8s, round2Decimals, secondsToHours, hoursToDays, daysToMonths } from "../../functionsAndConstants/Utils";
+import { getTotalContributions, getUserNeuronContribution } from "../../functionsAndConstants/treasuryDataFunctions";
+import { AppContext } from "../../Context";
+import { getDateAsString } from "../../functionsAndConstants/Utils";
 import Typography from "@mui/material/Typography";
 import { Divider } from "@mui/material";
-import ButtonField from "../../../../../components/Button";
-import { BACKGROUND_COLOR, CONTRAST_COLOR, DIVIDER_SX } from "../../../../../Theme";
+import ButtonField from "../../components/Button";
+import { BACKGROUND_COLOR, CONTRAST_COLOR, DIVIDER_SX } from "../../Theme";
 
 
 const NeuronStates = { locked: 1, dissolving: 2, unlocked: 3, spawning: 4 };

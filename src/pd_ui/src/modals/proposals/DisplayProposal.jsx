@@ -10,7 +10,7 @@ import { getProposalType, PROPOSAL_ACTIONS } from "./utils";
 import CloseIcon from '@mui/icons-material/Close';
 import ButtonField from "../../components/Button";
 import CheckIcon from '@mui/icons-material/Check';
-import { copyText } from "../../functionsAndConstants/walletFunctions/CopyWalletAddress";
+import { copyText } from "../../wallet/CopyWalletAddress";
 import { AppContext } from "../../Context";
 import { homePageTypes } from "../../reducers/homePageReducer";
 import Graph from "../../components/Chart";

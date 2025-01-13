@@ -1,7 +1,7 @@
 import React, {useContext, useState} from 'react'
-import { AppContext } from '../../../Context'
+import { AppContext } from '../../Context'
 import Grid from '@mui/material/Unstable_Grid2'
-import SwitchField from '../../../components/Switch'
+import SwitchField from '../../components/Switch';
 
 const TreasuryConfingurationsComponent = (props) => {
 

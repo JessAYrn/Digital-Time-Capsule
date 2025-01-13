@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import TreasuryTab from './treasuryTab/TreasuryTab';
+import TreasuryTab from './TreasuryTab';
 import WalletTab from './WalletTab';
 import { TABS } from '../../reducers/navigationAndApiReducer';
 import  {AppContext}  from '../../Context';

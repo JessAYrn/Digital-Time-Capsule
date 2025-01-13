@@ -3,7 +3,7 @@ import { AppContext } from "../../Context";
 import DataField from '../../components/DataField';
 import Grid from '@mui/material/Unstable_Grid2';
 import { inTrillions, round2Decimals, shortenHexString } from '../../functionsAndConstants/Utils';
-import { copyText } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
+import { copyText } from '../../wallet/CopyWalletAddress';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DisplayQrCode from './DisplayQrCode';
 
