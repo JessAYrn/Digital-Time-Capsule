@@ -12,6 +12,7 @@ import TreasuryConfingurationsComponent from './TreasuryConfigurations';
 import TabsComponent from '../../../components/Tabs';
 import Graph, {getLabelsAndDataSetsInChartFormat} from "../../../components/Chart";
 import Typography from "@mui/material/Typography";
+import { WHITE_COLOR } from "../../../Theme";
 
 const TIME_FRAMES = [
     GRAPH_DATA_SET_TIMEFRAMES.week, 
@@ -75,6 +76,7 @@ const RenderBalances = () => {
         setModalIsOpen(true);
         setModalProps({
             fullScreen: true,
+            headerComponent: <Typography variant="h6">Configurations</Typography>,
             components: [
                 <TreasuryConfingurationsComponent/>
             ],
@@ -87,7 +89,7 @@ const RenderBalances = () => {
             <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"center"} flexDirection={"column"} alignItems={"center"} padding={0}>
                 <Grid xs={12}  width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} padding={0}>
                     <MenuField label={currencyDataSetName} xs={6} display={"flex"} alignItems={"left"} justifyContent={"left"} color={"primary"} menuItemProps={currencyMenuItemProps} MenuIcon={KeyboardArrowDownIcon}/>
-                    <ButtonField transparentBackground={true} Icon={TuneIcon} onClick={openTreasuryConfigurationsPage} gridSx={{ width: "100%", alignItems: "right", justifyContent:"right" }}/>
+                    <ButtonField transparentBorder={true} color={WHITE_COLOR} transparentBackground={true} Icon={TuneIcon} onClick={openTreasuryConfigurationsPage} gridSx={{ width: "100%", alignItems: "right", justifyContent:"right" }}/>
                 </Grid>
                 <Grid xs={12}  width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"}>
                     <Grid xs={6} width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>
@@ -120,7 +122,7 @@ const RenderBalances = () => {
                 selectedTab={chartDataSetTimeFrame} 
                 setSelectedTab={setChartDataSetTimeFrame} 
                 indicatorColor={"primary"}
-                sx={{ backgroundColor: "transparent", position: "relative", top: "28px"}}
+                sx={{ backgroundColor: "transparent", position: "relative"}}
                 />
             </Grid>
         </>

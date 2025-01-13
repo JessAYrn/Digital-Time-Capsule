@@ -1,33 +1,20 @@
-import React, { useContext, useMemo } from 'react';
+import React, { useContext } from 'react';
 import { AppContext } from "../../Context";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
-import { Typography } from "@mui/material";
-import CarouselComponent from '../../components/Carousel';
-import RenderPreviewNeuron from './renderComponents/RenderPreviewNeuron';
+import { Divider, Typography } from "@mui/material";
 import ButtonField from '../../components/Button';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import RenderBalances from './renderComponents/RenderBalances';
+import RenderBalancesSection from './renderComponents/RenderBalancesSection';
 import { copyText } from '../../functionsAndConstants/Utils';
+import RenderNeuronsSection from './renderComponents/RenderNeuronsSection';
+import { DIVIDER_SX } from '../../Theme';
+
+
 
 const TreasuryTab = () => {
 
     const { treasuryState, setModalIsOpen, setModalProps } = useContext(AppContext);
-
-    const activeFundingCampaigns = treasuryState.fundingCampaigns.filter(([campaignId, {settled}]) => {return settled === false} );
-    const inactiveFundingCampaigns = treasuryState.fundingCampaigns.filter(([campaignId, {settled}]) => {return settled === true} );
-    
-
-    
-    const {activeNeurons, inactiveNeurons} = useMemo(() => {
-        const activeNeurons = [];
-        const inactiveNeurons = [];
-        for (const [neuronId, neuronData] of treasuryState?.neurons?.icp) {
-            if(!!neuronData?.neuronInfo) activeNeurons.push([neuronId, neuronData]); else inactiveNeurons.push([neuronId, neuronData]);
-        }
-        return { activeNeurons, inactiveNeurons };
-    }, [treasuryState?.neurons]);
-
 
     const displayTreasuryAccountId = () => {
         let chars = [...treasuryState.daoIcpAccountId];
@@ -59,16 +46,13 @@ const TreasuryTab = () => {
         });
     };
 
+    
+
     return (
         <Grid columns={12} xs={11} md={9} rowSpacing={0} display="flex" justifyContent="center" alignItems="center" flexDirection={"column"} paddingTop={"15px"}>
-            <RenderBalances/>
-            <CarouselComponent 
-                title={"Active Neurons"} 
-                sx={{marginTop: "75px"}}
-                defaultComponent={<Typography textAlign={"center"} component={"There are currently no neurons staked in this treasury"} />}
-            >
-                { activeNeurons.map(([neuronId, neuronData]) => { return (<RenderPreviewNeuron neuronData={neuronData} neuronId={neuronId} />); }) }
-            </CarouselComponent>
+            <RenderBalancesSection/>
+            <Divider sx={{...DIVIDER_SX, marginTop: "70px", marginBottom: "70px"}}/>
+            <RenderNeuronsSection/>
 
             <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
                 {/* <AccordionField>

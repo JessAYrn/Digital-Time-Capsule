@@ -3,12 +3,11 @@ import Grid from "@mui/material/Unstable_Grid2";
 import ButtonField from "../../../components/Button";
 import DataField from "../../../components/DataField";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-
 import { fromE8s, round2Decimals, shortenString, copyText } from "../../../functionsAndConstants/Utils";
 import { getUserNeuronContribution, getTotalContributions } from "../../../functionsAndConstants/treasuryDataFunctions";
 import RenderNeuron from "./RenderNeuron";
 import { AppContext } from "../../../Context";
-import { BACKGROUND_COLOR, CONTRAST_COLOR, WHITE_COLOR } from "../../../Theme";
+import {  CONTRAST_COLOR, WHITE_COLOR } from "../../../Theme";
 
 const PreviewNeuron = (props) => {
     const {neuronData, neuronId } = props;
@@ -32,17 +31,16 @@ const PreviewNeuron = (props) => {
         return {userContribution, totalContributions, totalStake, userStake, totalVotingPower, userVotingPower, totalMaturity, userMaturity}
     }, []);
 
-    const viewNeuron = () => {
+    const onViewNeuron = () => {
         setModalProps({
             fullScreen: true,
-            headerComponent: <ButtonField text={neuronId} onClick={() => copyText(neuronId)} />,
+            headerComponent: <ButtonField transparentBorder={true} transparentBackground={true} text={neuronId} onClick={() => copyText(neuronId)} />,
             components:[
                 <RenderNeuron neuronData={neuronData} neuronId={neuronId}/>
             ]
         });
         setModalIsOpen(true)
     }
-
 
     return (
         
@@ -96,17 +94,17 @@ const PreviewNeuron = (props) => {
                         gridSx={{width: "115px", backgroundColor: WHITE_COLOR}}
                         elevation={24}
                         text={"Stake"}
-                        onClick={viewNeuron}
+                        onClick={onViewNeuron}
                         iconSize={'small'}
                     />
                 </Grid>
                 <Grid xs={6} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
                     <ButtonField
-                        color={WHITE_COLOR}
+                        color={CONTRAST_COLOR}
                         gridSx={{width: "115px"}}
                         elevation={24}
                         text={"View"}
-                        onClick={viewNeuron}
+                        onClick={onViewNeuron}
                         iconSize={'small'}
                     />
                 </Grid>
