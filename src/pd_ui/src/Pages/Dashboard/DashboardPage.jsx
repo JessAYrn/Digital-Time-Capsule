@@ -3,13 +3,15 @@ import Switch from '../../components/Switch';
 import Grid from '@mui/material/Unstable_Grid2';
 import {homePageTypes} from '../../reducers/homePageReducer';
 import { AppContext } from '../../Context';
-import RenderVotingDistributionsGraph from './RenderVotingDistribution';
-import RenderProposals from './RenderProposals';
-import RenderDaoParticipants from './RenderDaoParticipants';
-import RenderDaoMetaData from './RenderDaoMetaData';
+import RenderVotingDistributionsGraph from './renderComponents/RenderVotingDistribution';
+import RenderProposals from './renderComponents/RenderProposals';
+import RenderDaoParticipants from './renderComponents/RenderDaoParticipants';
+import RenderDaoMetaData from './renderComponents/RenderDaoMetaData';
 import { Divider } from '@mui/material';
 import { DIVIDER_SX, CONTRAST_COLOR } from '../../Theme';
 import DataField from '../../components/DataField';
+import Typography from "@mui/material/Typography";
+
 const DashboardPage = () => {
 
     const { homePageDispatch, homePageState, navigationAndApiState, setModalIsOpen, setModalIsLoading, setModalProps } = useContext(AppContext);

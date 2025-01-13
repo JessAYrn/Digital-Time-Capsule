@@ -1,14 +1,14 @@
 import React, {useContext} from "react";
 import Grid from "@mui/material/Unstable_Grid2";
-import CarouselComponent from '../../components/Carousel';
-import DataField from '../../components/DataField';
+import CarouselComponent from '../../../components/Carousel';
+import DataField from '../../../components/DataField';
 import Typography  from "@mui/material/Typography";
-import PreviewProposal from '../../proposals/PreviewProposal';
-import DisplayProposal from '../../proposals/DisplayProposal';
-import { shortenString } from "../../functionsAndConstants/Utils";
-import { AppContext } from "../../Context";
+import PreviewProposal from '../../../proposals/PreviewProposal';
+import DisplayProposal from '../../../proposals/DisplayProposal';
+import { shortenString } from "../../../functionsAndConstants/Utils";
+import { AppContext } from "../../../Context";
 import { Divider } from "@mui/material";
-import { DIVIDER_SX, CONTRAST_COLOR } from "../../Theme";
+import { DIVIDER_SX, CONTRAST_COLOR } from "../../../Theme";
 
 
 

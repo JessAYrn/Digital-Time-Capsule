@@ -1,12 +1,12 @@
 import React, { useContext, useState} from "react";
 import Grid from "@mui/material/Unstable_Grid2";
-import AccordionField from '../../components/Accordion'
-import DataTable from '../../components/Table';
+import AccordionField from '../../../components/Accordion'
+import DataTable from '../../../components/Table';
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
-import { AppContext } from "../../Context";
-import { homePageTypes} from "../../reducers/homePageReducer"
-import { copyText } from '../../functionsAndConstants/walletFunctions/CopyWalletAddress';
+import { AppContext } from "../../../Context";
+import { homePageTypes} from "../../../reducers/homePageReducer"
+import { copyText } from '../../../functionsAndConstants/walletFunctions/CopyWalletAddress';
 
 const RenderDaoParticipants = () => {
 

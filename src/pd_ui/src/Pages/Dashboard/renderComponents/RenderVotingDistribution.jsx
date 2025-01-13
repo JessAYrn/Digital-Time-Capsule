@@ -1,11 +1,11 @@
 import React, {useMemo, useContext} from "react";
-import Graph from "../../components/Chart";
+import Graph from "../../../components/Chart";
 import Grid from "@mui/material/Unstable_Grid2";
 import Typography from "@mui/material/Typography";
-import { CHART_TYPES } from "../../functionsAndConstants/Constants";
-import { AppContext } from "../../Context";
-import { sortAndReduceDataMapArray, getLabelsAndDataSetsInChartFormat } from "../../components/Chart";
-import { fromE8s } from "../../functionsAndConstants/Utils";
+import { CHART_TYPES } from "../../../functionsAndConstants/Constants";
+import { AppContext } from "../../../Context";
+import { sortAndReduceDataMapArray, getLabelsAndDataSetsInChartFormat } from "../../../components/Chart";
+import { fromE8s } from "../../../functionsAndConstants/Utils";
 
 
 
