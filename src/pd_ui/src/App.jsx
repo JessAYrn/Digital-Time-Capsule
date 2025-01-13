@@ -19,7 +19,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import theme from './Theme';
 import { AppContext } from './Context';
 import FinancesPage from './pages/finances/FinancesPage';
-import CreateAccount from './pages/login/renderComponents/CreateAccount';
+import CreateAccount from './pages/login/renderComponents/RenderCreateAccount';
 import { fromE8s, shortenHexString } from './functionsAndConstants/Utils';
 import Grid from '@mui/material/Unstable_Grid2';
 import { Typography } from '@mui/material';

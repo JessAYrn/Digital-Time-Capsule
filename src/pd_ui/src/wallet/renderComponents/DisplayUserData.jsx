@@ -4,7 +4,7 @@ import DataField from '../../components/DataField';
 import Grid from '@mui/material/Unstable_Grid2';
 import { inTrillions, round2Decimals, shortenHexString } from '../../functionsAndConstants/Utils';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import DisplayQrCode from '../../pages/finances/renderComponents/DisplayQrCode';
+import DisplayQrCode from '../../pages/finances/renderComponents/RenderQrCode';
 import { copyText } from '../../functionsAndConstants/Utils';
 
 

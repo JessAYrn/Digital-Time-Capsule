@@ -1,18 +1,13 @@
 import React, {useContext, useMemo} from "react";
-import { AppContext } from "../../../../Context";
+import { AppContext } from "../../../Context";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import { Typography } from "@mui/material";
-import { fromE8s, round2Decimals, round8Decimals, secondsToHours, hoursToDays, daysToMonths } from "../../../../functionsAndConstants/Utils";
-import Graph, { getLabelsAndDataSetsInChartFormat, sortAndReduceDataMapArray } from "../../../../components/Chart";
-import { CHART_TYPES } from "../../../../functionsAndConstants/Constants";
-import { getTotalContributions, getUserNeuronContribution } from "../../../../functionsAndConstants/treasuryDataFunctions";
-import { GRAPH_DISPLAY_LABELS } from "../../../../functionsAndConstants/Constants";
-import HourglassTopIcon from '@mui/icons-material/HourglassTop';
-import LockIcon from '@mui/icons-material/Lock';
-import HistoryToggleOffIcon from '@mui/icons-material/HistoryToggleOff';
-import LockOpenIcon from '@mui/icons-material/LockOpen';
-import DataTable from "../../../../components/Table";
-import RenderNeuronValues from "../RenderNeuronValues";
+import { fromE8s, round8Decimals } from "../../../functionsAndConstants/Utils";
+import Graph, { getLabelsAndDataSetsInChartFormat, sortAndReduceDataMapArray } from "../../../components/Chart";
+import { CHART_TYPES } from "../../../functionsAndConstants/Constants";
+import { GRAPH_DISPLAY_LABELS } from "../../../functionsAndConstants/Constants";
+import DataTable from "../../../components/Table";
+import RenderNeuronValues from "./RenderNeuronValues";
 
 const RenderNeuron = (props) => {
 
