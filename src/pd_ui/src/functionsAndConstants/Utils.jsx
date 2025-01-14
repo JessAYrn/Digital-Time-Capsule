@@ -375,10 +375,10 @@ export const userNamePermitted = (userName) => {
 }
 
 export const getFundingCampaignAssetTypeAndValue = (asset) => {
-    const type = Object.keys(asset)[0];
-    const value = fromE8s(parseInt(asset[type].e8s));
-    const fromNeuron = asset[type].fromNeuron;
-    return {type, value, fromNeuron};
+  const type = Object.keys(asset)[0];
+  const value = fromE8s(parseInt(asset[type].e8s));
+  const fromNeuron = asset[type].fromNeuron;
+  return {type, value, fromNeuron};
 };
 
 

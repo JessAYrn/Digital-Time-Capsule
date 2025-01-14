@@ -1,5 +1,5 @@
 import React from 'react';
-import { Typography, Paper } from '@mui/material';
+import { Typography } from '@mui/material';
 import Carousel from 'react-material-ui-carousel'
 import { PAPER_COLOR } from '../Theme';
 import Grid from '@mui/material/Unstable_Grid2';

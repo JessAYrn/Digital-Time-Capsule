@@ -51,12 +51,6 @@ const ActionButton = (props) => {
         });
     };
 
-    const speedDialActions = [
-        {name: "Create Proposal", icon: HowToVoteIcon , onClick: openProposalForm},
-        {name: "Treasury Transaction", icon: AccountBalanceIcon, onClick: () => openTransactWithTreasuryForm()},
-        {name: "Wallet Transaction", icon: AccountBalanceWalletIcon , onClick: () => openTransactWithWallerForm()},
-    ]
-
     return (
         <Grid
         onClick={onClick}

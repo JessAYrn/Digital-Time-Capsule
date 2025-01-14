@@ -9,7 +9,7 @@ import RenderBalancesSection from './renderComponents/RenderBalancesSection';
 import { copyText } from '../../functionsAndConstants/Utils';
 import RenderNeuronsSection from './renderComponents/RenderNeuronsSection';
 import { DIVIDER_SX } from '../../Theme';
-
+import RenderFundingCampaignsSection from './renderComponents/RenderFundingCampaignsSection';
 
 
 const TreasuryTab = () => {
@@ -52,22 +52,9 @@ const TreasuryTab = () => {
         <Grid columns={12} xs={11} md={9} rowSpacing={0} display="flex" justifyContent="center" alignItems="center" flexDirection={"column"} paddingTop={"15px"}>
             <RenderBalancesSection/>
             <Divider sx={{...DIVIDER_SX, marginTop: "70px", marginBottom: "70px"}}/>
+            <RenderFundingCampaignsSection/>
+            <Divider sx={{...DIVIDER_SX, marginTop: "70px", marginBottom: "70px"}}/>
             <RenderNeuronsSection/>
-
-            <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
-                {/* <AccordionField>
-                <div 
-                    title={"Active Funding Campaigns"} 
-                    fundingCampaigns={activeFundingCampaigns}
-                    CustomComponent={DisplayAllFundingCampaigns}
-                ></div>
-                <div 
-                    title={"Inactive Funding Campaigns"} 
-                    fundingCampaigns={inactiveFundingCampaigns}
-                    CustomComponent={DisplayAllFundingCampaigns}
-                ></div>
-                </AccordionField> */}
-            </Grid>
             <ButtonField
                 gridSx={{marginTop: "20px", marginBottom: "60px"}}
                 text={"View Treasury Account ID"}

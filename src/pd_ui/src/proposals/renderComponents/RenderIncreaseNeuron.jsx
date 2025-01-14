@@ -12,7 +12,7 @@ import { Typography } from '@mui/material';
 import {Checkbox} from '@mui/material';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import { CONTRAST_COLOR } from '../../Theme';
+import { CONTRAST_COLOR, WHITE_COLOR } from '../../Theme';
 
 const IncreaseNeuron = (props) => {
     const { onSubmitProposal, payload, action, disabled } = props;
@@ -84,7 +84,7 @@ const IncreaseNeuron = (props) => {
                             disabled={disabled} 
                             control={
                                 <Checkbox 
-                                    color='white'
+                                    sx={{color: WHITE_COLOR}}
                                     checked={showOnBehalfOfDropdown} 
                                     onChange={(e) => setShowOnBehalfOfDropdown(e.target.checked)}
                                 />

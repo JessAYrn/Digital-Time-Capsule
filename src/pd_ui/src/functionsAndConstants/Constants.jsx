@@ -110,18 +110,6 @@ export const CHART_TYPES = {
     pie: "PIE"
 }; 
 
-export const GRAPH_DATA_SETS = {
-    fundingCampaignContributions: "fundingCampaignContributions",
-    usersTotalStakesAndVotingPowers: "usersTotalStakesAndVotingPowers",
-    neuronContributions: "neuronContributions",
-    balancesHistory: {
-        week: "week",
-        month: "month",
-        year: "year",
-        allTime: "allTime",
-    }
-}
-
 export const GRAPH_DATA_SET_TIMEFRAMES = {
     week: "1W",
     month: "1M",

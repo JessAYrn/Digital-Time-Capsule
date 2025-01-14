@@ -8,6 +8,9 @@ import { getUserNeuronContribution, getTotalContributions } from "../../../funct
 import RenderNeuron from "./RenderNeuron";
 import { AppContext } from "../../../Context";
 import {  CONTRAST_COLOR, WHITE_COLOR } from "../../../Theme";
+import CreateProposalForm from "../../../proposals/CreateProposalForm";
+import { PROPOSAL_ACTIONS } from "../../../proposals/utils";
+import { Typography } from "@mui/material";
 
 const PreviewNeuron = (props) => {
     const {neuronData, neuronId } = props;
@@ -41,6 +44,17 @@ const PreviewNeuron = (props) => {
         });
         setModalIsOpen(true)
     }
+
+    const onStake = () => {
+        setModalProps({
+            fullScreen: true,
+            headerComponent: <Typography variant="h6">Create Proposal</Typography>,
+            components:[
+                <CreateProposalForm proposalAction={PROPOSAL_ACTIONS.IncreaseNeuron} proposalPayload={{neuronId}}/>
+            ]
+        });
+        setModalIsOpen(true)
+    };
 
     return (
         
@@ -94,7 +108,7 @@ const PreviewNeuron = (props) => {
                         gridSx={{width: "115px", backgroundColor: WHITE_COLOR}}
                         elevation={24}
                         text={"Stake"}
-                        onClick={onViewNeuron}
+                        onClick={onStake}
                         iconSize={'small'}
                     />
                 </Grid>

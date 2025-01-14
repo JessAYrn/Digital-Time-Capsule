@@ -1,66 +1,66 @@
 import React, {useMemo, useContext} from "react";
 import { AppContext } from "../../../Context";
 import Grid from "@mui/material/Unstable_Grid2";
-import Graph from "../../components/Fields/Chart";
-import InputBox from "../../components/Fields/InputBox";
-import { nanoSecondsToMiliSeconds, shortenHexString, millisecondsToSeconds, secondsToHours, hoursToDays, round2Decimals } from "../../../functionsAndConstants/Utils";
-import ButtonField from "../../components/Fields/Button";
-import DataField from "../../components/Fields/DataField";
+import Graph from "../../../components/Chart";
+import InputBox from "../../../components/InputBox";
+import { nanoSecondsToMiliSeconds, millisecondsToSeconds, secondsToHours, hoursToDays, round2Decimals, getFundingCampaignAssetTypeAndValue } from "../../../functionsAndConstants/Utils";
+import ButtonField from "../../../components/Button";
+import DataField from "../../../components/DataField";
 import PriceCheckIcon from '@mui/icons-material/PriceCheck';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import { GRAPH_DATA_SETS, CHART_TYPES, GRAPH_DISPLAY_LABELS } from "../../../functionsAndConstants/Constants";
-import { getFundingCampaignAssetTypeAndValue } from "../../../functionsAndConstants/Utils";
-import { copyText } from "../../../functionsAndConstants/walletFunctions/CopyWalletAddress";
+import { CHART_TYPES, GRAPH_DISPLAY_LABELS } from "../../../functionsAndConstants/Constants";
 import { mapDataMapToChartFormat } from "../../../mappers/treasuryPageMapperFunctions";
-import AddLiquidityOrRepayFundingCampaign, {ACTION_TYPES} from "../modalPages/financesPageModals/AddLiquidityOrRepayFundingCampaign";
+import RenderAddLiquidityOrRepayFundingCampaign, {ACTION_TYPES} from "./RenderAddLiquidityOrRepayFundingCampaign";
+import { fromE8s } from "../../../functionsAndConstants/Utils";
 
-const DisplayFundingCampaign = (props) => {
+const RenderFundingCampaign = (props) => {
     const { fundingCampaign, campaignId } = props;
     const { contributions, terms } = fundingCampaign;
     const {setModalIsOpen, setModalProps, homePageState } = useContext(AppContext);
 
-    const { value: amountToFundValue, type: amountToFundType } = getFundingCampaignAssetTypeAndValue(fundingCampaign?.amountToFund);
-    const { value: amountDisbursedToRecipientValue, type: amountDisbursedToRecipientType } = getFundingCampaignAssetTypeAndValue(fundingCampaign?.amountDisbursedToRecipient);
-    const { value: campaignWalletBalanceValue, type: campaignWalletBalanceType } = getFundingCampaignAssetTypeAndValue(fundingCampaign?.campaignWalletBalance);
-    let nextPaymentDueDate = undefined;
-    let paymentAmountsValue = undefined;
-    let paymentAmountsType = undefined;
-    let initialLoanInterestAmountValue = undefined;
-    let initialLoanInterestAmountType = undefined;
-    let remainingLoanInterestAmountValue = undefined;
-    let remainingLoanInterestAmountType = undefined;
-    let remainingLoanPrincipalAmountValue = undefined;
-    let remainingLoanPrincipalAmountType = undefined;
-    let remainingCollateralLockedValue = undefined;
-    let remainingCollateralLockedType = undefined;
-    let forfeitedCollateralValue = undefined;
-    let forfeitedCollateralType = undefined;
-    let amountPaidDuringCurrentPaymentIntervalValue = undefined;
-    let amountPaidDuringCurrentPaymentIntervalType = undefined;
-    
-    if(terms[0]){
-        nextPaymentDueDate = terms[0].nextPaymentDueDate[0];
-        paymentAmountsValue = getFundingCampaignAssetTypeAndValue(terms[0].paymentAmounts).value;
-        paymentAmountsType = getFundingCampaignAssetTypeAndValue(terms[0].paymentAmounts).type;
-        initialLoanInterestAmountValue = getFundingCampaignAssetTypeAndValue(terms[0].initialLoanInterestAmount).value;
-        initialLoanInterestAmountType = getFundingCampaignAssetTypeAndValue(terms[0].initialLoanInterestAmount).type;
-        remainingCollateralLockedValue = getFundingCampaignAssetTypeAndValue(terms[0].remainingCollateralLocked).value;
-        remainingCollateralLockedType = getFundingCampaignAssetTypeAndValue(terms[0].remainingCollateralLocked).type;
-        forfeitedCollateralValue = getFundingCampaignAssetTypeAndValue(terms[0].forfeitedCollateral).value;
-        forfeitedCollateralType = getFundingCampaignAssetTypeAndValue(terms[0].forfeitedCollateral).type;
-        remainingLoanInterestAmountValue = getFundingCampaignAssetTypeAndValue(terms[0].remainingLoanInterestAmount).value;
-        remainingLoanInterestAmountType = getFundingCampaignAssetTypeAndValue(terms[0].remainingLoanInterestAmount).type;
-        remainingLoanPrincipalAmountValue = getFundingCampaignAssetTypeAndValue(terms[0].remainingLoanPrincipalAmount).value;
-        remainingLoanPrincipalAmountType = getFundingCampaignAssetTypeAndValue(terms[0].remainingLoanPrincipalAmount).type;
-        amountPaidDuringCurrentPaymentIntervalValue = getFundingCampaignAssetTypeAndValue(terms[0].amountRepaidDuringCurrentPaymentInterval).value;
-        amountPaidDuringCurrentPaymentIntervalType = getFundingCampaignAssetTypeAndValue(terms[0].amountRepaidDuringCurrentPaymentInterval).type;
-    };
+    console.log(fundingCampaign);
+
+    const {
+        amountToFund,
+        amountDisbursedToRecipient,
+        campaignWalletBalance,
+        nextPaymentDueDate,
+        paymentAmounts,
+        initialLoanInterestAmount,
+        remainingCollateralLocked,
+        forfeitedCollateral,
+        remainingLoanInterestAmount,
+        remainingLoanPrincipalAmount,
+        amountRepaidDuringCurrentPaymentInterval
+    } = useMemo( () => {
+
+        let obj = {
+            amountToFund: getFundingCampaignAssetTypeAndValue(fundingCampaign?.amountToFund),
+            amountDisbursedToRecipient: getFundingCampaignAssetTypeAndValue(fundingCampaign?.amountDisbursedToRecipient),
+            campaignWalletBalance: getFundingCampaignAssetTypeAndValue(fundingCampaign?.campaignWalletBalance),
+        };
+
+        if(fundingCampaign?.terms[0]){
+            obj = {
+                ...obj,
+                nextPaymentDueDate: fundingCampaign?.terms[0]?.nextPaymentDueDate[0],
+                paymentAmounts: getFundingCampaignAssetTypeAndValue(fundingCampaign?.terms[0]?.paymentAmounts),
+                initialLoanInterestAmount: getFundingCampaignAssetTypeAndValue(fundingCampaign?.terms[0]?.initialLoanInterestAmount),
+                remainingCollateralLocked: getFundingCampaignAssetTypeAndValue(fundingCampaign?.terms[0]?.remainingCollateralLocked),
+                forfeitedCollateral: getFundingCampaignAssetTypeAndValue(fundingCampaign?.terms[0]?.forfeitedCollateral),
+                remainingLoanInterestAmount: getFundingCampaignAssetTypeAndValue(fundingCampaign?.terms[0]?.remainingLoanInterestAmount),
+                remainingLoanPrincipalAmount: getFundingCampaignAssetTypeAndValue(fundingCampaign?.terms[0]?.remainingLoanPrincipalAmount),
+                amountRepaidDuringCurrentPaymentInterval: getFundingCampaignAssetTypeAndValue(fundingCampaign?.terms[0]?.amountRepaidDuringCurrentPaymentInterval)
+            }
+        }
+
+        return obj;
+    }, []);
 
     const onClickAddLiquidityOrRepayFundingCampaign = () => {
         setModalProps({
             flexDirection: "column",
             components: [
-                <AddLiquidityOrRepayFundingCampaign campaignId={campaignId} actionType={fundingCampaign?.funded ? ACTION_TYPES.repayFundingCampaign : ACTION_TYPES.addLiquidity}/>
+                <RenderAddLiquidityOrRepayFundingCampaign campaignId={campaignId} actionType={fundingCampaign?.funded ? ACTION_TYPES.repayFundingCampaign : ACTION_TYPES.addLiquidity}/>
             ],
         });
         setModalIsOpen(true);
@@ -71,26 +71,55 @@ const DisplayFundingCampaign = (props) => {
         const nowInSeconds = millisecondsToSeconds(Date.now());
         const secondsUntillDue = Math.max(nextPaymentDueDateInseconds - nowInSeconds, 0);
         return {seconds: secondsUntillDue, hours: round2Decimals(secondsToHours(secondsUntillDue)), days: round2Decimals(hoursToDays(secondsToHours(secondsUntillDue))) };
-    },[nextPaymentDueDate]);    
+    },[nextPaymentDueDate]); 
+    
+    // const {chartLabels, chartDataSets} = useMemo(() => {
+    //     const dataMapArray = [];
+
+    //     for(let [principal, {stake_e8s}] of contributions){
+    //         const label = homePageState?.canisterData?.userNames[principal];
+    //         const dataPointObj = { stake_e8s: fromE8s(parseInt(stake_e8s)) }; 
+    //         dataMapArray.push([label, dataPointObj ]);
+    //     };
+
+    //     const reducedDataMapArray = sortAndReduceDataMapArray(dataMapArray, "stake_e8s", 10);
+    //     const {labels: chartLabels, datasets} =  getLabelsAndDataSetsInChartFormat(reducedDataMapArray, 125);
+    //     const chartDataSets = [{...datasets[0], label: GRAPH_DISPLAY_LABELS.icp_staked}]
+
+    //     return {chartLabels, chartDataSets};
+    // }, [contributions]);
+
+    // const {chartLabels, chartDataSets} = useMemo(() => {
+    //     const dataMapArray = [];
+
+    //     for(let [principal, contribution] of contributions){
+    //         const 
+    //         const label = homePageState?.canisterData?.userNames[principal];
+    //         const dataPointObj = { stake_e8s: fromE8s(parseInt(stake_e8s)) }; 
+    //         dataMapArray.push([label, dataPointObj ]);
+    //     };
+    // }, [contributions]);
+
+    console.log(contributions);
     
     return (
         <>
             <Grid display={"flex"} width={"100%"} justifyContent={"center"} alignItems={"center"} xs={12} padding={0} margin={"10px"} flexDirection={"column"}>
                 <DataField
                     label={"amount requested"}
-                    text={`${amountToFundValue} ${amountToFundType}`}
+                    text={`${amountToFund.value} ${amountToFund.type}`}
                     disabled={true}
                     transparentBackground={true}
                 />
                 <DataField
                     label={"Campaign Wallet Balance"}
-                    text={`${campaignWalletBalanceValue} ${campaignWalletBalanceType}`}
+                    text={`${campaignWalletBalance.value} ${campaignWalletBalance.type}`}
                     disabled={true}
                     transparentBackground={true}
                 />
                 <DataField
                     label={"Amount Disbursed"}
-                    text={`${amountDisbursedToRecipientValue} ${amountDisbursedToRecipientType}`}
+                    text={`${amountDisbursedToRecipient.value} ${amountDisbursedToRecipient.type}`}
                     disabled={true}
                     transparentBackground={true}
                 />
@@ -102,7 +131,7 @@ const DisplayFundingCampaign = (props) => {
                 />
                 {!!terms.length && 
                     <DataField
-                        text={`${remainingCollateralLockedValue} ${remainingCollateralLockedType}`}
+                        text={`${remainingCollateralLocked.value} ${remainingCollateralLocked.type}`}
                         label={"Collateral Locked"}
                         disabled={true}
                         transparentBackground={true}
@@ -111,26 +140,26 @@ const DisplayFundingCampaign = (props) => {
                 {nextPaymentDueDate &&
                     <>
                         <DataField
-                            text={`${forfeitedCollateralValue} ${forfeitedCollateralType}` }
+                            text={`${forfeitedCollateral.value} ${forfeitedCollateral.type}` }
                             label={"Collateral Forfeited"}
                             disabled={true}
                             transparentBackground={true}
                         />
                         <DataField
-                            text={`${remainingLoanPrincipalAmountValue} ${remainingLoanPrincipalAmountType}` }
+                            text={`${remainingLoanPrincipalAmount.value} ${remainingLoanPrincipalAmount.type}` }
                             label={"Remaininig Principal Owed"}
                             disabled={true}
                             transparentBackground={true}
                         />
                         <DataField
-                            text={`${remainingLoanInterestAmountValue} ${remainingLoanInterestAmountType}` }
+                            text={`${remainingLoanInterestAmount.value} ${remainingLoanInterestAmount.type}` }
                             label={"Remaining Interest Owed"}
                             disabled={true}
                             transparentBackground={true}
                         />
                         <DataField
                             label={"Payment Due"}
-                            text={`${Math.max(paymentAmountsValue - amountPaidDuringCurrentPaymentIntervalValue, 0)} ${paymentAmountsType}`}
+                            text={`${Math.max(paymentAmounts.value - amountRepaidDuringCurrentPaymentInterval.value, 0)} ${paymentAmounts.type}`}
                             disabled={true}
                             transparentBackground={true}
                         />
@@ -149,7 +178,7 @@ const DisplayFundingCampaign = (props) => {
                     rows={4}
                 />
                 
-                {/* {contributions.length > 0 &&
+                {/* {!!contributions.length &&
                 <Graph
                     withoutPaper={true}
                     width={"25%"}
@@ -177,4 +206,4 @@ const DisplayFundingCampaign = (props) => {
     );
 };
 
-export default DisplayFundingCampaign;
+export default RenderFundingCampaign;
