@@ -23,8 +23,8 @@ export const navigationAndApiInitialState={
     },
     backendActor: undefined,
     location:{
-        route: NAV_LINKS.dashboard,
-        tab: null
+        route: NAV_LINKS.finances,
+        tab: TABS.treasury
     }
 }
 

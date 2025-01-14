@@ -9,13 +9,16 @@ import DataField from "../../../components/DataField";
 import PsychologyAltTwoToneIcon from '@mui/icons-material/PsychologyAltTwoTone';
 import CreateProposalForm from "../../../proposals/CreateProposalForm";
 import { PROPOSAL_ACTIONS } from "../../../proposals/utils";
-import { fromE8s, round2Decimals, secondsToHours, hoursToDays, daysToMonths, getDateAsString } from "../../../functionsAndConstants/Utils";
+import { fromE8s, round2Decimals, secondsToHours, hoursToDays, daysToMonths, getDateAsString, copyText } from "../../../functionsAndConstants/Utils";
 import { getTotalContributions, getUserNeuronContribution } from "../../../functionsAndConstants/treasuryDataFunctions";
 import { AppContext } from "../../../Context";
 import Typography from "@mui/material/Typography";
 import { Divider } from "@mui/material";
 import ButtonField from "../../../components/Button";
-import { BACKGROUND_COLOR, CONTRAST_COLOR, DIVIDER_SX } from "../../../Theme";
+import RenderNeuron from "./RenderNeuron";
+import { BACKGROUND_COLOR, CONTRAST_COLOR, DIVIDER_SX, WHITE_COLOR } from "../../../Theme";
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+
 
 
 const NeuronStates = { locked: 1, dissolving: 2, unlocked: 3, spawning: 4 };
@@ -62,10 +65,18 @@ const RenderNeuronValues = (props) => {
         let {proposalAction, proposalPayload } = props;
         setModalIsOpen(true);
         setModalProps({
+            headerComponent: <Typography variant="h6" color={WHITE_COLOR}>Create Proposal</Typography>,
+            fullScreen: true,
             components: [
                 <CreateProposalForm proposalAction={proposalAction} proposalPayload={proposalPayload}/>
             ],
-            handleClose: () => setModalIsOpen(false)
+            handleReturn: () => {
+                setModalProps({
+                    headerComponent: <ButtonField transparentBorder={true} Icon={ContentCopyIcon} transparentBackground={true} text={neuronId} onClick={() => copyText(neuronId)} />,
+                    fullScreen: true,
+                    components: [<RenderNeuron neuronId={neuronId} neuronData={neuronData}/>]
+                })
+            }
         });
     };
 
@@ -75,13 +86,13 @@ const RenderNeuronValues = (props) => {
         <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} xs={12} flexDirection={"column"} padding={0} width={"100%"}>
 
             <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0} flexDirection={"column"}>
-                <DataField transparentBorder={true} gridSx={{padding: "0px"}} label={"Neuron Voting Power:"} text={neuronVotingPower} buttonColor="primary" labelColor="primary" transparentBackground={true}/>
-                <DataField transparentBorder={true} gridSx={{padding: "0px"}} label={"Your Voting Power:"} text={userVotingPower} buttonColor="primary" labelColor="primary" transparentBackground={true}/>
+                <DataField transparentBorder={true} gridSx={{padding: "0px"}} label={"Neuron Voting Power:"} text={neuronVotingPower} buttonColor={WHITE_COLOR} labelColor={WHITE_COLOR} transparentBackground={true}/>
+                <DataField transparentBorder={true} gridSx={{padding: "0px"}} label={"Your Voting Power:"} text={userVotingPower} buttonColor={WHITE_COLOR} labelColor={WHITE_COLOR} transparentBackground={true}/>
             </Grid>
 
             <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0} paddingTop={"25px"} flexDirection={"column"}>
-                <DataField transparentBorder={true} gridSx={{padding: "0px"}} label={"Neuron Stake:"} text={`${neuronStake} ICP`} buttonColor="primary" labelColor="primary" transparentBackground={true}/>
-                <DataField transparentBorder={true} gridSx={{padding: "0px"}} label={"Your Stake:"} text={`${userStake} ICP`} buttonColor="primary" labelColor="primary" transparentBackground={true}/>
+                <DataField transparentBorder={true} gridSx={{padding: "0px"}} label={"Neuron Stake:"} text={`${neuronStake} ICP`} buttonColor={WHITE_COLOR} labelColor={WHITE_COLOR} transparentBackground={true}/>
+                <DataField transparentBorder={true} gridSx={{padding: "0px"}} label={"Your Stake:"} text={`${userStake} ICP`} buttonColor={WHITE_COLOR} labelColor={WHITE_COLOR} transparentBackground={true}/>
             </Grid>
 
             <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0} paddingTop={"10px"}>
@@ -103,8 +114,8 @@ const RenderNeuronValues = (props) => {
             <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
 
             <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0} paddingTop={"25px"} flexDirection={"column"}>
-                <DataField transparentBorder={true} gridSx={{padding: "0px"}} label={"Neuron Maturity:"} text={`${neuronMaturity} ICP`} buttonColor="primary" labelColor="primary" transparentBackground={true}/>
-                <DataField transparentBorder={true} gridSx={{padding: "0px"}} label={"Your Maturity:"} text={`${userMaturity} ICP`} buttonColor="primary" labelColor="primary" transparentBackground={true}/>
+                <DataField transparentBorder={true} gridSx={{padding: "0px"}} label={"Neuron Maturity:"} text={`${neuronMaturity} ICP`} buttonColor={WHITE_COLOR} labelColor={WHITE_COLOR} transparentBackground={true}/>
+                <DataField transparentBorder={true} gridSx={{padding: "0px"}} label={"Your Maturity:"} text={`${userMaturity} ICP`} buttonColor={WHITE_COLOR} labelColor={WHITE_COLOR} transparentBackground={true}/>
             </Grid>
 
             <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0} marginTop={"20px"}>
@@ -158,8 +169,8 @@ const RenderNeuronValues = (props) => {
                 gridSx={{padding: "0px"}}
                 label={"Neuron State:"} 
                 text={neuronState} 
-                buttonColor="primary" 
-                labelColor="primary" 
+                buttonColor={WHITE_COLOR} 
+                labelColor={WHITE_COLOR} 
                 buttonIcon={neuronStateIcon}
                 transparentBackground={true}
                 onClick={() => {}}

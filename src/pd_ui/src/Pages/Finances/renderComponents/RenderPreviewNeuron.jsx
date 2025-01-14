@@ -34,7 +34,7 @@ const PreviewNeuron = (props) => {
     const onViewNeuron = () => {
         setModalProps({
             fullScreen: true,
-            headerComponent: <ButtonField transparentBorder={true} transparentBackground={true} text={neuronId} onClick={() => copyText(neuronId)} />,
+            headerComponent: <ButtonField transparentBorder={true} Icon={ContentCopyIcon} transparentBackground={true} text={neuronId} onClick={() => copyText(neuronId)} />,
             components:[
                 <RenderNeuron neuronData={neuronData} neuronId={neuronId}/>
             ]

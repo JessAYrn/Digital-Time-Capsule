@@ -233,11 +233,9 @@ const theme = createTheme({
         styleOverrides: {
           root: {
             ".MuiDialog-paperFullScreen":{
-              maxHeight: "100%",
-              height: "auto",
+              height: "100%",
               position: "absolute",
               bottom: 0,
-              minHeight: "60%"
             }
           }
         }

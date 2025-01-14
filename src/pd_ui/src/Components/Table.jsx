@@ -2,9 +2,9 @@ import React, {useState} from "react";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import  Box  from "@mui/system/Box";
 import { DataGrid} from '@mui/x-data-grid';
-import "./Table.scss";
 import { objectsAreEqual } from "../functionsAndConstants/Utils";
 import ButtonField from "./Button";
+import { WHITE_COLOR } from "../Theme";
 
 
 
@@ -12,7 +12,6 @@ const DataTable = (props) => {
     const { 
         rows, 
         columns, 
-        onCellEditStop, 
         isLoading, 
         onRowClick,
         onCellClick,
@@ -24,15 +23,10 @@ const DataTable = (props) => {
         disabled,
         onClick_button_1, 
         onClick_button_2,
-        transparent,
         checkboxSelection
     } = props;
     const [pageSize, setPageSize] = useState(5);
     const [tableState, setTableState] = useState({});
-
-    const onCellEditStop_ = (rowState) => {
-        console.log(rowState);
-    };
 
     const onStateChange_ = (newState) => {
         if(!objectsAreEqual(tableState, newState)) setTableState(newState);
@@ -40,36 +34,8 @@ const DataTable = (props) => {
 
     return (
         <Grid display="flex" justifyContent="center" alignItems="center" width={"100%"} flexDirection="column">
-            <Box sx={{ height: 400, width: '100%', color: "white" }}>
+            <Box sx={{ height: 345, width: '95%', color: WHITE_COLOR }}>
                 <DataGrid
-                    className={`${transparent ? "transparent" : ""} dataGridTable`}
-                    sx={{
-                        boxShadow: 2,
-                        border: 2,
-                        '& .MuiDataGrid-cell': {
-                            color: 'secondary.main'
-                        },
-                        borderColor: 'primary.main',
-                        '& .MuiDataGrid-cell:hover': {
-                        color: 'primary.main',
-                        },
-                        '& .MuiDataGrid-withBorderColor': {
-                            borderColor: 'primary.light'
-                        },
-                        color: 'white.main',
-                        '& .MuiDataGrid-cell' :{
-                            color: 'white.main'
-                        },
-                        '& .css-ecaxhr-MuiDataGrid-root': {
-                            color: 'custom.main',
-                        },
-                        '& .css-rtrcn9-MuiTablePagination-root': {
-                            color: 'white.main'
-                        },
-                        '& .css-zylse7-MuiButtonBase-root-MuiIconButton-root':{
-                            color: 'white.main'
-                        }
-                    }}
                     disableRowSelectionOnClick={true}
                     onStateChange={ (state) => onStateChange_(state) }
                     columns={columns}
