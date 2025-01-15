@@ -8,10 +8,12 @@ import DataField from "../../../../components/DataField";
 import PriceCheckIcon from '@mui/icons-material/PriceCheck';
 import RenderAddLiquidityOrRepayFundingCampaign, {ACTION_TYPES} from "./RenderAddLiquidityOrRepayFundingCampaign";
 import RenderFundingCampaignContributions from "./RenderFundingCampaignContributions";
+import { Divider } from "@mui/material";
+import { DIVIDER_SX } from "../../../../Theme";
 
 const RenderFundingCampaign = (props) => {
     const { fundingCampaign, campaignId } = props;
-    const { contributions, terms } = fundingCampaign;
+    const { contributions, terms, settled, funded } = fundingCampaign;
     const {setModalIsOpen, setModalProps, homePageState } = useContext(AppContext);
 
     console.log(fundingCampaign);
@@ -20,14 +22,13 @@ const RenderFundingCampaign = (props) => {
         amountToFund,
         amountDisbursedToRecipient,
         campaignWalletBalance,
-        nextPaymentDueDate,
-        paymentAmounts,
+        paymentDue,
+        timeUntilPaymentIsDue,
         initialLoanInterestAmount,
         remainingCollateralLocked,
         forfeitedCollateral,
         remainingLoanInterestAmount,
         remainingLoanPrincipalAmount,
-        amountRepaidDuringCurrentPaymentInterval
     } = useMemo( () => {
 
         let obj = {
@@ -37,21 +38,29 @@ const RenderFundingCampaign = (props) => {
         };
 
         if(fundingCampaign?.terms[0]){
+            const amountRepaidDuringCurrentPaymentInterval = getFundingCampaignAssetTypeAndValue(fundingCampaign?.terms[0]?.amountRepaidDuringCurrentPaymentInterval);
+            const paymentAmounts = getFundingCampaignAssetTypeAndValue(fundingCampaign?.terms[0]?.paymentAmounts);
+            const paymentDue = {value: Math.max(paymentAmounts.value - amountRepaidDuringCurrentPaymentInterval.value, 0), type: paymentAmounts.type};
+
+            const nextPaymentDueDateInseconds = millisecondsToSeconds(nanoSecondsToMiliSeconds(parseInt(fundingCampaign?.terms[0]?.nextPaymentDueDate[0])));
+            const nowInSeconds = millisecondsToSeconds(Date.now());
+            const secondsUntillDue = Math.max(nextPaymentDueDateInseconds - nowInSeconds, 0);
+            const timeUntilPaymentIsDue = round2Decimals(secondsToHours(secondsUntillDue)) > 48 ? `${round2Decimals(hoursToDays(secondsToHours(secondsUntillDue)))} days` : `${round2Decimals(secondsToHours(secondsUntillDue))} hours`;
+
             obj = {
                 ...obj,
-                nextPaymentDueDate: fundingCampaign?.terms[0]?.nextPaymentDueDate[0],
-                paymentAmounts: getFundingCampaignAssetTypeAndValue(fundingCampaign?.terms[0]?.paymentAmounts),
+                paymentDue,
+                timeUntilPaymentIsDue,
                 initialLoanInterestAmount: getFundingCampaignAssetTypeAndValue(fundingCampaign?.terms[0]?.initialLoanInterestAmount),
                 remainingCollateralLocked: getFundingCampaignAssetTypeAndValue(fundingCampaign?.terms[0]?.remainingCollateralLocked),
                 forfeitedCollateral: getFundingCampaignAssetTypeAndValue(fundingCampaign?.terms[0]?.forfeitedCollateral),
                 remainingLoanInterestAmount: getFundingCampaignAssetTypeAndValue(fundingCampaign?.terms[0]?.remainingLoanInterestAmount),
-                remainingLoanPrincipalAmount: getFundingCampaignAssetTypeAndValue(fundingCampaign?.terms[0]?.remainingLoanPrincipalAmount),
-                amountRepaidDuringCurrentPaymentInterval: getFundingCampaignAssetTypeAndValue(fundingCampaign?.terms[0]?.amountRepaidDuringCurrentPaymentInterval)
+                remainingLoanPrincipalAmount: getFundingCampaignAssetTypeAndValue(fundingCampaign?.terms[0]?.remainingLoanPrincipalAmount)
             }
         }
 
         return obj;
-    }, []);
+    }, [fundingCampaign]);
 
     const onClickAddLiquidityOrRepayFundingCampaign = () => {
         setModalProps({
@@ -62,13 +71,6 @@ const RenderFundingCampaign = (props) => {
         });
         setModalIsOpen(true);
     };
-
-    const timeUntilPaymentIsDue = useMemo(() => {
-        const nextPaymentDueDateInseconds = millisecondsToSeconds(nanoSecondsToMiliSeconds(parseInt(nextPaymentDueDate)));
-        const nowInSeconds = millisecondsToSeconds(Date.now());
-        const secondsUntillDue = Math.max(nextPaymentDueDateInseconds - nowInSeconds, 0);
-        return {seconds: secondsUntillDue, hours: round2Decimals(secondsToHours(secondsUntillDue)), days: round2Decimals(hoursToDays(secondsToHours(secondsUntillDue))) };
-    },[nextPaymentDueDate]); 
     
     console.log(contributions);
     
@@ -76,51 +78,34 @@ const RenderFundingCampaign = (props) => {
         <>
             <Grid display={"flex"} width={"100%"} justifyContent={"center"} alignItems={"center"} xs={12} padding={0} margin={"10px"} flexDirection={"column"}>
                 <DataField
-                    label={"amount requested"}
+                    text={homePageState?.canisterData?.userNames[fundingCampaign?.recipient]}
+                    label={"Requested By: "}
+                    disabled={true}
+                    transparentBackground={true}
+                />
+                <Divider sx={{...DIVIDER_SX, marginTop: "30px", marginBottom: "30px"}} />
+                <DataField
+                    label={"Amount Requested"}
                     text={`${amountToFund.value} ${amountToFund.type}`}
                     disabled={true}
                     transparentBackground={true}
                 />
-                <DataField
-                    label={"Campaign Wallet Balance"}
+                {!!funded && !!settled && <DataField
+                    label={"Amount Collected"}
                     text={`${campaignWalletBalance.value} ${campaignWalletBalance.type}`}
                     disabled={true}
                     transparentBackground={true}
-                />
+                />}
+                { funded && 
                 <DataField
                     label={"Amount Disbursed"}
                     text={`${amountDisbursedToRecipient.value} ${amountDisbursedToRecipient.type}`}
                     disabled={true}
                     transparentBackground={true}
-                />
-                <DataField
-                    text={homePageState?.canisterData?.userNames[fundingCampaign?.recipient]}
-                    label={"Recipient: "}
-                    disabled={true}
-                    transparentBackground={true}
-                />
-                {!!terms.length && 
-                    <DataField
-                        text={`${remainingCollateralLocked.value} ${remainingCollateralLocked.type}`}
-                        label={"Collateral Locked"}
-                        disabled={true}
-                        transparentBackground={true}
-                    />
-                }
-                {nextPaymentDueDate &&
+                />}
+                {!!terms.length && funded && !settled &&
                     <>
-                        <DataField
-                            text={`${forfeitedCollateral.value} ${forfeitedCollateral.type}` }
-                            label={"Collateral Forfeited"}
-                            disabled={true}
-                            transparentBackground={true}
-                        />
-                        <DataField
-                            text={`${remainingLoanPrincipalAmount.value} ${remainingLoanPrincipalAmount.type}` }
-                            label={"Remaininig Principal Owed"}
-                            disabled={true}
-                            transparentBackground={true}
-                        />
+                        <Divider sx={{...DIVIDER_SX, marginTop: "30px", marginBottom: "30px"}} />
                         <DataField
                             text={`${remainingLoanInterestAmount.value} ${remainingLoanInterestAmount.type}` }
                             label={"Remaining Interest Owed"}
@@ -128,25 +113,51 @@ const RenderFundingCampaign = (props) => {
                             transparentBackground={true}
                         />
                         <DataField
+                            text={`${remainingLoanPrincipalAmount.value} ${remainingLoanPrincipalAmount.type}` }
+                            label={"Remaining Principal Owed"}
+                            disabled={true}
+                            transparentBackground={true}
+                        />
+                        <DataField
                             label={"Payment Due"}
-                            text={`${Math.max(paymentAmounts.value - amountRepaidDuringCurrentPaymentInterval.value, 0)} ${paymentAmounts.type}`}
+                            text={`${paymentDue.value} ${paymentDue.type}`}
                             disabled={true}
                             transparentBackground={true}
                         />
                         <DataField
                             label={"Time Until Payment Is Due: "}
-                            text={`${timeUntilPaymentIsDue?.days > 2 ? timeUntilPaymentIsDue?.days : timeUntilPaymentIsDue?.hours } ${timeUntilPaymentIsDue?.days > 2 ? "days" : "hours"}`}
+                            text={timeUntilPaymentIsDue}
                             disabled={true}
                             transparentBackground={true}
                         />
                     </>
                 }
+                {!!terms.length && 
+                    <>
+                        <Divider sx={{...DIVIDER_SX, marginTop: "30px", marginBottom: "30px"}} />
+                        {!settled && <DataField
+                            text={`${remainingCollateralLocked.value} ${remainingCollateralLocked.type}`}
+                            label={"Collateral Deposited"}
+                            disabled={true}
+                            transparentBackground={true}
+                        />}
+                        {funded && <DataField
+                            text={`${forfeitedCollateral.value} ${forfeitedCollateral.type}` }
+                            label={"Collateral Forfeited"}
+                            disabled={true}
+                            transparentBackground={true}
+                        />}
+                    </>
+                }
+                <Divider sx={{...DIVIDER_SX, marginTop: "30px", marginBottom: "30px"}} />
                 <InputBox
+                    width={"100%"}
                     value={fundingCampaign?.description }
                     label={"Description"}
                     disabled={true}
                     rows={4}
                 />
+                <Divider sx={{...DIVIDER_SX, marginTop: "30px", marginBottom: "30px"}} />
                 <RenderFundingCampaignContributions fundingCampaign={fundingCampaign} />
                 {!fundingCampaign?.settled &&
                     <Grid display={"flex"} width={"100%"} justifyContent={"left"} alignItems={"left"} xs={12} padding={0} margin={"10px"} >

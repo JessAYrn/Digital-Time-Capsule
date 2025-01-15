@@ -35,11 +35,11 @@ const RenderFundingCampaignContributions = (props) => {
     }, [contributions]);
 
     return (
+        !!contributions.length && 
         <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} xs={12} width={"100%"}  padding={0} flexDirection={'column'}>
             <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0}>
-                <Typography width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"} variant="h6">Campaign Contributions</Typography>
+                <Typography width={"100%"} textAlign={"center"} variant="h6">Campaign Contributions</Typography>
             </Grid>
-            { !!contributions.length && 
                     <Grid display={"flex"} width={"100%"} justifyContent={"center"} alignItems={"center"} xs={12} padding={0} margin={"10px"}>
                         <Graph
                             withoutPaper={true}
@@ -51,8 +51,8 @@ const RenderFundingCampaignContributions = (props) => {
                             maintainAspectRatio={false}
                         />  
                     </Grid> 
-            }
         </Grid>
+        
     );
 };
 
