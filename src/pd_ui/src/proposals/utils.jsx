@@ -1,3 +1,5 @@
+import { toE8s } from "../functionsAndConstants/Utils";
+
 export const PROPOSAL_ACTIONS = {
     AddAdmin: "AddAdmin" ,
     RemoveAdmin: "RemoveAdmin" ,
@@ -54,13 +56,12 @@ export const MIN_DISSOLVE_DELAY_FOR_REWARDS_IN_SECONDS = 15768000;
 
 export const MAX_AGE_BONUS_SECONDS = 126230400;
 
-export const getHypotheticalVotingPowerIncreaseFromStake = (neuronData, stakeIncrease, recipient) => {
-    let additionalVotingPower = stakeIncrease;
-    if(!neuronData) return [[recipient, {additionalVotingPower}]];
+export const getHypotheticalVotingPowerIncreaseFromStake = (neuronData, stakeIncrease = 0, recipient) => {
+    if(!neuronData) return [[recipient, {additionalVotingPower: toE8s(stakeIncrease)}]];
     const [_, {neuronInfo}] = neuronData;
     let {stake_e8s: neuronTotalStake, voting_power: neuronTotalVotingPower} = neuronInfo;
-    const votingPowerBonusMultipllier = neuronTotalVotingPower / neuronTotalStake;
-    additionalVotingPower *= votingPowerBonusMultipllier;
+    const votingPowerBonusMultipllier = parseInt(neuronTotalVotingPower) / parseInt(neuronTotalStake);
+    const additionalVotingPower = toE8s(stakeIncrease) * votingPowerBonusMultipllier;
     return [[recipient, {additionalVotingPower}]]
 };
 
