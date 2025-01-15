@@ -1,11 +1,11 @@
 import React, { useContext, useMemo } from "react";
 import Grid from "@mui/material/Unstable_Grid2";
-import CarouselComponent from "../../../components/Carousel";
-import DataField from "../../../components/DataField";
-import { CONTRAST_COLOR } from "../../../Theme";
+import CarouselComponent from "../../../../components/Carousel";
+import DataField from "../../../../components/DataField";
+import { CONTRAST_COLOR } from "../../../../Theme";
 import Typography from "@mui/material/Typography";
 import RenderPreviewNeuron from "./RenderPreviewNeuron";
-import { AppContext } from "../../../Context";
+import { AppContext } from "../../../../Context";
 import RenderInactiveNeuronsList from "./RenderInactiveNeuronsList";
 const RenderNeuronsSection = (props) => {
 

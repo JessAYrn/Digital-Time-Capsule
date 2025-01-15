@@ -7,9 +7,9 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import RenderBalancesSection from './renderComponents/RenderBalancesSection';
 import { copyText } from '../../functionsAndConstants/Utils';
-import RenderNeuronsSection from './renderComponents/RenderNeuronsSection';
+import RenderNeuronsSection from './renderComponents/renderNeuronsSection/RenderNeuronsSection';
 import { DIVIDER_SX } from '../../Theme';
-import RenderFundingCampaignsSection from './renderComponents/RenderFundingCampaignsSection';
+import RenderFundingCampaignsSection from './renderComponents/renderFundingCampaignsSection/RenderFundingCampaignsSection';
 
 
 const TreasuryTab = () => {

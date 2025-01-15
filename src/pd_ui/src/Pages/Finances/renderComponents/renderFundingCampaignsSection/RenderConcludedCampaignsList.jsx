@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
-import { AppContext } from "../../../Context";
-import DataField from "../../../components/DataField";
-import { CONTRAST_COLOR } from "../../../Theme";
+import { AppContext } from "../../../../Context";
+import DataField from "../../../../components/DataField";
+import { CONTRAST_COLOR } from "../../../../Theme";
 import Typography from "@mui/material/Typography";
 import RenderFundingCampaign from "./RenderFundingCampaign";
 import Grid from "@mui/material/Unstable_Grid2";

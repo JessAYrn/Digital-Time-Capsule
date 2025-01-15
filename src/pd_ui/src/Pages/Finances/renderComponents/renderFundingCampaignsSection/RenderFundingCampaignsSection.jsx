@@ -1,14 +1,14 @@
 import React, { useContext, useMemo } from "react";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import RenderPreviewFundingCampaign from "./RenderPreviewFundingCampaign";
-import CarouselComponent from "../../../components/Carousel";
-import { AppContext } from "../../../Context";
+import CarouselComponent from "../../../../components/Carousel";
+import { AppContext } from "../../../../Context";
 import Typography from "@mui/material/Typography";
-import { BACKGROUND_COLOR, CONTRAST_COLOR } from "../../../Theme";
-import ButtonField from "../../../components/Button";
-import DataField from "../../../components/DataField";
-import CreateProposalForm from "../../../proposals/CreateProposalForm";
-import { PROPOSAL_ACTIONS } from "../../../proposals/utils";
+import { BACKGROUND_COLOR, CONTRAST_COLOR } from "../../../../Theme";
+import ButtonField from "../../../../components/Button";
+import DataField from "../../../../components/DataField";
+import CreateProposalForm from "../../../../proposals/CreateProposalForm";
+import { PROPOSAL_ACTIONS } from "../../../../proposals/utils";
 import RenderConcludedCampaignsList from "./RenderConcludedCampaignsList";
 
 

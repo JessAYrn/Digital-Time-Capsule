@@ -1,10 +1,10 @@
 import React, { useMemo } from "react";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
-import { getFundingCampaignAssetTypeAndValue } from "../../../functionsAndConstants/Utils";
-import DataField from "../../../components/DataField";
-import { WHITE_COLOR } from "../../../Theme";
-import ButtonField from "../../../components/Button";
-import { CONTRAST_COLOR } from "../../../Theme";
+import { getFundingCampaignAssetTypeAndValue } from "../../../../functionsAndConstants/Utils";
+import DataField from "../../../../components/DataField";
+import { WHITE_COLOR } from "../../../../Theme";
+import ButtonField from "../../../../components/Button";
+import { CONTRAST_COLOR } from "../../../../Theme";
 
 const RenderPreviewFundingCampaign = (props) => {
     const { campaignId, fundingCampaign } = props;

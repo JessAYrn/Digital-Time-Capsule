@@ -1,16 +1,13 @@
 import React, {useMemo, useContext} from "react";
-import { AppContext } from "../../../Context";
+import { AppContext } from "../../../../Context";
 import Grid from "@mui/material/Unstable_Grid2";
-import Graph from "../../../components/Chart";
-import InputBox from "../../../components/InputBox";
-import { nanoSecondsToMiliSeconds, millisecondsToSeconds, secondsToHours, hoursToDays, round2Decimals, getFundingCampaignAssetTypeAndValue } from "../../../functionsAndConstants/Utils";
-import ButtonField from "../../../components/Button";
-import DataField from "../../../components/DataField";
+import InputBox from "../../../../components/InputBox";
+import { nanoSecondsToMiliSeconds, millisecondsToSeconds, secondsToHours, hoursToDays, round2Decimals, getFundingCampaignAssetTypeAndValue } from "../../../../functionsAndConstants/Utils";
+import ButtonField from "../../../../components/Button";
+import DataField from "../../../../components/DataField";
 import PriceCheckIcon from '@mui/icons-material/PriceCheck';
-import { CHART_TYPES, GRAPH_DISPLAY_LABELS } from "../../../functionsAndConstants/Constants";
-import { mapDataMapToChartFormat } from "../../../mappers/treasuryPageMapperFunctions";
 import RenderAddLiquidityOrRepayFundingCampaign, {ACTION_TYPES} from "./RenderAddLiquidityOrRepayFundingCampaign";
-import { fromE8s } from "../../../functionsAndConstants/Utils";
+import RenderFundingCampaignContributions from "./RenderFundingCampaignContributions";
 
 const RenderFundingCampaign = (props) => {
     const { fundingCampaign, campaignId } = props;
@@ -73,33 +70,6 @@ const RenderFundingCampaign = (props) => {
         return {seconds: secondsUntillDue, hours: round2Decimals(secondsToHours(secondsUntillDue)), days: round2Decimals(hoursToDays(secondsToHours(secondsUntillDue))) };
     },[nextPaymentDueDate]); 
     
-    // const {chartLabels, chartDataSets} = useMemo(() => {
-    //     const dataMapArray = [];
-
-    //     for(let [principal, {stake_e8s}] of contributions){
-    //         const label = homePageState?.canisterData?.userNames[principal];
-    //         const dataPointObj = { stake_e8s: fromE8s(parseInt(stake_e8s)) }; 
-    //         dataMapArray.push([label, dataPointObj ]);
-    //     };
-
-    //     const reducedDataMapArray = sortAndReduceDataMapArray(dataMapArray, "stake_e8s", 10);
-    //     const {labels: chartLabels, datasets} =  getLabelsAndDataSetsInChartFormat(reducedDataMapArray, 125);
-    //     const chartDataSets = [{...datasets[0], label: GRAPH_DISPLAY_LABELS.icp_staked}]
-
-    //     return {chartLabels, chartDataSets};
-    // }, [contributions]);
-
-    // const {chartLabels, chartDataSets} = useMemo(() => {
-    //     const dataMapArray = [];
-
-    //     for(let [principal, contribution] of contributions){
-    //         const 
-    //         const label = homePageState?.canisterData?.userNames[principal];
-    //         const dataPointObj = { stake_e8s: fromE8s(parseInt(stake_e8s)) }; 
-    //         dataMapArray.push([label, dataPointObj ]);
-    //     };
-    // }, [contributions]);
-
     console.log(contributions);
     
     return (
@@ -177,19 +147,7 @@ const RenderFundingCampaign = (props) => {
                     disabled={true}
                     rows={4}
                 />
-                
-                {/* {!!contributions.length &&
-                <Graph
-                    withoutPaper={true}
-                    width={"25%"}
-                    height={"400px"}
-                    hideButton2={true}
-                    type={CHART_TYPES.pie}
-                    defaultLabel={GRAPH_DISPLAY_LABELS.icp}
-                    dataSets={mapDataMapToChartFormat(contributions, GRAPH_DATA_SETS.fundingCampaignContributions, homePageState?.canisterData?.userNames)}
-                    defaultDataSetName={GRAPH_DATA_SETS.fundingCampaignContributions}
-                    maintainAspectRatio={false}
-                />} */}
+                <RenderFundingCampaignContributions fundingCampaign={fundingCampaign} />
                 {!fundingCampaign?.settled &&
                     <Grid display={"flex"} width={"100%"} justifyContent={"left"} alignItems={"left"} xs={12} padding={0} margin={"10px"} >
                         <ButtonField

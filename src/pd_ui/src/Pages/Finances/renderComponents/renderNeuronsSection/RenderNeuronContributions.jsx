@@ -1,20 +1,18 @@
 import React, { useMemo, useContext } from "react";
 import Grid from "@mui/material/Unstable_Grid2";
 import { Typography } from "@mui/material";
-import DataTable from "../../../components/Table";
-import Graph from "../../../components/Chart";
-import { CHART_TYPES } from "../../../functionsAndConstants/Constants";
-import { GRAPH_DISPLAY_LABELS } from "../../../functionsAndConstants/Constants";
-import { AppContext } from "../../../Context";
-import { fromE8s, round8Decimals } from "../../../functionsAndConstants/Utils";
-import { sortAndReduceDataMapArray, getLabelsAndDataSetsInChartFormat } from "../../../components/Chart";
+import DataTable from "../../../../components/Table";
+import Graph from "../../../../components/Chart";
+import { CHART_TYPES } from "../../../../functionsAndConstants/Constants";
+import { GRAPH_DISPLAY_LABELS } from "../../../../functionsAndConstants/Constants";
+import { AppContext } from "../../../../Context";
+import { fromE8s, round8Decimals } from "../../../../functionsAndConstants/Utils";
+import { sortAndReduceDataMapArray, getLabelsAndDataSetsInChartFormat } from "../../../../components/Chart";
 
         
-const RenderContributionsSection = (props) => {
+const RenderContributions = (props) => {
     
-    const { neuronData } = props;
-
-    const { contributions } = neuronData;
+    const { contributions } = props;
 
     const {homePageState} = useContext(AppContext);
 
@@ -34,8 +32,6 @@ const RenderContributionsSection = (props) => {
         return {chartLabels, chartDataSets};
     }, [contributions]);
     
-    console.log(chartLabels, chartDataSets);
-
 
     return (
         <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} xs={12} width={"100%"}  padding={0} flexDirection={'column'}>
@@ -68,7 +64,7 @@ const RenderContributionsSection = (props) => {
     );
 }
 
-export default RenderContributionsSection;
+export default RenderContributions;
 
 const neuronContributionsTableColumns = [
     { 

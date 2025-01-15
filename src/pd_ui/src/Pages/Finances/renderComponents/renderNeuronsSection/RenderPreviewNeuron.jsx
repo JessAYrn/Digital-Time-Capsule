@@ -1,15 +1,15 @@
 import React, {useContext, useMemo} from "react";
 import Grid from "@mui/material/Unstable_Grid2";
-import ButtonField from "../../../components/Button";
-import DataField from "../../../components/DataField";
+import ButtonField from "../../../../components/Button";
+import DataField from "../../../../components/DataField";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import { fromE8s, round2Decimals, shortenString, copyText } from "../../../functionsAndConstants/Utils";
-import { getUserNeuronContribution, getTotalContributions } from "../../../functionsAndConstants/treasuryDataFunctions";
+import { fromE8s, round2Decimals, shortenString, copyText } from "../../../../functionsAndConstants/Utils";
+import { getUserNeuronContribution, getTotalContributions } from "../../../../functionsAndConstants/treasuryDataFunctions";
 import RenderNeuron from "./RenderNeuron";
-import { AppContext } from "../../../Context";
-import {  CONTRAST_COLOR, WHITE_COLOR } from "../../../Theme";
-import CreateProposalForm from "../../../proposals/CreateProposalForm";
-import { PROPOSAL_ACTIONS } from "../../../proposals/utils";
+import { AppContext } from "../../../../Context";
+import {  CONTRAST_COLOR, WHITE_COLOR } from "../../../../Theme";
+import { PROPOSAL_ACTIONS } from "../../../../proposals/utils";
+import CreateProposalForm from "../../../../proposals/CreateProposalForm";
 import { Typography } from "@mui/material";
 
 const PreviewNeuron = (props) => {

@@ -1,11 +1,11 @@
 import React, { useContext } from "react";
-import DataField from "../../../components/DataField";
+import DataField from "../../../../components/DataField";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
-import { AppContext } from "../../../Context";
+import { AppContext } from "../../../../Context";
 import RenderNeuron from "./RenderNeuron";
-import ButtonField from "../../../components/Button";
-import { copyText } from "../../../functionsAndConstants/Utils";
-import { CONTRAST_COLOR } from "../../../Theme";
+import ButtonField from "../../../../components/Button";
+import { copyText } from "../../../../functionsAndConstants/Utils";
+import { CONTRAST_COLOR } from "../../../../Theme";
 import Typography from "@mui/material/Typography";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
