@@ -92,9 +92,10 @@ const CreateProposalForm = (props) => {
         justifyContent="center" 
         alignItems="center" 
         flexDirection={"column"} 
+        width={"100%"}
         >
             <MenuField
-                xs={8}
+                xs={12}
                 display={"flex"}
                 alignItems={"center"}
                 justifyContent={"left"}

@@ -236,6 +236,9 @@ const theme = createTheme({
               height: "100%",
               position: "absolute",
               bottom: 0,
+              display: "flex",
+              alignItems: "center",
+              flexDirection: "column",
             }
           }
         }

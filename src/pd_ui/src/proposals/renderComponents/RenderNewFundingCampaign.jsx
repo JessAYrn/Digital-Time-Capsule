@@ -133,7 +133,7 @@ const NewFundingCampaign = (props) => {
     },[initialCollateralLocked?.fromNeuron]);
 
     return(
-        <Grid xs={12} display={'flex'} flexDirection={'column'} justifyContent={'center'} alignItems={'center'}> 
+        <Grid xs={12} width={"100%"} display={'flex'} flexDirection={'column'} justifyContent={'center'} alignItems={'center'}> 
             <Grid minWidth={"275px"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
                 <MenuField
                     disabled={disabled}
@@ -161,7 +161,7 @@ const NewFundingCampaign = (props) => {
             { amountToFund.type && 
             <>
                 <Typography>{amountToFund.type.toUpperCase()}</Typography>
-                <Grid minWidth={"275px"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
+                <Grid width={"100%"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
                     <InputBox
                         disabled={disabled}
                         hasError={hasError_1}
@@ -186,7 +186,7 @@ const NewFundingCampaign = (props) => {
             </>
             }         
             { !!amountToFund.value && !hasError_1 && 
-                <Grid minWidth={"275px"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
+                <Grid width={"100%"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
                     <InputBox
                         disabled={disabled}
                         hasError={hasError_2}
@@ -208,7 +208,7 @@ const NewFundingCampaign = (props) => {
                 </Grid>
             }
             { !!description && !hasError_2 &&
-                <Grid minWidth={"275px"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
+                <Grid width={"100%"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
                     <MenuField
                         disabled={disabled}
                         xs={8}
@@ -233,7 +233,7 @@ const NewFundingCampaign = (props) => {
             {
                 isALoan &&
                 <>
-                    <Grid minWidth={"275px"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
+                    <Grid width={"100%"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
                     <InputBox
                         disabled={disabled}
                         width={"100%"}
@@ -262,7 +262,7 @@ const NewFundingCampaign = (props) => {
                     />
                     </Grid>
                     { !!paymentIntervalsInDays && !hasError_3 &&
-                        <Grid minWidth={"275px"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
+                        <Grid width={"100%"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
                         <InputBox
                             disabled={disabled}
                             hasError={hasError_4}
@@ -288,7 +288,7 @@ const NewFundingCampaign = (props) => {
                         </Grid>
                     }
                 { !!paymentAmounts.value && !hasError_4 && 
-                    <Grid minWidth={"275px"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
+                    <Grid width={"100%"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
                         <InputBox
                             disabled={disabled}
                             hasError={hasError_5}
@@ -312,7 +312,7 @@ const NewFundingCampaign = (props) => {
                     </Grid>
                 }
                 { !!initialLoanInterestAmount.value && !hasError_5 &&
-                    <Grid minWidth={"275px"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
+                    <Grid width={"100%"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
                         <MenuField
                             disabled={disabled}
                             xs={8}
@@ -340,7 +340,7 @@ const NewFundingCampaign = (props) => {
                 { initialCollateralLocked?.type === FUNDING_CAMPAIGN_ASSET_TYPES.icp_staked &&
                     <>
                         <Typography>{initialCollateralLocked.type.toUpperCase()}</Typography>
-                        <Grid minWidth={"275px"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
+                        <Grid width={"100%"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
                             <MenuField
                                 disabled={disabled}
                                 xs={8}
@@ -373,7 +373,7 @@ const NewFundingCampaign = (props) => {
                                 transparentBackground={true}
                             />
                         }
-                        <Grid minWidth={"275px"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
+                        <Grid width={"100%"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
                         <InputBox
                             disabled={disabled}
                             hasError={hasError_6}

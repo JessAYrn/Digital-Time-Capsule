@@ -101,6 +101,7 @@ const DisplayProposal = (props) => {
             justifyContent="center" 
             alignItems="center" 
             flexDirection={"column"} 
+            width={"100%"}
         >
             <Grid 
                 columns={12}

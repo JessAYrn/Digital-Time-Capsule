@@ -38,7 +38,7 @@ const SpawnNeuron = (props) => {
     };
 
     return (
-        <Grid2 xs={12} display={'flex'} justifyContent={"center"} alignItems={'center'} flexDirection={'column'}>
+        <Grid2 width={"100%"} xs={12} display={'flex'} justifyContent={"center"} alignItems={'center'} flexDirection={'column'}>
             <MenuField
                 xs={8}
                 disabled={disabled}
