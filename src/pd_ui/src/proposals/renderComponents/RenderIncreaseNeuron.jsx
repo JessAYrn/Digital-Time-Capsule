@@ -16,6 +16,8 @@ import { CONTRAST_COLOR, WHITE_COLOR } from '../../Theme';
 import { sortAndReduceDataMapArray, getLabelsAndDataSetsInChartFormat } from '../../components/Chart';
 import Graph from '../../components/Chart';
 import { getHypotheticalVotingPowerIncreaseFromStake } from '../utils';
+import { DIVIDER_SX } from '../../Theme';
+import Divider from '@mui/material/Divider';
 
 
 const IncreaseNeuron = (props) => {
@@ -151,6 +153,7 @@ const IncreaseNeuron = (props) => {
                     {!!onBehalfOf.length && <Typography marginBottom={"20px"} varient={"h6"} color={"#bdbdbd"}> {homePageState?.canisterData?.userNames[onBehalfOf[0]]} </Typography>}
                     {!!hypotheticalDatasets && !!hypotheticalLabels &&
                     <> 
+                        <Divider sx={{...DIVIDER_SX, marginTop: "60px", marginBottom: "60px"}} />
                         <Typography variant="h6">Voting Power Distribution If Approved: </Typography>
                         <Graph
                             height={"426px"}
