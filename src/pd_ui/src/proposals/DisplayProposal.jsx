@@ -26,6 +26,8 @@ import NewFundingCampaign from "./renderComponents/RenderNewFundingCampaign";
 import WithdrawFromMultiSigWallet from "./renderComponents/RenderWithdrawFromMultiSigWallet";
 import CancelFundingCampaign from "./renderComponents/RenderCancelFundingCampaign";
 import { CONTRAST_COLOR, WHITE_COLOR } from "../Theme";
+import Divider from '@mui/material/Divider';
+import { DIVIDER_SX } from "../Theme";
 
 const DisplayProposal = (props) => {
 
@@ -125,17 +127,18 @@ const DisplayProposal = (props) => {
                     menuItemProps={[{ text: actionType, onClick: ()  => {}, selected: true},]}
                 />
                 <Typography varient={"h6"} color={"#bdbdbd"}> {actionType} </Typography>
-                { actionType === PROPOSAL_ACTIONS.IncreaseDissolveDelay && <IncreaseDissolveDelay action={actionType} payload={payload} disabled={true}/> }
-                { actionType === PROPOSAL_ACTIONS.IncreaseNeuron && <IncreaseNeuron action={actionType} payload={payload} disabled={true}/> }
-                { (actionType === PROPOSAL_ACTIONS.CreateNeuron || actionType === PROPOSAL_ACTIONS.PurchaseCycles || actionType === PROPOSAL_ACTIONS.SetCostToEnterDao) && <SetAmount action={actionType} payload={payload} disabled={true}/> }
-                { (actionType === PROPOSAL_ACTIONS.DisburseNeuron || actionType === PROPOSAL_ACTIONS.DissolveNeuron) && <DissolveOrDisburseNeuron action={actionType} payload={payload} disabled={true}/> }
-                { (actionType === PROPOSAL_ACTIONS.AddAdmin || actionType === PROPOSAL_ACTIONS.RemoveAdmin) && <AddOrRemoveAdmin action={actionType} payload={payload} disabled={true}/> }
-                { actionType === PROPOSAL_ACTIONS.FollowNeuron && <FollowNeuron action={actionType} payload={payload} disabled={true}/> }
-                { actionType === PROPOSAL_ACTIONS.SpawnNeuron && <SpawnNeuron action={actionType} payload={payload} disabled={true}/> }
-                { actionType === PROPOSAL_ACTIONS.CreateFundingCampaign && <NewFundingCampaign action={actionType} payload={payload} disabled={true}/> }
-                { actionType === PROPOSAL_ACTIONS.CancelFundingCampaign && <CancelFundingCampaign action={actionType} payload={payload} disabled={true}/> }
-                { actionType === PROPOSAL_ACTIONS.WithdrawFromMultiSigWallet && <WithdrawFromMultiSigWallet action={actionType} payload={payload} disabled={true}/> }
+                { actionType === PROPOSAL_ACTIONS.IncreaseDissolveDelay && <IncreaseDissolveDelay action={actionType} payload={payload} disabled={true} finalized={finalized}/> }
+                { actionType === PROPOSAL_ACTIONS.IncreaseNeuron && <IncreaseNeuron action={actionType} payload={payload} disabled={true} finalized={finalized}/> }
+                { (actionType === PROPOSAL_ACTIONS.CreateNeuron || actionType === PROPOSAL_ACTIONS.PurchaseCycles || actionType === PROPOSAL_ACTIONS.SetCostToEnterDao) && <SetAmount action={actionType} payload={payload} disabled={true} finalized={finalized}/> }
+                { (actionType === PROPOSAL_ACTIONS.DisburseNeuron || actionType === PROPOSAL_ACTIONS.DissolveNeuron) && <DissolveOrDisburseNeuron action={actionType} payload={payload} disabled={true} finalized={finalized}/> }
+                { (actionType === PROPOSAL_ACTIONS.AddAdmin || actionType === PROPOSAL_ACTIONS.RemoveAdmin) && <AddOrRemoveAdmin action={actionType} payload={payload} finalized={finalized} disabled={true}/> }
+                { actionType === PROPOSAL_ACTIONS.FollowNeuron && <FollowNeuron action={actionType} payload={payload} disabled={true} finalized={finalized}/> }
+                { actionType === PROPOSAL_ACTIONS.SpawnNeuron && <SpawnNeuron action={actionType} payload={payload} disabled={true} finalized={finalized}/> }
+                { actionType === PROPOSAL_ACTIONS.CreateFundingCampaign && <NewFundingCampaign action={actionType} payload={payload} disabled={true} finalized={finalized}/> }
+                { actionType === PROPOSAL_ACTIONS.CancelFundingCampaign && <CancelFundingCampaign action={actionType} payload={payload} disabled={true} finalized={finalized}/> }
+                { actionType === PROPOSAL_ACTIONS.WithdrawFromMultiSigWallet && <WithdrawFromMultiSigWallet action={actionType} payload={payload} disabled={true} finalized={finalized}/> }
             </Grid>
+            <Divider sx={{...DIVIDER_SX, marginTop: "60px", marginBottom: "60px"}} />
             <Grid
                 columns={12}
                 xs={12} 
@@ -144,7 +147,6 @@ const DisplayProposal = (props) => {
                 justifyContent="center" 
                 alignItems="center" 
                 flexDirection={"column"} 
-                marginTop={"50px"}
                 width={"100%"}
             >
                 { !finalized && <DataField
@@ -174,6 +176,7 @@ const DisplayProposal = (props) => {
                     transparentBackground={true}
                 />
             </Grid>
+            <Divider sx={{...DIVIDER_SX, marginTop: "60px", marginBottom: "60px"}} />
             <Grid 
                 columns={12}
                 xs={12} 
@@ -182,8 +185,7 @@ const DisplayProposal = (props) => {
                 justifyContent="center" 
                 alignItems="center" 
                 flexDirection={"column"} 
-                marginTop={"50px"}
-
+                width={"100%"}
             >
                 <Typography variant="h6">Voting Report</Typography>
                 <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"}>
@@ -234,6 +236,7 @@ const DisplayProposal = (props) => {
                         transparentBackground={true}
                     />
                 </Grid>
+                <Divider sx={{...DIVIDER_SX, marginTop: "60px", marginBottom: "60px"}} />
                 { !finalized && 
                     <Grid xs={12} width={"97%"} display={"flex"} justifyContent={"center"} alignItems={"center"}>
                         <Grid xs={6} width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>

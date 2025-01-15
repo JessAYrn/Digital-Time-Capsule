@@ -21,7 +21,7 @@ import Divider from '@mui/material/Divider';
 
 
 const IncreaseNeuron = (props) => {
-    const { onSubmitProposal, payload, action, disabled } = props;
+    const { onSubmitProposal, payload, action, disabled, finalized } = props;
     const { treasuryState, homePageState } = useContext(AppContext);
     const [selectedNeuronId, setSelectedNeuronId] = useState(payload?.neuronId?.toString());
     const [amount, setAmount] = useState(payload?.amount || payload?.amount === BigInt(0) ? fromE8s(parseInt(payload?.amount)) : null);
@@ -62,7 +62,7 @@ const IncreaseNeuron = (props) => {
     }, [selectedNeuronId]);     
 
     const {hypotheticalLabels, hypotheticalDatasets} = useMemo(() => {
-        if(!selectedNeuronData) return {};
+        if(!selectedNeuronData || finalized) return {};
 
         const usersHypotheticalVotingPowersMap = {};
         for(let [principal, { balances: { voting_power } }] of treasuryState?.usersTreasuryDataArray) usersHypotheticalVotingPowersMap[principal] = voting_power;

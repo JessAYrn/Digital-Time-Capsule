@@ -12,10 +12,11 @@ import { getHypotheticalVotingPowerIncreaseFromIncreasedDissolveDelay } from '..
 import Graph, { getLabelsAndDataSetsInChartFormat, sortAndReduceDataMapArray } from '../../components/Chart';
 import { daysToSeconds, fromE8s, secondsToDays } from '../../functionsAndConstants/Utils';
 import { CONTRAST_COLOR } from '../../Theme';
-
+import Divider from '@mui/material/Divider';
+import { DIVIDER_SX } from '../../Theme';
 
 const IncreaseDissolveDelay = (props) => {  
-    const { onSubmitProposal, payload, action, disabled} = props;
+    const { onSubmitProposal, payload, action, disabled, finalized} = props;
     const { treasuryState, homePageState } = useContext(AppContext);
     const [selectedNeuronId, setSelectedNeuronId] = useState(payload?.neuronId?.toString());
     const [additionalDissolveDelaySeconds, setAdditionalDissolveDelaySeconds] = useState(parseInt(payload?.additionalDissolveDelaySeconds));
@@ -49,7 +50,7 @@ const IncreaseDissolveDelay = (props) => {
     };
 
     const {hypotheticalLabels, hypotheticalDatasets} = useMemo(() => {
-        if(!selectedNeuronData) return {};
+        if(!selectedNeuronData || finalized) return {};
 
         const usersHypotheticalVotingPowersMap = {};
         for(let [principal, { balances: { voting_power } }] of treasuryState?.usersTreasuryDataArray) usersHypotheticalVotingPowersMap[principal] = voting_power;
@@ -105,6 +106,7 @@ const IncreaseDissolveDelay = (props) => {
             }
             {!!hypotheticalDatasets && !!hypotheticalLabels &&
             <> 
+                <Divider sx={{...DIVIDER_SX, marginTop: "60px", marginBottom: "60px"}} />   
                 <Typography variant="h6">Voting Power Distribution If Approved: </Typography>
                 <Graph
                     height={"426px"}

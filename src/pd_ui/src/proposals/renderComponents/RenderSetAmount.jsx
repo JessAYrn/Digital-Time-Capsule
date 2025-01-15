@@ -15,7 +15,7 @@ import Graph from '../../components/Chart';
 
 const SetAmount = (props) => {
 
-    const {onSubmitProposal, action, payload, disabled} = props;
+    const {onSubmitProposal, action, payload, disabled, finalized} = props;
     const [amount, setAmount] = useState(payload?.amount || payload?.amount === BigInt(0) ? fromE8s(parseInt(payload?.amount)) : null);
     const [hasError, setHasError] = useState(false);
     const [isReadyToSubmit, setIsReadyToSubmit] = useState(false);
@@ -25,7 +25,7 @@ const SetAmount = (props) => {
     useEffect(() => { setIsReadyToSubmit(!!amount && !hasError); }, [amount]);
 
     const {hypotheticalLabels, hypotheticalDatasets} = useMemo(() => {
-        if(action !== PROPOSAL_ACTIONS.CreateNeuron) return {};
+        if(action !== PROPOSAL_ACTIONS.CreateNeuron || finalized) return {};
 
         const usersHypotheticalVotingPowersMap = {};
         for(let [principal, { balances: { voting_power } }] of treasuryState?.usersTreasuryDataArray) usersHypotheticalVotingPowersMap[principal] = voting_power;
