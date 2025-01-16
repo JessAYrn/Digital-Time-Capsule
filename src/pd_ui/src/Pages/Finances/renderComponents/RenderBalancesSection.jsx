@@ -91,7 +91,7 @@ const RenderBalances = () => {
                     <MenuField label={currencyDataSetName} xs={6} display={"flex"} alignItems={"left"} justifyContent={"left"} color={"primary"} menuItemProps={currencyMenuItemProps} MenuIcon={KeyboardArrowDownIcon}/>
                     <ButtonField transparentBorder={true} color={WHITE_COLOR} transparentBackground={true} Icon={TuneIcon} onClick={openTreasuryConfigurationsPage} gridSx={{ width: "100%", alignItems: "right", justifyContent:"right" }}/>
                 </Grid>
-                <Grid xs={12}  width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"}>
+                <Grid xs={12}  width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} padding={0}>
                     <Grid xs={6} width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>
                         <Typography variant="h4" color={"custom"}>{treasuryBalances[currencyDataSetName]?.total}</Typography>
                         <InfoToolTip text={`The sum of all ${currencyDataSetName} deposited into the treasury by all users.`} placement="top-end" color="white"/>
@@ -102,13 +102,13 @@ const RenderBalances = () => {
                     </Grid>
                 </Grid>
                 {treasuryBalances[currencyDataSetName]?.multiSig && 
-                <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>
+                <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"} padding={0}>
                     <Typography variant="h6" color={'#bdbdbd'}>{treasuryBalances[currencyDataSetName]?.multiSig}</Typography>
                     <InfoToolTip text={`The amount of ${currencyDataSetName} within the treasury's multi-sig wallet. Available for use via proposals submitted to the DAO and voted on by staking members.`} placement="bottom-end" color="white"/>
                 </Grid>}
             </Grid>
 
-            <Grid display={"flex"} flexDirection={'column'} xs={12} width={"100%"} padding={0}>
+            <Grid display={"flex"} flexDirection={'column'} xs={12} width={"100%"} padding={0} marginTop={"30px"}>
                 <Graph 
                 type={CHART_TYPES.line} 
                 datasets={chartDataSets}

@@ -59,7 +59,11 @@ const theme = createTheme({
       MuiPaper:{
         styleOverrides: {
           root:{
-            backgroundColor: BACKGROUND_COLOR
+            backgroundColor: BACKGROUND_COLOR,
+            "&.MuiPopover-paper": {
+              borderRadius: "5px",
+              border: `solid ${DIVIDER_SX.borderColor}`,
+            }
           }
         }
       },
