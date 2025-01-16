@@ -25,9 +25,10 @@ import SpawnNeuron from "./renderComponents/RenderSpawnNeuron";
 import NewFundingCampaign from "./renderComponents/RenderNewFundingCampaign";
 import WithdrawFromMultiSigWallet from "./renderComponents/RenderWithdrawFromMultiSigWallet";
 import CancelFundingCampaign from "./renderComponents/RenderCancelFundingCampaign";
-import { CONTRAST_COLOR, WHITE_COLOR } from "../Theme";
+import { BACKGROUND_COLOR, CONTRAST_COLOR, WHITE_COLOR } from "../Theme";
 import Divider from '@mui/material/Divider';
 import { DIVIDER_SX } from "../Theme";
+import ActionButtons from "../components/persistentComponents/ActionButtons";
 
 const DisplayProposal = (props) => {
 
@@ -57,43 +58,72 @@ const DisplayProposal = (props) => {
     let payload = action[actionType];
     let {yay, nay, totalParticipated} = voteTally;
 
-    const onConfirmVote = async (bool) => {
-        setModalIsLoading(true);
-        let result = await navigationAndApiState.backendActor.voteOnProposal(proposalId, bool);
-        setModalIsLoading(false);
-        if(result.err){
+    const RenderVoteButtons = () => {
+
+        const onConfirmVote = async (bool) => {
+            setModalIsLoading(true);
+            let result = await navigationAndApiState.backendActor.voteOnProposal(proposalId, bool);
+            setModalIsLoading(false);
+            if(result.err){
+                setModalProps({
+                    flexDirection: "column",
+                    components: [
+                        <Typography padding={"10px"} children={`Your vote could not be successfully submitted.`} />,
+                        <ButtonField color={CONTRAST_COLOR} text={"Close"} Icon={CloseIcon} onClick={() => setModalIsOpen(false)} />
+                    ]
+                });
+                return;
+            } else if(result.ok) {
+                let updatedProposals = result.ok;
+                homePageDispatch({
+                    actionType: homePageTypes.SET_PROPOSALS_DATA,
+                    payload: updatedProposals
+                });
+            }
+            setModalIsOpen(false);
+        };
+
+        const onVote = (bool) => {
+            const decision = bool ? "ADOPT" : "REJECT";
+            setModalIsOpen(true);
             setModalProps({
                 flexDirection: "column",
                 components: [
-                    <Typography padding={"10px"} children={`Your vote could not be successfully submitted.`} />,
-                    <ButtonField color={CONTRAST_COLOR} text={"Close"} Icon={CloseIcon} onClick={() => setModalIsOpen(false)} />
+                    <Typography padding={"10px"} children={`Confirm your vote to ${decision} proposal #${proposalId}`} />,
+                    <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} >
+                        <ButtonField gridSx={{margin: "15px", backgroundColor: CONTRAST_COLOR}} color={BACKGROUND_COLOR} text={"Confirm"} Icon={CheckIcon} onClick={() => onConfirmVote(bool)} />
+                        <ButtonField gridSx={{margin: "15px"}} color={CONTRAST_COLOR} text={"Cancel"} Icon={CloseIcon} onClick={() => setModalIsOpen(false)} />
+                    </Grid>
                 ]
-            });
-            return;
-        } else if(result.ok) {
-            let updatedProposals = result.ok;
-            homePageDispatch({
-                actionType: homePageTypes.SET_PROPOSALS_DATA,
-                payload: updatedProposals
-            });
-        }
-        setModalIsOpen(false);
-    };
-
-    const onVote = (bool) => {
-        const decision = bool ? "ADOPT" : "REJECT";
-        setModalIsOpen(true);
-        setModalProps({
-            flexDirection: "column",
-            components: [
-                <Typography padding={"10px"} children={`Confirm your vote to ${decision} proposal #${proposalId}`} />,
-                <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} >
-                    <ButtonField gridSx={{margin: "15px"}} color={CONTRAST_COLOR} text={"Confirm"} Icon={CheckIcon} onClick={() => onConfirmVote(bool)} />
-                    <ButtonField gridSx={{margin: "15px"}} color={CONTRAST_COLOR} text={"Cancel"} Icon={CloseIcon} onClick={() => setModalIsOpen(false)} />
+            })
+        };
+        
+        return (
+            <Grid xs={12} width={"100%"} padding={0} display={"flex"} justifyContent={"center"} alignItems={"center"} position={"fixed"} bottom={0} >
+                <Grid xs={4} width={"100%"} padding={0} display={"flex"} justifyContent={"center"} alignItems={"center"}>
+                    <ButtonField
+                    text={"Adopt"}
+                    gridSx={{ width: "135px", backgroundColor: CONTRAST_COLOR }}
+                    onClick={() => onVote(true)}
+                    Icon={ThumbUpIcon}
+                    color={BACKGROUND_COLOR}
+                    disabled={hasVoted}
+                    />
                 </Grid>
-            ]
-        })
-    };
+                <Grid xs={4} width={"100%"} padding={0} display={"flex"} justifyContent={"center"} alignItems={"center"}>
+                    <ButtonField
+                        text={"Reject"}
+                        gridSx={{ width: "135px", backgroundColor: BACKGROUND_COLOR }}
+                        onClick={() => onVote(false)}
+                        Icon={ThumbDownIcon}
+                        color={CONTRAST_COLOR}
+                        disabled={hasVoted}
+                    />
+                </Grid>
+            </Grid>
+        )
+    }
+
 
     return(
         <Grid 
@@ -236,37 +266,19 @@ const DisplayProposal = (props) => {
                         transparentBackground={true}
                     />
                 </Grid>
-                <Divider sx={{...DIVIDER_SX, marginTop: "60px", marginBottom: "60px"}} />
-                { !finalized && 
-                    <Grid xs={12} width={"97%"} display={"flex"} justifyContent={"center"} alignItems={"center"}>
-                        <Grid xs={6} width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>
-                            <ButtonField
-                                text={"Adopt"}
-                                onClick={() => onVote(true)}
-                                Icon={ThumbUpIcon}
-                                color={!hasVoted ? CONTRAST_COLOR: WHITE_COLOR}
-                                disabled={hasVoted}
-                            />
-                        </Grid>
-                        <Grid xs={6} width={"100%"} display={"flex"} justifyContent={"right"} alignItems={"center"}>
-                            <ButtonField
-                                text={"Reject"}
-                                onClick={() => onVote(false)}
-                                Icon={ThumbDownIcon}
-                                color={!hasVoted ? CONTRAST_COLOR: WHITE_COLOR}
-                                disabled={hasVoted}
-                            />
-                        </Grid>
-                    </Grid>
-                }
-                { finalized && <DataField
-                    label={'Executed: '}
-                    text={`${executed ? "True" : "False"}`}
-                    onClick={() => {}}
-                    disabled={true}
-                    transparentBackground={true}
-                /> }
+                { finalized && 
+                <>
+                    <Divider sx={{...DIVIDER_SX, marginTop: "60px", marginBottom: "60px"}} />
+                    <DataField
+                        label={'Executed: '}
+                        text={`${executed ? "True" : "False"}`}
+                        onClick={() => {}}
+                        disabled={true}
+                        transparentBackground={true}
+                    />
+                </> }
             </Grid>
+            { !finalized && !hasVoted && <RenderVoteButtons /> }
         </Grid>
     )
 };

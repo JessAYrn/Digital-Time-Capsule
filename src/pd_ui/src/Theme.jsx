@@ -1,9 +1,9 @@
 import { createTheme } from '@mui/material/styles';
 import { grey } from '@mui/material/colors';
 
-export const BACKGROUND_COLOR = "#101010" 
+export const BACKGROUND_COLOR = "#0A0A0A" 
 
-export const PAPER_COLOR = "#141414"
+export const PAPER_COLOR = "#101010"
 
 export const BUTTON_SX = {
   borderColor: "#2e3539",
