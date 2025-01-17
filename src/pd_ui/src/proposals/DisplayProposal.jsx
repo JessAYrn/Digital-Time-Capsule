@@ -99,7 +99,7 @@ const DisplayProposal = (props) => {
         };
         
         return (
-            <Grid xs={12} width={"100%"} padding={0} display={"flex"} justifyContent={"center"} alignItems={"center"} position={"fixed"} bottom={0} >
+            <Grid xs={12} width={"100%"} padding={0} display={"flex"} justifyContent={"center"} alignItems={"center"} position={"fixed"} bottom={"10px"} >
                 <Grid xs={4} width={"100%"} padding={0} display={"flex"} justifyContent={"center"} alignItems={"center"}>
                     <ButtonField
                     text={"Adopt"}
@@ -135,39 +135,30 @@ const DisplayProposal = (props) => {
             flexDirection={"column"} 
             width={"100%"}
         >
-            <Grid 
-                columns={12}
-                xs={12} 
-                rowSpacing={0} 
-                display="flex" 
-                justifyContent="center" 
-                alignItems="center" 
-                flexDirection={"column"} 
-                width={"100%"}
-            >
-                <MenuField
-                    xs={8}
-                    disabled={true}
-                    display={"flex"}
-                    alignItems={"center"}
-                    justifyContent={"center"}
-                    color={CONTRAST_COLOR}
-                    label={"Proposal Type"}
-                    MenuIcon={KeyboardArrowDownIcon}
-                    menuItemProps={[{ text: actionType, onClick: ()  => {}, selected: true},]}
-                />
-                <Typography varient={"h6"} color={"#bdbdbd"}> {actionType} </Typography>
-                { actionType === PROPOSAL_ACTIONS.IncreaseDissolveDelay && <IncreaseDissolveDelay action={actionType} payload={payload} disabled={true} finalized={finalized}/> }
-                { actionType === PROPOSAL_ACTIONS.IncreaseNeuron && <IncreaseNeuron action={actionType} payload={payload} disabled={true} finalized={finalized}/> }
-                { (actionType === PROPOSAL_ACTIONS.CreateNeuron || actionType === PROPOSAL_ACTIONS.PurchaseCycles || actionType === PROPOSAL_ACTIONS.SetCostToEnterDao) && <SetAmount action={actionType} payload={payload} disabled={true} finalized={finalized}/> }
-                { (actionType === PROPOSAL_ACTIONS.DisburseNeuron || actionType === PROPOSAL_ACTIONS.DissolveNeuron) && <DissolveOrDisburseNeuron action={actionType} payload={payload} disabled={true} finalized={finalized}/> }
-                { (actionType === PROPOSAL_ACTIONS.AddAdmin || actionType === PROPOSAL_ACTIONS.RemoveAdmin) && <AddOrRemoveAdmin action={actionType} payload={payload} finalized={finalized} disabled={true}/> }
-                { actionType === PROPOSAL_ACTIONS.FollowNeuron && <FollowNeuron action={actionType} payload={payload} disabled={true} finalized={finalized}/> }
-                { actionType === PROPOSAL_ACTIONS.SpawnNeuron && <SpawnNeuron action={actionType} payload={payload} disabled={true} finalized={finalized}/> }
-                { actionType === PROPOSAL_ACTIONS.CreateFundingCampaign && <NewFundingCampaign action={actionType} payload={payload} disabled={true} finalized={finalized}/> }
-                { actionType === PROPOSAL_ACTIONS.CancelFundingCampaign && <CancelFundingCampaign action={actionType} payload={payload} disabled={true} finalized={finalized}/> }
-                { actionType === PROPOSAL_ACTIONS.WithdrawFromMultiSigWallet && <WithdrawFromMultiSigWallet action={actionType} payload={payload} disabled={true} finalized={finalized}/> }
-            </Grid>
+            
+            <MenuField
+                xs={8}
+                disabled={true}
+                display={"flex"}
+                alignItems={"center"}
+                justifyContent={"center"}
+                color={CONTRAST_COLOR}
+                label={"Proposal Type"}
+                MenuIcon={KeyboardArrowDownIcon}
+                menuItemProps={[{ text: actionType, onClick: ()  => {}, selected: true},]}
+            />
+            <Typography varient={"h6"} color={"#bdbdbd"}> {actionType} </Typography>
+            <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
+            { actionType === PROPOSAL_ACTIONS.IncreaseDissolveDelay && <IncreaseDissolveDelay action={actionType} payload={payload} disabled={true} finalized={finalized}/> }
+            { actionType === PROPOSAL_ACTIONS.IncreaseNeuron && <IncreaseNeuron action={actionType} payload={payload} disabled={true} finalized={finalized}/> }
+            { (actionType === PROPOSAL_ACTIONS.CreateNeuron || actionType === PROPOSAL_ACTIONS.PurchaseCycles || actionType === PROPOSAL_ACTIONS.SetCostToEnterDao) && <SetAmount action={actionType} payload={payload} disabled={true} finalized={finalized}/> }
+            { (actionType === PROPOSAL_ACTIONS.DisburseNeuron || actionType === PROPOSAL_ACTIONS.DissolveNeuron) && <DissolveOrDisburseNeuron action={actionType} payload={payload} disabled={true} finalized={finalized}/> }
+            { (actionType === PROPOSAL_ACTIONS.AddAdmin || actionType === PROPOSAL_ACTIONS.RemoveAdmin) && <AddOrRemoveAdmin action={actionType} payload={payload} finalized={finalized} disabled={true}/> }
+            { actionType === PROPOSAL_ACTIONS.FollowNeuron && <FollowNeuron action={actionType} payload={payload} disabled={true} finalized={finalized}/> }
+            { actionType === PROPOSAL_ACTIONS.SpawnNeuron && <SpawnNeuron action={actionType} payload={payload} disabled={true} finalized={finalized}/> }
+            { actionType === PROPOSAL_ACTIONS.CreateFundingCampaign && <NewFundingCampaign action={actionType} payload={payload} disabled={true} finalized={finalized}/> }
+            { actionType === PROPOSAL_ACTIONS.CancelFundingCampaign && <CancelFundingCampaign action={actionType} payload={payload} disabled={true} finalized={finalized}/> }
+            { actionType === PROPOSAL_ACTIONS.WithdrawFromMultiSigWallet && <WithdrawFromMultiSigWallet action={actionType} payload={payload} disabled={true} finalized={finalized}/> }
             <Divider sx={{...DIVIDER_SX, marginTop: "60px", marginBottom: "60px"}} />
             <Grid
                 columns={12}
