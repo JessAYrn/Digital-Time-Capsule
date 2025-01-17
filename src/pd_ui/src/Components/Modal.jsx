@@ -57,7 +57,7 @@ const ModalComponent = (props) => {
             </IconButton>
         </Grid>}
         {components &&
-          <Grid maxWidth={"700px"} marginTop={fullScreen ? "60px": ""} border={fullScreen? "" : "solid grey "} display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} flexDirection={flexDirection} padding={"10px"}>
+          <Grid maxWidth={"700px"} marginBottom={fullScreen ? "70px": ""} marginTop={fullScreen ? "60px": ""} border={fullScreen? "" : "solid grey "} display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} flexDirection={flexDirection} padding={"10px"}>
               {components.map(component => { return component })}
           </Grid>}
       </Dialog>

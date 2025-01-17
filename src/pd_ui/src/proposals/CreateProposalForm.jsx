@@ -23,7 +23,8 @@ import IncreaseDissolveDelay from "./renderComponents/RenderIncreaseDissolveDela
 import CancelFundingCampaign from "./renderComponents/RenderCancelFundingCampaign";
 import WithdrawFromMultiSigWallet from "./renderComponents/RenderWithdrawFromMultiSigWallet";
 import { sortProposals } from "../functionsAndConstants/governanceDataFunctions";
-import { CONTRAST_COLOR } from "../Theme";
+import { CONTRAST_COLOR, DIVIDER_SX, BACKGROUND_COLOR } from "../Theme";
+import { Divider } from "@mui/material";
 
 const CreateProposalForm = (props) => {
     const { proposalAction, proposalPayload } = props;
@@ -104,7 +105,11 @@ const CreateProposalForm = (props) => {
                 MenuIcon={KeyboardArrowDownIcon}
                 menuItemProps={mainMenuItemProps}
             />
-            <Typography varient={"h6"} color={"#bdbdbd"}> {proposalAction_} </Typography>
+            {proposalAction_ && 
+            <>
+                <Typography varient={"h6"} color={"#bdbdbd"}> {proposalAction_} </Typography>
+                <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
+            </>}
             {
                 (proposalAction_ ===  PROPOSAL_ACTIONS.IncreaseNeuron || proposalAction_ === PROPOSAL_ACTIONS.CreateNeuron) &&
                 <DataField label={"Available Balance: "} text={`${fromE8s(availableBalance) } ICP`} isLoading={!treasuryState.dataHasBeenLoaded} disabled={true} transparentBackground={true}/>
@@ -123,8 +128,8 @@ const CreateProposalForm = (props) => {
             { proposalAction_ === PROPOSAL_ACTIONS.CancelFundingCampaign && <CancelFundingCampaign onSubmitProposal={onSubmitProposal} action={proposalAction_} payload={proposalPayload_}/> }
             { proposalAction_ === PROPOSAL_ACTIONS.WithdrawFromMultiSigWallet && <WithdrawFromMultiSigWallet onSubmitProposal={onSubmitProposal} action={proposalAction_} payload={proposalPayload_}/> }
             { (proposalAction_ === PROPOSAL_ACTIONS.InstallUpgrades || proposalAction_ === PROPOSAL_ACTIONS.ToggleSupportMode || proposalAction_ === PROPOSAL_ACTIONS.TogglePrivacySetting) 
-                && <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"}> 
-                    <ButtonField Icon={DoneIcon} color={CONTRAST_COLOR} text={'Submit Proposal'} onClick={() => onSubmitProposal({[proposalAction_]: {}})} /> 
+                && <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"} position={"fixed"} bottom={"10px"} width={"100%"} >
+                    <ButtonField Icon={DoneIcon} color={BACKGROUND_COLOR} gridSx={{ width: "230px", backgroundColor: CONTRAST_COLOR }} text={'Submit Proposal'} onClick={() => onSubmitProposal({[proposalAction_]: {}})} /> 
                 </Grid> 
             }
         </Grid>

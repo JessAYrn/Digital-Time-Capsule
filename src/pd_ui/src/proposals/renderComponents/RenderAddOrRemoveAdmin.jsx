@@ -6,7 +6,7 @@ import ButtonField from '../../components/Button';
 import { Typography } from '@mui/material';
 import DoneIcon from '@mui/icons-material/Done';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
-import { CONTRAST_COLOR } from '../../Theme';
+import { CONTRAST_COLOR, BACKGROUND_COLOR } from '../../Theme';
 
 const AddOrRemoveAdmin = (props) => {
     const { onSubmitProposal, action, payload, disabled } = props;
@@ -36,15 +36,17 @@ const AddOrRemoveAdmin = (props) => {
             />
             {principal && <Typography varient={"h6"} color={"#bdbdbd"}> {homePageState?.canisterData?.userNames[principal]} </Typography>}
             {isReadyToSubmit && !disabled &&
-            <>
-                <ButtonField
+                <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"} position={"fixed"} bottom={"10px"} width={"100%"} >
+                    <ButtonField
                         disabled={disabled}
                         Icon={DoneIcon}
-                        color={CONTRAST_COLOR}
+                        color={BACKGROUND_COLOR}
+                        gridSx={{ width: "230px", backgroundColor: CONTRAST_COLOR }}
                         text={'Submit Proposal'}
                         onClick={submitProposal}
                     />
-            </>}
+                </Grid>
+            }
         </Grid>
     );
 };

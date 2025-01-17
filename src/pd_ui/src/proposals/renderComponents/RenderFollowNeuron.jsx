@@ -9,7 +9,8 @@ import InputBox from '../../components/InputBox';
 import { INPUT_BOX_FORMATS } from '../../functionsAndConstants/Constants';
 import DoneIcon from '@mui/icons-material/Done';
 import ButtonField from '../../components/Button';
-import { CONTRAST_COLOR } from '../../Theme';
+import { CONTRAST_COLOR, DIVIDER_SX, BACKGROUND_COLOR } from '../../Theme';
+import { Divider } from '@mui/material';
 
 export const NEURON_TOPICS = {
     // The `Unspecified` topic is used as a fallback when
@@ -90,7 +91,7 @@ const FollowNeuron = (props) => {
     const [selectedNeuronId, setSelectedNeuronId] = useState(payload?.neuronId?.toString());
     const [topicName, setTopicName] = useState(Object.keys(NEURON_TOPICS).find((key) => NEURON_TOPICS[key] === payload?.topic));
     const [followee, setFollowee] = useState(payload?.followee?.toString());
-    const [hasError, setHasError] = useState(false);
+    const [hasError, setHasError] = useState(true);
     const [isReadyToSubmit, setIsReadyToSubmit] = useState(false);
 
     const {treasuryState} = useContext(AppContext);
@@ -133,6 +134,7 @@ const FollowNeuron = (props) => {
             {selectedNeuronId && 
             <>
                 <Typography varient={"h6"} color={"#bdbdbd"}> {selectedNeuronId} </Typography>
+                <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
                 <MenuField
                     disabled={disabled}
                     xs={8}
@@ -150,6 +152,7 @@ const FollowNeuron = (props) => {
                 topicName &&
                 <>
                     <Typography varient={"h6"} color={"#bdbdbd"}> {topicName} </Typography>
+                    <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
                     <InputBox
                         disabled={disabled}
                         xs={12}
@@ -170,13 +173,16 @@ const FollowNeuron = (props) => {
             }
             { isReadyToSubmit && !disabled &&
                 <>
-                    <ButtonField
-                        disabled={disabled}
-                        Icon={DoneIcon}
-                        color={CONTRAST_COLOR}
-                        text={'Submit Proposal'}
-                        onClick={submitProposal}
-                    />
+                    <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"} position={"fixed"} bottom={"10px"} width={"100%"} >
+                        <ButtonField
+                            disabled={disabled}
+                            Icon={DoneIcon}
+                            color={BACKGROUND_COLOR}
+                            gridSx={{ width: "230px", backgroundColor: CONTRAST_COLOR }}
+                            text={'Submit Proposal'}
+                            onClick={submitProposal}
+                        />
+                    </Grid>
                 </>
             }
         </Grid>

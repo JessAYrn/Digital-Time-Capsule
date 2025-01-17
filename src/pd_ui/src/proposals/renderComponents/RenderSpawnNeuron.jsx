@@ -8,7 +8,8 @@ import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
 import { INPUT_BOX_FORMATS } from '../../functionsAndConstants/Constants';
 import ButtonField from '../../components/Button';
 import DoneIcon from '@mui/icons-material/Done';
-import { CONTRAST_COLOR } from '../../Theme';
+import { CONTRAST_COLOR, DIVIDER_SX, BACKGROUND_COLOR } from '../../Theme';
+import { Divider } from '@mui/material';
 
 const SpawnNeuron = (props) => {
 
@@ -53,6 +54,7 @@ const SpawnNeuron = (props) => {
             {selectedNeuronId && 
             <>
                 <Typography varient={"h6"} color={"#bdbdbd"}> {selectedNeuronId} </Typography>
+                <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
                 <InputBox
                     disabled={disabled}
                     label={"Percentage of Maturity to Spawn"}
@@ -76,13 +78,16 @@ const SpawnNeuron = (props) => {
             }
             { isReadyToSubmit && !disabled &&
             <>
-                <ButtonField
-                    disabled={disabled}
-                    Icon={DoneIcon}
-                    color={CONTRAST_COLOR}
-                    text={'Submit Proposal'}
-                    onClick={submitProposal}
-                />
+                <Grid2 xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"} position={"fixed"} bottom={"10px"} width={"100%"} >
+                    <ButtonField
+                        disabled={disabled}
+                        Icon={DoneIcon}
+                        color={BACKGROUND_COLOR}
+                        gridSx={{ width: "230px", backgroundColor: CONTRAST_COLOR }}
+                        text={'Submit Proposal'}
+                        onClick={submitProposal}
+                    />
+                </Grid2>
             </>
             }
         </Grid2>

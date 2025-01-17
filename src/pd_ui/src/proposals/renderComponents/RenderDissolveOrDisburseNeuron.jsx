@@ -6,7 +6,7 @@ import MenuField from '../../components/MenuField';
 import ButtonField from '../../components/Button';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
-import { CONTRAST_COLOR } from '../../Theme';
+import { CONTRAST_COLOR, BACKGROUND_COLOR } from '../../Theme';
 
 const DissolveOrDisburseNeuron = (props) => {
     const { onSubmitProposal, action, payload, disabled } = props;
@@ -43,13 +43,19 @@ const DissolveOrDisburseNeuron = (props) => {
             />
             {selectedNeuronId && <Typography varient={"h6"} color={"#bdbdbd"}> {selectedNeuronId} </Typography>}
             { isReadyToSubmit && !disabled &&
-                <ButtonField
-                    disabled={disabled}
-                    Icon={DoneIcon}
-                    color={CONTRAST_COLOR}
-                    text={'Submit Proposal'}
-                    onClick={submitProposal}
-                />
+                <>
+                    <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"} position={"fixed"} bottom={"10px"} width={"100%"} >
+                    <ButtonField
+                        disabled={disabled}
+                        Icon={DoneIcon}
+                        color={BACKGROUND_COLOR}
+                        gridSx={{ width: "230px", backgroundColor: CONTRAST_COLOR }}
+                        text={'Submit Proposal'}
+                        onClick={submitProposal}
+                        />
+                    </Grid>     
+                </>
+                    
             }
         </Grid>
     );

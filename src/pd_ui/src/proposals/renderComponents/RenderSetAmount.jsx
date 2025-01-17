@@ -12,7 +12,7 @@ import { sortAndReduceDataMapArray, getLabelsAndDataSetsInChartFormat } from '..
 import { AppContext } from '../../Context';
 import { Divider, Typography } from '@mui/material';
 import Graph from '../../components/Chart';
-
+import { BACKGROUND_COLOR } from '../../Theme';
 const SetAmount = (props) => {
 
     const {onSubmitProposal, action, payload, disabled, finalized} = props;
@@ -82,12 +82,18 @@ const SetAmount = (props) => {
                     </>
                     }
             {isReadyToSubmit && !disabled &&
-            <ButtonField
-                Icon={DoneIcon}
-                color={CONTRAST_COLOR}
-                text={'Submit Proposal'}
-                onClick={submitProposal}
-            />}
+                <>
+                    <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"} position={"fixed"} bottom={"10px"} width={"100%"} >
+                        <ButtonField
+                            Icon={DoneIcon}
+                            color={BACKGROUND_COLOR}
+                            gridSx={{ width: "230px", backgroundColor: CONTRAST_COLOR }}
+                            text={'Submit Proposal'}
+                            onClick={submitProposal}
+                        />
+                    </Grid>
+                </>
+            }
         </Grid>
     );
 };

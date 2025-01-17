@@ -12,11 +12,10 @@ import { Typography } from '@mui/material';
 import {Checkbox} from '@mui/material';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import { CONTRAST_COLOR, WHITE_COLOR } from '../../Theme';
+import { CONTRAST_COLOR, WHITE_COLOR, DIVIDER_SX, BACKGROUND_COLOR } from '../../Theme';
 import { sortAndReduceDataMapArray, getLabelsAndDataSetsInChartFormat } from '../../components/Chart';
 import Graph from '../../components/Chart';
 import { getHypotheticalVotingPowerIncreaseFromStake } from '../utils';
-import { DIVIDER_SX } from '../../Theme';
 import Divider from '@mui/material/Divider';
 
 
@@ -104,6 +103,7 @@ const IncreaseNeuron = (props) => {
             { !!selectedNeuronId && 
                 <>
                     <Typography varient={"h6"} color={"#bdbdbd"}> {selectedNeuronId} </Typography>
+                    <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
                     <InputBox
                         disabled={disabled}
                         width={"100%"}
@@ -170,13 +170,19 @@ const IncreaseNeuron = (props) => {
                 </>
             }
             {isReadyToSubmit && !disabled && 
-            <ButtonField
-            Icon={DoneIcon}
-            color={CONTRAST_COLOR}
-            disabled={disabled}
-            text={'Submit Proposal'}
-            onClick={submitProposal}
-            />}
+                <>
+                    <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"} position={"fixed"} bottom={"10px"} width={"100%"} >
+                        <ButtonField
+                            Icon={DoneIcon}
+                            color={BACKGROUND_COLOR}
+                            gridSx={{ width: "230px", backgroundColor: CONTRAST_COLOR }}
+                            disabled={disabled}
+                            text={'Submit Proposal'}
+                            onClick={submitProposal}
+                        />
+                    </Grid>
+                </>
+            }
         </Grid>
     )
 };

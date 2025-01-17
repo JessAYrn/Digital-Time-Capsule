@@ -12,7 +12,8 @@ import DoneIcon from '@mui/icons-material/Done';
 import InfoToolTip from '../../components/InfoToolTip';
 import { getUncollateralizedStake } from '../../functionsAndConstants/treasuryDataFunctions';
 import DataField from '../../components/DataField';
-import { CONTRAST_COLOR } from '../../Theme';
+import { CONTRAST_COLOR, DIVIDER_SX, BACKGROUND_COLOR } from '../../Theme';
+import { Divider } from '@mui/material';
 
  
 
@@ -161,6 +162,7 @@ const NewFundingCampaign = (props) => {
             { amountToFund.type && 
             <>
                 <Typography>{amountToFund.type.toUpperCase()}</Typography>
+                <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
                 <Grid width={"100%"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
                     <InputBox
                         disabled={disabled}
@@ -186,9 +188,11 @@ const NewFundingCampaign = (props) => {
             </>
             }         
             { !!amountToFund.value && !hasError_1 && 
-                <Grid width={"100%"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
-                    <InputBox
-                        disabled={disabled}
+                <>
+                    <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
+                    <Grid width={"100%"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
+                        <InputBox
+                            disabled={disabled}
                         hasError={hasError_2}
                         width={"100%"}
                         label={"Description"}
@@ -204,11 +208,14 @@ const NewFundingCampaign = (props) => {
                         text={`A brief description or link to external references regarding this funding campaign.`} 
                         placement={"top-start"}
                         color={"white"}
-                    />
-                </Grid>
+                        />
+                    </Grid>
+                </>
             }
             { !!description && !hasError_2 &&
-                <Grid width={"100%"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
+                <>
+                    <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
+                    <Grid width={"100%"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
                     <MenuField
                         disabled={disabled}
                         xs={8}
@@ -226,20 +233,22 @@ const NewFundingCampaign = (props) => {
                             Donations are not required to be repaid nor collateralized.`} 
                         placement={"top-start"}
                         color={"white"}
-                    />
-                </Grid>
+                        />
+                    </Grid>
+                </>
             }
             { isALoan !== undefined && <Typography>This funding campaign {isALoan? "is a loan": "is NOT a loan"}</Typography> }
             {
                 isALoan &&
                 <>
+                    <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
                     <Grid width={"100%"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
-                    <InputBox
-                        disabled={disabled}
-                        width={"100%"}
-                        hasError={hasError_3}
-                        label={"Repayment Intervals"}
-                        format={INPUT_BOX_FORMATS.numberFormat}
+                        <InputBox
+                            disabled={disabled}
+                            width={"100%"}
+                            hasError={hasError_3}
+                            label={"Repayment Intervals"}
+                            format={INPUT_BOX_FORMATS.numberFormat}
                         allowNegative={false}
                         maxDecimalPlaces={0}
                         parseNumber={parseInt}
@@ -262,32 +271,37 @@ const NewFundingCampaign = (props) => {
                     />
                     </Grid>
                     { !!paymentIntervalsInDays && !hasError_3 &&
-                        <Grid width={"100%"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
-                        <InputBox
-                            disabled={disabled}
-                            hasError={hasError_4}
-                            width={"100%"}
-                            label={"Minimum Payment Amounts"}
-                            format={INPUT_BOX_FORMATS.numberFormat}
-                            allowNegative={false}
-                            value={paymentAmounts.value}
-                            parseNumber={parseFloat}
-                            suffix={` ${paymentAmounts.type.toUpperCase()}`}
-                            onChange={(value) => {
-                                setHasError_4(value === "NaN" || value === NaN || value === "" || value === 0);
-                                setPaymentAmounts({...paymentAmounts, value});
-                            }}
-                        />
-                        <InfoToolTip
-                            text={`The minimum amount of ${paymentAmounts.type.toUpperCase()} that the proposer is promising to repay during each repayment interval.
-                                (e.g. if 10 ${paymentAmounts.type.toUpperCase()} is selected, the proposer is promising to repay at least 10 ${paymentAmounts.type.toUpperCase()} during each repayment interval)`
-                            }
-                            placement={"top-start"}
-                            color={"white"}
-                        />
-                        </Grid>
+                        <>
+                            <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
+                            <Grid width={"100%"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
+                            <InputBox
+                                disabled={disabled}
+                                hasError={hasError_4}
+                                width={"100%"}
+                                label={"Minimum Payment Amounts"}
+                                format={INPUT_BOX_FORMATS.numberFormat}
+                                allowNegative={false}
+                                value={paymentAmounts.value}
+                                parseNumber={parseFloat}
+                                suffix={` ${paymentAmounts.type.toUpperCase()}`}
+                                onChange={(value) => {
+                                    setHasError_4(value === "NaN" || value === NaN || value === "" || value === 0);
+                                    setPaymentAmounts({...paymentAmounts, value});
+                                }}
+                            />
+                            <InfoToolTip
+                                text={`The minimum amount of ${paymentAmounts.type.toUpperCase()} that the proposer is promising to repay during each repayment interval.
+                                    (e.g. if 10 ${paymentAmounts.type.toUpperCase()} is selected, the proposer is promising to repay at least 10 ${paymentAmounts.type.toUpperCase()} during each repayment interval)`
+                                }
+                                placement={"top-start"}
+                                color={"white"}
+                            />
+                            </Grid>
+                        </>
                     }
                 { !!paymentAmounts.value && !hasError_4 && 
+                <>
+                    <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
                     <Grid width={"100%"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
                         <InputBox
                             disabled={disabled}
@@ -310,8 +324,10 @@ const NewFundingCampaign = (props) => {
                             color={"white"}
                         />
                     </Grid>
-                }
+                </>}
                 { !!initialLoanInterestAmount.value && !hasError_5 &&
+                <>
+                    <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
                     <Grid width={"100%"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
                         <MenuField
                             disabled={disabled}
@@ -336,7 +352,7 @@ const NewFundingCampaign = (props) => {
                             color={"white"}
                         />
                     </Grid>
-                }
+                </>}
                 { initialCollateralLocked?.type === FUNDING_CAMPAIGN_ASSET_TYPES.icp_staked &&
                     <>
                         <Typography>{initialCollateralLocked.type.toUpperCase()}</Typography>
@@ -364,6 +380,7 @@ const NewFundingCampaign = (props) => {
                     || initialCollateralLocked?.fromNeuron &&
                     <>
                         <Typography>{initialCollateralLocked.fromNeuron}</Typography>
+                        <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
                         {!disabled && 
                             <DataField 
                                 label={"Available Stake: "} 
@@ -400,12 +417,17 @@ const NewFundingCampaign = (props) => {
                 </>
             } 
             { isReadyToSubmit && !disabled &&
-                <ButtonField
+            <>
+                <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"} position={"fixed"} bottom={"10px"} width={"100%"} >
+                    <ButtonField
                     Icon={DoneIcon}
-                    color={CONTRAST_COLOR}
+                    color={BACKGROUND_COLOR}
+                    gridSx={{ width: "230px", backgroundColor: CONTRAST_COLOR }}
                     text={'Submit proposal'}
                     onClick={submitProposal}
-                /> 
+                    /> 
+                </Grid>
+                </>
             }
         </Grid>
     )

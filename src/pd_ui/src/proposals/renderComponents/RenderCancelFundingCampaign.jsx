@@ -5,7 +5,7 @@ import { Typography } from '@mui/material';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import MenuField from '../../components/MenuField';
-import { CONTRAST_COLOR } from '../../Theme';
+import { CONTRAST_COLOR, BACKGROUND_COLOR } from '../../Theme';
 
 const CancelFundingCampaign = (props) => {
     const {onSubmitProposal, action, payload, disabled} = props;
@@ -42,12 +42,17 @@ const CancelFundingCampaign = (props) => {
             {(!!fundingCampaignId && fundingCampaignId !== 0) && 
             <>
                 <Typography varient={"h6"} color={"#bdbdbd"}> Funding Campaign Selected: {fundingCampaignId} </Typography>
-                {!disabled && <ButtonField
+                {!disabled && 
+                <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"} position={"fixed"} bottom={"10px"} width={"100%"} >
+                <ButtonField
                     disabled={disabled}
-                    color={CONTRAST_COLOR}
+                    color={BACKGROUND_COLOR}
+                    gridSx={{ width: "230px", backgroundColor: CONTRAST_COLOR }}
                     text={'Submit Proposal'}
                     onClick={submitProposal}
-                />}
+                />
+                </Grid>
+                }
             </>
         }
         </Grid>

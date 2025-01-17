@@ -11,9 +11,8 @@ import { INPUT_BOX_FORMATS, CHART_TYPES, GRAPH_DISPLAY_LABELS } from '../../func
 import { getHypotheticalVotingPowerIncreaseFromIncreasedDissolveDelay } from '../../proposals/utils';
 import Graph, { getLabelsAndDataSetsInChartFormat, sortAndReduceDataMapArray } from '../../components/Chart';
 import { daysToSeconds, fromE8s, secondsToDays } from '../../functionsAndConstants/Utils';
-import { CONTRAST_COLOR } from '../../Theme';
-import Divider from '@mui/material/Divider';
-import { DIVIDER_SX } from '../../Theme';
+import { CONTRAST_COLOR, DIVIDER_SX, BACKGROUND_COLOR } from '../../Theme';
+import { Divider } from '@mui/material';
 
 const IncreaseDissolveDelay = (props) => {  
     const { onSubmitProposal, payload, action, disabled, finalized} = props;
@@ -88,6 +87,7 @@ const IncreaseDissolveDelay = (props) => {
             {selectedNeuronId && 
             <>
                 <Typography varient={"h6"} color={"#bdbdbd"}> {selectedNeuronId} </Typography>
+                <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
                 <InputBox
                     width={"100%"}
                     hasError={hasError}
@@ -121,13 +121,18 @@ const IncreaseDissolveDelay = (props) => {
             </>
             }
             { !!isReadyToSubmit && !disabled &&
-                <ButtonField
-                    Icon={DoneIcon}
-                    color={CONTRAST_COLOR}
-                    disabled={disabled}
-                    text={'Submit Proposal'}
-                    onClick={submitProposal}
-                />
+                <>
+                    <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"} position={"fixed"} bottom={"10px"} width={"100%"} >
+                        <ButtonField
+                            Icon={DoneIcon}
+                            color={BACKGROUND_COLOR}
+                            gridSx={{ width: "230px", backgroundColor: CONTRAST_COLOR }}
+                            disabled={disabled}
+                            text={'Submit Proposal'}
+                            onClick={submitProposal}
+                        />
+                    </Grid>
+                </>
             }
             
         </Grid>

@@ -6,18 +6,14 @@ import LockOpenIcon from '@mui/icons-material/LockOpen';
 import HistoryToggleOffIcon from '@mui/icons-material/HistoryToggleOff';
 import LockIcon from '@mui/icons-material/Lock';
 import DataField from "../../../../components/DataField";
-import PsychologyAltTwoToneIcon from '@mui/icons-material/PsychologyAltTwoTone';
-import CreateProposalForm from "../../../../proposals/CreateProposalForm";
 import { PROPOSAL_ACTIONS } from "../../../../proposals/utils";
-import { fromE8s, round2Decimals, secondsToHours, hoursToDays, daysToMonths, getDateAsString, copyText } from "../../../../functionsAndConstants/Utils";
+import { fromE8s, round2Decimals, secondsToHours, hoursToDays, daysToMonths, getDateAsString } from "../../../../functionsAndConstants/Utils";
 import { getTotalContributions, getUserNeuronContribution } from "../../../../functionsAndConstants/treasuryDataFunctions";
 import { AppContext } from "../../../../Context";
 import Typography from "@mui/material/Typography";
 import { Divider } from "@mui/material";
 import ButtonField from "../../../../components/Button";
-import RenderNeuron from "./RenderNeuron";
-import { BACKGROUND_COLOR, CONTRAST_COLOR, DIVIDER_SX, WHITE_COLOR } from "../../../../Theme";
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import { CONTRAST_COLOR, DIVIDER_SX, WHITE_COLOR } from "../../../../Theme";
 
 
 
@@ -25,10 +21,10 @@ const NeuronStates = { locked: 1, dissolving: 2, unlocked: 3, spawning: 4 };
 
 const RenderNeuronValues = (props) => {
 
-    const {neuronId, neuronData} = props;
+    const {neuronId, neuronData, openProposalForm} = props;
 
     const {contributions, neuron, neuronInfo} = neuronData;
-    const { setModalIsOpen, setModalProps, treasuryState } = useContext(AppContext);
+    const { treasuryState } = useContext(AppContext);
 
     const {dissolveDelay, userStake, userVotingPower, userMaturity, neuronStake, neuronVotingPower, neuronMaturity, neuronState, neuronStateIcon, dateDissolved} = useMemo(() => {
         const {dissolve_state} = neuron;
@@ -61,25 +57,6 @@ const RenderNeuronValues = (props) => {
         return {dissolveDelay, userStake, userVotingPower, userMaturity, neuronStake, neuronVotingPower, neuronMaturity, neuronState, neuronStateIcon, dateDissolved};
     },[]);
 
-    const openProposalForm = (props) => {
-        let {proposalAction, proposalPayload } = props;
-        setModalIsOpen(true);
-        setModalProps({
-            headerComponent: <Typography variant="h6" color={WHITE_COLOR}>Create Proposal</Typography>,
-            fullScreen: true,
-            components: [
-                <CreateProposalForm proposalAction={proposalAction} proposalPayload={proposalPayload}/>
-            ],
-            handleReturn: () => {
-                setModalProps({
-                    headerComponent: <ButtonField transparentBorder={true} Icon={ContentCopyIcon} transparentBackground={true} text={neuronId} onClick={() => copyText(neuronId)} />,
-                    fullScreen: true,
-                    components: [<RenderNeuron neuronId={neuronId} neuronData={neuronData}/>]
-                })
-            }
-        });
-    };
-
 
     return (
         neuronInfo ? 
@@ -90,25 +67,11 @@ const RenderNeuronValues = (props) => {
                 <DataField transparentBorder={true} gridSx={{padding: "0px"}} label={"Your Voting Power:"} text={userVotingPower} buttonColor={WHITE_COLOR} labelColor={WHITE_COLOR} transparentBackground={true}/>
             </Grid>
 
+            <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
+
             <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0} paddingTop={"25px"} flexDirection={"column"}>
                 <DataField transparentBorder={true} gridSx={{padding: "0px"}} label={"Neuron Stake:"} text={`${neuronStake} ICP`} buttonColor={WHITE_COLOR} labelColor={WHITE_COLOR} transparentBackground={true}/>
                 <DataField transparentBorder={true} gridSx={{padding: "0px"}} label={"Your Stake:"} text={`${userStake} ICP`} buttonColor={WHITE_COLOR} labelColor={WHITE_COLOR} transparentBackground={true}/>
-            </Grid>
-
-            <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0} paddingTop={"10px"}>
-                <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={6} padding={0} >
-                    <ButtonField
-                    gridSx={{padding: "0px", backgroundColor: CONTRAST_COLOR, width: "100%"}}
-                    buttonGridSx={{width: "100%"}}
-                    color={BACKGROUND_COLOR}
-                    text={"Increase Stake"} 
-                    Icon={AddIcon}
-                    onClick={() => openProposalForm({
-                        proposalAction: PROPOSAL_ACTIONS.IncreaseNeuron,
-                        proposalPayload: {neuronId}
-                    })}
-                />
-                </Grid>
             </Grid>
 
             <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
@@ -116,19 +79,6 @@ const RenderNeuronValues = (props) => {
             <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0} paddingTop={"25px"} flexDirection={"column"}>
                 <DataField transparentBorder={true} gridSx={{padding: "0px"}} label={"Neuron Maturity:"} text={`${neuronMaturity} ICP`} buttonColor={WHITE_COLOR} labelColor={WHITE_COLOR} transparentBackground={true}/>
                 <DataField transparentBorder={true} gridSx={{padding: "0px"}} label={"Your Maturity:"} text={`${userMaturity} ICP`} buttonColor={WHITE_COLOR} labelColor={WHITE_COLOR} transparentBackground={true}/>
-            </Grid>
-
-            <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0} marginTop={"20px"}>
-                <ButtonField
-                gridSx={{padding: "0px", backgroundColor: CONTRAST_COLOR}}
-                text={"Spawn Neuron From Maturity"} 
-                color={BACKGROUND_COLOR}
-                Icon={PsychologyAltTwoToneIcon}
-                onClick={() => openProposalForm({
-                    proposalAction: PROPOSAL_ACTIONS.SpawnNeuron,
-                    proposalPayload: {neuronId}
-                })}
-                />
             </Grid>
 
             <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />

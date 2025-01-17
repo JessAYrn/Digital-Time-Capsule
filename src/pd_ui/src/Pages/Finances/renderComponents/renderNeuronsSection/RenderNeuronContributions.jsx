@@ -1,6 +1,6 @@
 import React, { useMemo, useContext } from "react";
 import Grid from "@mui/material/Unstable_Grid2";
-import { Typography } from "@mui/material";
+import { Divider, Typography } from "@mui/material";
 import DataTable from "../../../../components/Table";
 import Graph from "../../../../components/Chart";
 import { CHART_TYPES } from "../../../../functionsAndConstants/Constants";
@@ -8,6 +8,7 @@ import { GRAPH_DISPLAY_LABELS } from "../../../../functionsAndConstants/Constant
 import { AppContext } from "../../../../Context";
 import { fromE8s, round8Decimals } from "../../../../functionsAndConstants/Utils";
 import { sortAndReduceDataMapArray, getLabelsAndDataSetsInChartFormat } from "../../../../components/Chart";
+import { DIVIDER_SX } from "../../../../Theme";
 
         
 const RenderContributions = (props) => {
@@ -51,6 +52,7 @@ const RenderContributions = (props) => {
                             maintainAspectRatio={false}
                         />  
                     </Grid>
+                    <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
                     <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} xs={12} padding={0} flexDirection={"column"} width={"100%"}>
                         <DataTable
                             transparent={true}

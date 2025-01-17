@@ -5,12 +5,11 @@ import SwitchField from '../../../components/Switch';
 
 const TreasuryConfingurationsComponent = (props) => {
 
-    const {setModalIsOpen, setModalIsLoading, treasuryState, navigationAndApiState} = useContext(AppContext);
+    const { setModalIsLoading, treasuryState, navigationAndApiState} = useContext(AppContext);
     const [autoContributeToLoans, setAutoContributeToLoans] = useState(treasuryState?.userTreasuryData?.automaticallyContributeToLoans);
     const [autoRepayLoans, setAutoRepayLoans] = useState(treasuryState?.userTreasuryData?.automaticallyRepayLoans);
 
     const onSwitchToggle = async (newAutoRepayLoansSetting, newAutoLoanContributionSetting) => {
-        setModalIsOpen(true);
         setModalIsLoading(true);
         setAutoRepayLoans(newAutoRepayLoansSetting);
         setAutoContributeToLoans(newAutoLoanContributionSetting);
@@ -18,7 +17,6 @@ const TreasuryConfingurationsComponent = (props) => {
             automaticallyContributeToLoans: [newAutoLoanContributionSetting],
             automaticallyRepayLoans: [newAutoRepayLoansSetting]
         });
-        setModalIsOpen(false);
         setModalIsLoading(false);
     };
     

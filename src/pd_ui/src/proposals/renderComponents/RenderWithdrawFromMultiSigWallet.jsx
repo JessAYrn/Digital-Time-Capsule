@@ -4,9 +4,9 @@ import { principalHasProperFormat, fromE8s, toE8s } from "../../functionsAndCons
 import InputBox from "../../components/InputBox";
 import DoneIcon from '@mui/icons-material/Done';
 import ButtonField from "../../components/Button";
-import { Typography } from "@mui/material";
 import { INPUT_BOX_FORMATS } from "../../functionsAndConstants/Constants";
-import { CONTRAST_COLOR } from "../../Theme";
+import { CONTRAST_COLOR, DIVIDER_SX, BACKGROUND_COLOR } from "../../Theme";
+import { Divider } from "@mui/material";
 
 const WithdrawFromMultiSigWallet = (props) => {
     const { onSubmitProposal, action, payload, disabled } = props;
@@ -36,7 +36,7 @@ const WithdrawFromMultiSigWallet = (props) => {
             />
             {!!to && 
                 <>
-                    <Typography varient={"h6"} color={"#bdbdbd"}> {to} </Typography>
+                    <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
                     <InputBox
                         disabled={disabled}
                         width={"100%"}
@@ -54,12 +54,18 @@ const WithdrawFromMultiSigWallet = (props) => {
                 </>
             }
             {isReadyToSubmit && !disabled &&
-            <ButtonField
-                Icon={DoneIcon}
-                color={CONTRAST_COLOR}
-                text={'Submit Proposal'}
-                onClick={submitProposal}
-            />}
+                <>
+                    <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"} position={"fixed"} bottom={"10px"} width={"100%"} >
+                        <ButtonField
+                            Icon={DoneIcon}
+                            color={BACKGROUND_COLOR}
+                            gridSx={{ width: "230px", backgroundColor: CONTRAST_COLOR }}
+                            text={'Submit Proposal'}
+                            onClick={submitProposal}
+                        />
+                    </Grid>
+                </>
+            }
         </Grid>
     );
 };
