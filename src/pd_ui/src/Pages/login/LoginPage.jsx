@@ -65,7 +65,7 @@ const LoginPage = (props) => {
             </Grid>
             <Grid xs={11} md={9} display="flex" justifyContent="center" alignItems="center" paddingBottom={5} paddingTop={0}>
                     <ButtonField
-                    gridSx={{backgroundColor: CONTRAST_COLOR, width: "50%"}}
+                    gridSx={{backgroundColor: CONTRAST_COLOR, width: "50%", height: "50px"}}
                     color={BACKGROUND_COLOR}
                     text={"Login"}
                     onClick={handleLogin}
