@@ -7,8 +7,9 @@ import { getBackendActor } from "../../functionsAndConstants/authentication";
 import { navigationAndApiTypes } from "../../reducers/navigationAndApiReducer";
 import LoginIcon from '@mui/icons-material/Login';
 import { AppContext } from "../../Context";
-import { Paper } from "@mui/material";
 import ButtonField from "../../components/Button";
+import { BACKGROUND_COLOR, CONTRAST_COLOR, DIVIDER_SX } from "../../Theme";
+import Divider from "@mui/material/Divider";
 
 const LoginPage = (props) => {
 
@@ -63,22 +64,17 @@ const LoginPage = (props) => {
                 />
             </Grid>
             <Grid xs={11} md={9} display="flex" justifyContent="center" alignItems="center" paddingBottom={5} paddingTop={0}>
-                <Paper color={'secondary'} sx={{
-                    width: "90px", 
-                    backgroundColor: 
-                    "#343434", 
-                    display:"flex", 
-                    justifyContent:"center",
-                    alignItems:"center",
-                }} >
                     <ButtonField
+                    gridSx={{backgroundColor: CONTRAST_COLOR, width: "50%"}}
+                    color={BACKGROUND_COLOR}
                     text={"Login"}
                     onClick={handleLogin}
                     Icon={LoginIcon}
                     iconSize={'medium'}
                     />
-                </Paper>
             </Grid>
+
+            <Divider sx={{...DIVIDER_SX, marginTop: "60px", marginBottom: "60px"}} />
             <Grid xs={11} md={9} display="flex" flexDirection={"column"} justifyContent="center" alignItems="center" paddingBottom={5} paddingTop={0}>
                 <DataField
                     label={'This DAO Is: '}
@@ -105,6 +101,7 @@ const LoginPage = (props) => {
                     transparentBackground={true}
                 />
             </Grid>
+            <Divider sx={{...DIVIDER_SX, marginTop: "60px", marginBottom: "60px"}} />
             <Grid xs={11} md={9} display="flex" flexDirection={"column"} justifyContent="center" alignItems="center" paddingBottom={5} paddingTop={0}>
                 <DataField
                     label={'Front-end Canister Balance: '}
