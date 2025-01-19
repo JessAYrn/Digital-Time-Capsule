@@ -5,7 +5,7 @@ import { Divider, Typography } from "@mui/material";
 import ButtonField from '../../components/Button';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import RenderBalancesSection from './renderComponents/RenderBalancesSection';
+import RenderBalancesSection from './renderComponents/RenderTreasuryBalancesSection';
 import { copyText } from '../../functionsAndConstants/Utils';
 import RenderNeuronsSection from './renderComponents/renderNeuronsSection/RenderNeuronsSection';
 import { DIVIDER_SX } from '../../Theme';
@@ -49,18 +49,18 @@ const TreasuryTab = () => {
     
 
     return (
-        <Grid columns={12} xs={11} md={9} rowSpacing={0} display="flex" justifyContent="center" alignItems="center" flexDirection={"column"} paddingTop={"15px"}>
+        <Grid columns={12} xs={11} md={9} rowSpacing={0} display="flex" justifyContent="center" alignItems="center" flexDirection={"column"} marginTop={"15px"} marginBottom={"70px"}>
             <RenderBalancesSection/>
             <Divider sx={{...DIVIDER_SX, marginTop: "70px", marginBottom: "70px"}}/>
             <RenderFundingCampaignsSection/>
             <Divider sx={{...DIVIDER_SX, marginTop: "70px", marginBottom: "70px"}}/>
             <RenderNeuronsSection/>
-            <ButtonField
+            {/* <ButtonField
                 gridSx={{marginTop: "20px", marginBottom: "60px"}}
                 text={"View Treasury Account ID"}
                 onClick={openTreasuryAccountIdModal}
                 iconSize={'large'}
-            />
+            /> */}
         </Grid>
     )
 };

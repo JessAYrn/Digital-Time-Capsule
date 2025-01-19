@@ -18,7 +18,7 @@ const InfoToolTip = (props) => {
 
     return (
         <Tooltip title={text} placement={placement} open={open} sx={style} arrow disableFocusListener onClick={Open}>
-            <InfoOutlinedIcon color={color} fontSize="small" style={{fontSize: "17px", paddingLeft: "5px"}}/>
+            <InfoOutlinedIcon fontSize="small" style={{fontSize: "17px", paddingLeft: "5px", color: color}}/>
         </Tooltip>   
     )
 };

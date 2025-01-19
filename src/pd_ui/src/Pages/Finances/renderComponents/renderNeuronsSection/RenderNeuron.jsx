@@ -14,7 +14,7 @@ const RenderNeuron = (props) => {
 
     const { neuronId, neuronData } = props;
 
-    const { contributions } = neuronData;
+    const { contributions, neuronInfo } = neuronData;
 
     const { setModalIsOpen, setModalProps } = useContext(AppContext);
 
@@ -43,7 +43,7 @@ const RenderNeuron = (props) => {
             <Divider sx={{...DIVIDER_SX, marginTop: "60px", marginBottom: "60px"}}/>
             <RenderNeuronContributions contributions={contributions}/>
 
-            <Grid xs={12} width={"100%"} padding={0} display={"flex"} justifyContent={"center"} alignItems={"center"} position={"fixed"} bottom={"10px"}>
+            { !!neuronInfo && <Grid xs={12} width={"100%"} padding={0} display={"flex"} justifyContent={"center"} alignItems={"center"} position={"fixed"} bottom={"10px"}>
                 <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={6} padding={0} >
                     <ButtonField
                         gridSx={{padding: "0px", backgroundColor: CONTRAST_COLOR, width: "170px", height: "44px"}}
@@ -68,7 +68,7 @@ const RenderNeuron = (props) => {
                     })}
                     />
                 </Grid>
-            </Grid>
+            </Grid>}
         </Grid>
     );
 
