@@ -10,7 +10,7 @@ import { AppContext } from "../../Context";
 import ButtonField from "../../components/Button";
 import { BACKGROUND_COLOR, CONTRAST_COLOR, DIVIDER_SX } from "../../Theme";
 import Divider from "@mui/material/Divider";
-
+import Typography from "@mui/material/Typography";
 const LoginPage = (props) => {
 
     const { navigationAndApiDispatch, homePageState, homePageDispatch } = useContext(AppContext);
@@ -55,27 +55,7 @@ const LoginPage = (props) => {
     
     return(
         <Grid container columns={12} xs={12} rowSpacing={8} display="flex" justifyContent="center" alignItems="center" flexDirection={"column"}>
-            <Grid xs={11} md={9} display="flex" justifyContent="center" alignItems="center">
-                <img 
-                    style={{maxWidth: "50vw", maxHeight: "50vh"}}
-                    className={`img`}
-                    src={'P2.svg'}
-                    alt="Logo"
-                />
-            </Grid>
-            <Grid xs={11} md={9} display="flex" justifyContent="center" alignItems="center" paddingBottom={5} paddingTop={0}>
-                    <ButtonField
-                    gridSx={{backgroundColor: CONTRAST_COLOR, width: "50%", height: "50px"}}
-                    color={BACKGROUND_COLOR}
-                    text={"Login"}
-                    onClick={handleLogin}
-                    Icon={LoginIcon}
-                    iconSize={'medium'}
-                    />
-            </Grid>
-
-            <Divider sx={{...DIVIDER_SX, marginTop: "60px", marginBottom: "60px"}} />
-            <Grid xs={11} md={9} display="flex" flexDirection={"column"} justifyContent="center" alignItems="center" paddingBottom={5} paddingTop={0}>
+            <Grid xs={11} md={9} display="flex" flexDirection={"column"} justifyContent="center" alignItems="center"  marginTop={"60px"}>
                 <DataField
                     label={'This DAO Is: '}
                     className={'loginPage'}
@@ -99,6 +79,16 @@ const LoginPage = (props) => {
                     isLoading={isLoading}
                     disabled={true}
                     transparentBackground={true}
+                />
+            </Grid>
+            <Grid xs={12} md={9} display="flex" justifyContent="center" alignItems="center" paddingBottom={5} paddingTop={0} marginTop={"60px"}>
+                <ButtonField
+                gridSx={{backgroundColor: CONTRAST_COLOR, width: "50%", height: "50px"}}
+                color={BACKGROUND_COLOR}
+                text={"Login"}
+                onClick={handleLogin}
+                Icon={LoginIcon}
+                iconSize={'medium'}
                 />
             </Grid>
             <Divider sx={{...DIVIDER_SX, marginTop: "60px", marginBottom: "60px"}} />
@@ -135,6 +125,12 @@ const LoginPage = (props) => {
                     disabled={true}
                     transparentBackground={true}
                 />
+            </Grid>
+            <Grid xs={11} display="flex" justifyContent="center" alignItems="center" padding={0}>
+                <Typography sx={{fontSize: "12px", color: CONTRAST_COLOR}}>
+                    This is a Personal DAO. Get your own soon.
+                </Typography>
+                <img style={{width: "40px", height: "40px", padding: 0, margin: 0}} src={'P2.svg'} alt="Logo"/>
             </Grid>
         </Grid>
     );
