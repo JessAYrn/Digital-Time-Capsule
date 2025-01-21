@@ -11,7 +11,6 @@ import { getFundingCampaignAssetTypeAndValue } from "../../../../functionsAndCon
 const RenderFundingCampaignContributions = (props) => {
 
     const { fundingCampaign } = props;
-    console.log(fundingCampaign);
     const { contributions, amountToFund } = fundingCampaign;
 
     const {homePageState} = useContext(AppContext);

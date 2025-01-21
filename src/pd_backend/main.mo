@@ -45,7 +45,7 @@ shared actor class User() = this {
     private var requestsForAccessMap: MainTypes.RequestsForAccessMap = HashMap.fromIter(Iter.fromArray(requestsForAccess), Iter.size(Iter.fromArray(requestsForAccess)), Text.equal, Text.hash);
     private stable var proposalIndex: Nat = 0;
     private stable var proposalsArray_v2: MainTypes.Proposals_V2 = [];
-    private stable var frontEndCanisterBalance: Nat = 1;
+    private stable var uiCanisterBalance: Nat = 1;
     private stable var quorum: Float = 0.125;
     private var maxNumberDaoMembers : Nat = 250;
     private stable var costToEnterDao: Nat64 = 0;
@@ -177,6 +177,16 @@ shared actor class User() = this {
         let result = await TxHelperMethods.transferICP(caller, userProfilesMap_v2, amount, accountId); return result;
     };
 
+    public shared({caller}) func transferICPFromTreasuryAccountToTreasuryAccount(amount: Nat64, recipientTreasurySubaccount: Blob) : async {amountSent: Nat64} {
+        let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v4.treasuryCanisterPrincipal);          
+        let result = await treasuryCanister.transferICP(
+            amount, 
+            {identifier = #Principal(Principal.toText(caller)); accountType = #UserTreasuryData}, 
+            {owner = Principal.fromText(daoMetaData_v4.treasuryCanisterPrincipal); subaccount = ?recipientTreasurySubaccount; accountType = #UserTreasuryData}
+        );
+        return result;
+    };
+
 
     public composite query({caller}) func readTransaction() : async Result.Result<[(Nat, JournalTypes.Transaction)], JournalTypes.Error> {
         let result = userProfilesMap_v2.get(caller);
@@ -266,41 +276,40 @@ shared actor class User() = this {
         await CanisterManagementMethods.requestEntryToDao(caller, daoIsPublic, Principal.fromActor(this), costToEnterDao, daoMetaData_v4, requestsForAccessMap);
     };
 
-    public composite query func getDaoPublicData() : async MainTypes.DaoPublicData{
-        let currentCyclesBalance_backend = Cycles.balance();
-        let managerCanister: Manager.Manager = actor(daoMetaData_v4.managerCanisterPrincipal);
-        let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v4.treasuryCanisterPrincipal);
-        let currentCyclesBalance_frontend  = frontEndCanisterBalance;
-        let currentCyclesBalance_treasury = await treasuryCanister.getCyclesBalance();
-        let currentCyclesBalance_manager = await managerCanister.getCyclesBalance();
+    public query func getDaoPublicData() : async MainTypes.DaoPublicData{
         let daoFounder = if(daoMetaData_v4.founder == "Null"){ "No Founder Declared Yet"} else {
             switch(userProfilesMap_v2.get(Principal.fromText(daoMetaData_v4.founder))){
                 case(?{userName}){ userName };
                 case null { daoMetaData_v4.founder }
             }
         };
-        return {currentCyclesBalance_backend; currentCyclesBalance_frontend; currentCyclesBalance_manager; currentCyclesBalance_treasury; daoFounder; costToEnterDao; daoIsPublic};
+        return {daoFounder; costToEnterDao; daoIsPublic};
     };
 
     public composite query({caller}) func getCanisterData() : async Result.Result<(MainTypes.CanisterDataExport), JournalTypes.Error> {
         if(daoMetaData_v4.founder != "Null") { switch(userProfilesMap_v2.get(caller)){case null { return #err(#NotAuthorized) }; case(?_){}}; };
+        
         let managerCanister : Manager.Manager = actor(daoMetaData_v4.managerCanisterPrincipal);
         let treasuryCanister: Treasury.Treasury = actor(daoMetaData_v4.treasuryCanisterPrincipal);
-        let neuronsDataArray = await treasuryCanister.getNeuronsDataArray();
-        let profilesMetaData = CanisterManagementMethods.getProfilesMetaData(userProfilesMap_v2);
-        let currentVersions = await managerCanister.getCurrentVersions();
+        let {currentVersionInstalled; currentVersionLoaded} = await managerCanister.getCurrentVersions();
+
         let canisterDataPackagedForExport = {
             daoMetaData_v4 with 
-            proposals = GovernanceHelperMethods.tallyAllProposalVotes({proposals = proposalsMap_v2; neuronsDataArray; userProfilesMap = userProfilesMap_v2;});
+            proposals = GovernanceHelperMethods.tallyAllProposalVotes({proposals = proposalsMap_v2; neuronsDataArray = await treasuryCanister.getNeuronsDataArray(); userProfilesMap = userProfilesMap_v2;});
             isAdmin = CanisterManagementMethods.getIsAdmin(caller, daoMetaData_v4);
-            currentCyclesBalance_backend = Cycles.balance();
             journalCount = userProfilesMap_v2.size();
-            profilesMetaData;
-            releaseVersionInstalled = currentVersions.currentVersionInstalled.number;
-            releaseVersionLoaded = currentVersions.currentVersionLoaded.number;
+            profilesMetaData = CanisterManagementMethods.getProfilesMetaData(userProfilesMap_v2);
+            releaseVersionInstalled = currentVersionInstalled.number;
+            releaseVersionLoaded = currentVersionLoaded.number;
             requestsForAccess = Iter.toArray(requestsForAccessMap.entries());
             costToEnterDao;
             daoIsPublic;
+            cyclesBalances = {
+                ui = uiCanisterBalance;
+                treasury = await treasuryCanister.getCyclesBalance();
+                manager = await managerCanister.getCyclesBalance();
+                api = Cycles.balance();
+            }
         };
         return #ok(canisterDataPackagedForExport);
     };
@@ -409,7 +418,7 @@ shared actor class User() = this {
 
     private func heartBeat_hourly(): async () {
         let {cycles} = await ic.canister_status({ canister_id = Principal.fromText(daoMetaData_v4.frontEndPrincipal) });
-        frontEndCanisterBalance := cycles;
+        uiCanisterBalance := cycles;
     };
 
     public shared({caller}) func createProposal(action: MainTypes.ProposalActions_V2): async Result.Result<(MainTypes.Proposals_V2),MainTypes.Error>{
@@ -472,7 +481,7 @@ shared actor class User() = this {
             let quorumHasBeenReached = participationRate >= quorum;
             let percentageOfTotalVotingPowerVotingYes = FloatX.divideNat64(yay, totalVotingPower);
             let percentageOfTotalVotingPowerVotingNo = FloatX.divideNat64(nay, totalVotingPower);
-            let canFinalize = percentageOfTotalVotingPowerVotingYes > 0.5 or percentageOfTotalVotingPowerVotingNo > 0.5 or (votingPeriodHasEnded and quorumHasBeenReached);
+            let canFinalize = percentageOfTotalVotingPowerVotingYes > 0.5 or percentageOfTotalVotingPowerVotingNo > 0.5 or (votingPeriodHasEnded);
             var executed: Bool = false;
             var finalized: Bool = false;
             var action = proposal.action;
@@ -480,7 +489,7 @@ shared actor class User() = this {
             if(canFinalize){
                 finalized := true;
                 timeVotingPeriodEnds := Time.now();
-                if( yay > nay){
+                if( yay > nay and quorumHasBeenReached){
                         switch(await executeProposal(proposal)){
                             case null {};
                             case(?{amountSent}){ 
@@ -670,7 +679,7 @@ shared actor class User() = this {
         ignore recurringTimer<system>(#seconds (24 * 60 * 60), heartBeat_unshared);
         ignore recurringTimer<system>(#seconds (3 * 60 * 60), finalizeAllEligibleProposals);
         ignore recurringTimer<system>(#seconds (24 * 60 * 60), heartBeat_hourly);
-        // ignore recurringTimer<system>(#seconds (30), updateUsersTxHistory);
+        ignore recurringTimer<system>(#seconds (30), updateUsersTxHistory);
 
     };
 }

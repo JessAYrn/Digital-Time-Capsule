@@ -71,7 +71,7 @@ const RenderProposals = () => {
 
             <CarouselComponent 
                 title={"Proposals"} 
-                defaultComponent={<Typography textAlign={"center"} component={"There are currently no active proposals"} />} 
+                defaultComponent={<Typography textAlign={"center"} >There are currently no active proposals</Typography>} 
                 sx={{padding: "0px"}}
             >
                 {activeProposals.map((proposal) => { return <PreviewProposal proposal={proposal} onViewProposal={() => viewProposal(proposal, false)} /> })}

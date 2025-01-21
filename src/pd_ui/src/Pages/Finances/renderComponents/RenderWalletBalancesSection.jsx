@@ -27,7 +27,7 @@ const RenderBalances = () => {
     const [chartDataSetTimeFrame, setChartDataSetTimeFrame] = useState(GRAPH_DATA_SET_TIMEFRAMES.month);
 
     const walletBalances = {
-        [GRAPH_DISPLAY_LABELS.icp]: round2Decimals(fromE8s( walletState?.walletData?.balances?.icp || 0))
+        [GRAPH_DISPLAY_LABELS.icp]: round2Decimals(fromE8s( walletState?.walletData?.balance || 0))
     };
 
     const {chartLabels, chartDataSets} = useMemo(() => {

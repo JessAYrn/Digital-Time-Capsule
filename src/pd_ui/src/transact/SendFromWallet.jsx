@@ -19,6 +19,8 @@ const SendFromWallet = (props) => {
 
     const [recipientAddress_, setRecipientAddress_] = useState(recipientAddress || "");
     const [amount_, setAmount_] = useState(amount || 0);
+    const [hasError_1, setHasError_1] = useState(true);
+    const [hasError_2, setHasError_2] = useState(true);
 
     const { walletState, navigationAndApiState, setModalIsOpen, setModalIsLoading, setModalProps } = useContext(AppContext);
 
@@ -39,7 +41,6 @@ const SendFromWallet = (props) => {
             const e8s = toE8s(amount);
             const accountId = fromHexString(recipientAddress);
             const result = await navigationAndApiState.backendActor.transferICP(e8s, accountId);
-            console.log(result);
             setModalIsLoading(false);
             setModalIsOpen(false);
             if("err" in result){
@@ -119,15 +120,21 @@ const SendFromWallet = (props) => {
         });
     }
 
-    const onChangeRecipientAddress = (e) => { setRecipientAddress_(e.target.value); };
+    const onChangeRecipientAddress = (e) => { 
+        setRecipientAddress_(e.target.value); 
+        setHasError_1(!icpWalletAddressHasProperFormat(e.target.value) && !principalHasProperFormat(e.target.value));
+    };
 
-    const onChangeAmount = (e) => { setAmount_(parseFloat(e.target.value)); };
+    const onChangeAmount = (e) => { 
+        const parsedAmount = parseFloat(e.target.value);
+        setAmount_(parsedAmount); 
+        setHasError_2(!parsedAmount || !isANumber(parsedAmount));
+    };
 
-    const {hasError_1, hasError_2} = useMemo(() => {
-        const hasError_1 = !recipientAddress_  || (!icpWalletAddressHasProperFormat(recipientAddress_) && !principalHasProperFormat(recipientAddress_));
-        const hasError_2 = !amount_ || !isANumber(amount_);
-        return {hasError_1, hasError_2};
-    }, [recipientAddress_, amount_]);
+    const onClickMax = () => {
+        setAmount_( fromE8s(parseFloat(walletState.walletData.balance)));
+        setHasError_2(false);
+    }
 
     return (
         <Grid display={'flex'} flexDirection={'column'} justifyContent={'center'} alignItems={'center'} width={"100%"}> 
@@ -177,6 +184,7 @@ const SendFromWallet = (props) => {
                     maxDecimalPlaces={8}
                     format={INPUT_BOX_FORMATS.numberFormat}
                     width={"100%"}
+                    ButtonComponent={ <ButtonField text={"Max"} onClick={onClickMax} color={CONTRAST_COLOR} transparentBorder={true} transparentBackground={true}/> }
                     />
                 </Grid>
             </>

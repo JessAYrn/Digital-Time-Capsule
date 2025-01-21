@@ -31,8 +31,6 @@ const RenderFundingCampaignsSection = () => {
         return {activeFundingCampaigns, inactiveFundingCampaigns};
     }, [fundingCampaigns]);
 
-    console.log(activeFundingCampaigns);
-
     const onViewConcludedCampaigns = () => {
         setModalIsOpen(true);
         setModalProps({ 

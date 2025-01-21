@@ -1,9 +1,7 @@
 import React, { useContext} from "react";
 import { AppContext } from "../../Context";
-import TransactWithTreasuryModal from "../../wallet/renderComponents/TransactWithTreasury";
 import CreateProposalForm from "../../proposals/CreateProposalForm";
 import Grid from "@mui/material/Unstable_Grid2";
-import TransactWithWalletModal from "../../wallet/WalletModal";
 import Typography from "@mui/material/Typography";
 import ButtonField from "../Button";
 import { BACKGROUND_COLOR, CONTRAST_COLOR } from "../../Theme";
@@ -16,8 +14,8 @@ const ActionButton = (props) => {
 
     const coordinates = { x:0, y:0 };
 
-    const show = () => {  console.log("show"); styleApi.start({top: 0}); };
-    const hide = () => { console.log("hide"); styleApi.start({top: 100}) };
+    const show = () => {  styleApi.start({top: 0}); };
+    const hide = () => { styleApi.start({top: 100}) };
 
     const [style, styleApi] = useSpring(() => ({ from: { top: 0 } }), []);
 
@@ -29,31 +27,7 @@ const ActionButton = (props) => {
         }
     });
 
-    const { setModalProps, setModalIsOpen } = useContext(AppContext);
-
-    const openTransactWithTreasuryForm = () => {
-        setModalIsOpen(true);
-        setModalProps({
-            flexDirection: "column",
-            fullScreen: true,
-            headerComponent: <Typography padding={"10px"} variant='h6' children={""} />,
-            components: [ 
-                <Typography padding={"10px"} variant='h6' children={"TRANSACT WITH TREASURY"} />,
-                <TransactWithTreasuryModal/>
-            ],
-        });
-    };
-
-    const openTransactWithWallerForm = () => {
-      setModalIsOpen(true);
-      setModalProps({
-            flexDirection: "column",
-            components: [ 
-                <Typography padding={"10px"} variant='h6' children={"TRANSACT WITH WALLET"} />,
-                <TransactWithWalletModal/>
-            ],
-      });
-  };
+const { setModalProps, setModalIsOpen } = useContext(AppContext);
 
   const openTransactOptions = () => {
     setModalIsOpen(true);

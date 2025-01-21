@@ -91,7 +91,13 @@ module{
         releaseVersionInstalled: Nat;
         requestsForAccess: RequestsForAccess;
         costToEnterDao: Nat64;
-        daoIsPublic: Bool
+        daoIsPublic: Bool;
+        cyclesBalances: {
+            ui: Nat;
+            api: Nat;
+            treasury: Nat;
+            manager: Nat;
+        }
     };
 
     public type DaoMetaData_V4 = {
@@ -115,10 +121,6 @@ module{
     public type RequestsForAccessMap = HashMap.HashMap<Text, RequestForAccess>;
 
     public type DaoPublicData = {
-        currentCyclesBalance_backend: Nat;
-        currentCyclesBalance_frontend: Nat;
-        currentCyclesBalance_manager: Nat;
-        currentCyclesBalance_treasury: Nat;
         daoIsPublic: Bool;
         daoFounder: Text;
         costToEnterDao: Nat64;

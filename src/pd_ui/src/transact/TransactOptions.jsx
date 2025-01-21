@@ -9,11 +9,8 @@ import { AppContext } from "../Context";
 import SendFromWallet from "./SendFromWallet";
 import Typography from "@mui/material/Typography";
 import RenderReceiveToWallet from "./RenderReceiveToWallet";
-import ReceiveToWallet from "./ReceiveToWallet";
-// import DepositFromWalletToTreasury from "./DepositFromWalletToTreasury";
-// import WithdrawFromTreasuryToWallet from "./WithdrawFromTreasuryToWallet";
-// import TransferFromTreasuryToOtherUser from "./TransferFromTreasuryToOtherUser";
-// import PurchaseMoreICP from "./PurchaseMoreICP";
+import RenderTransactWithTreasury, {ACTIONS} from "./RenderTransactWithTreasury";
+import RenderBuyCrypto from "./RenderBuyCrypto";
 
 
 const TransactOptions = () => {
@@ -48,30 +45,67 @@ const TransactOptions = () => {
         });
     };
 
-    const onDepositFromWalletToTreasury = () => { console.log("Deposit from Wallet To Treasury"); };
+    const onDepositFromWalletToTreasury = () => { 
+        setModalIsOpen(true);
+        setModalProps({
+            components: [<RenderTransactWithTreasury action={ACTIONS.DEPOSIT}/>],
+            fullScreen: true,
+            headerComponent: <Typography variant="h6">Deposit from Wallet to Treasury</Typography>,
+            handleReturn: returnToTransactOptions
+        });
+    };
 
-    const onWithdrawFromTreasuryToWallet = () => { console.log("Withdraw from Treasury To Wallet"); };
+    const onWithdrawFromTreasuryToWallet = () => { 
+        setModalIsOpen(true);
+        setModalProps({
+            components: [<RenderTransactWithTreasury action={ACTIONS.WITHDRAW}/>],
+            fullScreen: true,
+            headerComponent: <Typography variant="h6">Withdraw from Treasury to Wallet</Typography>,
+            handleReturn: returnToTransactOptions
+        });
+    };
 
-    const onTransferFromTreasuryToOtherUser = () => { console.log("Transfer from Treasury To Other User"); };
+    const onTransferFromTreasuryToOtherUser = () => { 
+        setModalIsOpen(true);
+        setModalProps({
+            components: [<RenderTransactWithTreasury action={ACTIONS.TRANSFER}/>],
+            fullScreen: true,
+            headerComponent: <Typography variant="h6">Transfer from Treasury to Other User</Typography>,
+            handleReturn: returnToTransactOptions
+        });
+    };
 
-    const onPurchaseMoreICP = () => { console.log("Purchase More $ICP"); };
+    const onPurchaseMoreICP = () => { 
+        setModalIsOpen(true);
+        setModalProps({
+            components: [<RenderBuyCrypto/>],
+            fullScreen: true,
+            headerComponent: <Typography variant="h6">Purchase More $ICP</Typography>,
+            handleReturn: returnToTransactOptions
+        });
+    };
 
     return (
         <Grid xs={12} md={9} display="flex" flexDirection={"column"} justifyContent="center" alignItems="center" >
             <Typography variant="h6" sx={{color: CONTRAST_COLOR, marginBottom: "10px"}}>Wallet</Typography>
             <ButtonField transparentBorder={true} color={WHITE_COLOR} transparentBackground={true} Icon={KeyboardArrowRightIcon} text={"Send from Your Wallet"} onClick={onSendFromWallet} gridSx={{ width: "100%"}} sx={{width: "100%"}}/>
             <Divider sx={{...DIVIDER_SX}} />
+
             <ButtonField transparentBorder={true} color={WHITE_COLOR} transparentBackground={true} Icon={KeyboardArrowRightIcon} text={"Receive to Your Wallet"} onClick={onReceiveToWallet} gridSx={{ width: "100%"}} sx={{width: "100%"}}/>
             <Divider sx={{...DIVIDER_SX,  marginBottom: "30px"}} />
+
             <Typography variant="h6" sx={{color: CONTRAST_COLOR, marginBottom: "10px"}}>Treasury</Typography>
-            <ButtonField transparentBorder={true} color={WHITE_COLOR} transparentBackground={true} Icon={KeyboardArrowRightIcon} text={"Deposit from Your Wallet To Your Treasury Account"} gridSx={{ width: "100%"}} sx={{width: "100%"}}/>
+            <ButtonField transparentBorder={true} color={WHITE_COLOR} transparentBackground={true} Icon={KeyboardArrowRightIcon} text={"Deposit from Your Wallet To Your Treasury Account"} onClick={onDepositFromWalletToTreasury} gridSx={{ width: "100%"}} sx={{width: "100%"}}/>
             <Divider sx={{...DIVIDER_SX}} />
-            <ButtonField transparentBorder={true} color={WHITE_COLOR} transparentBackground={true} Icon={KeyboardArrowRightIcon} text={"Withdraw from Your Treasury Account To Your Wallet"} gridSx={{ width: "100%"}} sx={{width: "100%"}}/>
+
+            <ButtonField transparentBorder={true} color={WHITE_COLOR} transparentBackground={true} Icon={KeyboardArrowRightIcon} text={"Withdraw from Your Treasury Account To Your Wallet"} onClick={onWithdrawFromTreasuryToWallet} gridSx={{ width: "100%"}} sx={{width: "100%"}}/>
             <Divider sx={{...DIVIDER_SX}} />
-            <ButtonField transparentBorder={true} color={WHITE_COLOR} transparentBackground={true} Icon={KeyboardArrowRightIcon} text={"Transfer from Your Treasury Account To Other User's Treasury Account"} gridSx={{ width: "100%"}} sx={{width: "100%"}}/>
+
+            <ButtonField transparentBorder={true} color={WHITE_COLOR} transparentBackground={true} Icon={KeyboardArrowRightIcon} text={"Transfer from Your Treasury Account To Other User's Treasury Account"} onClick={onTransferFromTreasuryToOtherUser} gridSx={{ width: "100%"}} sx={{width: "100%"}}/>
             <Divider sx={{...DIVIDER_SX,  marginBottom: "30px"}} />
+
             <Typography variant="h6" sx={{color: CONTRAST_COLOR, marginBottom: "10px"}}>Purchase</Typography>
-            <ButtonField transparentBorder={true} color={WHITE_COLOR} transparentBackground={true} Icon={KeyboardArrowRightIcon} text={"Buy More $ICP"} gridSx={{ width: "100%"}} sx={{width: "100%"}}/>
+            <ButtonField transparentBorder={true} color={WHITE_COLOR} transparentBackground={true} Icon={KeyboardArrowRightIcon} text={"Buy More $ICP"} onClick={onPurchaseMoreICP} gridSx={{ width: "100%"}} sx={{width: "100%"}}/>
         </Grid>
     )
 }

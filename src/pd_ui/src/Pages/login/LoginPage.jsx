@@ -34,19 +34,13 @@ const LoginPage = (props) => {
     useEffect(async () => {
         setIsLoading(true);
         const {actor} = await getBackendActor({anon: true});
-        const {
-            currentCyclesBalance_backend, currentCyclesBalance_frontend, currentCyclesBalance_treasury, currentCyclesBalance_manager,daoFounder, costToEnterDao, daoIsPublic
-        } = await actor.getDaoPublicData();
+        const { daoFounder, costToEnterDao, daoIsPublic } = await actor.getDaoPublicData();
         actor.heartBeat();
         homePageDispatch({
             payload: {
                 daoFounder,
                 costToEnterDao: fromE8s(parseInt(costToEnterDao)),
                 daoIsPublic,
-                currentCyclesBalance_backend: parseInt(currentCyclesBalance_backend),
-                currentCyclesBalance_frontend: parseInt(currentCyclesBalance_frontend),
-                currentCyclesBalance_treasury: parseInt(currentCyclesBalance_treasury),
-                currentCyclesBalance_manager: parseInt(currentCyclesBalance_manager)
             },
             actionType: homePageTypes.SET_DAO_PUBLIC_DATA
         });
@@ -83,50 +77,15 @@ const LoginPage = (props) => {
             </Grid>
             <Grid xs={12} md={9} display="flex" justifyContent="center" alignItems="center" paddingBottom={5} paddingTop={0} marginTop={"60px"}>
                 <ButtonField
-                gridSx={{backgroundColor: CONTRAST_COLOR, width: "50%", height: "50px"}}
+                gridSx={{backgroundColor: CONTRAST_COLOR, width: "200px", height: "50px"}}
                 color={BACKGROUND_COLOR}
-                text={"Login"}
+                text={"Enter"}
                 onClick={handleLogin}
                 Icon={LoginIcon}
                 iconSize={'medium'}
                 />
             </Grid>
-            <Divider sx={{...DIVIDER_SX, marginTop: "60px", marginBottom: "60px"}} />
-            <Grid xs={11} md={9} display="flex" flexDirection={"column"} justifyContent="center" alignItems="center" paddingBottom={5} paddingTop={0}>
-                <DataField
-                    label={'Front-end Canister Balance: '}
-                    className={'loginPage'}
-                    text={`${round2Decimals(inTrillions(homePageState.daoPublicData.currentCyclesBalance_frontend))} T`}
-                    isLoading={isLoading}
-                    disabled={true}
-                    transparentBackground={true}
-                />
-                <DataField
-                    label={'Back-end Canister Balance: '}
-                    className={'loginPage'}
-                    text={`${round2Decimals(inTrillions(homePageState.daoPublicData.currentCyclesBalance_backend))} T`}
-                    isLoading={isLoading}
-                    disabled={true}
-                    transparentBackground={true}
-                />
-                <DataField
-                    label={'Treasury Canister Balance: '}
-                    className={'loginPage'}
-                    text={`${round2Decimals(inTrillions(homePageState.daoPublicData.currentCyclesBalance_treasury))} T`}
-                    isLoading={isLoading}
-                    disabled={true}
-                    transparentBackground={true}
-                />
-                <DataField
-                    label={'Manager Canister Balance: '}
-                    className={'loginPage'}
-                    text={`${round2Decimals(inTrillions(homePageState.daoPublicData.currentCyclesBalance_manager))} T`}
-                    isLoading={isLoading}
-                    disabled={true}
-                    transparentBackground={true}
-                />
-            </Grid>
-            <Grid xs={11} display="flex" justifyContent="center" alignItems="center" padding={0}>
+            <Grid xs={11} display="flex" justifyContent="center" alignItems="center" padding={0} position={"fixed"} bottom={"10px"}>
                 <Typography sx={{fontSize: "12px", color: CONTRAST_COLOR}}>
                     This is a Personal DAO. Get your own soon.
                 </Typography>

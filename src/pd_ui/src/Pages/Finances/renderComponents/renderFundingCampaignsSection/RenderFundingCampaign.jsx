@@ -13,10 +13,9 @@ import { DIVIDER_SX } from "../../../../Theme";
 
 const RenderFundingCampaign = (props) => {
     const { fundingCampaign, campaignId } = props;
-    const { contributions, terms, settled, funded } = fundingCampaign;
+    const {  terms, settled, funded } = fundingCampaign;
     const {setModalIsOpen, setModalProps, homePageState } = useContext(AppContext);
 
-    console.log(fundingCampaign);
 
     const {
         amountToFund,
@@ -72,7 +71,6 @@ const RenderFundingCampaign = (props) => {
         setModalIsOpen(true);
     };
     
-    console.log(contributions);
     
     return (
         <>

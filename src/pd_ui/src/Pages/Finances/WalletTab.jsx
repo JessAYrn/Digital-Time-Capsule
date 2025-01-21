@@ -14,8 +14,6 @@ const WalletTab = (props) => {
 
     const { walletState, setModalIsOpen, setModalProps } = useContext(AppContext);
 
-    console.log("walletState:", walletState);
-
     const onViewTxHistory = () => {
         setModalIsOpen(true);
         setModalProps({
