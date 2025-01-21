@@ -1,7 +1,7 @@
 import React from 'react';
 import { QrReader } from 'react-qr-reader';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
-import ButtonField from '../../components/Button';
+import ButtonField from '../components/Button';
 import { Typography } from '@mui/material';
 
 const QrReaderContent = (props) => {

@@ -5,7 +5,7 @@ import InputBox from "../components/InputBox";
 import { icpWalletAddressHasProperFormat, principalHasProperFormat, isANumber, round8Decimals, shortenHexString, fromHexString, fromE8s, toE8s  } from "../functionsAndConstants/Utils";
 import ButtonField from "../components/Button";
 import CenterFocusWeakIcon from '@mui/icons-material/CenterFocusWeak';
-import QrReaderContent from "../wallet/renderComponents/ScanQrCodeModal";
+import QrReaderContent from "./ScanQrCodeModal";
 import { INPUT_BOX_FORMATS, e8sInOneICP } from "../functionsAndConstants/Constants";
 import DataField from "../components/DataField";
 import { BACKGROUND_COLOR, WHITE_COLOR, CONTRAST_COLOR, DIVIDER_SX } from "../Theme";
