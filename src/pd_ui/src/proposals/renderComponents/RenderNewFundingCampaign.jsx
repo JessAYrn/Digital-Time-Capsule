@@ -173,10 +173,10 @@ const NewFundingCampaign = (props) => {
                         allowNegative={false}
                         suffix={` ${amountToFund.type.toUpperCase()}`}
                         value={amountToFund.value}
-                        parseNumber={parseFloat}
-                        onChange={(value) => {
-                            setHasError_1(value === "NaN" || value === NaN || value === "" || value === 0);
-                            setAmountToFund({...amountToFund, value});
+                        onChange={(e) => {
+                            const parsedValue = parseFloat(e.target.value);
+                            setHasError_1(parsedValue === "NaN" || parsedValue === NaN || parsedValue === "" || parsedValue === 0);
+                            setAmountToFund({...amountToFund, value: parsedValue});
                         }}
                     /> 
                     <InfoToolTip 
@@ -199,9 +199,9 @@ const NewFundingCampaign = (props) => {
                         format={INPUT_BOX_FORMATS.noFormat}
                         value={description}
                         rows={5}
-                        onChange={(value) => {
-                            setHasError_2(!value.length);
-                            setDescription(value);
+                        onChange={(e) => {
+                            setHasError_2(!e.target.value.length);
+                            setDescription(e.target.value);
                         }}
                     />
                     <InfoToolTip 
@@ -251,14 +251,12 @@ const NewFundingCampaign = (props) => {
                             format={INPUT_BOX_FORMATS.numberFormat}
                         allowNegative={false}
                         maxDecimalPlaces={0}
-                        parseNumber={parseInt}
-                        maxValue={30}
-                        omitMaxValueButton={true}
                         suffix={" days"}
                         value={paymentIntervalsInDays}
-                        onChange={(value) => {
-                            setHasError_3(value > 30 || value === "NaN" || value === NaN || value === "" || value === 0);
-                            setPaymentIntervalsInDays(value);
+                        onChange={(e) => {
+                            const parsedValue = parseInt(e.target.value);
+                            setHasError_3(parsedValue > 30 || parsedValue === "NaN" || parsedValue === NaN || parsedValue === "" || parsedValue === 0);
+                            setPaymentIntervalsInDays(parsedValue);
                         }}
                     />
                     <InfoToolTip 
@@ -282,11 +280,11 @@ const NewFundingCampaign = (props) => {
                                 format={INPUT_BOX_FORMATS.numberFormat}
                                 allowNegative={false}
                                 value={paymentAmounts.value}
-                                parseNumber={parseFloat}
                                 suffix={` ${paymentAmounts.type.toUpperCase()}`}
-                                onChange={(value) => {
-                                    setHasError_4(value === "NaN" || value === NaN || value === "" || value === 0);
-                                    setPaymentAmounts({...paymentAmounts, value});
+                                onChange={(e) => {
+                                    const parsedValue = parseFloat(e.target.value);
+                                    setHasError_4(parsedValue === "NaN" || parsedValue === NaN || parsedValue === "" || parsedValue === 0);
+                                    setPaymentAmounts({...paymentAmounts, value: parsedValue});
                                 }}
                             />
                             <InfoToolTip
@@ -311,11 +309,11 @@ const NewFundingCampaign = (props) => {
                             format={INPUT_BOX_FORMATS.numberFormat}
                             allowNegative={false}
                             value={initialLoanInterestAmount.value}
-                            parseNumber={parseFloat}
                             suffix={` ${initialLoanInterestAmount.type.toUpperCase()}`}
-                            onChange={(value) => {
-                                setHasError_5(value === "NaN" || value === NaN || value === "" || value === 0);
-                                setInitialLoanInterestAmount({...initialLoanInterestAmount, value});
+                            onChange={(e) => {
+                                const parsedValue = parseFloat(e.target.value);
+                                setHasError_5(parsedValue === "NaN" || parsedValue === NaN || parsedValue === "" || parsedValue === 0);
+                                setInitialLoanInterestAmount({...initialLoanInterestAmount, value: parsedValue});
                             }}
                         />
                         <InfoToolTip
@@ -399,11 +397,11 @@ const NewFundingCampaign = (props) => {
                             format={INPUT_BOX_FORMATS.numberFormat}
                             allowNegative={false}
                             value={initialCollateralLocked.value}
-                            parseNumber={parseFloat}
                             suffix={` ${initialCollateralLocked.type.toUpperCase()}`}
-                            onChange={(value) => {
-                                setHasError_6(`${value}` === "NaN" || value === NaN || value === "" || value === 0 || value > avaiableStake);
-                                setInitialCollateralLocked({...initialCollateralLocked, value});
+                            onChange={(e) => {
+                                const parsedValue = parseFloat(e.target.value);
+                                setHasError_6(parsedValue === "NaN" || parsedValue === NaN || parsedValue === "" || parsedValue === 0 || parsedValue > avaiableStake);
+                                setInitialCollateralLocked({...initialCollateralLocked, value: parsedValue});
                             }}
                         />
                         <InfoToolTip

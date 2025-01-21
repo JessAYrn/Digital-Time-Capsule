@@ -45,11 +45,10 @@ const AddLiquidityOrRepayFundingCampaign = (props) => {
                 label={actionType === ACTION_TYPES.addLiquidity ? "Amount of ICP to Add" : "Amount of ICP to Repay"}
                 placeHolder={"0 ICP"}
                 format={INPUT_BOX_FORMATS.numberFormat}
-                onChange={(value) => { setHasError(!value); setAmount(value); }}
+                onChange={(e) => { setHasError(!value); setAmount(parseFloat(e.target.value)); }}
                 hasError={hasError}
                 allowNegative={false}
                 maxDecimalPlaces={8}
-                parseNumber={parseFloat}
                 width={"100%"}
                 value={amount}
                 suffix={" ICP"}

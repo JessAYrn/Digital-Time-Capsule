@@ -6,10 +6,7 @@ import { Typography } from '@mui/material';
 
 const QrReaderContent = (props) => {
 
-    const {
-        setRecipientAddress,
-        setShowQrReader
-    } = props;
+    const { onCloseQrReader } = props;
 
     return(
         <Grid width={"100%"}>
@@ -17,22 +14,15 @@ const QrReaderContent = (props) => {
             <QrReader
                 constraints = {{ facingMode: "environment" }}
                 onResult={(result, error) => {
-                    if (!!result) {
-                        setRecipientAddress(result?.text);
-                        setShowQrReader(false)
-                    }
-
-                    if (!!error) {
-                        console.info(error);
-                    }
-                    }}
-                    style={{ height: '50%' }}
-            />
-            <ButtonField
-                text={'Cancel'}
-                className={'qrCancelButtonDiv'}
-                onClick={() => setShowQrReader(false)}
-            />
+                    if (!!result) { onCloseQrReader({recipientAddress: result?.text}); }
+                    if (!!error) { console.info(error); }
+                }}
+                style={{ height: '50%' }}
+                />
+                <ButtonField
+                    text={'Cancel'}
+                    onClick={onCloseQrReader}
+                />
         </Grid>
     )
 };

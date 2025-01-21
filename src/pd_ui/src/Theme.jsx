@@ -246,6 +246,13 @@ const theme = createTheme({
           }
         }
       },
+      MuiTextField: {
+        styleOverrides: {
+          root: {
+            backgroundColor: BACKGROUND_COLOR,
+          }
+        }
+      }
     },
 });
 

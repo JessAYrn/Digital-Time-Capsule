@@ -88,8 +88,10 @@ const RenderBalances = () => {
         <>
             <Grid xs={12} width={"100%"} display={"flex"} justifyContent={"center"} flexDirection={"column"} alignItems={"center"} padding={0}>
                 <Grid xs={12}  width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} padding={0}>
-                    <MenuField label={currencyDataSetName} xs={6} display={"flex"} alignItems={"left"} justifyContent={"left"} color={"primary"} menuItemProps={currencyMenuItemProps} MenuIcon={KeyboardArrowDownIcon}/>
-                    <ButtonField transparentBorder={true} color={WHITE_COLOR} transparentBackground={true} Icon={TuneIcon} onClick={openTreasuryConfigurationsPage} gridSx={{ width: "100%", alignItems: "right", justifyContent:"right" }}/>
+                    <MenuField sx={{width: "100%"}} label={currencyDataSetName} xs={6} display={"flex"} alignItems={"left"} justifyContent={"left"} color={"primary"} menuItemProps={currencyMenuItemProps} MenuIcon={KeyboardArrowDownIcon}/>
+                    <Grid xs={6} display={"flex"} alignItems={"right"} justifyContent={"right"} width={"100%"}>
+                        <ButtonField transparentBorder={true} color={WHITE_COLOR} transparentBackground={true} Icon={TuneIcon} onClick={openTreasuryConfigurationsPage}/>
+                    </Grid>
                 </Grid>
                 <Grid xs={12}  width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} padding={0}>
                     <Grid xs={6} width={"100%"} display={"flex"} justifyContent={"left"} alignItems={"center"}>

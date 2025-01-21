@@ -94,10 +94,9 @@ const IncreaseDissolveDelay = (props) => {
                     disabled={disabled}
                     label={"Additional Dissolve Delay Days"}
                     placeHolder={`Max: ${secondsToDays(maxAdditionalDissolveDelaySeconds)} Days`}
-                    onChange={(value) => { setHasError(!value || daysToSeconds(value) > maxAdditionalDissolveDelaySeconds); setAdditionalDissolveDelaySeconds(daysToSeconds(value)); }}
+                    onChange={(e) => { setHasError(!e.target.value || daysToSeconds(parseInt(e.target.value)) > maxAdditionalDissolveDelaySeconds); setAdditionalDissolveDelaySeconds(daysToSeconds(parseInt(e.target.value))); }}
                     allowNegative={false}
                     maxDecimalPlaces={0}
-                    parseNumber={parseInt}
                     format={INPUT_BOX_FORMATS.numberFormat}
                     value={secondsToDays(additionalDissolveDelaySeconds)}
                     suffix={" Days"}

@@ -245,8 +245,6 @@ const JournalPage = (props) => {
                     disabled={journalPageData.submitted}
                     rows={"1"}
                     index={index}
-                    dispatch={journalDispatch}
-                    dispatchAction={types.CHANGE_ENTRY_TITLE}
                     value={journalPageData.title}
                 />
                 <InputBox
@@ -257,8 +255,6 @@ const JournalPage = (props) => {
                     rows={"1"}
                     disabled={journalPageData.submitted}
                     index={index}
-                    dispatch={journalDispatch}
-                    dispatchAction={types.CHANGE_LOCATION}
                     value={journalPageData.location}
                 />
                 <InputBox
@@ -269,8 +265,6 @@ const JournalPage = (props) => {
                     disabled={journalPageData.submitted}
                     rows={"16"}
                     index={index}
-                    dispatch={journalDispatch}
-                    dispatchAction={types.CHANGE_TEXT}
                     value={journalPageData.text}
                 />
             </Grid>

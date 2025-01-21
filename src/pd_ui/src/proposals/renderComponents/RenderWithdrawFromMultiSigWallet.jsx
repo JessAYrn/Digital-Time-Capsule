@@ -31,7 +31,7 @@ const WithdrawFromMultiSigWallet = (props) => {
                 hasError={hasError_1}
                 label={"Recipient Principal"}
                 placeHolder={"Recipient Principal"}
-                onChange={(value) => {setHasError_1(!value || !principalHasProperFormat(value)); setTo(value);}}
+                onChange={(e) => {setHasError_1(!e.target.value || !principalHasProperFormat(e.target.value)); setTo(e.target.value);}}
                 value={to}
             />
             {!!to && 
@@ -43,10 +43,9 @@ const WithdrawFromMultiSigWallet = (props) => {
                         hasError={hasError_2}
                         label={"Amount"}
                         placeHolder={"Amount"}
-                        onChange={(value) => {setHasError_2(!value); setAmount(value);}}
+                        onChange={(e) => {setHasError_2(!e.target.value); setAmount(parseFloat(e.target.value));}}
                         allowNegative={false}
                         maxDecimalPlaces={8}
-                        parseNumber={parseFloat}
                         format={INPUT_BOX_FORMATS.numberFormat}
                         value={amount}
                         suffix={" ICP"}

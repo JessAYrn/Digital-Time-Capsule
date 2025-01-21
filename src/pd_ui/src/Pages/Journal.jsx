@@ -49,7 +49,6 @@ const Journal = (props) => {
 
     const onTextBoxChange = () => setCounter(counter + 1);
 
-    const onDisableEdit = async (isEditing) => { if(!isEditing) sendData(); };
 
     const onDatePickerChange = async (e) => {
         const date = new Date(e);
@@ -145,27 +144,18 @@ const Journal = (props) => {
                     <InputBox
                         label={"This Journal Belongs To: "}
                         rows={"1"}
-                        showEditButton={true}
-                        dispatch={journalDispatch}
                         onChange={onTextBoxChange}
-                        onDisableEdit={onDisableEdit}
-                        dispatchAction={types.CHANGE_NAME}
                         value={journalState.bio.name}
                     />
                     <DatePickerField
                         value={journalState.bio.dob[0]}
                         label={"Date Of Birth"}
                         onChange={onDatePickerChange}
-                        showEditButton={true}
                     />
                     <InputBox
                         label={"Place of Birth: "}
                         rows={"1"}
-                        showEditButton={true}
                         onChange={onTextBoxChange}
-                        onDisableEdit={onDisableEdit}
-                        dispatch={journalDispatch}
-                        dispatchAction={types.CHANGE_POB}
                         value={journalState.bio.pob}
                     />
                 </Grid>
@@ -181,7 +171,6 @@ const Journal = (props) => {
                     flexDirection={"column"}
                 >
                 <FileCarousel
-                    showEditButton={true}
                     revokeDataURL={false}
                     onChange={triggerSendDataFunctionAfterReduxStateUpdate}
                     filesMetaDataArray={journalState.bio.photos}
@@ -207,22 +196,14 @@ const Journal = (props) => {
                 >
                     <InputBox
                         label={"Dedications: "}
-                        showEditButton={true}
                         onChange={onTextBoxChange}
-                        onDisableEdit={onDisableEdit}
                         rows={"8"}
-                        dispatch={journalDispatch}
-                        dispatchAction={types.CHANGE_DEDICATIONS}
                         value={journalState.bio.dedications}
                     />
                     <InputBox
                         label={"Preface: "}
-                        showEditButton={true}
                         onChange={onTextBoxChange}
-                        onDisableEdit={onDisableEdit}
                         rows={"16"}
-                        dispatch={journalDispatch}
-                        dispatchAction={types.CHANGE_PREFACE}
                         value={journalState.bio.preface}
                     />
                 </Grid>

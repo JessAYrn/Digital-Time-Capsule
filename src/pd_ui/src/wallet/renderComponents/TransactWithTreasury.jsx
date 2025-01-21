@@ -46,9 +46,9 @@ const TransactWithTreasuryModal = (props) => {
         setModalIsOpen(false);
     };
 
-    const onAmountChange = (value) => {
-        setHasError(!isANumber(value));
-        setAmount(value);
+    const onAmountChange = (e) => {
+        setHasError(!isANumber(parseFloat(e.target.value)));
+        setAmount(parseFloat(e.target.value));
     };
 
     return (
@@ -113,7 +113,6 @@ const TransactWithTreasuryModal = (props) => {
                 allowNegative={false}
                 allowLeadingZeros={false}
                 suffix={" ICP"}
-                parseNumber={parseFloat}
                 value={amount}
                 format={INPUT_BOX_FORMATS.numberFormat}
             />}

@@ -1,16 +1,14 @@
 import React, { useContext} from "react";
 import { AppContext } from "../../Context";
-import HowToVoteIcon from '@mui/icons-material/HowToVote';
 import TransactWithTreasuryModal from "../../wallet/renderComponents/TransactWithTreasury";
 import CreateProposalForm from "../../proposals/CreateProposalForm";
-import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import Grid from "@mui/material/Unstable_Grid2";
-import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import TransactWithWalletModal from "../../wallet/WalletModal";
 import Typography from "@mui/material/Typography";
 import ButtonField from "../Button";
 import { BACKGROUND_COLOR, CONTRAST_COLOR } from "../../Theme";
 import { useScroll, useSpring, animated } from "@react-spring/web";
+import TransactOptions from "../../transact/TransactOptions";
 
 const ActionButton = (props) => {
 
@@ -37,6 +35,8 @@ const ActionButton = (props) => {
         setModalIsOpen(true);
         setModalProps({
             flexDirection: "column",
+            fullScreen: true,
+            headerComponent: <Typography padding={"10px"} variant='h6' children={""} />,
             components: [ 
                 <Typography padding={"10px"} variant='h6' children={"TRANSACT WITH TREASURY"} />,
                 <TransactWithTreasuryModal/>
@@ -53,6 +53,18 @@ const ActionButton = (props) => {
                 <TransactWithWalletModal/>
             ],
       });
+  };
+
+  const openTransactOptions = () => {
+    setModalIsOpen(true);
+    setModalProps({
+      flexDirection: "column",
+      fullScreen: true,
+      headerComponent: <Typography padding={"10px"} variant='h6' children={"TRANSACT OPTIONS"} />,
+      components: [ 
+        <TransactOptions/>
+      ],
+    });
   };
 
     const openProposalForm = () => {
@@ -98,7 +110,7 @@ const ActionButton = (props) => {
                             gridSx={{ width: "135px"}}
                             elevation={0}
                             text={"Transact"}
-                            onClick={() => {}}
+                            onClick={openTransactOptions}
                             iconSize={'small'}
                         />
                     </Grid>

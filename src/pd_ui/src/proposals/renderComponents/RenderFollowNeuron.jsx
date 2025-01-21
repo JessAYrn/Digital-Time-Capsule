@@ -159,10 +159,10 @@ const FollowNeuron = (props) => {
                         width={"100%"}
                         hasError={hasError}
                         label={"Neuron Id to Follow"}
-                        rows={"1"}
-                        onChange={(neuronId) => { 
-                            setHasError(!neuronId); 
-                            setFollowee(neuronId)
+                        rows={1}
+                        onChange={(e) => { 
+                            setHasError(!e.target.value); 
+                            setFollowee(e.target.value)
                         }}
                         value={followee}
                         allowNegative={false}

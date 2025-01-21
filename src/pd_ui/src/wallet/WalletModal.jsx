@@ -4,7 +4,6 @@ import {FormControlLabel} from '@mui/material'
 import {FormGroup} from '@mui/material'
 import {Checkbox} from '@mui/material'
 import RenderDisplayUserData from './renderComponents/DisplayUserData'
-import RenderSendCrypto from './renderComponents/SendCryptoModal'
 import RenderBuyCrypto from './renderComponents/RenderBuyCrypto'
 
 export const actions = { send: "send", receive: "receive", buy: "buy" };
@@ -41,7 +40,6 @@ const [action, setAction] = useState(actions.receive);
                 </FormGroup>
             </Grid>
             { action === actions.receive && <RenderDisplayUserData/> }
-            { action === actions.send && <RenderSendCrypto/> }
             { action === actions.buy && <RenderBuyCrypto/> }
         </Grid>
     )

@@ -59,17 +59,15 @@ const SpawnNeuron = (props) => {
                     disabled={disabled}
                     label={"Percentage of Maturity to Spawn"}
                     placeHolder={"Percentage of Maturity to Spawn"}
-                    onChange={(value) => {
-                        setHasError(!value || value > 100);
-                        setPercentageOfRewardsToSpawn(value);
+                    onChange={(e) => {
+                        const parsedValue = parseFloat(e.target.value);
+                        setHasError(!e.target.value || parsedValue > 100);
+                        setPercentageOfRewardsToSpawn(parsedValue);
                     }}
                     value={percentageOfRewardsToSpawn}
                     hasError={hasError}
                     format={INPUT_BOX_FORMATS.numberFormat}
-                    maxValue={100}
-                    parseNumber={parseInt}
                     width={"100%"}
-                    omitMaxValueButton={true}
                     maxDecimalPlaces={0}
                     allowNegative={false}
                     suffix={" %"}

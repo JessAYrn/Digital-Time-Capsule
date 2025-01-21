@@ -41,8 +41,8 @@ const CreateAccount = (props) => {
                 label="Enter Username"
                 placeholder="Enter Username"
                 onChange={(e) => {
-                    setUsername(e);
-                    setHasError(!userNamePermitted(e) || !e.length);
+                    setUsername(e.target.value);
+                    setHasError(!userNamePermitted(e.target.value) || !e.target.value.length);
                 }}
                 hasError={hasError}
                 value={username}

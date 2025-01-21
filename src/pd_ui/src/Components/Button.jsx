@@ -51,6 +51,7 @@ const ButtonField = (props) => {
                 { hyperLink ?
                     <a href={hyperLink} target="_blank" rel="noreferrer noopener" style={{color: CONTRAST_COLOR}}>{text}</a> :
                     <ButtonType 
+
                         varient={upload ? 'contained' : null}
                         component={upload ? "label" : null}
                         aria-controls={ariaControls}
@@ -59,7 +60,7 @@ const ButtonField = (props) => {
                         id={id}
                         onBlur={onBlur}
                         size={iconSize} 
-                        sx={{color: color}}
+                        sx={{color: color, width: "100%"}}
                         endIcon={(text && Icon) ?<Icon/> : null} 
                         onClick={handleClick}
                         disabled={disabled}

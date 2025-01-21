@@ -110,10 +110,9 @@ const IncreaseNeuron = (props) => {
                         hasError={hasError}
                         label={"Amount"}
                         placeHolder={"Amount"}
-                        onChange={(value) => { setHasError(!value); setAmount(value); }}
+                        onChange={(e) => { setHasError(!e.target.value); setAmount(parseFloat(e.target.value)); }}
                         allowNegative={false}
                         maxDecimalPlaces={8}
-                        parseNumber={parseFloat}
                         format={INPUT_BOX_FORMATS.numberFormat}
                         value={amount}
                         suffix={" ICP"}
