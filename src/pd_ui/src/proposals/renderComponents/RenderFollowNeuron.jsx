@@ -91,7 +91,7 @@ const FollowNeuron = (props) => {
     const [selectedNeuronId, setSelectedNeuronId] = useState(payload?.neuronId?.toString());
     const [topicName, setTopicName] = useState(Object.keys(NEURON_TOPICS).find((key) => NEURON_TOPICS[key] === payload?.topic));
     const [followee, setFollowee] = useState(payload?.followee?.toString());
-    const [hasError, setHasError] = useState(true);
+    const [hasError, setHasError] = useState(!disabled);
     const [isReadyToSubmit, setIsReadyToSubmit] = useState(false);
 
     const {treasuryState} = useContext(AppContext);
