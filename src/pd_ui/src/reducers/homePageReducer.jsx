@@ -20,10 +20,6 @@ export const homePageInitialState={
         costToEnterDao: 0,
         daoFounder: "",
         daoIsPublic: null,
-        currentCyclesBalance_backend: 1,
-        currentCyclesBalance_frontend: 1,
-        currentCyclesBalance_treasury: 1,
-        currentCyclesBalance_manager: 1,
     },
     userNames: {},
     canisterData: {
@@ -41,7 +37,13 @@ export const homePageInitialState={
         isAdmin: false,
         supportMode: false,
         acceptingRequests: false,
-        requestsForAccess: []
+        requestsForAccess: [],
+        cyclesBalances: {
+            ui: 1,
+            api: 1,
+            treasury: 1,
+            manager: 1,
+        }
     }
 }
 

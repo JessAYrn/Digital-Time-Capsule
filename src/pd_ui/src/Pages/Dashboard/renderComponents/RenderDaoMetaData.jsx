@@ -1,13 +1,10 @@
 import React, {useContext} from "react";
-import AccordionField from '../../../components/Accordion'
 import Grid from "@mui/material/Unstable_Grid2";
 import DataField from '../../../components/DataField';
 import { AppContext } from "../../../Context";
 import { CANISTER_DATA_FIELDS } from "../../../functionsAndConstants/Constants";
-
 import { round2Decimals, inTrillions, shortenHexString, fromE8s, copyText} from "../../../functionsAndConstants/Utils";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import Typography from "@mui/material/Typography";
 import { Divider } from "@mui/material";
 import { DIVIDER_SX } from "../../../Theme";
 
@@ -80,16 +77,16 @@ const RenderDaoMetaData = () => {
             <Divider sx={{...DIVIDER_SX, marginTop: "15px", marginBottom: "15px"}}/>
             <Grid width={"100%"} xs={12} display="flex" justifyContent="center" alignItems="center" paddingBottom={"15px"} paddingTop={"15px"} flexDirection={"column"}>
                 <DataField
-                    label={'Frontend Cycles Balance:'}
-                    text={`${round2Decimals(inTrillions(homePageState.daoPublicData.currentCyclesBalance_frontend))} T`}
+                    label={'UI Cycles Balance:'}
+                    text={`${round2Decimals(inTrillions(homePageState?.canisterData?.cyclesBalances?.ui))} T`}
                     isCycles={true}
                     disabled={true}
                     transparentBackground={true}
                     transparentBorder={true}
                 />
                 <DataField
-                    label={'Backend Cycles Balance:'}
-                    text={`${round2Decimals(inTrillions(homePageState.daoPublicData.currentCyclesBalance_backend))} T`}
+                    label={'API Cycles Balance:'}
+                    text={`${round2Decimals(inTrillions(homePageState?.canisterData?.cyclesBalances?.api))} T`}
                     isCycles={true}
                     disabled={true}
                     transparentBackground={true}
@@ -97,7 +94,7 @@ const RenderDaoMetaData = () => {
                 />
                 <DataField
                     label={'Treasury Cycles Balance:'}
-                    text={`${round2Decimals(inTrillions(homePageState.daoPublicData.currentCyclesBalance_treasury))} T`}
+                    text={`${round2Decimals(inTrillions(homePageState?.canisterData?.cyclesBalances?.treasury))} T`}
                     isCycles={true}
                     disabled={true}
                     transparentBackground={true}
@@ -105,7 +102,7 @@ const RenderDaoMetaData = () => {
                 />
                 <DataField
                     label={'Manager Cycles Balance:'}
-                    text={`${round2Decimals(inTrillions(homePageState.daoPublicData.currentCyclesBalance_manager))} T`}
+                    text={`${round2Decimals(inTrillions(homePageState?.canisterData?.cyclesBalances?.manager))} T`}
                     isCycles={true}
                     disabled={true}
                     transparentBackground={true}

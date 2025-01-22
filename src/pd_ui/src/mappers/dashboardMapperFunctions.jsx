@@ -20,6 +20,7 @@ export const mapBackendCanisterDataToFrontEndObj = (props) => {
         managerCanisterPrincipal,
         daoIsPublic,
         costToEnterDao,
+        cyclesBalances,
     } = props;
 
     return {
@@ -41,7 +42,8 @@ export const mapBackendCanisterDataToFrontEndObj = (props) => {
         releaseVersionInstalled: parseInt(releaseVersionInstalled),
         founder,
         daoIsPublic,
-        costToEnterDao: parseInt(costToEnterDao)
+        costToEnterDao: parseInt(costToEnterDao),
+        cyclesBalances,
     }
 }; 
 

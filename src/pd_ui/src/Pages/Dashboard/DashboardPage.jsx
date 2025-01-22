@@ -39,6 +39,8 @@ const DashboardPage = () => {
         });
         setModalIsOpen(true);
     }
+
+    console.log(homePageState);
     
 
     return(

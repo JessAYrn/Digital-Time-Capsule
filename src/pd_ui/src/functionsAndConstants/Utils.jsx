@@ -162,7 +162,7 @@ export const round8Decimals = (num) => {
 };
 
 export const inTrillions = (num) => {
-  return num / 1000000000000;
+  return parseInt(num) / 1000000000000;
 }
 
 export const getFileArrayBuffer = (inputFile) => {
