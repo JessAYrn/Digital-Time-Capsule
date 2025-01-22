@@ -40,9 +40,6 @@ const DashboardPage = () => {
         setModalIsOpen(true);
     }
 
-    console.log(homePageState);
-    
-
     return(
         <Grid columns={12} xs={11} md={9} rowSpacing={0} padding={0} display="flex" justifyContent="center" alignItems="center" flexDirection={"column"}>
             <RenderVotingDistributionsGraph/>
