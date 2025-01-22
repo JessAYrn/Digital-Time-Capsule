@@ -111,18 +111,15 @@ const RenderTransactWithTreasury = (props) => {
                 />
             </Grid>}
             {!!amount && !hasError &&
-                <>
-                    <Divider sx={{...DIVIDER_SX, marginBottom: "30px"}}/>
-                    <Grid display={'flex'} justifyContent={'center'} alignItems={'center'} width={"100%"}>
-                        <ButtonField
-                        Icon={DoneIcon}
-                        gridSx={{width: "50%", backgroundColor: CONTRAST_COLOR}}
-                        color={BACKGROUND_COLOR}
+                <Grid display={'flex'} justifyContent={'center'} alignItems={'center'} width={"100%"} position={"fixed"} bottom={"10px"}>
+                    <ButtonField
+                    Icon={DoneIcon}
+                    gridSx={{width: "50%", backgroundColor: CONTRAST_COLOR}}
+                    color={BACKGROUND_COLOR}
                         text={'Submit'}
                         onClick={onSubmit}
-                        />
-                    </Grid>
-                </>
+                    />
+                </Grid>
             } 
 
         </Grid>

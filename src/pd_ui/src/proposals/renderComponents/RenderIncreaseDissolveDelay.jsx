@@ -19,7 +19,7 @@ const IncreaseDissolveDelay = (props) => {
     const { treasuryState, homePageState } = useContext(AppContext);
     const [selectedNeuronId, setSelectedNeuronId] = useState(payload?.neuronId?.toString());
     const [additionalDissolveDelaySeconds, setAdditionalDissolveDelaySeconds] = useState(parseInt(payload?.additionalDissolveDelaySeconds));
-    const [hasError, setHasError] = useState(false);
+    const [hasError, setHasError] = useState(true);
     const [isReadyToSubmit, setIsReadyToSubmit] = useState(false);
 
     const neuronMenuItemProps = treasuryState?.neurons?.icp?.filter(([neuronId, neuronData]) => {

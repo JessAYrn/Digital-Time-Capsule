@@ -34,12 +34,12 @@ const NewFundingCampaign = (props) => {
     const [initialLoanInterestAmount, setInitialLoanInterestAmount] = useState(terms ? getFundingCampaignAssetTypeAndValue(terms?.initialLoanInterestAmount) : null);
     const [initialCollateralLocked, setInitialCollateralLocked] = useState(terms ? getFundingCampaignAssetTypeAndValue(terms?.initialCollateralLocked) : null);
 
-    const [hasError_1, setHasError_1] = useState(false);
-    const [hasError_2, setHasError_2] = useState(false);
-    const [hasError_3, setHasError_3] = useState(false);
-    const [hasError_4, setHasError_4] = useState(false);
-    const [hasError_5, setHasError_5] = useState(false);
-    const [hasError_6, setHasError_6] = useState(false);
+    const [hasError_1, setHasError_1] = useState(true);
+    const [hasError_2, setHasError_2] = useState(true);
+    const [hasError_3, setHasError_3] = useState(true);
+    const [hasError_4, setHasError_4] = useState(true);
+    const [hasError_5, setHasError_5] = useState(true);
+    const [hasError_6, setHasError_6] = useState(true);
     const [isReadyToSubmit, setIsReadyToSubmit] = useState(false);
 
     const amountToFundOptions = (exlude = []) => {

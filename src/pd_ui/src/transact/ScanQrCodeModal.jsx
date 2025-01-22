@@ -9,7 +9,7 @@ const QrReaderContent = (props) => {
     const { onCloseQrReader } = props;
 
     return(
-        <Grid width={"100%"}>
+        <Grid width={"100%"} display={"flex"} flexDirection={"column"} justifyContent={"center"} alignItems={"center"}>
             <Typography display={"flex"} justifyContent={"center"} alignItems={"center"}>Scan QR Code</Typography>
             <QrReader
                 constraints = {{ facingMode: "environment" }}
@@ -19,10 +19,12 @@ const QrReaderContent = (props) => {
                 }}
                 style={{ height: '50%' }}
                 />
-                <ButtonField
-                    text={'Cancel'}
-                    onClick={onCloseQrReader}
-                />
+                <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} position={"fixed"} bottom={"10px"}>
+                    <ButtonField
+                        text={'Cancel'}
+                        onClick={onCloseQrReader}
+                    />
+                </Grid>
         </Grid>
     )
 };

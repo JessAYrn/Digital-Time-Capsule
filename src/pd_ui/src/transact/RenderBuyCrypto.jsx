@@ -33,12 +33,12 @@ const BuyCrypto = (props) => {
 
     return (
         <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} flexDirection={"column"}>
-            <Typography width={"100%"}>
+            <Typography width={"100%"} textAlign={"center"}>
                 This decentralized application requires users to stake $ICP in order to receive voting power, 
                 rewards and loans. You are being redirected to a third party service to purchase $ICP that will be sent automatically 
                 to your wallet here within this application upon completion of purchase.
             </Typography>
-            <Grid xs={12} display={"flex"}  justifyContent={"center"} alignItems={"center"} width={"100%"} marginTop={"10px"}>
+            <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} position={"fixed"} bottom={"10px"}>
                 <ButtonField text= {"Continue"} hyperLink={url} />
             </Grid>
         </Grid>

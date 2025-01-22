@@ -13,7 +13,7 @@ const CreateAccount = (props) => {
     const { navigationAndApiState, setModalIsOpen, setModalIsLoading } = useContext(AppContext);
 
     const [username, setUsername] = useState("");
-    const [hasError, setHasError] = useState(false);
+    const [hasError, setHasError] = useState(true);
 
     const [typography, setTypography] = useState("Enter Your Desired Username: ");
 

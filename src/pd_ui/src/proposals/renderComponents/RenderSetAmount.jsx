@@ -17,7 +17,7 @@ const SetAmount = (props) => {
 
     const {onSubmitProposal, action, payload, disabled, finalized} = props;
     const [amount, setAmount] = useState(payload?.amount || payload?.amount === BigInt(0) ? fromE8s(parseInt(payload?.amount)) : null);
-    const [hasError, setHasError] = useState(false);
+    const [hasError, setHasError] = useState(true);
     const [isReadyToSubmit, setIsReadyToSubmit] = useState(false);
 
     const { treasuryState, homePageState } = useContext(AppContext);

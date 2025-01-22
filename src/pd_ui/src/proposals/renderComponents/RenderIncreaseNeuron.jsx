@@ -24,7 +24,7 @@ const IncreaseNeuron = (props) => {
     const { treasuryState, homePageState } = useContext(AppContext);
     const [selectedNeuronId, setSelectedNeuronId] = useState(payload?.neuronId?.toString());
     const [amount, setAmount] = useState(payload?.amount || payload?.amount === BigInt(0) ? fromE8s(parseInt(payload?.amount)) : null);
-    const [hasError, setHasError] = useState(false);
+    const [hasError, setHasError] = useState(true);
     const [onBehalfOf, setOnBehalfOf] = useState(payload?.onBehalfOf || []);
     const [showOnBehalfOfDropdown, setShowOnBehalfOfDropdown] = useState(payload?.onBehalfOf?.length);
     const [isReadyToSubmit, setIsReadyToSubmit] = useState(false);

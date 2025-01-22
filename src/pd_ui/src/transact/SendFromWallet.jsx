@@ -81,8 +81,7 @@ const SendFromWallet = (props) => {
                     disabled={true}
                     transparentBackground={true}
                 />
-                <Divider sx={DIVIDER_SX}/>
-                <Grid display={'flex'} justifyContent={'center'} alignItems={'center'} width={"100%"}>
+                <Grid display={'flex'} justifyContent={'center'} alignItems={'center'} width={"100%"} position={"fixed"} bottom={"10px"}>
                     <ButtonField
                         gridSx={{margin: "20px", width: "170px", backgroundColor: CONTRAST_COLOR}}
                         color={BACKGROUND_COLOR}
@@ -190,9 +189,7 @@ const SendFromWallet = (props) => {
             </>
             }
             {recipientAddress_ && !hasError_1 && !hasError_2 && amount_ > 0 &&
-            <>
-                <Divider sx={DIVIDER_SX}/>
-                <Grid display={'flex'} justifyContent={'center'} alignItems={'center'} width={"100%"}>
+                <Grid display={'flex'} justifyContent={'center'} alignItems={'center'} width={"100%"} position={"fixed"} bottom={"10px"}>
                         <ButtonField
                         gridSx={{margin: "20px", width: "50%", backgroundColor: CONTRAST_COLOR} }
                     color={BACKGROUND_COLOR}
@@ -202,7 +199,6 @@ const SendFromWallet = (props) => {
                         onClick={onViewSummary}
                     />
                 </Grid>
-            </>
             }
         </Grid>
     )

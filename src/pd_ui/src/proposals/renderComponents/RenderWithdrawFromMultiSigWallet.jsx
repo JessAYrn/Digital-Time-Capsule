@@ -12,8 +12,8 @@ const WithdrawFromMultiSigWallet = (props) => {
     const { onSubmitProposal, action, payload, disabled } = props;
     const [amount, setAmount] = useState(payload?.amount || payload?.amount === BigInt(0) ? fromE8s(parseInt(payload?.amount)) : null);
     const [to, setTo] = useState(payload?.to || null);
-    const [hasError_1, setHasError_1] = useState(false);
-    const [hasError_2, setHasError_2] = useState(false);
+    const [hasError_1, setHasError_1] = useState(true);
+    const [hasError_2, setHasError_2] = useState(true);
 
     const isReadyToSubmit = useMemo(() => {
         return !!amount && !!to && !hasError_1 && !hasError_2

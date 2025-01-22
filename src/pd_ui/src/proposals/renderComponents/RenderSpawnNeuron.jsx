@@ -20,7 +20,7 @@ const SpawnNeuron = (props) => {
 
     const [selectedNeuronId, setSelectedNeuronId] = useState(payload?.neuronId?.toString());
     const [percentageOfRewardsToSpawn, setPercentageOfRewardsToSpawn] = useState(payload?.percentage_to_spawn || 1);
-    const [hasError, setHasError] = useState(false);
+    const [hasError, setHasError] = useState(true);
     const [isReadyToSubmit, setIsReadyToSubmit] = useState(false);
 
     const neuronMenuItemProps = treasuryState.neurons.icp.map(([neuronId, neuronData]) => {

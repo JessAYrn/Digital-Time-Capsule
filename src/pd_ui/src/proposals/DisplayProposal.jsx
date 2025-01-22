@@ -25,10 +25,9 @@ import SpawnNeuron from "./renderComponents/RenderSpawnNeuron";
 import NewFundingCampaign from "./renderComponents/RenderNewFundingCampaign";
 import WithdrawFromMultiSigWallet from "./renderComponents/RenderWithdrawFromMultiSigWallet";
 import CancelFundingCampaign from "./renderComponents/RenderCancelFundingCampaign";
-import { BACKGROUND_COLOR, CONTRAST_COLOR, WHITE_COLOR } from "../Theme";
+import { BACKGROUND_COLOR, CONTRAST_COLOR } from "../Theme";
 import Divider from '@mui/material/Divider';
 import { DIVIDER_SX } from "../Theme";
-import ActionButtons from "../components/persistentComponents/ActionButtons";
 
 const DisplayProposal = (props) => {
 
