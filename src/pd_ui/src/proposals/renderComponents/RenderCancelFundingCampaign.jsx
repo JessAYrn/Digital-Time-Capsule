@@ -17,7 +17,7 @@ const CancelFundingCampaign = (props) => {
     };
 
     const fundingCampaignMenuItemProps = treasuryState?.fundingCampaigns?.filter(([campaign, fundingCampaign]) => {
-        return !fundingCampaign?.funded;
+        return !fundingCampaign?.funded && !fundingCampaign?.settled;
     }).map(([campaignId, fundingCampaign]) => {
         return {
             text: parseInt(campaignId),

@@ -22,7 +22,7 @@ const RenderFundingCampaignsSection = () => {
         const activeFundingCampaigns = [];
         const inactiveFundingCampaigns = [];
         for (const [campaignId, fundingCampaign] of fundingCampaigns) {
-            if (fundingCampaign.finalized) {
+            if (!fundingCampaign.settled) {
                 activeFundingCampaigns.push([campaignId, fundingCampaign]);
             } else {
                 inactiveFundingCampaigns.push([campaignId, fundingCampaign]);

@@ -1,14 +1,19 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useContext } from "react";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import { getFundingCampaignAssetTypeAndValue } from "../../../../functionsAndConstants/Utils";
 import DataField from "../../../../components/DataField";
 import { WHITE_COLOR } from "../../../../Theme";
 import ButtonField from "../../../../components/Button";
+import RenderFundingCampaign from "./RenderFundingCampaign";
+import RenderAddLiquidityOrRepayFundingCampaign from "./RenderAddLiquidityOrRepayFundingCampaign";
 import { CONTRAST_COLOR } from "../../../../Theme";
+import { ACTION_TYPES } from "./RenderAddLiquidityOrRepayFundingCampaign";
+import { AppContext } from "../../../../Context";
+import Typography from "@mui/material/Typography";
 
 const RenderPreviewFundingCampaign = (props) => {
     const { campaignId, fundingCampaign } = props;
-
+    const { setModalIsOpen, setModalProps } = useContext(AppContext);
 
     const {
         amountToFund,
@@ -32,7 +37,26 @@ const RenderPreviewFundingCampaign = (props) => {
 
         return obj;
     }, []);
+    
+    const onView = () => {
+        setModalIsOpen(true);
+        setModalProps({
+            fullScreen: true,
+            headerComponent: <Typography variant="h6">Funding Campaign</Typography>,
+            components: [<RenderFundingCampaign fundingCampaign={fundingCampaign} campaignId={campaignId}/>],
+        })
+    }
 
+    const onClickAddLiquidityOrRepayFundingCampaign = () => {
+        setModalProps({
+            flexDirection: "column",
+            components: [
+                <RenderAddLiquidityOrRepayFundingCampaign campaignId={campaignId} actionType={fundingCampaign?.funded ? ACTION_TYPES.repayFundingCampaign : ACTION_TYPES.addLiquidity}/>
+            ],
+        });
+        setModalIsOpen(true);
+    };
+    
     return (
         <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} padding={0} flexDirection={"column"}>
             <DataField
@@ -82,7 +106,7 @@ const RenderPreviewFundingCampaign = (props) => {
                         gridSx={{width: "115px", backgroundColor: WHITE_COLOR}}
                         elevation={24}
                         text={"Lend"}
-                        onClick={() => {}}
+                        onClick={onClickAddLiquidityOrRepayFundingCampaign}
                         iconSize={'small'}
                     />
                 </Grid>
@@ -92,7 +116,7 @@ const RenderPreviewFundingCampaign = (props) => {
                         gridSx={{width: "115px"}}
                         elevation={24}
                         text={"View"}
-                        onClick={() => {}}
+                        onClick={onView}
                         iconSize={'small'}
                     />
                 </Grid>

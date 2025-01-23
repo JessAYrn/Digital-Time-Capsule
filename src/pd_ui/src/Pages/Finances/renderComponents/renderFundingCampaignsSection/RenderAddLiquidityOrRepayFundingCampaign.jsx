@@ -10,6 +10,7 @@ import { toE8s, fromE8s } from "../../../../functionsAndConstants/Utils";
 import { treasuryTypes } from "../../../../reducers/treasuryReducer";
 import { sortFundingCampaigns } from "../../../../functionsAndConstants/treasuryDataFunctions";
 import DataField from "../../../../components/DataField";
+import { BACKGROUND_COLOR, CONTRAST_COLOR } from "../../../../Theme";
 
 export const ACTION_TYPES = {
     addLiquidity: "addLiquidity",
@@ -39,13 +40,18 @@ const AddLiquidityOrRepayFundingCampaign = (props) => {
 
     return(
         <Grid xs={12} display="flex" justifyContent="center" alignItems="center" flexDirection="column">
-            <Typography variant={"h6"} color={"#bdbdbd"}> {actionType === ACTION_TYPES.addLiquidity ? "Add Liquidity" : "Repay Funding Campaign"} </Typography>
+            <Typography variant={"h6"} color={"#bdbdbd"}> {actionType === ACTION_TYPES.addLiquidity ? "Add Funding" : "Repay Funding"} </Typography>
             <DataField label={"Available Balance: "} text={`${fromE8s(availableBalance) } ICP`} isLoading={!treasuryState.dataHasBeenLoaded} disabled={true} transparentBackground={true}/>
             <InputBox
-                label={actionType === ACTION_TYPES.addLiquidity ? "Amount of ICP to Add" : "Amount of ICP to Repay"}
+                label={actionType === ACTION_TYPES.addLiquidity ? "Amount to Add" : "Amount to Repay"}
                 placeHolder={"0 ICP"}
                 format={INPUT_BOX_FORMATS.numberFormat}
-                onChange={(e) => { setHasError(!value); setAmount(parseFloat(e.target.value)); }}
+                onChange={(e) => { 
+                    const parsedValue = parseFloat(e.target.value);
+                    setHasError(Object.is(parsedValue, NaN) || parsedValue === 0); 
+                    setAmount(parsedValue); 
+                }
+                }
                 hasError={hasError}
                 allowNegative={false}
                 maxDecimalPlaces={8}
@@ -53,14 +59,14 @@ const AddLiquidityOrRepayFundingCampaign = (props) => {
                 value={amount}
                 suffix={" ICP"}
             />
-            {
-            (amount && !hasError) ? 
+            { !hasError &&
                 <ButtonField
                     Icon={DoneIcon}
-                    color={"secondary"}
+                    gridSx={{ width: "100%", backgroundColor: CONTRAST_COLOR}}
+                    color={BACKGROUND_COLOR}
                     text={"Submit"}
                     onClick={onSubmit}
-                />: null
+                />
             }
         </Grid>
     )
