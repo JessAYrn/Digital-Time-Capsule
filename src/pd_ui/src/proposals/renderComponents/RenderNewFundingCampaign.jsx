@@ -242,7 +242,7 @@ const NewFundingCampaign = (props) => {
                                                 value={paymentIntervalsInDays}
                                                 onChange={(e) => {
                                                     const parsedValue = parseInt(e.target.value);
-                                                    setHasError_3(parsedValue > 30 ||Object.is(parsedValue, NaN) || parsedValue === 0);
+                                                    setHasError_3(parsedValue > 30 || Object.is(parsedValue, NaN) || parsedValue === 0);
                                                     setPaymentIntervalsInDays(parsedValue);
                                                 }}
                                             />

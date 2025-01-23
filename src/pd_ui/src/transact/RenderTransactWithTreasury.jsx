@@ -42,7 +42,7 @@ const RenderTransactWithTreasury = (props) => {
 
     const onChangeAmount = (e) => {
         const parsedAmount = parseFloat(e.target.value);
-        setHasError(parsedAmount > availableBalance || !isANumber(parsedAmount));
+        setHasError(Object.is(parsedAmount, NaN) || parsedAmount === 0 || parsedAmount > availableBalance);
         setAmount(parsedAmount);
     }
 
@@ -95,33 +95,36 @@ const RenderTransactWithTreasury = (props) => {
             </> }
             <Divider sx={DIVIDER_SX}/>
             { (action === ACTIONS.DEPOSIT || action === ACTIONS.WITHDRAW || !!recipientPrincipal) &&
-             <Grid display={'flex'} justifyContent={'center'} alignItems={'center'} width={"100%"}>
-                <InputBox
-                hasError={hasError}
-                label={"Amount: "}
-                rows={"1"}
-                value={amount}
-                onChange={onChangeAmount}
-                allowNegative={false}
-                suffix={" ICP"}
-                maxDecimalPlaces={8}
-                format={INPUT_BOX_FORMATS.numberFormat}
-                width={"100%"}
-                ButtonComponent={ <ButtonField text={"Max"} onClick={onClickMax} color={CONTRAST_COLOR} transparentBorder={true} transparentBackground={true}/> }
-                />
-            </Grid>}
-            {!!amount && !hasError &&
-                <Grid display={'flex'} justifyContent={'center'} alignItems={'center'} width={"100%"} position={"fixed"} bottom={"10px"}>
-                    <ButtonField
-                    Icon={DoneIcon}
-                    gridSx={{width: "50%", backgroundColor: CONTRAST_COLOR}}
-                    color={BACKGROUND_COLOR}
-                        text={'Submit'}
-                        onClick={onSubmit}
-                    />
-                </Grid>
-            } 
-
+                <>
+                    <Grid display={'flex'} justifyContent={'center'} alignItems={'center'} width={"100%"}>
+                        <InputBox
+                        hasError={hasError}
+                        label={"Amount: "}
+                        rows={"1"}
+                        value={amount}
+                        onChange={onChangeAmount}
+                        allowNegative={false}
+                        suffix={" ICP"}
+                        maxDecimalPlaces={8}
+                        format={INPUT_BOX_FORMATS.numberFormat}
+                        width={"100%"}
+                        ButtonComponent={ <ButtonField text={"Max"} onClick={onClickMax} color={CONTRAST_COLOR} transparentBorder={true} transparentBackground={true}/> }
+                        />
+                    </Grid>
+                    {!hasError &&
+                        <Grid display={'flex'} justifyContent={'center'} alignItems={'center'} width={"100%"} position={"fixed"} bottom={"10px"}>
+                            <ButtonField
+                            Icon={DoneIcon}
+                            gridSx={{width: "50%", backgroundColor: CONTRAST_COLOR}}
+                            color={BACKGROUND_COLOR}
+                                text={'Submit'}
+                                onClick={onSubmit}
+                            />
+                        </Grid>
+                    } 
+                
+                </>
+            }
         </Grid>
     );
 }

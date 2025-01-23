@@ -19,8 +19,8 @@ const SendFromWallet = (props) => {
 
     const [recipientAddress_, setRecipientAddress_] = useState(recipientAddress || "");
     const [amount_, setAmount_] = useState(amount || 0);
-    const [hasError_1, setHasError_1] = useState(true);
-    const [hasError_2, setHasError_2] = useState(true);
+    const [hasError_1, setHasError_1] = useState(!(principalHasProperFormat(recipientAddress_) || icpWalletAddressHasProperFormat(recipientAddress_)));
+    const [hasError_2, setHasError_2] = useState(Object.is(amount_, NaN) || amount_ === 0);
 
     const { walletState, navigationAndApiState, setModalIsOpen, setModalIsLoading, setModalProps } = useContext(AppContext);
 
@@ -28,7 +28,7 @@ const SendFromWallet = (props) => {
         const {recipientAddress, amount} = props;
         setModalProps({
             fullScreen: true,
-            headerComponent: <Typography>"Send From Wallet"</Typography>,
+            headerComponent: <Typography>Send From Wallet</Typography>,
             components: [<SendFromWallet recipientAddress={recipientAddress} amount={amount}/>],
         });
     };
@@ -106,7 +106,6 @@ const SendFromWallet = (props) => {
             fullScreen: true,
             headerComponent: <Typography>Summary</Typography>,
             components: [<RenderSummary recipientAddress={recipientAddress_} amount={amount_}/>],
-            handleReturn: returnToEdit
         });
     }
 
@@ -127,7 +126,7 @@ const SendFromWallet = (props) => {
     const onChangeAmount = (e) => { 
         const parsedAmount = parseFloat(e.target.value);
         setAmount_(parsedAmount); 
-        setHasError_2(!parsedAmount || !isANumber(parsedAmount));
+        setHasError_2(Object.is(parsedAmount, NaN) || parsedAmount === 0);
     };
 
     const onClickMax = () => {
@@ -168,37 +167,37 @@ const SendFromWallet = (props) => {
                     }
                 />
             </Grid>
-            {recipientAddress_ && !hasError_1 &&
-            <>
-                <Divider sx={DIVIDER_SX}/>
-                <Grid display={'flex'} justifyContent={'center'} alignItems={'center'} width={"100%"}>
-                    <InputBox
-                    hasError={hasError_2}
-                    label={"Amount: "}
-                    rows={"10"}
-                    value={amount_}
-                    onChange={onChangeAmount}
-                    allowNegative={false}
-                    suffix={" ICP"}
-                    maxDecimalPlaces={8}
-                    format={INPUT_BOX_FORMATS.numberFormat}
-                    width={"100%"}
-                    ButtonComponent={ <ButtonField text={"Max"} onClick={onClickMax} color={CONTRAST_COLOR} transparentBorder={true} transparentBackground={true}/> }
-                    />
-                </Grid>
-            </>
-            }
-            {recipientAddress_ && !hasError_1 && !hasError_2 && amount_ > 0 &&
-                <Grid display={'flex'} justifyContent={'center'} alignItems={'center'} width={"100%"} position={"fixed"} bottom={"10px"}>
-                        <ButtonField
-                        gridSx={{margin: "20px", width: "50%", backgroundColor: CONTRAST_COLOR} }
-                    color={BACKGROUND_COLOR}
-                    sx={{width: "100%"}}
-                    text={"summary"}
-                    disabled={hasError_1 || hasError_2 || !amount_}
-                        onClick={onViewSummary}
-                    />
-                </Grid>
+            {!hasError_1 &&
+                <>
+                    <Divider sx={DIVIDER_SX}/>
+                    <Grid display={'flex'} justifyContent={'center'} alignItems={'center'} width={"100%"}>
+                        <InputBox
+                        hasError={hasError_2}
+                        label={"Amount: "}
+                        rows={"10"}
+                        value={amount_}
+                        onChange={onChangeAmount}
+                        allowNegative={false}
+                        suffix={" ICP"}
+                        maxDecimalPlaces={8}
+                        format={INPUT_BOX_FORMATS.numberFormat}
+                        width={"100%"}
+                        ButtonComponent={ <ButtonField text={"Max"} onClick={onClickMax} color={CONTRAST_COLOR} transparentBorder={true} transparentBackground={true}/> }
+                        />
+                    </Grid>
+                    { !hasError_2 &&
+                        <Grid display={'flex'} justifyContent={'center'} alignItems={'center'} width={"100%"} position={"fixed"} bottom={"10px"}>
+                                <ButtonField
+                                gridSx={{margin: "20px", width: "50%", backgroundColor: CONTRAST_COLOR} }
+                            color={BACKGROUND_COLOR}
+                            sx={{width: "100%"}}
+                            text={"summary"}
+                            disabled={hasError_1 || hasError_2 || !amount_}
+                                onClick={onViewSummary}
+                            />
+                        </Grid>
+                    }
+                </>
             }
         </Grid>
     )
