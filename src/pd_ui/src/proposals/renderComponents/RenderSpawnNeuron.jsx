@@ -4,7 +4,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import Typography from '@mui/material/Typography';
 import { AppContext } from '../../Context';
 import InputBox from '../../components/InputBox';
-import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
+import Grid from '@mui/material/Unstable_Grid2/Grid2';
 import { INPUT_BOX_FORMATS } from '../../functionsAndConstants/Constants';
 import ButtonField from '../../components/Button';
 import DoneIcon from '@mui/icons-material/Done';
@@ -21,9 +21,10 @@ const SpawnNeuron = (props) => {
     const [selectedNeuronId, setSelectedNeuronId] = useState(payload?.neuronId?.toString());
     const [percentageOfRewardsToSpawn, setPercentageOfRewardsToSpawn] = useState(payload?.percentage_to_spawn || 1);
     const [hasError, setHasError] = useState(!disabled);
-    const [isReadyToSubmit, setIsReadyToSubmit] = useState(false);
 
-    const neuronMenuItemProps = treasuryState.neurons.icp.map(([neuronId, neuronData]) => {
+    const neuronMenuItemProps = treasuryState?.neurons?.icp?.filter(([neuronId, {neuronInfo}]) => {
+        return !!neuronInfo;
+    }).map(([neuronId, neuronData]) => {
         return {
             text: neuronId,  
             onClick: () => setSelectedNeuronId(neuronId),
@@ -31,15 +32,12 @@ const SpawnNeuron = (props) => {
         }
     });
 
-    useEffect(() => { setIsReadyToSubmit(selectedNeuronId && percentageOfRewardsToSpawn && !hasError);}, 
-    [selectedNeuronId, percentageOfRewardsToSpawn]);
-
     const submitProposal = async () => {
         onSubmitProposal({ [action]: {neuronId: BigInt(selectedNeuronId), percentage_to_spawn: percentageOfRewardsToSpawn} });
     };
 
     return (
-        <Grid2 width={"100%"} xs={12} display={'flex'} justifyContent={"center"} alignItems={'center'} flexDirection={'column'}>
+        <Grid width={"100%"} xs={12} display={'flex'} justifyContent={"center"} alignItems={'center'} flexDirection={'column'}>
             <MenuField
                 xs={8}
                 disabled={disabled}
@@ -52,43 +50,43 @@ const SpawnNeuron = (props) => {
                 menuItemProps={neuronMenuItemProps}
             />
             {selectedNeuronId && 
-            <>
-                <Typography varient={"h6"} color={"#bdbdbd"}> {selectedNeuronId} </Typography>
-                <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
-                <InputBox
-                    disabled={disabled}
-                    label={"Percentage of Maturity to Spawn"}
-                    placeHolder={"Percentage of Maturity to Spawn"}
-                    onChange={(e) => {
-                        const parsedValue = parseFloat(e.target.value);
-                        setHasError(!e.target.value || parsedValue > 100);
-                        setPercentageOfRewardsToSpawn(parsedValue);
-                    }}
-                    value={percentageOfRewardsToSpawn}
-                    hasError={hasError}
-                    format={INPUT_BOX_FORMATS.numberFormat}
-                    width={"100%"}
-                    maxDecimalPlaces={0}
-                    allowNegative={false}
-                    suffix={" %"}
-                />
-            </>
-            }
-            { isReadyToSubmit && !disabled &&
-            <>
-                <Grid2 xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"} position={"fixed"} bottom={"10px"} width={"100%"} >
-                    <ButtonField
+                <>
+                    <Typography varient={"h6"} color={"#bdbdbd"}> {selectedNeuronId} </Typography>
+                    <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
+                    <InputBox
                         disabled={disabled}
-                        Icon={DoneIcon}
-                        color={BACKGROUND_COLOR}
-                        gridSx={{ width: "230px", backgroundColor: CONTRAST_COLOR }}
-                        text={'Submit Proposal'}
-                        onClick={submitProposal}
+                        label={"Percentage of Maturity to Spawn"}
+                        placeHolder={"Percentage of Maturity to Spawn"}
+                        onChange={(e) => {
+                            const parsedValue = parseInt(e.target.value);
+                            setHasError(Object.is(parsedValue, NaN) || parsedValue === 0 || parsedValue > 100);
+                            setPercentageOfRewardsToSpawn(parsedValue);
+                        }}
+                        value={percentageOfRewardsToSpawn}
+                        hasError={hasError}
+                        format={INPUT_BOX_FORMATS.numberFormat}
+                        width={"100%"}
+                        maxDecimalPlaces={0}
+                        allowNegative={false}
+                        suffix={" %"}
                     />
-                </Grid2>
-            </>
+                    { !hasError && !disabled &&
+                        <>
+                            <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"} position={"fixed"} bottom={"10px"} width={"100%"} >
+                                <ButtonField
+                                    disabled={disabled}
+                                    Icon={DoneIcon}
+                                    color={BACKGROUND_COLOR}
+                                    gridSx={{ width: "230px", backgroundColor: CONTRAST_COLOR }}
+                                    text={'Submit Proposal'}
+                                    onClick={submitProposal}
+                                />
+                            </Grid>
+                        </>
+                    }
+                </>
             }
-        </Grid2>
+        </Grid>
     );
 
 };

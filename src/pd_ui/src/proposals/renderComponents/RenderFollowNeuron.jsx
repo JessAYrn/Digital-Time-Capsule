@@ -92,11 +92,12 @@ const FollowNeuron = (props) => {
     const [topicName, setTopicName] = useState(Object.keys(NEURON_TOPICS).find((key) => NEURON_TOPICS[key] === payload?.topic));
     const [followee, setFollowee] = useState(payload?.followee?.toString());
     const [hasError, setHasError] = useState(!disabled);
-    const [isReadyToSubmit, setIsReadyToSubmit] = useState(false);
 
     const {treasuryState} = useContext(AppContext);
 
-    const neuronMenuItemProps = treasuryState?.neurons?.icp?.map(([neuronId, neuronData]) => {
+    const neuronMenuItemProps = treasuryState?.neurons?.icp?.filter(([neuronId, {neuronInfo}]) => {
+        return !!neuronInfo;
+    }).map(([neuronId, neuronData]) => {
         return {
             text: neuronId,  
             onClick: () => setSelectedNeuronId(neuronId),
@@ -109,10 +110,6 @@ const FollowNeuron = (props) => {
     ).map(
         (topicName_) => { return {text: topicName_,  onClick: () => setTopicName(topicName_) };
     });
-
-    useEffect(() => {
-        setIsReadyToSubmit(selectedNeuronId && topicName && followee && !hasError);
-    }, [selectedNeuronId, topicName, followee]);
 
     const submitProposal = async () => {
         await onSubmitProposal({[action]: {neuronId: BigInt(selectedNeuronId), topic: NEURON_TOPICS[topicName], followee: BigInt(followee)}});
@@ -132,57 +129,58 @@ const FollowNeuron = (props) => {
                 menuItemProps={neuronMenuItemProps}
             />
             {selectedNeuronId && 
-            <>
-                <Typography varient={"h6"} color={"#bdbdbd"}> {selectedNeuronId} </Typography>
-                <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
-                <MenuField
-                    disabled={disabled}
-                    xs={8}
-                    display={"flex"}
-                    alignItems={"center"}
-                    justifyContent={"center"}
-                    color={CONTRAST_COLOR}
-                    label={"Topic"}
-                    MenuIcon={KeyboardArrowDownIcon}
-                    menuItemProps={neuronTopicItemProps}
-                />
-            </>
-            }
-            {
-                topicName &&
                 <>
-                    <Typography varient={"h6"} color={"#bdbdbd"}> {topicName} </Typography>
+                    <Typography varient={"h6"} color={"#bdbdbd"}> {selectedNeuronId} </Typography>
                     <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
-                    <InputBox
+                    <MenuField
                         disabled={disabled}
-                        xs={12}
-                        width={"100%"}
-                        hasError={hasError}
-                        label={"Neuron Id to Follow"}
-                        rows={1}
-                        onChange={(e) => { 
-                            setHasError(!e.target.value); 
-                            setFollowee(e.target.value)
-                        }}
-                        value={followee}
-                        allowNegative={false}
-                        maxDecimalPlaces={0}
-                        format={INPUT_BOX_FORMATS.numberFormat}
+                        xs={8}
+                        display={"flex"}
+                        alignItems={"center"}
+                        justifyContent={"center"}
+                        color={CONTRAST_COLOR}
+                        label={"Topic"}
+                        MenuIcon={KeyboardArrowDownIcon}
+                        menuItemProps={neuronTopicItemProps}
                     />
-                </>
-            }
-            { isReadyToSubmit && !disabled &&
-                <>
-                    <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"} position={"fixed"} bottom={"10px"} width={"100%"} >
-                        <ButtonField
-                            disabled={disabled}
-                            Icon={DoneIcon}
-                            color={BACKGROUND_COLOR}
-                            gridSx={{ width: "230px", backgroundColor: CONTRAST_COLOR }}
-                            text={'Submit Proposal'}
-                            onClick={submitProposal}
-                        />
-                    </Grid>
+               
+                    { topicName &&
+                        <>
+                            <Typography varient={"h6"} color={"#bdbdbd"}> {topicName} </Typography>
+                            <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
+                            <InputBox
+                                disabled={disabled}
+                                xs={12}
+                                width={"100%"}
+                                hasError={hasError}
+                                label={"Neuron Id to Follow"}
+                                rows={1}
+                                onChange={(e) => { 
+                                    setHasError(!e.target.value); 
+                                    setFollowee(e.target.value)
+                                }}
+                                value={followee}
+                                allowNegative={false}
+                                maxDecimalPlaces={0}
+                                format={INPUT_BOX_FORMATS.numberFormat}
+                            />
+                        
+                            { !hasError && !disabled &&
+                                <>
+                                    <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"} position={"fixed"} bottom={"10px"} width={"100%"} >
+                                        <ButtonField
+                                            disabled={disabled}
+                                            Icon={DoneIcon}
+                                            color={BACKGROUND_COLOR}
+                                            gridSx={{ width: "230px", backgroundColor: CONTRAST_COLOR }}
+                                            text={'Submit Proposal'}
+                                            onClick={submitProposal}
+                                        />
+                                    </Grid>
+                                </>
+                            }
+                        </>
+                    }
                 </>
             }
         </Grid>

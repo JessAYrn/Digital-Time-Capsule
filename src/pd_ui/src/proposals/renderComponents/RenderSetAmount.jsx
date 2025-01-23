@@ -18,11 +18,9 @@ const SetAmount = (props) => {
     const {onSubmitProposal, action, payload, disabled, finalized} = props;
     const [amount, setAmount] = useState(payload?.amount || payload?.amount === BigInt(0) ? fromE8s(parseInt(payload?.amount)) : null);
     const [hasError, setHasError] = useState(!disabled);
-    const [isReadyToSubmit, setIsReadyToSubmit] = useState(false);
 
     const { treasuryState, homePageState } = useContext(AppContext);
 
-    useEffect(() => { setIsReadyToSubmit(!!amount && !hasError); }, [amount]);
 
     const {hypotheticalLabels, hypotheticalDatasets} = useMemo(() => {
         if(action !== PROPOSAL_ACTIONS.CreateNeuron || finalized) return {};
@@ -56,8 +54,12 @@ const SetAmount = (props) => {
                 width={"100%"}
                 hasError={hasError}
                 label={"Amount"}
-                placeHolder={"Amount"}
-                onChange={(e) => {setHasError(!e.target.value); setAmount(parseFloat(e.target.value));}}
+                placeHolder={"0 ICP"}
+                onChange={(e) => {
+                    const parsedValue = parseFloat(e.target.value);
+                    setHasError(Object.is(parsedValue, NaN) || parsedValue === 0); 
+                    setAmount(parsedValue);
+                }}
                 allowNegative={false}
                 maxDecimalPlaces={8}
                 format={INPUT_BOX_FORMATS.numberFormat}
@@ -65,22 +67,22 @@ const SetAmount = (props) => {
                 suffix={" ICP"}
             />
             {!!hypotheticalDatasets && !!hypotheticalLabels &&
-                    <> 
-                        <Divider sx={{...DIVIDER_SX, marginTop: "60px", marginBottom: "60px"}} />
-                        <Typography variant="h6">Voting Power Distribution If Approved: </Typography>
-                        <Graph
-                            height={"426px"}
-                            withoutPaper={true}
-                            type={CHART_TYPES.pie}
-                            datasets={hypotheticalDatasets}
-                            labels={hypotheticalLabels}
-                            maintainAspectRatio={false}
-                            hideButton1={true}
-                            hideButton2={true}
-                        />  
-                    </>
-                    }
-            {isReadyToSubmit && !disabled &&
+                <> 
+                    <Divider sx={{...DIVIDER_SX, marginTop: "60px", marginBottom: "60px"}} />
+                    <Typography variant="h6">Voting Power Distribution If Approved: </Typography>
+                    <Graph
+                        height={"426px"}
+                        withoutPaper={true}
+                        type={CHART_TYPES.pie}
+                        datasets={hypotheticalDatasets}
+                        labels={hypotheticalLabels}
+                        maintainAspectRatio={false}
+                        hideButton1={true}
+                        hideButton2={true}
+                    />  
+                </>
+            }
+            {!hasError && !disabled &&
                 <>
                     <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"} position={"fixed"} bottom={"10px"} width={"100%"} >
                         <ButtonField

@@ -12,17 +12,16 @@ const DissolveOrDisburseNeuron = (props) => {
     const { onSubmitProposal, action, payload, disabled } = props;
     const { treasuryState } = useContext(AppContext);
     const [selectedNeuronId, setSelectedNeuronId] = useState(payload?.neuronId?.toString());
-    const [isReadyToSubmit, setIsReadyToSubmit] = useState(false);
 
-    const neuronMenuItemProps = treasuryState?.neurons?.icp?.map(([neuronId, neuronData]) => {
+    const neuronMenuItemProps = treasuryState?.neurons?.icp?.filter(([neuronId, {neuronInfo}]) => {
+        return !!neuronInfo;
+    }).map(([neuronId, neuronData]) => {
         return {
             text: neuronId,  
             onClick: () => setSelectedNeuronId(neuronId),
             selected: neuronId === selectedNeuronId
         }
     });
-
-    useEffect(() => {setIsReadyToSubmit(!!selectedNeuronId)}, [selectedNeuronId])
 
     const submitProposal = async () => {
         await onSubmitProposal({[action]: {neuronId: BigInt(selectedNeuronId)}});
@@ -41,21 +40,22 @@ const DissolveOrDisburseNeuron = (props) => {
                 MenuIcon={KeyboardArrowDownIcon}
                 menuItemProps={neuronMenuItemProps}
             />
-            {selectedNeuronId && <Typography varient={"h6"} color={"#bdbdbd"}> {selectedNeuronId} </Typography>}
-            { isReadyToSubmit && !disabled &&
+            {selectedNeuronId && 
                 <>
-                    <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"} position={"fixed"} bottom={"10px"} width={"100%"} >
-                    <ButtonField
-                        disabled={disabled}
-                        Icon={DoneIcon}
-                        color={BACKGROUND_COLOR}
-                        gridSx={{ width: "230px", backgroundColor: CONTRAST_COLOR }}
-                        text={'Submit Proposal'}
-                        onClick={submitProposal}
-                        />
-                    </Grid>     
+                    <Typography varient={"h6"} color={"#bdbdbd"}> {selectedNeuronId} </Typography>
+                    { !disabled &&
+                        <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"} position={"fixed"} bottom={"10px"} width={"100%"} >
+                            <ButtonField
+                                disabled={disabled}
+                                Icon={DoneIcon}
+                                color={BACKGROUND_COLOR}
+                                gridSx={{ width: "230px", backgroundColor: CONTRAST_COLOR }}
+                                text={'Submit Proposal'}
+                                onClick={submitProposal}
+                                />
+                        </Grid>     
+                    }
                 </>
-                    
             }
         </Grid>
     );

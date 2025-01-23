@@ -43,15 +43,15 @@ const CancelFundingCampaign = (props) => {
             <>
                 <Typography varient={"h6"} color={"#bdbdbd"}> Funding Campaign Selected: {fundingCampaignId} </Typography>
                 {!disabled && 
-                <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"} position={"fixed"} bottom={"10px"} width={"100%"} >
-                <ButtonField
-                    disabled={disabled}
-                    color={BACKGROUND_COLOR}
-                    gridSx={{ width: "230px", backgroundColor: CONTRAST_COLOR }}
-                    text={'Submit Proposal'}
-                    onClick={submitProposal}
-                />
-                </Grid>
+                    <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"} position={"fixed"} bottom={"10px"} width={"100%"} >
+                        <ButtonField
+                            disabled={disabled}
+                            color={BACKGROUND_COLOR}
+                            gridSx={{ width: "230px", backgroundColor: CONTRAST_COLOR }}
+                            text={'Submit Proposal'}
+                            onClick={submitProposal}
+                        />
+                    </Grid>
                 }
             </>
         }

@@ -34,7 +34,7 @@ const WithdrawFromMultiSigWallet = (props) => {
                 onChange={(e) => {setHasError_1(!e.target.value || !principalHasProperFormat(e.target.value)); setTo(e.target.value);}}
                 value={to}
             />
-            {!!to && 
+            {!hasError_1 && 
                 <>
                     <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
                     <InputBox
@@ -43,26 +43,31 @@ const WithdrawFromMultiSigWallet = (props) => {
                         hasError={hasError_2}
                         label={"Amount"}
                         placeHolder={"Amount"}
-                        onChange={(e) => {setHasError_2(!e.target.value); setAmount(parseFloat(e.target.value));}}
+                        onChange={(e) => {
+                            const parsedValue = parseFloat(e.target.value);
+                            setHasError_2(Object.is(parsedValue, NaN) || parsedValue === 0);
+                            setAmount(parsedValue);
+                        }}
                         allowNegative={false}
                         maxDecimalPlaces={8}
                         format={INPUT_BOX_FORMATS.numberFormat}
                         value={amount}
                         suffix={" ICP"}
                     />
-                </>
-            }
-            {isReadyToSubmit && !disabled &&
-                <>
-                    <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"} position={"fixed"} bottom={"10px"} width={"100%"} >
-                        <ButtonField
-                            Icon={DoneIcon}
-                            color={BACKGROUND_COLOR}
-                            gridSx={{ width: "230px", backgroundColor: CONTRAST_COLOR }}
-                            text={'Submit Proposal'}
-                            onClick={submitProposal}
-                        />
-                    </Grid>
+                    {!hasError_2 && !disabled &&
+                        <>
+                            <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"} position={"fixed"} bottom={"10px"} width={"100%"} >
+                                <ButtonField
+                                    Icon={DoneIcon}
+                                    color={BACKGROUND_COLOR}
+                                    gridSx={{ width: "230px", backgroundColor: CONTRAST_COLOR }}
+                                    text={'Submit Proposal'}
+                                    onClick={submitProposal}
+                                />
+                            </Grid>
+                        </>
+                    }
+                    
                 </>
             }
         </Grid>

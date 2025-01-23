@@ -1,4 +1,4 @@
-import React, {useState, useContext, useEffect, useMemo} from 'react';
+import React, {useState, useContext, useMemo} from 'react';
 import MenuField from '../../components/MenuField';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { AppContext } from '../../Context';
@@ -7,7 +7,7 @@ import { Typography } from '@mui/material';
 import DoneIcon from '@mui/icons-material/Done';
 import InputBox from '../../components/InputBox';
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
-import { INPUT_BOX_FORMATS, CHART_TYPES, GRAPH_DISPLAY_LABELS } from '../../functionsAndConstants/Constants';
+import { INPUT_BOX_FORMATS, CHART_TYPES } from '../../functionsAndConstants/Constants';
 import { getHypotheticalVotingPowerIncreaseFromIncreasedDissolveDelay } from '../../proposals/utils';
 import Graph, { getLabelsAndDataSetsInChartFormat, sortAndReduceDataMapArray } from '../../components/Chart';
 import { daysToSeconds, fromE8s, secondsToDays } from '../../functionsAndConstants/Utils';
@@ -20,7 +20,6 @@ const IncreaseDissolveDelay = (props) => {
     const [selectedNeuronId, setSelectedNeuronId] = useState(payload?.neuronId?.toString());
     const [additionalDissolveDelaySeconds, setAdditionalDissolveDelaySeconds] = useState(parseInt(payload?.additionalDissolveDelaySeconds));
     const [hasError, setHasError] = useState(!disabled);
-    const [isReadyToSubmit, setIsReadyToSubmit] = useState(false);
 
     const neuronMenuItemProps = treasuryState?.neurons?.icp?.filter(([neuronId, neuronData]) => {
         return !!neuronData.neuronInfo
@@ -41,8 +40,6 @@ const IncreaseDissolveDelay = (props) => {
         const maxAdditionalDissolveDelaySeconds = Math.floor(maxDissolveDelaySecondsPossible - parseInt(dissolve_delay_seconds));
         return {maxAdditionalDissolveDelaySeconds, selectedNeuronData};
     }, [selectedNeuronId]);
-
-    useEffect(() => {setIsReadyToSubmit(!!selectedNeuronId && additionalDissolveDelaySeconds && !hasError )}, [selectedNeuronId, additionalDissolveDelaySeconds]);
 
     const submitProposal = async () => {
         await onSubmitProposal({[action]: {neuronId: BigInt(selectedNeuronId), additionalDissolveDelaySeconds}});
@@ -85,55 +82,56 @@ const IncreaseDissolveDelay = (props) => {
                 menuItemProps={neuronMenuItemProps}
             />
             {selectedNeuronId && 
-            <>
-                <Typography varient={"h6"} color={"#bdbdbd"}> {selectedNeuronId} </Typography>
-                <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
-                <InputBox
-                    width={"100%"}
-                    hasError={hasError}
-                    disabled={disabled}
-                    label={"Additional Dissolve Delay Days"}
-                    placeHolder={`Max: ${secondsToDays(maxAdditionalDissolveDelaySeconds)} Days`}
-                    onChange={(e) => { setHasError(!e.target.value || daysToSeconds(parseInt(e.target.value)) > maxAdditionalDissolveDelaySeconds); setAdditionalDissolveDelaySeconds(daysToSeconds(parseInt(e.target.value))); }}
-                    allowNegative={false}
-                    maxDecimalPlaces={0}
-                    format={INPUT_BOX_FORMATS.numberFormat}
-                    value={secondsToDays(additionalDissolveDelaySeconds)}
-                    suffix={" Days"}
-                />
-            </>
-            }
-            {!!hypotheticalDatasets && !!hypotheticalLabels &&
-            <> 
-                <Divider sx={{...DIVIDER_SX, marginTop: "60px", marginBottom: "60px"}} />   
-                <Typography variant="h6">Voting Power Distribution If Approved: </Typography>
-                <Graph
-                    height={"426px"}
-                    withoutPaper={true}
-                    type={CHART_TYPES.pie}
-                    datasets={hypotheticalDatasets}
-                    labels={hypotheticalLabels}
-                    maintainAspectRatio={false}
-                    hideButton1={true}
-                    hideButton2={true}
-                />  
-            </>
-            }
-            { !!isReadyToSubmit && !disabled &&
                 <>
-                    <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"} position={"fixed"} bottom={"10px"} width={"100%"} >
-                        <ButtonField
-                            Icon={DoneIcon}
-                            color={BACKGROUND_COLOR}
-                            gridSx={{ width: "230px", backgroundColor: CONTRAST_COLOR }}
-                            disabled={disabled}
-                            text={'Submit Proposal'}
-                            onClick={submitProposal}
-                        />
-                    </Grid>
+                    <Typography varient={"h6"} color={"#bdbdbd"}> {selectedNeuronId} </Typography>
+                    <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
+                    <InputBox
+                        width={"100%"}
+                        hasError={hasError}
+                        disabled={disabled}
+                        label={"Additional Dissolve Delay Days"}
+                        placeHolder={`Max: ${secondsToDays(maxAdditionalDissolveDelaySeconds)} Days`}
+                        onChange={(e) => { 
+                            const parsedValue = parseInt(e.target.value);
+                            setHasError(Object.is(parsedValue, NaN) || parsedValue === 0 || daysToSeconds(parsedValue) > maxAdditionalDissolveDelaySeconds); 
+                            setAdditionalDissolveDelaySeconds(daysToSeconds(parsedValue)); 
+                        }}
+                        allowNegative={false}
+                        maxDecimalPlaces={0}
+                        format={INPUT_BOX_FORMATS.numberFormat}
+                        value={secondsToDays(additionalDissolveDelaySeconds)}
+                        suffix={" Days"}
+                    />
+                    {!!hypotheticalDatasets && !!hypotheticalLabels &&
+                        <> 
+                            <Divider sx={{...DIVIDER_SX, marginTop: "60px", marginBottom: "60px"}} />   
+                            <Typography variant="h6">Voting Power Distribution If Approved: </Typography>
+                            <Graph
+                                height={"426px"}
+                                withoutPaper={true}
+                                type={CHART_TYPES.pie}
+                                datasets={hypotheticalDatasets}
+                                labels={hypotheticalLabels}
+                                maintainAspectRatio={false}
+                                hideButton1={true}
+                                hideButton2={true}
+                            />  
+                        </>
+                    }
+                    { !hasError && !disabled &&
+                        <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"} position={"fixed"} bottom={"10px"} width={"100%"} >
+                            <ButtonField
+                                Icon={DoneIcon}
+                                color={BACKGROUND_COLOR}
+                                gridSx={{ width: "230px", backgroundColor: CONTRAST_COLOR }}
+                                disabled={disabled}
+                                text={'Submit Proposal'}
+                                onClick={submitProposal}
+                            />
+                        </Grid>
+                    }
                 </>
             }
-            
         </Grid>
 
     );

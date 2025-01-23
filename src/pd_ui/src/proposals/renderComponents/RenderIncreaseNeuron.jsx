@@ -27,9 +27,6 @@ const IncreaseNeuron = (props) => {
     const [hasError, setHasError] = useState(!disabled);
     const [onBehalfOf, setOnBehalfOf] = useState(payload?.onBehalfOf || []);
     const [showOnBehalfOfDropdown, setShowOnBehalfOfDropdown] = useState(payload?.onBehalfOf?.length);
-    const [isReadyToSubmit, setIsReadyToSubmit] = useState(false);
-
-    useEffect(() => { setIsReadyToSubmit(!!amount && !hasError && selectedNeuronId); }, [amount, selectedNeuronId]);
 
     const {neuronMenuItemProps, onBehalfOfMenuItemProps} = useMemo(() => {
 
@@ -110,7 +107,11 @@ const IncreaseNeuron = (props) => {
                         hasError={hasError}
                         label={"Amount"}
                         placeHolder={"Amount"}
-                        onChange={(e) => { setHasError(!e.target.value); setAmount(parseFloat(e.target.value)); }}
+                        onChange={(e) => { 
+                            const parsedValue = parseFloat(e.target.value);
+                            setHasError(Object.is(parsedValue, NaN) || parsedValue === 0); 
+                            setAmount(parsedValue); 
+                        }}
                         allowNegative={false}
                         maxDecimalPlaces={8}
                         format={INPUT_BOX_FORMATS.numberFormat}
@@ -136,50 +137,52 @@ const IncreaseNeuron = (props) => {
                         />
                     </FormGroup>}
                     {!!showOnBehalfOfDropdown &&
-                        <MenuField
-                            sx={{marginBottom: "20px"}}
-                            xs={8}
-                            disabled={disabled}
-                            display={"flex"}
-                            alignItems={"center"}
-                            justifyContent={"center"}
-                            color={CONTRAST_COLOR}
-                            label={"Who to credit this stake to?"}
-                            MenuIcon={KeyboardArrowDownIcon}
-                            menuItemProps={onBehalfOfMenuItemProps}
-                        />
+                        <>
+                            <MenuField
+                                sx={{marginBottom: "20px"}}
+                                xs={8}
+                                disabled={disabled}
+                                display={"flex"}
+                                alignItems={"center"}
+                                justifyContent={"center"}
+                                color={CONTRAST_COLOR}
+                                label={"Who to credit this stake to?"}
+                                MenuIcon={KeyboardArrowDownIcon}
+                                menuItemProps={onBehalfOfMenuItemProps}
+                            />
+                            {!!onBehalfOf.length && <Typography marginBottom={"20px"} varient={"h6"} color={"#bdbdbd"}> {homePageState?.canisterData?.userNames[onBehalfOf[0]]} </Typography>}
+                        </>
                     }
-                    {!!onBehalfOf.length && <Typography marginBottom={"20px"} varient={"h6"} color={"#bdbdbd"}> {homePageState?.canisterData?.userNames[onBehalfOf[0]]} </Typography>}
                     {!!hypotheticalDatasets && !!hypotheticalLabels &&
-                    <> 
-                        <Divider sx={{...DIVIDER_SX, marginTop: "60px", marginBottom: "60px"}} />
-                        <Typography variant="h6">Voting Power Distribution If Approved: </Typography>
-                        <Graph
-                            height={"426px"}
-                            withoutPaper={true}
-                            type={CHART_TYPES.pie}
-                            datasets={hypotheticalDatasets}
-                            labels={hypotheticalLabels}
-                            maintainAspectRatio={false}
-                            hideButton1={true}
-                            hideButton2={true}
-                        />  
-                    </>
+                        <> 
+                            <Divider sx={{...DIVIDER_SX, marginTop: "60px", marginBottom: "60px"}} />
+                            <Typography variant="h6">Voting Power Distribution If Approved: </Typography>
+                            <Graph
+                                height={"426px"}
+                                withoutPaper={true}
+                                type={CHART_TYPES.pie}
+                                datasets={hypotheticalDatasets}
+                                labels={hypotheticalLabels}
+                                maintainAspectRatio={false}
+                                hideButton1={true}
+                                hideButton2={true}
+                            />  
+                        </>
                     }
-                </>
-            }
-            {isReadyToSubmit && !disabled && 
-                <>
-                    <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"} position={"fixed"} bottom={"10px"} width={"100%"} >
-                        <ButtonField
-                            Icon={DoneIcon}
-                            color={BACKGROUND_COLOR}
-                            gridSx={{ width: "230px", backgroundColor: CONTRAST_COLOR }}
-                            disabled={disabled}
-                            text={'Submit Proposal'}
-                            onClick={submitProposal}
-                        />
-                    </Grid>
+                    {!hasError && (!showOnBehalfOfDropdown || (showOnBehalfOfDropdown && !!onBehalfOf.length)) && !disabled && 
+                        <>
+                            <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"} position={"fixed"} bottom={"10px"} width={"100%"} >
+                                <ButtonField
+                                    Icon={DoneIcon}
+                                    color={BACKGROUND_COLOR}
+                                    gridSx={{ width: "230px", backgroundColor: CONTRAST_COLOR }}
+                                    disabled={disabled}
+                                    text={'Submit Proposal'}
+                                    onClick={submitProposal}
+                                />
+                            </Grid>
+                        </>
+                    }
                 </>
             }
         </Grid>
