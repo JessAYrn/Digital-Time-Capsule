@@ -49,7 +49,7 @@ const RenderNeuronsSection = (props) => {
         return (
             <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} padding={0} flexDirection={"column"} paddingTop={"20px"}>
                 <Typography textAlign={"center"} >
-                    {"There are currently no neurons staked in this treasury. Neurons are used to stake ICP which allows this DAO to earn rewards and participate in the governance of the ICP blockchain."}
+                    {"There are currently no neurons staked in this treasury. Neurons are used to stake ICP which allows this DAO to earn rewards and participate in the governance of the ICP blockchain. Users may also leverage their staked ICP to borrow funds from the treasury."}
                     </Typography>
                 <ButtonField gridSx={{backgroundColor: CONTRAST_COLOR, marginTop: "20px"}} color={BACKGROUND_COLOR} text={"Create Neuron"} onClick={onCreateNeuron}/>
             </Grid>
