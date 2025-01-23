@@ -7,15 +7,24 @@ const QrReaderContent = (props) => {
 
     const { onCloseQrReader } = props;
 
+    const onResult = (result, error) => {
+        if (!!result) {
+            console.log(result)
+            onCloseQrReader({recipientAddress: result?.text})
+        }   
+
+        if (!!error)  console.log(error);
+        
+    }
+    
+
     return(
-        <>
+        <Grid width={"100%"} display={"flex"} flexDirection={"column"} justifyContent={"center"} alignItems={"center"}>
             <QrReader
                 constraints = {{ facingMode: "rear" }}
-                onResult={(result, error) => {
-                    if (!!result) { onCloseQrReader({recipientAddress: result?.text}); }
-                    if (!!error) { console.log(error); }
-                }}
-                style={{ height: '50%' }}
+                onResult={onResult}
+                videoStyle={{ height: '275px', width: '275px' }}
+                containerStyle={{ width: '275px' }}
             />
                 <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} position={"fixed"} bottom={"10px"}>
                     <ButtonField
@@ -23,7 +32,7 @@ const QrReaderContent = (props) => {
                         onClick={onCloseQrReader}
                     />
                 </Grid>
-        </>
+        </Grid>
     )
 };
 
