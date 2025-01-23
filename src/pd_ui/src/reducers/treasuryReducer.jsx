@@ -4,8 +4,8 @@ export const treasuryTypes={
     SET_TREASURY_DATA: "SET_TREASURY_DATA",
     SET_DATA_HAS_BEEN_LOADED: "SET_DATA_HAS_BEEN_LOADED",
     SET_IS_LOADING:"SET_IS_LOADING",
-    SET_TREASURY_BALANCES_DATA: "SET_TREASURY_BALANCES_DATA"
-
+    SET_TREASURY_BALANCES_DATA: "SET_TREASURY_BALANCES_DATA",
+    SET_USER_TREASURY_DATA: "SET_USER_TREASURY_DATA"
 }
 
 export const treasuryPageInitialState={
@@ -15,13 +15,19 @@ export const treasuryPageInitialState={
     stakes: [],
     daoWalletBalance: 0,
     daoIcpAccountId: "" ,
-    balancesData: []
+    balancesData: [],
+    userTreasuryData: {}
 }
 
 const changeValue=(state=treasuryPageInitialState, action)=>{
     const{actionType,payload}=action;
 
     switch(actionType){
+        case treasuryTypes.SET_USER_TREASURY_DATA:
+            state.userTreasuryData = payload;
+            return {
+                ...state
+            }
         case treasuryTypes.SET_ENTIRE_TREASURY_REDUX_STATE:
             state = payload;
             return {

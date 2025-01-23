@@ -647,7 +647,8 @@ shared actor class User() = this {
         };
     };
 
-    public shared({caller}) func updateAutomatedSettings({automaticallyContributeToLoans: ?Bool; automaticallyRepayLoans: ?Bool;}): async () {
+    public shared({caller}) func updateAutomatedSettings({automaticallyContributeToLoans: ?Bool; automaticallyRepayLoans: ?Bool;}): 
+    async {automaticallyContributeToLoans: ?Bool; automaticallyRepayLoans: ?Bool;}  {
         let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v4.treasuryCanisterPrincipal);
         await treasuryCanister.updateAutomatedSettings({userPrinciapl = caller; automaticallyContributeToLoans; automaticallyRepayLoans});
     };

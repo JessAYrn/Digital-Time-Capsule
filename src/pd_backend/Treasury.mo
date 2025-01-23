@@ -299,12 +299,14 @@ shared actor class Treasury (principal : Principal) = this {
         await createTreasuryData_(principal);
     };
 
-    public shared({caller}) func updateAutomatedSettings({userPrinciapl: Principal; automaticallyContributeToLoans: ?Bool; automaticallyRepayLoans: ?Bool;}): async () {
+    public shared({caller}) func updateAutomatedSettings({userPrinciapl: Principal; automaticallyContributeToLoans: ?Bool; automaticallyRepayLoans: ?Bool;}):
+    async {automaticallyContributeToLoans: ?Bool; automaticallyRepayLoans: ?Bool;} {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         let userPrincipalAsText = Principal.toText(userPrinciapl);
         let ?userTreasuryData = usersTreasuryDataMap.get(userPrincipalAsText) else throw Error.reject("User not found.");
         let newUserTreasuryData = {userTreasuryData with automaticallyContributeToLoans; automaticallyRepayLoans};
         usersTreasuryDataMap.put(userPrincipalAsText, newUserTreasuryData);
+        return {automaticallyContributeToLoans; automaticallyRepayLoans};
     };
     
     // revised to conform to new data structure
