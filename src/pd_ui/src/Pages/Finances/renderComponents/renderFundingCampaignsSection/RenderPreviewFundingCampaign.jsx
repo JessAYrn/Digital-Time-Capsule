@@ -50,6 +50,8 @@ const RenderPreviewFundingCampaign = (props) => {
     const onClickAddLiquidityOrRepayFundingCampaign = () => {
         setModalProps({
             flexDirection: "column",
+            fullScreen: true,
+            headerComponent: <Typography variant="h6">{fundingCampaign?.funded ? "Repay Funding Campaign" : "Add Funding"}</Typography>,
             components: [
                 <RenderAddLiquidityOrRepayFundingCampaign campaignId={campaignId} actionType={fundingCampaign?.funded ? ACTION_TYPES.repayFundingCampaign : ACTION_TYPES.addLiquidity}/>
             ],

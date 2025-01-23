@@ -39,8 +39,7 @@ const AddLiquidityOrRepayFundingCampaign = (props) => {
     };
 
     return(
-        <Grid xs={12} display="flex" justifyContent="center" alignItems="center" flexDirection="column">
-            <Typography variant={"h6"} color={"#bdbdbd"}> {actionType === ACTION_TYPES.addLiquidity ? "Add Funding" : "Repay Funding"} </Typography>
+        <Grid xs={12} width={"100%"} display="flex" justifyContent="center" alignItems="center" flexDirection="column">
             <DataField label={"Available Balance: "} text={`${fromE8s(availableBalance) } ICP`} isLoading={!treasuryState.dataHasBeenLoaded} disabled={true} transparentBackground={true}/>
             <InputBox
                 label={actionType === ACTION_TYPES.addLiquidity ? "Amount to Add" : "Amount to Repay"}
@@ -60,13 +59,15 @@ const AddLiquidityOrRepayFundingCampaign = (props) => {
                 suffix={" ICP"}
             />
             { !hasError &&
-                <ButtonField
-                    Icon={DoneIcon}
-                    gridSx={{ width: "100%", backgroundColor: CONTRAST_COLOR}}
-                    color={BACKGROUND_COLOR}
-                    text={"Submit"}
-                    onClick={onSubmit}
-                />
+                <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"} position={"fixed"} bottom={"10px"} width={"100%"} >
+                    <ButtonField
+                        Icon={DoneIcon}
+                        gridSx={{ width: "50%", backgroundColor: CONTRAST_COLOR}}
+                        color={BACKGROUND_COLOR}
+                        text={"Submit"}
+                        onClick={onSubmit}
+                    />
+                </Grid>
             }
         </Grid>
     )
