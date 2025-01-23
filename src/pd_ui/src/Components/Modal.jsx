@@ -14,6 +14,7 @@ const ModalComponent = (props) => {
   const { open, handleClose, handleReturn, components, flexDirection, fullScreen, headerComponent } = props
   return (
       <Dialog 
+      disableScrollLock={false}
       fullScreen={fullScreen}
       open={open} 
       onClose={handleClose} 
