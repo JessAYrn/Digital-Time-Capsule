@@ -6,7 +6,7 @@ import Typography from "@mui/material/Typography";
 import ButtonField from "../Button";
 import { BACKGROUND_COLOR, CONTRAST_COLOR } from "../../Theme";
 import { useScroll, useSpring, animated } from "@react-spring/web";
-import TransactOptions from "../../transact/TransactOptions";
+import TransactOptions from "../../transact/RenderTransactOptions";
 
 const ActionButton = (props) => {
 

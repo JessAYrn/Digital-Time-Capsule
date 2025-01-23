@@ -1,16 +1,16 @@
 import React, {useContext, useState, useMemo} from "react";
 import Grid from "@mui/material/Unstable_Grid2";
 import { Divider, Typography } from "@mui/material";
-import DataField from "../components/DataField";
-import { AppContext } from "../Context";
-import InputBox from "../components/InputBox";
-import ButtonField from "../components/Button";
-import { INPUT_BOX_FORMATS } from "../functionsAndConstants/Constants";
-import { WHITE_COLOR, CONTRAST_COLOR, DIVIDER_SX, BACKGROUND_COLOR } from "../Theme";
-import { isANumber, fromE8s, toE8s, isANumber,   } from "../functionsAndConstants/Utils";
+import DataField from "../../components/DataField";
+import { AppContext } from "../../Context";
+import InputBox from "../../components/InputBox";
+import ButtonField from "../../components/Button";
+import { INPUT_BOX_FORMATS } from "../../functionsAndConstants/Constants";
+import { WHITE_COLOR, CONTRAST_COLOR, DIVIDER_SX, BACKGROUND_COLOR } from "../../Theme";
+import { isANumber, fromE8s, toE8s, isANumber,   } from "../../functionsAndConstants/Utils";
 import DoneIcon from '@mui/icons-material/Done';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import MenuField from "../components/MenuField";
+import MenuField from "../../components/MenuField";
 
 export const ACTIONS = {
     DEPOSIT: "deposit",

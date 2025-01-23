@@ -1,9 +1,9 @@
 import React, { useContext, useMemo} from "react";
 import Grid from "@mui/material/Unstable_Grid2";
 import { Typography } from "@mui/material";
-import { AppContext } from "../Context";
-import ButtonField from "../components/Button";
-import { CONTRAST_COLOR } from "../Theme";
+import { AppContext } from "../../Context";
+import ButtonField from "../../components/Button";
+import { CONTRAST_COLOR } from "../../Theme";
 
 const BuyCrypto = (props) => {
 

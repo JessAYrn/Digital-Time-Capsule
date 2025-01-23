@@ -1,6 +1,6 @@
 import React, {useContext} from "react";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
-import { AppContext } from "../Context";
+import { AppContext } from "../../Context";
 
 const DisplayQrCode = (props) => {
     const { walletState } = useContext(AppContext);

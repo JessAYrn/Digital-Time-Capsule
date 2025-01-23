@@ -6,11 +6,11 @@ import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import ButtonField from "../components/Button";
 import { Typography } from "@mui/material";
 import { AppContext } from "../Context";
-import SendFromWallet from "./SendFromWallet";
+import SendFromWallet from "./transactOptions/RenderSendFromWallet";
 import Typography from "@mui/material/Typography";
-import RenderReceiveToWallet from "./RenderReceiveToWallet";
-import RenderTransactWithTreasury, {ACTIONS} from "./RenderTransactWithTreasury";
-import RenderBuyCrypto from "./RenderBuyCrypto";
+import RenderReceiveToWallet from "./transactOptions/RenderReceiveToWallet";
+import RenderTransactWithTreasury, {ACTIONS} from "./transactOptions/RenderTransactWithTreasury";
+import RenderBuyCrypto from "./transactOptions/RenderBuyCrypto";
 
 
 const TransactOptions = () => {

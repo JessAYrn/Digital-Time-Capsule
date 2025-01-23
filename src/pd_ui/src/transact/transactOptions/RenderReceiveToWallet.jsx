@@ -1,13 +1,13 @@
 import React, {useContext} from 'react';
-import { AppContext } from "../Context";
-import DataField from '../components/DataField';
+import { AppContext } from "../../Context";
+import DataField from '../../components/DataField';
 import Grid from '@mui/material/Unstable_Grid2';
-import { inTrillions, round2Decimals, shortenHexString } from '../functionsAndConstants/Utils';
+import { inTrillions, round2Decimals, shortenHexString } from '../../functionsAndConstants/Utils';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DisplayQrCode from './RenderQrCode';
-import { copyText } from '../functionsAndConstants/Utils';
+import { copyText } from '../../functionsAndConstants/Utils';
 import { Divider } from '@mui/material';
-import { CONTRAST_COLOR, DIVIDER_SX, WHITE_COLOR } from '../Theme';
+import { CONTRAST_COLOR, DIVIDER_SX, WHITE_COLOR } from '../../Theme';
 
 
 const RenderReceiveData = (props) => {
