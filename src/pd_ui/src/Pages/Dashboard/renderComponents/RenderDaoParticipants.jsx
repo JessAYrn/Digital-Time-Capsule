@@ -24,7 +24,6 @@ const RenderDaoParticipants = () => {
             return row.userPrincipal;
         });
         let result = await navigationAndApiState.backendActor.grantAccess(principals);
-        result = mapRequestsForAccessToTableRows(result);
         homePageDispatch({
             actionType: homePageTypes.SET_CANISTER_DATA,
             payload: { ...homePageState.canisterData, requestsForAccess: result }
@@ -138,7 +137,7 @@ const mapRequestsForAccessToTableRows = (requestsForAccess) => {
         return {
             id: index,
             userPrincipal: userPrincipal,
-            approvalStatus: approvalStatus
+            approvalStatus: approved
         }
     });
     return requestsForAccess_;

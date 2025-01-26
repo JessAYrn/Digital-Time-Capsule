@@ -79,13 +79,13 @@ module{
 
     public func removeFromRequestsList( principals: [Text], requestsForAccessMap:  MainTypes.RequestsForAccessMap, apiCanisterPrincipal: Principal, treasuryCanisterPrincipal: Principal) : async () { 
         let ledger: Ledger.Interface = actor(Ledger.CANISTER_ID);
-
+        let {transfer_fee} = await ledger.transfer_fee({});
+        
         func removeRequest(principal: Text): async () {
             let ?{escrowSubaccountId; } = requestsForAccessMap.get(principal) else return;
             let newUserDepositBalance = await ledger.icrc1_balance_of({owner = apiCanisterPrincipal; subaccount = ?escrowSubaccountId});
-            let {transfer_fee} = await ledger.transfer_fee({});
             if(newUserDepositBalance > Nat64.toNat(transfer_fee.e8s)){
-                ignore await ledger.icrc1_transfer({
+                ignore ledger.icrc1_transfer({
                     to = {owner = treasuryCanisterPrincipal; subaccount = null};
                     fee = ?Nat64.toNat(transfer_fee.e8s);
                     memo = null;
@@ -97,7 +97,7 @@ module{
             requestsForAccessMap.delete(principal); 
         };
 
-        for(principal in Iter.fromArray(principals)){ ignore removeRequest(principal); }; 
+        for(principal in Iter.fromArray(principals)){ await removeRequest(principal); }; 
     };
 
     public func canConfigureApp(daoMetaData: MainTypes.DaoMetaData_V4) : Bool {

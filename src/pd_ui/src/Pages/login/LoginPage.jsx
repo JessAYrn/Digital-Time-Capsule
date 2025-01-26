@@ -1,20 +1,21 @@
 import React, {useContext, useEffect, useState} from "react";
 import DataField from "../../components/DataField";
 import { homePageTypes } from "../../reducers/homePageReducer";
-import { round2Decimals, inTrillions, fromE8s } from "../../functionsAndConstants/Utils";
+import { fromE8s } from "../../functionsAndConstants/Utils";
 import Grid from '@mui/material/Unstable_Grid2';
 import { getBackendActor } from "../../functionsAndConstants/authentication";
 import { navigationAndApiTypes } from "../../reducers/navigationAndApiReducer";
 import LoginIcon from '@mui/icons-material/Login';
 import { AppContext } from "../../Context";
 import ButtonField from "../../components/Button";
-import { BACKGROUND_COLOR, CONTRAST_COLOR, DIVIDER_SX } from "../../Theme";
-import Divider from "@mui/material/Divider";
+import { BACKGROUND_COLOR, CONTRAST_COLOR,  } from "../../Theme";
 import Typography from "@mui/material/Typography";
+import RenderGreetingScreen from "./renderComponents/RenderGreetingScreen";
+
 const LoginPage = (props) => {
 
     const { navigationAndApiDispatch, homePageState, homePageDispatch } = useContext(AppContext);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     
     const handleLogin = async() => {
         setIsLoading(true);
@@ -48,13 +49,13 @@ const LoginPage = (props) => {
     },[]);
     
     return(
+        isLoading ? <RenderGreetingScreen /> :
         <Grid container columns={12} xs={12} rowSpacing={8} display="flex" justifyContent="center" alignItems="center" flexDirection={"column"}>
             <Grid xs={11} md={9} display="flex" flexDirection={"column"} justifyContent="center" alignItems="center"  marginTop={"60px"}>
                 <DataField
                     label={'This DAO Is: '}
                     className={'loginPage'}
                     text={`${homePageState.daoPublicData.daoIsPublic ? "Public":"Private"}`}
-                    isLoading={isLoading}
                     disabled={true}
                     transparentBackground={true}
                 />
@@ -62,7 +63,6 @@ const LoginPage = (props) => {
                     label={'Founded By: '}
                     className={'loginPage'}
                     text={`${homePageState.daoPublicData.daoFounder}`}
-                    isLoading={isLoading}
                     disabled={true}
                     transparentBackground={true}
                 />
@@ -70,7 +70,6 @@ const LoginPage = (props) => {
                     label={'The Cost To Enter Is: '}
                     className={'loginPage'}
                     text={`${homePageState.daoPublicData.costToEnterDao} $ICP`}
-                    isLoading={isLoading}
                     disabled={true}
                     transparentBackground={true}
                 />
