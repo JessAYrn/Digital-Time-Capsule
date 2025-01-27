@@ -84,7 +84,7 @@ const LoginPage = (props) => {
                 iconSize={'medium'}
                 />
             </Grid>
-            <Grid xs={11} display="flex" justifyContent="center" alignItems="center" padding={0} position={"fixed"} bottom={"10px"}>
+            <Grid xs={12} display="flex" justifyContent="center" alignItems="center" padding={0} position={"fixed"} maxWidth={"700px"} bottom={0}>
                 <Typography sx={{fontSize: "12px", color: CONTRAST_COLOR}}>
                     This is a Personal DAO. Get your own soon.
                 </Typography>

@@ -59,10 +59,10 @@ const AddLiquidityOrRepayFundingCampaign = (props) => {
                 suffix={" ICP"}
             />
             { !hasError &&
-                <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"} position={"fixed"} bottom={"10px"} width={"100%"} >
+                <Grid xs={12} display={"flex"} maxWidth={"700px"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"} position={"fixed"} bottom={0}  width={"100%"} >
                     <ButtonField
                         Icon={DoneIcon}
-                        gridSx={{ width: "50%", backgroundColor: CONTRAST_COLOR}}
+                        gridSx={{margin: "2.5%", width: "95%", backgroundColor: CONTRAST_COLOR}}
                         color={BACKGROUND_COLOR}
                         text={"Submit"}
                         onClick={onSubmit}

@@ -10,6 +10,7 @@ import RenderAddLiquidityOrRepayFundingCampaign, {ACTION_TYPES} from "./RenderAd
 import RenderFundingCampaignContributions from "./RenderFundingCampaignContributions";
 import { Divider } from "@mui/material";
 import { DIVIDER_SX, CONTRAST_COLOR, BACKGROUND_COLOR } from "../../../../Theme";
+import Typography from "@mui/material/Typography";
 
 const RenderFundingCampaign = (props) => {
     const { fundingCampaign, campaignId } = props;
@@ -159,9 +160,9 @@ const RenderFundingCampaign = (props) => {
             />
             <RenderFundingCampaignContributions fundingCampaign={fundingCampaign} />
             {!fundingCampaign?.settled &&
-                <Grid display={"flex"} position={"fixed"} bottom={"10px"} width={"100%"} justifyContent={"center"} alignItems={"center"} xs={12} padding={0} margin={"10px"} >
+                <Grid display={"flex"} position={"fixed"} maxWidth={"700px"} bottom={0} width={"100%"} justifyContent={"center"} alignItems={"center"} xs={12}  >
                     <ButtonField
-                    gridSx={{width: "350px", backgroundColor: CONTRAST_COLOR}}
+                    gridSx={{margin: "2.5%", width: "95%", backgroundColor: CONTRAST_COLOR}}
                     color={BACKGROUND_COLOR}
                     text={fundingCampaign?.funded ? "Repay Funding Campaign" : "Contribute To Funding Campaign"}
                     Icon={PriceCheckIcon}

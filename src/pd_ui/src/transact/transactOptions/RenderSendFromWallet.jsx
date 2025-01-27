@@ -81,16 +81,16 @@ const SendFromWallet = (props) => {
                     disabled={true}
                     transparentBackground={true}
                 />
-                <Grid display={'flex'} justifyContent={'center'} alignItems={'center'} width={"100%"} position={"fixed"} bottom={"10px"}>
+                <Grid display={'flex'} justifyContent={'center'} alignItems={'center'} width={"100%"} position={"fixed"} maxWidth={"700px"} bottom={0}>
                     <ButtonField
-                        gridSx={{margin: "20px", width: "170px", backgroundColor: CONTRAST_COLOR}}
+                        gridSx={{ margin: "2.5%", width: "40%", backgroundColor: CONTRAST_COLOR}}
                         color={BACKGROUND_COLOR}
                         sx={{width: "100%"}}
                         text={"send now"}
                         onClick={onSendICP}
                     />
                     <ButtonField
-                        gridSx={{margin: "20px", width: "170px", backgroundColor: BACKGROUND_COLOR}}
+                        gridSx={{margin: "2.5%", width: "40%", backgroundColor: BACKGROUND_COLOR}}
                         color={CONTRAST_COLOR}
                         sx={{width: "100%"}}
                         text={"edit"}
@@ -186,15 +186,14 @@ const SendFromWallet = (props) => {
                         />
                     </Grid>
                     { !hasError_2 &&
-                        <Grid display={'flex'} justifyContent={'center'} alignItems={'center'} width={"100%"} position={"fixed"} bottom={"10px"}>
+                        <Grid display={'flex'} justifyContent={'center'} alignItems={'center'} width={"100%"} maxWidth={"700px"} position={"fixed"} bottom={0}>
                                 <ButtonField
-                                gridSx={{margin: "20px", width: "50%", backgroundColor: CONTRAST_COLOR} }
-                            color={BACKGROUND_COLOR}
-                            sx={{width: "100%"}}
-                            text={"summary"}
-                            disabled={hasError_1 || hasError_2 || !amount_}
-                                onClick={onViewSummary}
-                            />
+                                gridSx={{margin: "2.5%", width: "95%", backgroundColor: CONTRAST_COLOR} }
+                                color={BACKGROUND_COLOR}
+                                text={"summary"}
+                                disabled={hasError_1 || hasError_2 || !amount_}
+                                    onClick={onViewSummary}
+                                />
                         </Grid>
                     }
                 </>

@@ -43,11 +43,9 @@ const RenderNeuron = (props) => {
             <Divider sx={{...DIVIDER_SX, marginTop: "60px", marginBottom: "60px"}}/>
             <RenderNeuronContributions contributions={contributions}/>
 
-            { !!neuronInfo && <Grid xs={12} width={"100%"} padding={0} display={"flex"} justifyContent={"center"} alignItems={"center"} position={"fixed"} bottom={"10px"}>
-                <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={6} padding={0} >
+            { !!neuronInfo && <Grid xs={12} width={"100%"} padding={0} display={"flex"} justifyContent={"center"} alignItems={"center"} position={"fixed"} bottom={0} maxWidth={"700px"}>
                     <ButtonField
-                        gridSx={{padding: "0px", backgroundColor: CONTRAST_COLOR, width: "170px", height: "44px"}}
-                        buttonGridSx={{width: "135px"}}
+                        gridSx={{ backgroundColor: CONTRAST_COLOR, margin: "2.5%", width: "40%"}}
                         color={BACKGROUND_COLOR}
                         text={"Stake"} 
                         onClick={() => openProposalForm({
@@ -55,19 +53,16 @@ const RenderNeuron = (props) => {
                             proposalPayload: {neuronId}
                         })}
                     />
-                </Grid>
-                <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={6} padding={0}>
                     <ButtonField
-                    gridSx={{padding: "0px", backgroundColor: CONTRAST_COLOR, width: "170px", height: "44px"}}
-                    buttonGridSx={{width: "135px"}}
+                    gridSx={{ margin: "2.5%", width: "40%", backgroundColor: CONTRAST_COLOR}}
                     text={"Spawn Rewards"} 
+                    sx={{fontSize: "8px"}}
                     color={BACKGROUND_COLOR}
                     onClick={() => openProposalForm({
                         proposalAction: PROPOSAL_ACTIONS.SpawnNeuron,
                         proposalPayload: {neuronId}
                     })}
                     />
-                </Grid>
             </Grid>}
         </Grid>
     );

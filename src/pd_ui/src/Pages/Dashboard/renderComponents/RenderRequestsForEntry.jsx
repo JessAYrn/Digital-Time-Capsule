@@ -9,53 +9,54 @@ import { homePageTypes} from "../../../reducers/homePageReducer"
 import { copyText, objectsAreEqual } from '../../../functionsAndConstants/Utils';
 import { BACKGROUND_COLOR, CONTRAST_COLOR } from "../../../Theme";
 
-const RenderDaoParticipants = () => {
+const RenderRequestsForEntry = () => {
 
     const { homePageState, homePageDispatch, navigationAndApiState } = useContext(AppContext);
 
-    const [usersTableIsLoading, setUsersTableIsLoading] = useState(false);
+    const [requestsTableIsLoading, setRequestsTableIsLoading] = useState(false);
 
     const [tableState, setTableState] = useState({});
 
-    const subsidize = async () => {
-        setUsersTableIsLoading(true);
-        let principals = tableState?.rowSelection?.map(rowId => {
+    const onGrantAccess = async () => {
+        setRequestsTableIsLoading(true);
+        let selectedRows = tableState.rowSelection;
+        let principals = selectedRows.map(rowId => {
             let row = tableState.rows.dataRowIdToModelLookup[rowId];
             return row.userPrincipal;
         });
-        let result = await navigationAndApiState.backendActor.updateApprovalStatus(principals, true);
-        result = mapUsersProfileDataToTableRows(result.ok);
+        let result = await navigationAndApiState.backendActor.grantAccess(principals);
         homePageDispatch({
             actionType: homePageTypes.SET_CANISTER_DATA,
-            payload: { ...homePageState.canisterData, profilesMetaData: result }
-        })
-        setUsersTableIsLoading(false);
+            payload: { ...homePageState.canisterData, requestsForAccess: result }
+        });
+        setRequestsTableIsLoading(false)
     };
 
-    const Unsubsidize = async () => {
-        setUsersTableIsLoading(true);
-        let principals = tableState?.rowSelection?.map(rowId => {
+    const onDenyAccess = async () => {
+        setRequestsTableIsLoading(true);
+        let selectedRows = tableState.rowSelection;
+        let principals = selectedRows.map(rowId => {
             let row = tableState.rows.dataRowIdToModelLookup[rowId];
             return row.userPrincipal;
         });
-        let result = await navigationAndApiState.backendActor.updateApprovalStatus(principals, false);
-        result = mapUsersProfileDataToTableRows(result.ok);
+        let result = await navigationAndApiState.backendActor.removeFromRequestsList(principals);
+        result = mapRequestsForAccessToTableRows(result);
         homePageDispatch({
             actionType: homePageTypes.SET_CANISTER_DATA,
-            payload: { ...homePageState.canisterData, profilesMetaData: result }
-        })
-        setUsersTableIsLoading(false);
+            payload: { ...homePageState.canisterData, requestsForAccess: result }
+        });
+        setRequestsTableIsLoading(false);
     };
 
     return (
-        <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"} flexDirection={"column"} padding={0} maxWidth={"700px"}>
+        <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"} flexDirection={"column"} padding={0}>
             <DataTable
                 onCellClick={(e) => { if(e === "yes" || e === "no") return; else copyText(e)}}
                 transparent={true}
                 checkboxSelection={true}
                 disabled={!homePageState.canisterData.isAdmin}
-                columns={usersTableColumns}
-                rows={mapUsersProfileDataToTableRows(homePageState.canisterData.profilesMetaData)}
+                columns={requestsForAccessTableColumns}
+                rows={mapRequestsForAccessToTableRows(homePageState.canisterData.requestsForAccess)}
                 onStateChange={(newState) => { if(!objectsAreEqual(tableState, newState)) setTableState(newState) }}
             />
             {
@@ -64,65 +65,58 @@ const RenderDaoParticipants = () => {
                         <ButtonField
                             gridSx={{margin: "2.5%", width: "40%", backgroundColor: CONTRAST_COLOR}}
                             color={BACKGROUND_COLOR}
-                            onClick={subsidize}
+                            onClick={onGrantAccess}
                             Icon={CheckIcon}
-                            text={"Subsidize"}
+                            text={"Approve"}
                             disabled={!homePageState.canisterData.isAdmin}
-                            isLoading={usersTableIsLoading}
+                            isLoading={requestsTableIsLoading}
                             iconSize={"medium"}
                         />
                         <ButtonField
                             gridSx={{margin: "2.5%", width: "40%", backgroundColor: BACKGROUND_COLOR}}
                             color={CONTRAST_COLOR}
-                            onClick={Unsubsidize}
+                            onClick={onDenyAccess}
                             Icon={ClearIcon}
-                            text={"Unsubsidize"}
+                            text={"Deny"}
                             disabled={!homePageState.canisterData.isAdmin}
-                            isLoading={usersTableIsLoading}
+                            isLoading={requestsTableIsLoading}
                             iconSize={"medium"}
                         />
                     </Grid>
             }
         </Grid>
     )
+
 };
 
-export default RenderDaoParticipants;
+export default RenderRequestsForEntry;
 
-
-const mapUsersProfileDataToTableRows = (usersProfileData) => {
-    const sortedUsersProfileData = usersProfileData.sort((a, b) => a?.userName?.localeCompare(b?.userName));
-    console.log(sortedUsersProfileData);
-    const profileMetaData = sortedUsersProfileData.map((metaData, index) => {
+const mapRequestsForAccessToTableRows = (requestsForAccess) => {
+    const requestsForAccess_ = requestsForAccess.map(([userPrincipal, {approved}], index) => {
         return {
             id: index,
-            ...metaData
+            userPrincipal: userPrincipal,
+            approvalStatus: approved
         }
     });
-    return profileMetaData;
-};
+    return requestsForAccess_;
+}
 
-const usersTableColumns = [
+const requestsForAccessTableColumns = [
     { 
         field: 'id', 
         headerName: '#', 
         width: 90 
     },
     {
-        field: 'canisterId',
-        headerName: 'Root Canister',
-        width: 200,
-        editable: false,
-    },
-    {
-        field: 'userName',
-        headerName: 'User Name',
-        width: 200,
-        editable: false,
+      field: 'userPrincipal',
+      headerName: 'User Principal',
+      width: 200,
+      editable: false,
     },
     {
         field: 'approvalStatus',
-        headerName: 'Subsidized',
+        headerName: 'Approved',
         width: 200,
         type: 'boolean'
     }

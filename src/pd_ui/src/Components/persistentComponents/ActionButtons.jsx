@@ -68,26 +68,22 @@ const { setModalProps, setModalIsOpen } = useContext(AppContext);
         >
             {CustomActionButtonComponents ? CustomActionButtonComponents :
                 <>
-                    <Grid xs={4} width={"100%"} padding={0} display={"flex"} justifyContent={"center"} alignItems={"center"}>
-                        <ButtonField
-                            color={BACKGROUND_COLOR}
-                            gridSx={{ width: "135px", backgroundColor: CONTRAST_COLOR }}
-                            elevation={0}
-                            text={"Propose"}
-                            onClick={openProposalForm}
-                            iconSize={'small'}
-                        />
-                        </Grid>
-                        <Grid xs={4} width={"100%"} padding={0} display={"flex"} justifyContent={"center"} alignItems={"center"}>
-                        <ButtonField
-                            color={CONTRAST_COLOR}
-                            gridSx={{ width: "135px"}}
-                            elevation={0}
-                            text={"Transact"}
-                            onClick={openTransactOptions}
-                            iconSize={'small'}
-                        />
-                    </Grid>
+                    <ButtonField
+                        color={BACKGROUND_COLOR}
+                        gridSx={{ margin: "2.5%", width: "40%", backgroundColor: CONTRAST_COLOR }}
+                        elevation={0}
+                        text={"Propose"}
+                        onClick={openProposalForm}
+                        iconSize={'small'}
+                    />
+                    <ButtonField
+                        color={CONTRAST_COLOR}
+                        gridSx={{ margin: "2.5%", width: "40%"}}
+                        elevation={0}
+                        text={"Transact"}
+                        onClick={openTransactOptions}
+                        iconSize={'small'}
+                    />
                 </>
             }
         </Grid>

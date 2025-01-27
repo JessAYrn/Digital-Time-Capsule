@@ -38,8 +38,8 @@ const BuyCrypto = (props) => {
                 rewards and loans. You are being redirected to a third party service to purchase $ICP that will be sent automatically 
                 to your wallet here within this application upon completion of purchase.
             </Typography>
-            <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} position={"fixed"} bottom={"10px"}>
-                <ButtonField text= {"Continue"} hyperLink={url} />
+            <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} position={"fixed"} maxWidth={"700px"} bottom={0}>
+                <ButtonField text= {"Continue"} hyperLink={url} gridSx={{margin: "2.5%", width: "95%", backgroundColor: CONTRAST_COLOR}} />
             </Grid>
         </Grid>
     )

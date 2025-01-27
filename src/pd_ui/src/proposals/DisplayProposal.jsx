@@ -98,27 +98,23 @@ const DisplayProposal = (props) => {
         };
         
         return (
-            <Grid xs={12} width={"100%"} padding={0} display={"flex"} justifyContent={"center"} alignItems={"center"} position={"fixed"} bottom={"10px"} >
-                <Grid xs={4} width={"100%"} padding={0} display={"flex"} justifyContent={"center"} alignItems={"center"}>
+            <Grid xs={12} width={"100%"} padding={0} display={"flex"} justifyContent={"center"} alignItems={"center"} position={"fixed"} bottom={0} maxWidth={"700px"}>
                     <ButtonField
                     text={"Adopt"}
-                    gridSx={{ width: "135px", backgroundColor: CONTRAST_COLOR }}
+                    gridSx={{ margin: "2.5%", width: "40%", backgroundColor: CONTRAST_COLOR }}
                     onClick={() => onVote(true)}
                     Icon={ThumbUpIcon}
                     color={BACKGROUND_COLOR}
                     disabled={hasVoted}
                     />
-                </Grid>
-                <Grid xs={4} width={"100%"} padding={0} display={"flex"} justifyContent={"center"} alignItems={"center"}>
                     <ButtonField
                         text={"Reject"}
-                        gridSx={{ width: "135px", backgroundColor: BACKGROUND_COLOR }}
+                        gridSx={{ margin: "2.5%", width: "40%", backgroundColor: BACKGROUND_COLOR }}
                         onClick={() => onVote(false)}
                         Icon={ThumbDownIcon}
                         color={CONTRAST_COLOR}
                         disabled={hasVoted}
                     />
-                </Grid>
             </Grid>
         )
     }

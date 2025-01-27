@@ -167,12 +167,12 @@ const FollowNeuron = (props) => {
                         
                             { !hasError && !disabled &&
                                 <>
-                                    <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"} position={"fixed"} bottom={"10px"} width={"100%"} >
+                                    <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"} maxWidth={"700px"} position={"fixed"} bottom={0} width={"100%"} >
                                         <ButtonField
                                             disabled={disabled}
                                             Icon={DoneIcon}
                                             color={BACKGROUND_COLOR}
-                                            gridSx={{ width: "230px", backgroundColor: CONTRAST_COLOR }}
+                                            gridSx={{ margin: "2.5%", width: "95%", backgroundColor: CONTRAST_COLOR }}
                                             text={'Submit Proposal'}
                                             onClick={submitProposal}
                                         />

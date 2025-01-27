@@ -12,32 +12,21 @@ const DataTable = (props) => {
     const { 
         rows, 
         columns, 
-        isLoading, 
         onRowClick,
         onCellClick,
-        Icon_1, 
-        Icon_2,
-        text_1, 
-        text_2,
-        iconSize,
         disabled,
-        onClick_button_1, 
-        onClick_button_2,
-        checkboxSelection
+        checkboxSelection,
+        onStateChange
     } = props;
-    const [pageSize, setPageSize] = useState(5);
-    const [tableState, setTableState] = useState({});
 
-    const onStateChange_ = (newState) => {
-        if(!objectsAreEqual(tableState, newState)) setTableState(newState);
-    };
+    const [pageSize, setPageSize] = useState(5);
 
     return (
         <Grid display="flex" justifyContent="center" alignItems="center" width={"100%"} flexDirection="column">
-            <Box sx={{ height: 345, width: '95%', color: WHITE_COLOR }}>
+            <Box sx={{  width: '95%', color: WHITE_COLOR }}>
                 <DataGrid
                     disableRowSelectionOnClick={true}
-                    onStateChange={ (state) => onStateChange_(state) }
+                    onStateChange={onStateChange}
                     columns={columns}
                     onCellClick={ (e) => { if(onCellClick){onCellClick(e.formattedValue)}} }
                     onRowClick={ (e) => { if(onRowClick) onRowClick(e.row)} }
@@ -51,32 +40,6 @@ const DataTable = (props) => {
                     setPageSize={(newPageSize) => setPageSize(newPageSize)}
                 />
             </Box>
-            {
-                (onClick_button_1 || onClick_button_2) && tableState.rowSelection && (tableState.rowSelection.length > 0) &&
-                    <Grid display="flex" justifyContent="center" alignItems="center" width={"100%"}>
-                        <Grid display="flex" justifyContent="left" alignItems="center" width={"50%"}>
-                            {onClick_button_1 && <ButtonField
-                                onClick={() => onClick_button_1({tableState})}
-                                Icon={Icon_1}
-                                text={text_1}
-                                disabled={disabled}
-                                isLoading={isLoading}
-                                iconSize={iconSize}
-                            />}
-                        </Grid>
-                        <Grid display="flex" justifyContent="right" alignItems="center" width={"50%"}>
-                        {onClick_button_2 && <ButtonField
-                            onClick={() => onClick_button_2({tableState})}
-                            Icon={Icon_2}
-                            text={text_2}
-                            disabled={disabled}
-                            isLoading={isLoading}
-                            iconSize={iconSize}
-                        />}
-                        </Grid>
-                    </Grid>
-            }
-            
         </Grid>
     )
 

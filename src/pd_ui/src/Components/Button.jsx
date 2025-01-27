@@ -66,7 +66,7 @@ const ButtonField = (props) => {
                         disabled={disabled}
                         loading={isLoading}
                     >
-                        {text && !isLoading && <Typography sx={{color: color, ...sx}}>{text}</Typography>}
+                        {text && !isLoading && <Typography sx={{display: "flex", justifyContent: "center", alignItems: "center", minHeight: "24px", color: color, ...sx}}>{text}</Typography>}
                         {!text && Icon && <Icon sx={sx}/>}
                         {upload && <input type="file" hidden onChange={onChange} ref={ref}/>}
                     </ButtonType>
