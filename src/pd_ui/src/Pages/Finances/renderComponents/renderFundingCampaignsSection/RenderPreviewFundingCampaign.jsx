@@ -20,11 +20,20 @@ const RenderPreviewFundingCampaign = (props) => {
         amountDisbursedToRecipient,
         remainingCollateralLocked,
         remainingLoanPrincipalAmount,
+        initialLoanInterestAmount,
+        campaignWalletBalance,
+        forfeitedCollateral,
+        remainingLoanInterestAmount,
+        funded
     } = useMemo( () => {
 
         let obj = {
             amountToFund: getFundingCampaignAssetTypeAndValue(fundingCampaign?.amountToFund),
             amountDisbursedToRecipient: getFundingCampaignAssetTypeAndValue(fundingCampaign?.amountDisbursedToRecipient),
+            campaignWalletBalance: getFundingCampaignAssetTypeAndValue(fundingCampaign?.campaignWalletBalance),
+            forfeitedCollateral: getFundingCampaignAssetTypeAndValue(fundingCampaign?.terms[0]?.forfeitedCollateral),
+            remainingLoanInterestAmount: getFundingCampaignAssetTypeAndValue(fundingCampaign?.terms[0]?.remainingLoanInterestAmount),
+            funded: fundingCampaign?.funded,
         };
 
         if(fundingCampaign?.terms[0]){
@@ -32,6 +41,7 @@ const RenderPreviewFundingCampaign = (props) => {
                 ...obj,
                 remainingCollateralLocked: getFundingCampaignAssetTypeAndValue(fundingCampaign?.terms[0]?.remainingCollateralLocked),
                 remainingLoanPrincipalAmount: getFundingCampaignAssetTypeAndValue(fundingCampaign?.terms[0]?.remainingLoanPrincipalAmount),
+                initialLoanInterestAmount: getFundingCampaignAssetTypeAndValue(fundingCampaign?.terms[0]?.initialLoanInterestAmount),
             }
         }
 
@@ -70,58 +80,88 @@ const RenderPreviewFundingCampaign = (props) => {
                 disabled={true}
             />
             <DataField
-                label={"Amount Requested: "}
+                label={ funded ? "Amount Borrowed: " : "Amount Requested: " }
                 text={`${amountToFund.value} ${amountToFund.type}`}
                 buttonColor={WHITE_COLOR}
                 transparentBackground={true}
                 transparentBorder={true}
                 disabled={true}
-            />
-            <DataField
+            /> 
+            {funded ? <DataField
                 label={"Amount Disbursed: "}
                 text={`${amountDisbursedToRecipient.value} ${amountDisbursedToRecipient.type}`}
                 buttonColor={WHITE_COLOR}
                 transparentBackground={true}
                 transparentBorder={true}
                 disabled={true}
-            />
-            {remainingLoanPrincipalAmount && <DataField
-                label={"Remaining Principal: "}
+            /> : <DataField
+                label={"Amount Collected: "}
+                text={`${campaignWalletBalance.value} ${campaignWalletBalance.type}`}
+                buttonColor={WHITE_COLOR}
+                transparentBackground={true}
+                transparentBorder={true}
+                disabled={true}
+            />}
+            {funded && remainingLoanPrincipalAmount && <DataField
+                label={"Remaining Principal Owed: "}
                 text={`${remainingLoanPrincipalAmount.value} ${remainingLoanPrincipalAmount.type}`}
                 buttonColor={WHITE_COLOR}
                 transparentBackground={true}
                 transparentBorder={true}
                 disabled={true}
             />}
-            {remainingCollateralLocked && <DataField
-                label={"Collateral Locked: "}
-                text={`${remainingCollateralLocked.value} ${remainingCollateralLocked.type}`}
-                buttonColor={WHITE_COLOR}
-                transparentBackground={true}
-                transparentBorder={true}
-                disabled={true}
-            />}
+            {initialLoanInterestAmount && 
+                funded ? <DataField
+                    label={ "Interest Owed: "}
+                    text={`${remainingLoanInterestAmount.value} ${remainingLoanInterestAmount.type}`}
+                    buttonColor={WHITE_COLOR}
+                    transparentBackground={true}
+                    transparentBorder={true}
+                    disabled={true}
+                /> : <DataField
+                    label={ "Interest Offered: "}
+                    text={`${initialLoanInterestAmount.value} ${initialLoanInterestAmount.type}`}
+                    buttonColor={WHITE_COLOR}
+                    transparentBackground={true}
+                    transparentBorder={true}
+                    disabled={true}
+                />
+            }
+            {remainingCollateralLocked && 
+                funded ? <DataField 
+                    label={ "Collateral Forfeited: "}
+                    text={`${forfeitedCollateral.value} ${forfeitedCollateral.type}`}
+                    buttonColor={WHITE_COLOR}
+                    transparentBackground={true}
+                    transparentBorder={true}
+                    disabled={true}
+                    /> : <DataField
+                    label={ "Collateral Locked: "}
+                    text={`${remainingCollateralLocked.value} ${remainingCollateralLocked.type}`}
+                    buttonColor={WHITE_COLOR}
+                    transparentBackground={true}
+                    transparentBorder={true}
+                    disabled={true}
+                />}
             <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
-                <Grid xs={6} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
+                {!fundingCampaign?.funded && 
                     <ButtonField
                         color={CONTRAST_COLOR}
-                        gridSx={{width: "115px", backgroundColor: WHITE_COLOR}}
+                        gridSx={{margin: "2.5%", width: "40%", backgroundColor: WHITE_COLOR}}
                         elevation={24}
                         text={"Lend"}
                         onClick={onClickAddLiquidityOrRepayFundingCampaign}
                         iconSize={'small'}
                     />
-                </Grid>
-                <Grid xs={6} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
+                }
                     <ButtonField
                         color={CONTRAST_COLOR}
-                        gridSx={{width: "115px"}}
+                        gridSx={{margin: "2.5%", width: !fundingCampaign?.funded ? "40%" : "95%"}}
                         elevation={24}
                         text={"View"}
                         onClick={onView}
                         iconSize={'small'}
                     />
-                </Grid>
             </Grid>
         </Grid>
     )

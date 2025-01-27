@@ -102,26 +102,22 @@ const PreviewNeuron = (props) => {
                 transparentBorder={true}
             />
             <Grid xs={12} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
-                <Grid xs={6} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
                     <ButtonField
                         color={CONTRAST_COLOR}
-                        gridSx={{width: "115px", backgroundColor: WHITE_COLOR}}
+                        gridSx={{width: "40%", margin: "2.5%", backgroundColor: WHITE_COLOR}}
                         elevation={24}
                         text={"Stake"}
                         onClick={onStake}
                         iconSize={'small'}
                     />
-                </Grid>
-                <Grid xs={6} display="flex" justifyContent="center" alignItems="center" width={"100%"}>
                     <ButtonField
                         color={CONTRAST_COLOR}
-                        gridSx={{width: "115px"}}
+                        gridSx={{width: "40%", margin: "2.5%"}}
                         elevation={24}
                         text={"View"}
                         onClick={onViewNeuron}
                         iconSize={'small'}
                     />
-                </Grid>
             </Grid>
         </Grid>
     )

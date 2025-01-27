@@ -9,7 +9,7 @@ const PersistedComponents = (props) => {
     return (
         <>
             <ToolBar />
-            <Grid zIndex={10} position={"fixed"} bottom={0} xs={12} width={"100%"} height={"95px"} padding={0} >
+            <Grid zIndex={10} position={"fixed"} bottom={0} xs={12} width={"100%"} height={"90px"} padding={0} >
                 <ActionButtons /> 
                 <NavBar/>
             </Grid>

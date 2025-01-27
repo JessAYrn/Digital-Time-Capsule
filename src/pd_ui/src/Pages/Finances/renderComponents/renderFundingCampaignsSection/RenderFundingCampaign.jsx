@@ -25,6 +25,7 @@ const RenderFundingCampaign = (props) => {
         paymentDue,
         timeUntilPaymentIsDue,
         initialLoanInterestAmount,
+        initialCollateralLocked,
         remainingCollateralLocked,
         forfeitedCollateral,
         remainingLoanInterestAmount,
@@ -55,6 +56,7 @@ const RenderFundingCampaign = (props) => {
                 remainingCollateralLocked: getFundingCampaignAssetTypeAndValue(fundingCampaign?.terms[0]?.remainingCollateralLocked),
                 forfeitedCollateral: getFundingCampaignAssetTypeAndValue(fundingCampaign?.terms[0]?.forfeitedCollateral),
                 remainingLoanInterestAmount: getFundingCampaignAssetTypeAndValue(fundingCampaign?.terms[0]?.remainingLoanInterestAmount),
+                initialCollateralLocked: getFundingCampaignAssetTypeAndValue(fundingCampaign?.terms[0]?.initialCollateralLocked),
                 remainingLoanPrincipalAmount: getFundingCampaignAssetTypeAndValue(fundingCampaign?.terms[0]?.remainingLoanPrincipalAmount)
             }
         }
@@ -89,6 +91,14 @@ const RenderFundingCampaign = (props) => {
                 disabled={true}
                 transparentBackground={true}
             />
+            {initialLoanInterestAmount &&
+                    <DataField
+                        text={`${initialLoanInterestAmount.value} ${initialLoanInterestAmount.type}` }
+                        label={"Interest Offered"}
+                        disabled={true}
+                        transparentBackground={true}
+                    />
+            }
             {!funded && !settled && 
                 <DataField
                 label={"Amount Collected"}
@@ -97,57 +107,71 @@ const RenderFundingCampaign = (props) => {
                 transparentBackground={true}
                 />
             }
-            { funded && 
             <DataField
                 label={"Amount Disbursed"}
                 text={`${amountDisbursedToRecipient.value} ${amountDisbursedToRecipient.type}`}
                 disabled={true}
                 transparentBackground={true}
-            />}
-            {!!terms.length && funded && !settled &&
+            />
+            {!!terms.length &&
                 <>
                     <Divider sx={{...DIVIDER_SX, marginTop: "30px", marginBottom: "30px"}} />
                     <DataField
-                        text={`${remainingLoanInterestAmount.value} ${remainingLoanInterestAmount.type}` }
-                        label={"Remaining Interest Owed"}
+                        text={`${initialCollateralLocked.value} ${initialCollateralLocked.type}`}
+                        label={"Initial Collateral"}
                         disabled={true}
                         transparentBackground={true}
-                    />
-                    <DataField
-                        text={`${remainingLoanPrincipalAmount.value} ${remainingLoanPrincipalAmount.type}` }
-                        label={"Remaining Principal Owed"}
-                        disabled={true}
-                        transparentBackground={true}
-                    />
-                    <DataField
-                        label={"Payment Due"}
-                        text={`${paymentDue.value} ${paymentDue.type}`}
-                        disabled={true}
-                        transparentBackground={true}
-                    />
-                    <DataField
-                        label={"Time Until Payment Is Due: "}
-                        text={timeUntilPaymentIsDue}
-                        disabled={true}
-                        transparentBackground={true}
-                    />
-                </>
-            }
-            {!!terms.length && 
-                <>
-                    <Divider sx={{...DIVIDER_SX, marginTop: "30px", marginBottom: "30px"}} />
-                    {!settled && <DataField
-                        text={`${remainingCollateralLocked.value} ${remainingCollateralLocked.type}`}
-                        label={"Collateral Deposited"}
-                        disabled={true}
-                        transparentBackground={true}
-                    />}
-                    {funded && <DataField
-                        text={`${forfeitedCollateral.value} ${forfeitedCollateral.type}` }
-                        label={"Collateral Forfeited"}
-                        disabled={true}
-                        transparentBackground={true}
-                    />}
+                    /> 
+                    {!settled && 
+                        <DataField
+                            text={`${remainingCollateralLocked.value} ${remainingCollateralLocked.type}`}
+                            label={"Remaining Collateral"}
+                            disabled={true}
+                            transparentBackground={true}
+                        />
+                    }
+                    {(funded || settled) &&
+                        <DataField
+                            text={`${forfeitedCollateral.value} ${forfeitedCollateral.type}` }
+                            label={"Forfeited Collateral"}
+                            disabled={true}
+                            transparentBackground={true}
+                        />
+                    }
+                    {funded && 
+                        <>
+                            <Divider sx={{...DIVIDER_SX, marginTop: "30px", marginBottom: "30px"}} />
+                            <DataField
+                                text={`${remainingLoanPrincipalAmount.value} ${remainingLoanPrincipalAmount.type}` }
+                                label={"Remaining Principal Owed"}
+                                disabled={true}
+                                transparentBackground={true}
+                            />
+                            <DataField
+                                text={`${remainingLoanInterestAmount.value} ${remainingLoanInterestAmount.type}` }
+                                label={"Remaining Interest Owed"}
+                                disabled={true}
+                                transparentBackground={true}
+                            />
+                        </>
+                    }
+                    { funded && !settled && 
+                        <>
+                        <Divider sx={{...DIVIDER_SX, marginTop: "30px", marginBottom: "30px"}} />
+                            <DataField
+                                label={"Payment Due"}
+                                text={`${paymentDue.value} ${paymentDue.type}`}
+                                disabled={true}
+                                transparentBackground={true}
+                            />
+                            <DataField
+                                label={"Time Until Payment Is Due: "}
+                                text={timeUntilPaymentIsDue}
+                                disabled={true}
+                                transparentBackground={true}
+                            />
+                        </>
+                    }
                 </>
             }
             <Divider sx={{...DIVIDER_SX, marginTop: "30px", marginBottom: "30px"}} />

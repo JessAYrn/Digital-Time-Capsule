@@ -65,6 +65,7 @@ const { setModalProps, setModalIsOpen } = useContext(AppContext);
         bgcolor={"transparent"} 
         padding={0}
         zIndex={10}
+        height={"37px"}
         >
             {CustomActionButtonComponents ? CustomActionButtonComponents :
                 <>
