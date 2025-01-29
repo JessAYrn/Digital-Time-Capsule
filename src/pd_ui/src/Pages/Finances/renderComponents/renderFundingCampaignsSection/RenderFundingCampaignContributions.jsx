@@ -6,8 +6,6 @@ import { CHART_TYPES } from "../../../../functionsAndConstants/Constants";
 import { AppContext } from "../../../../Context";
 import { sortAndReduceDataMapArray, getLabelsAndDataSetsInChartFormat } from "../../../../components/Chart";
 import { getFundingCampaignAssetTypeAndValue } from "../../../../functionsAndConstants/Utils";
-import Divider from "@mui/material/Divider";
-import { DIVIDER_SX } from "../../../../Theme";
 
 
 const RenderFundingCampaignContributions = (props) => {
@@ -36,9 +34,7 @@ const RenderFundingCampaignContributions = (props) => {
     }, [contributions]);
 
     return (
-        !!contributions.length && 
         <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} xs={12} width={"100%"}  padding={0} flexDirection={'column'}>
-            <Divider sx={{...DIVIDER_SX, marginTop: "30px", marginBottom: "30px"}} />
             <Grid display={"flex"} justifyContent={"center"} alignItems={"center"} width={"100%"} xs={12} padding={0}>
                 <Typography width={"100%"} textAlign={"center"} variant="h6">Campaign Contributions</Typography>
             </Grid>
