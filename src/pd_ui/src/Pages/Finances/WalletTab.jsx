@@ -12,7 +12,7 @@ import { CONTRAST_COLOR } from '../../Theme';
 
 const WalletTab = (props) => {
 
-    const { walletState, setModalIsOpen, setModalProps } = useContext(AppContext);
+    const { walletState, navigationAndApiState, setModalIsOpen, setModalProps } = useContext(AppContext);
 
     const onViewTxHistory = () => {
         setModalIsOpen(true);
@@ -21,6 +21,11 @@ const WalletTab = (props) => {
             headerComponent: <Typography variant="h6">Transaction History</Typography>,
             components: [<RenderTxHistory/>],
         });
+    }
+
+    const onCopyWalletAddress = () => {
+        navigationAndApiState.backendActor.listenForTransactions(false);
+        copyText(walletState.walletData.address);
     }
 
     return (
@@ -37,7 +42,7 @@ const WalletTab = (props) => {
             marginBottom={"70px"}
         >
             <RenderWalletBalancesSection/>
-            <DataField gridSx={{marginTop: "60px"}} transparentBorder={true} transparentBackground={true} label={"Wallet Address"} text={shortenHexString(walletState.walletData.address)} buttonIcon={ContentCopyIcon} onClick={() => copyText(walletState.walletData.address)}/>
+            <DataField gridSx={{marginTop: "60px"}} transparentBorder={true} transparentBackground={true} label={"Wallet Address"} text={shortenHexString(walletState.walletData.address)} buttonIcon={ContentCopyIcon} onClick={onCopyWalletAddress}/>
             <DataField gridSx={{marginTop: "20px"}} label={"Transaction History"} text={"View"} onClick={onViewTxHistory} buttonColor={CONTRAST_COLOR}/>    
         </Grid>
             

@@ -12,9 +12,19 @@ import { CONTRAST_COLOR, DIVIDER_SX, WHITE_COLOR } from '../../Theme';
 
 const RenderReceiveData = (props) => {
 
-    const { journalState, walletState } = useContext(AppContext);
+    const { journalState, walletState, navigationAndApiState } = useContext(AppContext);
     const { userMetaData } = journalState;
     const { cyclesBalance, rootCanisterPrincipal } = userMetaData;
+
+    const onCopyWalletAddress = () => {
+        navigationAndApiState.backendActor.listenForTransactions(false);
+        copyText(walletState.walletData.address);
+    };
+
+    const onCopyCanisterId = () => {
+        navigationAndApiState.backendActor.listenForTransactions(false);
+        copyText(rootCanisterPrincipal);
+    };
 
     return (
         <Grid columns={12} rowSpacing={8} display="flex" justifyContent="center" alignItems="center" flexDirection={"column"} width={"100%"}>
@@ -26,7 +36,7 @@ const RenderReceiveData = (props) => {
                 label={'Wallet Address '}
                 text={`${shortenHexString(walletState.walletData.address)}`}
                 isLoading={!walletState.dataHasBeenLoaded}
-                onClick={() => copyText( walletState.walletData.address )}
+                onClick={onCopyWalletAddress}
                 labelColor={WHITE_COLOR}
                 buttonColor={CONTRAST_COLOR}
                 buttonIcon={ContentCopyIcon}
@@ -42,7 +52,7 @@ const RenderReceiveData = (props) => {
                     buttonIcon={ContentCopyIcon}
                     buttonColor={WHITE_COLOR}
                     labelColor={WHITE_COLOR}
-                    onClick={() => copyText(rootCanisterPrincipal)}
+                    onClick={onCopyCanisterId}
                     transparentBackground={true}
                     transparentBorder={true}
                 />

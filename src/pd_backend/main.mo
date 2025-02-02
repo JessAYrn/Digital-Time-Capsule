@@ -56,8 +56,9 @@ shared actor class User() = this {
     private let ic : IC.Self = actor "aaaaa-aa";
     private stable var subnetType: MainTypes.SubnetType = #Application;
     private let ledger: Ledger.Interface = actor(Ledger.CANISTER_ID);
+    private var listenerTimerId: ?Timer.TimerId = null;
 
-    let {recurringTimer; setTimer} = Timer;
+    let {recurringTimer; setTimer; cancelTimer} = Timer;
 
     public shared func setCostToEnterDaoTemp(cost: Nat): async (){ costToEnterDao := Nat64.fromNat(cost) * 100_000_000; };
 
@@ -200,9 +201,22 @@ shared actor class User() = this {
         };
     };
 
-    private func updateUsersTxHistory() : async () {
-        let newStartIndexForNextQuery = await TxHelperMethods.updateUsersTxHistory(userProfilesMap_v2, startIndexForBlockChainQuery, daoMetaData_v4);
-        startIndexForBlockChainQuery := newStartIndexForNextQuery;
+    public shared({caller}) func listenForTransactions(stopWhenCaughtUp: Bool) : async () {
+        if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this))){ let ?_ = userProfilesMap_v2.get(caller) else return; };
+        
+        func cancelLister() : (){ let ?timerId = listenerTimerId else return; cancelTimer(timerId); listenerTimerId := null; };
+
+        cancelLister();
+
+        listenerTimerId := ?recurringTimer<system>(#seconds (15), func (): async () {
+
+            let {newStartIndexForNextQuery; isCaughtUp} =  await TxHelperMethods.updateUsersTxHistory(userProfilesMap_v2, startIndexForBlockChainQuery, daoMetaData_v4);
+            startIndexForBlockChainQuery := newStartIndexForNextQuery;
+            if(stopWhenCaughtUp and isCaughtUp){ cancelLister(); };
+
+        });
+
+        ignore setTimer<system>(#seconds (60 * 5), func (): async () { cancelLister(); });
     };
 
     public shared({caller}) func grantAccess(principals : [Text]) : async MainTypes.RequestsForAccess {
@@ -407,14 +421,6 @@ shared actor class User() = this {
         let updatedMetaData = await CanisterManagementMethods.heartBeat(cyclesBalance_backend, daoMetaData_v4, userProfilesMap_v2);
         daoMetaData_v4 := updatedMetaData;
     };  
-
-    private func heartBeat_unshared(): async () {
-        let cyclesBalance_backend = Cycles.balance();
-        ignore NotificationProtocolMethods.updateUserCanisterNotifications(userProfilesMap_v2);
-        ignore AnalyticsHelperMethods.saveCurrentBalances(userProfilesMap_v2, daoMetaData_v4);
-        let updatedMetaData = await CanisterManagementMethods.heartBeat(cyclesBalance_backend, daoMetaData_v4, userProfilesMap_v2);
-        daoMetaData_v4 := updatedMetaData;
-    };
 
     private func heartBeat_hourly(): async () {
         let {cycles} = await ic.canister_status({ canister_id = Principal.fromText(daoMetaData_v4.frontEndPrincipal) });
@@ -677,10 +683,13 @@ shared actor class User() = this {
         userProfilesArray_v2 := []; 
         proposalsArray_v2 := [];
         requestsForAccess := [];
-        ignore recurringTimer<system>(#seconds (24 * 60 * 60), heartBeat_unshared);
+        ignore recurringTimer<system>(#seconds (24 * 60 * 60), func(): async (){ 
+            ignore AnalyticsHelperMethods.saveCurrentBalances(userProfilesMap_v2, daoMetaData_v4);
+            ignore heartBeat(); 
+        });
         ignore recurringTimer<system>(#seconds (3 * 60 * 60), finalizeAllEligibleProposals);
         ignore recurringTimer<system>(#seconds (24 * 60 * 60), heartBeat_hourly);
-        ignore recurringTimer<system>(#seconds (30), updateUsersTxHistory);
+        ignore recurringTimer<system>(#seconds (60 * 60), func (): async () { await listenForTransactions(true); });
 
     };
 }

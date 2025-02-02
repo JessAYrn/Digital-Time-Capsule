@@ -15,6 +15,7 @@ export const loadAllDataIntoReduxStores = async (navigationAndApiState, dispatch
     if(!loadSuccessful) return {loadSuccessful};
     //calls the backend and loads the retrieved data into the appropriate redux stores.
     let promises = [
+        navigationAndApiState.backendActor.listenForTransactions(false),
         loadWalletData(navigationAndApiState, walletDispatch, walletTypes),
         loadCanisterData(navigationAndApiState, homePageDispatch, homePageTypes),
         loadJournalData(navigationAndApiState, journalDispatch, journalTypes),

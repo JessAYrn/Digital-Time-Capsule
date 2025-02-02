@@ -131,9 +131,9 @@ const Router = (props) => {
                 flexDirection={"column"}
                 marginTop={"60px"}
             > 
-            { displayComponent && <PersistedComponents/>}
                 {displayComponent ? 
                     <>
+                        <PersistedComponents/>
                         {navigationAndApiState?.location?.route === NAV_LINKS.dashboard && <DashboardPage/>}
                         {navigationAndApiState?.location.route === NAV_LINKS.finances && <FinancesPage />}
                     </>  : 
