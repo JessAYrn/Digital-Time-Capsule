@@ -8,10 +8,10 @@ import Iter "mo:base/Iter";
 import Blob "mo:base/Blob";
 import Journal "../../Journal";
 import Nat64 "mo:base/Nat64";
-import Array "mo:base/Array";
 import Hex "../../Serializers/Hex";
 import Treasury "../../Treasury";
 import Buffer "mo:base/Buffer";
+import HashMap "mo:base/HashMap";
 
 module{
 
@@ -31,8 +31,15 @@ module{
         };
     };
 
-    public func updateUsersTxHistory( profilesMap: MainTypes.UserProfilesMap_V2, startIndexForBlockChainQuery: Nat64, metaData : {treasuryCanisterPrincipal : Text}
-    ): async ({newStartIndexForNextQuery: Nat64; isCaughtUp: Bool}) {
+    public func updateUsersTxHistoryFromNext2000Blocks( profilesMap: MainTypes.UserProfilesMap_V2, startIndexForBlockChainQuery: Nat64, metaData : {treasuryCanisterPrincipal : Text}): 
+    async ({newStartIndexForNextQuery: Nat64; isCaughtUp: Bool}) {
+
+        let accountIdsToCanisterIds = HashMap.HashMap<Account.AccountIdentifier, Principal>(0, Blob.equal, Blob.hash);
+
+        label populatingAccountIdsToCanisterIdsMap for((principal, {canisterId; accountId}) in profilesMap.entries()){
+            let ?accountId_ = accountId else { continue populatingAccountIdsToCanisterIdsMap };
+            accountIdsToCanisterIds.put(accountId_, canisterId);
+        };
 
         let {blocks; chain_length; archived_blocks} = await ledger.query_blocks({ start = startIndexForBlockChainQuery; length = Ledger.MAX_BLOCK_QUERY_LENGTH; });
 
@@ -55,22 +62,20 @@ module{
             switch(operation_){
                 case(#Transfer({to; from; amount; fee;})){
                     let timeOfCreation = transaction.created_at_time.timestamp_nanos;
-                    let userProfile_sender = findProfileWithGivenAccountId(profilesMap, from);
-                    let userProfile_recipient = findProfileWithGivenAccountId(profilesMap, to);
-                    switch(userProfile_sender){
+                    let senderCanisterId = accountIdsToCanisterIds.get(from);
+                    let recipientCanisterId = accountIdsToCanisterIds.get(to);
+                    switch(senderCanisterId){
                         case null {};
-                        case(?userProfile_sender_){
-                            let (_, profile) = userProfile_sender_;
-                            let userJournal : Journal.Journal = actor(Principal.toText(profile.canisterId));
+                        case(?senderCanisterId_){
+                            let userJournal : Journal.Journal = actor(Principal.toText(senderCanisterId_));
                             let tx : JournalTypes.Transaction = { balanceDelta = amount.e8s + fee.e8s; increase = false; recipient = to; timeStamp = timeOfCreation; source = from; };
                             ignore userJournal.updateTxHistory(timeOfCreation,tx);
                         };
                     };
-                    switch(userProfile_recipient){
+                    switch(recipientCanisterId){
                         case null {};
-                        case(?userProfile_recipient_){
-                            let (_, profile) = userProfile_recipient_;
-                            let userJournal : Journal.Journal = actor(Principal.toText(profile.canisterId));
+                        case(?recipientCanisterId_){
+                            let userJournal : Journal.Journal = actor(Principal.toText(recipientCanisterId_));
                             let tx : JournalTypes.Transaction = { balanceDelta = amount.e8s; increase = true; recipient = to; timeStamp = timeOfCreation; source = from; };
                             ignore userJournal.updateTxHistory(timeOfCreation,tx);
                         };
@@ -90,18 +95,4 @@ module{
 
         return {newStartIndexForNextQuery; isCaughtUp};
     };
-
-    private func findProfileWithGivenAccountId(profilesMap: MainTypes.UserProfilesMap_V2, accountId: Account.AccountIdentifier)
-    : ?(Principal, MainTypes.UserProfile_V2){
-        let profilesArray = Iter.toArray(profilesMap.entries());
-        let userProfile = Array.find<(Principal, MainTypes.UserProfile_V2)>(
-            profilesArray, 
-            func ((princpal: Principal, profile: MainTypes.UserProfile_V2)): Bool {
-                let ?accountId_ = profile.accountId else { return false; };
-                return Blob.equal(accountId_, accountId);
-            }
-        );
-        return userProfile;
-    };
-
 };

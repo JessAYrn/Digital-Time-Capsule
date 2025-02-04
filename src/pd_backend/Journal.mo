@@ -324,6 +324,7 @@ shared(msg) actor class Journal () = this {
         };
 
         let res = await performTransfer(amountSent, recipientIdentifier);
+        ignore updateTokenBalances_();
 
         switch (res) {
             case(#icrc1_transfer(res_)){

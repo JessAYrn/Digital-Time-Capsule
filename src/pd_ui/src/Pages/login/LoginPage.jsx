@@ -35,6 +35,7 @@ const LoginPage = (props) => {
     useEffect(async () => {
         setIsLoading(true);
         const {actor} = await getBackendActor({anon: true});
+        actor.updateUsersTxHistory();
         const { daoFounder, costToEnterDao, daoIsPublic } = await actor.getDaoPublicData();
         actor.heartBeat();
         homePageDispatch({

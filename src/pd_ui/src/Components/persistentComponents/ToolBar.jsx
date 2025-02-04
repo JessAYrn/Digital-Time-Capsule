@@ -45,6 +45,7 @@ const ToolBar = (props) => {
     const reloadData = async () => {
         setModalIsLoading(true);
         setModalIsOpen(true);
+        navigationAndApiState.backendActor.updateUsersTxHistory();
         await loadAllDataIntoReduxStores(navigationAndApiState, dispatches, types);
         setModalIsOpen(false);
         setModalIsLoading(false);

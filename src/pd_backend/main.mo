@@ -56,11 +56,8 @@ shared actor class User() = this {
     private let ic : IC.Self = actor "aaaaa-aa";
     private stable var subnetType: MainTypes.SubnetType = #Application;
     private let ledger: Ledger.Interface = actor(Ledger.CANISTER_ID);
-    private var listenerTimerId: ?Timer.TimerId = null;
 
-    let {recurringTimer; setTimer; cancelTimer} = Timer;
-
-    public shared func setCostToEnterDaoTemp(cost: Nat): async (){ costToEnterDao := Nat64.fromNat(cost) * 100_000_000; };
+    let {recurringTimer; setTimer} = Timer;
 
     public query({caller}) func hasAccount() : async Bool { switch(userProfilesMap_v2.get(caller)){ case null { return false}; case(_){ return true;}}; };
 
@@ -201,22 +198,10 @@ shared actor class User() = this {
         };
     };
 
-    public shared({caller}) func listenForTransactions(stopWhenCaughtUp: Bool) : async () {
-        if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this))){ let ?_ = userProfilesMap_v2.get(caller) else return; };
-        
-        func cancelLister() : (){ let ?timerId = listenerTimerId else return; cancelTimer(timerId); listenerTimerId := null; };
-
-        cancelLister();
-
-        listenerTimerId := ?recurringTimer<system>(#seconds (15), func (): async () {
-
-            let {newStartIndexForNextQuery; isCaughtUp} =  await TxHelperMethods.updateUsersTxHistory(userProfilesMap_v2, startIndexForBlockChainQuery, daoMetaData_v4);
-            startIndexForBlockChainQuery := newStartIndexForNextQuery;
-            if(stopWhenCaughtUp and isCaughtUp){ cancelLister(); };
-
-        });
-
-        ignore setTimer<system>(#seconds (60 * 5), func (): async () { cancelLister(); });
+    public shared func updateUsersTxHistory() : async () {
+        let {newStartIndexForNextQuery; isCaughtUp} =  await TxHelperMethods.updateUsersTxHistoryFromNext2000Blocks(userProfilesMap_v2, startIndexForBlockChainQuery, daoMetaData_v4);
+        startIndexForBlockChainQuery := newStartIndexForNextQuery;
+        if(not isCaughtUp){ ignore  updateUsersTxHistory() };
     };
 
     public shared({caller}) func grantAccess(principals : [Text]) : async MainTypes.RequestsForAccess {
@@ -689,7 +674,7 @@ shared actor class User() = this {
         });
         ignore recurringTimer<system>(#seconds (3 * 60 * 60), finalizeAllEligibleProposals);
         ignore recurringTimer<system>(#seconds (24 * 60 * 60), heartBeat_hourly);
-        ignore recurringTimer<system>(#seconds (60 * 60), func (): async () { await listenForTransactions(true); });
+        ignore recurringTimer<system>(#seconds (60 * 15), func (): async () { await updateUsersTxHistory(); });
 
     };
 }
