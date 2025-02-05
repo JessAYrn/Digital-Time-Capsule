@@ -31,19 +31,6 @@ module{
         icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText};
     };
 
-    public type FundingCampaign = {
-        contributions: CampaignContributionsArray;
-        amountToFund: {icp: {e8s : Nat64;}; };
-        amountDisbursedToRecipient: {icp: {e8s : Nat64;}; };
-        campaignWalletBalance: {icp: {e8s : Nat64;}; };
-        recipient: PrincipalAsText;
-        subaccountId: Account.Subaccount;
-        description: Text; 
-        settled: Bool;
-        funded: Bool;
-        terms:?FundingCampaignTerms;
-    };
-
     public type FundingCampaignTerms = {
         paymentIntervals: Nat64;
         nextPaymentDueDate: ?Int;
@@ -57,17 +44,47 @@ module{
         amountRepaidDuringCurrentPaymentInterval: {icp: {e8s : Nat64;}; };
     };
 
+    public type Payment = {
+        owed: {icp: {e8s : Nat64;}; };
+        unreleasedCollateral: {icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText}};
+        releasedCollateral: {icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText}};
+        forfeitedCollateral: {icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText}};
+        dueDate: Int;
+    };
+
+    public type FundingCampaignLoanAgreement = {
+        payments: [Payment];
+        initialLoanPrincipalAmount: {icp: {e8s : Nat64;}; };
+        initialLoanInterestAmount: {icp: {e8s : Nat64;}; };
+        initialCollateralLocked: {icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText}};
+    };
+
+    public type FundingCampaignLoanAgreementInput = {
+        paymentTermPeriod: Nat64;
+        numberOfPayments: Nat64;
+        initialLoanPrincipalAmount: {icp: {e8s : Nat64;}; };
+        initialLoanInterestAmount: {icp: {e8s : Nat64;}; };
+        initialCollateralLocked: {icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText}};
+    };
+
     public type FundingCampaignInput = {
         amountToFund: {icp: {e8s : Nat64;}; };
         description: Text; 
-        terms:?FundingCampaignTermsInput
+        loanAgreement:?FundingCampaignLoanAgreementInput
     };
 
-    public type FundingCampaignTermsInput = {
-        paymentIntervals: Nat64;
-        paymentAmounts: {icp: {e8s : Nat64;}; };
-        initialLoanInterestAmount: {icp: {e8s : Nat64;}; };
-        initialCollateralLocked: {icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText}};
+     public type FundingCampaign = {
+        contributions: CampaignContributionsArray;
+        amountToFund: {icp: {e8s : Nat64;}; };
+        amountDisbursedToRecipient: {icp: {e8s : Nat64;}; };
+        campaignWalletBalance: {icp: {e8s : Nat64;}; };
+        recipient: PrincipalAsText;
+        subaccountId: Account.Subaccount;
+        description: Text; 
+        settled: Bool;
+        funded: Bool;
+        terms:?FundingCampaignTerms;
+        loanAgreement: ?FundingCampaignLoanAgreement;
     };
 
     public type FundingCampaignsArray = [(CampaignId, FundingCampaign)];

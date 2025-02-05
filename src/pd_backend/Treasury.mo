@@ -22,6 +22,7 @@ import AnalyticsTypes "Types/Analytics/types";
 import AsyncronousHelperMethods "Modules/Treasury/AsyncronousHelperMethods";
 import SyncronousHelperMethods "Modules/Treasury/SyncronousHelperMethods";
 import NatX "MotokoNumbers/NatX";
+import Buffer "mo:base/Buffer";
 
 shared actor class Treasury (principal : Principal) = this {
 
@@ -55,24 +56,50 @@ shared actor class Treasury (principal : Principal) = this {
 
     public shared({caller}) func createFundingCampaign(campaign: TreasuryTypes.FundingCampaignInput, userPrincipal: Text) : async () {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
-        let terms = switch(campaign.terms){
+
+        let loanAgreement: ?TreasuryTypes.FundingCampaignLoanAgreement = switch(campaign.loanAgreement){
             case null { null };
-            case (?terms) { 
-                let {stake_e8s = userStakedIcp; collateralized_stake_e8s} = SyncronousHelperMethods.getUserNeuronStakeInfo(userPrincipal, neuronDataMap, terms.initialCollateralLocked.icp_staked.fromNeuron);
+            case (?{paymentTermPeriod; numberOfPayments; initialLoanPrincipalAmount; initialLoanInterestAmount; initialCollateralLocked}) { 
+
+                if(numberOfPayments == 0) throw Error.reject("Number of payments cannot be 0.");
+
+                func getLoanPaymentsSchedule(): {payments: [TreasuryTypes.Payment]; totalOwed: Nat64; totalUnreleasedCollateral: Nat64} {
+                    let paymentsAmount = NatX.nat64ComputeFractionMultiplication({factor = 1; numerator = initialLoanPrincipalAmount.icp.e8s + initialLoanInterestAmount.icp.e8s; denominator = numberOfPayments});
+                    let unreleasedCollateralAmountPerPayment = NatX.nat64ComputeFractionMultiplication({factor = 1; numerator = initialCollateralLocked.icp_staked.e8s; denominator = numberOfPayments});
+                    let paymentsBuffer = Buffer.Buffer<TreasuryTypes.Payment>(0);
+                    
+                    var totalOwed: Nat64 = 0;
+                    var totalUnreleasedCollateral: Nat64 = 0;
+
+                    for(i in Iter.range(1, Nat64.toNat(numberOfPayments))){
+                        totalOwed += paymentsAmount;
+                        totalUnreleasedCollateral += unreleasedCollateralAmountPerPayment;
+
+                        let payment : TreasuryTypes.Payment = {
+                            owed = {icp = {e8s = paymentsAmount}};
+                            unreleasedCollateral =  {icp_staked = {e8s = unreleasedCollateralAmountPerPayment; fromNeuron = initialCollateralLocked.icp_staked.fromNeuron}};
+                            releasedCollateral = {icp_staked = {e8s = 0; fromNeuron = initialCollateralLocked.icp_staked.fromNeuron}};
+                            forfeitedCollateral = {icp_staked = {e8s = 0; fromNeuron = initialCollateralLocked.icp_staked.fromNeuron}};
+                            dueDate = Time.now() + i * Nat64.toNat(paymentTermPeriod);
+                        };
+                        paymentsBuffer.add(payment);
+                    };
+
+                    return {payments = Buffer.toArray(paymentsBuffer); totalOwed; totalUnreleasedCollateral};
+                };
+
+                let {payments; totalOwed; totalUnreleasedCollateral} = getLoanPaymentsSchedule();
+
+                let {stake_e8s = userStakedIcp; collateralized_stake_e8s} = SyncronousHelperMethods.getUserNeuronStakeInfo(userPrincipal, neuronDataMap, initialCollateralLocked.icp_staked.fromNeuron);
                 let userCollateralizedStakedIcp : Nat64 = switch(collateralized_stake_e8s){case (?collateralizedStake) {collateralizedStake}; case (null) {0;}};
                 let stakeAvailabletoCollateralize = userStakedIcp - userCollateralizedStakedIcp;
-                if (stakeAvailabletoCollateralize < terms.initialCollateralLocked.icp_staked.e8s) throw Error.reject("User has insufficient staked ICP.");
-                SyncronousHelperMethods.updateUserNeuronContribution(neuronDataMap, {userPrincipal; delta = terms.initialCollateralLocked.icp_staked.e8s; neuronId = terms.initialCollateralLocked.icp_staked.fromNeuron; operation = #AddCollateralizedStake});
-                ?{  terms with 
-                    remainingLoanInterestAmount = {icp = { e8s : Nat64 = 0 }};
-                    remainingLoanPrincipalAmount = {icp = { e8s : Nat64 = 0 }};
-                    remainingCollateralLocked = terms.initialCollateralLocked;
-                    forfeitedCollateral = {terms.initialCollateralLocked with icp_staked = { terms.initialCollateralLocked.icp_staked with e8s : Nat64 = 0;} };
-                    amountRepaidDuringCurrentPaymentInterval = {icp = { e8s : Nat64 = 0 }};
-                    nextPaymentDueDate = null;
-                };
+                if (stakeAvailabletoCollateralize < totalUnreleasedCollateral) throw Error.reject("User has insufficient staked ICP.");
+                SyncronousHelperMethods.updateUserNeuronContribution(neuronDataMap, {userPrincipal; delta = totalUnreleasedCollateral; neuronId = initialCollateralLocked.icp_staked.fromNeuron; operation = #AddCollateralizedStake});
+            
+                ?{ initialLoanPrincipalAmount = {icp = {e8s = totalOwed}}; initialLoanInterestAmount; initialCollateralLocked = {icp_staked = {e8s = totalUnreleasedCollateral; fromNeuron = initialCollateralLocked.icp_staked.fromNeuron}}; payments };
             };
         };
+
         fundingCampaignsMap.put(campaignIndex, {
             campaign with 
             contributions = []; 
@@ -82,8 +109,10 @@ shared actor class Treasury (principal : Principal) = this {
             funded = false;
             campaignWalletBalance = {icp = {e8s: Nat64 = 0}; }; 
             amountDisbursedToRecipient = {icp = {e8s: Nat64 = 0}; }; 
-            terms;
+            loanAgreement;
+            terms = null;
         });
+
         campaignIndex += 1;
     };
 
@@ -94,16 +123,31 @@ shared actor class Treasury (principal : Principal) = this {
 
     public shared({caller}) func cancelFundingCampaign(campaignId: Nat): async TreasuryTypes.FundingCampaignsArray {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
+
         let ?campaign = fundingCampaignsMap.get(campaignId) else throw Error.reject("Campaign not found.");
-        let {funded; campaignWalletBalance; terms;} = campaign;
+        let {funded; campaignWalletBalance; loanAgreement;} = campaign;
+
         if(funded) throw Error.reject("Funding campaign has already been funded.");
+
         await AsyncronousHelperMethods.distributePayoutsFromFundingCampaign(campaignId, campaignWalletBalance.icp.e8s, usersTreasuryDataMap, updateTokenBalances, fundingCampaignsMap, Principal.fromActor(this));
-        let updatedTerms: ?TreasuryTypes.FundingCampaignTerms = switch(terms){case null { null }; case (?terms) { 
-            let { remainingCollateralLocked } = terms;
-            SyncronousHelperMethods.updateUserNeuronContribution(neuronDataMap, {userPrincipal = campaign.recipient; delta = remainingCollateralLocked.icp_staked.e8s; neuronId = remainingCollateralLocked.icp_staked.fromNeuron; operation = #SubtractCollateralizedStake});
-            ?{ terms with remainingCollateralLocked = {remainingCollateralLocked with icp_staked = {remainingCollateralLocked.icp_staked with e8s: Nat64 = 0}}; };
-        };};
-        fundingCampaignsMap.put(campaignId, {campaign with terms = updatedTerms; settled = true});
+
+        let updatedLoanAgreement: ?TreasuryTypes.FundingCampaignLoanAgreement = switch(loanAgreement){
+            case null { null }; 
+            case (?loanAgreement) { 
+                
+                let { initialCollateralLocked; payments } = loanAgreement;
+                let updatedPaymentsBuffer = Buffer.Buffer<TreasuryTypes.Payment>(0);
+
+                for(payment in Iter.fromArray(payments)){
+                    updatedPaymentsBuffer.add({payment with unreleasedCollateral = {icp_staked = {e8s: Nat64 = 0; fromNeuron = payment.unreleasedCollateral.icp_staked.fromNeuron}}});
+                };
+
+                SyncronousHelperMethods.updateUserNeuronContribution(neuronDataMap, {userPrincipal = campaign.recipient; delta = initialCollateralLocked.icp_staked.e8s; neuronId = initialCollateralLocked.icp_staked.fromNeuron; operation = #SubtractCollateralizedStake});
+                ?{ loanAgreement with payments = Buffer.toArray(updatedPaymentsBuffer) };
+            };
+        };
+
+        fundingCampaignsMap.put(campaignId, {campaign with loanAgreement = updatedLoanAgreement; settled = true});
         return Iter.toArray(fundingCampaignsMap.entries());
     };
 
@@ -113,40 +157,41 @@ shared actor class Treasury (principal : Principal) = this {
         await AsyncronousHelperMethods.contributeToFundingCampaign(contributor, campaignId, amount, fundingCampaignsMap, usersTreasuryDataMap, Principal.fromActor(this), updateTokenBalances);
     };
 
-    public shared({caller}) func contributeToAllFundingCampaignsForLoans(contributor: TreasuryTypes.PrincipalAsText, amount: Nat64) : async TreasuryTypes.FundingCampaignsArray {
-        if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
-        let {totalLoansAwaitingContributions} = SyncronousHelperMethods.getTotalFundingAwaitingContributions(fundingCampaignsMap);
-        let totalAmountToContribute = Nat64.min(amount, totalLoansAwaitingContributions);
-        label makingContributions for((campaignId, campaign) in fundingCampaignsMap.entries()){
-            let {settled; funded; amountToFund = loanAmount; terms;} = campaign;
-            if(settled or funded or terms == null) continue makingContributions;
-            let amountToContributeToThisCampaign = NatX.nat64ComputePercentage({value = totalAmountToContribute; numerator = loanAmount.icp.e8s; denominator = totalLoansAwaitingContributions});
-            ignore contributeToFundingCampaign(contributor, campaignId, amountToContributeToThisCampaign);
-        };
-        return Iter.toArray(fundingCampaignsMap.entries());
-    };
+    private func disburseAvailableLiquidityToAllAwaitingLoanFundingCampaigns(): async () {
 
-    private func makeContributionsByAllUsersToAllFundingCampaignsForLoans(): async () {
         var totalLiquidityAvailableForLoans: Nat64 = 0;
+        let usersContributingLiquidityToLoans = Buffer.Buffer<(principal: TreasuryTypes.PrincipalAsText, userTreasuryData: TreasuryTypes.UserTreasuryData)>(0);
 
-        label summingAvailableLiquidity for((principal, {balances; automaticallyContributeToLoans}) in usersTreasuryDataMap.entries()){ 
-            if(principal == Principal.toText(Principal.fromActor(this))) continue summingAvailableLiquidity;
-            switch(automaticallyContributeToLoans){ case(?true){totalLiquidityAvailableForLoans += balances.icp.e8s;}; case(_){}; }; 
-        };
-
-        let {totalLoansAwaitingContributions} = SyncronousHelperMethods.getTotalFundingAwaitingContributions(fundingCampaignsMap);
-
-        label makingContributions for((userPrincipal, {automaticallyContributeToLoans; balances}) in usersTreasuryDataMap.entries()){ 
-            switch(automaticallyContributeToLoans){ 
-                case (?true){
-                    let userLiquidityAvailableForLoans = balances.icp.e8s;
-                    let portionOfAwaitingLoansToBeProvidedByThisUser = NatX.nat64ComputePercentage({value = totalLoansAwaitingContributions; numerator = userLiquidityAvailableForLoans; denominator = totalLiquidityAvailableForLoans});
-                    let amountToContribute = Nat64.min(userLiquidityAvailableForLoans, portionOfAwaitingLoansToBeProvidedByThisUser);
-                    ignore contributeToAllFundingCampaignsForLoans(userPrincipal, amountToContribute);
-                };
-                case(_){ continue makingContributions };
+        label summingAvailableLiquidityForLoans for((principal, userTreasuryData) in usersTreasuryDataMap.entries()){ 
+            let {balances; automaticallyContributeToLoans;} = userTreasuryData;
+            let ?isSetToAutomaticallyContributeToLoans = automaticallyContributeToLoans else continue summingAvailableLiquidityForLoans;
+            if(isSetToAutomaticallyContributeToLoans) {
+                totalLiquidityAvailableForLoans += balances.icp.e8s;
+                usersContributingLiquidityToLoans.add((principal, userTreasuryData));
             };
         };
+
+        if(totalLiquidityAvailableForLoans < 100_000_000) return;
+
+        var oldestActiveFundingCampaign: ?(campaignId: Nat, campaign: TreasuryTypes.FundingCampaign) = null;
+
+        label searchingForOldestActiveFundingCampaign for(i in Iter.range(0, fundingCampaignsMap.size() - 1)){
+            let ?campaign = fundingCampaignsMap.get(i) else continue searchingForOldestActiveFundingCampaign;
+            let {settled; funded; loanAgreement;} = campaign;
+            if(settled or funded or loanAgreement == null) continue searchingForOldestActiveFundingCampaign;
+            oldestActiveFundingCampaign := ?(i, campaign);
+            break searchingForOldestActiveFundingCampaign;
+        };
+
+        let ?(campaignId, {loanAgreement}) = oldestActiveFundingCampaign else return;
+        let ?{initialLoanPrincipalAmount = amountNeededToFundLoan;} = loanAgreement else return;
+
+        for((userPrincipal, {balances}) in Iter.fromArray(Buffer.toArray(usersContributingLiquidityToLoans))){ 
+            let userLiquidityAvailableForLoans = balances.icp.e8s;
+            let liquidityToBeProvidedByThisUserForThisLoan = NatX.nat64ComputeFractionMultiplication({factor = amountNeededToFundLoan.icp.e8s; numerator = userLiquidityAvailableForLoans; denominator = totalLiquidityAvailableForLoans});
+            ignore contributeToFundingCampaign(userPrincipal, campaignId, liquidityToBeProvidedByThisUserForThisLoan); 
+        };
+        ignore setTimer<system>(#seconds(5 * 60), func(): async (){ ignore disburseAvailableLiquidityToAllAwaitingLoanFundingCampaigns(); });
     };
 
     public shared({caller}) func repayFundingCampaign(contributor: TreasuryTypes.PrincipalAsText, campaignId: Nat, amount: Nat64) : async TreasuryTypes.FundingCampaignsArray {
@@ -166,7 +211,7 @@ shared actor class Treasury (principal : Principal) = this {
                 case true { paymentAmounts.icp.e8s - amountRepaidDuringCurrentPaymentInterval.icp.e8s; };
                 case false { 0; };
             };
-            let amountToRepayOnThisLoan = NatX.nat64ComputePercentage({value = totalAmountToRepay; numerator = debtDueOnThisLoan; denominator = totalDebtsDue});
+            let amountToRepayOnThisLoan = NatX.nat64ComputeFractionMultiplication({factor = totalAmountToRepay; numerator = debtDueOnThisLoan; denominator = totalDebtsDue});
             ignore repayFundingCampaign(contributor, campaignId, amountToRepayOnThisLoan);
         };
         return Iter.toArray(fundingCampaignsMap.entries());
@@ -194,7 +239,7 @@ shared actor class Treasury (principal : Principal) = this {
                 (0, paymentAmounts.icp.e8s - amountRepaidDuringCurrentPaymentInterval.icp.e8s);
             } else {  (amountRepaidDuringCurrentPaymentInterval.icp.e8s - paymentAmounts.icp.e8s, 0);  };
 
-            let amountOfCollateralForfeited = Nat64.min( remainingCollateralLocked.icp_staked.e8s, NatX.nat64ComputePercentage({value = initialCollateralLocked.icp_staked.e8s; numerator = paymentAmountMissed; denominator = amountDisbursedToRecipient.icp.e8s}));
+            let amountOfCollateralForfeited = Nat64.min( remainingCollateralLocked.icp_staked.e8s, NatX.nat64ComputeFractionMultiplication({factor = initialCollateralLocked.icp_staked.e8s; numerator = paymentAmountMissed; denominator = amountDisbursedToRecipient.icp.e8s}));
             let updatedRemainingCollateralLocked = {remainingCollateralLocked with icp_staked = { remainingCollateralLocked.icp_staked with e8s = remainingCollateralLocked.icp_staked.e8s - amountOfCollateralForfeited } };
             let updatedForfeitedCollateral = {forfeitedCollateral with icp_staked = { forfeitedCollateral.icp_staked with e8s = forfeitedCollateral.icp_staked.e8s + amountOfCollateralForfeited} };
             let nextPaymentDueDate = ?(Time.now() + Nat64.toNat(paymentIntervals));
@@ -547,7 +592,7 @@ shared actor class Treasury (principal : Principal) = this {
         ignore recurringTimer<system>(#seconds(24 * 60 * 60), func (): async () { 
             await AsyncronousHelperMethods.upateNeuronsDataMap(neuronDataMap, null);
             ignore setTimer<system>(#seconds(5 * 60), func(): async (){ ignore repayAllFundingCampaignsOwedByAllUsers(); });
-            ignore setTimer<system>(#seconds(10 * 60), func(): async (){ ignore makeContributionsByAllUsersToAllFundingCampaignsForLoans(); });
+            ignore setTimer<system>(#seconds(10 * 60), func(): async (){ ignore disburseAvailableLiquidityToAllAwaitingLoanFundingCampaigns(); });
         });
     };    
 };

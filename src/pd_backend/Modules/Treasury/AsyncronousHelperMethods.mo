@@ -173,7 +173,7 @@ module{
         for((_, {stake_e8s = userContribution }) in Iter.fromArray(contributions)){ totalAmountContributedToNeuron += userContribution; };
 
         label loop_ for((userPrincipal, {stake_e8s = userContribution }) in Iter.fromArray(contributions)){
-            let amountOwedToUser: Nat64 = NatX.nat64ComputePercentage({value = neuronInfo_.stake_e8s; numerator = userContribution; denominator = totalAmountContributedToNeuron});
+            let amountOwedToUser: Nat64 = NatX.nat64ComputeFractionMultiplication({factor = neuronInfo_.stake_e8s; numerator = userContribution; denominator = totalAmountContributedToNeuron});
             ignore performUserPayoutFromNeuronDisbursal(Principal.fromText(userPrincipal), amountOwedToUser);
         };
     };
@@ -189,7 +189,7 @@ module{
         let ?{contributions; amountDisbursedToRecipient; subaccountId = campaignSubaccountId} = fundingCampaignsMap.get(campaignId) else { throw Error.reject("No campaign found") };
         label loop_ for((userPrincipal, {icp = userCampaignContribution}) in Iter.fromArray(contributions)){
             var amountOwedToUser: Nat64 = if(amountDisbursedToRecipient.icp.e8s == 0) { userCampaignContribution.e8s }
-            else { NatX.nat64ComputePercentage({value = amountRepaid; numerator = userCampaignContribution.e8s; denominator = amountDisbursedToRecipient.icp.e8s}) };
+            else { NatX.nat64ComputeFractionMultiplication({factor = amountRepaid; numerator = userCampaignContribution.e8s; denominator = amountDisbursedToRecipient.icp.e8s}) };
             let ?{subaccountId = userSubaccountId} = usersTreasuryDataMap.get(userPrincipal) else { continue loop_ };
             ignore performTransfer(amountOwedToUser, { subaccountId = ?campaignSubaccountId; accountType = #FundingCampaign }, { owner = treasuryCanisterId; subaccountId = ?userSubaccountId; accountType = #UserTreasuryData }, updateTokenBalances);
         };
@@ -216,15 +216,25 @@ module{
         treasuryCanisterId: Principal,
         updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async (),
     ) : async TreasuryTypes.FundingCampaignsArray {
+
         let ?campaign = fundingCampaignsMap.get(campaignId) else throw Error.reject("Campaign not found.");
+
         let {subaccountId = fundingCampaignSubaccountId; funded; campaignWalletBalance; amountToFund} = campaign;
+
         if(funded) throw Error.reject("Campaign already funded.");
+
         if(campaignWalletBalance.icp.e8s >= amountToFund.icp.e8s) throw Error.reject("Campaign already funded.");
+
         let amountRemainingToFund = amountToFund.icp.e8s - campaignWalletBalance.icp.e8s;
+
         let amountToContribute = Nat64.min(amount, amountRemainingToFund);
+
         let (_, contributorSubaccountId) = SyncronousHelperMethods.getIdAndSubaccount(#Principal(contributor), usersTreasuryDataMap, fundingCampaignsMap);
+
         let {amountSent} = await performTransfer(amountToContribute + txFee, {subaccountId = ?contributorSubaccountId; accountType = #UserTreasuryData}, {owner = treasuryCanisterId; subaccountId = ?fundingCampaignSubaccountId; accountType = #FundingCampaign}, updateTokenBalances);
+
         creditCampaignContribution(contributor, campaignId, amountSent, fundingCampaignsMap);
+        
         return Iter.toArray(fundingCampaignsMap.entries());
     };
 
@@ -263,7 +273,7 @@ module{
             {icp = {e8s: Nat64 = terms.remainingLoanPrincipalAmount.icp.e8s - amountToDeductFromPrincipalAmount}}  
         } else { settled := true; {icp = {e8s: Nat64 = 0}}; };
         
-        let amountToDecollateralize: Nat64 = NatX.nat64ComputePercentage({value = terms.initialCollateralLocked.icp_staked.e8s; numerator = amountToDeductFromPrincipalAmount; denominator = amountDisbursedToRecipient.icp.e8s});
+        let amountToDecollateralize: Nat64 = NatX.nat64ComputeFractionMultiplication({factor = terms.initialCollateralLocked.icp_staked.e8s; numerator = amountToDeductFromPrincipalAmount; denominator = amountDisbursedToRecipient.icp.e8s});
         let collateralRemainingAfterDecollateralization: Nat64 = if(terms.remainingCollateralLocked.icp_staked.e8s > amountToDecollateralize){
             terms.remainingCollateralLocked.icp_staked.e8s - amountToDecollateralize} else { 0 };
         let remainingCollateralLocked = {icp_staked = {e8s = collateralRemainingAfterDecollateralization; fromNeuron = terms.remainingCollateralLocked.icp_staked.fromNeuron; }};

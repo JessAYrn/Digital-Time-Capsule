@@ -39,7 +39,7 @@ module{
         let withdrawelamount = Nat64.min(amount, balances.icp.e8s);
         let treasuryFee: Nat64 = switch(Principal.toText(caller) == daoMetaData.founder){
             case true { 0 };
-            case false { NatX.nat64ComputePercentage({value = withdrawelamount; numerator = 1; denominator = 200}); };
+            case false { NatX.nat64ComputeFractionMultiplication({factor = withdrawelamount; numerator = 1; denominator = 200}); };
         };
         if(withdrawelamount < 1_000_000){ return {amountSent: Nat64 = 0}; };
         ignore await treasury.transferICP(

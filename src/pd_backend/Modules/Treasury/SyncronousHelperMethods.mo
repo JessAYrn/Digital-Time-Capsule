@@ -28,7 +28,7 @@ module{
         );
         for((contributor, neuronStakeInfo) in Iter.fromArray(contributions)){
             let {stake_e8s = userTotalStake;} = neuronStakeInfo;
-            let userVotingPower = NatX.nat64ComputePercentage({value = userTotalStake; numerator = neuronTotalVotingPower; denominator = neuronTotalStake});
+            let userVotingPower = NatX.nat64ComputeFractionMultiplication({factor = userTotalStake; numerator = neuronTotalVotingPower; denominator = neuronTotalStake});
             contributionsMap.put(contributor, {neuronStakeInfo with voting_power = userVotingPower});
         };
         neuronDataMap.put(neuronId, {neuronData with contributions = Iter.toArray(contributionsMap.entries())});
@@ -49,7 +49,7 @@ module{
             let contributionsMap = HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.NeuronStakeInfo>( Iter.fromArray(contributions), Iter.size(Iter.fromArray(contributions)), Text.equal, Text.hash );
             let ?{stake_e8s = userContributions; voting_power; collateralized_stake_e8s} = contributionsMap.get(pincipal) else { continue loop_};
 
-            totalStake += NatX.nat64ComputePercentage({value = neuronInfo_.stake_e8s; numerator = userContributions; denominator = totalNeuronContributions}); 
+            totalStake += NatX.nat64ComputeFractionMultiplication({factor = neuronInfo_.stake_e8s; numerator = userContributions; denominator = totalNeuronContributions}); 
             totalVotingPower += voting_power; 
             totalCollateralizedStake += switch(collateralized_stake_e8s){ case null { 0; }; case(?collateralized_stake_e8s_) { collateralized_stake_e8s_; }; };
         };
@@ -133,7 +133,7 @@ module{
 
         for((contributor, neuronStakeInfo) in parentNeuronContributionsMap.entries()){
             let {stake_e8s = userStakeInParentNeuron} = neuronStakeInfo;
-            let userStakeInNewNeuron = NatX.nat64ComputePercentage({value = newNeuronTotalStake; numerator = userStakeInParentNeuron; denominator = parentNeuronTotalStake});
+            let userStakeInNewNeuron = NatX.nat64ComputeFractionMultiplication({factor = newNeuronTotalStake; numerator = userStakeInParentNeuron; denominator = parentNeuronTotalStake});
             newNeuronContributionsMap.put(contributor, { stake_e8s = userStakeInNewNeuron; voting_power = 0; collateralized_stake_e8s = null; });
         };
 
@@ -209,7 +209,7 @@ module{
         var totalContributedAmount: Nat64 = 0;
         for((_, {icp = lenderContribution}) in Iter.fromArray(loanContributions)) totalContributedAmount += lenderContribution.e8s;
         label distributionLoop for ((principal, {icp = lenderContribution}) in Iter.fromArray(loanContributions)){
-            let stakeCredit = NatX.nat64ComputePercentage({value = amountToDistribute; numerator = lenderContribution.e8s; denominator = totalContributedAmount});
+            let stakeCredit = NatX.nat64ComputeFractionMultiplication({factor = amountToDistribute; numerator = lenderContribution.e8s; denominator = totalContributedAmount});
             updateUserNeuronContribution(neuronDataMap, {userPrincipal = principal; delta = stakeCredit; neuronId; operation = #AddStake});
             remainingAmount -= stakeCredit;
         };
@@ -244,31 +244,6 @@ module{
             totalDebts += remainingLoanPrincipalAmount.icp.e8s + remainingLoanInterestAmount.icp.e8s;
         };
         return {totalDebts};
-    };
-
-    public func getTotalFundingAwaitingContributions(fundingCampaignMap: TreasuryTypes.FundingCampaignsMap): 
-    {totalFundingAwaitingContributions: Nat64; totalLoansAwaitingContributions: Nat64;} {
-
-        var totalFundingAwaitingContributions: Nat64 = 0;
-        var totalLoansAwaitingContributions: Nat64 = 0;
-
-        label summingFundingAwaitingContributions for((_, campaign) in fundingCampaignMap.entries()){
-            let {amountToFund; funded; settled;} = campaign;
-            if(settled or funded) continue summingFundingAwaitingContributions;
-            totalFundingAwaitingContributions += amountToFund.icp.e8s;
-            if(campaign.terms != null) totalLoansAwaitingContributions += amountToFund.icp.e8s
-        };
-        return {totalFundingAwaitingContributions; totalLoansAwaitingContributions};
-    };
-
-    public func getTotalFundingForUserAwaitingContributions(userPrincipal: TreasuryTypes.PrincipalAsText, fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap): {totalFundingForUserAwaitingContributions: Nat64} {
-        var totalFundingForUserAwaitingContributions: Nat64 = 0;
-        label summingFundingAwaitingContributions for((_, campaign) in fundingCampaignsMap.entries()){
-            let {recipient; amountToFund; funded; settled;} = campaign;
-            if(settled or funded or recipient != userPrincipal) continue summingFundingAwaitingContributions;
-            totalFundingForUserAwaitingContributions += amountToFund.icp.e8s;
-        };
-        return {totalFundingForUserAwaitingContributions};
     };
 
     public func isProxyOrHasAProxyNeuron(neuronId: Nat64, neuronDataMap: TreasuryTypes.NeuronsDataMap): Bool {
