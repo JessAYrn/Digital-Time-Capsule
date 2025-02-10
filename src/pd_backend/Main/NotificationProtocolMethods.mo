@@ -1,6 +1,6 @@
-import MainTypes "../../Types/Main/types";
+import MainTypes "types";
 import Error "mo:base/Error";
-import Journal "../../Journal";
+import Journal "../Journal";
 import Principal "mo:base/Principal";
 import Iter "mo:base/Iter";
 

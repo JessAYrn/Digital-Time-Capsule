@@ -292,10 +292,8 @@ shared(msg) actor class Journal () = this {
 
     public shared({caller}) func transferICP( amount: Nat64, recipientIdentifier: JournalTypes.RecipientIdentifier) : async {amountSent: Nat64} {
         if( Principal.toText(caller) != mainCanisterId_) { throw Error.reject("Unauthorized access."); };
-        if(amount < txFee){ return {amountSent: Nat64 = 0}; };
-        var amountSent = amount - txFee;
 
-        func performTransfer(amountSent: Nat64, recipientIdentifier: JournalTypes.RecipientIdentifier) : 
+        func performTransfer(amountToSend: Nat64, recipientIdentifier: JournalTypes.RecipientIdentifier) : 
         async {#icrc1_transfer: Ledger.Result; #transfer: Ledger.Result_5} {
             switch(recipientIdentifier) {
                 case(#PrincipalAndSubaccount(recipient, subaccount)) {
@@ -303,7 +301,7 @@ shared(msg) actor class Journal () = this {
                         memo = null;
                         from_subaccount = null;
                         to = {owner = recipient; subaccount};
-                        amount = Nat64.toNat(amountSent);
+                        amount = Nat64.toNat(amountToSend);
                         fee = ?Nat64.toNat(txFee);
                         created_at_time = ?Nat64.fromNat(Int.abs(Time.now()));
                     });
@@ -314,7 +312,7 @@ shared(msg) actor class Journal () = this {
                         memo = Nat64.fromNat(0);
                         from_subaccount = null;
                         to = accountId;
-                        amount = { e8s = amountSent};
+                        amount = { e8s = amountToSend};
                         fee = { e8s = txFee };
                         created_at_time = ?{ timestamp_nanos = Nat64.fromNat(Int.abs(Time.now())) };
                     });
@@ -322,8 +320,8 @@ shared(msg) actor class Journal () = this {
                 };
             };
         };
-
-        let res = await performTransfer(amountSent, recipientIdentifier);
+        var amountSent = amount;
+        let res = await performTransfer(amount, recipientIdentifier);
         ignore updateTokenBalances_();
 
         switch (res) {

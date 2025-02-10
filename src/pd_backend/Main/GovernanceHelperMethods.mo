@@ -1,5 +1,5 @@
-import TreasuryTypes "../../Types/Treasury/types";
-import MainTypes "../../Types/Main/types";
+import TreasuryTypes "../Treasury/types";
+import MainTypes "types";
 import HashMap "mo:base/HashMap";
 import Iter "mo:base/Iter";
 import Principal "mo:base/Principal";

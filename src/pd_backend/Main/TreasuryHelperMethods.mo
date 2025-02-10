@@ -1,11 +1,11 @@
 import Principal "mo:base/Principal";
 import Error "mo:base/Error";
-import MainTypes "../../Types/Main/types";
-import Journal "../../Journal";
-import Treasury "../../Treasury";
+import MainTypes "types";
+import Journal "../Journal";
+import Treasury "../Treasury";
 import Nat64 "mo:base/Nat64";
-import TreasuryTypes "../../Types/Treasury/types";
-import NatX "../../MotokoNumbers/NatX";
+import TreasuryTypes "../Treasury/types";
+import NatX "../MotokoNumbers/NatX";
 
 module{
 
@@ -15,7 +15,7 @@ module{
         caller: Principal,
         amount: Nat64
     ) : async {amountSent: Nat64} {
-        if(amount < 10_000){ return {amountSent: Nat64 = 0}; };
+
         let ?userProfile = profiles.get(caller) else { throw Error.reject("User not found") };
         let userCanisterId = userProfile.canisterId;
         let userCanister: Journal.Journal = actor(Principal.toText(userCanisterId));
@@ -41,7 +41,9 @@ module{
             case true { 0 };
             case false { NatX.nat64ComputeFractionMultiplication({factor = withdrawelamount; numerator = 1; denominator = 200}); };
         };
+
         if(withdrawelamount < 1_000_000){ return {amountSent: Nat64 = 0}; };
+        
         ignore await treasury.transferICP(
             treasuryFee, {identifier = #SubaccountId(userTreasurySubaccountId); accountType = #UserTreasuryData}, 
             {owner = Principal.fromText(daoMetaData.treasuryCanisterPrincipal); subaccount = null; accountType = #MultiSigAccount});

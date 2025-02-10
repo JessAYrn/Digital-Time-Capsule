@@ -2,10 +2,10 @@ import Text "mo:base/Text";
 import Principal "mo:base/Principal";
 import Cycles "mo:base/ExperimentalCycles";
 import Error "mo:base/Error";
-import MainTypes "../../Types/Main/types";
-import Journal "../../Journal";
+import MainTypes "types";
+import Journal "../Journal";
 import CanisterManagementMethods "../Main/CanisterManagementMethods";
-import Treasury "../../Treasury";
+import Treasury "../Treasury";
 
 module{
 

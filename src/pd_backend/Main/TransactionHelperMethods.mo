@@ -1,26 +1,25 @@
-import MainTypes "../../Types/Main/types";
-import Account "../../Serializers/Account";
+import MainTypes "types";
+import Account "../Serializers/Account";
 import Result "mo:base/Result";
 import Principal "mo:base/Principal";
-import JournalTypes "../../Types/Journal/types";
-import Ledger "../../NNS/Ledger";
+import JournalTypes "../Types/Journal/types";
+import Ledger "../NNS/Ledger";
 import Iter "mo:base/Iter";
 import Blob "mo:base/Blob";
-import Journal "../../Journal";
+import Journal "../Journal";
 import Nat64 "mo:base/Nat64";
-import Hex "../../Serializers/Hex";
-import Treasury "../../Treasury";
+import Hex "../Serializers/Hex";
+import Treasury "../Treasury";
 import Buffer "mo:base/Buffer";
 import HashMap "mo:base/HashMap";
 
 module{
 
     private let ledger  : Ledger.Interface  = actor(Ledger.CANISTER_ID);
-    private let txFee : Nat64 = 10_000;
 
     public func transferICP(callerId: Principal, profilesMap: MainTypes.UserProfilesMap_V2 ,amount: Nat64, canisterAccountId: Account.AccountIdentifier) : 
     async Result.Result<({amountSent: Nat64}), JournalTypes.Error> {
-        if(amount < txFee){ return #err(#TxFailed) };
+
         let userProfile = profilesMap.get(callerId);
         switch(userProfile) {
             case null{ #err(#NotFound) }; 

@@ -1,8 +1,8 @@
 import Result "mo:base/Result";
-import JournalTypes "../../Types/Journal/types";
+import JournalTypes "../Types/Journal/types";
 import Principal "mo:base/Principal";
-import MainTypes "../../Types/Main/types";
-import Journal "../../Journal";
+import MainTypes "types";
+import Journal "../Journal";
 import Blob "mo:base/Blob";
 
 

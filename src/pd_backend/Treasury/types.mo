@@ -3,9 +3,9 @@ import Principal "mo:base/Principal";
 import Nat64 "mo:base/Nat64";
 import Blob "mo:base/Blob";
 import Buffer "mo:base/Buffer";
-import Governance "../../NNS/Governance";
-import Account "../../Serializers/Account";
-import IC "../../Types/IC/types";
+import Governance "../NNS/Governance";
+import Account "../Serializers/Account";
+import IC "../Types/IC/types";
 
 
 module{
@@ -46,25 +46,27 @@ module{
 
     public type Payment = {
         owed: {icp: {e8s : Nat64;}; };
-        unreleasedCollateral: {icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText}};
-        releasedCollateral: {icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText}};
-        forfeitedCollateral: {icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText}};
+        paid: {icp: {e8s : Nat64;}; };
+        collateralForfeited: {icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText}};
+        collateralReleased: {icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText}};
         dueDate: Int;
     };
 
     public type FundingCampaignLoanAgreement = {
+        numberOfPayments: Nat64;
+        paymentTermPeriod: Nat64;
         payments: [Payment];
-        initialLoanPrincipalAmount: {icp: {e8s : Nat64;}; };
-        initialLoanInterestAmount: {icp: {e8s : Nat64;}; };
-        initialCollateralLocked: {icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText}};
+        loanPrincipal: {icp: {e8s : Nat64;}; };
+        loanInterest: {icp: {e8s : Nat64;}; };
+        collateralProvided: {icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText}};
     };
 
     public type FundingCampaignLoanAgreementInput = {
         paymentTermPeriod: Nat64;
         numberOfPayments: Nat64;
-        initialLoanPrincipalAmount: {icp: {e8s : Nat64;}; };
-        initialLoanInterestAmount: {icp: {e8s : Nat64;}; };
-        initialCollateralLocked: {icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText}};
+        loanPrincipal: {icp: {e8s : Nat64;}; };
+        loanInterest: {icp: {e8s : Nat64;}; };
+        collateralProvided: {icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText}};
     };
 
     public type FundingCampaignInput = {
