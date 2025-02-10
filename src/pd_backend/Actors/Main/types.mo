@@ -1,11 +1,11 @@
-import Account "../Serializers/Account";
+import Account "../../Serializers/Account";
 import Principal "mo:base/Principal";
 import HashMap "mo:base/HashMap";
 import Nat "mo:base/Nat";
-import JournalTypes "../Types/Journal/types";
+import JournalTypes "../User/types";
 import TreasuryTypes "../Treasury/types";
-import IC "../Types/IC/types";
-import Ledger "../NNS/Ledger";
+import IC "../../Types/IC/types";
+import Ledger "../../NNS/Ledger";
 
 
 module{
@@ -72,7 +72,7 @@ module{
     public type AdminData = {percentage : Nat};
 
     public type CanisterDataExport = {
-        journalCount: Nat;
+        usersCount: Nat;
         treasuryCanisterPrincipal: Text;
         managerCanisterPrincipal: Text;
         frontEndPrincipal: Text;

@@ -1,9 +1,9 @@
-import { JOURNAL_TABS,} from "../functionsAndConstants/Constants"
+import { USER_TABS,} from "../functionsAndConstants/Constants"
 
-export const types = {
+export const userTypes = {
     SET_ENTIRE_REDUX_STATE: "SET_ENTIRE_REDUX_STATE",
-    SET_JOURNAL: "SET_JOURNAL",
-    SET_JOURNAL_TAB:"SET_JOURNAL_TAB",
+    SET_USER_DATA: "SET_USER_DATA",
+    SET_USER_TAB:"SET_USER_TAB",
     SET_NOTIFICATIONS:"SET_NOTIFICATIONS",
     SET_BIO: "SET_BIO",
     SET_DATA_HAS_BEEN_LOADED: "SET_DATA_HAS_BEEN_LOADED",
@@ -33,7 +33,7 @@ export const types = {
 
 export const initialState = {
     dataHasBeenLoaded: undefined,
-    journalPageTab: JOURNAL_TABS.diaryTab,
+    userPageTab: USER_TABS.diaryTab,
     bio: {
         name: '',
         dob: [],
@@ -48,7 +48,7 @@ export const initialState = {
         cyclesBalance: 0,
         rootCanisterPrincipal: ""
     },
-    journal: [],
+    userData: [],
     notifications:[],
     isLoading: false,
 };
@@ -75,8 +75,8 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
-        case types.SET_JOURNAL:
-            state.journal = payload;
+        case types.SET_USER_DATA:
+            state.userData = payload;
             return {
                 ...state
             }
@@ -85,8 +85,8 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
-        case types.SET_JOURNAL_TAB:
-            state.journalPageTab=payload;
+        case types.SET_USER_TAB:
+            state.userPageTab=payload;
             return{
                 ...state
             }
@@ -114,58 +114,58 @@ const changeValue = (state = initialState, action) => {
         }
         case types.CHANGE_ENTRY_TITLE:
             updatedJournalPage = {
-                ... state.journal[index],
+                ... state.userData[index],
                 title: payload
             }
-            state.journal[index] = updatedJournalPage;
+            state.userData[index] = updatedJournalPage;
             return {
                 ...state
             }
         case types.CHANGE_PAGE_IS_OPEN:
         updatedJournalPage = {
-            ... state.journal[index],
+            ... state.userData[index],
             isOpen: payload
         }
-        state.journal[index] = updatedJournalPage;
+        state.userData[index] = updatedJournalPage;
         return {
             ...state
         }
         case types.CHANGE_LOCATION:
             updatedJournalPage = {
-                ... state.journal[index],
+                ... state.userData[index],
                 location: payload
             }
-            state.journal[index] = updatedJournalPage;
+            state.userData[index] = updatedJournalPage;
             return {
                 ...state
             }
         case types.ADD_JOURNAL_ENTRY_FILE:
-            updatedFilesMetaDataArry = [...state.journal[index].filesMetaData];
+            updatedFilesMetaDataArry = [...state.userData[index].filesMetaData];
             updatedFilesMetaDataArry.push(defaultFileMetaData);
-            state.journal[index].filesMetaData = updatedFilesMetaDataArry;
+            state.userData[index].filesMetaData = updatedFilesMetaDataArry;
             return {
                 ...state
             }
         case types.MARK_JOURNAL_ENTRY_AS_DELETED:
-            updatedFilesMetaDataArry = state.journal[index].filesMetaData.map((metaData, i) => {
+            updatedFilesMetaDataArry = state.userData[index].filesMetaData.map((metaData, i) => {
                 if(i === fileIndex) return null;
                 return metaData;
             });
-            state.journal[index].filesMetaData = updatedFilesMetaDataArry;
+            state.userData[index].filesMetaData = updatedFilesMetaDataArry;
             return {
                 ...state
             }
         case types.CHANGE_FILE_METADATA:
             updatedFileMetaData = {
-                ...state.journal[index].filesMetaData[fileIndex],
+                ...state.userData[index].filesMetaData[fileIndex],
                 fileName: payload.fileName,
                 lastModified: payload.lastModified,
                 fileType: payload.fileType,
                 file: payload.file
             };
-            updatedFilesMetaDataArry = [...state.journal[index].filesMetaData];
+            updatedFilesMetaDataArry = [...state.userData[index].filesMetaData];
             updatedFilesMetaDataArry[fileIndex] = updatedFileMetaData;
-            state.journal[index].filesMetaData = updatedFilesMetaDataArry;
+            state.userData[index].filesMetaData = updatedFilesMetaDataArry;
             return {
                 ...state
             }
@@ -185,12 +185,12 @@ const changeValue = (state = initialState, action) => {
             }
         case types.CHANGE_FILE_LOAD_STATUS:
             updatedFileMetaData = {
-                ...state.journal[index].filesMetaData[fileIndex],
+                ...state.userData[index].filesMetaData[fileIndex],
                 isLoading: payload,
             };
-            updatedFilesMetaDataArry = [...state.journal[index].filesMetaData];
+            updatedFilesMetaDataArry = [...state.userData[index].filesMetaData];
             updatedFilesMetaDataArry[fileIndex] = updatedFileMetaData;
-            state.journal[index].filesMetaData = updatedFilesMetaDataArry;
+            state.userData[index].filesMetaData = updatedFilesMetaDataArry;
             return {
                 ...state
             }
@@ -204,19 +204,19 @@ const changeValue = (state = initialState, action) => {
             } 
         case types.CHANGE_TEXT:
             updatedJournalPage = {
-                ... state.journal[index],
+                ... state.userData[index],
                 text: payload
             }
-            state.journal[index] = updatedJournalPage;
+            state.userData[index] = updatedJournalPage;
             return {
                 ...state
             }
         case types.CHANGE_UNLOCK_TIME:
             updatedJournalPage = {
-                ... state.journal[index],
+                ... state.userData[index],
                 timeOfUnlock: payload
             }
-            state.journal[index] = updatedJournalPage;
+            state.userData[index] = updatedJournalPage;
             return {
                 ...state
             }

@@ -1,6 +1,6 @@
 import MainTypes "types";
 import Error "mo:base/Error";
-import Journal "../Journal";
+import User "../User/Actor";
 import Principal "mo:base/Principal";
 import Iter "mo:base/Iter";
 
@@ -14,7 +14,7 @@ module{
         while(index_ < length){
             let (_, userProfile) = profilesArray[index_];
             let {canisterId} = userProfile;
-            let userCanister: Journal.Journal = actor(Principal.toText(canisterId));
+            let userCanister: User.User = actor(Principal.toText(canisterId));
             ignore userCanister.updateNotifications();
             index_ += 1;
         };
@@ -26,7 +26,7 @@ module{
             case null { throw Error.reject("Profile Not Found")};
             case(?profile){
                 let {canisterId} = profile;
-                let userJournal : Journal.Journal = actor(Principal.toText(canisterId));
+                let userJournal : User.User = actor(Principal.toText(canisterId));
                 await userJournal.clearNotifications();
             };
         };

@@ -1,5 +1,5 @@
 import { combineReducers } from "redux";
-import journalReducer from "./journalReducer";
+import userReducer from "./userReducer";
 import walletReducer from './walletReducer';
 import homePageReducer from './homePageReducer';
 import navigationAndApiReducer from './navigationAndApiReducer';
@@ -7,7 +7,7 @@ import notificationsReducer from './notificationsReducer';
 import treasuryReducer  from "./treasuryReducer";
 
 const rootReducer = combineReducers({
-    journal: journalReducer,
+    user: userReducer,
     wallet: walletReducer,
     navigationAndApi: navigationAndApiReducer,
     homePage: homePageReducer,

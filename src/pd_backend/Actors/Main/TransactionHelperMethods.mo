@@ -1,15 +1,15 @@
 import MainTypes "types";
-import Account "../Serializers/Account";
+import Account "../../Serializers/Account";
 import Result "mo:base/Result";
 import Principal "mo:base/Principal";
-import JournalTypes "../Types/Journal/types";
-import Ledger "../NNS/Ledger";
+import JournalTypes "../User/types";
+import Ledger "../../NNS/Ledger";
 import Iter "mo:base/Iter";
 import Blob "mo:base/Blob";
-import Journal "../Journal";
+import User "../User/Actor";
 import Nat64 "mo:base/Nat64";
-import Hex "../Serializers/Hex";
-import Treasury "../Treasury";
+import Hex "../../Serializers/Hex";
+import Treasury "../Treasury/Actor";
 import Buffer "mo:base/Buffer";
 import HashMap "mo:base/HashMap";
 
@@ -24,7 +24,7 @@ module{
         switch(userProfile) {
             case null{ #err(#NotFound) }; 
             case (? profile){
-                let userJournal : Journal.Journal = actor(Principal.toText(profile.canisterId));
+                let userJournal : User.User = actor(Principal.toText(profile.canisterId));
                 let {amountSent} = await userJournal.transferICP(amount, #AccountIdentifier(canisterAccountId)); return #ok({amountSent});
             };
         };
@@ -66,7 +66,7 @@ module{
                     switch(senderCanisterId){
                         case null {};
                         case(?senderCanisterId_){
-                            let userJournal : Journal.Journal = actor(Principal.toText(senderCanisterId_));
+                            let userJournal : User.User = actor(Principal.toText(senderCanisterId_));
                             let tx : JournalTypes.Transaction = { balanceDelta = amount.e8s + fee.e8s; increase = false; recipient = to; timeStamp = timeOfCreation; source = from; };
                             ignore userJournal.updateTxHistory(timeOfCreation,tx);
                         };
@@ -74,7 +74,7 @@ module{
                     switch(recipientCanisterId){
                         case null {};
                         case(?recipientCanisterId_){
-                            let userJournal : Journal.Journal = actor(Principal.toText(recipientCanisterId_));
+                            let userJournal : User.User = actor(Principal.toText(recipientCanisterId_));
                             let tx : JournalTypes.Transaction = { balanceDelta = amount.e8s; increase = true; recipient = to; timeStamp = timeOfCreation; source = from; };
                             ignore userJournal.updateTxHistory(timeOfCreation,tx);
                         };

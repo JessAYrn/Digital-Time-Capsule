@@ -7,8 +7,8 @@ import { getFileUrl_fromApi } from "../components/fileManger/FileManagementTools
 
 export const loadAllDataIntoReduxStores = async (navigationAndApiState, dispatchFunctions, types) => {
     let loadSuccessful = true;
-    let {journalDispatch, walletDispatch, homePageDispatch, notificationsDispatch, treasuryDispatch} = dispatchFunctions;
-    let {journalTypes, walletTypes, homePageTypes, notificationsTypes, treasuryTypes } = types;
+    let {userDispatch, walletDispatch, homePageDispatch, notificationsDispatch, treasuryDispatch} = dispatchFunctions;
+    let {userTypes, walletTypes, homePageTypes, notificationsTypes, treasuryTypes } = types;
     //checks to see if user has an account. If not, then it attemptes to make an account, if 
     //the account creation is unsuccessful, then it returns
     loadSuccessful = await navigationAndApiState.backendActor.hasAccount();
@@ -17,7 +17,7 @@ export const loadAllDataIntoReduxStores = async (navigationAndApiState, dispatch
     let promises = [
         loadWalletData(navigationAndApiState, walletDispatch, walletTypes),
         loadCanisterData(navigationAndApiState, homePageDispatch, homePageTypes),
-        loadJournalData(navigationAndApiState, journalDispatch, journalTypes),
+        loadUserData(navigationAndApiState, userDispatch, userTypes),
         loadNotificationsData(navigationAndApiState, notificationsDispatch, notificationsTypes),
         loadTreasuryData(navigationAndApiState, treasuryDispatch, treasuryTypes)
     ];
@@ -37,10 +37,10 @@ export const loadNotificationsData = async (navigationAndApiState, notifications
     });
 };
 
-export const loadJournalData = async (navigationAndApiState, journalDispatch, types) => {
-    let journal = await navigationAndApiState.backendActor.readJournal();
-    journal = journal.ok;
-    let { userJournalData, userPrincipal, cyclesBalance, rootCanisterPrincipal } = journal;
+export const loadUserData = async (navigationAndApiState, userDispatch, types) => {
+    let userData = await navigationAndApiState.backendActor.readJournal();
+    userData = userData.ok;
+    let { userJournalData, userPrincipal, cyclesBalance, rootCanisterPrincipal } = userData;
     let [journalEntries, journalBio] = userJournalData;
     const filesMetaData = journalBio.photos.map(fileData => {
         return { ...fileData, lastModified : parseInt(fileData.lastModified), isLoading: true };
@@ -51,11 +51,11 @@ export const loadJournalData = async (navigationAndApiState, journalDispatch, ty
         photos: filesMetaData
     };
     journalEntries = mapApiObjectToFrontEndJournalEntriesObject(journalEntries);
-    journalDispatch({
+    userDispatch({
         payload: journalBio,
         actionType: types.SET_BIO
     })
-    journalDispatch({
+    userDispatch({
         payload: {
             userPrincipal,
             cyclesBalance: parseInt(cyclesBalance),
@@ -64,11 +64,11 @@ export const loadJournalData = async (navigationAndApiState, journalDispatch, ty
         },
         actionType: types.SET_USER_META_DATA
     });
-    journalDispatch({
+    userDispatch({
         payload: journalEntries,
-        actionType: types.SET_JOURNAL
+        actionType: types.SET_USER_DATA
     });
-    journalDispatch({
+    userDispatch({
         actionType: types.SET_DATA_HAS_BEEN_LOADED,
         payload: true,
     });

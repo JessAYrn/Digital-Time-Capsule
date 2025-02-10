@@ -8,21 +8,21 @@ import Text "mo:base/Text";
 import Array "mo:base/Array";
 import Nat "mo:base/Nat";
 import Option "mo:base/Option";
-import IC "../Types/IC/types";
-import Manager "../Manager";
-import AssetCanister "../Types/AssetCanister/types";
+import IC "../../Types/IC/types";
+import Manager "../Manager/Actor";
+import AssetCanister "../../Types/AssetCanister/types";
 import HashMap "mo:base/HashMap";
-import Support "../SupportCanisterIds/SupportCanisterIds";
+import Support "../../SupportCanisterIds/SupportCanisterIds";
 import Time "mo:base/Time";
 import Float "mo:base/Float";
 import Int "mo:base/Int";
 import Int64 "mo:base/Int64";
 import Debug "mo:base/Debug";
 import Nat64 "mo:base/Nat64";
-import Treasury "../Treasury";
-import FloatX "../MotokoNumbers/FloatX";
-import Account "../Serializers/Account";
-import Ledger "../NNS/Ledger";
+import Treasury "../Treasury/Actor";
+import FloatX "../../MotokoNumbers/FloatX";
+import Account "../../Serializers/Account";
+import Ledger "../../NNS/Ledger";
 
 module{
 

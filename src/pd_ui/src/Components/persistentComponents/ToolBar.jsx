@@ -1,6 +1,6 @@
-import React, { useContext, useMemo, useState } from 'react';
+import React, { useContext, useMemo } from 'react';
 import Grid from "@mui/material/Unstable_Grid2";
-import { types as journalTypes } from "../../reducers/journalReducer";
+import { userTypes } from "../../reducers/userReducer";
 import { walletTypes } from "../../reducers/walletReducer";
 import { homePageTypes } from "../../reducers/homePageReducer";
 import { notificationsTypes } from "../../reducers/notificationsReducer";
@@ -24,7 +24,7 @@ const ToolBar = (props) => {
     const { style, onClick} = props;
 
     const {
-        journalDispatch,
+        userDispatch,
         walletDispatch,
         homePageDispatch,
         notificationsState,
@@ -37,8 +37,8 @@ const ToolBar = (props) => {
         setModalIsOpen,
     } = useContext(AppContext);
 
-    const dispatches = { homePageDispatch, treasuryDispatch, walletDispatch, notificationsDispatch, journalDispatch};
-    const types = { journalTypes, walletTypes, homePageTypes, notificationsTypes, treasuryTypes};
+    const dispatches = { homePageDispatch, treasuryDispatch, walletDispatch, notificationsDispatch, userDispatch};
+    const types = { userTypes, walletTypes, homePageTypes, notificationsTypes, treasuryTypes};
 
     const onClick_logout = () => { document.location.reload(); };
 

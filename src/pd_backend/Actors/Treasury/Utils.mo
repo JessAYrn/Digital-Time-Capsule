@@ -1,14 +1,14 @@
-import Account "../Serializers/Account";
-import TreasuryTypes "types";
+import Account "../../Serializers/Account";
+import TreasuryTypes "../Treasury/types";
 import Nat64 "mo:base/Nat64";
-import Ledger "../NNS/Ledger";
+import Ledger "../../NNS/Ledger";
 import Time "mo:base/Time";
 import Int "mo:base/Int";
 import Blob "mo:base/Blob";
 import Debug "mo:base/Debug";
 import Nat "mo:base/Nat";
 import HashMap "mo:base/HashMap";
-import NatX "../MotokoNumbers/NatX";
+import NatX "../../MotokoNumbers/NatX";
 import Iter "mo:base/Iter";
 import Text "mo:base/Text";
 

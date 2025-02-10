@@ -3,9 +3,9 @@ import Principal "mo:base/Principal";
 import Cycles "mo:base/ExperimentalCycles";
 import Error "mo:base/Error";
 import MainTypes "types";
-import Journal "../Journal";
-import CanisterManagementMethods "../Main/CanisterManagementMethods";
-import Treasury "../Treasury";
+import User "../User/Actor";
+import CanisterManagementMethods "CanisterManagementMethods";
+import Treasury "../Treasury/Actor";
 
 module{
 
@@ -23,7 +23,7 @@ module{
                 if(not isUserNameAvailable(userName, profilesMap)){ throw Error.reject("The selected user name has already been taken") };
                 let amountOfCyclesToSend = switch(subnetType){ case(#Fiduciary){ 2_500_000_000_000 }; case(#Application){ 1_250_000_000_000}};
                 Cycles.add<system>(amountOfCyclesToSend);
-                let newUserJournal = await Journal.Journal();
+                let newUserJournal = await User.User();
                 let amountAccepted = await newUserJournal.wallet_receive();
                 let treasuryCanister: Treasury.Treasury = actor(daoMetaData.treasuryCanisterPrincipal);
                 ignore treasuryCanister.createTreasuryData(callerId);

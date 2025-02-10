@@ -1,6 +1,6 @@
 import React, {useState, useReducer, useEffect, useMemo} from 'react';
 import notificationsReducer, { notificationsInitialState, notificationsTypes } from './reducers/notificationsReducer';
-import journalReducer, { initialState, types } from './reducers/journalReducer';
+import userReducer, { initialState, userTypes } from './reducers/userReducer';
 import { allStatesLoaded, loadAllDataIntoReduxStores } from './functionsAndConstants/loadingFunctions';
 import walletReducer, { walletInitialState, walletTypes } from './reducers/walletReducer';
 import homePageReducer, { homePageInitialState, homePageTypes } from './reducers/homePageReducer';
@@ -28,7 +28,7 @@ import PersistedComponents from './components/persistentComponents/PersistedComp
 
 const Router = (props) => {
 
-    const [journalState, journalDispatch] = useReducer(journalReducer, initialState);
+    const [userState, userDispatch] = useReducer(userReducer, initialState);
     const [notificationsState, notificationsDispatch] = useReducer(notificationsReducer, notificationsInitialState);
     const [walletState, walletDispatch] = useReducer(walletReducer, walletInitialState);
     const [homePageState, homePageDispatch] = useReducer(homePageReducer, homePageInitialState);
@@ -39,9 +39,9 @@ const Router = (props) => {
     const [modalIsLoading, setModalIsLoading] = useState(false);
     const [modalProps, setModalProps] = useState({});
 
-    const ReducerDispatches={ walletDispatch, journalDispatch, homePageDispatch, navigationAndApiDispatch, notificationsDispatch, treasuryDispatch };
-    const ReducerTypes={ journalTypes:types, walletTypes, homePageTypes, navigationAndApiTypes, notificationsTypes, treasuryTypes };
-    const context = { journalState, journalDispatch, walletDispatch, walletState, homePageDispatch, homePageState, navigationAndApiDispatch, navigationAndApiState, notificationsState, notificationsDispatch, treasuryState, treasuryDispatch, modalIsOpen, setModalIsOpen, modalIsLoading, setModalIsLoading, modalProps, setModalProps };
+    const ReducerDispatches={ walletDispatch, userDispatch, homePageDispatch, navigationAndApiDispatch, notificationsDispatch, treasuryDispatch };
+    const ReducerTypes={ userTypes, walletTypes, homePageTypes, navigationAndApiTypes, notificationsTypes, treasuryTypes };
+    const context = { userState, userDispatch, walletDispatch, walletState, homePageDispatch, homePageState, navigationAndApiDispatch, navigationAndApiState, notificationsState, notificationsDispatch, treasuryState, treasuryDispatch, modalIsOpen, setModalIsOpen, modalIsLoading, setModalIsLoading, modalProps, setModalProps };
 
     const loadAllDataIntoReduxStores_ =  async () => { const result = await loadAllDataIntoReduxStores(navigationAndApiState, ReducerDispatches, ReducerTypes); return result };
 
@@ -101,7 +101,7 @@ const Router = (props) => {
 
     const displayComponent = useMemo(() => {
         return navigationAndApiState?.userCredentials?.agent && allStatesLoaded({
-            journalState,
+            userState,
             notificationsState,
             walletState,
             homePageState,
@@ -110,7 +110,7 @@ const Router = (props) => {
     },[
         navigationAndApiState.userCredentials.principal, 
         treasuryState.dataHasBeenLoaded,
-        journalState.dataHasBeenLoaded,
+        userState.dataHasBeenLoaded,
         walletState.dataHasBeenLoaded,
         homePageState.dataHasBeenLoaded,
         notificationsState.dataHasBeenLoaded,

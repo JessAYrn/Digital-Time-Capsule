@@ -6,7 +6,7 @@ export const navigationAndApiTypes={
 
 export const NAV_LINKS = {
     wallet : '/wallet',
-    journal : '/app',
+    user : '/app',
     account: '/account',
     dashboard: '/',
     finances:'/finances',

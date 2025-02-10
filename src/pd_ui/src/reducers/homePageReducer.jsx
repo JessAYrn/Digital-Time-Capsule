@@ -1,5 +1,3 @@
-// import changeValue from "./journalReducer"
-
 import { NULL_STRING_CAPITALIZED } from "../functionsAndConstants/Constants";
 
 
@@ -24,7 +22,7 @@ export const homePageInitialState={
     userNames: {},
     canisterData: {
         profilesMetaData: [],
-        journalCount: 0,
+        usersCount: 0,
         backEndCyclesBurnRatePerDay: 1,
         backEndPrincipal: NULL_STRING_CAPITALIZED,
         frontEndPrincipal: NULL_STRING_CAPITALIZED,

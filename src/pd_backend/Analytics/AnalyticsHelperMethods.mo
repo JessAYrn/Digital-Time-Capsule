@@ -1,8 +1,8 @@
-import MainTypes "../../Main/types";
+import MainTypes "../Actors/Main/types";
 import Iter "mo:base/Iter";
 import Principal "mo:base/Principal";
-import Journal "../../Journal";
-import Treasury "../../Treasury";
+import User "../Actors/User/Actor";
+import Treasury "../Actors/Treasury/Actor";
 
 module{
     public func saveCurrentBalances(userProfilesMap: MainTypes.UserProfilesMap_V2, daoMetaData: MainTypes.DaoMetaData_V4): async (){
@@ -14,7 +14,7 @@ module{
             let (principal, profile) = userProfilesArray[index];
             let userTreasuryDeposits = await treasuryCanister.getUserTreasuryData(principal);
             let{canisterId} = profile;
-            let userCansiter : Journal.Journal = actor(Principal.toText(canisterId));
+            let userCansiter : User.User = actor(Principal.toText(canisterId));
             ignore userCansiter.saveCurrentBalances(userTreasuryDeposits.balances);
             index += 1;
         }

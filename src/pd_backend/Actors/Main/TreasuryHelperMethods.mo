@@ -1,11 +1,11 @@
 import Principal "mo:base/Principal";
 import Error "mo:base/Error";
 import MainTypes "types";
-import Journal "../Journal";
-import Treasury "../Treasury";
+import User "../User/Actor";
+import Treasury "../Treasury/Actor";
 import Nat64 "mo:base/Nat64";
 import TreasuryTypes "../Treasury/types";
-import NatX "../MotokoNumbers/NatX";
+import NatX "../../MotokoNumbers/NatX";
 
 module{
 
@@ -18,7 +18,7 @@ module{
 
         let ?userProfile = profiles.get(caller) else { throw Error.reject("User not found") };
         let userCanisterId = userProfile.canisterId;
-        let userCanister: Journal.Journal = actor(Principal.toText(userCanisterId));
+        let userCanister: User.User = actor(Principal.toText(userCanisterId));
         let treasury: Treasury.Treasury = actor(daoMetaData.treasuryCanisterPrincipal);
         let {subaccountId = userTreasurySubaccountId} = await treasury.getUserTreasuryData(caller);
         let {amountSent} = await userCanister.transferICP( amount, #PrincipalAndSubaccount(Principal.fromText(daoMetaData.treasuryCanisterPrincipal), ?userTreasurySubaccountId ));

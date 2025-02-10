@@ -1,6 +1,6 @@
 import React, {useState, useContext, useMemo, useEffect} from "react";
 import InputBox from "../components/Fields/InputBox";
-import {types} from "../reducers/journalReducer";
+import {types} from "../reducers/userReducer";
 import { AppContext } from "../Context";
 import DatePickerField from "../components/Fields/DatePicker";
 import { monthInMilliSeconds} from "../functionsAndConstants/Constants";
@@ -27,8 +27,8 @@ const JournalPage = (props) => {
     const { index } = props;
 
     const { 
-        journalState,
-        journalDispatch,
+        userState,
+        userDispatch,
         navigationAndApiState,
         navigationAndApiDispatch,
         setModalIsOpen,
@@ -36,8 +36,8 @@ const JournalPage = (props) => {
     } = useContext(AppContext);
 
     const journalPageData = useMemo(() => {
-        return journalState.journal[index];
-    }, [journalState.journal[index]]);
+        return userState.user[index];
+    }, [userState.user[index]]);
 
 
     useEffect(() => { scrollToTop(); },[]);
@@ -50,7 +50,7 @@ const JournalPage = (props) => {
     const onTextBoxChange = () => setCounter(counter + 1);
 
     const sendData = async () => {
-        journalDispatch({ actionType: types.SET_IS_LOADING, payload: true });
+        userDispatch({ actionType: types.SET_IS_LOADING, payload: true });
         const entryKey = {entryKey: journalPageData.entryKey}
         const filesMetaData = journalPageData.filesMetaData.filter(fileMetaData => !!fileMetaData.fileName)
         const entryAsApiObject = {
@@ -61,13 +61,13 @@ const JournalPage = (props) => {
             filesMetaData: filesMetaData
         };
         await navigationAndApiState.backendActor.updateJournalEntry( entryKey, entryAsApiObject );
-        journalDispatch({ actionType: types.SET_IS_LOADING, payload: false });
+        userDispatch({ actionType: types.SET_IS_LOADING, payload: false });
         setCounter(1);
     };
 
     const handleClosePage = async (e) => {   
         if (!journalPageData.submitted) sendData();
-        journalDispatch({
+        userDispatch({
             actionType: types.CHANGE_PAGE_IS_OPEN,
             payload: false,
             index: index
@@ -79,13 +79,13 @@ const JournalPage = (props) => {
             let currentTime = new Date();
             currentTime = currentTime.getTime();
             const oneMonthFromNow = currentTime + monthInMilliSeconds;
-            journalDispatch({
+            userDispatch({
                 index: index,
                 actionType: types.CHANGE_UNLOCK_TIME,
                 payload: [oneMonthFromNow]
             });
         } else {
-            journalDispatch({
+            userDispatch({
                 index: index,
                 actionType: types.CHANGE_UNLOCK_TIME,
                 payload: []
@@ -104,7 +104,7 @@ const JournalPage = (props) => {
     const onDatePickerChange_unlockTime = async (e) => {
         const date = new Date(e);
         const dateInMilliseconds = date.getTime();
-        journalDispatch({
+        userDispatch({
             index: index,
             actionType: types.CHANGE_UNLOCK_TIME,
             payload: [dateInMilliseconds]
@@ -113,7 +113,7 @@ const JournalPage = (props) => {
     }
 
     const handleAddFile = async () => {
-        journalDispatch({ index: index, actionType: types.ADD_JOURNAL_ENTRY_FILE });
+        userDispatch({ index: index, actionType: types.ADD_JOURNAL_ENTRY_FILE });
         const element = document.querySelector(".fileUploaderWrapperGrid");
         element?.scrollIntoView({behavior: "smooth"});
     };
@@ -125,8 +125,8 @@ const JournalPage = (props) => {
         let result = await navigationAndApiState.backendActor.submitJournalEntry(entryKey);
         let journalEntries = result.ok;
         journalEntries = mapApiObjectToFrontEndJournalEntriesObject(journalEntries);
-        journalDispatch({ payload: journalEntries, actionType: types.SET_JOURNAL });
-        journalDispatch({ actionType: types.CHANGE_PAGE_IS_OPEN, payload: false, index: index });
+        userDispatch({ payload: journalEntries, actionType: types.SET_JOURNAL });
+        userDispatch({ actionType: types.CHANGE_PAGE_IS_OPEN, payload: false, index: index });
         setModalIsLoading(false);
         setModalIsOpen(false);
     }
@@ -285,7 +285,7 @@ const JournalPage = (props) => {
                     filesMetaDataArray={journalPageData.filesMetaData}
                     revokeDataURL={true}
                     index={index}
-                    dispatch={journalDispatch}
+                    dispatch={userDispatch}
                     dispatchActionToAddFile={types.ADD_JOURNAL_ENTRY_FILE}
                     dispatchActionToRemoveFile={types.MARK_JOURNAL_ENTRY_AS_DELETED}
                     dispatchActionToChangeFileMetaData={types.CHANGE_FILE_METADATA}

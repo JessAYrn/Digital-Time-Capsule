@@ -1,4 +1,4 @@
-import Ledger "NNS/Ledger";
+import Ledger "../../NNS/Ledger";
 import Error "mo:base/Error";
 import Trie "mo:base/Trie";
 import Hash "mo:base/Hash";
@@ -13,26 +13,26 @@ import Time "mo:base/Time";
 import Iter "mo:base/Iter";
 import Buffer "mo:base/Buffer";
 import Int "mo:base/Int";
-import Account "Serializers/Account";
+import Account "../../Serializers/Account";
 import Option "mo:base/Option";
-import JournalTypes "Types/Journal/types";
+import UserTypes "types";
 import HashMap "mo:base/HashMap";
-import NotificationsTypes "Types/Notifications/types";
-import AnalyticsTypes "Types/Analytics/types";
+import NotificationsTypes "../../Types/Notifications/types";
+import AnalyticsTypes "../../Analytics/types";
 
 
-shared(msg) actor class Journal () = this {
+shared(msg) actor class User () = this {
 
-    private stable var journalArray : [(Nat, JournalTypes.JournalEntry)] = [];
-    private var journalMap : JournalTypes.JournalMap = HashMap.fromIter<Nat, JournalTypes.JournalEntry>(Iter.fromArray(journalArray), Iter.size(Iter.fromArray(journalArray)), Nat.equal, Hash.hash);
-    private stable var filesArray : [(Text, JournalTypes.File)] = [];
-    private var filesMap : JournalTypes.FileMap = HashMap.fromIter<Text, JournalTypes.File>(Iter.fromArray(filesArray), Iter.size(Iter.fromArray(filesArray)), Text.equal, Text.hash);
-    private stable var txHistoryArray : [(Nat, JournalTypes.Transaction)] = [];
-    private var txHistoryMap : JournalTypes.TxHistoryMap = HashMap.fromIter<Nat, JournalTypes.Transaction>(Iter.fromArray(txHistoryArray), Iter.size(Iter.fromArray(txHistoryArray)), Nat.equal, Hash.hash);
+    private stable var journalArray : [(Nat, UserTypes.JournalEntry)] = [];
+    private var journalMap : UserTypes.JournalMap = HashMap.fromIter<Nat, UserTypes.JournalEntry>(Iter.fromArray(journalArray), Iter.size(Iter.fromArray(journalArray)), Nat.equal, Hash.hash);
+    private stable var filesArray : [(Text, UserTypes.File)] = [];
+    private var filesMap : UserTypes.FileMap = HashMap.fromIter<Text, UserTypes.File>(Iter.fromArray(filesArray), Iter.size(Iter.fromArray(filesArray)), Text.equal, Text.hash);
+    private stable var txHistoryArray : [(Nat, UserTypes.Transaction)] = [];
+    private var txHistoryMap : UserTypes.TxHistoryMap = HashMap.fromIter<Nat, UserTypes.Transaction>(Iter.fromArray(txHistoryArray), Iter.size(Iter.fromArray(txHistoryArray)), Nat.equal, Hash.hash);
     private stable var balancesArray : AnalyticsTypes.BalancesArray = [];
     private var balancesMap : AnalyticsTypes.BalancesMap = HashMap.fromIter<Text, AnalyticsTypes.Balances>(Iter.fromArray(balancesArray), Iter.size(Iter.fromArray(balancesArray)), Text.equal, Text.hash);
-    private stable var biography : JournalTypes.Bio = { name = ""; dob = null; pob = ""; dedications = ""; preface = ""; photos = []; };
-    private stable var tokenBalances : JournalTypes.Balances = { icp = {e8s = 0}; eth = {e8s = 0}; btc = {e8s = 0}; icp_staked = {e8s = 0}; };
+    private stable var biography : UserTypes.Bio = { name = ""; dob = null; pob = ""; dedications = ""; preface = ""; photos = []; };
+    private stable var tokenBalances : UserTypes.Balances = { icp = {e8s = 0}; eth = {e8s = 0}; btc = {e8s = 0}; icp_staked = {e8s = 0}; };
     private stable var notifications : NotificationsTypes.Notifications = [];
     private stable var mainCanisterId_ : Text = "null"; 
     private stable var journalEntryIndex : Nat = 0;
@@ -52,29 +52,29 @@ shared(msg) actor class Journal () = this {
         { accepted = Nat64.fromNat(accepted) };
     };
 
-    public shared({caller}) func setMainCanisterPrincipalId() : async Result.Result<(),JournalTypes.Error> {
+    public shared({caller}) func setMainCanisterPrincipalId() : async Result.Result<(),UserTypes.Error> {
         if(mainCanisterId_ != "null"){ return #err(#NotAuthorized); };
         mainCanisterId_ := Principal.toText(caller);
         return #ok(());
     };
 
     public shared({caller}) func createEntry() : 
-    async Result.Result<([JournalTypes.JournalEntryExportKeyValuePair]), JournalTypes.Error> {
+    async Result.Result<([UserTypes.JournalEntryExportKeyValuePair]), UserTypes.Error> {
         if( Principal.toText(caller) != mainCanisterId_ ) { return #err(#NotAuthorized); };
-        journalMap.put(journalEntryIndex, { JournalTypes.JournalEntryDefault with timeStarted = Time.now(); });
+        journalMap.put(journalEntryIndex, { UserTypes.JournalEntryDefault with timeStarted = Time.now(); });
         journalEntryIndex += 1;
         let journalAsArray = Iter.toArray(journalMap.entries());
         let journalAsArrayExport = mapJournalEntriesArrayToExport(journalAsArray);
         #ok(journalAsArrayExport);
     };
 
-    public shared({caller}) func deleteFile(fileId: Text): async Result.Result<(), JournalTypes.Error>{
+    public shared({caller}) func deleteFile(fileId: Text): async Result.Result<(), UserTypes.Error>{
         if( Principal.toText(caller) != mainCanisterId_ ) { return #err(#NotAuthorized); };
         filesMap.delete(fileId);
         return #ok(());
     };
 
-    public shared({caller}) func uploadFileChunk(fileId: Text, chunkId : Nat, blobChunk : Blob) : async Result.Result<(Text), JournalTypes.Error> {
+    public shared({caller}) func uploadFileChunk(fileId: Text, chunkId : Nat, blobChunk : Blob) : async Result.Result<(Text), UserTypes.Error> {
         if( Principal.toText(caller) != mainCanisterId_ ) { return #err(#NotAuthorized); };
         let fileOption = filesMap.get(fileId);
         let fileTrie = Option.get(fileOption, Trie.empty());
@@ -90,8 +90,8 @@ shared(msg) actor class Journal () = this {
 
     public query({caller}) func readJournal() : 
     async {
-        journalAsArrayExport: [JournalTypes.JournalEntryExportKeyValuePair];  
-        biography: JournalTypes.Bio;  
+        journalAsArrayExport: [UserTypes.JournalEntryExportKeyValuePair];  
+        biography: UserTypes.Bio;  
         canisterPrincipal: Text;
         cyclesBalance: Nat;
     } {
@@ -113,9 +113,9 @@ shared(msg) actor class Journal () = this {
         let notificationsBuffer = Buffer.fromArray<NotificationsTypes.Notification>(notifications);
         let journalIter = journalMap.entries();
         let currentTime = Time.now();
-        Iter.iterate<JournalTypes.JournalEntryKeyValuePair>(
+        Iter.iterate<UserTypes.JournalEntryKeyValuePair>(
             journalIter, 
-            func((key, entry) : JournalTypes.JournalEntryKeyValuePair, _index) {
+            func((key, entry) : UserTypes.JournalEntryKeyValuePair, _index) {
             let { notified; timeOfUnlock; title } = entry;
             let timeOfUnlock_ = Option.get(timeOfUnlock, currentTime - 1);
             if(notified == false and currentTime > timeOfUnlock_){
@@ -139,20 +139,20 @@ shared(msg) actor class Journal () = this {
     };
 
     public shared({caller}) func markJournalEntryAsRead(key : Nat): 
-    async Result.Result<(), JournalTypes.Error> {
+    async Result.Result<(), UserTypes.Error> {
         if( Principal.toText(caller) != mainCanisterId_) { return #err(#NotAuthorized); };
         let entry = journalMap.get(key);
         switch(entry){
             case null{ #err(#NotFound); };
             case(? entryValue){
-                let updatedEntryValue : JournalTypes.JournalEntry = { entryValue with notified = true; read = true; };
+                let updatedEntryValue : UserTypes.JournalEntry = { entryValue with notified = true; read = true; };
                 journalMap.put(key,updatedEntryValue);
                 #ok(());
             };
         }
     };
 
-    public query({caller}) func readJournalFileChunk (fileId : Text, chunkId: Nat) : async Result.Result<(Blob),JournalTypes.Error> {
+    public query({caller}) func readJournalFileChunk (fileId : Text, chunkId: Nat) : async Result.Result<(Blob),UserTypes.Error> {
         if( Principal.toText(caller) != mainCanisterId_) { return #err(#NotAuthorized); };
 
         let file = filesMap.get(fileId);
@@ -173,7 +173,7 @@ shared(msg) actor class Journal () = this {
         };
     };
 
-    public query({caller}) func readJournalFileSize (fileId : Text) : async Result.Result<(Nat),JournalTypes.Error> {
+    public query({caller}) func readJournalFileSize (fileId : Text) : async Result.Result<(Nat),UserTypes.Error> {
         if( Principal.toText(caller) != mainCanisterId_) { return #err(#NotAuthorized); };
         let file = filesMap.get(fileId);
         switch(file){
@@ -185,15 +185,15 @@ shared(msg) actor class Journal () = this {
         };
     };
 
-    public shared({caller}) func updateBio(bio: JournalTypes.Bio) : async Result.Result<(JournalTypes.Bio), JournalTypes.Error>{
+    public shared({caller}) func updateBio(bio: UserTypes.Bio) : async Result.Result<(UserTypes.Bio), UserTypes.Error>{
         if( Principal.toText(caller) != mainCanisterId_) { return #err(#NotAuthorized); };
         biography := bio;
         #ok(biography);
     };
 
-    public shared({caller}) func updatePhotos(photos: [JournalTypes.FileMetaData]) : async Result.Result<(JournalTypes.Bio), JournalTypes.Error>{
+    public shared({caller}) func updatePhotos(photos: [UserTypes.FileMetaData]) : async Result.Result<(UserTypes.Bio), UserTypes.Error>{
         if( Principal.toText(caller) != mainCanisterId_) { return #err(#NotAuthorized); };
-        let updatedBiography : JournalTypes.Bio = {
+        let updatedBiography : UserTypes.Bio = {
             name = biography.name;
             dob = biography.dob;
             pob = biography.pob;
@@ -205,8 +205,8 @@ shared(msg) actor class Journal () = this {
         #ok(biography);
     };
 
-    public shared({caller}) func updateJournalEntry(key: Nat, journalEntry: JournalTypes.JournalEntry) : 
-    async Result.Result<([JournalTypes.JournalEntryExportKeyValuePair]),JournalTypes.Error> {
+    public shared({caller}) func updateJournalEntry(key: Nat, journalEntry: UserTypes.JournalEntry) : 
+    async Result.Result<([UserTypes.JournalEntryExportKeyValuePair]),UserTypes.Error> {
         if( Principal.toText(caller) != mainCanisterId_) { return #err(#NotAuthorized); };
         let entry = journalMap.get(key);
 
@@ -226,7 +226,7 @@ shared(msg) actor class Journal () = this {
     };
 
     public shared({caller}) func submitEntry(key: Nat) : 
-    async Result.Result<[JournalTypes.JournalEntryExportKeyValuePair], JournalTypes.Error> {
+    async Result.Result<[UserTypes.JournalEntryExportKeyValuePair], UserTypes.Error> {
         if( Principal.toText(caller) != mainCanisterId_) { return #err(#NotAuthorized); };
         let entry = journalMap.get(key);
         switch(entry){
@@ -242,7 +242,7 @@ shared(msg) actor class Journal () = this {
     } ;
 
     public shared({caller}) func deleteJournalEntry(key: Nat) : 
-    async Result.Result<(),JournalTypes.Error> {
+    async Result.Result<(),UserTypes.Error> {
         if( Principal.toText(caller) != mainCanisterId_) { return #err(#NotAuthorized); };
         let entry = journalMap.get(key);
 
@@ -258,7 +258,7 @@ shared(msg) actor class Journal () = this {
 
     };
 
-    public shared({caller}) func deleteJournalEntryFile(fileId: Text) : async Result.Result<(),JournalTypes.Error> {
+    public shared({caller}) func deleteJournalEntryFile(fileId: Text) : async Result.Result<(),UserTypes.Error> {
         if( Principal.toText(caller) != mainCanisterId_) { return #err(#NotAuthorized); };
         let entryFiles = filesMap.get(fileId);
         switch(entryFiles){
@@ -270,7 +270,7 @@ shared(msg) actor class Journal () = this {
         };
     };
 
-    public shared({caller}) func saveCurrentBalances(treasuryBalances: JournalTypes.Balances) : async () {
+    public shared({caller}) func saveCurrentBalances(treasuryBalances: UserTypes.Balances) : async () {
         if( Principal.toText(caller) != mainCanisterId_) { throw Error.reject("Unauthorized access."); };
         let thisCanisterIcpBalance = await ledger.account_balance({ account = userAccountId() });
         //will need to retreive the proper balances of the other currencies once they've been integrated
@@ -290,10 +290,10 @@ shared(msg) actor class Journal () = this {
         return Iter.toArray(balancesMap.entries());
     };
 
-    public shared({caller}) func transferICP( amount: Nat64, recipientIdentifier: JournalTypes.RecipientIdentifier) : async {amountSent: Nat64} {
+    public shared({caller}) func transferICP( amount: Nat64, recipientIdentifier: UserTypes.RecipientIdentifier) : async {amountSent: Nat64} {
         if( Principal.toText(caller) != mainCanisterId_) { throw Error.reject("Unauthorized access."); };
 
-        func performTransfer(amountToSend: Nat64, recipientIdentifier: JournalTypes.RecipientIdentifier) : 
+        func performTransfer(amountToSend: Nat64, recipientIdentifier: UserTypes.RecipientIdentifier) : 
         async {#icrc1_transfer: Ledger.Result; #transfer: Ledger.Result_5} {
             switch(recipientIdentifier) {
                 case(#PrincipalAndSubaccount(recipient, subaccount)) {
@@ -363,12 +363,12 @@ shared(msg) actor class Journal () = this {
         };
     };
 
-    public query({caller}) func readWalletTxHistory() : async [(Nat,JournalTypes.Transaction)] {
+    public query({caller}) func readWalletTxHistory() : async [(Nat,UserTypes.Transaction)] {
         if( Principal.toText(caller) != mainCanisterId_) { throw Error.reject("Unauthorized access."); };
         Iter.toArray(txHistoryMap.entries());
     };
 
-    public shared({caller}) func updateTxHistory(timeStamp: Nat64, tx : JournalTypes.Transaction) : async () {
+    public shared({caller}) func updateTxHistory(timeStamp: Nat64, tx : UserTypes.Transaction) : async () {
         if( Principal.toText(caller) != mainCanisterId_) { throw Error.reject("Unauthorized access."); };
         txHistoryMap.put(Nat64.toNat(timeStamp), tx);
         ignore updateTokenBalances_();
@@ -399,11 +399,11 @@ shared(msg) actor class Journal () = this {
         return tokenBalances.icp;
     };
 
-    private func mapJournalEntriesArrayToExport(journalAsArray: [JournalTypes.JournalEntryKeyValuePair]) : 
-    [JournalTypes.JournalEntryExportKeyValuePair] {
+    private func mapJournalEntriesArrayToExport(journalAsArray: [UserTypes.JournalEntryKeyValuePair]) : 
+    [UserTypes.JournalEntryExportKeyValuePair] {
         let currentTime = Time.now();
-        let journalAsArrayExport = Array.map<JournalTypes.JournalEntryKeyValuePair, JournalTypes.JournalEntryExportKeyValuePair>(
-            journalAsArray, func ((key, entry): JournalTypes.JournalEntryKeyValuePair) : JournalTypes.JournalEntryExportKeyValuePair{
+        let journalAsArrayExport = Array.map<UserTypes.JournalEntryKeyValuePair, UserTypes.JournalEntryExportKeyValuePair>(
+            journalAsArray, func ((key, entry): UserTypes.JournalEntryKeyValuePair) : UserTypes.JournalEntryExportKeyValuePair{
                 let timeOfUnlock = Option.get(entry.timeOfUnlock, currentTime - 1);
                 let entryExport = { entry with locked = entry.submitted and currentTime < timeOfUnlock; };
                 return (key, entryExport);

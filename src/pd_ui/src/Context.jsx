@@ -1,7 +1,7 @@
 import {createContext} from 'react';
 
 export const UI_CONTEXTS = {
-    JOURNAL: 'journal',
+    USER: 'user',
     ACCOUNT_PAGE: 'accountPage',
     WALLET: 'wallet',
     HOME_PAGE: 'homePage',
@@ -10,12 +10,12 @@ export const UI_CONTEXTS = {
 };
 
 const APP_CONTEXTS={
-    journalState:{},
-    journalDispatch: () => {},
+    userState:{},
+    userDispatch: () => {},
     walletState:{},
     walletDispatch:()=>{},
-    homePageDispatch:()=>{},
     homePageState:{},
+    homePageDispatch:()=>{},
     navigationAndApiState:{},
     navigationAndApiDispatch:()=>{},
     notificationsState:{},

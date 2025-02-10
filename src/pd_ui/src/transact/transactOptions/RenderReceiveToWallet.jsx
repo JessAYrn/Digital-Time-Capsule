@@ -12,8 +12,8 @@ import { CONTRAST_COLOR, DIVIDER_SX, WHITE_COLOR } from '../../Theme';
 
 const RenderReceiveData = (props) => {
 
-    const { journalState, walletState, navigationAndApiState } = useContext(AppContext);
-    const { userMetaData } = journalState;
+    const { userState, walletState, navigationAndApiState } = useContext(AppContext);
+    const { userMetaData } = userState;
     const { cyclesBalance, rootCanisterPrincipal } = userMetaData;
 
     const onCopyWalletAddress = () => {

@@ -1,10 +1,10 @@
-import TreasuryTypes "types";
+import TreasuryTypes "/types";
 import Iter "mo:base/Iter";
 import Error "mo:base/Error";
-import Account "../Serializers/Account";
+import Account "../../Serializers/Account";
 import Principal "mo:base/Principal";
-import Utils "./Utils";
-import NatX "../MotokoNumbers/NatX";
+import Utils "/Utils";
+import NatX "../../MotokoNumbers/NatX";
 import Buffer "mo:base/Buffer";
 import Float "mo:base/Float";
 import Time "mo:base/Time";
@@ -13,9 +13,9 @@ import Nat64 "mo:base/Nat64";
 import HashMap "mo:base/HashMap";
 import Array "mo:base/Array";
 import Text "mo:base/Text";
-import Ledger "../NNS/Ledger";
+import Ledger "../../NNS/Ledger";
 import Timer "mo:base/Timer";
-import NeuronMethods "NeuronMethods";
+import NeuronMethods "/NeuronMethods";
 
 module{
 

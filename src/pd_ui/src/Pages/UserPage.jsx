@@ -1,6 +1,6 @@
 import JournalPage from "./JournalPage";
 import React, { useContext, useEffect, useState } from "react";
-import {types} from "../reducers/journalReducer";
+import {types} from "../reducers/userReducer";
 import { AppContext } from "../Context";
 import InputBox from "../components/Fields/InputBox";
 import SpeedDialField from '../components/Fields/SpeedDialField'
@@ -18,26 +18,26 @@ import { mapApiObjectToFrontEndJournalEntriesObject } from "../mappers/journalPa
 const count = 30
 
 
-const Journal = (props) => {
+const UserPage = (props) => {
 
-    const { journalState, journalDispatch, navigationAndApiState, navigationAndApiDispatch, setModalIsOpen, setModalIsLoading, setModalProps} = useContext(AppContext);
+    const { userState, userDispatch, navigationAndApiState, navigationAndApiDispatch, setModalIsOpen, setModalIsLoading, setModalProps} = useContext(AppContext);
     const [counter, setCounter] = useState(1);
 
     const sendData = async () => {
-        journalDispatch({
+        userDispatch({
             actionType: types.SET_IS_LOADING,
             payload: true
         })
-        const photos = journalState.bio.photos.filter(file => file && !!file.fileName);
+        const photos = userState.bio.photos.filter(file => file && !!file.fileName);
         const result = await navigationAndApiState.backendActor.updateBio({
-            dob: journalState.bio.dob[0] ? [milisecondsToNanoSeconds(journalState.bio.dob[0])] : [],
-            pob: journalState.bio.pob,
-            name: journalState.bio.name,
-            dedications: journalState.bio.dedications,
-            preface: journalState.bio.preface,
+            dob: userState.bio.dob[0] ? [milisecondsToNanoSeconds(userState.bio.dob[0])] : [],
+            pob: userState.bio.pob,
+            name: userState.bio.name,
+            dedications: userState.bio.dedications,
+            preface: userState.bio.preface,
             photos: photos
         });
-        journalDispatch({
+        userDispatch({
             actionType: types.SET_IS_LOADING,
             payload: false
         })
@@ -53,7 +53,7 @@ const Journal = (props) => {
     const onDatePickerChange = async (e) => {
         const date = new Date(e);
         const dateInMilliseconds = date.getTime();
-        journalDispatch({
+        userDispatch({
             actionType: types.CHANGE_DOB,
             payload: [dateInMilliseconds]
         });
@@ -64,9 +64,9 @@ const Journal = (props) => {
 
     const openPage = async (props) => {
         const {entryKey, locked} = props;
-        const index = journalState.journal.findIndex((page) => page.entryKey === entryKey);
+        const index = userState.userData.findIndex((page) => page.entryKey === entryKey);
         if(!locked){
-            journalDispatch({
+            userDispatch({
                 actionType: types.CHANGE_PAGE_IS_OPEN,
                 payload: true,
                 index: index
@@ -75,7 +75,7 @@ const Journal = (props) => {
     };
 
     const addFile = () => {
-        journalDispatch({ actionType: types.ADD_COVER_PHOTO });
+        userDispatch({ actionType: types.ADD_COVER_PHOTO });
         const element = document.querySelector(".fileUploaderWrapperGrid");
         element?.scrollIntoView({behavior: "smooth"});
     };
@@ -99,7 +99,7 @@ const Journal = (props) => {
         let journalEntries = result.ok;
         journalEntries = mapApiObjectToFrontEndJournalEntriesObject(journalEntries);
         const entryKey = getHighestEntryKey(journalEntries);
-        journalDispatch({ payload: journalEntries, actionType: types.SET_JOURNAL });
+        userDispatch({ payload: journalEntries, actionType: types.SET_JOURNAL });
         openPage({entryKey: entryKey, locked: false});
         setModalIsOpen(false);
         setModalIsLoading(false)
@@ -111,7 +111,7 @@ const Journal = (props) => {
     ]
 
     const getIndexOfVisiblePage = () => {
-        return journalState.journal.findIndex(page => page.isOpen === true);
+        return userState.userData.findIndex(page => page.isOpen === true);
     }
 
     return(
@@ -145,10 +145,10 @@ const Journal = (props) => {
                         label={"This Journal Belongs To: "}
                         rows={"1"}
                         onChange={onTextBoxChange}
-                        value={journalState.bio.name}
+                        value={userState.bio.name}
                     />
                     <DatePickerField
-                        value={journalState.bio.dob[0]}
+                        value={userState.bio.dob[0]}
                         label={"Date Of Birth"}
                         onChange={onDatePickerChange}
                     />
@@ -156,7 +156,7 @@ const Journal = (props) => {
                         label={"Place of Birth: "}
                         rows={"1"}
                         onChange={onTextBoxChange}
-                        value={journalState.bio.pob}
+                        value={userState.bio.pob}
                     />
                 </Grid>
                 <Grid 
@@ -173,10 +173,10 @@ const Journal = (props) => {
                 <FileCarousel
                     revokeDataURL={false}
                     onChange={triggerSendDataFunctionAfterReduxStateUpdate}
-                    filesMetaDataArray={journalState.bio.photos}
-                    journalState={journalState}
+                    filesMetaDataArray={userState.bio.photos}
+                    userState={userState}
                     navigationAndApiDispatch={navigationAndApiDispatch}
-                    dispatch={journalDispatch}
+                    dispatch={userDispatch}
                     dispatchActionToAddFile={types.ADD_COVER_PHOTO}
                     dispatchActionToRemoveFile={types.MARK_COVER_PHOTO_AS_DELETED}
                     classNameMod={'coverPhoto'}
@@ -198,13 +198,13 @@ const Journal = (props) => {
                         label={"Dedications: "}
                         onChange={onTextBoxChange}
                         rows={"8"}
-                        value={journalState.bio.dedications}
+                        value={userState.bio.dedications}
                     />
                     <InputBox
                         label={"Preface: "}
                         onChange={onTextBoxChange}
                         rows={"16"}
-                        value={journalState.bio.preface}
+                        value={userState.bio.preface}
                     />
                 </Grid>
                 <Grid 
@@ -221,7 +221,7 @@ const Journal = (props) => {
                         onRowClick={openPage}
                         transparent={true}
                         columns={journalPagesTableColumns}
-                        rows={mapRequestsForAccessToTableRows(journalState.journal)}
+                        rows={mapRequestsForAccessToTableRows(userState.userData)}
                     />
                 </Grid>
                 <SpeedDialField actions={speedDialActions} position={"right"}/>
@@ -232,4 +232,4 @@ const Journal = (props) => {
 
 }
 
-export default Journal;
+export default UserPage;

@@ -5,7 +5,7 @@ import UploadIcon from '@mui/icons-material/Upload';
 import "./fileCarousel.scss";
 import ButtonField from "../Button";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
-import { defaultFileMetaData } from "../../../reducers/journalReducer";
+import { defaultFileMetaData } from "../../reducers/userReducer";
 import { CONTRAST_COLOR } from "../../Theme";
 
 

@@ -1,11 +1,11 @@
-import Account "Serializers/Account";
-import Ledger "NNS/Ledger";
-import Governance "NNS/Governance";
+import Account "../../Serializers/Account";
+import Ledger "../../NNS/Ledger";
+import Governance "../../NNS/Governance";
 import Principal "mo:base/Principal";
 import Error "mo:base/Error";
 import Hash "mo:base/Hash";
 import Text "mo:base/Text";
-import TreasuryTypes "Treasury/types";
+import TreasuryTypes "../Treasury/types";
 import HashMap "mo:base/HashMap";
 import Iter "mo:base/Iter";
 import Cycles "mo:base/ExperimentalCycles";
@@ -16,12 +16,12 @@ import Time "mo:base/Time";
 import Blob "mo:base/Blob";
 import Nat "mo:base/Nat";
 import Timer "mo:base/Timer";
-import IC "Types/IC/types";
+import IC "../../Types/IC/types";
 import Debug "mo:base/Debug";
-import AnalyticsTypes "Types/Analytics/types";
-import NeuronMethods "Treasury/NeuronMethods";
-import FundingCampaignsMethods "Treasury/FundingCampaignMethods";
-import Utils "Treasury/Utils";
+import AnalyticsTypes "../../Analytics/types";
+import NeuronMethods "../Treasury/NeuronMethods";
+import FundingCampaignsMethods "../Treasury/FundingCampaignMethods";
+import Utils "../Treasury/Utils";
 
 
 shared actor class Treasury (principal : Principal) = this {

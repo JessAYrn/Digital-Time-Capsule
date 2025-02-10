@@ -44,8 +44,8 @@ module {
     public type Key = Text;
     public type Key__1 = Text;
     public type Sha256 = ?Blob;
-    public type WasmType = { #Backend; #Frontend; #Journal; #Manager; #Treasury; };
-    public type WasmModule = { #Journal: Blob; #Frontend: Blob; #Backend: Blob; #Treasury: Blob; #Manager: Blob; };
+    public type WasmType = { #Backend; #Frontend; #User; #Manager; #Treasury; };
+    public type WasmModule = { #User: Blob; #Frontend: Blob; #Backend: Blob; #Treasury: Blob; #Manager: Blob; };
 
     public type Interface = actor {
         getAssetChunk : shared query { key : Key; chunkId : Nat; version : Nat; } -> async (ChunkId, ChunkData);

@@ -21,7 +21,7 @@ const RenderDaoMetaData = () => {
                     transparentBackground={true}
                     transparentBorder={true}
                     label={'Accounts Created:'}
-                    text={homePageState.canisterData[CANISTER_DATA_FIELDS.journalCount]}
+                    text={homePageState.canisterData[CANISTER_DATA_FIELDS.usersCount]}
                     disabled={true}
                 />
                 <DataField

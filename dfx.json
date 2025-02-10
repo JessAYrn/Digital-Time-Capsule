@@ -1,19 +1,19 @@
 {
   "canisters": {
     "pd_api": {
-      "main": "src/pd_backend/main.mo",
+      "main": "src/pd_backend/Actors/Main/actor.mo",
       "type": "motoko"
     },
-    "journal": {
-      "main": "src/pd_backend/Journal.mo",
+    "user": {
+      "main": "src/pd_backend/Actors/User/Actor.mo",
       "type": "motoko"
     },
     "treasury": {
-      "main": "src/pd_backend/Treasury.mo",
+      "main": "src/pd_backend/Actors/Treasury/Actor.mo",
       "type": "motoko"
     },
     "manager": {
-      "main": "src/pd_backend/Manager.mo",
+      "main": "src/pd_backend/Actors/Manager/Actor.mo",
       "type": "motoko"
     },
     "pd_ui": {

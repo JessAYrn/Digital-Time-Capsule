@@ -4,16 +4,16 @@ import Iter "mo:base/Iter";
 import Nat64 "mo:base/Nat64";
 import Debug "mo:base/Debug";
 import Error "mo:base/Error";
-import Governance "../NNS/Governance"; 
+import Governance "../../NNS/Governance"; 
 import Int "mo:base/Int";
 import Time "mo:base/Time";
 import Nat "mo:base/Nat";
 import Blob "mo:base/Blob";
 import HashMap "mo:base/HashMap";
 import Text "mo:base/Text";
-import Ledger "../NNS/Ledger";
-import Account "../Serializers/Account";
-import NatX "../MotokoNumbers/NatX";
+import Ledger "../../NNS/Ledger";
+import Account "../../Serializers/Account";
+import NatX "../../MotokoNumbers/NatX";
 import Utils "Utils";
 
 

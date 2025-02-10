@@ -1,4 +1,4 @@
-import Ledger "NNS/Ledger";
+import Ledger "../../NNS/Ledger";
 import Error "mo:base/Error";
 import Nat "mo:base/Nat";
 import Principal "mo:base/Principal";
@@ -7,14 +7,13 @@ import Cycles "mo:base/ExperimentalCycles";
 import Nat64 "mo:base/Nat64";
 import Iter "mo:base/Iter";
 import Buffer "mo:base/Buffer";
-import Account "Serializers/Account";
+import Account "../../Serializers/Account";
 import Bool "mo:base/Bool";
-import WasmStore "Types/WasmStore/types";
+import WasmStore "../../Types/WasmStore/types";
 import HashMap "mo:base/HashMap";
 import Array "mo:base/Array";
 import Timer "mo:base/Timer";
-import IC "/Types/IC/types";
-import CanisterManagementMethods "/Modules/Manager/CanisterManagementMethods";
+import CanisterManagementMethods "CanisterManagementMethods";
 
 shared(msg) actor class Manager (principal : Principal) = this {
 
@@ -41,7 +40,7 @@ shared(msg) actor class Manager (principal : Principal) = this {
             case(?#Frontend(wasmModule)){ return wasmModule };
             case(?#Backend(wasmModule)){ return wasmModule };
             case(?#Manager(wasmModule)){ return wasmModule };
-            case(?#Journal(wasmModule)){ return wasmModule };
+            case(?#User(wasmModule)){ return wasmModule };
             case(?#Treasury(wasmModule)){ return wasmModule };
             case(_) {throw Error.reject("Wasm Module Not Found")}
         };
@@ -108,7 +107,7 @@ shared(msg) actor class Manager (principal : Principal) = this {
                     let backendCanisterPrincipalBlob = Principal.fromText(backEndPrincipal);
                     ignore CanisterManagementMethods.installCode_(?backendCanisterPrincipalBlob, wasmModule, treasuryCanisterPrincipalBlob, mode); 
                 };
-                case(#Journal(wasmModule)){ 
+                case(#User(wasmModule)){ 
                     for((_, profile) in Iter.fromArray(profilesArray)) { 
                         ignore CanisterManagementMethods.installCode_(null, wasmModule, profile.canisterId, mode); 
                     };
@@ -137,10 +136,10 @@ shared(msg) actor class Manager (principal : Principal) = this {
         let backendWasm = await wasmStore.getModule({version = currentVersionInstalled.number + 1; wasmType = #Backend});
         let frontendWasm = await wasmStore.getModule({version = currentVersionInstalled.number + 1; wasmType = #Frontend});
         let managerWasm = await wasmStore.getModule({version = currentVersionInstalled.number + 1; wasmType = #Manager});
-        let journalWasm = await wasmStore.getModule({version = currentVersionInstalled.number + 1; wasmType = #Journal});
+        let userWasm = await wasmStore.getModule({version = currentVersionInstalled.number + 1; wasmType = #User});
         let treasuryWasm = await wasmStore.getModule({version = currentVersionInstalled.number + 1; wasmType = #Treasury});
 
-        release := { release with wasmModules = [journalWasm, frontendWasm, backendWasm, treasuryWasm, managerWasm]; };
+        release := { release with wasmModules = [userWasm, frontendWasm, backendWasm, treasuryWasm, managerWasm]; };
     };
 
     public shared({caller}) func loadAssets(): async () {
@@ -239,7 +238,7 @@ shared(msg) actor class Manager (principal : Principal) = this {
           case(#Frontend){ switch(wasmModule){ case(#Frontend(_)){return true}; case(_){ return false }; } };
           case(#Manager){ switch(wasmModule){ case(#Manager(_)){return true}; case(_){ return false }; } };
           case(#Treasury){ switch(wasmModule){ case(#Treasury(_)){return true}; case(_){ return false }; } };
-          case(#Journal){ switch(wasmModule){ case(#Journal(_)){return true}; case(_){ return false }; } };
+          case(#User){ switch(wasmModule){ case(#User(_)){return true}; case(_){ return false }; } };
         }
       }
     ) else { return null };

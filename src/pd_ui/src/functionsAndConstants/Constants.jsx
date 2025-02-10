@@ -43,7 +43,7 @@ export const CANISTER_DATA_FIELDS = {
     lastRecordedBackEndCyclesBalance: "lastRecordedBackEndCyclesBalance",
     RequestsForAccess: "RequestsForAccess",
     users: "users",
-    journalCount: "journalCount",
+    usersCount: "usersCount",
     profilesMetaData: "profilesMetaData",
     treasuryCanisterPrincipal: "treasuryCanisterPrincipal",
     managerCanisterPrincipal: "managerCanisterPrincipal",
@@ -74,7 +74,7 @@ export const PROVIDER_STATUS = {
     idle: 'idle'
 }
 
-export const JOURNAL_TABS={
+export const USER_TABS={
     diaryTab:'diaryTab',
     notesTab:'notesTab'
 }

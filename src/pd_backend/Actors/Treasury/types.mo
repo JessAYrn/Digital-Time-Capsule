@@ -3,9 +3,9 @@ import Principal "mo:base/Principal";
 import Nat64 "mo:base/Nat64";
 import Blob "mo:base/Blob";
 import Buffer "mo:base/Buffer";
-import Governance "../NNS/Governance";
-import Account "../Serializers/Account";
-import IC "../Types/IC/types";
+import Governance "../../NNS/Governance";
+import Account "../../Serializers/Account";
+import IC "../../Types/IC/types";
 
 
 module{
