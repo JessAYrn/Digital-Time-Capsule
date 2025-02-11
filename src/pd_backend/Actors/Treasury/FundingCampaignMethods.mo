@@ -257,10 +257,8 @@ module{
 
         label disbursingCampaignFundings for((campaignId, campaign) in fundingCampaignsMap.entries()){
             let {settled; funded; amountToFund; campaignWalletBalance} = campaign;
-            if(settled or funded) continue disbursingCampaignFundings;
-            if( campaignWalletBalance.icp.e8s >= amountToFund.icp.e8s - (2 * txFee) ){
-                ignore disburseCampaignFundingToRecipient({ campaignId; usersTreasuryDataMap; fundingCampaignsMap; treasuryCanisterId; updateTokenBalances });
-            };
+            if(settled or funded or campaignWalletBalance.icp.e8s < amountToFund.icp.e8s) continue disbursingCampaignFundings;
+            ignore disburseCampaignFundingToRecipient({ campaignId; usersTreasuryDataMap; fundingCampaignsMap; treasuryCanisterId; updateTokenBalances });
         };
     };
 

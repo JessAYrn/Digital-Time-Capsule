@@ -2,7 +2,7 @@ import React, {useMemo, useContext} from "react";
 import { AppContext } from "../../../../Context";
 import Grid from "@mui/material/Unstable_Grid2";
 import InputBox from "../../../../components/InputBox";
-import { nanoSecondsToMiliSeconds, millisecondsToSeconds, secondsToHours, hoursToDays, round2Decimals, getFundingCampaignAssetTypeAndValue } from "../../../../functionsAndConstants/Utils";
+import { getFundingCampaignAssetTypeAndValue, getDateInNanoSeconds, fromE8s, nanoSecondsToDays, nanoSecondsToMiliSeconds } from "../../../../functionsAndConstants/Utils";
 import ButtonField from "../../../../components/Button";
 import DataField from "../../../../components/DataField";
 import PriceCheckIcon from '@mui/icons-material/PriceCheck';
@@ -14,7 +14,7 @@ import Typography from "@mui/material/Typography";
 
 const RenderFundingCampaign = (props) => {
     const { fundingCampaign, campaignId } = props;
-    const {  terms, settled, funded } = fundingCampaign;
+    const {  loanAgreement, settled, funded } = fundingCampaign;
     const {setModalIsOpen, setModalProps, homePageState } = useContext(AppContext);
 
 
@@ -22,15 +22,17 @@ const RenderFundingCampaign = (props) => {
         amountToFund,
         amountDisbursedToRecipient,
         campaignWalletBalance,
-        paymentDue,
-        timeUntilPaymentIsDue,
-        initialLoanInterestAmount,
-        initialCollateralLocked,
-        remainingCollateralLocked,
-        forfeitedCollateral,
-        remainingLoanInterestAmount,
-        remainingLoanPrincipalAmount,
-        collateralReturned
+        nextDuePayment,
+        collateralLocked,
+        collateralForfeited,
+        collateralReleased,
+        collateralProvided,
+        totalOwed,
+        loanInterest,
+        numberOfPayments,
+        paymentTermPeriod,
+        loanPrincipal,
+        payments
     } = useMemo( () => {
 
         let obj = {
@@ -39,38 +41,41 @@ const RenderFundingCampaign = (props) => {
             campaignWalletBalance: getFundingCampaignAssetTypeAndValue(fundingCampaign?.campaignWalletBalance),
         };
 
-        if(fundingCampaign?.terms[0]){
-            const amountRepaidDuringCurrentPaymentInterval = getFundingCampaignAssetTypeAndValue(fundingCampaign?.terms[0]?.amountRepaidDuringCurrentPaymentInterval);
-            const paymentAmounts = getFundingCampaignAssetTypeAndValue(fundingCampaign?.terms[0]?.paymentAmounts);
-            const paymentDue = {value: Math.max(paymentAmounts.value - amountRepaidDuringCurrentPaymentInterval.value, 0), type: paymentAmounts.type};
+        if(loanAgreement[0]){
+            const { payments, collateralProvided, loanPrincipal, loanInterest, numberOfPayments, paymentTermPeriod } = loanAgreement[0];
 
-            const nextPaymentDueDateInseconds = millisecondsToSeconds(nanoSecondsToMiliSeconds(parseInt(fundingCampaign?.terms[0]?.nextPaymentDueDate[0])));
-            const nowInSeconds = millisecondsToSeconds(Date.now());
-            const secondsUntillDue = Math.max(nextPaymentDueDateInseconds - nowInSeconds, 0);
-            const timeUntilPaymentIsDue = round2Decimals(secondsToHours(secondsUntillDue)) > 48 ? `${round2Decimals(hoursToDays(secondsToHours(secondsUntillDue)))} days` : `${round2Decimals(secondsToHours(secondsUntillDue))} hours`;
+            const nowInNanoSeconds = getDateInNanoSeconds(new Date());
 
-            const initialCollateralLocked = getFundingCampaignAssetTypeAndValue(fundingCampaign?.terms[0]?.initialCollateralLocked);
-            const remainingCollateralLocked = getFundingCampaignAssetTypeAndValue(fundingCampaign?.terms[0]?.remainingCollateralLocked);
-            const forfeitedCollateral = getFundingCampaignAssetTypeAndValue(fundingCampaign?.terms[0]?.forfeitedCollateral);
-            const remainingLoanPrincipalAmount = getFundingCampaignAssetTypeAndValue(fundingCampaign?.terms[0]?.remainingLoanPrincipalAmount);
-            const remainingLoanInterestAmount = getFundingCampaignAssetTypeAndValue(fundingCampaign?.terms[0]?.remainingLoanInterestAmount);
-            const collateralReturned = {...initialCollateralLocked, value: initialCollateralLocked.value - remainingCollateralLocked.value - forfeitedCollateral.value};
-            const initialLoanInterestAmount = getFundingCampaignAssetTypeAndValue(fundingCampaign?.terms[0]?.initialLoanInterestAmount);
+            let nextDuePayment = payments[0];
+            let totalCollateralReleased = 0;
+            let totalCollateralForfeited = 0;
+            let totalOwed = 0;
+
+            for(let payment of payments){
+                totalCollateralReleased += parseInt(payment.collateralReleased.icp_staked.e8s);
+                totalCollateralForfeited += parseInt(payment.collateralForfeited.icp_staked.e8s);
+                totalOwed += parseInt(payment.owed.icp.e8s);
+                if(payment.dueDate < nowInNanoSeconds) continue;
+                if(payment.dueDate < nextDuePayment.dueDate) nextDuePayment = payment;
+            };
+
+            const remainingCollateralLocked = getFundingCampaignAssetTypeAndValue(collateralProvided).value - fromE8s(totalCollateralReleased + totalCollateralForfeited);
 
             obj = {
                 ...obj,
-                paymentDue,
-                timeUntilPaymentIsDue,
-                initialLoanInterestAmount,
-                remainingCollateralLocked,
-                forfeitedCollateral,
-                remainingLoanInterestAmount,
-                initialCollateralLocked,
-                remainingLoanPrincipalAmount,
-                collateralReturned
+                payments,
+                nextDuePayment,
+                numberOfPayments,
+                paymentTermPeriod,
+                loanInterest: getFundingCampaignAssetTypeAndValue(loanInterest),
+                loanPrincipal: getFundingCampaignAssetTypeAndValue(loanPrincipal),
+                collateralProvided: getFundingCampaignAssetTypeAndValue(collateralProvided),
+                totalOwed: {...getFundingCampaignAssetTypeAndValue(loanPrincipal), value: fromE8s(totalOwed)},
+                collateralLocked: {...getFundingCampaignAssetTypeAndValue(collateralProvided), value: remainingCollateralLocked},
+                collateralForfeited: {...getFundingCampaignAssetTypeAndValue(collateralProvided), value: fromE8s(totalCollateralForfeited)},
+                collateralReleased: { ...getFundingCampaignAssetTypeAndValue(collateralProvided), value: fromE8s(totalCollateralReleased)},
             }
         }
-
         return obj;
     }, [fundingCampaign]);
 
@@ -106,7 +111,7 @@ const RenderFundingCampaign = (props) => {
 
                 <DataField
                     label={"Campaign Type:"}
-                    text={!!terms.length ? "Loan" : "Donation"}
+                    text={!!loanAgreement?.length ? "Loan" : "Donation"}
                     disabled={true}
                     transparentBackground={true}
                 />
@@ -118,33 +123,45 @@ const RenderFundingCampaign = (props) => {
                 />
                 {funded &&
                     <DataField
-                        label={!!terms.length ? "Loan Amount:" : "Donation Amount:"}
+                        label={!!loanAgreement?.length ? "Loan Amount:" : "Donation Amount:"}
                         text={`${amountDisbursedToRecipient?.value} ${amountDisbursedToRecipient?.type}`}
                         disabled={true}
                         transparentBackground={true}
                     />
                 }
                 {!funded && <DataField
-                    label={`${!!terms.length ? "Loan Amount Requested:" : "Donation Amount Requested:"}`}
+                    label={`${!!loanAgreement?.length ? "Loan Amount Requested:" : "Donation Amount Requested:"}`}
                     text={`${amountToFund?.value} ${amountToFund?.type}`}
                     disabled={true}
                     transparentBackground={true}
                 />}
-                {!!terms.length &&
-                    <DataField
-                        text={`${initialLoanInterestAmount?.value} ${initialLoanInterestAmount?.type}` }
-                        label={"Loan Interest Offered:"}
-                        disabled={true}
-                        transparentBackground={true}
-                    />
-                }
-                {!!terms.length &&
-                    <DataField
-                        label={"Loan Collateral Provided:"}
-                        text={`${initialCollateralLocked?.value} ${initialCollateralLocked?.type}`}
-                        disabled={true}
-                        transparentBackground={true}
-                    />
+                {!!loanAgreement?.length &&
+                    <>
+                        <DataField
+                            text={`${loanInterest?.value} ${loanInterest?.type}` }
+                            label={"Interest Offered:"}
+                            disabled={true}
+                            transparentBackground={true}
+                        />
+                        <DataField
+                            label={"Collateral Provided:"}
+                            text={`${collateralProvided?.value} ${collateralProvided?.type}`}
+                            disabled={true}
+                            transparentBackground={true}
+                        />
+                        <DataField
+                            label={"Number of Payments:"}
+                            text={`${numberOfPayments}`}
+                            disabled={true}
+                            transparentBackground={true}
+                        />
+                        <DataField
+                            label={"Payment Term Period:"}
+                            text={`${nanoSecondsToDays(parseInt(paymentTermPeriod))} days`}
+                            disabled={true}
+                            transparentBackground={true}
+                        />
+                    </>
                 }
                 {!funded && !settled && 
                     <DataField
@@ -164,19 +181,19 @@ const RenderFundingCampaign = (props) => {
                 <Typography color={CONTRAST_COLOR} textAlign={"center"}>Outstanding Loan Obligations</Typography>
                 <DataField
                     label={"Remaining Owed:"}
-                    text={`${remainingLoanPrincipalAmount?.value + remainingLoanInterestAmount?.value} ${remainingLoanPrincipalAmount?.type}`}
+                    text={`${totalOwed?.value} ${totalOwed?.type}`}
                     disabled={true}
                     transparentBackground={true}
                 />
                  <DataField
                     label={"Amount Due:"}
-                    text={`${paymentDue?.value} ${paymentDue?.type}`}
+                    text={`${getFundingCampaignAssetTypeAndValue(nextDuePayment?.owed).value} ${getFundingCampaignAssetTypeAndValue(nextDuePayment?.owed).type}`}
                     disabled={true}
                     transparentBackground={true}
                 />
                 <DataField
-                    label={"Payment Is Due In: "}
-                    text={timeUntilPaymentIsDue}
+                    label={"Due Date: "}
+                    text={new Date(nanoSecondsToMiliSeconds(parseInt(nextDuePayment?.dueDate))).toLocaleDateString()}
                     disabled={true}
                     transparentBackground={true}
                 />
@@ -190,19 +207,19 @@ const RenderFundingCampaign = (props) => {
                 <Typography color={CONTRAST_COLOR} textAlign={"center"}>Collateral Details</Typography>
                 <DataField
                     label={"Unreleased Collateral:"}
-                    text={`${remainingCollateralLocked?.value} ${remainingCollateralLocked?.type}`}
+                    text={`${collateralLocked?.value} ${collateralLocked?.type}`}
                     disabled={true}
                     transparentBackground={true}
                 />
                 <DataField
                     label={"Released Collateral:"}
-                    text={`${collateralReturned?.value} ${collateralReturned?.type}`}
+                    text={`${collateralReleased?.value} ${collateralReleased?.type}`}
                     disabled={true}
                     transparentBackground={true}
                 />
                 <DataField
                     label={"Forfeited Collateral:"}
-                    text={`${forfeitedCollateral?.value} ${forfeitedCollateral?.type}`}
+                    text={`${collateralForfeited?.value} ${collateralForfeited?.type}`}
                     disabled={true}
                     transparentBackground={true}
                 />
@@ -214,13 +231,13 @@ const RenderFundingCampaign = (props) => {
         <Grid display={"flex"} width={"100%"} justifyContent={"center"} alignItems={"center"} xs={12} padding={0} margin={"10px"} flexDirection={"column"}>
             <RenderCampaignDetails />
 
-            {!!terms.length && !!funded && !settled &&
+            {!!loanAgreement?.length && !!funded && !settled &&
             <>
                 <Divider sx={{...DIVIDER_SX, marginTop: "30px", marginBottom: "30px"}} />
                 <RenderLoanObligations />
             </>}
 
-            {!!terms.length && !!funded &&
+            {!!loanAgreement?.length && !!funded &&
             <>
                 <Divider sx={{...DIVIDER_SX, marginTop: "30px", marginBottom: "30px"}} />
                 <RenderCollateralDetails />

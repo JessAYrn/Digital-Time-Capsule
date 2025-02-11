@@ -24,7 +24,7 @@ const WalletTab = (props) => {
     }
 
     const onCopyWalletAddress = () => {
-        navigationAndApiState.backendActor.listenForTransactions(false);
+        navigationAndApiState.backendActor.updateUsersTxHistory();
         copyText(walletState.walletData.address);
     }
 

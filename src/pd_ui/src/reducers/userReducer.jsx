@@ -70,49 +70,49 @@ const changeValue = (state = initialState, action) => {
     let updatedPhotos;
 
     switch (actionType){
-        case types.SET_ENTIRE_REDUX_STATE:
+        case userTypes.SET_ENTIRE_REDUX_STATE:
             state = payload;
             return {
                 ...state
             }
-        case types.SET_USER_DATA:
+        case userTypes.SET_USER_DATA:
             state.userData = payload;
             return {
                 ...state
             }
-        case types.SET_IS_LOADING:
+        case userTypes.SET_IS_LOADING:
             state.isLoading = payload;
             return {
                 ...state
             }
-        case types.SET_USER_TAB:
+        case userTypes.SET_USER_TAB:
             state.userPageTab=payload;
             return{
                 ...state
             }
        
-        case types.SET_NOTIFICATIONS:
+        case userTypes.SET_NOTIFICATIONS:
         state.notifications = payload;
 
         return {
             ...state
         }
-        case types.SET_BIO:
+        case userTypes.SET_BIO:
             state.bio = payload;
             return {
                 ...state
             }
-        case types.SET_DATA_HAS_BEEN_LOADED:
+        case userTypes.SET_DATA_HAS_BEEN_LOADED:
         state.dataHasBeenLoaded = payload
         return {
             ...state
         }
-        case types.SET_USER_META_DATA:
+        case userTypes.SET_USER_META_DATA:
         state.userMetaData = payload;
         return {
             ...state
         }
-        case types.CHANGE_ENTRY_TITLE:
+        case userTypes.CHANGE_ENTRY_TITLE:
             updatedJournalPage = {
                 ... state.userData[index],
                 title: payload
@@ -121,7 +121,7 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
-        case types.CHANGE_PAGE_IS_OPEN:
+        case userTypes.CHANGE_PAGE_IS_OPEN:
         updatedJournalPage = {
             ... state.userData[index],
             isOpen: payload
@@ -130,7 +130,7 @@ const changeValue = (state = initialState, action) => {
         return {
             ...state
         }
-        case types.CHANGE_LOCATION:
+        case userTypes.CHANGE_LOCATION:
             updatedJournalPage = {
                 ... state.userData[index],
                 location: payload
@@ -139,14 +139,14 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
-        case types.ADD_JOURNAL_ENTRY_FILE:
+        case userTypes.ADD_JOURNAL_ENTRY_FILE:
             updatedFilesMetaDataArry = [...state.userData[index].filesMetaData];
             updatedFilesMetaDataArry.push(defaultFileMetaData);
             state.userData[index].filesMetaData = updatedFilesMetaDataArry;
             return {
                 ...state
             }
-        case types.MARK_JOURNAL_ENTRY_AS_DELETED:
+        case userTypes.MARK_JOURNAL_ENTRY_AS_DELETED:
             updatedFilesMetaDataArry = state.userData[index].filesMetaData.map((metaData, i) => {
                 if(i === fileIndex) return null;
                 return metaData;
@@ -155,7 +155,7 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
-        case types.CHANGE_FILE_METADATA:
+        case userTypes.CHANGE_FILE_METADATA:
             updatedFileMetaData = {
                 ...state.userData[index].filesMetaData[fileIndex],
                 fileName: payload.fileName,
@@ -169,7 +169,7 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
-        case types.CHANGE_FILE_METADATA_JOURNAL_COVER_PAGE:
+        case userTypes.CHANGE_FILE_METADATA_JOURNAL_COVER_PAGE:
             updatedFileMetaData = {
                 ...state.bio.photos[fileIndex],
                 fileName: payload.fileName,
@@ -183,7 +183,7 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
-        case types.CHANGE_FILE_LOAD_STATUS:
+        case userTypes.CHANGE_FILE_LOAD_STATUS:
             updatedFileMetaData = {
                 ...state.userData[index].filesMetaData[fileIndex],
                 isLoading: payload,
@@ -194,7 +194,7 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
-        case types.CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE:
+        case userTypes.CHANGE_FILE_LOAD_STATUS_JOURNAL_COVER_PAGE:
             updatedFileMetaData = { ...state.bio.photos[fileIndex], isLoading: payload };
             updatedFilesMetaDataArry = [...state.bio.photos];
             updatedFilesMetaDataArry[fileIndex] = updatedFileMetaData;
@@ -202,7 +202,7 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             } 
-        case types.CHANGE_TEXT:
+        case userTypes.CHANGE_TEXT:
             updatedJournalPage = {
                 ... state.userData[index],
                 text: payload
@@ -211,7 +211,7 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
-        case types.CHANGE_UNLOCK_TIME:
+        case userTypes.CHANGE_UNLOCK_TIME:
             updatedJournalPage = {
                 ... state.userData[index],
                 timeOfUnlock: payload
@@ -220,7 +220,7 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
-        case types.CHANGE_NAME:
+        case userTypes.CHANGE_NAME:
             state.bio = {
                 ...state.bio,
                 name: payload
@@ -228,13 +228,13 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
-        case types.ADD_COVER_PHOTO:
+        case userTypes.ADD_COVER_PHOTO:
             state.bio.photos.push(defaultFileMetaData);
             state.bio.photos = [...state.bio.photos];
             return {
                 ...state
             }
-        case types.MARK_COVER_PHOTO_AS_DELETED:
+        case userTypes.MARK_COVER_PHOTO_AS_DELETED:
             updatedPhotos = state.bio.photos.map((metaData, i) =>  {
                 if(i === fileIndex) return null;
                 return metaData
@@ -243,7 +243,7 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
-        case types.CHANGE_DOB:
+        case userTypes.CHANGE_DOB:
             state.bio = {
                 ...state.bio,
                 dob: payload
@@ -251,7 +251,7 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
-        case types.CHANGE_POB:
+        case userTypes.CHANGE_POB:
             state.bio = {
                 ...state.bio,
                 pob: payload
@@ -259,7 +259,7 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
-        case types.CHANGE_PREFACE:
+        case userTypes.CHANGE_PREFACE:
             state.bio = {
                 ...state.bio,
                 preface: payload
@@ -267,7 +267,7 @@ const changeValue = (state = initialState, action) => {
             return {
                 ...state
             }
-        case types.CHANGE_DEDICATIONS:
+        case userTypes.CHANGE_DEDICATIONS:
         state.bio = {
             ...state.bio,
             dedications: payload
