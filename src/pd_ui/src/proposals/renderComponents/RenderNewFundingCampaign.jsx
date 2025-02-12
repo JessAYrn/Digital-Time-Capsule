@@ -21,18 +21,19 @@ const NewFundingCampaign = (props) => {
 
     const { onSubmitProposal, action, payload, disabled } = props;
     const fundingCampaignInput = payload?.fundingCampaignInput;
-    const terms = fundingCampaignInput?.terms[0] || false;
+    const loanAgreement = fundingCampaignInput?.loanAgreement[0];
 
     const { treasuryState, setModalProps, setModalIsLoading } = useContext(AppContext);
 
     const [description, setDescription] = useState(fundingCampaignInput?.description);
     const [amountToFund, setAmountToFund] = useState(fundingCampaignInput?.amountToFund ? getFundingCampaignAssetTypeAndValue(fundingCampaignInput?.amountToFund) : {});
-    const [isALoan, setIsALoan] = useState(fundingCampaignInput ? !!terms : undefined);
+    const [isALoan, setIsALoan] = useState(fundingCampaignInput ? !!loanAgreement : undefined);
     
-    const [paymentIntervalsInDays, setPaymentIntervalsInDays] = useState(terms ? nanoSecondsToDays(parseInt(terms?.paymentIntervals)) : null);
-    const [paymentAmounts, setPaymentAmounts] = useState(terms ? getFundingCampaignAssetTypeAndValue(terms?.paymentAmounts) : {});
-    const [initialLoanInterestAmount, setInitialLoanInterestAmount] = useState(terms ? getFundingCampaignAssetTypeAndValue(terms?.initialLoanInterestAmount) : {});
-    const [initialCollateralLocked, setInitialCollateralLocked] = useState(terms ? getFundingCampaignAssetTypeAndValue(terms?.initialCollateralLocked) : {});
+    const [paymentTermPeriodInDays, setPaymentTermPeriodInDays] = useState(loanAgreement ? nanoSecondsToDays(parseInt(loanAgreement?.paymentTermPeriod)) : null);
+    const [numberOfPayments, setNumberOfPayments] = useState(loanAgreement ? loanAgreement?.numberOfPayments : null);
+    const [loanPrincipal, setLoanPrincipal] = useState(loanAgreement ? getFundingCampaignAssetTypeAndValue(loanAgreement?.loanPrincipal) : {});
+    const [loanInterest, setLoanInterest] = useState(loanAgreement ? getFundingCampaignAssetTypeAndValue(loanAgreement?.loanInterest) : {});
+    const [collateralProvided, setCollateralProvided] = useState(loanAgreement ? getFundingCampaignAssetTypeAndValue(loanAgreement?.collateralProvided) : {});
 
     const [hasError_1, setHasError_1] = useState(!disabled);
     const [hasError_2, setHasError_2] = useState(!disabled);
@@ -47,8 +48,8 @@ const NewFundingCampaign = (props) => {
                 text: FUNDING_CAMPAIGN_ASSET_TYPES[key].toUpperCase(),
                 onClick: () => {
                     setAmountToFund({...amountToFund, type: FUNDING_CAMPAIGN_ASSET_TYPES[key]});
-                    setPaymentAmounts({...paymentAmounts, type: FUNDING_CAMPAIGN_ASSET_TYPES[key]});
-                    setInitialLoanInterestAmount({...initialLoanInterestAmount, type: FUNDING_CAMPAIGN_ASSET_TYPES[key]});
+                    setLoanPrincipal({...loanPrincipal, type: FUNDING_CAMPAIGN_ASSET_TYPES[key]});
+                    setLoanInterest({...loanInterest, type: FUNDING_CAMPAIGN_ASSET_TYPES[key]});
                 },
                 disabled: exlude.includes(FUNDING_CAMPAIGN_ASSET_TYPES[key])
             }
@@ -57,10 +58,10 @@ const NewFundingCampaign = (props) => {
 
     const currencyToCollateralizeOptions = (exclude = []) => {
         const menuItemProps = Object.keys(FUNDING_CAMPAIGN_ASSET_TYPES).map(key => {
-                return {
-                    text: FUNDING_CAMPAIGN_ASSET_TYPES[key],
-                    onClick: () => {
-                    setInitialCollateralLocked({...initialCollateralLocked, type: FUNDING_CAMPAIGN_ASSET_TYPES[key]});
+            return {
+                text: FUNDING_CAMPAIGN_ASSET_TYPES[key],
+                onClick: () => {
+                    setCollateralProvided({...collateralProvided, type: FUNDING_CAMPAIGN_ASSET_TYPES[key]});
                 },
                 disabled: exclude.includes(FUNDING_CAMPAIGN_ASSET_TYPES[key])
             }
@@ -77,7 +78,7 @@ const NewFundingCampaign = (props) => {
                     menuItemProps.push({
                         text: neuronId,
                         onClick: () => {
-                            setInitialCollateralLocked({...initialCollateralLocked, fromNeuron: neuronId, availableStake});
+                            setCollateralProvided({...collateralProvided, fromNeuron: neuronId, availableStake});
                         }
                     });
                 }
@@ -100,7 +101,7 @@ const NewFundingCampaign = (props) => {
             }
         });
         return menuItemProps;
-    }, [initialCollateralLocked]);
+    }, [collateralProvided]);
 
 
     const isALoanMenuItemProps = [
@@ -109,87 +110,315 @@ const NewFundingCampaign = (props) => {
     ];
 
     const submitProposal = async () => {
-        const terms = isALoan ? [{
-            paymentIntervals: daysToNanoSeconds(paymentIntervalsInDays),
-            initialLoanInterestAmount: {[initialLoanInterestAmount.type]: { e8s: toE8s(initialLoanInterestAmount.value), fromNeuron: initialLoanInterestAmount.fromNeuron }},
-            paymentAmounts: {[paymentAmounts.type]: { e8s: toE8s(paymentAmounts.value), fromNeuron: paymentAmounts.fromNeuron }},
-            initialCollateralLocked: {[initialCollateralLocked.type]: { e8s: toE8s(initialCollateralLocked.value), fromNeuron: initialCollateralLocked.fromNeuron }}
-            }] : [];
+        const loanAgreement = isALoan ? [{
+            numberOfPayments,
+            paymentTermPeriod: daysToNanoSeconds(paymentTermPeriodInDays),
+            loanPrincipal: {[loanPrincipal.type]: { e8s: toE8s(loanPrincipal.value) }},
+            loanInterest: {[loanInterest.type]: { e8s: toE8s(loanInterest.value) }},
+            collateralProvided: {[collateralProvided.type]: { e8s: toE8s(collateralProvided.value), fromNeuron: collateralProvided.fromNeuron }}
+        }] : [];
         const payload = {
             amountToFund: { [amountToFund.type]: { e8s: toE8s(amountToFund.value) } },
             description: description,
-            terms
+            loanAgreement
         };
         await onSubmitProposal({[action]: {fundingCampaignInput :payload}});
     };
 
+    const canDisplayCurrencyToRaiseSection = useMemo(() => { return isALoan !== undefined; }, [isALoan]);
+
+    const canDisplayLoanObligationsSection = useMemo(() => {
+        return !!canDisplayCurrencyToRaiseSection && isALoan && !!amountToFund.type && !!amountToFund.value && !hasError_1;
+    }, [canDisplayCurrencyToRaiseSection, isALoan, amountToFund, hasError_1]);
+
+    const canDisplayCollateralSection = useMemo(() => {
+        return !!canDisplayLoanObligationsSection && !!loanInterest.type && !!loanInterest.value && !hasError_2 && !!numberOfPayments && !hasError_3 && !!paymentTermPeriodInDays && !hasError_4;
+    }, [canDisplayLoanObligationsSection, loanInterest, hasError_2, numberOfPayments, hasError_3, paymentTermPeriodInDays, hasError_4]);
+
+    const canDisplayDescriptionSection = useMemo(() => {
+        if(isALoan === true){
+            return !!canDisplayCollateralSection && !!collateralProvided.type && !!collateralProvided.value && !hasError_5;
+        } else if (isALoan === false){
+            return !!canDisplayCurrencyToRaiseSection && !!amountToFund.type && !!amountToFund.value && !hasError_1;
+        } else {
+            return false;
+        }
+    }, [canDisplayCurrencyToRaiseSection, amountToFund, hasError_1, canDisplayCollateralSection, collateralProvided, hasError_5]);
+
+    const canDisplaySubmitProposalButton = useMemo(() => {
+        return !!canDisplayDescriptionSection && !!description && !hasError_6 && !disabled;
+    }, [canDisplayDescriptionSection, description, hasError_6, disabled]);
+
     return(
-        <Grid xs={12} width={"100%"} display={'flex'} flexDirection={'column'} justifyContent={'center'} alignItems={'center'}> 
-            <Grid minWidth={"275px"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
+
+        <>
+            <Grid width={"100%"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
                 <MenuField
-                    disabled={disabled}
-                    xs={8}
-                    display={"flex"}
-                    alignItems={"center"}
-                    justifyContent={"center"}
-                    color={CONTRAST_COLOR}
-                    label={"Currency To Receive"}
-                    MenuIcon={KeyboardArrowDownIcon}
-                    menuItemProps={amountToFundOptions([
-                        FUNDING_CAMPAIGN_ASSET_TYPES.icp_staked,
-                        FUNDING_CAMPAIGN_ASSET_TYPES.ck_btc,
-                        FUNDING_CAMPAIGN_ASSET_TYPES.ck_eth,
-                        FUNDING_CAMPAIGN_ASSET_TYPES.ck_usdc,
-                        FUNDING_CAMPAIGN_ASSET_TYPES.ck_usdt
-                    ])}
-                />
-                <InfoToolTip 
-                    text={"The Currency that the proposer wishes to raise in this funding campaign. Currently Only ICP is available. ckBTC, ckETH, ckUSDC and ckUSDT coming soon."} 
+                disabled={disabled}
+                xs={8}
+                display={"flex"}
+                alignItems={"center"}
+                justifyContent={"center"}
+                color={CONTRAST_COLOR}
+                label={"Is this a loan?"}
+                MenuIcon={KeyboardArrowDownIcon}
+                menuItemProps={isALoanMenuItemProps}
+            />
+            <InfoToolTip 
+                text={`Specifies whether this funding campaign is a loan or a donation.
+                    Loans require repayment and some form of collateral. 
+                    Donations are not required to be repaid nor collateralized.`} 
                     placement={"top-start"}
                     color={"white"}
-                />
-            </Grid>
-            { amountToFund.type && 
-            <>
-                <Typography>{amountToFund.type.toUpperCase()}</Typography>
-                <Grid width={"100%"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
-                    <InputBox
-                        disabled={disabled}
-                        hasError={hasError_1}
-                        width={"100%"}
-                        label={"Amount to Receive"}
-                        format={INPUT_BOX_FORMATS.numberFormat}
-                        allowNegative={false}
-                        maxDecimalPlaces={8}
-                        suffix={` ${amountToFund.type.toUpperCase()}`}
-                        value={amountToFund.value}
-                        onChange={(e) => {
-                            const parsedValue = parseFloat(e.target.value);
-                            setHasError_1(Object.is(parsedValue, NaN) || parsedValue === 0);
-                            setAmountToFund({...amountToFund, value: parsedValue});
-                        }}
-                    /> 
-                    <InfoToolTip 
-                        text={`The amount of ${amountToFund.type.toUpperCase()} that the proposer wishes to raise.`} 
-                        placement={"top-start"}
-                        color={"white"}
                     />
-                </Grid>
-                 
-                { !!amountToFund.value && !hasError_1 && 
-                    <>
-                        <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
-                        <Grid width={"100%"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
-                            <InputBox
-                                disabled={disabled}
+            </Grid>
+            {isALoan !== undefined && <Typography>This funding campaign {isALoan? "is a loan": "is a donation"}</Typography> }
+            {canDisplayCurrencyToRaiseSection && 
+                <>
+                    <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
+                    <Grid minWidth={"275px"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
+                        <MenuField
+                            disabled={disabled}
+                            xs={8}
+                            display={"flex"}
+                            alignItems={"center"}
+                            justifyContent={"center"}
+                            color={CONTRAST_COLOR}
+                            label={"Currency To Raise"}
+                            MenuIcon={KeyboardArrowDownIcon}
+                            menuItemProps={amountToFundOptions([
+                                FUNDING_CAMPAIGN_ASSET_TYPES.icp_staked,
+                                FUNDING_CAMPAIGN_ASSET_TYPES.ck_btc,
+                                FUNDING_CAMPAIGN_ASSET_TYPES.ck_eth,
+                                FUNDING_CAMPAIGN_ASSET_TYPES.ck_usdc,
+                                FUNDING_CAMPAIGN_ASSET_TYPES.ck_usdt
+                            ])}
+                        />
+                        <InfoToolTip 
+                            text={"The Currency that the proposer wishes to raise in this funding campaign. Currently Only ICP is available. ckBTC, ckETH, ckUSDC and ckUSDT coming soon."} 
+                            placement={"top-start"}
+                            color={"white"}
+                        />
+                    </Grid>
+                    { amountToFund.type && 
+                        <>
+                            <Typography>{amountToFund.type.toUpperCase()}</Typography> 
+                            <Grid width={"100%"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
+                                <InputBox
+                                    disabled={disabled}
+                                    hasError={hasError_1}
+                                    width={"100%"}
+                                    label={"Amount to Receive"}
+                                    format={INPUT_BOX_FORMATS.numberFormat}
+                                    allowNegative={false}
+                                    maxDecimalPlaces={8}
+                                    suffix={` ${amountToFund.type.toUpperCase()}`}
+                                    value={amountToFund.value}
+                                    onChange={(e) => {
+                                        const parsedValue = parseFloat(e.target.value);
+                                        setHasError_1(Object.is(parsedValue, NaN) || parsedValue === 0);
+                                        setAmountToFund({...amountToFund, value: parsedValue});
+                                        setLoanPrincipal({...loanPrincipal, value: parsedValue});
+                                    }}
+                                /> 
+                                <InfoToolTip 
+                                    text={`The amount of ${amountToFund.type.toUpperCase()} that the proposer wishes to raise.`} 
+                                    placement={"top-start"}
+                                    color={"white"}
+                                />
+                            </Grid>
+                
+                        </>
+                    }
+                </>
+            }
+            {canDisplayLoanObligationsSection && 
+                <>
+                    <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
+                    <Grid width={"100%"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
+                        <InputBox
+                            disabled={disabled}
                             hasError={hasError_2}
+                            width={"100%"}
+                            label={"Interest to be paid"}
+                            format={INPUT_BOX_FORMATS.numberFormat}
+                            maxDecimalPlaces={8}
+                            allowNegative={false}
+                            value={loanInterest.value}
+                            suffix={` ${loanInterest.type.toUpperCase()}`}
+                            onChange={(e) => {
+                                const parsedValue = parseFloat(e.target.value);
+                                setHasError_2(Object.is(parsedValue, NaN));
+                                setLoanInterest({...loanInterest, value: parsedValue});
+                            }}
+                        />
+                        <InfoToolTip
+                            text={`The amount of ${loanInterest.type.toUpperCase()} that the proposer is promising to repay as interest for this loan.`}
+                            placement={"top-start"}
+                            color={"white"}
+                        />
+                    </Grid>
+                    {!!loanInterest.value && !hasError_2 &&
+                        <>
+                            <Grid width={"100%"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
+                                <InputBox
+                                disabled={disabled}
+                                hasError={hasError_3}
+                                width={"100%"}
+                                label={"Number of Payments"}
+                                format={INPUT_BOX_FORMATS.numberFormat}
+                                allowNegative={false}
+                                value={numberOfPayments}
+                                onChange={(e) => {
+                                    const parsedValue = parseInt(e.target.value);
+                                    setHasError_3(Object.is(parsedValue, NaN) || parsedValue === 0);
+                                    setNumberOfPayments(parsedValue);
+                                }}
+                            />
+                                <InfoToolTip
+                                    text={`The number of payments cycles that the proposer is offering to repay the loan.
+                                        (e.g. if 10 payments are selected, the proposer is promising to repay the loan in 10 payments)`
+                                    }
+                                    placement={"top-start"}
+                                    color={"white"}
+                                />
+                            </Grid>
+                            {!!numberOfPayments && !hasError_3 &&
+                                <>
+                                    <Grid width={"100%"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
+                                    <InputBox
+                                        disabled={disabled}
+                                        width={"100%"}
+                                        hasError={hasError_4}
+                                        label={"Payment Term Period"}
+                                        format={INPUT_BOX_FORMATS.numberFormat}
+                                        allowNegative={false}
+                                        maxDecimalPlaces={0}
+                                        suffix={" days"}
+                                        value={paymentTermPeriodInDays}
+                                        onChange={(e) => {
+                                            const parsedValue = parseInt(e.target.value);
+                                            setHasError_4(parsedValue > 30 || Object.is(parsedValue, NaN) || parsedValue === 0);
+                                            setPaymentTermPeriodInDays(parsedValue);
+                                        }}
+                                    />
+                                    <InfoToolTip 
+                                        text={`The time span of each payment cycle.` } 
+                                        placement={"top-start"}
+                                            color={"white"}
+                                        />
+                                    </Grid>
+                                </>
+                            }
+                        </>
+                    }
+                </>
+            }
+            {canDisplayCollateralSection && 
+                <>
+                    <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
+                    <Grid width={"100%"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
+                        <MenuField
+                            disabled={disabled}
+                            xs={8}
+                            display={"flex"}
+                            alignItems={"center"}
+                            justifyContent={"center"}
+                            color={CONTRAST_COLOR}
+                            label={"Collateral Type"}
+                            MenuIcon={KeyboardArrowDownIcon}
+                            menuItemProps={currencyToCollateralizeOptions([
+                                amountToFund.type,
+                                FUNDING_CAMPAIGN_ASSET_TYPES.ck_btc,
+                                FUNDING_CAMPAIGN_ASSET_TYPES.ck_eth,
+                                FUNDING_CAMPAIGN_ASSET_TYPES.ck_usdc,
+                                FUNDING_CAMPAIGN_ASSET_TYPES.ck_usdt
+                            ])}
+                        />
+                        <InfoToolTip
+                            text={` The currency that the proposer wishes to use as collateral for this loan.`}
+                            placement={"top-start"}
+                            color={"white"}
+                        />
+                    </Grid>
+                    { collateralProvided.type && <Typography>{collateralProvided.type.toUpperCase()}</Typography> }
+                    { collateralProvided.type === FUNDING_CAMPAIGN_ASSET_TYPES.icp_staked &&
+                        <>
+                            <Grid width={"100%"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
+                                    <MenuField
+                                    disabled={disabled}
+                                    xs={8}
+                                    display={"flex"}
+                                    alignItems={"center"}
+                                    justifyContent={"center"}
+                                    color={CONTRAST_COLOR}
+                                    label={"From Neuron"}
+                                    MenuIcon={KeyboardArrowDownIcon}
+                                    menuItemProps={neuronsToCollateralizeOptions}
+                                />
+                                <InfoToolTip
+                                    text={`The neuron that holds the staked ICP that the proposer wishes to collateralize.`}
+                                    placement={"top-start"}
+                                    color={"white"}
+                                />
+                            </Grid>
+                            {!disabled && !!collateralProvided.fromNeuron &&
+                                <DataField 
+                                    label={"Available Stake: "} 
+                                    text={`${collateralProvided.availableStake} ICP`} 
+                                    isLoading={!treasuryState.dataHasBeenLoaded} 
+                                    disabled={true}
+                                    transparentBackground={true}
+                                />
+                            }
+                        </>
+                    }
+                    { !!collateralProvided.type && 
+                        (
+                            collateralProvided.type !== FUNDING_CAMPAIGN_ASSET_TYPES.icp_staked || 
+                            (collateralProvided.type === FUNDING_CAMPAIGN_ASSET_TYPES.icp_staked && !!collateralProvided.fromNeuron)
+                        ) &&
+                        <>
+                        <Grid width={"100%"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
+                                <InputBox
+                                    disabled={disabled}
+                                    hasError={hasError_5}
+                                    width={"100%"}
+                                    label={"Amount to be collateralized"}
+                                    format={INPUT_BOX_FORMATS.numberFormat}
+                                    allowNegative={false}
+                                    value={collateralProvided.value}
+                                    suffix={` ${collateralProvided.type.toUpperCase()}`}
+                                    onChange={(e) => {
+                                        const parsedValue = parseFloat(e.target.value);
+                                        setHasError_5(Object.is(parsedValue, NaN) || parsedValue === 0 || parsedValue > collateralProvided.availableStake);
+                                        setCollateralProvided({...collateralProvided, value: parsedValue});
+                                    }}
+                                />
+                                <InfoToolTip
+                                    text={`The amount of the ${collateralProvided.type.toUpperCase()} that the proposer wishes to lock within the treasury as collateral for this loan.`}
+                                    placement={"top-start"}
+                                    color={"white"}
+                                />
+                            </Grid>
+                        </>
+                    }
+                </>
+            }
+            {canDisplayDescriptionSection && 
+                <>
+                    <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
+                    <Grid width={"100%"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
+                        <InputBox
+                            disabled={disabled}
+                            hasError={hasError_6}
                             width={"100%"}
                             label={"Description"}
                             format={INPUT_BOX_FORMATS.noFormat}
                             value={description}
                             rows={5}
                             onChange={(e) => {
-                                setHasError_2(!e.target.value.length);
+                                setHasError_6(!e.target.value.length);
                                 setDescription(e.target.value);
                             }}
                         />
@@ -197,243 +426,25 @@ const NewFundingCampaign = (props) => {
                             text={`A brief description or link to external references regarding this funding campaign.`} 
                             placement={"top-start"}
                             color={"white"}
-                            />
-                        </Grid>
-                    
-                        { !!description && !hasError_2 &&
-                            <>
-                                <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
-                                <Grid width={"100%"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
-                                <MenuField
-                                    disabled={disabled}
-                                    xs={8}
-                                    display={"flex"}
-                                    alignItems={"center"}
-                                    justifyContent={"center"}
-                                    color={CONTRAST_COLOR}
-                                    label={"Is this a loan?"}
-                                    MenuIcon={KeyboardArrowDownIcon}
-                                    menuItemProps={isALoanMenuItemProps}
-                                />
-                                <InfoToolTip 
-                                    text={`Specifies whether this funding campaign is a loan or a donation.
-                                        Loans require repayment and some form of collateral. 
-                                        Donations are not required to be repaid nor collateralized.`} 
-                                    placement={"top-start"}
-                                    color={"white"}
-                                    />
-                                </Grid>
-                        
-                                { isALoan !== undefined && <Typography>This funding campaign {isALoan? "is a loan": "is NOT a loan"}</Typography> }
-                                {
-                                    isALoan &&
-                                    <>
-                                        <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
-                                        <Grid width={"100%"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
-                                            <InputBox
-                                                disabled={disabled}
-                                                width={"100%"}
-                                                hasError={hasError_3}
-                                                label={"Repayment Intervals"}
-                                                format={INPUT_BOX_FORMATS.numberFormat}
-                                                allowNegative={false}
-                                                maxDecimalPlaces={0}
-                                                suffix={" days"}
-                                                value={paymentIntervalsInDays}
-                                                onChange={(e) => {
-                                                    const parsedValue = parseInt(e.target.value);
-                                                    setHasError_3(parsedValue > 30 || Object.is(parsedValue, NaN) || parsedValue === 0);
-                                                    setPaymentIntervalsInDays(parsedValue);
-                                                }}
-                                            />
-                                            <InfoToolTip 
-                                                text={`The frequency at which the proposer is promising to make at least 1 payment on the loan. 
-                                                    (e.g. if 7 days is selected, the proposer is promising to make at least 1 payment every 7 days)
-                                                    The maximum repayment interval is 30 days.`
-                                                } 
-                                                placement={"top-start"}
-                                                color={"white"}
-                                            />
-                                        </Grid>
-                                        { !!paymentIntervalsInDays && !hasError_3 &&
-                                            <>
-                                                <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
-                                                <Grid width={"100%"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
-                                                <InputBox
-                                                    disabled={disabled}
-                                                    hasError={hasError_4}
-                                                    width={"100%"}
-                                                    label={"Minimum Payment Amounts"}
-                                                    format={INPUT_BOX_FORMATS.numberFormat}
-                                                    allowNegative={false}
-                                                    value={paymentAmounts.value}
-                                                    suffix={` ${paymentAmounts.type.toUpperCase()}`}
-                                                    onChange={(e) => {
-                                                        const parsedValue = parseFloat(e.target.value);
-                                                        setHasError_4(Object.is(parsedValue, NaN) || parsedValue === 0);
-                                                        setPaymentAmounts({...paymentAmounts, value: parsedValue});
-                                                    }}
-                                                />
-                                                <InfoToolTip
-                                                    text={`The minimum amount of ${paymentAmounts.type.toUpperCase()} that the proposer is promising to repay during each repayment interval.
-                                                        (e.g. if 10 ${paymentAmounts.type.toUpperCase()} is selected, the proposer is promising to repay at least 10 ${paymentAmounts.type.toUpperCase()} during each repayment interval)`
-                                                    }
-                                                    placement={"top-start"}
-                                                    color={"white"}
-                                                />
-                                                </Grid>
-                                            
-                                                { !!paymentAmounts.value && !hasError_4 && 
-                                                    <>
-                                                        <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
-                                                        <Grid width={"100%"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
-                                                            <InputBox
-                                                                disabled={disabled}
-                                                                hasError={hasError_5}
-                                                                width={"100%"}
-                                                                label={"Interest to be paid"}
-                                                                format={INPUT_BOX_FORMATS.numberFormat}
-                                                                allowNegative={false}
-                                                                value={initialLoanInterestAmount.value}
-                                                                suffix={` ${initialLoanInterestAmount.type.toUpperCase()}`}
-                                                                onChange={(e) => {
-                                                                    const parsedValue = parseFloat(e.target.value);
-                                                                    setHasError_5(Object.is(parsedValue, NaN));
-                                                                    setInitialLoanInterestAmount({...initialLoanInterestAmount, value: parsedValue});
-                                                                }}
-                                                            />
-                                                            <InfoToolTip
-                                                                text={`The amount of ${paymentAmounts.type.toUpperCase()} that the proposer is promising to repay as interest for this loan.`}
-                                                                placement={"top-start"}
-                                                                color={"white"}
-                                                            />
-                                                        </Grid>
-                                                    
-                                                        { !Object.is(initialLoanInterestAmount.value, NaN) && !hasError_5 &&
-                                                            <>
-                                                                <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />
-                                                                <Grid width={"100%"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
-                                                                    <MenuField
-                                                                        disabled={disabled}
-                                                                        xs={8}
-                                                                        display={"flex"}
-                                                                        alignItems={"center"}
-                                                                        justifyContent={"center"}
-                                                                        color={CONTRAST_COLOR}
-                                                                        label={"Collateral Type"}
-                                                                        MenuIcon={KeyboardArrowDownIcon}
-                                                                        menuItemProps={currencyToCollateralizeOptions([
-                                                                            amountToFund.type,
-                                                                            FUNDING_CAMPAIGN_ASSET_TYPES.ck_btc,
-                                                                            FUNDING_CAMPAIGN_ASSET_TYPES.ck_eth,
-                                                                            FUNDING_CAMPAIGN_ASSET_TYPES.ck_usdc,
-                                                                            FUNDING_CAMPAIGN_ASSET_TYPES.ck_usdt
-                                                                        ])}
-                                                                    />
-                                                                    <InfoToolTip
-                                                                        text={` The currency that the proposer wishes to use as collateral for this loan.`}
-                                                                        placement={"top-start"}
-                                                                        color={"white"}
-                                                                    />
-                                                                </Grid>
-                                                            
-                                                                {initialCollateralLocked?.type && <Typography>{initialCollateralLocked.type.toUpperCase()}</Typography>}
-                                                                { initialCollateralLocked?.type === FUNDING_CAMPAIGN_ASSET_TYPES.icp_staked &&
-                                                                    <Grid width={"100%"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
-                                                                        <MenuField
-                                                                            disabled={disabled}
-                                                                            xs={8}
-                                                                            display={"flex"}
-                                                                            alignItems={"center"}
-                                                                            justifyContent={"center"}
-                                                                            color={CONTRAST_COLOR}
-                                                                            label={"From Neuron"}
-                                                                            MenuIcon={KeyboardArrowDownIcon}
-                                                                            menuItemProps={neuronsToCollateralizeOptions}
-                                                                        />
-                                                                        <InfoToolTip
-                                                                            text={`The neuron that holds the staked ICP that the proposer wishes to collateralize.`}
-                                                                            placement={"top-start"}
-                                                                            color={"white"}
-                                                                        />
-                                                                    </Grid>
-                                                                }
-                                                                { initialCollateralLocked?.type &&  initialCollateralLocked?.fromNeuron &&
-                                                                    <Typography>{initialCollateralLocked.fromNeuron}</Typography>
-                                                                }
-
-                                                                { initialCollateralLocked?.type && <Divider sx={{...DIVIDER_SX, marginTop: "20px", marginBottom: "20px"}} />}
-
-                                                                { initialCollateralLocked?.type &&  initialCollateralLocked?.fromNeuron &&
-                                                                    !disabled && 
-                                                                    <DataField 
-                                                                        label={"Available Stake: "} 
-                                                                        text={`${initialCollateralLocked.availableStake} ICP`} 
-                                                                        isLoading={!treasuryState.dataHasBeenLoaded} 
-                                                                        disabled={true}
-                                                                        transparentBackground={true}
-                                                                    />
-                                                                }
-                                                                {  
-                                                                    ( 
-                                                                        (initialCollateralLocked?.type === FUNDING_CAMPAIGN_ASSET_TYPES.icp_staked && !!initialCollateralLocked.fromNeuron) || 
-                                                                        initialCollateralLocked?.type === FUNDING_CAMPAIGN_ASSET_TYPES.icp ||
-                                                                        initialCollateralLocked?.type === FUNDING_CAMPAIGN_ASSET_TYPES.ck_btc ||
-                                                                        initialCollateralLocked?.type === FUNDING_CAMPAIGN_ASSET_TYPES.ck_eth ||
-                                                                        initialCollateralLocked?.type === FUNDING_CAMPAIGN_ASSET_TYPES.ck_usdc ||
-                                                                        initialCollateralLocked?.type === FUNDING_CAMPAIGN_ASSET_TYPES.ck_usdt 
-                                                                    ) &&
-
-                                                                    <>
-                                                                        <Grid width={"100%"} xs={12} display={'flex'} justifyContent={'center'} alignItems={'center'}>
-                                                                            <InputBox
-                                                                                disabled={disabled}
-                                                                                hasError={hasError_6}
-                                                                                width={"100%"}
-                                                                                label={"Amount to be collateralized"}
-                                                                                format={INPUT_BOX_FORMATS.numberFormat}
-                                                                                allowNegative={false}
-                                                                                value={initialCollateralLocked.value}
-                                                                                suffix={` ${initialCollateralLocked.type.toUpperCase()}`}
-                                                                                onChange={(e) => {
-                                                                                    const parsedValue = parseFloat(e.target.value);
-                                                                                    setHasError_6(Object.is(parsedValue, NaN) || parsedValue === 0 || parsedValue > initialCollateralLocked.availableStake);
-                                                                                    setInitialCollateralLocked({...initialCollateralLocked, value: parsedValue});
-                                                                                }}
-                                                                            />
-                                                                            <InfoToolTip
-                                                                                text={`The amount of the ${initialCollateralLocked.type.toUpperCase()} that the proposer wishes to lock within the treasury as collateral for this loan.`}
-                                                                                placement={"top-start"}
-                                                                                color={"white"}
-                                                                            />
-                                                                        </Grid>
-                                                                        { !hasError_6 && !disabled &&
-                                                                            <>
-                                                                                <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"} maxWidth={"700px"} position={"fixed"} bottom={0} width={"100%"} >
-                                                                                    <ButtonField
-                                                                                    Icon={DoneIcon}
-                                                                                    color={BACKGROUND_COLOR}
-                                                                                    gridSx={{ margin: "2.5%", width: "95%", backgroundColor: CONTRAST_COLOR }}
-                                                                                    text={'Submit proposal'}
-                                                                                    onClick={submitProposal}
-                                                                                    /> 
-                                                                                </Grid>
-                                                                            </>
-                                                                        }
-                                                                    </>
-                                                                }
-                                                            </>
-                                                        }
-                                                    </>
-                                                }
-                                            </>
-                                        }
-                                    </>
-                                } 
-                        </>}
-                </>}
-            </>}    
-        </Grid>
+                        />
+                    </Grid>
+                </>
+            }
+            {canDisplaySubmitProposalButton && 
+                <>
+                    <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"} maxWidth={"700px"} position={"fixed"} bottom={0} width={"100%"} >
+                        <ButtonField
+                            Icon={DoneIcon}
+                            color={BACKGROUND_COLOR}
+                            gridSx={{ margin: "2.5%", width: "95%", backgroundColor: CONTRAST_COLOR }}
+                            text={'Submit proposal'}
+                            onClick={submitProposal}
+                        /> 
+                    </Grid>
+                </>
+            }
+        </>
+   
     )
 };
 
