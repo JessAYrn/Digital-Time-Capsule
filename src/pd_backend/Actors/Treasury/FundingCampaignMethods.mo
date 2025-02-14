@@ -13,15 +13,10 @@ import Nat64 "mo:base/Nat64";
 import HashMap "mo:base/HashMap";
 import Array "mo:base/Array";
 import Text "mo:base/Text";
-import Ledger "../../NNS/Ledger";
 import Timer "mo:base/Timer";
 import NeuronMethods "/NeuronMethods";
 
 module{
-
-    let txFee: Nat64 = 10_000;
-
-    private let ledger : Ledger.Interface  = actor(Ledger.CANISTER_ID);
 
     let {setTimer} = Timer;
     
@@ -35,7 +30,7 @@ module{
 
         let loanAgreement: ?TreasuryTypes.FundingCampaignLoanAgreement = switch(newCampaignInput.loanAgreement){
             case null { null };
-            case (?{paymentTermPeriod; numberOfPayments; loanPrincipal; loanInterest; collateralProvided;}) { 
+            case (?{paymentTermPeriod; numberOfPayments; loanInterest; collateralProvided;}) { 
 
                 if(numberOfPayments == 0) throw Error.reject("Number of payments cannot be 0.");
 
@@ -49,7 +44,7 @@ module{
                 let collateralReleased = {icp_staked = {e8s: Nat64 = 0; fromNeuron = collateralProvided.icp_staked.fromNeuron}};
                 let collateralForfeited = {icp_staked = {e8s: Nat64 = 0; fromNeuron = collateralProvided.icp_staked.fromNeuron}};
             
-                ?{ loanPrincipal; loanInterest; collateralProvided; collateralReleased; collateralForfeited; payments; numberOfPayments; paymentTermPeriod};
+                ?{ loanPrincipal = newCampaignInput.amountToFund; loanInterest; collateralProvided; collateralReleased; collateralForfeited; payments; numberOfPayments; paymentTermPeriod};
             };
         };
 
@@ -163,7 +158,7 @@ module{
 
         let updatedPaymentsBuffer = Buffer.Buffer<TreasuryTypes.Payment>(0);
 
-        label updatingPayments for((payment) in Iter.fromArray(payments)){
+        label updatingPayments for(payment in Iter.fromArray(payments)){
             let {owed; paid; collateralReleased; dueDate;} = payment;
 
             if(dueDate < Time.now()) {
@@ -173,7 +168,7 @@ module{
 
             let amountPaid = Nat64.min(owed.icp.e8s, remainingPaymentToApplyCreditFor);
             let updatedAmountOwed = {icp = {e8s = owed.icp.e8s - amountPaid; } };
-            let updatedPaid = {icp = {e8s = paid.icp.e8s + amountPaid; } };
+            let updatedPaid = { icp = { e8s = paid.icp.e8s + amountPaid; } };
 
             let collateralReleaseAsResultOfAmountPaid = NatX.nat64ComputeFractionMultiplication({factor = collateralProvided.icp_staked.e8s; numerator = amountPaid; denominator = initialLoanObligation});
             let updatedCollateralReleased = {icp_staked = {e8s = collateralReleased.icp_staked.e8s + collateralReleaseAsResultOfAmountPaid; fromNeuron = collateralProvided.icp_staked.fromNeuron; }};
@@ -184,7 +179,6 @@ module{
 
             collateralToBeReleased += collateralReleaseAsResultOfAmountPaid;
             remainingPaymentToApplyCreditFor -= amountPaid;
-            if(remainingPaymentToApplyCreditFor == 0) break updatingPayments;
         };
         
         let updatedLoanAgreement = {loanAgreement with payments = Buffer.toArray(updatedPaymentsBuffer); };
@@ -195,7 +189,8 @@ module{
         let settledCollateralRatio = Float.fromInt64(Int64.fromNat64(totalCollateralReleased + totalCollateralForfeited )) / Float.fromInt64(Int64.fromNat64(collateralProvided.icp_staked.e8s)) ;
         let isSettled = settledCollateralRatio >= 0.999;
         if(isSettled) {
-            let slippage: Nat64 = if( totalCollateralReleased + totalCollateralForfeited > collateralProvided.icp_staked.e8s) { 0 } else { totalCollateralReleased + totalCollateralForfeited - collateralProvided.icp_staked.e8s };
+            let totalUnlockedCollateral = Nat64.min(totalCollateralReleased + totalCollateralForfeited, collateralProvided.icp_staked.e8s);
+            let slippage: Nat64 = collateralProvided.icp_staked.e8s - totalUnlockedCollateral;
             NeuronMethods.updateUserNeuronContribution(neuronDataMap, {userPrincipal = recipient; delta = slippage; neuronId = collateralProvided.icp_staked.fromNeuron; operation = #SubtractCollateralizedStake});
         };
         
@@ -220,11 +215,7 @@ module{
         let paymentTo = {owner = treasuryCanisterId; subaccountId = ?recipientSubaccountId; accountType = #UserTreasuryData};
         let {amountSent} = await Utils.performTransfer(campaignWalletBalance.icp.e8s, paymentFrom, paymentTo, updateTokenBalances);
         
-        updatedCampaign := {
-            updatedCampaign with funded = true; settled = true;
-            campaignWalletBalance = {icp = { e8s = Nat64.fromNat( await ledger.icrc1_balance_of({owner = treasuryCanisterId; subaccount = ?campaignSubaccountId})) }};
-            amountDisbursedToRecipient = {icp = {e8s = amountSent}};
-        };
+        updatedCampaign := { updatedCampaign with funded = true; settled = true; amountDisbursedToRecipient = {icp = {e8s = amountSent}}; };
         
         let ?loanAgreement_ = updatedCampaign.loanAgreement else { fundingCampaignsMap.put(campaignId, updatedCampaign); return; };
 
@@ -304,7 +295,8 @@ module{
         let settledCollateralRatio = Float.fromInt64(Int64.fromNat64(totalCollateralReleased + totalCollateralForfeited )) / Float.fromInt64(Int64.fromNat64(collateralProvided.icp_staked.e8s)) ;
         let isSettled = settledCollateralRatio >= 0.999;
         if(isSettled) {
-            let slippage: Nat64 = if( totalCollateralReleased + totalCollateralForfeited > collateralProvided.icp_staked.e8s) { 0 } else { totalCollateralReleased + totalCollateralForfeited - collateralProvided.icp_staked.e8s };
+            let totalUnlockedCollateral = Nat64.min(totalCollateralReleased + totalCollateralForfeited, collateralProvided.icp_staked.e8s);
+            let slippage: Nat64 = collateralProvided.icp_staked.e8s - totalUnlockedCollateral;
             NeuronMethods.updateUserNeuronContribution(neuronDataMap, {userPrincipal = recipient; delta = slippage; neuronId = collateralProvided.icp_staked.fromNeuron; operation = #SubtractCollateralizedStake});
         };
 
@@ -356,7 +348,7 @@ module{
         let amountRemainingToFund = amountToFund.icp.e8s - campaignWalletBalance.icp.e8s;
         let amountToContribute = Nat64.min(amount, amountRemainingToFund);
         let (_, contributorSubaccountId) = Utils.getIdAndSubaccount(#Principal(contributor), usersTreasuryDataMap, fundingCampaignsMap);
-        let {amountSent} = await Utils.performTransfer(amountToContribute + txFee, {subaccountId = ?contributorSubaccountId; accountType = #UserTreasuryData}, {owner = treasuryCanisterId; subaccountId = ?fundingCampaignSubaccountId; accountType = #FundingCampaign}, updateTokenBalances);
+        let {amountSent} = await Utils.performTransfer(amountToContribute, {subaccountId = ?contributorSubaccountId; accountType = #UserTreasuryData}, {owner = treasuryCanisterId; subaccountId = ?fundingCampaignSubaccountId; accountType = #FundingCampaign}, updateTokenBalances);
         creditCampaignContribution({contributor; campaignId; amount = amountSent; fundingCampaignsMap});
         return Iter.toArray(fundingCampaignsMap.entries());
     };

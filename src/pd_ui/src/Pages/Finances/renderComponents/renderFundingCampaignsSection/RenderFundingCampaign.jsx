@@ -2,7 +2,7 @@ import React, {useMemo, useContext} from "react";
 import { AppContext } from "../../../../Context";
 import Grid from "@mui/material/Unstable_Grid2";
 import InputBox from "../../../../components/InputBox";
-import { getFundingCampaignAssetTypeAndValue, getDateInNanoSeconds, fromE8s, nanoSecondsToDays, nanoSecondsToMiliSeconds } from "../../../../functionsAndConstants/Utils";
+import { getFundingCampaignAssetTypeAndValue, getDateInNanoSeconds, fromE8s, nanoSecondsToDays, nanoSecondsToMiliSeconds, round8Decimals } from "../../../../functionsAndConstants/Utils";
 import ButtonField from "../../../../components/Button";
 import DataField from "../../../../components/DataField";
 import PriceCheckIcon from '@mui/icons-material/PriceCheck';
@@ -124,14 +124,14 @@ const RenderFundingCampaign = (props) => {
                 {funded &&
                     <DataField
                         label={!!loanAgreement?.length ? "Loan Amount:" : "Donation Amount:"}
-                        text={`${amountDisbursedToRecipient?.value} ${amountDisbursedToRecipient?.type}`}
+                        text={`${round8Decimals(loanPrincipal?.value)} ${loanPrincipal?.type}`}
                         disabled={true}
                         transparentBackground={true}
                     />
                 }
                 {!funded && <DataField
                     label={`${!!loanAgreement?.length ? "Loan Amount Requested:" : "Donation Amount Requested:"}`}
-                    text={`${amountToFund?.value} ${amountToFund?.type}`}
+                    text={`${round8Decimals(amountToFund?.value)} ${amountToFund?.type}`}
                     disabled={true}
                     transparentBackground={true}
                 />}
@@ -166,7 +166,7 @@ const RenderFundingCampaign = (props) => {
                 {!funded && !settled && 
                     <DataField
                     label={"Funding Amount Collected: "}
-                    text={`${campaignWalletBalance?.value} ${campaignWalletBalance?.type}`}
+                    text={`${round8Decimals(campaignWalletBalance?.value)} ${campaignWalletBalance?.type}`}
                     disabled={true}
                     transparentBackground={true}
                     />
@@ -181,13 +181,13 @@ const RenderFundingCampaign = (props) => {
                 <Typography color={CONTRAST_COLOR} textAlign={"center"}>Outstanding Loan Obligations</Typography>
                 <DataField
                     label={"Remaining Owed:"}
-                    text={`${totalOwed?.value} ${totalOwed?.type}`}
+                    text={`${round8Decimals(totalOwed?.value)} ${totalOwed?.type}`}
                     disabled={true}
                     transparentBackground={true}
                 />
                  <DataField
                     label={"Amount Due:"}
-                    text={`${getFundingCampaignAssetTypeAndValue(nextDuePayment?.owed).value} ${getFundingCampaignAssetTypeAndValue(nextDuePayment?.owed).type}`}
+                    text={`${round8Decimals(getFundingCampaignAssetTypeAndValue(nextDuePayment?.owed).value)} ${getFundingCampaignAssetTypeAndValue(nextDuePayment?.owed).type}`}
                     disabled={true}
                     transparentBackground={true}
                 />
@@ -207,19 +207,19 @@ const RenderFundingCampaign = (props) => {
                 <Typography color={CONTRAST_COLOR} textAlign={"center"}>Collateral Details</Typography>
                 <DataField
                     label={"Unreleased Collateral:"}
-                    text={`${collateralLocked?.value} ${collateralLocked?.type}`}
+                    text={`${round8Decimals(collateralLocked?.value)} ${collateralLocked?.type}`}
                     disabled={true}
                     transparentBackground={true}
                 />
                 <DataField
                     label={"Released Collateral:"}
-                    text={`${collateralReleased?.value} ${collateralReleased?.type}`}
+                    text={`${round8Decimals(collateralReleased?.value)} ${collateralReleased?.type}`}
                     disabled={true}
                     transparentBackground={true}
                 />
                 <DataField
                     label={"Forfeited Collateral:"}
-                    text={`${collateralForfeited?.value} ${collateralForfeited?.type}`}
+                    text={`${round8Decimals(collateralForfeited?.value)} ${collateralForfeited?.type}`}
                     disabled={true}
                     transparentBackground={true}
                 />

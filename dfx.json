@@ -1,7 +1,7 @@
 {
   "canisters": {
     "pd_api": {
-      "main": "src/pd_backend/Actors/Main/actor.mo",
+      "main": "src/pd_backend/Actors/Main/Actor.mo",
       "type": "motoko"
     },
     "user": {

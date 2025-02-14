@@ -30,10 +30,10 @@ const NewFundingCampaign = (props) => {
     const [isALoan, setIsALoan] = useState(fundingCampaignInput ? !!loanAgreement : undefined);
     
     const [paymentTermPeriodInDays, setPaymentTermPeriodInDays] = useState(loanAgreement ? nanoSecondsToDays(parseInt(loanAgreement?.paymentTermPeriod)) : null);
-    const [numberOfPayments, setNumberOfPayments] = useState(loanAgreement ? loanAgreement?.numberOfPayments : null);
-    const [loanPrincipal, setLoanPrincipal] = useState(loanAgreement ? getFundingCampaignAssetTypeAndValue(loanAgreement?.loanPrincipal) : {});
+    const [numberOfPayments, setNumberOfPayments] = useState(loanAgreement ? parseInt(loanAgreement?.numberOfPayments) : null);
     const [loanInterest, setLoanInterest] = useState(loanAgreement ? getFundingCampaignAssetTypeAndValue(loanAgreement?.loanInterest) : {});
     const [collateralProvided, setCollateralProvided] = useState(loanAgreement ? getFundingCampaignAssetTypeAndValue(loanAgreement?.collateralProvided) : {});
+
 
     const [hasError_1, setHasError_1] = useState(!disabled);
     const [hasError_2, setHasError_2] = useState(!disabled);
@@ -48,7 +48,6 @@ const NewFundingCampaign = (props) => {
                 text: FUNDING_CAMPAIGN_ASSET_TYPES[key].toUpperCase(),
                 onClick: () => {
                     setAmountToFund({...amountToFund, type: FUNDING_CAMPAIGN_ASSET_TYPES[key]});
-                    setLoanPrincipal({...loanPrincipal, type: FUNDING_CAMPAIGN_ASSET_TYPES[key]});
                     setLoanInterest({...loanInterest, type: FUNDING_CAMPAIGN_ASSET_TYPES[key]});
                 },
                 disabled: exlude.includes(FUNDING_CAMPAIGN_ASSET_TYPES[key])
@@ -113,7 +112,6 @@ const NewFundingCampaign = (props) => {
         const loanAgreement = isALoan ? [{
             numberOfPayments,
             paymentTermPeriod: daysToNanoSeconds(paymentTermPeriodInDays),
-            loanPrincipal: {[loanPrincipal.type]: { e8s: toE8s(loanPrincipal.value) }},
             loanInterest: {[loanInterest.type]: { e8s: toE8s(loanInterest.value) }},
             collateralProvided: {[collateralProvided.type]: { e8s: toE8s(collateralProvided.value), fromNeuron: collateralProvided.fromNeuron }}
         }] : [];
@@ -218,7 +216,6 @@ const NewFundingCampaign = (props) => {
                                         const parsedValue = parseFloat(e.target.value);
                                         setHasError_1(Object.is(parsedValue, NaN) || parsedValue === 0);
                                         setAmountToFund({...amountToFund, value: parsedValue});
-                                        setLoanPrincipal({...loanPrincipal, value: parsedValue});
                                     }}
                                 /> 
                                 <InfoToolTip 

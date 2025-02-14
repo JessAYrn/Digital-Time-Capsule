@@ -32,7 +32,7 @@ module{
             case(#NeuronSubaccountId(subaccount)) { let memo: Nat64 = 0; (memo, subaccount) };
         };
         let treasuryNeuronAccountId = Account.accountIdentifier(Principal.fromText(Governance.CANISTER_ID), treasuryNeuronSubaccountId);
-        var amountSent = amount - txFee;
+        var amountSent = amount;
         var transferInput = {memo;
           from_subaccount = ?senderSubaccount;
           to = treasuryNeuronAccountId;
@@ -248,7 +248,8 @@ module{
         switch(operation){
             case(#AddStake) { updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount = userNeuronStakeInfo.stake_e8s + delta; neuronId; property = #Stake}); };
             case(#SubtractStake) {
-                let newAmount: Nat64 = switch(userNeuronStakeInfo.stake_e8s > delta){ case true {userNeuronStakeInfo.stake_e8s - delta }; case false { 0 }};
+                let amountToSubtract = Nat64.min(userNeuronStakeInfo.stake_e8s, delta);
+                let newAmount: Nat64 = userNeuronStakeInfo.stake_e8s - amountToSubtract;
                 updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount; neuronId; property = #Stake});
             };
             case(#AddCollateralizedStake) { 
@@ -258,7 +259,8 @@ module{
             };
             case(#SubtractCollateralizedStake) { 
                 let collateralized_stake_e8s: Nat64 = switch(userNeuronStakeInfo.collateralized_stake_e8s){ case null { 0; }; case(?collateralized_stake_e8s_) { collateralized_stake_e8s_; }; };
-                let newAmount: Nat64 = switch(collateralized_stake_e8s > delta){case true { collateralized_stake_e8s - delta }; case false { 0 }};
+                let amountToSubtract = Nat64.min(collateralized_stake_e8s, delta);
+                let newAmount: Nat64 = collateralized_stake_e8s - amountToSubtract;
                 updateUserNeuronStakeInfo( neuronDataMap, {userPrincipal; newAmount; neuronId; property = #CollateralizedStake});
             };
         };

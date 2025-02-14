@@ -16,16 +16,6 @@ const RenderReceiveData = (props) => {
     const { userMetaData } = userState;
     const { cyclesBalance, rootCanisterPrincipal } = userMetaData;
 
-    const onCopyWalletAddress = () => {
-        navigationAndApiState.backendActor.listenForTransactions(false);
-        copyText(walletState.walletData.address);
-    };
-
-    const onCopyCanisterId = () => {
-        navigationAndApiState.backendActor.listenForTransactions(false);
-        copyText(rootCanisterPrincipal);
-    };
-
     return (
         <Grid columns={12} rowSpacing={8} display="flex" justifyContent="center" alignItems="center" flexDirection={"column"} width={"100%"}>
             
@@ -36,7 +26,7 @@ const RenderReceiveData = (props) => {
                 label={'Wallet Address '}
                 text={`${shortenHexString(walletState.walletData.address)}`}
                 isLoading={!walletState.dataHasBeenLoaded}
-                onClick={onCopyWalletAddress}
+                onClick={() => { copyText(walletState.walletData.address) }}
                 labelColor={WHITE_COLOR}
                 buttonColor={CONTRAST_COLOR}
                 buttonIcon={ContentCopyIcon}
@@ -52,7 +42,7 @@ const RenderReceiveData = (props) => {
                     buttonIcon={ContentCopyIcon}
                     buttonColor={WHITE_COLOR}
                     labelColor={WHITE_COLOR}
-                    onClick={onCopyCanisterId}
+                    onClick={() => { copyText(rootCanisterPrincipal) }}
                     transparentBackground={true}
                     transparentBorder={true}
                 />

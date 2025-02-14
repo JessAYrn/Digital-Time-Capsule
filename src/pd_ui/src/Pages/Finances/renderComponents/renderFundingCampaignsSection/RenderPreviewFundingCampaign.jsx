@@ -22,13 +22,15 @@ const RenderPreviewFundingCampaign = (props) => {
         loanInterest,
         campaignWalletBalance,
         totalOwed,
-        funded
+        funded,
+        isALoan
     } = useMemo( () => {
 
         let obj = {
             amountToFund: getFundingCampaignAssetTypeAndValue(fundingCampaign?.amountToFund),
             campaignWalletBalance: getFundingCampaignAssetTypeAndValue(fundingCampaign?.campaignWalletBalance),
             funded: fundingCampaign?.funded,
+            isALoan: !!fundingCampaign?.loanAgreement[0],
         };
 
         if(fundingCampaign?.loanAgreement[0]){
@@ -151,7 +153,7 @@ const RenderPreviewFundingCampaign = (props) => {
                         color={CONTRAST_COLOR}
                         gridSx={{margin: "2.5%", width: "40%", backgroundColor: WHITE_COLOR}}
                         elevation={24}
-                        text={"Lend"}
+                        text={isALoan ? "Lend" : "Donate"}
                         onClick={onClickAddLiquidityOrRepayFundingCampaign}
                         iconSize={'small'}
                     />

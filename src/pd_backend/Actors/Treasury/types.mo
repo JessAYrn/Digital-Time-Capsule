@@ -64,7 +64,6 @@ module{
     public type FundingCampaignLoanAgreementInput = {
         paymentTermPeriod: Nat64;
         numberOfPayments: Nat64;
-        loanPrincipal: {icp: {e8s : Nat64;}; };
         loanInterest: {icp: {e8s : Nat64;}; };
         collateralProvided: {icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText}};
     };

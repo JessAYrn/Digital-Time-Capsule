@@ -42,20 +42,20 @@ const NavBar = (props) => {
             <Grid xs={6} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} padding={0}>
                 <ButtonField
                     transparentBorder={true}
-                    Icon={DashboardIcon}
+                    Icon={AccountBalanceIcon}
                     transparentBackground={true}
-                    color={navigationAndApiState.location.route === NAV_LINKS.dashboard ? CONTRAST_COLOR : WHITE_COLOR}
-                    onClick={() => changeRoute(NAV_LINKS.dashboard)}
+                    color={navigationAndApiState.location.route === NAV_LINKS.finances ? CONTRAST_COLOR : WHITE_COLOR}
+                    onClick={() => changeRoute(NAV_LINKS.finances)}
                     disabled={modalIsLoading}
                 />
             </Grid>
             <Grid xs={6} width={"100%"} display={"flex"} justifyContent={"center"} alignItems={"center"} padding={0}>
                 <ButtonField
                     transparentBorder={true}
-                    Icon={AccountBalanceIcon}
+                    Icon={DashboardIcon}
                     transparentBackground={true}
-                    color={navigationAndApiState.location.route === NAV_LINKS.finances ? CONTRAST_COLOR : WHITE_COLOR}
-                    onClick={() => changeRoute(NAV_LINKS.finances)}
+                    color={navigationAndApiState.location.route === NAV_LINKS.dashboard ? CONTRAST_COLOR : WHITE_COLOR}
+                    onClick={() => changeRoute(NAV_LINKS.dashboard)}
                     disabled={modalIsLoading}
                 />
             </Grid>
