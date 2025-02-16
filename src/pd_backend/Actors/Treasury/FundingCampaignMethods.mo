@@ -66,7 +66,7 @@ module{
     public func cancelFundingCampaign({
         campaignId: Nat;
         fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap;
-        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap;
+        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap_V2;
         neuronDataMap: TreasuryTypes.NeuronsDataMap;
         updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, TreasuryTypes.AccountType) -> async ();
         treasuryCanisterId: Principal;
@@ -95,7 +95,7 @@ module{
     public func distributePayoutsFromFundingCampaign({
         campaignId: Nat;
         amountRepaid: Nat64;
-        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap;
+        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap_V2;
         updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async ();
         fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap;
         treasuryCanisterId: Principal;
@@ -117,7 +117,7 @@ module{
         contributor: TreasuryTypes.PrincipalAsText;
         campaignId: Nat;
         fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap;
-        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap;
+        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap_V2;
         neuronDataMap: TreasuryTypes.NeuronsDataMap; 
         updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async ();
         treasuryCanisterId: Principal;
@@ -200,7 +200,7 @@ module{
 
     private func disburseCampaignFundingToRecipient({ 
         campaignId: TreasuryTypes.CampaignId; 
-        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap;
+        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap_V2;
         fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap;
         treasuryCanisterId: Principal;
         updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async ()
@@ -241,7 +241,7 @@ module{
 
     public func disburseEligibleCampaignFundingsToRecipient({
         fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap;
-        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap;
+        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap_V2;
         treasuryCanisterId: Principal;
         updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async ()
     }) : async () {
@@ -337,7 +337,7 @@ module{
         campaignId: Nat;
         amount: Nat64;
         fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap;
-        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap;
+        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap_V2;
         treasuryCanisterId: Principal;
         updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async ();
     }) : async TreasuryTypes.FundingCampaignsArray {
@@ -355,7 +355,7 @@ module{
 
     private func fundCampaignUsingAvailableLiquidity({
         fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap;
-        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap;
+        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap_V2;
         treasuryCanisterId: Principal;
         updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async ();
         campaignId: Nat;
@@ -364,12 +364,11 @@ module{
         let ?campaign = fundingCampaignsMap.get(campaignId) else return;
 
         var totalLiquidityAvailableForLoans: Nat64 = 0;
-        let usersContributingLiquidityToLoans = Buffer.Buffer<(principal: TreasuryTypes.PrincipalAsText, userTreasuryData: TreasuryTypes.UserTreasuryData)>(0);
+        let usersContributingLiquidityToLoans = Buffer.Buffer<(principal: TreasuryTypes.PrincipalAsText, userTreasuryData: TreasuryTypes.UserTreasuryData_V2)>(0);
 
         label summingAvailableLiquidityForLoans for((principal, userTreasuryData) in usersTreasuryDataMap.entries()){ 
             let {balances; automaticallyContributeToLoans;} = userTreasuryData;
-            let ?isSetToAutomaticallyContributeToLoans = automaticallyContributeToLoans else continue summingAvailableLiquidityForLoans;
-            if(isSetToAutomaticallyContributeToLoans) {
+            if(automaticallyContributeToLoans) {
                 totalLiquidityAvailableForLoans += balances.icp.e8s;
                 usersContributingLiquidityToLoans.add((principal, userTreasuryData));
             };
@@ -389,7 +388,7 @@ module{
 
     public func fundAllAwaitingLoanCampaignsUsingAvailableLiquidity({
         fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap;
-        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap;
+        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap_V2;
         treasuryCanisterId: Principal;
         updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async ();
     }): async () {
@@ -429,15 +428,14 @@ module{
     
 
     public func makeAllDuePaymentsByAllUsers({
-        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap;
+        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap_V2;
         fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap;
         treasuryCanisterId: Principal;
         neuronDataMap: TreasuryTypes.NeuronsDataMap;
         updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async ();
     }): async (){
         label makingPayments for((userPrincipal, {automaticallyRepayLoans; balances}) in usersTreasuryDataMap.entries()){ 
-            let ?autoRepayIsEnabled = automaticallyRepayLoans else continue makingPayments;
-            if(autoRepayIsEnabled) {
+            if(automaticallyRepayLoans) {
                 let ?{campaignId; payment;} = getNextDuePayment({userPrincipal; fundingCampaignsMap}) else continue makingPayments;
                 let amountToRepay = Nat64.min(payment.owed.icp.e8s, balances.icp.e8s);
                 ignore repayFundingCampaign({contributor = userPrincipal; campaignId; amount = amountToRepay; fundingCampaignsMap; usersTreasuryDataMap; treasuryCanisterId; updateTokenBalances; neuronDataMap});

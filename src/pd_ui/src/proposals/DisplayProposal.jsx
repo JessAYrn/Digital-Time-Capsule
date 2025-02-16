@@ -25,6 +25,7 @@ import SpawnNeuron from "./renderComponents/RenderSpawnNeuron";
 import NewFundingCampaign from "./renderComponents/RenderNewFundingCampaign";
 import WithdrawFromMultiSigWallet from "./renderComponents/RenderWithdrawFromMultiSigWallet";
 import CancelFundingCampaign from "./renderComponents/RenderCancelFundingCampaign";
+import UpdateTreasuryConfigurations from "./renderComponents/RenderUpdateTreasuryConfigurations";
 import { BACKGROUND_COLOR, CONTRAST_COLOR } from "../Theme";
 import Divider from '@mui/material/Divider';
 import { DIVIDER_SX } from "../Theme";
@@ -154,6 +155,7 @@ const DisplayProposal = (props) => {
             { actionType === PROPOSAL_ACTIONS.CreateFundingCampaign && <NewFundingCampaign action={actionType} payload={payload} disabled={true} finalized={finalized}/> }
             { actionType === PROPOSAL_ACTIONS.CancelFundingCampaign && <CancelFundingCampaign action={actionType} payload={payload} disabled={true} finalized={finalized}/> }
             { actionType === PROPOSAL_ACTIONS.WithdrawFromMultiSigWallet && <WithdrawFromMultiSigWallet action={actionType} payload={payload} disabled={true} finalized={finalized}/> }
+            { actionType === PROPOSAL_ACTIONS.SetTreasuryConfigurations && <UpdateTreasuryConfigurations action={actionType} payload={payload} disabled={true} finalized={finalized}/> }
             <Divider sx={{...DIVIDER_SX, marginTop: "60px", marginBottom: "60px"}} />
             <Grid
                 columns={12}

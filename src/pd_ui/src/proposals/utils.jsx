@@ -17,7 +17,8 @@ export const PROPOSAL_ACTIONS = {
     ToggleSupportMode: "ToggleSupportMode",
     WithdrawFromMultiSigWallet: "WithdrawFromMultiSigWallet",
     SetCostToEnterDao: "SetCostToEnterDao",
-    TogglePrivacySetting: "TogglePrivacySetting"
+    TogglePrivacySetting: "TogglePrivacySetting",
+    SetTreasuryConfigurations: "SetTreasuryConfigurations"
 };
 
 export const PAYLOAD_DATA_TYPES = {

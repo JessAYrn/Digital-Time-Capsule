@@ -1,4 +1,4 @@
-import { round8Decimals, toHexString, fromE8s, getDateAsString, nanoSecondsToMiliSeconds } from "../functionsAndConstants/Utils";
+import { toHexString, fromE8s, getDateAsString, nanoSecondsToMiliSeconds } from "../functionsAndConstants/Utils";
 import { sortFundingCampaigns } from "../functionsAndConstants/treasuryDataFunctions";
 
 export const mapBalancesData = (data) => {
@@ -22,8 +22,6 @@ export const mapBalancesData = (data) => {
 
 const treasuryDataToFrontendFormat = (principal, treasuryData) => {
     let {balances, automaticallyContributeToLoans, automaticallyRepayLoans} = treasuryData;
-    const automaticallyContributeToLoans_ = !!automaticallyContributeToLoans.length && !!automaticallyContributeToLoans[0];
-    const automaticallyRepayLoans_ = !!automaticallyRepayLoans.length && !!automaticallyRepayLoans[0];
     let {icp, icp_staked, eth, btc, voting_power} = balances;
     balances = {
         icp: parseInt(icp.e8s), 
@@ -32,7 +30,7 @@ const treasuryDataToFrontendFormat = (principal, treasuryData) => {
         btc: parseInt(btc.e8s),
         voting_power: parseInt(voting_power.e8s)
     }; 
-    return [ principal, { ...treasuryData, balances, automaticallyContributeToLoans: automaticallyContributeToLoans_, automaticallyRepayLoans: automaticallyRepayLoans_} ];
+    return [ principal, { ...treasuryData, balances, automaticallyContributeToLoans, automaticallyRepayLoans} ];
 };
 
 export const mapBackendTreasuryDataToFrontEndObj = (props) => {

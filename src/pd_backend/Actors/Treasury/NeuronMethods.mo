@@ -156,7 +156,7 @@ module{
 
     public func distributePayoutsFromNeuron(
         neuronId: TreasuryTypes.NeuronIdAsText,
-        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap, 
+        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap_V2, 
         updateTokenBalances: shared ( TreasuryTypes.Identifier, TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType  ) -> async (), 
         neuronDataMap: TreasuryTypes.NeuronsDataMap,
         treasuryCanisterId: Principal,

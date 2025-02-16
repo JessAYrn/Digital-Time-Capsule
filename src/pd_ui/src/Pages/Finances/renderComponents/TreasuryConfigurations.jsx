@@ -10,16 +10,16 @@ const TreasuryConfingurationsComponent = (props) => {
 
     const onSwitchToggle = async (newAutoRepayLoansSetting, newAutoLoanContributionSetting) => {
         setModalIsLoading(true);
-        const {automaticallyContributeToLoans, automaticallyRepayLoans} = await navigationAndApiState.backendActor.updateAutomatedSettings({
-            automaticallyContributeToLoans: [newAutoLoanContributionSetting],
-            automaticallyRepayLoans: [newAutoRepayLoansSetting]
+        const {automaticallyContributeToLoans, automaticallyRepayLoans} = await navigationAndApiState.backendActor.updateUserTreasuryConfigurations({
+            automaticallyContributeToLoans: newAutoLoanContributionSetting,
+            automaticallyRepayLoans: newAutoRepayLoansSetting
         });
         treasuryDispatch({
             actionType: treasuryTypes.SET_USER_TREASURY_DATA, 
             payload: {
                 ...treasuryState.userTreasuryData,
-                automaticallyContributeToLoans: automaticallyContributeToLoans[0], 
-                automaticallyRepayLoans: automaticallyRepayLoans[0],
+                automaticallyContributeToLoans, 
+                automaticallyRepayLoans
             }
         });
         setModalIsLoading(false);
@@ -33,13 +33,13 @@ const TreasuryConfingurationsComponent = (props) => {
                 sx={{ paddingTop: "20px", paddingBottom: "20px" }}
                 checked={treasuryState?.userTreasuryData?.automaticallyRepayLoans}
                 onClick={() => onSwitchToggle(!treasuryState?.userTreasuryData?.automaticallyRepayLoans, treasuryState?.userTreasuryData?.automaticallyContributeToLoans)}
-                labelLeft={"Auto pay on loans received from funding campaigns: "}
+                labelLeft={"Automatically repay loans received from funding campaigns: "}
                 />
                 <SwitchField
                 sx={{ paddingTop: "20px", paddingBottom: "20px" }}
                 checked={treasuryState?.userTreasuryData?.automaticallyContributeToLoans}
                 onClick={() => onSwitchToggle(treasuryState?.userTreasuryData?.automaticallyRepayLoans, !treasuryState?.userTreasuryData?.automaticallyContributeToLoans)}
-                labelLeft={"Auto lend to approved funding campaigns: "}
+                labelLeft={"Automatically lend to approved funding campaigns: "}
                 />
             </Grid>
         </Grid>

@@ -172,6 +172,7 @@ module{
         #WithdrawFromMultiSigWallet: {amount: Nat64; to: PrincipalAsText;};
         #SetCostToEnterDao: {amount: Nat64};
         #TogglePrivacySetting: {};
+        #SetTreasuryConfigurations: {automaticallyContributeToLoans: Bool; automaticallyRepayLoans: Bool};
     };
 
     public type Vote = { adopt: Bool };

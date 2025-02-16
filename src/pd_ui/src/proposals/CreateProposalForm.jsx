@@ -22,6 +22,7 @@ import IncreaseNeuron from "./renderComponents/RenderIncreaseNeuron";
 import IncreaseDissolveDelay from "./renderComponents/RenderIncreaseDissolveDelay";
 import CancelFundingCampaign from "./renderComponents/RenderCancelFundingCampaign";
 import WithdrawFromMultiSigWallet from "./renderComponents/RenderWithdrawFromMultiSigWallet";
+import UpdateTreasuryConfigurations from "./renderComponents/RenderUpdateTreasuryConfigurations";
 import { sortProposals } from "../functionsAndConstants/governanceDataFunctions";
 import { CONTRAST_COLOR, DIVIDER_SX, BACKGROUND_COLOR } from "../Theme";
 import { Divider } from "@mui/material";
@@ -48,7 +49,7 @@ const CreateProposalForm = (props) => {
         { text: PROPOSAL_ACTIONS.FollowNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.FollowNeuron), selected: proposalAction_ === PROPOSAL_ACTIONS.FollowNeuron},
         { text: PROPOSAL_ACTIONS.IncreaseDissolveDelay, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.IncreaseDissolveDelay), selected: proposalAction_ === PROPOSAL_ACTIONS.IncreaseDissolveDelay},
         { text: PROPOSAL_ACTIONS.IncreaseNeuron, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.IncreaseNeuron), selected: proposalAction_ === PROPOSAL_ACTIONS.IncreaseNeuron},
-
+        { text: PROPOSAL_ACTIONS.SetTreasuryConfigurations, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.SetTreasuryConfigurations), selected: proposalAction_ === PROPOSAL_ACTIONS.SetTreasuryConfigurations},
         { text: PROPOSAL_ACTIONS.InstallUpgrades, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.InstallUpgrades), selected: proposalAction_ === PROPOSAL_ACTIONS.InstallUpgrades},
         // { text: PROPOSAL_ACTIONS.PurchaseCycles, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.PurchaseCycles), selected: proposalAction_ === PROPOSAL_ACTIONS.PurchaseCycles},
         { text: PROPOSAL_ACTIONS.RemoveAdmin, onClick: ()  => onMenuItemClick(PROPOSAL_ACTIONS.RemoveAdmin), selected: proposalAction_ === PROPOSAL_ACTIONS.RemoveAdmin},
@@ -127,6 +128,7 @@ const CreateProposalForm = (props) => {
             { proposalAction_ === PROPOSAL_ACTIONS.CreateFundingCampaign && <NewFundingCampaign onSubmitProposal={onSubmitProposal} action={proposalAction_} payload={proposalPayload_}/> }
             { proposalAction_ === PROPOSAL_ACTIONS.CancelFundingCampaign && <CancelFundingCampaign onSubmitProposal={onSubmitProposal} action={proposalAction_} payload={proposalPayload_}/> }
             { proposalAction_ === PROPOSAL_ACTIONS.WithdrawFromMultiSigWallet && <WithdrawFromMultiSigWallet onSubmitProposal={onSubmitProposal} action={proposalAction_} payload={proposalPayload_}/> }
+            { proposalAction_ === PROPOSAL_ACTIONS.SetTreasuryConfigurations && <UpdateTreasuryConfigurations onSubmitProposal={onSubmitProposal} action={proposalAction_} payload={proposalPayload_}/> }
             { (proposalAction_ === PROPOSAL_ACTIONS.InstallUpgrades || proposalAction_ === PROPOSAL_ACTIONS.ToggleSupportMode || proposalAction_ === PROPOSAL_ACTIONS.TogglePrivacySetting) 
                 && <Grid xs={12} display={"flex"} justifyContent={"center"} alignItems={"center"} flexDirection={"column"} position={"fixed"} maxWidth={"700px"} bottom={0} width={"100%"} >
                     <ButtonField Icon={DoneIcon} color={BACKGROUND_COLOR} gridSx={{ margin: "2.5%", width: "95%", backgroundColor: CONTRAST_COLOR }} text={'Submit Proposal'} onClick={() => onSubmitProposal({[proposalAction_]: {}})} /> 

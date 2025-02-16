@@ -57,7 +57,7 @@ module{
 
     public func getIdAndSubaccount(
         identifier: TreasuryTypes.Identifier,
-        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap,
+        usersTreasuryDataMap: TreasuryTypes.UsersTreasuryDataMap_V2,
         fundingCampaignMap: TreasuryTypes.FundingCampaignsMap
     ) : (Text, Account.Subaccount) {
         switch(identifier){
@@ -81,7 +81,7 @@ module{
         };
     };
 
-    public func formatUserTreasuryDataForExport(neuronDataMap: TreasuryTypes.NeuronsDataMap , (userPrincipal, userTreasuryData): (TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryData)): ((TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryDataExport)) {
+    public func formatUserTreasuryDataForExport(neuronDataMap: TreasuryTypes.NeuronsDataMap , (userPrincipal, userTreasuryData): (TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryData_V2)): ((TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryDataExport)) {
         let {balances} = userTreasuryData;
 
         func computeTotalStakeDepositAndVotingPower( neuronDataMap: TreasuryTypes.NeuronsDataMap, pincipal: Text ): TreasuryTypes.NeuronStakeInfo {

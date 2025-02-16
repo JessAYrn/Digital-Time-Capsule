@@ -635,13 +635,17 @@ shared actor class API() = this {
             };
             case(#TogglePrivacySetting({})){ daoIsPublic := not daoIsPublic; null};
             case(#SetCostToEnterDao({amount})){ costToEnterDao := amount; null};
+            case(#SetTreasuryConfigurations({automaticallyContributeToLoans; automaticallyRepayLoans})){
+                ignore treasuryCanister.updateAllUsersTreasuryConfigurations({automaticallyContributeToLoans; automaticallyRepayLoans});
+                return null;
+            };
         };
     };
 
-    public shared({caller}) func updateAutomatedSettings({automaticallyContributeToLoans: ?Bool; automaticallyRepayLoans: ?Bool;}): 
-    async {automaticallyContributeToLoans: ?Bool; automaticallyRepayLoans: ?Bool;}  {
+    public shared({caller}) func updateUserTreasuryConfigurations({automaticallyContributeToLoans: Bool; automaticallyRepayLoans: Bool;}): 
+    async {automaticallyContributeToLoans: Bool; automaticallyRepayLoans: Bool;}  {
         let treasuryCanister : Treasury.Treasury = actor(daoMetaData_v4.treasuryCanisterPrincipal);
-        await treasuryCanister.updateAutomatedSettings({userPrinciapl = caller; automaticallyContributeToLoans; automaticallyRepayLoans});
+        await treasuryCanister.updateUserTreasuryConfigurations({userPrinciapl = caller; automaticallyContributeToLoans; automaticallyRepayLoans});
     };
 
     public shared({caller}) func emergencyVoteForToggleSupportModeProposal(): async () {

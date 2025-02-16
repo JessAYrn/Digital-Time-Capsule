@@ -29,7 +29,9 @@ shared actor class Treasury (principal : Principal) = this {
     private stable let ownerCanisterId : Text = Principal.toText(principal);
     private stable var sumOfAllTokenBalances : AnalyticsTypes.Balances = { icp = {e8s = 0}; icp_staked = {e8s = 0}; eth = {e8s = 0}; btc = {e8s = 0}; };
     private stable var usersTreasuryDataArray : TreasuryTypes.UsersTreasuryDataArray = [];
+    private stable var usersTreasuryDataArray_V2 : TreasuryTypes.UsersTreasuryDataArray_V2 = [];
     private var usersTreasuryDataMap : TreasuryTypes.UsersTreasuryDataMap = HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryData>(Iter.fromArray(usersTreasuryDataArray), Iter.size(Iter.fromArray(usersTreasuryDataArray)), Text.equal, Text.hash);
+    private var usersTreasuryDataMap_V2 : TreasuryTypes.UsersTreasuryDataMap_V2 = HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryData_V2>(Iter.fromArray(usersTreasuryDataArray_V2), Iter.size(Iter.fromArray(usersTreasuryDataArray_V2)), Text.equal, Text.hash);
     private stable var balancesHistoryArray : AnalyticsTypes.BalancesArray = [];
     private var balancesHistoryMap : AnalyticsTypes.BalancesMap = HashMap.fromIter<Text, AnalyticsTypes.Balances>(Iter.fromArray(balancesHistoryArray), Iter.size(Iter.fromArray(balancesHistoryArray)), Text.equal, Text.hash);
     private stable var neuronDataArray : TreasuryTypes.NeuronsDataArray = [];
@@ -46,10 +48,10 @@ shared actor class Treasury (principal : Principal) = this {
 
     public shared({caller}) func configureTreasuryCanister(): async (){
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
-        usersTreasuryDataMap.put(Principal.toText(Principal.fromActor(this)), {
+        usersTreasuryDataMap_V2.put(Principal.toText(Principal.fromActor(this)), {
             balances = { icp = {e8s : Nat64 = 0;}; eth = {e8s : Nat64 = 0}; btc = {e8s : Nat64 = 0}; };
-            automaticallyContributeToLoans: ?Bool = ?true;
-            automaticallyRepayLoans: ?Bool = ?true;
+            automaticallyContributeToLoans: Bool = true;
+            automaticallyRepayLoans: Bool = true;
             subaccountId = Account.defaultSubaccount();
         });
     };
@@ -67,18 +69,18 @@ shared actor class Treasury (principal : Principal) = this {
 
     public shared({caller}) func cancelFundingCampaign(campaignId: Nat): async TreasuryTypes.FundingCampaignsArray {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
-        await FundingCampaignsMethods.cancelFundingCampaign({campaignId; fundingCampaignsMap; usersTreasuryDataMap; neuronDataMap; updateTokenBalances; treasuryCanisterId; });
+        await FundingCampaignsMethods.cancelFundingCampaign({campaignId; fundingCampaignsMap; usersTreasuryDataMap = usersTreasuryDataMap_V2; neuronDataMap; updateTokenBalances; treasuryCanisterId; });
     };
 
     public shared({caller}) func contributeToFundingCampaign(contributor: TreasuryTypes.PrincipalAsText, campaignId: Nat, amount: Nat64) 
     : async TreasuryTypes.FundingCampaignsArray {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
-        await FundingCampaignsMethods.contributeToFundingCampaign({contributor; campaignId; amount; fundingCampaignsMap; usersTreasuryDataMap; treasuryCanisterId; updateTokenBalances});
+        await FundingCampaignsMethods.contributeToFundingCampaign({contributor; campaignId; amount; fundingCampaignsMap; usersTreasuryDataMap = usersTreasuryDataMap_V2; treasuryCanisterId; updateTokenBalances});
     };
 
     public shared({caller}) func repayFundingCampaign(contributor: TreasuryTypes.PrincipalAsText, campaignId: Nat, amount: Nat64) : async TreasuryTypes.FundingCampaignsArray {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
-        await FundingCampaignsMethods.repayFundingCampaign({amount; contributor; campaignId; fundingCampaignsMap; usersTreasuryDataMap; neuronDataMap; updateTokenBalances; treasuryCanisterId; });
+        await FundingCampaignsMethods.repayFundingCampaign({amount; contributor; campaignId; fundingCampaignsMap; usersTreasuryDataMap = usersTreasuryDataMap_V2; neuronDataMap; updateTokenBalances; treasuryCanisterId; });
     };
 
     private func createTreasuryData_(principal: Principal) : async () {
@@ -92,37 +94,45 @@ shared actor class Treasury (principal : Principal) = this {
                 btc = {e8s: Nat64 = 0};
             };
             subaccountId = newSubaccount;
-            automaticallyContributeToLoans = ?true;
-            automaticallyRepayLoans = ?true;
+            automaticallyContributeToLoans = true;
+            automaticallyRepayLoans = true;
         };
-        usersTreasuryDataMap.put(Principal.toText(principal), newUserTreasuryData);
+        usersTreasuryDataMap_V2.put(Principal.toText(principal), newUserTreasuryData);
     };
 
     public shared({caller}) func createTreasuryData(principal: Principal) : async () {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         let principalAsText = Principal.toText(principal);
-        if(usersTreasuryDataMap.get(principalAsText) != null) throw Error.reject("User already has treasury data.");
+        if(usersTreasuryDataMap_V2.get(principalAsText) != null) throw Error.reject("User already has treasury data.");
         await createTreasuryData_(principal);
     };
 
-    public shared({caller}) func updateAutomatedSettings({userPrinciapl: Principal; automaticallyContributeToLoans: ?Bool; automaticallyRepayLoans: ?Bool;}):
-    async {automaticallyContributeToLoans: ?Bool; automaticallyRepayLoans: ?Bool;} {
+    public shared({caller}) func updateUserTreasuryConfigurations({userPrinciapl: Principal; automaticallyContributeToLoans: Bool; automaticallyRepayLoans: Bool;}):
+    async {automaticallyContributeToLoans: Bool; automaticallyRepayLoans: Bool;} {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         let userPrincipalAsText = Principal.toText(userPrinciapl);
-        let ?userTreasuryData = usersTreasuryDataMap.get(userPrincipalAsText) else throw Error.reject("User not found.");
+        let ?userTreasuryData = usersTreasuryDataMap_V2.get(userPrincipalAsText) else throw Error.reject("User not found.");
         let newUserTreasuryData = {userTreasuryData with automaticallyContributeToLoans; automaticallyRepayLoans};
-        usersTreasuryDataMap.put(userPrincipalAsText, newUserTreasuryData);
+        usersTreasuryDataMap_V2.put(userPrincipalAsText, newUserTreasuryData);
         return {automaticallyContributeToLoans; automaticallyRepayLoans};
     };
+
+    public shared({caller}) func updateAllUsersTreasuryConfigurations({automaticallyContributeToLoans: Bool; automaticallyRepayLoans: Bool;}):
+    async () {
+        if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
+        for((userPrincipalAsText, userTreasuryData) in usersTreasuryDataMap_V2.entries()){
+            let newUserTreasuryData = {userTreasuryData with automaticallyContributeToLoans; automaticallyRepayLoans};
+            usersTreasuryDataMap_V2.put(userPrincipalAsText, newUserTreasuryData);
+        };
+    };
     
-    // revised to conform to new data structure
     public query({caller}) func getUsersTreasuryDataArray(): async TreasuryTypes.UsersTreasuryDataArrayExport {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         let usersDataExport = Iter.map<
-            (TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryData),
+            (TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryData_V2),
             (TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryDataExport)
-        >( usersTreasuryDataMap.entries(), func(
-            (principal, userTreasuryData): (TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryData)) : 
+        >( usersTreasuryDataMap_V2.entries(), func(
+            (principal, userTreasuryData): (TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryData_V2)) : 
             (TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryDataExport) {
                 Utils.formatUserTreasuryDataForExport(neuronDataMap, (principal, userTreasuryData));
             }
@@ -133,7 +143,7 @@ shared actor class Treasury (principal : Principal) = this {
     public query({caller}) func getUserTreasuryData(userPrincipal: Principal): async TreasuryTypes.UserTreasuryDataExport {
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
         let userPrincipalAsText = Principal.toText(userPrincipal);
-        let userTreasuryData = switch(usersTreasuryDataMap.get(userPrincipalAsText)){ case (?userTreasuryData) { userTreasuryData }; case (null) { throw Error.reject("User not found."); }; };
+        let userTreasuryData = switch(usersTreasuryDataMap_V2.get(userPrincipalAsText)){ case (?userTreasuryData) { userTreasuryData }; case (null) { throw Error.reject("User not found."); }; };
         let (_, userTreasuryDataExport) = Utils.formatUserTreasuryDataForExport(neuronDataMap, (userPrincipalAsText, userTreasuryData));
         return userTreasuryDataExport;
     };
@@ -182,7 +192,7 @@ shared actor class Treasury (principal : Principal) = this {
         let (manageNeuronResponse, neuronContributions) = await NeuronMethods.manageNeuron(neuronDataMap, args, newlyCreatedNeuronContributions); 
         func completeDisbursements(): async () {
             let ?neuronId_ = args.id else { throw Error.reject("No neuronId in response") };
-            await NeuronMethods.distributePayoutsFromNeuron( Nat64.toText(neuronId_.id), usersTreasuryDataMap, updateTokenBalances, neuronDataMap, Principal.fromActor(this));
+            await NeuronMethods.distributePayoutsFromNeuron( Nat64.toText(neuronId_.id), usersTreasuryDataMap_V2, updateTokenBalances, neuronDataMap, Principal.fromActor(this));
             ignore neuronDataMap.remove(Nat64.toText(neuronId_.id));
         };
         switch(manageNeuronResponse.command){
@@ -203,7 +213,7 @@ shared actor class Treasury (principal : Principal) = this {
 
     public shared({caller}) func createNeuron({amount: Nat64; contributor: Principal}) : async Result.Result<({amountSent: Nat64}), TreasuryTypes.Error>{
         if(Principal.toText(caller) != Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) throw Error.reject("Unauthorized access.");
-        let ?{subaccountId} = usersTreasuryDataMap.get(Principal.toText(contributor)) else Debug.trap("No subaccount for contributor");
+        let ?{subaccountId} = usersTreasuryDataMap_V2.get(Principal.toText(contributor)) else Debug.trap("No subaccount for contributor");
         let {amountSent} = await NeuronMethods.transferIcpToNeuron(amount, #Memo(neuronMemo), subaccountId, Principal.fromActor(this));
         ignore updateTokenBalances(#Principal(Principal.toText(contributor)), #Icp, #UserTreasuryData);
         newlyCreatedNeuronContributions := [(Principal.toText(contributor), {stake_e8s : Nat64 = amountSent; voting_power: Nat64 = 0; collateralized_stake_e8s = null})];
@@ -218,7 +228,7 @@ shared actor class Treasury (principal : Principal) = this {
         let ?neuronData = neuronDataMap.get(Nat64.toText(neuronId)) else Debug.trap("No neuron data for neuronId");
         let ?neuron = neuronData.neuron else Debug.trap("No neuron for neuronId");
         let {account = neuronSubaccount} = neuron;
-        let ?{subaccountId} = usersTreasuryDataMap.get(Principal.toText(contributor)) else Debug.trap("No subaccount for contributor");
+        let ?{subaccountId} = usersTreasuryDataMap_V2.get(Principal.toText(contributor)) else Debug.trap("No subaccount for contributor");
         let {amountSent} = await NeuronMethods.transferIcpToNeuron(amount, #NeuronSubaccountId(neuronSubaccount), subaccountId, Principal.fromActor(this));
         ignore updateTokenBalances(#Principal(Principal.toText(contributor)), #Icp, #UserTreasuryData);
         let principalToCredit = switch(onBehalfOf){case (?principal){principal}; case (null){Principal.toText(contributor);};};
@@ -237,14 +247,14 @@ shared actor class Treasury (principal : Principal) = this {
     public query({caller}) func daoWalletIcpBalance() : async Ledger.ICP {
         let canisterId =  Principal.fromActor(this);
         if( Principal.toText(caller) !=  Principal.toText(canisterId) and Principal.toText(caller) != ownerCanisterId) { throw Error.reject("Unauthorized access."); };
-        let ?treasuryData = usersTreasuryDataMap.get(Principal.toText(Principal.fromActor(this))) else throw Error.reject("User not found.");
+        let ?treasuryData = usersTreasuryDataMap_V2.get(Principal.toText(Principal.fromActor(this))) else throw Error.reject("User not found.");
         return treasuryData.balances.icp;
     };
     
     public shared({caller}) func updateTokenBalances( identifier: TreasuryTypes.Identifier, currency: TreasuryTypes.SupportedCurrencies, accountType: TreasuryTypes.AccountType) : async () {
         if( Principal.toText(caller) !=  Principal.toText(Principal.fromActor(this)) and Principal.toText(caller) != ownerCanisterId ) { throw Error.reject("Unauthorized access."); };
         func onUserTreasuryDataOrMultiSigAccountTypes(userPrincipal: Text, subaccountID: Blob): async(){
-            let ?userTreasuryData = usersTreasuryDataMap.get(userPrincipal) else throw Error.reject("User not found.");
+            let ?userTreasuryData = usersTreasuryDataMap_V2.get(userPrincipal) else throw Error.reject("User not found.");
             let updatedUserTreasuryData = switch(currency){
                 case(#Icp){ 
                     let e8s: Nat64 = Nat64.fromNat(await ledger.icrc1_balance_of({ owner = Principal.fromActor(this); subaccount = ?subaccountID })); 
@@ -253,7 +263,7 @@ shared actor class Treasury (principal : Principal) = this {
                 case(#Eth) { throw Error.reject("Eth not yet supported."); };
                 case(#Btc) { throw Error.reject("Btc not yet supported."); };
             };
-            usersTreasuryDataMap.put(userPrincipal, updatedUserTreasuryData);
+            usersTreasuryDataMap_V2.put(userPrincipal, updatedUserTreasuryData);
         };
 
         func onFundingCampaignAccountType(campaignId: Nat, subaccountID: Blob): async(){
@@ -269,7 +279,7 @@ shared actor class Treasury (principal : Principal) = this {
             fundingCampaignsMap.put(campaignId, updatedCampaign);
         };
 
-        let (id, subaccountID) = Utils.getIdAndSubaccount(identifier, usersTreasuryDataMap, fundingCampaignsMap);
+        let (id, subaccountID) = Utils.getIdAndSubaccount(identifier, usersTreasuryDataMap_V2, fundingCampaignsMap);
 
         switch(accountType){
             case(#UserTreasuryData){ await onUserTreasuryDataOrMultiSigAccountTypes(id, subaccountID); };
@@ -283,7 +293,7 @@ shared actor class Treasury (principal : Principal) = this {
 
         let {totalStake} = await getDaoTotalStakeAndVotingPower();
         var icp_e8s: Nat64 = 0;
-        for((principal, treasuryData) in usersTreasuryDataMap.entries()) icp_e8s += treasuryData.balances.icp.e8s;
+        for((principal, treasuryData) in usersTreasuryDataMap_V2.entries()) icp_e8s += treasuryData.balances.icp.e8s;
         for((_, campaign) in fundingCampaignsMap.entries()) icp_e8s += campaign.campaignWalletBalance.icp.e8s;
         sumOfAllTokenBalances := {
             eth = {e8s: Nat64 = 0};
@@ -319,7 +329,7 @@ shared actor class Treasury (principal : Principal) = this {
         
         let senderSubaccount = switch(sender.identifier){
             case (#SubaccountId(subaccount)) { subaccount };
-            case (_){ let (_, subaccount) = Utils.getIdAndSubaccount(sender.identifier, usersTreasuryDataMap, fundingCampaignsMap); subaccount};
+            case (_){ let (_, subaccount) = Utils.getIdAndSubaccount(sender.identifier, usersTreasuryDataMap_V2, fundingCampaignsMap); subaccount};
         };
         await Utils.performTransfer(
             amount, 
@@ -335,6 +345,7 @@ shared actor class Treasury (principal : Principal) = this {
 
     system func preupgrade() { 
         usersTreasuryDataArray := Iter.toArray(usersTreasuryDataMap.entries()); 
+        usersTreasuryDataArray_V2 := Iter.toArray(usersTreasuryDataMap_V2.entries());
         balancesHistoryArray := Iter.toArray(balancesHistoryMap.entries());
         neuronDataArray := Iter.toArray(neuronDataMap.entries());
         fundingCampaignsArray := Iter.toArray(fundingCampaignsMap.entries());
@@ -342,18 +353,23 @@ shared actor class Treasury (principal : Principal) = this {
 
     system func postupgrade() { 
         usersTreasuryDataArray:= []; 
+        usersTreasuryDataArray_V2:= [];
         balancesHistoryArray := [];
         neuronDataArray := [];
         fundingCampaignsArray := [];
 
+        // for((userPrincipal, userTreasuryData) in usersTreasuryDataMap.entries()){
+        //     usersTreasuryDataMap_V2.put(userPrincipal, {userTreasuryData with automaticallyContributeToLoans = true; automaticallyRepayLoans = true;});
+        // };
+
         ignore recurringTimer<system>(#seconds(6 * 60 * 60), func (): async () { 
-            ignore FundingCampaignsMethods.disburseEligibleCampaignFundingsToRecipient({ fundingCampaignsMap; usersTreasuryDataMap; treasuryCanisterId; updateTokenBalances });
+            ignore FundingCampaignsMethods.disburseEligibleCampaignFundingsToRecipient({ fundingCampaignsMap; usersTreasuryDataMap = usersTreasuryDataMap_V2; treasuryCanisterId; updateTokenBalances });
             ignore FundingCampaignsMethods.concludeAllEligbileBillingCycles({fundingCampaignsMap; neuronDataMap});
         });
         ignore recurringTimer<system>(#seconds(24 * 60 * 60), func (): async () { 
             await NeuronMethods.upateNeuronsDataMap(neuronDataMap, null);
-            ignore setTimer<system>(#seconds(5 * 60), func(): async (){ ignore FundingCampaignsMethods.makeAllDuePaymentsByAllUsers({usersTreasuryDataMap; fundingCampaignsMap; treasuryCanisterId; neuronDataMap; updateTokenBalances}); });
-            ignore setTimer<system>(#seconds(10 * 60), func(): async (){ ignore FundingCampaignsMethods.fundAllAwaitingLoanCampaignsUsingAvailableLiquidity({fundingCampaignsMap; usersTreasuryDataMap; treasuryCanisterId; updateTokenBalances}); });
+            ignore setTimer<system>(#seconds(5 * 60), func(): async (){ ignore FundingCampaignsMethods.makeAllDuePaymentsByAllUsers({usersTreasuryDataMap = usersTreasuryDataMap_V2; fundingCampaignsMap; treasuryCanisterId; neuronDataMap; updateTokenBalances}); });
+            ignore setTimer<system>(#seconds(10 * 60), func(): async (){ ignore FundingCampaignsMethods.fundAllAwaitingLoanCampaignsUsingAvailableLiquidity({fundingCampaignsMap; usersTreasuryDataMap = usersTreasuryDataMap_V2; treasuryCanisterId; updateTokenBalances}); });
         });
     };    
 };
