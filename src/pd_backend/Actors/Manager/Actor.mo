@@ -17,7 +17,7 @@ import CanisterManagementMethods "CanisterManagementMethods";
 
 shared(msg) actor class Manager (principal : Principal) = this {
 
-    private stable var currentVersionLoaded : { number: Nat; } = { number = 3; };
+    private stable var currentVersionLoaded : { number: Nat; } = { number = 4; };
     private stable var currentVersionInstalled : {number: Nat;} = currentVersionLoaded;
     private stable var newVersionAvailable : Bool = false;
     private stable var mainCanisterId : Text = Principal.toText(principal); 
@@ -37,8 +37,8 @@ shared(msg) actor class Manager (principal : Principal) = this {
             throw Error.reject("Unauthorized access."); 
         };
         switch(findWasmModule(wasmType, release.wasmModules)){
-            case(?#Frontend(wasmModule)){ return wasmModule };
-            case(?#Backend(wasmModule)){ return wasmModule };
+            case(?#UI(wasmModule)){ return wasmModule };
+            case(?#API(wasmModule)){ return wasmModule };
             case(?#Manager(wasmModule)){ return wasmModule };
             case(?#User(wasmModule)){ return wasmModule };
             case(?#Treasury(wasmModule)){ return wasmModule };
@@ -92,14 +92,14 @@ shared(msg) actor class Manager (principal : Principal) = this {
         let {frontEndPrincipal; treasuryCanisterPrincipal; backEndPrincipal} = daoMetaData;
         for(wasmModule in Iter.fromArray(release.wasmModules)){
             switch(wasmModule){
-                case(#Frontend(wasmModule)){ 
+                case(#UI(wasmModule)){ 
                     func upgradeFrontendCanister(): async (){
                         await CanisterManagementMethods.installCode_(null, wasmModule, Principal.fromText(frontEndPrincipal), mode);
                         await uploadAssetsToFrontendCanister(frontEndPrincipal);   
                     };
                     ignore upgradeFrontendCanister(); 
                 };
-                case(#Backend(wasmModule)){ 
+                case(#API(wasmModule)){ 
                     ignore CanisterManagementMethods.installCode_(null, wasmModule, Principal.fromText(backEndPrincipal), mode);
                 };
                 case(#Treasury(wasmModule)){ 
@@ -133,13 +133,13 @@ shared(msg) actor class Manager (principal : Principal) = this {
 
     private func loadModules() : async (){
         let wasmStore: WasmStore.Interface = actor(WasmStore.wasmStoreCanisterId);
-        let backendWasm = await wasmStore.getModule({version = currentVersionInstalled.number + 1; wasmType = #Backend});
-        let frontendWasm = await wasmStore.getModule({version = currentVersionInstalled.number + 1; wasmType = #Frontend});
+        let apiWasm = await wasmStore.getModule({version = currentVersionInstalled.number + 1; wasmType = #API});
+        let uiWasm = await wasmStore.getModule({version = currentVersionInstalled.number + 1; wasmType = #UI});
         let managerWasm = await wasmStore.getModule({version = currentVersionInstalled.number + 1; wasmType = #Manager});
         let userWasm = await wasmStore.getModule({version = currentVersionInstalled.number + 1; wasmType = #User});
         let treasuryWasm = await wasmStore.getModule({version = currentVersionInstalled.number + 1; wasmType = #Treasury});
 
-        release := { release with wasmModules = [userWasm, frontendWasm, backendWasm, treasuryWasm, managerWasm]; };
+        release := { release with wasmModules = [userWasm, uiWasm, apiWasm, treasuryWasm, managerWasm]; };
     };
 
     public shared({caller}) func loadAssets(): async () {
@@ -234,8 +234,8 @@ shared(msg) actor class Manager (principal : Principal) = this {
       wasmModules, 
       func(wasmModule: WasmStore.WasmModule): Bool{
         switch(wasmType){
-          case(#Backend){ switch(wasmModule){ case(#Backend(_)){return true}; case(_){ return false }; } };
-          case(#Frontend){ switch(wasmModule){ case(#Frontend(_)){return true}; case(_){ return false }; } };
+          case(#API){ switch(wasmModule){ case(#API(_)){return true}; case(_){ return false }; } };
+          case(#UI){ switch(wasmModule){ case(#UI(_)){return true}; case(_){ return false }; } };
           case(#Manager){ switch(wasmModule){ case(#Manager(_)){return true}; case(_){ return false }; } };
           case(#Treasury){ switch(wasmModule){ case(#Treasury(_)){return true}; case(_){ return false }; } };
           case(#User){ switch(wasmModule){ case(#User(_)){return true}; case(_){ return false }; } };

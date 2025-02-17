@@ -174,7 +174,7 @@ module{
             let backendCanisterId = Principal.fromText(daoMetaData.backEndPrincipal);
             let managerCanisterId = Principal.fromText(daoMetaData.managerCanisterPrincipal);
             let managerCanister: Manager.Manager = actor(daoMetaData.managerCanisterPrincipal);
-            let frontendWasmModule = await managerCanister.getReleaseModule(#Frontend);
+            let frontendWasmModule = await managerCanister.getReleaseModule(#UI);
             await installCode_(null, frontendWasmModule, Principal.fromText(frontEndPrincipal), #install);
             let uiCanister: AssetCanister.Interface = actor(frontEndPrincipal);
 

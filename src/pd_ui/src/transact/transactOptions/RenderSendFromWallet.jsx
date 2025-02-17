@@ -63,7 +63,7 @@ const SendFromWallet = (props) => {
                 <Divider sx={DIVIDER_SX}/>
                 <DataField
                     label={'Amount: '}
-                    text={`${round8Decimals(amount) - 0.0001} ICP`}
+                    text={`${round8Decimals(amount)} ICP`}
                     disabled={true}
                     transparentBackground={true}
                 />
@@ -76,8 +76,8 @@ const SendFromWallet = (props) => {
                 />
                 <Divider sx={DIVIDER_SX}/>
                 <DataField
-                    label={'Total: '}
-                    text={`${round8Decimals(amount)} ICP`}
+                    label={'Total Deducted: '}
+                    text={`${round8Decimals(amount + 0.0001)} ICP`}
                     disabled={true}
                     transparentBackground={true}
                 />
