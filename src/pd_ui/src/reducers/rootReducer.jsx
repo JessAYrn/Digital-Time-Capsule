@@ -1,15 +1,15 @@
 import { combineReducers } from "redux";
-import journalReducer from "./journalReducer";
+import userReducer from "./userReducer";
 import walletReducer from './walletReducer';
 import homePageReducer from './homePageReducer';
-import actorReducer from './actorReducer';
+import navigationAndApiReducer from './navigationAndApiReducer';
 import notificationsReducer from './notificationsReducer';
 import treasuryReducer  from "./treasuryReducer";
 
 const rootReducer = combineReducers({
-    journal: journalReducer,
+    user: userReducer,
     wallet: walletReducer,
-    actor: actorReducer,
+    navigationAndApi: navigationAndApiReducer,
     homePage: homePageReducer,
     notifications: notificationsReducer,
     treasury: treasuryReducer

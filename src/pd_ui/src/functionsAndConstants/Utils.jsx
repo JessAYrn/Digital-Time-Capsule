@@ -2,6 +2,27 @@ import * as canisterIds from "../../../../canister_ids.json";
 import * as pdFiles from "../../../declarations/pd_api"
 import * as pdUiFiles from "../../../declarations/pd_ui";
 import { e8sInOneICP, MASTER_COPY_FRONTEND_CANISTER_ID, PERMITTED_USERNAME_CHARACTERS } from "./Constants";
+import QRCode from 'qrcode';
+
+export const generateQrCode = async (walletAddress) => {
+    try{
+        const response = await QRCode.toDataURL(walletAddress);
+        
+        return response;
+     } catch (error){
+     }
+};
+
+export const copyText = (address) => {
+  const addressTextArea = document.createElement("input");
+  document.body.appendChild(addressTextArea);
+  addressTextArea.setAttribute("id", "addressTextArea_id");
+  addressTextArea.setAttribute("value", address);
+  const copyText = document.getElementById("addressTextArea_id");
+  addressTextArea.select();
+  navigator.clipboard.writeText(copyText.value);
+  document.body.removeChild(addressTextArea);    
+};
 
 
 export const toHexString = (byteArray)  =>{
@@ -94,9 +115,22 @@ export const shortenHexString = (hexString) => {
   return shortString
 }
 
+export const shortenString = (string, length) => {
+  const suffix = string.length > length ? "..." : "";
+  return string.slice(0,length) + suffix;
+};
+
 export const milisecondsToNanoSeconds = (time) => {
   return time * 1000000;
 }
+
+export const secondsToDays = (s) => {
+  return s / (60 * 60 * 24)
+}
+
+export const daysToSeconds = (d) => {
+  return d * 24 * 60 * 60
+};
 
 export const nanoSecondsToMiliSeconds = (time) => {
   return parseInt(time / 1000000);
@@ -128,7 +162,7 @@ export const round8Decimals = (num) => {
 };
 
 export const inTrillions = (num) => {
-  return num / 1000000000000;
+  return parseInt(num) / 1000000000000;
 }
 
 export const getFileArrayBuffer = (inputFile) => {
@@ -146,10 +180,6 @@ export const getFileArrayBuffer = (inputFile) => {
 export const delay = (ms) => {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
-
-export const daysToSeconds = (days) => {
-  return days * 86400;
-};
 
 export const secondsToMilliseconds = (seconds) => {
   return seconds * 1000;
@@ -282,12 +312,6 @@ export const getCurrentURL = () => {
   return window.location.href
 };
 
-export const isLocalHost = () => {
-  const url = getCurrentURL();
-  if(url.includes("localhost")) return true;
-  else false;
-}
-
 export const extractCanisterIdFromURL = (URL) => {
   if(process.env.NODE_ENV === "development") return MASTER_COPY_FRONTEND_CANISTER_ID;
   let canisterId = "";
@@ -351,10 +375,10 @@ export const userNamePermitted = (userName) => {
 }
 
 export const getFundingCampaignAssetTypeAndValue = (asset) => {
-    const type = Object.keys(asset)[0];
-    const value = fromE8s(parseInt(asset[type].e8s));
-    const fromNeuron = asset[type].fromNeuron;
-    return {type, value, fromNeuron};
+  const type = Object.keys(asset)[0];
+  const value = fromE8s(parseInt(asset[type].e8s));
+  const fromNeuron = asset[type].fromNeuron;
+  return {type, value, fromNeuron};
 };
 
 

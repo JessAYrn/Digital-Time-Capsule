@@ -1,33 +1,32 @@
 import { mapApiObjectToFrontEndJournalEntriesObject } from "../mappers/journalPageMappers";
-import { toHexString, nanoSecondsToMiliSeconds, shortenHexString } from "./Utils";
-import { generateQrCode } from "./walletFunctions/GenerateQrCode";
+import { toHexString, nanoSecondsToMiliSeconds, generateQrCode } from "./Utils";
+
 import { mapBackendCanisterDataToFrontEndObj } from "../mappers/dashboardMapperFunctions";
-import { mapBalancesDataFromApiToFrontend, mapBackendTreasuryDataToFrontEndObj } from "../mappers/treasuryPageMapperFunctions";
-import { getFileUrl_fromApi } from "../Components/Fields/fileManger/FileManagementTools";
+import { mapBalancesData, mapBackendTreasuryDataToFrontEndObj } from "../mappers/treasuryPageMapperFunctions";
+import { getFileUrl_fromApi } from "../components/fileManger/FileManagementTools";
 
-
-export const loadAllDataIntoReduxStores = async (actorState, dispatchFunctions, types) => {
+export const loadAllDataIntoReduxStores = async (navigationAndApiState, dispatchFunctions, types) => {
     let loadSuccessful = true;
-    let {journalDispatch, walletDispatch, homePageDispatch, notificationsDispatch, treasuryDispatch} = dispatchFunctions;
-    let {journalTypes, walletTypes, homePageTypes, notificationsTypes, treasuryTypes } = types;
+    let {userDispatch, walletDispatch, homePageDispatch, notificationsDispatch, treasuryDispatch} = dispatchFunctions;
+    let {userTypes, walletTypes, homePageTypes, notificationsTypes, treasuryTypes } = types;
     //checks to see if user has an account. If not, then it attemptes to make an account, if 
     //the account creation is unsuccessful, then it returns
-    let hasAccount = await actorState.backendActor.hasAccount();
-    if(!hasAccount) { loadSuccessful = false; return loadSuccessful;}
+    loadSuccessful = await navigationAndApiState.backendActor.hasAccount();
+    if(!loadSuccessful) return {loadSuccessful};
     //calls the backend and loads the retrieved data into the appropriate redux stores.
     let promises = [
-        loadWalletData(actorState, walletDispatch, walletTypes),
-        loadCanisterData(actorState, homePageDispatch, homePageTypes),
-        loadJournalData(actorState, journalDispatch, journalTypes),
-        loadNotificationsData(actorState, notificationsDispatch, notificationsTypes),
-        loadTreasuryData(actorState, treasuryDispatch, treasuryTypes)
+        loadWalletData(navigationAndApiState, walletDispatch, walletTypes),
+        loadCanisterData(navigationAndApiState, homePageDispatch, homePageTypes),
+        loadUserData(navigationAndApiState, userDispatch, userTypes),
+        loadNotificationsData(navigationAndApiState, notificationsDispatch, notificationsTypes),
+        loadTreasuryData(navigationAndApiState, treasuryDispatch, treasuryTypes)
     ];
-    const response = await Promise.all(promises);
-    return loadSuccessful
+    await Promise.all(promises);
+    return {loadSuccessful}
 };
 
-export const loadNotificationsData = async (actorState, notificationsDispatch, notificationsTypes) => {
-    let notificationsData = await actorState.backendActor.getNotifications();
+export const loadNotificationsData = async (navigationAndApiState, notificationsDispatch, notificationsTypes) => {
+    let notificationsData = await navigationAndApiState.backendActor.getNotifications();
     notificationsDispatch({
         actionType: notificationsTypes.SET_NOTIFICATIONS,
         payload: notificationsData
@@ -38,10 +37,10 @@ export const loadNotificationsData = async (actorState, notificationsDispatch, n
     });
 };
 
-export const loadJournalData = async (actorState, journalDispatch, types) => {
-    let journal = await actorState.backendActor.readJournal();
-    journal = journal.ok;
-    let { userJournalData, userPrincipal, cyclesBalance, rootCanisterPrincipal } = journal;
+export const loadUserData = async (navigationAndApiState, userDispatch, types) => {
+    let userData = await navigationAndApiState.backendActor.readJournal();
+    userData = userData.ok;
+    let { userJournalData, userPrincipal, cyclesBalance, rootCanisterPrincipal } = userData;
     let [journalEntries, journalBio] = userJournalData;
     const filesMetaData = journalBio.photos.map(fileData => {
         return { ...fileData, lastModified : parseInt(fileData.lastModified), isLoading: true };
@@ -52,11 +51,11 @@ export const loadJournalData = async (actorState, journalDispatch, types) => {
         photos: filesMetaData
     };
     journalEntries = mapApiObjectToFrontEndJournalEntriesObject(journalEntries);
-    journalDispatch({
+    userDispatch({
         payload: journalBio,
         actionType: types.SET_BIO
     })
-    journalDispatch({
+    userDispatch({
         payload: {
             userPrincipal,
             cyclesBalance: parseInt(cyclesBalance),
@@ -65,24 +64,23 @@ export const loadJournalData = async (actorState, journalDispatch, types) => {
         },
         actionType: types.SET_USER_META_DATA
     });
-    journalDispatch({
+    userDispatch({
         payload: journalEntries,
-        actionType: types.SET_JOURNAL
+        actionType: types.SET_USER_DATA
     });
-    journalDispatch({
+    userDispatch({
         actionType: types.SET_DATA_HAS_BEEN_LOADED,
         payload: true,
     });
 };
 
-export const loadWalletData = async (actorState, walletDispatch, types ) => {
+export const loadWalletData = async (navigationAndApiState, walletDispatch, types ) => {
     let promises = [ 
-        actorState.backendActor.readWalletData(), 
-        actorState.backendActor.retrieveUserBalances(), 
-        loadTxHistory(actorState, walletDispatch, types) 
+        navigationAndApiState.backendActor.readWalletData(), 
+        navigationAndApiState.backendActor.retrieveUserBalances(), 
+        loadTxHistory(navigationAndApiState, walletDispatch, types) 
     ];
     const [walletDataFromApi, balancesHistory, _ ] = await Promise.all(promises);
-    const userBalancesHistory = mapBalancesDataFromApiToFrontend(balancesHistory);
     const address = toHexString(new Uint8Array( [...walletDataFromApi.ok.address]));
     const walletData = { 
         balance : parseInt(walletDataFromApi.ok.balance.e8s), 
@@ -100,7 +98,7 @@ export const loadWalletData = async (actorState, walletDispatch, types ) => {
     });
     walletDispatch({
         actionType: types.SET_WALLET_BALANCES_DATA,
-        payload: userBalancesHistory
+        payload:  mapBalancesData(balancesHistory)
     });
     walletDispatch({
         actionType: types.SET_DATA_HAS_BEEN_LOADED,
@@ -109,8 +107,8 @@ export const loadWalletData = async (actorState, walletDispatch, types ) => {
     return walletData;
 };
 
-export const loadTxHistory = async (actorState, walletDispatch, types) => {
-    const tx = await actorState.backendActor.readTransaction();
+export const loadTxHistory = async (navigationAndApiState, walletDispatch, types) => {
+    const tx = await navigationAndApiState.backendActor.readTransaction();
     let transactionHistory = tx.ok.map(([mapKey, tx_]) => {
         const newKey = parseInt(mapKey);
         const newTx = {
@@ -134,8 +132,8 @@ export const loadTxHistory = async (actorState, walletDispatch, types) => {
     });
 };
 
-export const loadCanisterData = async (actorState, dispatch, types) => {
-    let canisterData = await actorState.backendActor.getCanisterData();
+export const loadCanisterData = async (navigationAndApiState, dispatch, types) => {
+    let canisterData = await navigationAndApiState.backendActor.getCanisterData();
     canisterData = canisterData.ok;
     canisterData = mapBackendCanisterDataToFrontEndObj(canisterData);
     dispatch({
@@ -149,19 +147,16 @@ export const loadCanisterData = async (actorState, dispatch, types) => {
     return canisterData;
 }
 
-export const loadTreasuryData = async (actorState, dispatch, types) => {
-    let promises = [actorState.backendActor.getTreasuryData(), actorState.backendActor.retrieveTreasuryBalances()];
+export const loadTreasuryData = async (navigationAndApiState, dispatch, types) => {
+    let promises = [navigationAndApiState.backendActor.getTreasuryData(), navigationAndApiState.backendActor.retrieveTreasuryBalances()];
     let [treasuryData, treasuryBalances] = await Promise.all(promises);
-    treasuryBalances = mapBalancesDataFromApiToFrontend(treasuryBalances);
-    treasuryData = treasuryData.ok;
-    treasuryData = mapBackendTreasuryDataToFrontEndObj(treasuryData);
     dispatch({
         actionType: types.SET_TREASURY_DATA,
-        payload: treasuryData
+        payload: mapBackendTreasuryDataToFrontEndObj(treasuryData.ok)
     });
     dispatch({
         actionType: types.SET_TREASURY_BALANCES_DATA,
-        payload: treasuryBalances
+        payload: mapBalancesData(treasuryBalances)
     });
     dispatch({
         actionType: types.SET_DATA_HAS_BEEN_LOADED,
@@ -175,7 +170,7 @@ export const fileLoaderHelper = async (props) => {
         fileData, 
         fileIndex,
         index,
-        actorState, 
+        navigationAndApiState, 
         dispatch, 
         dispatchActionToChangeFileLoadStatus,
         dispatchActionToChangeFileMetaData
@@ -186,7 +181,7 @@ export const fileLoaderHelper = async (props) => {
         fileIndex: fileIndex,
         index: index
     });
-    const dataURL = await getFileUrl_fromApi(actorState, fileData);
+    const dataURL = await getFileUrl_fromApi(navigationAndApiState, fileData);
     dispatch({
         actionType: dispatchActionToChangeFileMetaData,
         payload: { ...fileData, file: dataURL },

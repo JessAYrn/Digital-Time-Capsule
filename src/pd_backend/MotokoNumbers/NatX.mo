@@ -326,8 +326,8 @@ module {
     return Int.abs(result);
   };
 
-  public func nat64ComputePercentage({value: Nat64; numerator: Nat64; denominator: Nat64}): Nat64 {
-    Int64.toNat64(Float.toInt64(Float.fromInt64(Int64.fromNat64(value)) * (Float.fromInt64(Int64.fromNat64(numerator)) / Float.fromInt64(Int64.fromNat64(denominator))) ));
+  public func nat64ComputeFractionMultiplication({factor: Nat64; numerator: Nat64; denominator: Nat64}): Nat64 {
+    Int64.toNat64(Float.toInt64(Float.fromInt64(Int64.fromNat64(factor)) * (Float.fromInt64(Int64.fromNat64(numerator)) / Float.fromInt64(Int64.fromNat64(denominator))) ));
   };
 
 };

@@ -14,7 +14,7 @@ export const getLoginCredentials = async (anon) => {
     });
   });
   const identity = authClient.getIdentity();
-  const agent = new HttpAgent({ identity });
+  const agent = new HttpAgent({ identity, host: "https://icp-api.io" });
   return {agent};
 };
 

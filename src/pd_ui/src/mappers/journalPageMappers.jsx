@@ -1,6 +1,5 @@
-import { getDateAsStringMMDDYYY, milisecondsToNanoSeconds } from "../functionsAndConstants/Utils";
-import { nanoSecondsToMiliSeconds, getDateAsString, dateAisLaterThanOrSameAsDateB } from "../functionsAndConstants/Utils";
-import { TEST_DATA_FOR_NOTIFICATIONS } from "../testData/notificationsTestData";
+import { getDateAsStringMMDDYYY } from "../functionsAndConstants/Utils";
+import { nanoSecondsToMiliSeconds } from "../functionsAndConstants/Utils";
 
 export const journalPagesTableColumns = [
     { 
