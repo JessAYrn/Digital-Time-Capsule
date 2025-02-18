@@ -1,5 +1,5 @@
 {
-  "name": "hello_assets",
+  "name": "pd",
   "version": "0.1.0",
   "description": "Internet Computer starter application",
   "keywords": [
@@ -56,10 +56,11 @@
     "@fontsource/roboto": "^5.0.5",
     "@mui/icons-material": "^5.14.0",
     "@mui/lab": "^5.0.0-alpha.136",
-    "@mui/material": "^5.14.0",
+    "@mui/material": "^5.16.14",
     "@mui/system": "^5.14.0",
     "@mui/x-data-grid": "^6.10.0",
     "@mui/x-date-pickers": "^6.11.0",
+    "@react-spring/web": "^9.7.5",
     "@twa-dev/sdk": "^7.0.0",
     "@types/react": "^17.0.34",
     "@types/react-dom": "^17.0.11",
@@ -75,6 +76,7 @@
     "react-chartjs-2": "^5.2.0",
     "react-dom": "^17.0.2",
     "react-icons": "^4.4.0",
+    "react-material-ui-carousel": "^3.4.2",
     "react-number-format": "^5.4.0",
     "react-qr-reader": "^3.0.0-beta-1",
     "react-redux": "^7.2.6",

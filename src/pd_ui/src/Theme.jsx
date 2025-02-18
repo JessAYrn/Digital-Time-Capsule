@@ -1,23 +1,46 @@
 import { createTheme } from '@mui/material/styles';
 import { grey } from '@mui/material/colors';
 
+export const BACKGROUND_COLOR = "#0A0A0A" 
+
+export const PAPER_COLOR = "#101010"
+
+export const BUTTON_SX = {
+  borderColor: "#2e3539",
+  backgroundColor: "#192025"
+}
+
+export const CONTRAST_COLOR = "#F7931A"
+
+export const WHITE_COLOR = "#fafafa"
+
+export const DIVIDER_SX = {
+    width: "100%", 
+    marginBottom: "5px", 
+    marginTop: "5px", 
+    borderColor: "#2e3539"
+};
+
 const theme = createTheme({
     palette: {
       primary: {
         // light: will be calculated from palette.primary.main,
-        main: '#0A0A0A',
+        main: grey[50],
         // dark: will be calculated from palette.primary.main,
         // contrastText: will be calculated to contrast with palette.primary.main
       },
       secondary: {
-        main: '#343434',
+        main: CONTRAST_COLOR
       },
       // Provide every color token (light, main, dark, and contrastText) when using
       // custom colors for props in Material UI's components.
       // Then you will be able to use it like this: `<Button color="custom">`
       // (For TypeScript, you need to add module augmentation for the `custom` value)
       custom: {
-        main: '#F7931A',
+        main: CONTRAST_COLOR
+      },
+      text: {
+        primary: grey[50]
       },
       white: {
         main: grey[100],
@@ -33,6 +56,17 @@ const theme = createTheme({
       tonalOffset: 0.2,
     },
     components: {
+      MuiPaper:{
+        styleOverrides: {
+          root:{
+            backgroundColor: BACKGROUND_COLOR,
+            "&.MuiPopover-paper": {
+              borderRadius: "5px",
+              border: `solid ${DIVIDER_SX.borderColor}`,
+            }
+          }
+        }
+      },
       MuiTypography:{
         styleOverrides: {
           root:{
@@ -52,9 +86,9 @@ const theme = createTheme({
       MuiInputLabel: {
         styleOverrides: {
           root: {
-            color: '#F7931A' ,
+            color: CONTRAST_COLOR ,
             "&.Mui-disabled": {
-              color: '#F7931A'
+              color: CONTRAST_COLOR
             },
             "&.Mui-focused": {
               color: grey[400]
@@ -110,7 +144,6 @@ const theme = createTheme({
       MuiIconButton: {
         styleOverrides: {
           root:{
-            color: grey[50],
             "&.Mui-disabled": {
               color: grey[400]
             },
@@ -145,7 +178,7 @@ const theme = createTheme({
       MuiSwitch:{
         styleOverrides:{
           track:{
-            backgroundColor: "#F7931A"
+            backgroundColor: CONTRAST_COLOR
           }
         }
       },
@@ -153,7 +186,7 @@ const theme = createTheme({
         styleOverrides: {
           root: {
             width: "100%",
-            "& .MuiInputLabel-root": {
+            "&.MuiInputLabel-root": {
               left: "12px"
             }
           }
@@ -186,6 +219,44 @@ const theme = createTheme({
               zIndex: 1,
               color: "#343434"
             }
+          }
+        }
+      },
+      MuiTab: {
+        styleOverrides: {
+          root:{
+            "&.Mui-selected": {
+              color: grey[50]
+            },
+            color: grey[50]
+          },
+        }
+      },
+      MuiDialog:{
+        styleOverrides: {
+          root: {
+            ".MuiDialog-paperFullScreen":{
+              height: "100%",
+              position: "absolute",
+              bottom: 0,
+              display: "flex",
+              alignItems: "center",
+              flexDirection: "column",
+            }
+          }
+        }
+      },
+      MuiTextField: {
+        styleOverrides: {
+          root: {
+            backgroundColor: BACKGROUND_COLOR,
+          }
+        }
+      },
+      MuiCheckbox: {
+        styleOverrides: {
+          root: {
+            color: WHITE_COLOR
           }
         }
       }

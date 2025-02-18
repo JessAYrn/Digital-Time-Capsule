@@ -1,30 +1,28 @@
-// import changeValue from "./journalReducer"
-
 import { NULL_STRING_CAPITALIZED } from "../functionsAndConstants/Constants";
 
 
 export const homePageTypes={
-    SET_ENTIRE_DASHBOARD_REDUX_STATE:'SET_ENTIRE_DASHBOARD_REDUX_STATE',
     SET_CANISTER_DATA: "SET_CANISTER_DATA",
     SET_DATA_HAS_BEEN_LOADED: "SET_DATA_HAS_BEEN_LOADED",
     SET_IS_LOADING:"SET_IS_LOADING",
     SET_PROPOSALS_DATA: "SET_PROPOSALS_DATA",
-    SET_CANISTERS_CYCLES_BALANCES: "SET_CANISTERS_CYCLES_BALANCES",
+    SET_DAO_PUBLIC_DATA: "SET_DAO_PUBLIC_DATA",
+    SET_USER_NAMES: "SET_USER_NAMES"
 }
 
 
 export const homePageInitialState={
     dataHasBeenLoaded: undefined,
     isLoading: false,
-    canistersCyclesBalances: {
-        currentCyclesBalance_backend: 1,
-        currentCyclesBalance_frontend: 1,
-        currentCyclesBalance_treasury: 1,
-        currentCyclesBalance_manager: 1,
+    daoPublicData: {
+        costToEnterDao: 0,
+        daoFounder: "",
+        daoIsPublic: null,
     },
+    userNames: {},
     canisterData: {
         profilesMetaData: [],
-        journalCount: 0,
+        usersCount: 0,
         backEndCyclesBurnRatePerDay: 1,
         backEndPrincipal: NULL_STRING_CAPITALIZED,
         frontEndPrincipal: NULL_STRING_CAPITALIZED,
@@ -37,7 +35,13 @@ export const homePageInitialState={
         isAdmin: false,
         supportMode: false,
         acceptingRequests: false,
-        requestsForAccess: []
+        requestsForAccess: [],
+        cyclesBalances: {
+            ui: 1,
+            api: 1,
+            treasury: 1,
+            manager: 1,
+        }
     }
 }
 
@@ -46,18 +50,18 @@ const changeValue=(state=homePageInitialState, action)=>{
 
 
     switch(actionType){
-        case homePageTypes.SET_ENTIRE_DASHBOARD_REDUX_STATE:
-            state = payload;
-            return {
-                ...state
-            }
         case homePageTypes.SET_CANISTER_DATA:
                 state.canisterData = payload;
                 return {
                 ...state
             }
-        case homePageTypes.SET_CANISTERS_CYCLES_BALANCES:
-            state.canistersCyclesBalances = payload;
+        case homePageTypes.SET_USER_NAMES:
+            state.userNames = payload;
+            return {
+            ...state
+        }
+        case homePageTypes.SET_DAO_PUBLIC_DATA:
+            state.daoPublicData = payload;
             return {
             ...state
         }

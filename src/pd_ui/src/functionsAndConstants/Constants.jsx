@@ -8,20 +8,7 @@ export const monthInDays = 30;
 
 export const e8sInOneICP = 100000000;
 
-export const MAX_DISSOLVE_DELAY_IN_SECONDS = 252288000;
-
-export const MIN_DISSOLVE_DELAY_FOR_REWARDS_IN_SECONDS = 15768000;
-
 export const CHUNK_SIZE = 1024 * 1024;
-
-export const NAV_LINKS = {
-    wallet : '/wallet',
-    journal : '/app',
-    account: '/account',
-    dashboard: '/',
-    treasury:'/treasury',
-    groupJournal:'/groupjournal'
-};
 
 export const DEVICE_TYPES = {
     mobile: "mobile",
@@ -56,7 +43,7 @@ export const CANISTER_DATA_FIELDS = {
     lastRecordedBackEndCyclesBalance: "lastRecordedBackEndCyclesBalance",
     RequestsForAccess: "RequestsForAccess",
     users: "users",
-    journalCount: "journalCount",
+    usersCount: "usersCount",
     profilesMetaData: "profilesMetaData",
     treasuryCanisterPrincipal: "treasuryCanisterPrincipal",
     managerCanisterPrincipal: "managerCanisterPrincipal",
@@ -67,7 +54,9 @@ export const CANISTER_DATA_FIELDS = {
     isAdmin: "isAdmin",
     supportMode: "supportMode",
     acceptingRequests: "acceptingRequests",
-    canistersCyclesBalances: "canistersCyclesBalances",
+    daoPublicData: "daoPublicData",
+    costToEnterDao: "costToEnterDao",
+    daoIsPublic: "daoIsPublic"
 };
 
 export const PAGES = {
@@ -85,7 +74,7 @@ export const PROVIDER_STATUS = {
     idle: 'idle'
 }
 
-export const JOURNAL_TABS={
+export const USER_TABS={
     diaryTab:'diaryTab',
     notesTab:'notesTab'
 }
@@ -121,28 +110,23 @@ export const CHART_TYPES = {
     pie: "PIE"
 }; 
 
-export const GRAPH_DATA_SETS = {
-    fundingCampaignContributions: "fundingCampaignContributions",
-    usersTotalStakesAndVotingPowers: "usersTotalStakesAndVotingPowers",
-    neuronContributions: "neuronContributions",
-    balancesHistory: {
-        week: "week",
-        month: "month",
-        year: "year",
-        allTime: "allTime",
-    }
-}
+export const GRAPH_DATA_SET_TIMEFRAMES = {
+    week: "1W",
+    month: "1M",
+    year: "1Y",
+    allTime: "all",
+};
 
 export const GRAPH_DISPLAY_LABELS = {
-    icp: "ICP",
-    icp_staked: "ICP_STAKED",
-    btc: "BTC",
-    eth: "ETH",
-    xdrs: "XDRS",
-    stake: "ICP_STAKED",
-    stake_e8s: "ICP_STAKED",
-    votingPower: "VOTING_POWER",
-    voting_power: "VOTING_POWER",
+    icp: "icp",
+    icp_staked: "icp_staked",
+    btc: "btc",
+    eth: "eth",
+    xdrs: "xdrs",
+    stake: "icp_staked",
+    stake_e8s: "stake_e8s",
+    votingPower: "voting_power",
+    voting_power: "voting_power",
 
 };
 
