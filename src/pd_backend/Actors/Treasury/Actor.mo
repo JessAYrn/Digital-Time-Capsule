@@ -28,9 +28,7 @@ shared actor class Treasury (principal : Principal) = this {
 
     private stable let ownerCanisterId : Text = Principal.toText(principal);
     private stable var sumOfAllTokenBalances : AnalyticsTypes.Balances = { icp = {e8s = 0}; icp_staked = {e8s = 0}; eth = {e8s = 0}; btc = {e8s = 0}; };
-    private stable var usersTreasuryDataArray : TreasuryTypes.UsersTreasuryDataArray = [];
     private stable var usersTreasuryDataArray_V2 : TreasuryTypes.UsersTreasuryDataArray_V2 = [];
-    private var usersTreasuryDataMap : TreasuryTypes.UsersTreasuryDataMap = HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryData>(Iter.fromArray(usersTreasuryDataArray), Iter.size(Iter.fromArray(usersTreasuryDataArray)), Text.equal, Text.hash);
     private var usersTreasuryDataMap_V2 : TreasuryTypes.UsersTreasuryDataMap_V2 = HashMap.fromIter<TreasuryTypes.PrincipalAsText, TreasuryTypes.UserTreasuryData_V2>(Iter.fromArray(usersTreasuryDataArray_V2), Iter.size(Iter.fromArray(usersTreasuryDataArray_V2)), Text.equal, Text.hash);
     private stable var balancesHistoryArray : AnalyticsTypes.BalancesArray = [];
     private var balancesHistoryMap : AnalyticsTypes.BalancesMap = HashMap.fromIter<Text, AnalyticsTypes.Balances>(Iter.fromArray(balancesHistoryArray), Iter.size(Iter.fromArray(balancesHistoryArray)), Text.equal, Text.hash);
@@ -344,7 +342,6 @@ shared actor class Treasury (principal : Principal) = this {
     };
 
     system func preupgrade() { 
-        usersTreasuryDataArray := Iter.toArray(usersTreasuryDataMap.entries()); 
         usersTreasuryDataArray_V2 := Iter.toArray(usersTreasuryDataMap_V2.entries());
         balancesHistoryArray := Iter.toArray(balancesHistoryMap.entries());
         neuronDataArray := Iter.toArray(neuronDataMap.entries());
@@ -352,15 +349,10 @@ shared actor class Treasury (principal : Principal) = this {
     };
 
     system func postupgrade() { 
-        usersTreasuryDataArray:= []; 
         usersTreasuryDataArray_V2:= [];
         balancesHistoryArray := [];
         neuronDataArray := [];
         fundingCampaignsArray := [];
-
-        // for((userPrincipal, userTreasuryData) in usersTreasuryDataMap.entries()){
-        //     usersTreasuryDataMap_V2.put(userPrincipal, {userTreasuryData with automaticallyContributeToLoans = true; automaticallyRepayLoans = true;});
-        // };
 
         ignore recurringTimer<system>(#seconds(6 * 60 * 60), func (): async () { 
             ignore FundingCampaignsMethods.disburseEligibleCampaignFundingsToRecipient({ fundingCampaignsMap; usersTreasuryDataMap = usersTreasuryDataMap_V2; treasuryCanisterId; updateTokenBalances });

@@ -28,19 +28,6 @@ module{
         icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText};
     };
 
-    public type FundingCampaignTerms = {
-        paymentIntervals: Nat64;
-        nextPaymentDueDate: ?Int;
-        paymentAmounts: {icp: {e8s : Nat64;}; };
-        initialLoanInterestAmount: {icp: {e8s : Nat64;}; };
-        remainingLoanInterestAmount: {icp: {e8s : Nat64;}; };
-        initialCollateralLocked: {icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText}};
-        remainingCollateralLocked: {icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText}};
-        forfeitedCollateral: {icp_staked: {e8s : Nat64; fromNeuron: NeuronIdAsText}};
-        remainingLoanPrincipalAmount: {icp: {e8s : Nat64;}; };
-        amountRepaidDuringCurrentPaymentInterval: {icp: {e8s : Nat64;}; };
-    };
-
     public type Payment = {
         owed: {icp: {e8s : Nat64;}; };
         paid: {icp: {e8s : Nat64;}; };
@@ -81,7 +68,6 @@ module{
         description: Text; 
         settled: Bool;
         funded: Bool;
-        terms:?FundingCampaignTerms;
         loanAgreement: ?FundingCampaignLoanAgreement;
     };
 
@@ -126,14 +112,6 @@ module{
         voting_power : Nat64;
         collateralized_stake_e8s : ?Nat64;
     };
-    
-
-    public type UserTreasuryData = {
-        balances : Balances;
-        subaccountId : Account.Subaccount;
-        automaticallyContributeToLoans: ?Bool;
-        automaticallyRepayLoans: ?Bool;
-    };
 
     public type UserTreasuryData_V2 = {
         balances : Balances;
@@ -151,13 +129,9 @@ module{
 
     public type PrincipalAsText = Text;
 
-    public type UsersTreasuryDataArray = [(PrincipalAsText, UserTreasuryData)];
-
     public type UsersTreasuryDataArray_V2 = [(PrincipalAsText, UserTreasuryData_V2)];
 
     public type UsersTreasuryDataArrayExport = [(PrincipalAsText, UserTreasuryDataExport)];
-
-    public type UsersTreasuryDataMap = HashMap.HashMap<PrincipalAsText, UserTreasuryData>;
 
     public type UsersTreasuryDataMap_V2 = HashMap.HashMap<PrincipalAsText, UserTreasuryData_V2>;
 

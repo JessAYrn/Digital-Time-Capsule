@@ -58,7 +58,6 @@ module{
             campaignWalletBalance = {icp = {e8s: Nat64 = 0}; }; 
             amountDisbursedToRecipient = {icp = {e8s: Nat64 = 0}; }; 
             loanAgreement;
-            terms = null;
         });
 
     };
@@ -441,35 +440,5 @@ module{
                 ignore repayFundingCampaign({contributor = userPrincipal; campaignId; amount = amountToRepay; fundingCampaignsMap; usersTreasuryDataMap; treasuryCanisterId; updateTokenBalances; neuronDataMap});
             };
         };
-    };
-
-    public func getTotalDebtsByUser(userPrincipal: TreasuryTypes.PrincipalAsText, fundingCampaignsMap: TreasuryTypes.FundingCampaignsMap): {totalDebtsOwed: Nat64; totalDebtsDue: Nat64;} {
-        var totalDebtsOwed: Nat64 = 0;
-        var totalDebtsDue: Nat64 = 0;
-        label summingDebtsOwed for((campaignId, campaign) in fundingCampaignsMap.entries()){
-            let {recipient; terms; settled; funded;} = campaign;
-            if(settled or not funded) continue summingDebtsOwed;
-            if(recipient != userPrincipal) continue summingDebtsOwed;
-            let ?terms_ = terms else continue summingDebtsOwed;
-            let { remainingLoanPrincipalAmount; remainingLoanInterestAmount; paymentAmounts; amountRepaidDuringCurrentPaymentInterval } = terms_;
-            totalDebtsOwed += remainingLoanPrincipalAmount.icp.e8s + remainingLoanInterestAmount.icp.e8s;
-            totalDebtsDue += switch(paymentAmounts.icp.e8s > amountRepaidDuringCurrentPaymentInterval.icp.e8s){
-                case true { paymentAmounts.icp.e8s - amountRepaidDuringCurrentPaymentInterval.icp.e8s; };
-                case false { 0; };
-            };
-        };
-        return {totalDebtsOwed; totalDebtsDue};
-    };
-
-    public func getTotalDebts(fundingCampaignMap: TreasuryTypes.FundingCampaignsMap): {totalDebts: Nat64} {
-        var totalDebts: Nat64 = 0;
-        label summingDebts for((_, campaign) in fundingCampaignMap.entries()){
-            let {terms; settled; funded;} = campaign;
-            if(settled or not funded) continue summingDebts;
-            let ?terms_ = terms else continue summingDebts;
-            let {remainingLoanPrincipalAmount; remainingLoanInterestAmount } = terms_;
-            totalDebts += remainingLoanPrincipalAmount.icp.e8s + remainingLoanInterestAmount.icp.e8s;
-        };
-        return {totalDebts};
     };
 };
